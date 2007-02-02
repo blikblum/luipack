@@ -184,7 +184,7 @@ end;
 destructor TLogTreeView.Destroy;
 begin
   FImgList.Destroy;
-  FChannel.Free;
+  FreeAndNil(FChannel);
   inherited Destroy;
 end;
 
@@ -201,6 +201,7 @@ procedure TLogTreeView.AddMessage(AMsg: TLogMessage);
      AStrList.LoadFromStream(AStream);
      for i:= 0 to AStrList.Count - 1 do
        Items.AddChild(FLastNode,AStrList[i]);
+     FLastNode.Text:=FLastNode.Text+' ('+IntToStr(AStrList.Count)+' Items)';
      AStrList.Destroy;
   end;
 var
@@ -226,7 +227,9 @@ begin
          begin
            FLastNode:=AddChild(FParentNode,MsgText);
            if Assigned(Data) and (Data.Size>0) then
-             ParseStream(Data);
+             ParseStream(Data)
+           else
+             FLastNode.Text:=FLastNode.Text+' (No Items)';
          end;
        ltObject:
          begin

@@ -98,7 +98,7 @@ begin
     if AMsg.Data <> nil then
     begin
       DataSize:=AMsg.Data.Size;
-      //WriteLn('[FileChannel] Size Of Stream: ',DataSize);
+      //WriteLn('[IPCChannel] Size Of Stream: ',DataSize);
       WriteBuffer(DataSize,SizeOf(Integer));
       AMsg.Data.Position:=0;
       CopyFrom(AMsg.Data,DataSize);

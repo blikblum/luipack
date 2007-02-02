@@ -15,8 +15,9 @@ begin
     Channels.Add(TIPCChannel.Create);
     ActiveClasses:=[0,1];
     DefaultClass:=1;
+    Send('An empty StringList',AList);
     Send('A Text Message');
-    Send('Another Text Message');
+    Send('Another Text Message');   
     with AList do
     begin
       Add('aaaaaa');
