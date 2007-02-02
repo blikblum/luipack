@@ -67,7 +67,8 @@ const
     'EXCEPTION',
     'BITMAP',
     'HEAP INFO',
-    '','','','','','',
+    'MEMORY',
+    '','','','','',
     'WATCH');
 
 { TFileChannel }
