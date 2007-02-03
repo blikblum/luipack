@@ -1,5 +1,6 @@
 unit ATxSHex;
-
+{$mode delphi}
+{$H+}
 interface
 
 //Conversion from hex encoded string (for example, '10 20 AA FF': 4 chars) to normal string.

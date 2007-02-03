@@ -1,5 +1,8 @@
 unit ATxSProc;
 
+{$mode delphi}
+{$H+}
+
 interface
 
 uses

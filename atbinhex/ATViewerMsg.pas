@@ -1,5 +1,6 @@
 unit ATViewerMsg;
-
+{$mode delphi}
+{$H+}
 interface
 
 uses
@@ -40,7 +41,7 @@ begin
     begin Result:= IDCANCEL; Exit end;
 
   if h=INVALID_HANDLE_VALUE then
-    h:= Application.Handle;
+    h:= Application.MainForm.Handle;
 
   if Win32Platform=VER_PLATFORM_WIN32_NT
     then Result:= MessageBoxW(h, PWChar(Msg), PWChar(Title), Flags or MB_SETFOREGROUND)
