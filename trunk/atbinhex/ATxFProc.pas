@@ -1,5 +1,6 @@
 unit ATxFProc;
-
+{$mode delphi}
+{$H+}
 interface
 
 uses
@@ -47,7 +48,7 @@ begin
   IsDir:= false;
   if IsNT then
     begin
-    h:= FindFirstFileW(PWChar(fn), fdW);
+    h:= FindFirstFileW(PWChar(fn), @fdW);
     Result:= h<>INVALID_HANDLE_VALUE;
     if Result then
       begin
@@ -120,7 +121,7 @@ begin
   Result:= -1;
   if IsNT then
     begin
-    h:= FindFirstFileW(PWChar(fn), fdW);
+    h:= FindFirstFileW(PWChar(fn), @fdW);
     if h<>INVALID_HANDLE_VALUE then
       begin
       //Attr:= fdW.dwFileAttributes;

@@ -38,9 +38,12 @@
 // - Component appears on "Samples" page
 //
 
-{$BOOLEVAL OFF} //Short boolean evaluation
 
 unit ATFileNotification;
+
+{$mode delphi}
+{$H+}
+{$BOOLEVAL OFF} //Short boolean evaluation
 
 interface
 
@@ -62,6 +65,9 @@ type
   TATFileNotifyOptions = set of TATFileNotifyOption;
 
 const
+  //fpc does not have these
+  FILE_NOTIFY_CHANGE_LAST_ACCESS = $00000020;
+  FILE_NOTIFY_CHANGE_CREATION =	$00000040;
   cATFileNotifyFlags: array[TATFileNotifyOption] of DWORD = (
     FILE_NOTIFY_CHANGE_FILE_NAME,
     FILE_NOTIFY_CHANGE_DIR_NAME,
@@ -163,7 +169,7 @@ begin
   FillChar(Rec, SizeOf(Rec), 0);
   if Win32Platform = VER_PLATFORM_WIN32_NT then
   begin
-    h:= FindFirstFileW(PWChar(FileName), fdW);
+    h:= FindFirstFileW(PWChar(FileName), @fdW);
     Rec.FExist:= h<>INVALID_HANDLE_VALUE;
     if Rec.FExist then
     begin

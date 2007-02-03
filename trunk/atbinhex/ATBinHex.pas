@@ -7,11 +7,14 @@
 {                                                }
 {************************************************}
 
-{$OPTIMIZATION OFF} //Delphi 5 cannot compile this with optimization on.
+{$mode delphi}
+{$H+}
+
+{.$OPTIMIZATION OFF} //Delphi 5 cannot compile this with optimization on.
 {$BOOLEVAL OFF}    //Short boolean evaluation required.
 {$RANGECHECKS OFF} //For assignment compatability between DWORD and Longint.
 
-{$define NOTIF} //Enable file change notification code. Should be enabled.
+{.$define NOTIF} //Enable file change notification code. Should be enabled.
 {$define HSCROLLBAR_WORKAROUND}
                 //Enable workaround for Windows bug: when horiz scrollbar temporary hides,
                 //this may cause both horiz+vertical scrollbars + window border to disappear
@@ -25,7 +28,7 @@ unit ATBinHex;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, Graphics,
+  Windows, LMessages, LCLType, Types, SysUtils, Classes, Controls, Graphics,
   StdCtrls, ExtCtrls, 
   {$ifdef NOTIF} ATFileNotification, {$endif}
   Menus;
@@ -452,7 +455,7 @@ begin
   n2:= n;
 end;
 
-procedure InvertRect(Canvas: TCanvas; const Rect: TRect);
+procedure InvertRect(Canvas: TCanvas; Rect: TRect);
 begin
   Windows.InvertRect(Canvas.Handle, Rect);
 end;
@@ -557,7 +560,7 @@ end;
 
 function FontHeight(Canvas: TCanvas): integer;
 var
-  Metric: TTextMetric;
+  Metric: Windows.TTextMetric;
 begin
   if GetTextMetrics(Canvas.Handle, Metric)
     then Result:= Metric.tmHeight
@@ -778,8 +781,8 @@ begin
 
   //Init inherited properties
   Caption:= '';
-  Width:= 200;
-  Height:= 150;
+  //Width:= 200;
+  //Height:= 150;
   BevelOuter:= bvNone;
   BorderStyle:= bsSingle;
   Color:= clWindow;
@@ -1245,7 +1248,7 @@ procedure TATBinHex.HideScrollBar(AHorz: boolean);
 const
   ATypes: array[boolean] of integer = (SB_VERT, SB_HORZ);
 var
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
 begin
   FillChar(si, SizeOf(si), 0);
   si.cbSize:= SizeOf(si);
@@ -1263,7 +1266,7 @@ end;
 procedure TATBinHex.SetVScrollBar(APageSize: integer);
 var
   Cols, Max, Pos, Page: Int64;
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
 begin
   Cols:= ColsNum;
   if FFileOK and (FFileSize>Cols) then
@@ -1302,7 +1305,7 @@ end;
 procedure TATBinHex.SetHScrollBar;
 var
   Max, Page, Pos: integer;
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
 begin
   if                 //Hide horizontal scrollbar when:
     (not FFileOK) or // - read error occurs
@@ -2206,6 +2209,8 @@ var
   LenAll, Len: Int64;
   f: TextFile;
 begin
+  //todo
+  {
   if ACopies=0 then Inc(ACopies);
 
   Printer.Copies:= ACopies;
@@ -2254,6 +2259,7 @@ begin
     end;
   except
   end;
+  }
 end;
 
 procedure TATBinHex.CopyToClipboard(AsHex: boolean = false);
