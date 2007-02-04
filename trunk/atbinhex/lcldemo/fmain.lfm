@@ -1,0 +1,78 @@
+object Form1: TForm1
+  Left = 306
+  Height = 300
+  Top = 203
+  Width = 400
+  HorzScrollBar.Page = 399
+  VertScrollBar.Page = 299
+  ActiveControl = ButOpenFile
+  Caption = 'Form1'
+  object BinHexViewer: TATBinHex
+    Cursor = crIBeam
+    Left = 175
+    Height = 300
+    Width = 225
+    Align = alClient
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    Caption = 'BinHexViewer'
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    ParentColor = False
+    TabOrder = 0
+    FontOEM.CharSet = OEM_CHARSET
+    FontOEM.Height = -12
+    FontOEM.Name = 'Terminal'
+  end
+  object PanelLeft: TPanel
+    Height = 300
+    Width = 170
+    Align = alLeft
+    TabOrder = 1
+    object ButOpenFile: TButton
+      Left = 37
+      Height = 25
+      Top = 34
+      Width = 75
+      BorderSpacing.InnerBorder = 4
+      Caption = 'ButOpenFile'
+      OnClick = ButOpenFileClick
+      TabOrder = 0
+    end
+    object RadioGroupMode: TRadioGroup
+      Left = 8
+      Height = 168
+      Top = 104
+      Width = 150
+      AutoFill = True
+      Caption = 'RadioGroupMode'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.TopBottomSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      Items.Strings = (
+        'Text'
+        'Binary'
+        'HEX'
+        'Unicode'
+      )
+      OnClick = ChangeMode
+      TabOrder = 1
+    end
+  end
+  object Splitter1: TSplitter
+    Left = 170
+    Height = 300
+    Width = 5
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open existing file'
+    FilterIndex = 0
+    left = 139
+    top = 37
+  end
+end
