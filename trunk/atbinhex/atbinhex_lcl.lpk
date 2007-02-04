@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <PathDelim Value="\"/>
+    <Name Value="atbinhex_lcl"/>
+    <Author Value="Alexey Torgashin  (LCL port by Luiz Américo)"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="include\$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="ATBinHex is a viewer that can show files in HEX, Text, WideString and Binary modes"/>
+    <License Value="This software is provided &quot;as-is&quot;, without any express or implied warranty. 
+In no event shall the author be held liable for any damages arising from the use of this software.
+
+This software has freeware status. This means that permission is granted to anyone to freely use this software for any purpose, including commercial applications, and to alter and redistribute it, provided that the following conditions are met:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software to create a product, an acknowledgment in the product documentation and/or about box would be appreciated but not required.
+
+2. Modified versions in source or binary form must be plainly marked as such, and must not be misrepresented as being the original software.
+
+Copyright © 2006 Alexey Torgashin"/>
+    <Version Major="1" Minor="5" Release="6"/>
+    <Files Count="1">
+      <Item1>
+        <Filename Value="ATBinHex.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="ATBinHex"/>
+      </Item1>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="multiloglaz"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
