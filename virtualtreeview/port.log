@@ -83,6 +83,7 @@ Port started in 26/01/07
 * Added LResources unit
 * Used the PackArray Implmentation from original port
 * The TCanvas of VCL does not has width and height as LCL does. This cause conflict with "with" operator
+* Implemented TOLEStream
 
 
 #Major Tasks#
@@ -102,7 +103,7 @@ Port started in 26/01/07
 < > Bidi Support
   [ ]Properly Implement TBaseVirtualTree.UseRightToLeftAlignment
 #Secondary Tasks#
-< > OleAcc: MSAA (Accessibility)
+< > (low) OleAcc: MSAA (Accessibility)
 < > WMContextMenu: replace by DoContextPopup??. Add to LCL??
   [ ] Fix Double MouseRUp
   [ ] in line 2042 of callback simplify
@@ -123,7 +124,7 @@ Port started in 26/01/07
   [ ] Properly implement CreatePatternBrush or find a way to paint the lines
 < > Implement GetBkColor in LCL
 < > Begin/EndUpdate uses WM_SETREDRAW  message to avoid painting. See a crossplatform way of doing it
-<*> Translate MAKEROP4 from C to Pascal. Done copyed from fpc
+<*> Translate MAKEROP4 from C to Pascal. Done copied from fpc
 < > TCMMouseWheel is not used in Lazarus. Remove
 < > Revise CM* functions and messages
 < > Implement SubtractRect
