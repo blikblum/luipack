@@ -6,7 +6,7 @@ unit ATxSProc;
 interface
 
 uses
-  Windows, SysUtils;
+  Windows,SysUtils;
 
 type
   TDecodeRec = record SFrom, STo: string; end;

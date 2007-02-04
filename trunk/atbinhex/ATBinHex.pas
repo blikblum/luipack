@@ -20,7 +20,7 @@
                 //this may cause both horiz+vertical scrollbars + window border to disappear
                 //completely. This workaround rises users' question: why horiz scrollbar
                 //doesn't hide when lines become short enough. Should be enabled.
-//{$define DEBUG_FORM}
+//{.$define DEBUG_FORM}
                 //Show debug form. Must be commented in release!
 
 unit ATBinHex;
@@ -28,10 +28,17 @@ unit ATBinHex;
 interface
 
 uses
-  Windows, LMessages, LCLType, Types, SysUtils, Classes, Controls, Graphics,
-  StdCtrls, ExtCtrls, 
+  LCLIntf, LCLType, Types, SysUtils, Classes, Controls, Graphics,
+  StdCtrls, ExtCtrls, LCLProc, Dialogs, SharedLogger, IPCChannel,
   {$ifdef NOTIF} ATFileNotification, {$endif}
-  Menus;
+  Menus,
+  {$ifdef UseWindows}
+  Windows,
+  {$endif}
+  DelphiCompat;
+
+const
+  IsWinNT = True;
 
 type
   TATEncoding = (
@@ -88,6 +95,9 @@ const
   vpcmdDefaultSet = [vpcmdCopy, vpcmdCopyHex, {vpcmdSelectLine,} vpcmdSelectAll];
 
 type
+
+  { TATBinHex }
+
   TATBinHex = class(TPanel)
   private
     FFileName: WideString;
@@ -260,6 +270,7 @@ type
   protected
     procedure Click; override;
     procedure DblClick; override;
+    procedure DoOnResize; override;
     procedure Resize; override;
     procedure Paint; override;
     procedure WMGetDlgCode(var Message: TMessage); message WM_GETDLGCODE;
@@ -333,7 +344,7 @@ implementation
 uses
   Printers, Forms,
   {$ifdef DEBUG_FORM} TntStdCtrls, {$endif}
-  ATxSProc, ATxSHex, ATxFProc, ATxClipboard, ATViewerMsg;
+  ATxSProcFPC, ATxSHexFPC, ATxFProcFPC, ATxClipboardFPC, ATViewerMsgFPC;
 
 
 { Important constants: change with care }
@@ -457,7 +468,8 @@ end;
 
 procedure InvertRect(Canvas: TCanvas; Rect: TRect);
 begin
-  Windows.InvertRect(Canvas.Handle, Rect);
+  //todo
+  //InvertRect(Canvas.Handle, Rect);
 end;
 
 function SExtractAnsiFromWide(const S: WideString): AnsiString;
@@ -483,9 +495,10 @@ var
 begin
   S:= SConvertForOut(Str, TabSize, AnsiDecode);
 
-  if Win32Platform=VER_PLATFORM_WIN32_NT
-    then Windows.TextOutW(Canvas.Handle, X, Y, PWChar(S), Length(S))
-    else Windows.TextOutA(Canvas.Handle, X, Y, PChar(string(S)), Length(S));
+  if IsWinNT then
+    TextOutW(Canvas.Handle, X, Y, PWideChar(S), Length(S))
+  else
+    TextOut(Canvas.Handle, X, Y, PChar(string(S)), Length(S));
 end;
 
 type
@@ -508,9 +521,9 @@ begin
   GetMem(Dx, DxSize);
   FillChar(Dx^, DxSize, 0);
 
-  if Win32Platform=VER_PLATFORM_WIN32_NT
-    then Result:= GetTextExtentExPointW(Canvas.Handle, PWChar(S), Length(S), 0, nil, PInteger(Dx), Size)
-    else Result:= GetTextExtentExPointA(Canvas.Handle, PChar(string(S)), Length(S), 0, nil, PInteger(Dx), Size);
+  if IsWinNT
+    then Result:= GetTextExtentExPointW(Canvas.Handle, PWideChar(S), Length(S), 0, nil, PInteger(Dx), Size)
+    else Result:= GetTextExtentExPoint(Canvas.Handle, PChar(string(S)), Length(S), 0, nil, PInteger(Dx), Size);
 
   FillChar(Ext, SizeOf(Ext), 0);
   if Result then
@@ -535,9 +548,9 @@ var
 begin
   S:= SConvertForOut(Str, TabSize, AnsiDecode);
 
-  if Win32Platform=VER_PLATFORM_WIN32_NT
-    then OK:= GetTextExtentPoint32W(Canvas.Handle, PWChar(S), Length(S), Size)
-    else OK:= GetTextExtentPoint32A(Canvas.Handle, PChar(string(S)), Length(S), Size);
+  if IsWinNT
+    then OK:= GetTextExtentPoint32W(Canvas.Handle, PWideChar(S), Length(S), Size)
+    else OK:= GetTextExtentPoint(Canvas.Handle, PChar(string(S)), Length(S), Size);
   if OK
     then Result:= Size.cx
     else Result:= 0;
@@ -560,7 +573,7 @@ end;
 
 function FontHeight(Canvas: TCanvas): integer;
 var
-  Metric: Windows.TTextMetric;
+  Metric: TTextMetric;
 begin
   if GetTextMetrics(Canvas.Handle, Metric)
     then Result:= Metric.tmHeight
@@ -777,155 +790,162 @@ end;
 
 constructor TATBinHex.Create(AOwner: TComponent);
 begin
+  DebugLn('Before inherited Create');
   inherited Create(AOwner);
+  try
+    DebugLn('Passed inherited Create');
+    //Init inherited properties
+    Caption:= '';
+    DebugLn('Passed Caption');
+    //Width:= 200;
+    //Height:= 150;
+    BevelOuter:= bvNone;
+    BorderStyle:= bsSingle;
+    Color:= clWindow;
+    Cursor:= crIBeam;
+    ControlStyle:= ControlStyle + [csOpaque];
 
-  //Init inherited properties
-  Caption:= '';
-  //Width:= 200;
-  //Height:= 150;
-  BevelOuter:= bvNone;
-  BorderStyle:= bsSingle;
-  Color:= clWindow;
-  Cursor:= crIBeam;
-  ControlStyle:= ControlStyle + [csOpaque];
+    Font.Name:= 'Courier New';
+    Font.Size:= 10;
+    Font.Color:= clWindowText;
 
-  Font.Name:= 'Courier New';
-  Font.Size:= 10;
-  Font.Color:= clWindowText;
+    //Init fields
+    FMode:= vbmodeText;
+    FEncoding:= vencANSI;
+    FTextWidth:= 80;
+    FTextWidthHex:= 16;
+    FTextWidthFit:= false;
+    FTextWidthFitHex:= false;
+    FTextWrap:= false;
+    FTextColorHex:= clNavy;
+    FTextColorHex2:= clBlue;
+    FTextColorHexBack:= clLtGray2;
+    FTextColorLines:= clGray;
+    FTextColorError:= clRed;
+    FScrollPageSize:= true;
+    //FScrollHorzVisible:= false;
+    //FScrollVertVisible:= false;
+    FSearchIndent:= 5;
+    FSearchIndentHorz:= 5;
+    FTabSize:= 8;
+    FPopupCommands:= vpcmdDefaultSet;
 
-  //Init fields
-  FMode:= vbmodeText;
-  FEncoding:= vencANSI;
-  FTextWidth:= 80;
-  FTextWidthHex:= 16;
-  FTextWidthFit:= false;
-  FTextWidthFitHex:= false;
-  FTextWrap:= false;
-  FTextColorHex:= clNavy;
-  FTextColorHex2:= clBlue;
-  FTextColorHexBack:= clLtGray2;
-  FTextColorLines:= clGray;
-  FTextColorError:= clRed;
-  FScrollPageSize:= true;
-  //FScrollHorzVisible:= false;
-  //FScrollVertVisible:= false;
-  FSearchIndent:= 5;
-  FSearchIndentHorz:= 5;
-  FTabSize:= 8;
-  FPopupCommands:= vpcmdDefaultSet;
+    FAutoReload:= false;
+    FAutoReloadBeep:= false;
+    FAutoReloadFollowTail:= true;
 
-  FAutoReload:= false;
-  FAutoReloadBeep:= false;
-  FAutoReloadFollowTail:= true;
+    FMaxLength:= 0; //Initialized in AllocBuffer
+    FMaxLengths[vbmodeText]:= cMaxLengthDefault;
+    FMaxLengths[vbmodeBinary]:= cMaxLengthDefault;
+    FMaxLengths[vbmodeHex]:= cMaxLengthDefault;
+    FMaxLengths[vbmodeUnicode]:= cMaxLengthDefault;
 
-  FMaxLength:= 0; //Initialized in AllocBuffer
-  FMaxLengths[vbmodeText]:= cMaxLengthDefault;
-  FMaxLengths[vbmodeBinary]:= cMaxLengthDefault;
-  FMaxLengths[vbmodeHex]:= cMaxLengthDefault;
-  FMaxLengths[vbmodeUnicode]:= cMaxLengthDefault;
+    FHexOffsetLen:= 8;
+    FLockCount:= 0;
+    FSearchCallback:= nil;
+    FOnSelectionChange:= nil;
 
-  FHexOffsetLen:= 8;
-  FLockCount:= 0;
-  FSearchCallback:= nil;
-  FOnSelectionChange:= nil;
+    FFileName:= '';
+    FStream:= nil;
+    InitData;
+    DebugLn('Passed init data');
+    //Init objects
+    FFontOEM:= TFont.Create;
+    with FFontOEM do
+      begin
+      Name:= 'Terminal';
+      Size:= 9;
+      Color:= clWindowText;
+      CharSet:= OEM_CHARSET;
+      end;
+    DebugLn('Passed FontOEM');
+    FBitmap:= TBitmap.Create;
+    with FBitmap do
+      begin
+      Width:= Self.Width;
+      Height:= Self.Height;
+      end;
+    DebugLn('Passed FBitmap');
+    FTimer:= TTimer.Create(Self);
+    with FTimer do
+      begin
+      Enabled:= false;
+      Interval:= cMScrollTime;
+      OnTimer:= TimerTimer;
+      end;
+    DebugLn('Passed FTimer');
+    FStrings:= TStrPositions.Create;
 
-  FFileName:= '';
-  FStream:= nil;
-  InitData;
+    //Init popup menu
+    FMenuItemCopy:= TMenuItem.Create(Self);
+    with FMenuItemCopy do
+      begin
+      Caption:= 'Copy';
+      OnClick:= MenuItemCopyClick;
+      end;
 
-  //Init objects
-  FFontOEM:= TFont.Create;
-  with FFontOEM do
-    begin
-    Name:= 'Terminal';
-    Size:= 9;
-    Color:= clWindowText;
-    CharSet:= OEM_CHARSET;
-    end;
+    FMenuItemCopyHex:= TMenuItem.Create(Self);
+    with FMenuItemCopyHex do
+      begin
+      Caption:= 'Copy as hex';
+      OnClick:= MenuItemCopyHexClick;
+      end;
 
-  FBitmap:= TBitmap.Create;
-  with FBitmap do
-    begin
-    Width:= Self.Width;
-    Height:= Self.Height;
-    end;
+    FMenuItemSelectLine:= TMenuItem.Create(Self);
+    with FMenuItemSelectLine do
+      begin
+      Caption:= 'Select line';
+      OnClick:= MenuItemSelectLineClick;
+      end;
 
-  FTimer:= TTimer.Create(Self);
-  with FTimer do
-    begin
-    Enabled:= false;
-    Interval:= cMScrollTime;
-    OnTimer:= TimerTimer;
-    end;
+    FMenuItemSelectAll:= TMenuItem.Create(Self);
+    with FMenuItemSelectAll do
+      begin
+      Caption:= 'Select all';
+      OnClick:= MenuItemSelectAllClick;
+      end;
 
-  FStrings:= TStrPositions.Create;
+    FMenuItemSep:= TMenuItem.Create(Self);
+    with FMenuItemSep do
+      begin
+      Caption:= '-';
+      end;
 
-  //Init popup menu
-  FMenuItemCopy:= TMenuItem.Create(Self);
-  with FMenuItemCopy do
-    begin
-    Caption:= 'Copy';
-    OnClick:= MenuItemCopyClick;
-    end;
+    FMenu:= TPopupMenu.Create(Self);
+    with FMenu do
+      begin
+      Items.Add(FMenuItemCopy);
+      Items.Add(FMenuItemCopyHex);
+      Items.Add(FMenuItemSep);
+      Items.Add(FMenuItemSelectLine);
+      Items.Add(FMenuItemSelectAll);
+      end;
 
-  FMenuItemCopyHex:= TMenuItem.Create(Self);
-  with FMenuItemCopyHex do
-    begin
-    Caption:= 'Copy as hex';
-    OnClick:= MenuItemCopyHexClick;
-    end;
+    PopupMenu:= FMenu;
+    DebugLn('Passed Menu');
+    //Init notification object
+    {$ifdef NOTIF}
+    FNotif:= TATFileNotification.Create(Self);
+    with FNotif do
+      begin
+      Options:= [foNotifyFilename, foNotifyLastWrite, foNotifySize];
+      OnChanged:= NotifChanged;
+      end;
+    {$endif}
 
-  FMenuItemSelectLine:= TMenuItem.Create(Self);
-  with FMenuItemSelectLine do
-    begin
-    Caption:= 'Select line';
-    OnClick:= MenuItemSelectLineClick;
-    end;
+    //Init event handlers
+    OnMouseWheelUp:= MouseWheelUp;
+    OnMouseWheelDown:= MouseWheelDown;
+    OnContextPopup:= ContextPopup;
 
-  FMenuItemSelectAll:= TMenuItem.Create(Self);
-  with FMenuItemSelectAll do
-    begin
-    Caption:= 'Select all';
-    OnClick:= MenuItemSelectAllClick;
-    end;
-
-  FMenuItemSep:= TMenuItem.Create(Self);
-  with FMenuItemSep do
-    begin
-    Caption:= '-';
-    end;
-
-  FMenu:= TPopupMenu.Create(Self);
-  with FMenu do
-    begin
-    Items.Add(FMenuItemCopy);
-    Items.Add(FMenuItemCopyHex);
-    Items.Add(FMenuItemSep);
-    Items.Add(FMenuItemSelectLine);
-    Items.Add(FMenuItemSelectAll);
-    end;
-
-  PopupMenu:= FMenu;
-
-  //Init notification object
-  {$ifdef NOTIF}
-  FNotif:= TATFileNotification.Create(Self);
-  with FNotif do
-    begin
-    Options:= [foNotifyFilename, foNotifyLastWrite, foNotifySize];
-    OnChanged:= NotifChanged;
-    end;
-  {$endif}
-
-  //Init event handlers
-  OnMouseWheelUp:= MouseWheelUp;
-  OnMouseWheelDown:= MouseWheelDown;
-  OnContextPopup:= ContextPopup;
-
-  //Init debug form
-  {$ifdef DEBUG_FORM}
-  InitDebugForm;
-  {$endif}
+    //Init debug form
+    {$ifdef DEBUG_FORM}
+    InitDebugForm;
+    {$endif}
+  except
+    On E: Exception do
+      ShowMessage(E.Message);
+  end;
 end;
 
 destructor TATBinHex.Destroy;
@@ -1003,8 +1023,9 @@ var
   ch: char;
   //DebugX, DebugY: integer;
 begin
+  Logger.EnterMethod(Self,'Redraw');
   try
-  Lock;
+    Lock;
 
   //When file is not loaded, clear display and quit
   if FFileSize=0 then
@@ -1242,13 +1263,14 @@ begin
   finally
     Unlock;
   end;
+  Logger.ExitMethod(Self,'Redraw');
 end;
 
 procedure TATBinHex.HideScrollBar(AHorz: boolean);
 const
   ATypes: array[boolean] of integer = (SB_VERT, SB_HORZ);
 var
-  si: Windows.TScrollInfo;
+  si: TScrollInfo;
 begin
   FillChar(si, SizeOf(si), 0);
   si.cbSize:= SizeOf(si);
@@ -1266,7 +1288,7 @@ end;
 procedure TATBinHex.SetVScrollBar(APageSize: integer);
 var
   Cols, Max, Pos, Page: Int64;
-  si: Windows.TScrollInfo;
+  si: TScrollInfo;
 begin
   Cols:= ColsNum;
   if FFileOK and (FFileSize>Cols) then
@@ -1305,7 +1327,7 @@ end;
 procedure TATBinHex.SetHScrollBar;
 var
   Max, Page, Pos: integer;
-  si: Windows.TScrollInfo;
+  si: TScrollInfo;
 begin
   if                 //Hide horizontal scrollbar when:
     (not FFileOK) or // - read error occurs
@@ -1348,12 +1370,17 @@ end;
 
 procedure TATBinHex.Resize;
 begin
-  Redraw;
+  Logger.Send('Resize',Self);
+  inherited;
+  //if not (csLoading in ComponentState) then
+  //  Redraw;
 end;
 
 procedure TATBinHex.Paint;
 begin
+  Logger.EnterMethod(Self,'Paint');
   Canvas.Draw(0, 0, FBitmap);
+  Logger.ExitMethod(Self,'Paint');
 end;
 
 procedure TATBinHex.Click;
@@ -1398,6 +1425,13 @@ begin
     SelectLineAtPos(FMouseStartDbl, true);
 end;
 
+procedure TATBinHex.DoOnResize;
+begin
+  //there's a problem redrawing in Resize under LCL
+  inherited;
+  Redraw;
+end;
+
 procedure TATBinHex.ContextPopup(Sender: TObject; MousePos: TPoint; var Handled: boolean);
 begin
   FMousePopupPos:= MousePos;
@@ -1417,8 +1451,6 @@ begin
 end;
 
 function TATBinHex.ReadSource(const APos: Int64; ABuffer: pointer; ABufferSize: DWORD; var AReadSize: DWORD): boolean;
-var
-  PosRec: TInt64Rec;
 begin
   Result:= false;
 
@@ -1439,9 +1471,9 @@ begin
         FFileHandle<>INVALID_HANDLE_VALUE,
         'File handle not open: ReadSource');
 
-      PosRec:= TInt64Rec(APos);
-      SetFilePointer(FFileHandle, PosRec.Lo, @PosRec.Hi, FILE_BEGIN);
-      Result:= ReadFile(FFileHandle, ABuffer^, ABufferSize, AReadSize, nil);
+      FileSeek(FFileHandle,APos,fsFromBeginning);
+      AReadSize:=FileRead(FFileHandle, ABuffer^,ABufferSize);
+      Result:=AReadSize <> -1;
       end;
 
     //Read from stream
@@ -1727,7 +1759,7 @@ procedure TATBinHex.FreeData;
 begin
   if FFileHandle<>INVALID_HANDLE_VALUE then
     begin
-    CloseHandle(FFileHandle);
+    FileClose(FFileHandle);
     FFileHandle:= INVALID_HANDLE_VALUE;
     end;
   if Assigned(FBuffer) then
@@ -1773,7 +1805,7 @@ begin
   FFileSize:= FGetFileSize(FFileHandle);
   if FFileSize<0 then
     begin
-    CloseHandle(FFileHandle);
+    FileClose(FFileHandle);
     FFileHandle:= INVALID_HANDLE_VALUE;
     FFileSize:= 0;
     Exit
@@ -1958,6 +1990,7 @@ end;
 
 procedure TATBinHex.WMEraseBkgnd(var Message: TMessage);
 begin
+  Logger.Send('WMEraseBkgnd');
   Message.Result:= 1;
 end;
 
@@ -3015,5 +3048,11 @@ procedure Register;
 begin
   RegisterComponents('Samples', [TATBinHex]);
 end;
+
+initialization
+  Logger.Channels.Add(TIPCChannel.Create);
+
+finalization
+
 
 end.
