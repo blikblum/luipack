@@ -123,7 +123,8 @@ uses
   , oleacc // for MSAA IAccessible support
   {$endif}
   {$ifdef EnableOLE}
-  , ActiveX
+  , ActiveX,
+  OleUtils
   {$endif}
   ;
 
@@ -3305,7 +3306,7 @@ function TreeFromNode(Node: PVirtualNode): TBaseVirtualTree;
 
 implementation
 
-{$R VirtualTrees.res}
+{.$R VirtualTrees.res}
 
 uses
   {Consts,} Math,
@@ -22707,8 +22708,8 @@ begin
         // Do not use TStreamAdapter as it is not compatible with OLE (when flushing the clipboard OLE wants the HGlobal
         // back which is not supported by TStreamAdapater).
         CreateStreamOnHGlobal(0, True, OLEStream);
-        //lcl_todo_block Implement TOLEStream
-        //VCLStream := TOLEStream.Create(OLEStream);
+
+        VCLStream := TOLEStream.Create(OLEStream);
         WriteNodes(VCLStream);
         // Rewind stream.
         VCLStream.Position := 0;
@@ -22959,7 +22960,8 @@ var
   ImageName: string;
 
 begin
-  {$ifdef NeedWindows}
+  {$ifdef EnableWheelPanning}
+
   // Set both panning and scrolling flag. One will be removed shortly depending on whether the middle mouse button is
   // released before the mouse is moved or vice versa. The first case is referred to as wheel scrolling while the
   // latter is called wheel panning.
@@ -23004,6 +23006,7 @@ begin
   SetFocus;
   SetCapture(Handle);
   SetTimer(Handle, ScrollTimer, 20, nil);
+
   {$endif}
 end;
 
@@ -23017,7 +23020,7 @@ var
   Instance: Pointer;
 
 begin
-  {$ifdef NeedWindows}
+  {$ifdef EnableWheelPanning}
   if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
   begin
     // Release the mouse capture and stop the panscroll timer.
@@ -28177,7 +28180,7 @@ begin
               begin
                 Stream := nil;
                 if Medium.tymed = TYMED_ISTREAM then
-                  Stream := TOLEStream.Create(IUnknown(Medium.stm) as IStream)
+                  Stream := TOLEStream.Create(IUnknown(Medium.Pstm) as IStream)
                 else
                 begin
                   Data := GlobalLock(Medium.hGlobal);
@@ -28220,7 +28223,7 @@ begin
                 end;
               end;
           end;
-          ReleaseStgMedium(Medium);
+          ReleaseStgMedium(@Medium);
         end;
       end;
     finally
