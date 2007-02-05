@@ -1,5 +1,11 @@
 unit ATxClipboardFPC;
 
+{
+Original work by Alexey Torgashin
+LCL port: Luiz Americo Pereira Camara
+}
+
+
 {$mode objfpc}{$H+}
 
 interface
