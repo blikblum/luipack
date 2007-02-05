@@ -7,6 +7,10 @@
 {                                                }
 {************************************************}
 
+{
+LCL port: Luiz Americo Pereira Camara
+}
+
 {$mode delphi}
 {$H+}
 
@@ -25,16 +29,14 @@
 
 unit ATBinHex;
 
+
 interface
 
 uses
   LCLIntf, LCLType, Types, SysUtils, Classes, Controls, Graphics,
-  StdCtrls, ExtCtrls, LCLProc, Dialogs, SharedLogger, IPCChannel,
+  StdCtrls, ExtCtrls, SharedLogger, IPCChannel,
   {$ifdef NOTIF} ATFileNotification, {$endif}
   Menus,
-  {$ifdef UseWindows}
-  Windows,
-  {$endif}
   DelphiCompat;
 
 const
@@ -790,162 +792,149 @@ end;
 
 constructor TATBinHex.Create(AOwner: TComponent);
 begin
-  DebugLn('Before inherited Create');
   inherited Create(AOwner);
-  try
-    DebugLn('Passed inherited Create');
-    //Init inherited properties
-    Caption:= '';
-    DebugLn('Passed Caption');
-    //Width:= 200;
-    //Height:= 150;
-    BevelOuter:= bvNone;
-    BorderStyle:= bsSingle;
-    Color:= clWindow;
-    Cursor:= crIBeam;
-    ControlStyle:= ControlStyle + [csOpaque];
+  //Init inherited properties
+  Caption:= '';
+  //Width:= 200;
+  //Height:= 150;
+  BevelOuter:= bvNone;
+  BorderStyle:= bsSingle;
+  Color:= clWindow;
+  Cursor:= crIBeam;
+  ControlStyle:= ControlStyle + [csOpaque];
 
-    Font.Name:= 'Courier New';
-    Font.Size:= 10;
-    Font.Color:= clWindowText;
+  Font.Name:= 'Courier New';
+  Font.Size:= 10;
+  Font.Color:= clWindowText;
 
-    //Init fields
-    FMode:= vbmodeText;
-    FEncoding:= vencANSI;
-    FTextWidth:= 80;
-    FTextWidthHex:= 16;
-    FTextWidthFit:= false;
-    FTextWidthFitHex:= false;
-    FTextWrap:= false;
-    FTextColorHex:= clNavy;
-    FTextColorHex2:= clBlue;
-    FTextColorHexBack:= clLtGray2;
-    FTextColorLines:= clGray;
-    FTextColorError:= clRed;
-    FScrollPageSize:= true;
-    //FScrollHorzVisible:= false;
-    //FScrollVertVisible:= false;
-    FSearchIndent:= 5;
-    FSearchIndentHorz:= 5;
-    FTabSize:= 8;
-    FPopupCommands:= vpcmdDefaultSet;
+  //Init fields
+  FMode:= vbmodeText;
+  FEncoding:= vencANSI;
+  FTextWidth:= 80;
+  FTextWidthHex:= 16;
+  FTextWidthFit:= false;
+  FTextWidthFitHex:= false;
+  FTextWrap:= false;
+  FTextColorHex:= clNavy;
+  FTextColorHex2:= clBlue;
+  FTextColorHexBack:= clLtGray2;
+  FTextColorLines:= clGray;
+  FTextColorError:= clRed;
+  FScrollPageSize:= true;
+  //FScrollHorzVisible:= false;
+  //FScrollVertVisible:= false;
+  FSearchIndent:= 5;
+  FSearchIndentHorz:= 5;
+  FTabSize:= 8;
+  FPopupCommands:= vpcmdDefaultSet;
 
-    FAutoReload:= false;
-    FAutoReloadBeep:= false;
-    FAutoReloadFollowTail:= true;
+  FAutoReload:= false;
+  FAutoReloadBeep:= false;
+  FAutoReloadFollowTail:= true;
 
-    FMaxLength:= 0; //Initialized in AllocBuffer
-    FMaxLengths[vbmodeText]:= cMaxLengthDefault;
-    FMaxLengths[vbmodeBinary]:= cMaxLengthDefault;
-    FMaxLengths[vbmodeHex]:= cMaxLengthDefault;
-    FMaxLengths[vbmodeUnicode]:= cMaxLengthDefault;
+  FMaxLength:= 0; //Initialized in AllocBuffer
+  FMaxLengths[vbmodeText]:= cMaxLengthDefault;
+  FMaxLengths[vbmodeBinary]:= cMaxLengthDefault;
+  FMaxLengths[vbmodeHex]:= cMaxLengthDefault;
+  FMaxLengths[vbmodeUnicode]:= cMaxLengthDefault;
 
-    FHexOffsetLen:= 8;
-    FLockCount:= 0;
-    FSearchCallback:= nil;
-    FOnSelectionChange:= nil;
+  FHexOffsetLen:= 8;
+  FLockCount:= 0;
+  FSearchCallback:= nil;
+  FOnSelectionChange:= nil;
 
-    FFileName:= '';
-    FStream:= nil;
-    InitData;
-    DebugLn('Passed init data');
-    //Init objects
-    FFontOEM:= TFont.Create;
-    with FFontOEM do
-      begin
-      Name:= 'Terminal';
-      Size:= 9;
-      Color:= clWindowText;
-      CharSet:= OEM_CHARSET;
-      end;
-    DebugLn('Passed FontOEM');
-    FBitmap:= TBitmap.Create;
-    with FBitmap do
-      begin
-      Width:= Self.Width;
-      Height:= Self.Height;
-      end;
-    DebugLn('Passed FBitmap');
-    FTimer:= TTimer.Create(Self);
-    with FTimer do
-      begin
-      Enabled:= false;
-      Interval:= cMScrollTime;
-      OnTimer:= TimerTimer;
-      end;
-    DebugLn('Passed FTimer');
-    FStrings:= TStrPositions.Create;
+  FFileName:= '';
+  FStream:= nil;
+  InitData;
+  //Init objects
+  FFontOEM:= TFont.Create;
+  with FFontOEM do
+    begin
+    Name:= 'Terminal';
+    Size:= 9;
+    Color:= clWindowText;
+    CharSet:= OEM_CHARSET;
+    end;
+  FBitmap:= TBitmap.Create;
+  with FBitmap do
+    begin
+    Width:= Self.Width;
+    Height:= Self.Height;
+    end;
+  FTimer:= TTimer.Create(Self);
+  with FTimer do
+    begin
+    Enabled:= false;
+    Interval:= cMScrollTime;
+    OnTimer:= TimerTimer;
+    end;
+  FStrings:= TStrPositions.Create;
 
-    //Init popup menu
-    FMenuItemCopy:= TMenuItem.Create(Self);
-    with FMenuItemCopy do
-      begin
-      Caption:= 'Copy';
-      OnClick:= MenuItemCopyClick;
-      end;
+  //Init popup menu
+  FMenuItemCopy:= TMenuItem.Create(Self);
+  with FMenuItemCopy do
+    begin
+    Caption:= 'Copy';
+    OnClick:= MenuItemCopyClick;
+    end;
 
-    FMenuItemCopyHex:= TMenuItem.Create(Self);
-    with FMenuItemCopyHex do
-      begin
-      Caption:= 'Copy as hex';
-      OnClick:= MenuItemCopyHexClick;
-      end;
+  FMenuItemCopyHex:= TMenuItem.Create(Self);
+  with FMenuItemCopyHex do
+    begin
+    Caption:= 'Copy as hex';
+    OnClick:= MenuItemCopyHexClick;
+    end;
 
-    FMenuItemSelectLine:= TMenuItem.Create(Self);
-    with FMenuItemSelectLine do
-      begin
-      Caption:= 'Select line';
-      OnClick:= MenuItemSelectLineClick;
-      end;
+  FMenuItemSelectLine:= TMenuItem.Create(Self);
+  with FMenuItemSelectLine do
+    begin
+    Caption:= 'Select line';
+    OnClick:= MenuItemSelectLineClick;
+    end;
 
-    FMenuItemSelectAll:= TMenuItem.Create(Self);
-    with FMenuItemSelectAll do
-      begin
-      Caption:= 'Select all';
-      OnClick:= MenuItemSelectAllClick;
-      end;
+  FMenuItemSelectAll:= TMenuItem.Create(Self);
+  with FMenuItemSelectAll do
+    begin
+    Caption:= 'Select all';
+    OnClick:= MenuItemSelectAllClick;
+    end;
 
-    FMenuItemSep:= TMenuItem.Create(Self);
-    with FMenuItemSep do
-      begin
-      Caption:= '-';
-      end;
+  FMenuItemSep:= TMenuItem.Create(Self);
+  with FMenuItemSep do
+    begin
+    Caption:= '-';
+    end;
 
-    FMenu:= TPopupMenu.Create(Self);
-    with FMenu do
-      begin
-      Items.Add(FMenuItemCopy);
-      Items.Add(FMenuItemCopyHex);
-      Items.Add(FMenuItemSep);
-      Items.Add(FMenuItemSelectLine);
-      Items.Add(FMenuItemSelectAll);
-      end;
+  FMenu:= TPopupMenu.Create(Self);
+  with FMenu do
+    begin
+    Items.Add(FMenuItemCopy);
+    Items.Add(FMenuItemCopyHex);
+    Items.Add(FMenuItemSep);
+    Items.Add(FMenuItemSelectLine);
+    Items.Add(FMenuItemSelectAll);
+    end;
 
-    PopupMenu:= FMenu;
-    DebugLn('Passed Menu');
-    //Init notification object
-    {$ifdef NOTIF}
-    FNotif:= TATFileNotification.Create(Self);
-    with FNotif do
-      begin
-      Options:= [foNotifyFilename, foNotifyLastWrite, foNotifySize];
-      OnChanged:= NotifChanged;
-      end;
-    {$endif}
+  PopupMenu:= FMenu;
+  //Init notification object
+  {$ifdef NOTIF}
+  FNotif:= TATFileNotification.Create(Self);
+  with FNotif do
+    begin
+    Options:= [foNotifyFilename, foNotifyLastWrite, foNotifySize];
+    OnChanged:= NotifChanged;
+    end;
+  {$endif}
 
-    //Init event handlers
-    OnMouseWheelUp:= MouseWheelUp;
-    OnMouseWheelDown:= MouseWheelDown;
-    OnContextPopup:= ContextPopup;
+  //Init event handlers
+  OnMouseWheelUp:= MouseWheelUp;
+  OnMouseWheelDown:= MouseWheelDown;
+  OnContextPopup:= ContextPopup;
 
-    //Init debug form
-    {$ifdef DEBUG_FORM}
-    InitDebugForm;
-    {$endif}
-  except
-    On E: Exception do
-      ShowMessage(E.Message);
-  end;
+  //Init debug form
+  {$ifdef DEBUG_FORM}
+  InitDebugForm;
+  {$endif}
 end;
 
 destructor TATBinHex.Destroy;
@@ -3050,8 +3039,9 @@ begin
 end;
 
 initialization
+  {$ifdef DEBUG_ATBINHEX}
   Logger.Channels.Add(TIPCChannel.Create);
-
+  {$endif}
 finalization
 
 

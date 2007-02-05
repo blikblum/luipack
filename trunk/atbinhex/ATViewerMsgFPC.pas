@@ -2,6 +2,12 @@ unit ATViewerMsgFPC;
 
 {$mode objfpc}{$H+}
 
+{
+Original work by Alexey Torgashin
+LCL port: Luiz Americo Pereira Camara
+}
+
+
 interface
 
 uses
