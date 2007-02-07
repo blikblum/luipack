@@ -27,7 +27,7 @@ unit oleutils;
 {$mode objfpc}{$H+}
 
 interface
-
+{$ifdef Windows}
 uses
   Windows, Classes, ActiveX;
 
@@ -44,9 +44,9 @@ type
     function Seek(Offset: Integer; Origin: Word): Integer; overload; override;
     function Write(const Buffer; Count: Integer): Integer; override;
   end;
-
+{$endif}
 implementation
-
+{$ifdef Windows}
 { TOLEStream }
 
 constructor TOLEStream.Create(const Stream: IStream);
@@ -75,6 +75,6 @@ function TOLEStream.Write(const Buffer; Count: Integer): Integer;
 begin
   FSrcStream.Write(@Buffer,Count,@Result);
 end;
-
+{$endif}
 end.
 
