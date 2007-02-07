@@ -696,7 +696,7 @@ type
     constructor Create(Tree: TBaseVirtualTree; AFormatEtcArray: TFormatEtcArray);
 
     function Clone(out Enum: IEnumFormatEtc): HResult; stdcall;
-    function Next(celt: LongWord; out elt: FormatEtc; pceltFetched: LongWord): HResult; stdcall;
+    function Next(celt: LongWord; out elt: FormatEtc; out pceltFetched: LongWord): HResult; stdcall;
     function Reset: HResult; stdcall;
     function Skip(celt: LongWord): HResult; stdcall;
   end;
@@ -5743,10 +5743,10 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TEnumFormatEtc.Next(celt: LongWord; out elt: FormatEtc; pceltFetched: LongWord): HResult;
+function TEnumFormatEtc.Next(celt: LongWord; out elt: FormatEtc; out pceltFetched: LongWord): HResult;
 
 var
-  CopyCount: Integer;
+  CopyCount: LongWord;
 
 begin
   Result := S_FALSE;
@@ -5759,8 +5759,9 @@ begin
     Inc(FCurrentIndex, CopyCount);
     Result := S_OK;
   end;
-  if Assigned(PLongint(pceltFetched)) then
-    PLongInt(pceltFetched)^ := CopyCount;
+  //todo_lcl_check Delphi treats pceltFetched an PInteger. Implemented like in fpc.activex. What heappens with
+  // a C Program call with a NULL in pCeltFetcjed??
+  pceltFetched := CopyCount;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
