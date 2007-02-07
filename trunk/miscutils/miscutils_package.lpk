@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="2">
+    <PathDelim Value="\"/>
+    <Name Value="miscutils_package"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="include\$(LCLWidgetType)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="6">
+      <Item1>
+        <Filename Value="dbutils.pas"/>
+        <UnitName Value="dbutils"/>
+      </Item1>
+      <Item2>
+        <Filename Value="domutils.pas"/>
+        <UnitName Value="domutils"/>
+      </Item2>
+      <Item3>
+        <Filename Value="miscutils.pas"/>
+        <UnitName Value="miscutils"/>
+      </Item3>
+      <Item4>
+        <Filename Value="oleutils.pas"/>
+        <UnitName Value="oleutils"/>
+      </Item4>
+      <Item5>
+        <Filename Value="timerutils.pas"/>
+        <UnitName Value="timerutils"/>
+      </Item5>
+      <Item6>
+        <Filename Value="delphicompat.pas"/>
+        <UnitName Value="delphicompat"/>
+      </Item6>
+    </Files>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
