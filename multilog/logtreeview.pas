@@ -169,14 +169,16 @@ begin
     AddFromLazarusResource('value');
     AddFromLazarusResource('entermethod');
     AddFromLazarusResource('exitmethod');
-    AddFromLazarusResource('whatisthis');
+    AddFromLazarusResource('whatisthis');  //conditional
     AddFromLazarusResource('check');
     AddFromLazarusResource('strings');
     AddFromLazarusResource('callstack');
     AddFromLazarusResource('object');
     AddFromLazarusResource('error');
     AddFromLazarusResource('image');
-    AddFromLazarusResource('whatisthis');
+    AddFromLazarusResource('whatisthis');   //heap
+    AddFromLazarusResource('whatisthis');   //memory
+    AddFromLazarusResource('whatisthis');   //custom data
   end;
   Images:=FImgList;
 end;

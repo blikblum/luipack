@@ -26,6 +26,7 @@ LCL port: Luiz Americo Pereira Camara
                 //doesn't hide when lines become short enough. Should be enabled.
 //{.$define DEBUG_FORM}
                 //Show debug form. Must be commented in release!
+{.$define DEBUG_ATBINHEX}
 
 unit ATBinHex;
 
@@ -34,7 +35,8 @@ interface
 
 uses
   LCLIntf, LCLType, Types, SysUtils, Classes, Controls, Graphics,
-  StdCtrls, ExtCtrls, SharedLogger, IPCChannel,
+  StdCtrls, ExtCtrls,
+  SharedLogger, IPCChannel,
   {$ifdef NOTIF} ATFileNotification, {$endif}
   Menus,
   DelphiCompat;
@@ -273,7 +275,7 @@ type
     procedure Click; override;
     procedure DblClick; override;
     procedure DoOnResize; override;
-    procedure Resize; override;
+    //procedure Resize; override;
     procedure Paint; override;
     procedure WMGetDlgCode(var Message: TMessage); message WM_GETDLGCODE;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
@@ -1012,7 +1014,9 @@ var
   ch: char;
   //DebugX, DebugY: integer;
 begin
+  {$ifdef DEBUG_ATBINHEX}
   Logger.EnterMethod(Self,'Redraw');
+  {$endif}
   try
     Lock;
 
@@ -1252,7 +1256,9 @@ begin
   finally
     Unlock;
   end;
+  {$ifdef DEBUG_ATBINHEX}
   Logger.ExitMethod(Self,'Redraw');
+  {$endif}
 end;
 
 procedure TATBinHex.HideScrollBar(AHorz: boolean);
@@ -1356,15 +1362,15 @@ begin
 
   SetScrollInfo(Handle, SB_HORZ, si, true);
 end;
-
+{
 procedure TATBinHex.Resize;
 begin
-  Logger.Send('Resize',Self);
+  //Logger.Send('Resize',Self);
   inherited;
   //if not (csLoading in ComponentState) then
   //  Redraw;
 end;
-
+}
 procedure TATBinHex.Paint;
 begin
   Logger.EnterMethod(Self,'Paint');
@@ -1418,7 +1424,8 @@ procedure TATBinHex.DoOnResize;
 begin
   //there's a problem redrawing in Resize under LCL
   inherited;
-  Redraw;
+  if HandleAllocated then
+    Redraw;
 end;
 
 procedure TATBinHex.ContextPopup(Sender: TObject; MousePos: TPoint; var Handled: boolean);
