@@ -11,6 +11,7 @@ uses
   { add your units here }, fmain, atbinhex_lcl;
 
 begin
+  Application.Title:='ATBinHexLCLDemo';
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;
