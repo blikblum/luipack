@@ -55,11 +55,15 @@ function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size
 
 function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
 
-function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
-
 function GetTextExtentExPointW(DC: HDC; p2: PWideChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
 
+//GDI Functions
+
+function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
+
 function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
+
+
 
 implementation
 
