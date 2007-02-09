@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ATBinHex,
-  ExtCtrls, Buttons;
+  ExtCtrls, Buttons, lclintf;
 
 type
 
@@ -47,10 +47,12 @@ end;
 
 procedure TForm1.ButChooseFontClick(Sender: TObject);
 begin
+  {.$ifdef Windows}
   if FontDialog1.Execute then
   begin
     BinHexViewer.Font:=FontDialog1.Font;
   end;
+  {.$endif}
 end;
 
 procedure TForm1.ChangeMode(Sender: TObject);
