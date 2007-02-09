@@ -15,10 +15,13 @@ type
   TForm1 = class(TForm)
     BinHexViewer: TATBinHex;
     ButOpenFile: TButton;
+    ButChooseFont: TButton;
+    FontDialog1: TFontDialog;
     OpenDialog1: TOpenDialog;
     PanelLeft: TPanel;
     RadioGroupMode: TRadioGroup;
     Splitter1: TSplitter;
+    procedure ButChooseFontClick(Sender: TObject);
     procedure ButOpenFileClick(Sender: TObject);
     procedure ChangeMode(Sender: TObject);
   private
@@ -39,7 +42,14 @@ begin
   if OpenDialog1.Execute then
   begin
     BinHexViewer.Open(OpenDialog1.FileName);
-    
+  end;
+end;
+
+procedure TForm1.ButChooseFontClick(Sender: TObject);
+begin
+  if FontDialog1.Execute then
+  begin
+    BinHexViewer.Font:=FontDialog1.Font;
   end;
 end;
 

@@ -1,10 +1,10 @@
 object frmMain: TfrmMain
-  Left = 252
-  Height = 565
-  Top = 293
-  Width = 811
-  HorzScrollBar.Page = 810
-  VertScrollBar.Page = 564
+  Left = 209
+  Height = 591
+  Top = 240
+  Width = 864
+  HorzScrollBar.Page = 863
+  VertScrollBar.Page = 590
   ActiveControl = vtreeMessages
   Caption = 'Multilog Viewer'
   OnCreate = FormCreate
@@ -13,7 +13,7 @@ object frmMain: TfrmMain
     Left = 1
     Height = 28
     Top = 1
-    Width = 809
+    Width = 862
     BorderSpacing.Around = 1
     ButtonHeight = 28
     ButtonWidth = 28
@@ -31,16 +31,17 @@ object frmMain: TfrmMain
     end
   end
   object panelLeft: TPanel
-    Height = 535
+    Left = 291
+    Height = 561
     Top = 30
-    Width = 520
-    Align = alLeft
+    Width = 573
+    Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object panelViewer: TPanel
       Height = 175
-      Top = 360
-      Width = 520
+      Top = 386
+      Width = 573
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 0
@@ -48,7 +49,7 @@ object frmMain: TfrmMain
         AnchorSideLeft.Control = nbViewer
         AnchorSideBottom.Control = nbViewer
         Height = 18
-        Width = 520
+        Width = 573
         Align = alTop
         Anchors = [akLeft, akBottom]
         Caption = 'Data Viewer'
@@ -58,7 +59,7 @@ object frmMain: TfrmMain
       object nbViewer: TNotebook
         Height = 157
         Top = 18
-        Width = 520
+        Width = 573
         Align = alClient
         PageIndex = 3
         ShowTabs = False
@@ -116,7 +117,7 @@ object frmMain: TfrmMain
           Caption = 'PageHexViewer'
           object lbMemorySize: TLabel
             Height = 14
-            Width = 512
+            Width = 565
             Align = alTop
             Caption = 'Size:'
             Color = clNone
@@ -126,7 +127,7 @@ object frmMain: TfrmMain
             Cursor = crIBeam
             Height = 135
             Top = 14
-            Width = 512
+            Width = 565
             Align = alClient
             BevelOuter = bvNone
             BorderStyle = bsSingle
@@ -146,15 +147,15 @@ object frmMain: TfrmMain
     object Splitter2: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 355
-      Width = 520
+      Top = 381
+      Width = 573
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
-      Height = 355
-      Width = 520
+      Height = 381
+      Width = 573
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
@@ -162,9 +163,9 @@ object frmMain: TfrmMain
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
         AnchorSideTop.Side = asrBottom
-        Height = 209
+        Height = 235
         Top = 146
-        Width = 520
+        Width = 573
         Align = alClient
         BorderStyle = bsSingle
         Header.MainColumn = -1
@@ -182,7 +183,7 @@ object frmMain: TfrmMain
       object panelFilter: TPanel
         Height = 122
         Top = 24
-        Width = 520
+        Width = 573
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 1
@@ -385,7 +386,7 @@ object frmMain: TfrmMain
       end
       object TabControl1: TTabControl
         Height = 24
-        Width = 520
+        Width = 573
         Align = alTop
         Style = tsButtons
         TabIndex = 0
@@ -398,16 +399,15 @@ object frmMain: TfrmMain
     end
   end
   object panelRight: TPanel
-    Left = 525
-    Height = 535
+    Height = 561
     Top = 30
     Width = 286
-    Align = alClient
+    Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
     object nbWatches: TNotebook
-      Height = 200
-      Top = 335
+      Height = 175
+      Top = 386
       Width = 286
       Align = alBottom
       OnPageChanged = nbWatchesPageChanged
@@ -415,7 +415,7 @@ object frmMain: TfrmMain
       object pageLastest: TPage
         Caption = 'Last'
         object gridLastestWatch: TStringGrid
-          Height = 174
+          Height = 149
           Width = 278
           Align = alClient
           AutoFillColumns = True
@@ -470,22 +470,23 @@ object frmMain: TfrmMain
     object Splitter1: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 330
+      Top = 381
       Width = 286
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object gridCallStack: TStringGrid
-      Height = 330
-      Width = 286
+      Left = 5
+      Height = 381
+      Width = 281
       Align = alClient
       AutoFillColumns = True
       ColCount = 1
       Columns = <      
         item
           Title.Caption = 'CallStack'
-          Width = 286
+          Width = 281
         end>
       FixedColor = clBtnFace
       FixedCols = 0
@@ -496,15 +497,17 @@ object frmMain: TfrmMain
       TabOrder = 1
       TabStop = True
     end
+    object Splitter4: TSplitter
+      Height = 381
+      Width = 5
+    end
   end
-  object splitterVert: TSplitter
-    Left = 520
-    Height = 535
+  object Splitter5: TSplitter
+    Left = 286
+    Height = 561
     Top = 30
     Width = 5
     Beveled = True
-    Color = clBtnFace
-    ParentColor = False
   end
   object imgMessages: TImageList
     left = 176
@@ -973,5 +976,11 @@ object frmMain: TfrmMain
       FFFFFFFFFFFFFFFFFFFF874A20874A20874A20874A20874A20874A20874A2087
       4A20FFFFFFFFFFFFFFFFFFFFFFFF
     }
+  end
+  object Splitter3: TSplitter
+    Left = 280
+    Height = 5
+    Top = 173
+    Width = 5
   end
 end

@@ -76,10 +76,12 @@ type
     panelRight: TPanel;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
-    splitterVert: TSplitter;
     gridCallStack: TStringGrid;
     gridLastestWatch: TStringGrid;
     gridSelectedWatch: TStringGrid;
+    Splitter3: TSplitter;
+    Splitter4: TSplitter;
+    Splitter5: TSplitter;
     StringGridBitmap: TStringGrid;
     TabControl1: TTabControl;
     toolbarMain: TToolBar;

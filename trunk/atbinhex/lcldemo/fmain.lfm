@@ -6,7 +6,7 @@ object Form1: TForm1
   HorzScrollBar.Page = 751
   VertScrollBar.Page = 565
   ActiveControl = ButOpenFile
-  Caption = 'Form1'
+  Caption = 'ATBinHex for LCL demo'
   object BinHexViewer: TATBinHex
     Cursor = crIBeam
     Left = 175
@@ -30,10 +30,10 @@ object Form1: TForm1
     Align = alLeft
     TabOrder = 1
     object ButOpenFile: TButton
-      Left = 37
+      Left = 8
       Height = 25
-      Top = 34
-      Width = 75
+      Top = 8
+      Width = 96
       BorderSpacing.InnerBorder = 4
       Caption = 'Open File'
       OnClick = ButOpenFileClick
@@ -42,7 +42,7 @@ object Form1: TForm1
     object RadioGroupMode: TRadioGroup
       Left = 8
       Height = 168
-      Top = 104
+      Top = 88
       Width = 150
       AutoFill = True
       Caption = 'View Mode'
@@ -54,6 +54,7 @@ object Form1: TForm1
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1
+      ItemIndex = 0
       Items.Strings = (
         'Text'
         'Binary'
@@ -63,6 +64,16 @@ object Form1: TForm1
       OnClick = ChangeMode
       TabOrder = 1
     end
+    object ButChooseFont: TButton
+      Left = 8
+      Height = 25
+      Top = 48
+      Width = 96
+      BorderSpacing.InnerBorder = 4
+      Caption = 'Choose Font'
+      OnClick = ButChooseFontClick
+      TabOrder = 2
+    end
   end
   object Splitter1: TSplitter
     Left = 170
@@ -71,8 +82,14 @@ object Form1: TForm1
   end
   object OpenDialog1: TOpenDialog
     Title = 'Open existing file'
+    Filter = 'Text Files|*.txt|All|*.*'
     FilterIndex = 0
-    left = 139
-    top = 37
+    left = 80
+    top = 88
+  end
+  object FontDialog1: TFontDialog
+    Title = 'Select a font'
+    left = 331
+    top = 65
   end
 end
