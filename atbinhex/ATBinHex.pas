@@ -24,9 +24,13 @@ LCL port: Luiz Americo Pereira Camara
                 //this may cause both horiz+vertical scrollbars + window border to disappear
                 //completely. This workaround rises users' question: why horiz scrollbar
                 //doesn't hide when lines become short enough. Should be enabled.
+                
+                //LCL: disabling this define will lead to a crash. Dont know why.
+                
 //{.$define DEBUG_FORM}
                 //Show debug form. Must be commented in release!
 {.$define DEBUG_ATBINHEX}
+{.$define ENABLE_PRINT}
 
 unit ATBinHex;
 
@@ -301,7 +305,9 @@ type
     procedure Scroll(const APos: Int64; AIndentVert, AIndentHorz: integer);
     procedure SelectAll;
     procedure SelectNone(AFireEvent: boolean = true);
+    {$ifdef ENABLE_PRINT}
     procedure Print(ASelectionOnly: boolean; ACopies: word = 1);
+    {$endif}
     property PosPercent: word read GetPosPercent write SetPosPercent;
     property PosOffset: Int64 read GetPosOffset write SetPosOffset_;
     property SearchCallback: TATSearchCallback read FSearchCallback write FSearchCallback;
@@ -346,7 +352,10 @@ procedure Register;
 implementation
 
 uses
-  Printers, Forms,
+  {$ifdef ENABLE_PRINT}
+  Printers,
+  {$endif}
+  Forms,
   {$ifdef DEBUG_FORM} TntStdCtrls, {$endif}
   ATxSProcFPC, ATxSHexFPC, ATxFProcFPC, ATxClipboardFPC, ATViewerMsgFPC;
 
@@ -472,8 +481,7 @@ end;
 
 procedure InvertRect(Canvas: TCanvas; Rect: TRect);
 begin
-  //todo
-  //InvertRect(Canvas.Handle, Rect);
+  DelphiCompat.InvertRect(Canvas.Handle, Rect);
 end;
 
 function SExtractAnsiFromWide(const S: WideString): AnsiString;
@@ -2227,6 +2235,7 @@ begin
   end;
 end;
 
+{$ifdef ENABLE_PRINT}
 procedure TATBinHex.Print(ASelectionOnly: boolean; ACopies: word = 1);
 const
   BlockSize = 64*1024;
@@ -2239,7 +2248,7 @@ var
   f: TextFile;
 begin
   //todo
-  {
+
   if ACopies=0 then Inc(ACopies);
 
   Printer.Copies:= ACopies;
@@ -2288,8 +2297,8 @@ begin
     end;
   except
   end;
-  }
 end;
+{$endif}
 
 procedure TATBinHex.CopyToClipboard(AsHex: boolean = false);
 var
