@@ -80,7 +80,6 @@ type
     gridCallStack: TStringGrid;
     gridLastestWatch: TStringGrid;
     gridSelectedWatch: TStringGrid;
-    Splitter3: TSplitter;
     Splitter4: TSplitter;
     Splitter5: TSplitter;
     StringGridBitmap: TStringGrid;

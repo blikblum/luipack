@@ -160,4 +160,5 @@ Port started in 26/01/07
 < > See if is necessary handle LM_SETCURSOR (not used in LCL)
 < > See how replace CreateParams
 < > See if Canvas Respect TextStyle properties and if is necessary to set the bk in PaintNormalText
+< > IStream.SetSize expects ULARGE_INTEGER instead of LARGER_INTEGER
 

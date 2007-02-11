@@ -31,17 +31,17 @@ object frmMain: TfrmMain
     end
   end
   object panelLeft: TPanel
-    Left = 296
+    Left = 291
     Height = 567
     Top = 30
-    Width = 594
+    Width = 599
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object panelViewer: TPanel
       Height = 175
       Top = 392
-      Width = 594
+      Width = 599
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 0
@@ -49,7 +49,7 @@ object frmMain: TfrmMain
         AnchorSideLeft.Control = nbViewer
         AnchorSideBottom.Control = nbViewer
         Height = 18
-        Width = 594
+        Width = 599
         Align = alTop
         Anchors = [akLeft, akBottom]
         Caption = 'Data Viewer'
@@ -59,7 +59,7 @@ object frmMain: TfrmMain
       object nbViewer: TNotebook
         Height = 157
         Top = 18
-        Width = 594
+        Width = 599
         Align = alClient
         PageIndex = 0
         ShowTabs = False
@@ -88,7 +88,7 @@ object frmMain: TfrmMain
             AutoSize = True
           end
           object StringGridBitmap: TStringGrid
-            Left = 422
+            Left = 427
             Height = 149
             Width = 164
             Align = alRight
@@ -130,7 +130,7 @@ object frmMain: TfrmMain
           Caption = 'PageHexViewer'
           object lbMemorySize: TLabel
             Height = 14
-            Width = 586
+            Width = 591
             Align = alTop
             Caption = 'Size:'
             Color = clNone
@@ -140,7 +140,7 @@ object frmMain: TfrmMain
             Cursor = crIBeam
             Height = 135
             Top = 14
-            Width = 586
+            Width = 591
             Align = alClient
             BevelOuter = bvNone
             BorderStyle = bsSingle
@@ -161,14 +161,14 @@ object frmMain: TfrmMain
       Cursor = crVSplit
       Height = 5
       Top = 387
-      Width = 594
+      Width = 599
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
       Height = 387
-      Width = 594
+      Width = 599
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
@@ -178,7 +178,7 @@ object frmMain: TfrmMain
         AnchorSideTop.Side = asrBottom
         Height = 241
         Top = 146
-        Width = 594
+        Width = 599
         Align = alClient
         BorderStyle = bsSingle
         Header.MainColumn = -1
@@ -196,7 +196,7 @@ object frmMain: TfrmMain
       object panelFilter: TPanel
         Height = 122
         Top = 24
-        Width = 594
+        Width = 599
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 1
@@ -399,7 +399,7 @@ object frmMain: TfrmMain
       end
       object TabControl1: TTabControl
         Height = 24
-        Width = 594
+        Width = 599
         Align = alTop
         Style = tsButtons
         TabIndex = 0
@@ -516,17 +516,11 @@ object frmMain: TfrmMain
     end
   end
   object Splitter5: TSplitter
-    Left = 291
-    Height = 567
-    Top = 30
-    Width = 5
-    Beveled = True
-  end
-  object Splitter3: TSplitter
     Left = 286
     Height = 567
     Top = 30
     Width = 5
+    Beveled = True
   end
   object imgMessages: TImageList
     left = 176
