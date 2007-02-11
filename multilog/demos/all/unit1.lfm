@@ -1,0 +1,431 @@
+object Form1: TForm1
+  Left = 162
+  Height = 359
+  Top = 146
+  Width = 807
+  HorzScrollBar.Page = 806
+  VertScrollBar.Page = 358
+  ActiveControl = LogTreeView1
+  Caption = 'Test Multilog'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object LogTreeView1: TLogTreeView
+    Left = 464
+    Height = 359
+    Width = 343
+    Align = alClient
+    BorderStyle = bsSingle
+    DefaultItemHeight = 16
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+  end
+  object Notebook1: TNotebook
+    Height = 359
+    Width = 459
+    Align = alLeft
+    PageIndex = 5
+    object pageGeneral: TPage
+      Caption = 'General'
+      object butClear: TButton
+        Left = 12
+        Height = 27
+        Top = 294
+        Width = 144
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Clear'
+        OnClick = butClearClick
+        TabOrder = 0
+      end
+      object butSubLog: TButton
+        Left = 12
+        Height = 27
+        Top = 226
+        Width = 128
+        Anchors = [akRight, akBottom]
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Test Sub Procedure'
+        OnClick = SubLogClick
+        TabOrder = 1
+      end
+      object butTestLog: TButton
+        Left = 12
+        Height = 27
+        Top = 186
+        Width = 75
+        Anchors = [akRight, akBottom]
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Test All'
+        OnClick = TestLogClick
+        TabOrder = 2
+      end
+      object EditInfo: TEdit
+        Left = 108
+        Height = 23
+        Top = 30
+        Width = 152
+        TabOrder = 3
+        Text = 'A info example'
+      end
+      object butInfo: TButton
+        Left = 12
+        Height = 25
+        Top = 30
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Info'
+        OnClick = butInfoClick
+        TabOrder = 4
+      end
+      object butWarning: TButton
+        Left = 12
+        Height = 25
+        Top = 75
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Warning'
+        OnClick = butWarningClick
+        TabOrder = 5
+      end
+      object butError: TButton
+        Left = 12
+        Height = 25
+        Top = 120
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Error'
+        OnClick = butErrorClick
+        TabOrder = 6
+      end
+      object EditWarning: TEdit
+        Left = 108
+        Height = 23
+        Top = 75
+        Width = 152
+        TabOrder = 7
+        Text = 'A warning example'
+      end
+      object EditError: TEdit
+        Left = 108
+        Height = 23
+        Top = 122
+        Width = 152
+        TabOrder = 8
+        Text = 'A error example'
+      end
+    end
+    object pageVariables: TPage
+      Caption = 'Variables'
+      object editString: TEdit
+        Left = 100
+        Height = 23
+        Top = 30
+        Width = 142
+        TabOrder = 0
+      end
+      object butString: TButton
+        Left = 12
+        Height = 25
+        Top = 28
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'String'
+        OnClick = butStringClick
+        TabOrder = 1
+      end
+      object butInteger: TButton
+        Left = 12
+        Height = 25
+        Top = 83
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Integer'
+        OnClick = butIntegerClick
+        TabOrder = 2
+      end
+      object butFloat: TButton
+        Left = 12
+        Height = 25
+        Top = 138
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Float'
+        OnClick = butFloatClick
+        TabOrder = 3
+      end
+      object butBoolean: TButton
+        Left = 12
+        Height = 25
+        Top = 186
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Boolean'
+        OnClick = butBooleanClick
+        TabOrder = 4
+      end
+      object spinInteger: TSpinEdit
+        Left = 100
+        Height = 23
+        Top = 85
+        Width = 50
+        TabOrder = 5
+      end
+      object spinFloat: TFloatSpinEdit
+        Left = 100
+        Height = 23
+        Top = 141
+        Width = 50
+        Increment = 1
+        MaxValue = 100
+        TabOrder = 6
+      end
+      object comboBoolean: TComboBox
+        Left = 100
+        Height = 21
+        Top = 190
+        Width = 100
+        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        ItemIndex = 0
+        Items.Strings = (
+          'False'
+          'True'
+        )
+        MaxLength = 0
+        Style = csDropDownList
+        TabOrder = 7
+        Text = 'False'
+      end
+      object butStrings: TButton
+        Left = 12
+        Height = 25
+        Top = 241
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Strings'
+        OnClick = butStringsClick
+        TabOrder = 8
+      end
+      object memoStrings: TMemo
+        Left = 100
+        Height = 81
+        Top = 241
+        Width = 150
+        TabOrder = 9
+      end
+    end
+    object pageMethods: TPage
+      Caption = 'Method Tracking'
+      object comboEnterMethod: TComboBox
+        Left = 116
+        Height = 21
+        Top = 34
+        Width = 164
+        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        MaxLength = 0
+        TabOrder = 0
+      end
+      object butEnterMethod: TButton
+        Left = 20
+        Height = 25
+        Top = 34
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'EnterMethod'
+        OnClick = butEnterMethodClick
+        TabOrder = 1
+      end
+      object butExitMethod: TButton
+        Left = 20
+        Height = 25
+        Top = 94
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'ExitMethod'
+        OnClick = butExitMethodClick
+        TabOrder = 2
+      end
+      object editExitMethod: TEdit
+        Left = 116
+        Height = 23
+        Top = 94
+        Width = 164
+        ReadOnly = True
+        TabOrder = 3
+      end
+      object editCalledBy: TEdit
+        Left = 148
+        Height = 23
+        Top = 157
+        Width = 132
+        TabOrder = 4
+      end
+      object butCalledBy: TButton
+        Left = 20
+        Height = 25
+        Top = 157
+        Width = 107
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Send If CalledBy'
+        OnClick = butCalledByClick
+        TabOrder = 5
+      end
+    end
+    object pageSpecialized: TPage
+      Caption = 'Specialized Info'
+      object butCallStack: TButton
+        Left = 35
+        Height = 25
+        Top = 37
+        Width = 81
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Call Stack'
+        OnClick = butCallStackClick
+        TabOrder = 0
+      end
+      object butHeapInfo: TButton
+        Left = 35
+        Height = 25
+        Top = 82
+        Width = 81
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Heap Info'
+        OnClick = butHeapInfoClick
+        TabOrder = 1
+      end
+      object butException: TButton
+        Left = 35
+        Height = 25
+        Top = 130
+        Width = 81
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Exception'
+        OnClick = butExceptionClick
+        TabOrder = 2
+      end
+      object butObject: TButton
+        Left = 35
+        Height = 25
+        Top = 178
+        Width = 81
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Object'
+        OnClick = ObjectClick
+        TabOrder = 3
+      end
+      object ButSendMemory: TButton
+        Left = 35
+        Height = 25
+        Top = 226
+        Width = 81
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Memory'
+        OnClick = ButSendMemoryClick
+        TabOrder = 4
+      end
+    end
+    object pageWatches: TPage
+      Caption = 'Watches/CheckPoints'
+      object butWatchInteger: TButton
+        Left = 20
+        Height = 25
+        Top = 44
+        Width = 96
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Watch an Integer'
+        OnClick = butWatchIntegerClick
+        TabOrder = 0
+      end
+      object spinWatchInteger: TSpinEdit
+        Left = 132
+        Height = 23
+        Top = 44
+        Width = 50
+        TabOrder = 1
+      end
+      object butWatchString: TButton
+        Left = 20
+        Height = 25
+        Top = 102
+        Width = 96
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Watch a String'
+        OnClick = butWatchStringClick
+        TabOrder = 2
+      end
+      object EditWatchString: TEdit
+        Left = 132
+        Height = 23
+        Top = 102
+        Width = 152
+        TabOrder = 3
+      end
+      object ButGenericCheckPoint: TButton
+        Left = 20
+        Height = 25
+        Top = 154
+        Width = 133
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Add a Generic CheckPoint'
+        OnClick = ButGenericCheckPointClick
+        TabOrder = 4
+      end
+      object ButAddNamedCheckPoint: TButton
+        Left = 20
+        Height = 25
+        Top = 200
+        Width = 133
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Add a Named CheckPoint'
+        OnClick = ButAddNamedCheckPointClick
+        TabOrder = 5
+      end
+      object EditNamedCheckPoint: TEdit
+        Left = 188
+        Height = 23
+        Top = 200
+        Width = 144
+        TabOrder = 6
+      end
+    end
+    object PageBitmap: TPage
+      Caption = 'Bitmap'
+      object Image1: TImage
+        Left = 12
+        Height = 100
+        Top = 50
+        Width = 100
+      end
+      object ButOpenImage: TButton
+        Left = 12
+        Height = 25
+        Top = 14
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Open Image'
+        OnClick = ButOpenImageClick
+        TabOrder = 0
+      end
+      object ButSendBitmap: TButton
+        Left = 116
+        Height = 25
+        Top = 14
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Send Bitmap'
+        OnClick = ButSendBitmapClick
+        TabOrder = 1
+      end
+    end
+  end
+  object Splitter1: TSplitter
+    Left = 459
+    Height = 359
+    Width = 5
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open existing file'
+    FilterIndex = 0
+    left = 40
+    top = 208
+  end
+end
