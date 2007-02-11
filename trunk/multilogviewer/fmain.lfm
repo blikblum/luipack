@@ -61,7 +61,7 @@ object frmMain: TfrmMain
         Top = 18
         Width = 599
         Align = alClient
-        PageIndex = 0
+        PageIndex = 2
         ShowTabs = False
         object pageNull: TPage
           Caption = 'pageNull'
@@ -86,6 +86,7 @@ object frmMain: TfrmMain
             Height = 100
             Width = 100
             AutoSize = True
+            OnPaint = ImgViewerPaint
           end
           object StringGridBitmap: TStringGrid
             Left = 427

@@ -132,6 +132,9 @@ type
     destructor Destroy; override;
     function CalledBy(const AMethodName: String): Boolean;
     procedure Clear;
+    //Helper functions
+    function RectToStr(const ARect: TRect): String; //inline
+    function PointToStr(const APoint: TPoint): String; //inline
     //Send functions
     procedure Send(const AText: String); //inline;
     procedure Send(AClass: TDebugClass; const AText: String);
@@ -149,10 +152,10 @@ type
     procedure Send(AClass: TDebugClass; const AText: String; AValue: Int64);
     procedure Send(const AText: String; AValue: Boolean); //inline;
     procedure Send(AClass: TDebugClass; const AText: String; AValue: Boolean);
-    procedure Send(const AText: String; ARect: TRect); //inline;
-    procedure Send(AClass: TDebugClass; const AText: String; ARect: TRect);
-    procedure Send(const AText: String; APoint: TPoint); //inline;
-    procedure Send(AClass: TDebugClass; const AText: String; APoint: TPoint);
+    procedure Send(const AText: String; const ARect: TRect); //inline;
+    procedure Send(AClass: TDebugClass; const AText: String; const ARect: TRect);
+    procedure Send(const AText: String; const APoint: TPoint); //inline;
+    procedure Send(AClass: TDebugClass; const AText: String; const APoint: TPoint);
     procedure Send(const AText: String; AStrList: TStrings); //inline;
     procedure Send(AClass: TDebugClass; const AText: String; AStrList: TStrings);
     procedure Send(const AText: String; AObject: TObject); //inline;
@@ -353,6 +356,18 @@ begin
       Channels[i].Clear;
 end;
 
+function TLogger.RectToStr(const ARect: TRect): String;
+begin
+  with ARect do
+    Result:=Format('(Left: %d; Top: %d; Right: %d; Bottom: %d)',[Left,Top,Right,Bottom]);
+end;
+
+function TLogger.PointToStr(const APoint: TPoint): String;
+begin
+  with APoint do
+    Result:=Format('(X: %d; Y: %d)',[X,Y]);
+end;
+
 procedure TLogger.Send(const AText: String);
 begin
   Send(FDefaultClass,AText);
@@ -445,29 +460,28 @@ begin
   SendStream(ltValue,AText+' = '+BoolToStr(AValue),nil);
 end;
 
-procedure TLogger.Send(const AText: String; ARect: TRect);
+procedure TLogger.Send(const AText: String; const ARect: TRect);
 begin
   Send(FDefaultClass,AText,ARect);
 end;
 
-procedure TLogger.Send(AClass: TDebugClass; const AText: String; ARect: TRect);
+procedure TLogger.Send(AClass: TDebugClass; const AText: String;const ARect: TRect);
 begin
   if not (AClass in ActiveClasses) then Exit;
   with ARect do
-    SendStream(ltValue,Format('%s = (Left: %d; Top: %d; Right: %d; Bottom: %d)',[AText,Left,Top,Right,Bottom]),nil);
+    SendStream(ltValue,AText+ ' = '+RectToStr(ARect),nil);
 end;
 
-procedure TLogger.Send(const AText: String; APoint: TPoint);
+procedure TLogger.Send(const AText: String; const APoint: TPoint);
 begin
   Send(FDefaultClass,AText,APoint);
 end;
 
-procedure TLogger.Send(AClass: TDebugClass; const AText: String; APoint: TPoint
+procedure TLogger.Send(AClass: TDebugClass; const AText: String; const APoint: TPoint
   );
 begin
   if not (AClass in ActiveClasses) then Exit;
-  with APoint do
-    SendStream(ltValue,Format('%s = (X: %d; Y: %d)',[AText,X,Y]),nil);
+  SendStream(ltValue,AText+' = '+PointToStr(APoint),nil);
 end;
 
 procedure TLogger.Send(const AText: String; AStrList: TStrings);

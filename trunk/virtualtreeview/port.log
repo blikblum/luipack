@@ -84,12 +84,15 @@ Port started in 26/01/07
 * Used the PackArray Implmentation from original port
 * The TCanvas of VCL does not has width and height as LCL does. This cause conflict with "with" operator
 * Implemented TOLEStream
+* Fixed bug in LCL.GetScrollPos
 
 
 #Major Tasks#
+< > General Painting
+  [ ] The NodeBitmap width/Height is not reseted when erasing the background
 < > Define the UNICODE support schema. Probably change from widestring to ansistring and let LCL do the rest
   [ ] Use GetTextExtentPoint instead of GetTextExtentPoint32 since the later is a wrapper to the former in LCL
-  [ ] For now all rendering will be done with DrawTextW wrapper
+  [ ] For now all rendering will be done with DrawTextW wrapper > Windows.DrawTextW
 < > Find a way to mantain OLE drag and Drop in windows
   [ ] Also maintain OLE ClipBoard?? Necessary??
 < > Replace TWMTimer since is only called in win32. Or implement in GTK Intf?
@@ -135,7 +138,7 @@ Port started in 26/01/07
   [ ] Create versions for not i386
 
 #Checks#
-< > See if getting the length of PwideChar by typecasting to WideString is correct
+< > See if getting the length of PWideChar by typecasting to WideString is correct
 < > See if the Hint is being show in the correct place
 < > See the effect of using RecreateWnd (in TCustomVirtualTreeOptions.SetMiscOptions)
 < > WM_NCPAINT: see the behavior under LCL
@@ -160,5 +163,6 @@ Port started in 26/01/07
 < > See if is necessary handle LM_SETCURSOR (not used in LCL)
 < > See how replace CreateParams
 < > See if Canvas Respect TextStyle properties and if is necessary to set the bk in PaintNormalText
-< > IStream.SetSize expects ULARGE_INTEGER instead of LARGER_INTEGER
+< > IStream.SetSize expects ULARGE_INTEGER instead of LARGE_INTEGER
+< > Remove  TRect copy in FillRect
 

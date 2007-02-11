@@ -12432,6 +12432,7 @@ var
   Offset: TPoint;
 
 begin
+  Logger.EnterMethod(lcPaint,'ClearNodeBackground');
   with PaintInfo do
   begin
     EraseAction := eaDefault;
@@ -12470,6 +12471,7 @@ begin
           if (poDrawSelection in PaintOptions) and (toFullRowSelect in FOptions.FSelectionOptions) and
             (vsSelected in Node.States) and not (toUseBlendedSelection in FOptions.PaintOptions) then
           begin
+            Logger.Send('Setting the color of a selected node');
             if toShowHorzGridLines in FOptions.PaintOptions then
               Dec(R.Bottom);
             if Focused or (toPopupMode in FOptions.FPaintOptions) then
@@ -12488,6 +12490,7 @@ begin
           end
           else
           begin
+            Logger.Send('Setting the color of a NOT selected node');
             Brush.Color := Color;
             FillRect(R);
           end;
@@ -12496,6 +12499,7 @@ begin
       DoAfterItemErase(Canvas, Node, R);
     end;
   end;
+  Logger.ExitMethod(lcPaint,'ClearNodeBackground');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -14998,6 +15002,7 @@ begin
   if toAutoBidiColumnOrdering in FOptions.FAutoOptions then
     FHeader.FColumns.ReorderColumns(UseRightToLeftAlignment);
   FHeader.Invalidate(nil);
+  Logger.Send(lcPaint,'FEffectiveOffsetX after CMBidiModeChanged',FEffectiveOffsetX);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -22215,7 +22220,10 @@ begin
 
       // The clipping rectangle is given in client coordinates of the window. We have to convert it into
       // a sliding window of the tree image.
-      OffsetRect(Window, FEffectiveOffsetX - RTLOffset, -FOffsetY);
+      Logger.Send(lcPaint,'FEffectiveOffsetX: %d, RTLOffset: %d, OffsetY: %d',[FEffectiveOffsetX,RTLOffset,FOffsetY]);
+      //Logger.Send(lcPaint,'Window Before Offset',Window);
+      Windows.OffsetRect(Window, FEffectiveOffsetX - RTLOffset, -FOffsetY);
+      //Logger.Send(lcPaint,'Window After Offset',Window);
       PaintTree(Canvas, Window, Target, Options);
     end
     else
@@ -22425,6 +22433,7 @@ var
   NewStyles: TLineImage;
 
 begin
+  Logger.EnterMethod(lcPaint,'PaintTreeLines');
   NewStyles := nil;
 
   with PaintInfo do
@@ -22448,6 +22457,7 @@ begin
           SetLength(NewStyles, Length(LineImage));
           for I := IndentSize - 1 downto 0 do
           begin
+            Logger.Send(lcPaint,'FLineMode = lmBands');
             if (vsExpanded in Node.States) and not (vsAllChildrenHidden in Node.States) then
               NewStyles[I] := ltLeft
             else
@@ -22483,6 +22493,7 @@ begin
           end;
         end;
     else // lmNormal
+      Logger.Send(lcPaint,'FLineMode = lmNormal');
       PaintInfo.Canvas.Font.Color := FColors.TreeLineColor;
       for I := 0 to IndentSize - 1 do
       begin
@@ -22492,6 +22503,7 @@ begin
       end;
     end;
   end;
+  Logger.ExitMethod(lcPaint,'PaintTreeLines');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -27285,6 +27297,8 @@ var
 
 begin
   Logger.EnterMethod(lcPaint,'PaintTree');
+  Logger.Send(lcPaint,'Window',Window);
+  Logger.Send(lcPaint,'Target',Target);
   if not (tsPainting in FStates) then
   begin
     DoStateChange([tsPainting]);
@@ -27308,10 +27322,12 @@ begin
       PaintInfo.Canvas := NodeBitmap.Canvas;
       NodeBitmap.Canvas.Lock;
       try
+        Logger.Send(lcPaint,'FNewSelRect',FNewSelRect);
         // Prepare the current selection rectangle once. The corner points are absolute tree coordinates.
         SelectionRect := OrderRect(FNewSelRect);
+        Logger.Send(lcPaint,'SelectionRect',SelectionRect);
         DrawSelectionRect := IsMouseSelecting and not IsRectEmpty(SelectionRect);
-
+        Logger.Watch(lcPaint,'DrawSelectionRect',DrawSelectionRect);
         // R represents an entire node (all columns), but is a bit unprecise when it comes to
         // trees without any column defined, because FRangeX only represents the maximum width of all
         // nodes in the client area (not all defined nodes). There might be, however, wider nodes somewhere. Without full
@@ -27319,7 +27335,7 @@ begin
         // that the tree is fully displayed on screen.
         R := Rect(0, 0, Max(FRangeX, ClientWidth), 0);
         NodeBitmap.Width := Window.Right - Window.Left;
-
+        Logger.Send(lcPaint,'NodeBitmap.Width',NodeBitmap.Width);
         // Make sure the buffer bitmap and target bitmap use the same transformation mode.
         SetMapMode(NodeBitmap.Canvas.Handle, GetMapMode(TargetCanvas.Handle));
 
@@ -27343,7 +27359,7 @@ begin
         PaintInfo.Node := GetNodeAt(0, Window.Top, False, BaseOffset);
         if PaintInfo.Node = nil then
           BaseOffset := Window.Top;
-
+        Logger.Watch(lcPaint,'BaseOffset',BaseOffset);
         // Transform selection rectangle into node bitmap coordinates.
         if DrawSelectionRect then
           OffsetRect(SelectionRect, 0, -BaseOffset);
@@ -27355,7 +27371,7 @@ begin
 
         TargetRect := Rect(Target.X, Target.Y - (Window.Top - BaseOffset), MaximumRight, 0);
         TargetRect.Bottom := TargetRect.Top;
-
+        Logger.Send(lcPaint,'TargetRect',TargetRect);
         // This marker gets the index of the first column which is visible in the given window.
         // This is needed for column based background colors.
         FirstColumn := InvalidColumn;
@@ -27371,6 +27387,8 @@ begin
           // ----- main node paint loop
           while Assigned(PaintInfo.Node) do
           begin
+            Logger.EnterMethod(lcPaint,'PaintNode');
+            Logger.Watch(lcPaint,'BaseOffset',BaseOffset);
             // Initialize node if not already done.
             if not (vsInitialized in PaintInfo.Node.States) then
               InitNode(PaintInfo.Node);
@@ -27429,6 +27447,7 @@ begin
                   while ((PaintInfo.Column > InvalidColumn) or not UseColumns)
                     and (PaintInfo.CellRect.Left < Window.Right) do
                   begin
+                    Logger.Send(lcPaint,'Handling a column');
                     if UseColumns then
                     begin
                       PaintInfo.Column := FPositionToIndex[PaintInfo.Position];
@@ -27639,7 +27658,7 @@ begin
                   PaintSelectionRectangle(PaintInfo.Canvas, Window.Left, SelectionRect, Rect(0, 0, NodeBitmap.Width,
                     NodeBitmap.Height));
                 end;
-
+                Logger.SendBitmap(lcPaint,'NodeBitmap',NodeBitmap);
                 // Put the constructed node image onto the target canvas.
                 with TargetRect, NodeBitmap do
                   BitBlt(TargetCanvas.Handle, Left, Top, Width, Height, Canvas.Handle, Window.Left, 0, SRCCOPY);
@@ -27703,12 +27722,15 @@ begin
             end;
 
             PaintInfo.Node := Temp;
+            Logger.ExitMethod(lcPaint,'PaintNode');
           end;
         end;
 
         // Erase rest of window not covered by a node.
         if TargetRect.Top < MaximumBottom then
         begin
+          Logger.Watch(lcPaint,'UseBackground',UseBackground);
+          Logger.Watch(lcPaint,'UseColumns',UseColumns);
           // Keep the horizontal target position to determine the selection rectangle offset later (if necessary).
           BaseOffset := Target.X;
           Target := TargetRect.TopLeft;
@@ -27719,7 +27741,8 @@ begin
           NodeBitmap.PixelFormat := pf32Bit;
           NodeBitmap.Width := TargetRect.Right - TargetRect.Left + 1;
           NodeBitmap.Height := TargetRect.Bottom - TargetRect.Top + 1;
-
+          Logger.Send(lcPaint,'TargetRect',TargetRect);
+          Logger.Send(lcPaint,'NodeBitmap Width: %d Height: %d',[NodeBitmap.Width,NodeBitmap.Height]);
           // Call back application/descendants whether they want to erase this area.
           SetWindowOrgEx(NodeBitmap.Canvas.Handle, Target.X, 0, nil);
           if not DoPaintBackground(NodeBitmap.Canvas, TargetRect) then
@@ -27804,6 +27827,8 @@ begin
               end
               else
               begin
+                Logger.Send(lcPaint,'ErasingBackGround');
+                Logger.Send(lcPaint,'TargetRect',TargetRect);
                 // No columns nor bitmap background. Simply erase it with the tree color.
                 SetWindowOrgEx(NodeBitmap.Canvas.Handle, 0, 0, nil);
                 NodeBitmap.Canvas.Brush.Color := Color;
@@ -27812,7 +27837,7 @@ begin
             end;
           end;
           SetWindowOrgEx(NodeBitmap.Canvas.Handle, 0, 0, nil);
-
+          Logger.Watch(lcPaint,'DrawSelectionRect',DrawSelectionRect);
           if DrawSelectionRect then
           begin
             R := OrderRect(FNewSelRect);
@@ -27822,6 +27847,7 @@ begin
             SetBrushOrgEx(NodeBitmap.Canvas.Handle, 0, Target.X and 1, nil);
             PaintSelectionRectangle(NodeBitmap.Canvas, 0, R, TargetRect);
           end;
+          Logger.SendBitmap(lcPaint,'BackGroundBitmap',NodeBitmap);
           with Target, NodeBitmap do
             BitBlt(TargetCanvas.Handle, X, Y, Width, Height, Canvas.Handle, 0, 0, SRCCOPY);
         end;
@@ -29103,6 +29129,7 @@ begin
     {$ifdef UseFlatScrollbars}
       FScrollOffsetX := FlatSB_GetScrollPos(Handle, SB_HORZ);
     {$else}
+      //todo: Use get scrollinfo instead of GetScrollPos??
       FEffectiveOffsetX := GetScrollPos(Handle, SB_HORZ);
     {$endif UseFlatScrollbars}
     if UseRightToLeftAlignment then
@@ -29117,6 +29144,7 @@ begin
     // Reset the current horizontal offset to account for window resize etc.
     SetOffsetX(FOffsetX);
   end;
+  Logger.Send(lcPaint,'FEffectiveOffsetX after UpdateHScrollbar',FEffectiveOffsetX);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -29867,6 +29895,7 @@ var
   Size: TSize;
 
 begin
+  Logger.EnterMethod(lcPaint,'PaintNormalText') ;
   InitializeTextProperties(PaintInfo);
   with PaintInfo do
   begin
@@ -29935,6 +29964,7 @@ begin
 
     DoTextDrawing(PaintInfo, Text, R, DrawFormat);
   end;
+  Logger.ExitMethod(lcPaint,'PaintNormalText');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -29949,6 +29979,7 @@ var
   DrawFormat: Cardinal;
 
 begin
+  Logger.EnterMethod(lcPaint,'PaintStaticText');
   with PaintInfo do
   begin
     Canvas.Font := Font;
@@ -29995,6 +30026,7 @@ begin
     else
       DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat, False);
   end;
+  Logger.ExitMethod(lcPaint,'PaintStaticText');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -30290,6 +30322,7 @@ var
   TextOutFlags: Integer;
 
 begin
+  Logger.EnterMethod(lcPaint,'TCustomVirtualStringTree.DoPaintNode');
   // Set a new OnChange event for the canvas' font so we know if the application changes it in the callbacks.
   // This long winded procedure is necessary because font changes (as well as brush and pen changes) are
   // unfortunately not announced via the Canvas.OnChange event.
@@ -30313,6 +30346,7 @@ begin
       PaintStaticText(PaintInfo, TextOutFlags, S);
   end;
   RestoreFontChangeEvent(PaintInfo.Canvas);
+  Logger.ExitMethod(lcPaint,'TCustomVirtualStringTree.DoPaintNode');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
