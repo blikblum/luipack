@@ -1,6 +1,9 @@
 unit fmain;
 
-{ Copyright (C) 2006 Luiz Américo Pereira Câmara
+{ Viewer for Multilog messages
+
+  Copyright (C) 2006 Luiz Américo Pereira Câmara
+  pascalive@bol.com.br
 
   This source is free software; you can redistribute it and/or modify it under
   the terms of the GNU General Public License as published by the Free
@@ -23,12 +26,10 @@ unit fmain;
 interface
 //todo: - Use only one StringGrid for Watches
 //      - Optimize Watch update (Cache current values?)
-//      - Merge Changing and changed
-//      - Clicking in a item several times triggers Changed each time -> catch this
-//      - See if is possible to use String instead of PChar in TNodeData.Title
+
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Grids, StdCtrls, multilog, VirtualStringTree,VirtualTrees, ComCtrls, Buttons, simpleipc,watchlist,
+  Grids, StdCtrls, multilog, VirtualStringTree,VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
   Menus, ATBinHex;
 
 type
@@ -158,18 +159,35 @@ type
   end;
   PNodeData = ^TNodeData;
 
+const
+  PixelFormatNames: array [TPixelFormat] of String =
+  (
+    'pfDevice',
+    'pf1bit',
+    'pf4bit',
+    'pf8bit',
+    'pf15bit',
+    'pf16bit',
+    'pf24bit',
+    'pf32bit',
+    'pfCustom'
+    );
+  HandleTypeNames: array [TBitmapHandleType] of String =
+  ('bmDIB',
+  'bmDDB');
+  
 { TfrmMain }
 
 procedure TfrmMain.butToggleFilterClick(Sender: TObject);
 begin
   if FFilterVisible then
   begin
-    butToggleFilter.Caption:='More';
+    butToggleFilter.Caption:='More Options';
     panelFilter.Height:=editTitleFilter.Top+editTitleFilter.Height+4;
   end
   else
   begin
-    butToggleFilter.Caption:='Less';
+    butToggleFilter.Caption:='Less Options';
     panelFilter.Height:=checkValue.Top+checkValue.Height+4;
   end;
   FFilterVisible:=not FFilterVisible;
@@ -291,7 +309,8 @@ procedure TfrmMain.vtreeMessagesFocusChanging(Sender: TBaseVirtualTree;
 begin
   //Todo: merge with Changed?
   //The CallStack is only updated if the parent changes
-  if (OldNode = nil) or (NewNode = nil) or (OldNode^.Parent<>NewNode^.Parent) then
+  Allowed:=OldNode <> NewNode;
+  if Allowed and ((OldNode = nil) or (NewNode = nil) or (OldNode^.Parent<>NewNode^.Parent)) then
     UpdateCallStack(NewNode);
   //warning NewNode value is not more valid after here
 end;
@@ -506,10 +525,13 @@ end;
 
 procedure TfrmMain.ShowBitmapInfo(ABitmap: TBitmap);
 begin
-  with StringGridBitmap do
+  with StringGridBitmap, ABitmap do
   begin
-    Cells[1,0]:=IntToStr(ABitmap.Height);
-    Cells[1,1]:=IntToStr(ABitmap.Width);
+    Cells[1,0]:=IntToStr(Height);
+    Cells[1,1]:=IntToStr(Width);
+    Cells[1,2]:=PixelFormatNames[PixelFormat];
+    Cells[1,3]:=HandleTypeNames[HandleType];
+    Cells[1,4]:='$'+IntToHex(TransparentColor,8);
   end;
 end;
 
