@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 162
+  Left = 240
   Height = 359
-  Top = 146
+  Top = 288
   Width = 807
   HorzScrollBar.Page = 806
   VertScrollBar.Page = 358
@@ -23,7 +23,7 @@ object Form1: TForm1
     Height = 359
     Width = 459
     Align = alLeft
-    PageIndex = 5
+    PageIndex = 0
     object pageGeneral: TPage
       Caption = 'General'
       object butClear: TButton
@@ -394,6 +394,7 @@ object Form1: TForm1
         Height = 100
         Top = 50
         Width = 100
+        AutoSize = True
       end
       object ButOpenImage: TButton
         Left = 12

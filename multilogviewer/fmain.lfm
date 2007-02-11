@@ -1,10 +1,10 @@
 object frmMain: TfrmMain
   Left = 209
-  Height = 591
+  Height = 597
   Top = 240
-  Width = 864
-  HorzScrollBar.Page = 863
-  VertScrollBar.Page = 590
+  Width = 890
+  HorzScrollBar.Page = 889
+  VertScrollBar.Page = 596
   ActiveControl = vtreeMessages
   Caption = 'Multilog Viewer'
   OnCreate = FormCreate
@@ -13,7 +13,7 @@ object frmMain: TfrmMain
     Left = 1
     Height = 28
     Top = 1
-    Width = 862
+    Width = 888
     BorderSpacing.Around = 1
     ButtonHeight = 28
     ButtonWidth = 28
@@ -31,17 +31,17 @@ object frmMain: TfrmMain
     end
   end
   object panelLeft: TPanel
-    Left = 291
-    Height = 561
+    Left = 296
+    Height = 567
     Top = 30
-    Width = 573
+    Width = 594
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object panelViewer: TPanel
       Height = 175
-      Top = 386
-      Width = 573
+      Top = 392
+      Width = 594
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 0
@@ -49,7 +49,7 @@ object frmMain: TfrmMain
         AnchorSideLeft.Control = nbViewer
         AnchorSideBottom.Control = nbViewer
         Height = 18
-        Width = 573
+        Width = 594
         Align = alTop
         Anchors = [akLeft, akBottom]
         Caption = 'Data Viewer'
@@ -59,9 +59,9 @@ object frmMain: TfrmMain
       object nbViewer: TNotebook
         Height = 157
         Top = 18
-        Width = 573
+        Width = 594
         Align = alClient
-        PageIndex = 3
+        PageIndex = 0
         ShowTabs = False
         object pageNull: TPage
           Caption = 'pageNull'
@@ -88,9 +88,9 @@ object frmMain: TfrmMain
             AutoSize = True
           end
           object StringGridBitmap: TStringGrid
-            Left = 371
+            Left = 422
             Height = 149
-            Width = 136
+            Width = 164
             Align = alRight
             ColCount = 2
             FixedColor = clBtnFace
@@ -102,14 +102,27 @@ object frmMain: TfrmMain
             ScrollBars = ssAutoBoth
             TabOrder = 0
             TabStop = True
+            ColWidths = (
+              90
+              71
+            )
             Cells = (
-              2
+              5
               0
               0
               'Height'
               0
               1
               'Width'
+              0
+              2
+              'PixelFormat'
+              0
+              3
+              'HandleType'
+              0
+              4
+              'TransparentColor'
             )
           end
         end
@@ -117,7 +130,7 @@ object frmMain: TfrmMain
           Caption = 'PageHexViewer'
           object lbMemorySize: TLabel
             Height = 14
-            Width = 565
+            Width = 586
             Align = alTop
             Caption = 'Size:'
             Color = clNone
@@ -127,7 +140,7 @@ object frmMain: TfrmMain
             Cursor = crIBeam
             Height = 135
             Top = 14
-            Width = 565
+            Width = 586
             Align = alClient
             BevelOuter = bvNone
             BorderStyle = bsSingle
@@ -147,15 +160,15 @@ object frmMain: TfrmMain
     object Splitter2: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 381
-      Width = 573
+      Top = 387
+      Width = 594
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
-      Height = 381
-      Width = 573
+      Height = 387
+      Width = 594
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
@@ -163,9 +176,9 @@ object frmMain: TfrmMain
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
         AnchorSideTop.Side = asrBottom
-        Height = 235
+        Height = 241
         Top = 146
-        Width = 573
+        Width = 594
         Align = alClient
         BorderStyle = bsSingle
         Header.MainColumn = -1
@@ -183,7 +196,7 @@ object frmMain: TfrmMain
       object panelFilter: TPanel
         Height = 122
         Top = 24
-        Width = 573
+        Width = 594
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 1
@@ -348,7 +361,7 @@ object frmMain: TfrmMain
           Top = 2
           Width = 80
           BorderSpacing.InnerBorder = 4
-          Caption = 'Less'
+          Caption = 'Less Options'
           OnClick = butToggleFilterClick
           TabOrder = 15
         end
@@ -386,7 +399,7 @@ object frmMain: TfrmMain
       end
       object TabControl1: TTabControl
         Height = 24
-        Width = 573
+        Width = 594
         Align = alTop
         Style = tsButtons
         TabIndex = 0
@@ -399,7 +412,7 @@ object frmMain: TfrmMain
     end
   end
   object panelRight: TPanel
-    Height = 561
+    Height = 567
     Top = 30
     Width = 286
     Align = alLeft
@@ -407,7 +420,7 @@ object frmMain: TfrmMain
     TabOrder = 1
     object nbWatches: TNotebook
       Height = 175
-      Top = 386
+      Top = 392
       Width = 286
       Align = alBottom
       OnPageChanged = nbWatchesPageChanged
@@ -470,7 +483,7 @@ object frmMain: TfrmMain
     object Splitter1: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 381
+      Top = 387
       Width = 286
       Align = alBottom
       Beveled = True
@@ -478,7 +491,7 @@ object frmMain: TfrmMain
     end
     object gridCallStack: TStringGrid
       Left = 5
-      Height = 381
+      Height = 387
       Width = 281
       Align = alClient
       AutoFillColumns = True
@@ -498,16 +511,22 @@ object frmMain: TfrmMain
       TabStop = True
     end
     object Splitter4: TSplitter
-      Height = 381
+      Height = 387
       Width = 5
     end
   end
   object Splitter5: TSplitter
-    Left = 286
-    Height = 561
+    Left = 291
+    Height = 567
     Top = 30
     Width = 5
     Beveled = True
+  end
+  object Splitter3: TSplitter
+    Left = 286
+    Height = 567
+    Top = 30
+    Width = 5
   end
   object imgMessages: TImageList
     left = 176
@@ -976,11 +995,5 @@ object frmMain: TfrmMain
       FFFFFFFFFFFFFFFFFFFF874A20874A20874A20874A20874A20874A20874A2087
       4A20FFFFFFFFFFFFFFFFFFFFFFFF
     }
-  end
-  object Splitter3: TSplitter
-    Left = 280
-    Height = 5
-    Top = 173
-    Width = 5
   end
 end

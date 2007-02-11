@@ -25,18 +25,18 @@
     </RunParams>
     <RequiredPackages Count="4">
       <Item1>
-        <PackageName Value="atbinhex_lcl"/>
-        <MinVersion Major="1" Minor="5" Release="6" Valid="True"/>
-      </Item1>
-      <Item2>
         <PackageName Value="virtualtreeslcl"/>
         <MinVersion Major="4" Release="17" Build="20" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="multiloglaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="LCL"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="atbinhex_lcl"/>
+        <MinVersion Major="1" Minor="5" Release="6" Valid="True"/>
       </Item4>
     </RequiredPackages>
     <Units Count="3">
