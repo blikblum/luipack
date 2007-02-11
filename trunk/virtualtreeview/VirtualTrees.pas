@@ -102,9 +102,9 @@ interface
 
 uses
   {$ifdef NeedWindows}
-  Windows,
+
   {$endif}
-  Types, LCLType, LResources, LCLIntf, LMessages,
+  Windows, vtlogger,  LCLType, LResources, LCLIntf,  LMessages, Types,
   SysUtils, Classes, Graphics, Controls, Forms, ImgList, StdCtrls, Menus, Printers,
   CommCtrl,  // image lists, common controls tree structures
   SyncObjs  // Thread support
@@ -2095,7 +2095,7 @@ TBaseVirtualTree = class(TCustomControl)
     procedure WMCancelMode(var Message: TLMNoParams); message LM_CANCELMODE;
     procedure WMChangeState(var Message: TLMessage); message WM_CHANGESTATE;
     procedure WMChar(var Message: TLMChar); message LM_CHAR;
-    procedure WMContextMenu(var Message: TLMContextMenu); {message WM_CONTEXTMENU;}
+    procedure WMContextMenu(var Message: TLMContextMenu); {message LM_CONTEXTMENU;}
     procedure WMCopy(var Message: TLMNoParams); message LM_COPYTOCLIP;
     procedure WMCut(var Message: TLMNoParams); message LM_CUTTOCLIP;
     procedure WMEnable(var Message: TLMNoParams); message LM_ENABLE;
@@ -4977,6 +4977,7 @@ begin
 
   {$ifdef EnableOLE}
   // Initialize OLE subsystem for drag'n drop and clipboard operations.
+  //todo: replace by Suceeded (see in windows) 
   NeedToUnitialize := OleInitialize(nil) in [S_FALSE,S_OK];
   {$endif}
   // Register the tree reference clipboard format. Others will be handled in InternalClipboarFormats.
@@ -5103,7 +5104,7 @@ constructor TVTCriticalSection.Create;
 
 begin
   inherited Create;
-  InitializeCriticalSection(FSection);
+  //InitializeCriticalSection(FSection);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5111,7 +5112,7 @@ end;
 destructor TVTCriticalSection.Destroy;
 
 begin
-  DeleteCriticalSection(FSection);
+  //DeleteCriticalSection(FSection);
 
   inherited Destroy;
 end;
@@ -5121,7 +5122,7 @@ end;
 procedure TVTCriticalSection.Enter;
 
 begin
-  EnterCriticalSection(FSection);
+  //EnterCriticalSection(FSection);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5129,7 +5130,7 @@ end;
 procedure TVTCriticalSection.Leave;
 
 begin
-  LeaveCriticalSection(FSection);
+  //LeaveCriticalSection(FSection);
 end;
 
 //----------------- TWorkerThread --------------------------------------------------------------------------------------
@@ -6614,7 +6615,7 @@ begin
           if Assigned(Node) and (LineBreakStyle = hlbForceMultiLine) then
             DrawFormat := DrawFormat or DT_WORDBREAK;
           if IsWinNT then
-            DrawTextW(Handle, PWideChar(HintText), Length(HintText), R, DrawFormat, False)
+            Windows.DrawTextW(Handle, PWideChar(HintText), Length(HintText), R, DrawFormat)
           else
             DrawTextW(Handle, PWideChar(HintText), Length(HintText), R, DrawFormat, False);
         end;
@@ -6911,7 +6912,7 @@ begin
               // in the caption (limited by carriage return), which results in unoptimal overlay of the tooltip.
               // On Windows NT the tooltip exactly overlays the node text.
               if IsWinNT then
-                DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), R, DT_CALCRECT or DT_WORDBREAK, True)
+                Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), R, DT_CALCRECT or DT_WORDBREAK)
               else
                 DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), R, DT_CALCRECT, True);
               if BidiMode = bdLeftToRight then
@@ -6953,7 +6954,7 @@ begin
             Result := Rect(0, 0, MaxWidth, FTextHeight);
             // Calculate the true size of the text rectangle.
             if IsWinNT then
-              DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), Result, DT_CALCRECT, True)
+              Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), Result, DT_CALCRECT)
             else
               DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), Result, DT_CALCRECT, True);
             // The height of the text plus 2 pixels vertical margin plus the border determine the hint window height.
@@ -8781,13 +8782,13 @@ begin
     OffsetRect(Bounds, 1, 1);
     SetTextColor(DC, ColorToRGB(clBtnHighlight));
     if IsWinNT then
-      DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False)
+      Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat)
     else
       DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False);
     OffsetRect(Bounds, -1, -1);
     SetTextColor(DC, ColorToRGB(clBtnShadow));
     if IsWinNT then
-      DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False)
+      Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat)
     else
       DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False);
   end
@@ -8798,7 +8799,7 @@ begin
     else
       SetTextColor(DC, ColorToRGB(FHeader.FFont.Color));
     if IsWinNT then
-      DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False)
+      Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat)
     else
       DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat, False);
   end;
@@ -10550,8 +10551,8 @@ var
   Button: TMouseButton;
 
 begin
-  {$ifdef EnableHeader}
   Result := False;
+  {$ifdef EnableHeader}
   case Message.Msg of
     LM_SIZE:
       begin
@@ -14960,12 +14961,14 @@ end;
 procedure TBaseVirtualTree.CMColorChange(var Message: TLMessage);
 
 begin
+  Logger.EnterMethod(lcMessages,'CMColorChange');
   if not (csLoading in ComponentState) then
   begin
     PrepareBitmaps(True, False);
     if HandleAllocated then
       Invalidate;
   end;
+  Logger.ExitMethod(lcMessages,'CMColorChange');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15458,7 +15461,7 @@ begin
           RTLFactor := -1
         else
           RTLFactor := 1;
-
+        //todo: State is the same as ShiftState? 
         if ssCtrl in State then
           ScrollCount := WheelDelta div WHEEL_DELTA * ClientWidth
         else
@@ -15648,6 +15651,7 @@ end;
 procedure TBaseVirtualTree.WMCancelMode(var Message: TLMNoParams);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMCancelMode');
   // Clear any transient state.
   StopTimer(ExpandTimer);
   StopTimer(EditTimer);
@@ -15659,8 +15663,9 @@ begin
 
   DoStateChange([], [tsClearPending, tsEditPending, tsOLEDragPending, tsVCLDragPending, tsDrawSelecting,
     tsDrawSelPending, tsIncrementalSearching]);
-
-  inherited;
+  //lcl does not has a inherited procedure
+  //inherited WMCancelMode(Message);
+  Logger.ExitMethod(lcMessages,'WMCancelMode');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15672,6 +15677,7 @@ var
   LeaveStates: TVirtualTreeStates;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMChangeState');
   EnterStates := [];
   if csStopValidation in TChangeStates(LongWord(Message.WParam)) then
     Include(EnterStates, tsStopValidation);
@@ -15693,6 +15699,7 @@ begin
     Include(LeaveStates, tsValidationNeeded);
 
   DoStateChange(EnterStates, LeaveStates);
+  Logger.ExitMethod(lcMessages,'WMChangeState');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15700,13 +15707,15 @@ end;
 procedure TBaseVirtualTree.WMChar(var Message: TLMChar);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMChar');
   if tsIncrementalSearchPending in FStates then
   begin
     HandleIncrementalSearch(Message.CharCode);
     DoStateChange([], [tsIncrementalSearchPending]);
   end;
 
-  inherited;
+  inherited WMChar(Message);
+  Logger.ExitMethod(lcMessages,'WMChar');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15717,10 +15726,12 @@ procedure TBaseVirtualTree.WMContextMenu(var Message: TLMContextMenu);
 // We have to cancel some pending states here to avoid interferences.
 
 begin
+  Logger.EnterMethod(lcMessages,'WMContextMenu');
   DoStateChange([], [tsClearPending, tsEditPending, tsOLEDragPending, tsVCLDragPending]);
-
-  if not (tsPopupMenuShown in FStates) then
-    inherited;
+  //todo: remove comment after LCL update
+  //if not (tsPopupMenuShown in FStates) then
+  //  inherited WMContextMenu(Messages);
+  Logger.ExitMethod(lcMessages,'WMContextMenu');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15728,7 +15739,9 @@ end;
 procedure TBaseVirtualTree.WMCopy(var Message: TLMNoParams);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMCopy');
   CopyToClipboard;
+  Logger.ExitMethod(lcMessages,'WMCopy');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15736,7 +15749,9 @@ end;
 procedure TBaseVirtualTree.WMCut(var Message: TLMNoParams);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMCut');
   CutToClipboard;
+  Logger.ExitMethod(lcMessages,'WMCut');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15744,8 +15759,11 @@ end;
 procedure TBaseVirtualTree.WMEnable(var Message: TLMNoParams);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMEnable');
+  //LCL does not has inherited WMEnable
+  //inherited WMEnable(Message);
   RedrawWindow(Handle, nil, 0, RDW_FRAME or RDW_INVALIDATE or RDW_NOERASE or RDW_NOCHILDREN);
+  Logger.EnterMethod(lcMessages,'WMEnable');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15753,6 +15771,7 @@ end;
 procedure TBaseVirtualTree.WMEraseBkgnd(var Message: TLMEraseBkgnd);
 
 begin
+  Logger.Send(lcMessages,'WMEraseBkgnd - (Does nothing Set to 1)');
   Message.Result := 1;
 end;
 
@@ -15761,6 +15780,7 @@ end;
 procedure TBaseVirtualTree.WMGetDlgCode(var Message: TLMNoParams);
 
 begin
+  Logger.Send(lcMessages,'WMGetDlgCode');
   Message.Result := DLGC_WANTCHARS or DLGC_WANTARROWS;
   if FWantTabs then
     Message.Result := Message.Result or DLGC_WANTTAB;
@@ -15771,6 +15791,7 @@ end;
 procedure TBaseVirtualTree.WMGetObject(var Message: TLMessage);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMGetObject');
   {$ifdef EnableAccessible}
   GetAccessibilityFactory;
 
@@ -15791,6 +15812,7 @@ begin
   {$else}
   Message.Result := 0;
   {$endif}
+  Logger.ExitMethod(lcMessages,'WMGetObject');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15823,6 +15845,7 @@ var
   RTLFactor: Integer;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMHScroll');
   if UseRightToLeftAlignment then
     RTLFactor := -1
   else
@@ -15860,6 +15883,7 @@ begin
   end;
 
   Message.Result := 0;
+  Logger.ExitMethod(lcMessages,'WMHScroll');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15897,8 +15921,9 @@ var
   Buffer: array[0..1] of Char;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMKeyDown');
   // Make form key preview work and let application modify the key if it wants this.
-  inherited;
+  inherited WMKeyDown(Message);
 
   with Message do
   begin
@@ -16418,6 +16443,7 @@ begin
       end;
     end;
   end;
+  Logger.ExitMethod(lcMessages,'WMKeyDown');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16425,7 +16451,8 @@ end;
 procedure TBaseVirtualTree.WMKeyUp(var Message: TLMKeyUp);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMKeyUp');
+  inherited WMKeyUp(Message);
 
   case Message.CharCode of
     VK_SPACE:
@@ -16438,6 +16465,7 @@ begin
         FCheckNode := nil;
       end;
   end;
+  Logger.ExitMethod(lcMessages,'WMKeyUp');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16451,7 +16479,8 @@ var
   Unknown: IUnknown;
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMKillFocus');
+  inherited WMKillFocus(Msg);
 
   // Stop wheel panning if active.
   StopWheelPanning;
@@ -16493,6 +16522,7 @@ begin
     }
     // For other classes the active control should not be modified. Otherwise you need two clicks to select it.
   end;
+  Logger.ExitMethod(lcMessages,'WMKillFocus');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16503,13 +16533,16 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMLButtonDblClk');
   DoStateChange([tsLeftDblClick]);
-  inherited;
+  //LCL does not has a inherited WMLButtonDblClick
+  //inherited WMLButtonDblClick(Message);
 
   // get information about the hit
   GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
   HandleMouseDblClick(Message, HitInfo);
   DoStateChange([], [tsLeftDblClick]);
+  Logger.ExitMethod(lcMessages,'WMLButtonDblClk');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16520,12 +16553,14 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMLButtonDown');
   DoStateChange([tsLeftButtonDown]);
-  inherited;
+  inherited WMLButtonDown(Message);
 
   // get information about the hit
   GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
   HandleMouseDown(Message, HitInfo);
+  Logger.ExitMethod(lcMessages,'WMLButtonDown');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16536,13 +16571,15 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMLButtonUp');
   DoStateChange([], [tsLeftButtonDown]);
 
   // get information about the hit
   GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
   HandleMouseUp(Message, HitInfo);
 
-  inherited;
+  inherited WMLButtonUp(Message);
+  Logger.ExitMethod(lcMessages,'WMLButtonUp');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16553,8 +16590,9 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMMButtonDblClk');
   DoStateChange([tsMiddleDblClick]);
-  inherited;
+  inherited WMMButtonDblClk(Message);
 
   // get information about the hit
   if toMiddleClickSelect in FOptions.FSelectionOptions then
@@ -16563,6 +16601,7 @@ begin
     HandleMouseDblClick(Message, HitInfo);
   end;
   DoStateChange([], [tsMiddleDblClick]);
+  Logger.ExitMethod(lcMessages,'WMMButtonDblClk');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16573,11 +16612,12 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMMButtonDown');
   DoStateChange([tsMiddleButtonDown]);
 
   if FHeader.FStates = [] then
   begin
-    inherited;
+    inherited WMMButtonDown(Message);
 
     // Start wheel panning or scrolling if not already active, allowed and scrolling is useful at all.
     if (toWheelPanning in FOptions.FMiscOptions) and ([tsWheelScrolling, tsWheelPanning] * FStates = []) and
@@ -16598,6 +16638,7 @@ begin
       end;
     end;
   end;
+  Logger.ExitMethod(lcMessages,'WMMButtonDown');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16608,6 +16649,7 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMMButtonUp');
   DoStateChange([], [tsMiddleButtonDown]);
 
   // If wheel panning/scrolling is active and the mouse has not yet been moved then the user starts wheel auto scrolling.
@@ -16622,7 +16664,7 @@ begin
   else
     if FHeader.FStates = [] then
     begin
-      inherited;
+      inherited WMMButtonUp(Message);
 
       // get information about the hit
       if toMiddleClickSelect in FOptions.FSelectionOptions then
@@ -16631,6 +16673,7 @@ begin
         HandleMouseUp(Message, HitInfo);
       end;
     end;
+  Logger.ExitMethod('WMMButtonUp');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16640,12 +16683,14 @@ end;
 procedure TBaseVirtualTree.WMNCCalcSize(var Message: TLMNCCalcSize);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMNCCalcSize');
+  inherited WMNCCalcSize(Message);
 
   with FHeader do
     if hoVisible in FHeader.FOptions then
       with Message.CalcSize_Params^ do
         Inc(rgrc[0].Top, FHeight);
+  Logger.ExitMethod(lcMessages,'WMNCCalcSize');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16656,6 +16701,7 @@ procedure TBaseVirtualTree.WMNCDestroy(var Message: TWMNCDestroy);
 // window destruction, because of the automatic release of a window if its parent window is freed.
 
 begin
+  Logger.EnterMethod(lcMessages,'WMNCDestroy');
   InterruptValidation;
 
   StopTimer(ChangeTimer);
@@ -16670,7 +16716,8 @@ begin
   if tsInAnimation in FStates then
     HintWindowDestroyed := True; // Stop any pending animation.
 
-  inherited;
+  inherited WMNCDestroy(Message);
+  Logger.ExitMethod(lcMessages,'WMNCDestroy')
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16678,10 +16725,12 @@ end;
 procedure TBaseVirtualTree.WMNCHitTest(var Message: TWMNCHitTest);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMNCHitTest');
+  inherited WMNCHitTest(Message);
   if not (csDesigning in ComponentState) and (hoVisible in FHeader.FOptions) and
     FHeader.InHeader(ScreenToClient(SmallPointToPoint(Message.Pos))) then
     Message.Result := HTBORDER;
+  Logger.ExitMethod(lcMessages,'WMNCHitTest');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16700,6 +16749,7 @@ var
   {$endif ThemeSupport}
 
 begin
+  Logger.EnterMethod(lcMessages,'WMNCPaint');
   {$ifdef ThemeSupport}
     if tsUseThemes in FStates then
     begin
@@ -16749,6 +16799,7 @@ begin
     if tsUseThemes in FStates then
       ThemeServices.PaintBorder(Self, False);
   {$endif ThemeSupport}
+  Logger.ExitMethod(lcMessages,'WMNCPaint');
 end;
 
 {$endif}
@@ -16758,6 +16809,7 @@ end;
 procedure TBaseVirtualTree.WMPaint(var Message: TLMPaint);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMPaint');
   //todo_lcl_check see if windows.GetUpdateRect is equal to PaintStruct
   if tsVCLDragging in FStates then
     ImageList_DragShowNolock(False);
@@ -16765,11 +16817,12 @@ begin
     FUpdateRect := ClientRect
   else
     FUpdateRect:=Message.PaintStruct^.rcPaint;
-
-  inherited;
+  Logger.Send(lcPaint,'FUpdateRect', FUpdateRect);
+  inherited WMPaint(Message);
 
   if tsVCLDragging in FStates then
     ImageList_DragShowNolock(True);
+  Logger.ExitMethod(lcMessages,'WMPaint');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16777,7 +16830,9 @@ end;
 procedure TBaseVirtualTree.WMPaste(var Message: TLMNoParams);
 
 begin
+  Logger.EnterMethod(lcMessages,'WMPaste');
   PasteFromClipboard;
+  Logger.ExitMethod(lcMessages,'WMPaste');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16790,11 +16845,13 @@ procedure TBaseVirtualTree.WMPrint(var Message: TWMPrint);
 // the client area but also the non-client area (header!).
 
 begin
+  Logger.EnterMethod(lcMessages,'WMPrint');
   // Draw only if the window is visible or visibility is not required.
   if ((Message.Flags and PRF_CHECKVISIBLE) = 0) or IsWindowVisible(Handle) then
     Header.Columns.PaintHeader(Message.DC, FHeaderRect, -FEffectiveOffsetX);
 
-  inherited;
+  inherited WMPrint(Message);
+  Logger.ExitMethod(lcMessages,'WMPrint');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16807,6 +16864,7 @@ var
   Canvas: TCanvas;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMPrintClient');
   // Draw only if the window is visible or visibility is not required.
   if ((Message.Flags and PRF_CHECKVISIBLE) = 0) or IsWindowVisible(Handle) then
   begin
@@ -16827,6 +16885,7 @@ begin
       Canvas.Free;
     end;
   end;
+  Logger.ExitMethod(lcMessages,'WMPrintClient');
 end;
 
 {$endif}
@@ -16838,8 +16897,9 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMRButtonDblClk');
   DoStateChange([tsRightDblClick]);
-  inherited;
+  inherited WMRButtonDblClk(Message);
 
   // get information about the hit
   if toMiddleClickSelect in FOptions.FSelectionOptions then
@@ -16848,6 +16908,7 @@ begin
     HandleMouseDblClick(Message, HitInfo);
   end;
   DoStateChange([], [tsRightDblClick]);
+  Logger.ExitMethod(lcMessages,'WMRButtonDblClk');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16858,11 +16919,12 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMRButtonDown');
   DoStateChange([tsRightButtonDown]);
 
   if FHeader.FStates = [] then
   begin
-    inherited;
+    inherited WMRButtonDown(Message);
 
     // get information about the hit
     if toRightClickSelect in FOptions.FSelectionOptions then
@@ -16871,6 +16933,7 @@ begin
       HandleMouseDown(Message, HitInfo);
     end;
   end;
+  Logger.ExitMethod(lcMessages,'WMRButtonDown');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16883,6 +16946,7 @@ var
   HitInfo: THitInfo;
 
 begin
+  Logger.EnterMethod(lcMessages,'WMRButtonUp');
   DoStateChange([], [tsPopupMenuShown, tsRightButtonDown]);
 
   if FHeader.FStates = [] then
@@ -16896,7 +16960,7 @@ begin
       Invalidate;
     end;
 
-    inherited;
+    inherited WMRButtonUp(Message);
 
     // get information about the hit
     GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
@@ -16907,6 +16971,7 @@ begin
     if not Assigned(PopupMenu) then
       DoPopupMenu(HitInfo.HitNode, HitInfo.HitColumn, Point(Message.XPos, Message.YPos));
   end;
+  Logger.ExitMethod(lcMessages,'WMRButtonUp');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16919,6 +16984,7 @@ var
   NewCursor: TCursor;
 
 begin
+  Logger.EnterMethod(lcSetCursor,'WMSetCursor');
   {
   with Message do
   begin
@@ -16940,13 +17006,14 @@ begin
           Message.Result := 1;
         end
         else
-          inherited;
+          inherited WMSetCursor(Message);
       end;
     end
     else
-      inherited;
+      inherited WMSetCursor(Message);
   end;
   }
+  Logger.ExitMethod(lcSetCursor,'WMSetCursor');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16954,9 +17021,11 @@ end;
 procedure TBaseVirtualTree.WMSetFocus(var Msg: TLMSetFocus);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMSetFocus') ;
+  inherited WMSetFocus(Msg);
   if (FSelectionCount > 0) or not (toGhostedIfUnfocused in FOptions.FPaintOptions) then
     Invalidate;
+  Logger.ExitMethod(lcMessages,'WMSetFocus');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -16964,7 +17033,8 @@ end;
 procedure TBaseVirtualTree.WMSize(var Message: TLMSize);
 
 begin
-  inherited;
+  Logger.EnterMethod(lcMessages,'WMSize');
+  inherited WMSize(Message);
 
   // Need to update scroll bars here. This will cause a recursion because of the change of the client area
   // when changing a scrollbar. Usually this is no problem since with the second level recursion no change of the
@@ -16983,6 +17053,7 @@ begin
   finally
     DoStateChange([], [tsSizing]);
   end;
+  Logger.ExitMethod(lcMessages,'WMSize');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17013,6 +17084,7 @@ procedure TBaseVirtualTree.WMTimer(var Message: TLMessage);
 // centralized timer handling happens here
 
 begin
+  Logger.EnterMethod(lcMessages,'WMTimer');
   {$ifdef EnableTimer}
   with Message do
   begin
@@ -17048,6 +17120,7 @@ begin
     end;
   end;
   {$endif}
+  Logger.ExitMethod(lcMessages,'WMTimer');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17077,6 +17150,7 @@ procedure TBaseVirtualTree.WMVScroll(var Message: TLMVScroll);
   //--------------- end local functions ---------------------------------------
 
 begin
+  Logger.EnterMethod(lcMessages,'WMVScroll');
   case Message.ScrollCode of
     SB_BOTTOM:
       SetOffsetY(-Integer(FRoot.TotalHeight));
@@ -17110,6 +17184,7 @@ begin
       SetOffsetY(0);
   end;
   Message.Result := 0;
+  Logger.ExitMethod(lcMessages,'WMVScroll');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17738,6 +17813,7 @@ procedure TBaseVirtualTree.CreateWnd;
 begin
   DoStateChange([tsWindowCreating]);
   inherited;
+  Logger.Send(lcInfo,'Handle (CreateWnd)',Handle);
   DoStateChange([], [tsWindowCreating]);
 
   {$ifdef ThemeSupport}
@@ -22118,6 +22194,7 @@ var
   RTLOffset: Integer;
 
 begin
+  Logger.EnterMethod(lcPaint,'Paint');
   Options := [poBackground, poColumnColor, poDrawFocusRect, poDrawDropMark, poDrawSelection, poGridLines];
   if UseRightToLeftAlignment and FHeader.UseColumns then
     RTLOffset := ComputeRTLOffset(True)
@@ -22164,6 +22241,7 @@ begin
       PaintTree(Canvas, Window, Target, Options);
     end;
   end;
+  Logger.ExitMethod(lcPaint,'Paint');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23533,14 +23611,14 @@ begin
 
     if not Handled and Assigned(FHeader) then
       Handled := FHeader.HandleMessage(Message);
-    {$ifdef EnableNCFunctions}
+
     if not Handled then
     begin
       if (Message.Msg in [WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_NCMBUTTONDOWN]) and not Focused and CanFocus then
         SetFocus;
       inherited;
     end;
-    {$endif}
+
   end;
 end;
 
@@ -27206,6 +27284,7 @@ var
   FirstColumn: TColumnIndex;   // index of first column which is at least partially visible in the given window
 
 begin
+  Logger.EnterMethod(lcPaint,'PaintTree');
   if not (tsPainting in FStates) then
   begin
     DoStateChange([tsPainting]);
@@ -27755,6 +27834,7 @@ begin
       DoStateChange([], [tsPainting]);
     end;
   end;
+  Logger.ExitMethod(lcPaint,'PaintTree');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -29911,7 +29991,7 @@ begin
     else
       SetBkMode(Canvas.Handle, OPAQUE);
     if IsWinNT then
-      DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat, False)
+      Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat)
     else
       DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat, False);
   end;
@@ -30268,7 +30348,7 @@ procedure TCustomVirtualStringTree.DoTextDrawing(var PaintInfo: TVTPaintInfo; Te
 
 begin
   if IsWinNT then
-    DrawTextW(PaintInfo.Canvas.Handle, PWideChar(Text), Length(Text), CellRect, DrawFormat, False)
+    Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(Text), Length(Text), CellRect, DrawFormat)
   else
     DrawTextW(PaintInfo.Canvas.Handle, PWideChar(Text), Length(Text), CellRect, DrawFormat, False);
 end;
@@ -30514,7 +30594,7 @@ begin
   else
     DrawFormat := DrawFormat or DT_LEFT;
   if IsWinNT then
-    DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat, False)
+    Windows.DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat)
   else
     DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat, False);
   Result := PaintInfo.CellRect.Bottom - PaintInfo.CellRect.Top;
