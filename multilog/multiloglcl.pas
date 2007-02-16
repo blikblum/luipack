@@ -37,6 +37,8 @@ begin
   begin
     AStream:=TMemoryStream.Create;
     ABitmap.SaveToStream(AStream);
+    //hack to avoid keeping a copy in Abitmap
+    ABitmap.Canvas.Changing;
   end
   else
     AStream:=nil;
