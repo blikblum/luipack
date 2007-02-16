@@ -60,7 +60,7 @@ Port started in 26/01/07
 * Added missing SetWindowPos constants
 * Implemented MapWindowPoints
 * Added dummy RedrawWindow function
-* Commented call to DestroyWindowhandle in DEstroy. Probably will not be necessary since the header will be
+* Commented call to DestroyWindowHandle in Destroy. Probably will not be necessary since the header will be
   in the client area
 * Used Application.ProcessMessages in InterruptValidation instead of direct call
 * Added dummy LPtoDP
@@ -85,6 +85,8 @@ Port started in 26/01/07
 * The TCanvas of VCL does not has width and height as LCL does. This cause conflict with "with" operator
 * Implemented TOLEStream
 * Fixed bug in LCL.GetScrollPos
+* Fixed  Draw problems due to TCanvas.Color
+* Fixed Align problems of TVirtualNode (Hint from original port)
 
 
 #Major Tasks#
@@ -165,4 +167,8 @@ Port started in 26/01/07
 < > See if Canvas Respect TextStyle properties and if is necessary to set the bk in PaintNormalText
 < > IStream.SetSize expects ULARGE_INTEGER instead of LARGE_INTEGER
 < > Remove  TRect copy in FillRect
+< > In paint tree avoid using TBitmap.Canvas since it does a check each time is called
+< > Why there's a extra 1 in the NodeBitmap that clears the backGround
+< > See code duplicate in TBitmap.SetWidthHeight
+< > Document problem of TCanvas.Color
 

@@ -621,6 +621,7 @@ type
     TotalCount,              // sum of this node, all of its child nodes and their child nodes etc.
     TotalHeight: Cardinal;   // height in pixels this node covers on screen including the height of all of its
                              // children
+    Dummy2: Word;            // FPC: Sets need 4 bytes / in Delphi only 2 bytes
     // Note: Some copy routines require that all pointers (as well as the data area) in a node are
     //       located at the end of the node! Hence if you want to add new member fields (except pointers to internal
     //       data) then put them before field Parent.
@@ -12471,7 +12472,7 @@ begin
           if (poDrawSelection in PaintOptions) and (toFullRowSelect in FOptions.FSelectionOptions) and
             (vsSelected in Node.States) and not (toUseBlendedSelection in FOptions.PaintOptions) then
           begin
-            Logger.Send('Setting the color of a selected node');
+            Logger.Send(lcPaint,'Setting the color of a selected node');
             if toShowHorzGridLines in FOptions.PaintOptions then
               Dec(R.Bottom);
             if Focused or (toPopupMode in FOptions.FPaintOptions) then
@@ -12490,8 +12491,8 @@ begin
           end
           else
           begin
-            Logger.Send('Setting the color of a NOT selected node');
-            Brush.Color := Color;
+            Brush.Color := Self.Color;
+            Logger.Send(lcPaint,'Setting the color of a NOT selected node - Brush.Color',Brush.Color);
             FillRect(R);
           end;
         end;
@@ -13516,7 +13517,7 @@ begin
       Transparent := True;
       TransparentColor := clFuchsia;
       Brush.Color := clFuchsia;
-      FillRect(Rect(0, 0, Width, Height));
+      FillRect(Rect(0, 0, FMinusBM.Width, FMinusBM.Height));
       if FButtonStyle = bsTriangle then
       begin
         Brush.Color := clBlack;
@@ -13535,16 +13536,16 @@ begin
               Brush.Color := clWindow;
           end;
           Pen.Color := FColors.TreeLineColor;
-          Rectangle(0, 0, Width, Height);
+          Rectangle(0, 0, FMinusBM.Width, FMinusBM.Height);
           Pen.Color := Self.Font.Color;
-          MoveTo(2, Width div 2);
-          LineTo(Width - 2 , Width div 2);
+          MoveTo(2, FMinusBM.Width div 2);
+          LineTo(FMinusBM.Width - 2 , FMinusBM.Width div 2);
         end
         else
           FMinusBM.LoadFromLazarusResource('VT_XPBUTTONMINUS');
       end;
     end;
-
+    Logger.SendBitmap(lcPaintBitmap,'FMinusBM',FMinusBM);
     with FPlusBM, Canvas do
     begin
       FPlusBM.Width := 9;
@@ -13552,7 +13553,7 @@ begin
       Transparent := True;
       TransparentColor := clFuchsia;
       Brush.Color := clFuchsia;
-      FillRect(Rect(0, 0, Width, Height));
+      FillRect(Rect(0, 0, FPlusBM.Width, FPlusBM.Height));
       if FButtonStyle = bsTriangle then
       begin
         Brush.Color := clBlack;
@@ -13572,12 +13573,12 @@ begin
           end;
 
           Pen.Color := FColors.TreeLineColor;
-          Rectangle(0, 0, Width, Height);
+          Rectangle(0, 0, FPlusBM.Width, FPlusBM.Height);
           Pen.Color := Self.Font.Color;
-          MoveTo(2, Width div 2);
-          LineTo(Width - 2 , Width div 2);
-          MoveTo(Width div 2, 2);
-          LineTo(Width div 2, Width - 2);
+          MoveTo(2, FPlusBM.Width div 2);
+          LineTo(FPlusBM.Width - 2 , FPlusBM.Width div 2);
+          MoveTo(FPlusBM.Width div 2, 2);
+          LineTo(FPlusBM.Width div 2, FPlusBM.Width - 2);
         end
         else
           FPlusBM.LoadFromLazarusResource('VT_XPBUTTONPLUS');
@@ -15401,6 +15402,8 @@ var
   LeaveStates: TVirtualTreeStates;
 
 begin
+  Logger.EnterMethod(lcMessages,'CMMouseLeave');
+  Logger.Send(lcMessages,'FCurrentHotNode',Integer(Pointer(FCurrentHotNode)));
   // Reset the last used hint rectangle in case the mouse enters the window within the bounds
   if Assigned(FHintData.Tree) then
     FHintData.Tree.FLastHintRect := Rect(0, 0, 0, 0);
@@ -15422,7 +15425,8 @@ begin
   Header.FColumns.FDownIndex := NoColumn;
   Header.FColumns.FHoverIndex := NoColumn;
 
-  inherited;
+  inherited CMMouseLeave(Message);
+  Logger.ExitMethod(lcMessages,'CMMouseLeave');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17397,9 +17401,13 @@ function TBaseVirtualTree.AllocateInternalDataArea(Size: Cardinal): Cardinal;
 
 begin
   Assert((FRoot = nil) or (FRoot.ChildCount = 0), 'Internal data allocation must be done before any node is created.');
-
+  Logger.Send('FTotalInternalDataSize BEFORE',FTotalInternalDataSize);
+  Logger.Send('Size',Size);
+  Logger.Send('TreeNodeSize',TreeNodeSize);
   Result := TreeNodeSize + FTotalInternalDataSize;
+  Logger.Send('Result',Result);
   Inc(FTotalInternalDataSize, (Size + 3) and not 3);
+  Logger.Send('FTotalInternalDataSize AFTER', FTotalInternalDataSize);
   InitRootNode(Result);
 end;
 
@@ -20263,7 +20271,7 @@ var
 begin
   with PaintInfo, Canvas do
   begin
-    Brush.Color := Color;
+    Brush.Color := Self.Color;
     R := Rect(Left, Min(Top, Bottom), Left + 1, Max(Top, Bottom) + 1);
     LCLIntf.FillRect(Handle, R, FDottedBrush);
   end;
@@ -22406,6 +22414,7 @@ var
   XPos: Integer;
 
 begin
+  Logger.EnterMethod(lcPaint,'PaintNodeButton');
   if vsExpanded in Node.States then
     Bitmap := FMinusBM
   else
@@ -22416,9 +22425,10 @@ begin
     XPos := R.Left + ButtonX
   else
     XPos := R.Right - ButtonX - Bitmap.Width;
-
+  Logger.SendBitmap(lcPaintBitmap,'NodeButton',Bitmap);
   // Need to draw this masked.
   Canvas.Draw(XPos, R.Top + ButtonY, Bitmap);
+  Logger.ExitMethod(lcPaint,'PaintNodeButton');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -22494,7 +22504,9 @@ begin
         end;
     else // lmNormal
       Logger.Send(lcPaint,'FLineMode = lmNormal');
+      Logger.Send(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
       PaintInfo.Canvas.Font.Color := FColors.TreeLineColor;
+      Logger.Send(lcPaint,'Brush.Color',PaintInfo.Canvas.Font.Color);
       for I := 0 to IndentSize - 1 do
       begin
         DrawLineImage(PaintInfo, XPos, CellRect.Top, NodeHeight[Node], VAlignment, LineImage[I],
@@ -27389,6 +27401,7 @@ begin
           begin
             Logger.EnterMethod(lcPaint,'PaintNode');
             Logger.Watch(lcPaint,'BaseOffset',BaseOffset);
+            Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
             // Initialize node if not already done.
             if not (vsInitialized in PaintInfo.Node.States) then
               InitNode(PaintInfo.Node);
@@ -27431,11 +27444,11 @@ begin
               begin
                 // Init paint options for the background painting.
                 PaintInfo.PaintOptions := PaintOptions;
-
+                Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                 // The node background can contain a single color, a bitmap or can be drawn by the application.
                 ClearNodeBackground(PaintInfo, UseBackground, True, Rect(Window.Left, TargetRect.Top, Window.Right,
                   TargetRect.Bottom));
-
+                Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                 // Prepare column, position and node clipping rectangle.
                 PaintInfo.CellRect := R;
                 if UseColumns then
@@ -27580,7 +27593,7 @@ begin
 
                           // Prepare background and focus rect for the current cell.
                           PrepareCell(PaintInfo, Window.Left, NodeBitmap.Width);
-
+                          Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                           // Some parts are only drawn for the main column.
                           if IsMainColumn then
                           begin
@@ -27596,18 +27609,18 @@ begin
                             if ImageInfo[iiCheck].Index > -1 then
                               PaintCheckImage(PaintInfo);
                           end;
-
+                          Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                           if ImageInfo[iiState].Index > -1 then
                             PaintImage(PaintInfo, iiState, False);
                           if ImageInfo[iiNormal].Index > -1 then
                             PaintImage(PaintInfo, iiNormal, True);
-
+                          Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                           // Now let descendants or applications draw whatever they want,
                           // but don't draw the node if it is currently being edited.
                           if not ((tsEditing in FStates) and (Node = FFocusedNode) and
                             ((Column = FEditColumn) or not UseColumns)) then
                             DoPaintNode(PaintInfo);
-
+                          Logger.Watch(lcPaint,'Brush.Color',PaintInfo.Canvas.Brush.Color);
                           DoAfterCellPaint(Canvas, Node, Column, CellRect);
                         end;
                       end;
@@ -27658,7 +27671,7 @@ begin
                   PaintSelectionRectangle(PaintInfo.Canvas, Window.Left, SelectionRect, Rect(0, 0, NodeBitmap.Width,
                     NodeBitmap.Height));
                 end;
-                Logger.SendBitmap(lcPaint,'NodeBitmap',NodeBitmap);
+                Logger.SendBitmap(lcPaintBitmap,'NodeBitmap',NodeBitmap);
                 // Put the constructed node image onto the target canvas.
                 with TargetRect, NodeBitmap do
                   BitBlt(TargetCanvas.Handle, Left, Top, Width, Height, Canvas.Handle, Window.Left, 0, SRCCOPY);
@@ -27736,11 +27749,13 @@ begin
           Target := TargetRect.TopLeft;
           R := Rect(TargetRect.Left, 0, TargetRect.Left, MaximumBottom - Target.Y);
           TargetRect := Rect(0, 0, MaximumRight - Target.X, MaximumBottom - Target.Y);
+          Logger.Send(lcPaint,'NodeBitmap.Handle',NodeBitmap.Handle);
           // Avoid unnecessary copying of bitmap content. This will destroy the DC handle too.
           NodeBitmap.Height := 0;
           NodeBitmap.PixelFormat := pf32Bit;
           NodeBitmap.Width := TargetRect.Right - TargetRect.Left + 1;
           NodeBitmap.Height := TargetRect.Bottom - TargetRect.Top + 1;
+          Logger.Send(lcPaint,'NodeBitmap.Handle',NodeBitmap.Handle);
           Logger.Send(lcPaint,'TargetRect',TargetRect);
           Logger.Send(lcPaint,'NodeBitmap Width: %d Height: %d',[NodeBitmap.Width,NodeBitmap.Height]);
           // Call back application/descendants whether they want to erase this area.
@@ -27847,7 +27862,10 @@ begin
             SetBrushOrgEx(NodeBitmap.Canvas.Handle, 0, Target.X and 1, nil);
             PaintSelectionRectangle(NodeBitmap.Canvas, 0, R, TargetRect);
           end;
-          Logger.SendBitmap(lcPaint,'BackGroundBitmap',NodeBitmap);
+          Logger.Send(lcPaint,'NodeBitmap.Canvas.Height',NodeBitmap.Canvas.Height);
+          Logger.Send(lcPaint,'NodeBitmap.Canvas.ClipRect',NodeBitmap.Canvas.ClipRect);
+          Logger.Send(lcPaint,'Target',Target);
+          Logger.SendBitmap(lcPaintBitmap,'BackGroundBitmap',NodeBitmap);
           with Target, NodeBitmap do
             BitBlt(TargetCanvas.Handle, X, Y, Width, Height, Canvas.Handle, 0, 0, SRCCOPY);
         end;
@@ -29961,7 +29979,7 @@ begin
       SetBkMode(Canvas.Handle, TRANSPARENT)
     else
       SetBkMode(Canvas.Handle, OPAQUE);
-
+    Logger.Send(lcPaint,'Canvas.Brush.Color',Canvas.Brush.Color);
     DoTextDrawing(PaintInfo, Text, R, DrawFormat);
   end;
   Logger.ExitMethod(lcPaint,'PaintNormalText');
@@ -30417,6 +30435,7 @@ begin
     Result := nil
   else
     Result := PChar(Node) + FInternalDataOffset;
+  Logger.SendPointer('InternalData',Result);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
