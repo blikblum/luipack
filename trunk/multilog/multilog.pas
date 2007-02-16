@@ -136,6 +136,7 @@ type
     function RectToStr(const ARect: TRect): String; //inline
     function PointToStr(const APoint: TPoint): String; //inline
     //Send functions
+    //todo: Add sendPointer
     procedure Send(const AText: String); //inline;
     procedure Send(AClass: TDebugClass; const AText: String);
     procedure Send(const AText: String; Args: array of const); //inline;
@@ -160,6 +161,8 @@ type
     procedure Send(AClass: TDebugClass; const AText: String; AStrList: TStrings);
     procedure Send(const AText: String; AObject: TObject); //inline;
     procedure Send(AClass: TDebugClass; const AText: String; AObject: TObject);
+    procedure SendPointer(const AText: String; APointer: Pointer); //inline;
+    procedure SendPointer(AClass: TDebugClass; const AText: String; APointer: Pointer);
     procedure SendCallStack(const AText: String); //inline;
     procedure SendCallStack(AClass: TDebugClass; const AText: String);
     procedure SendException(const AText: String; AException: Exception); //inline;
@@ -532,6 +535,19 @@ begin
   SendStream(ltObject,TempStr,AStream);
 end;
 
+procedure TLogger.SendPointer(const AText: String; APointer: Pointer);
+begin
+  SendPointer(FDefaultClass,AText,APointer);
+end;
+
+procedure TLogger.SendPointer(AClass: TDebugClass; const AText: String;
+   APointer: Pointer);
+begin
+  //todo: add pointerToStr
+  if not (AClass in ActiveClasses) then Exit;
+  SendStream(ltValue,AText+' = '+IntToHex(Integer(APointer),8),nil);
+end;
+
 procedure TLogger.SendCallStack(const AText: String);
 begin
   SendCallStack(FDefaultClass,AText);
@@ -811,11 +827,14 @@ var
   i:Integer;
 begin
   //ensure that ExitMethod will be called allways if there's a unpaired Entermethod
-  //even if AClass is Active
+  //even if AClass is not Active
   if FLogStack.Count = 0 then Exit;
+  //todo: see if is necessary to do Uppercase (set case sensitive to false?)
   i:=FLogStack.IndexOf(UpperCase(AMethodName));
   if i <> -1 then
-    FLogStack.Delete(i);
+    FLogStack.Delete(i)
+  else
+    Exit;
   if Sender <> nil then
   begin
     if Sender is TComponent then
