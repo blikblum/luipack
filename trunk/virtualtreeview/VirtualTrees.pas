@@ -15441,9 +15441,14 @@ var
   RTLFactor: Integer;
 
 begin
+  //todo: rename to WM*
+  Logger.EnterMethod(lcScroll,'CMMouseWheel');
   StopWheelPanning;
 
-  inherited;
+  //todo:
+  //The only thing that inherited WMMouseWheel does is to call DoMouseWheel
+  //in the other hand it call a DefaultHandler that causes bug here. So skip it
+  //inherited WMMouseWheel(Message);
 
   if Message.Result = 0  then
   begin
@@ -15452,6 +15457,7 @@ begin
       Result := 1;
       if FRangeY > Cardinal(ClientHeight) then
       begin
+        Logger.Send(lcScroll,'Scroll Vertical - WheelDelta', WheelDelta);
         // Scroll vertically if there's something to scroll...
         if ssCtrl in State then
           ScrollCount := WheelDelta div WHEEL_DELTA * (ClientHeight div Integer(FDefaultNodeHeight))
@@ -15463,10 +15469,12 @@ begin
           else
             ScrollCount := Integer(ScrollLines) * WheelDelta div WHEEL_DELTA;
         end;
+        Logger.Send(lcScroll,'ScrollCount',ScrollCount);
         SetOffsetY(FOffsetY + ScrollCount * Integer(FDefaultNodeHeight));
       end
       else
       begin
+        Logger.Send('Scroll Horizontal - WheelDelta',WheelDelta);
         // ...else scroll horizontally.
         if UseRightToLeftAlignment then
           RTLFactor := -1
@@ -15477,10 +15485,12 @@ begin
           ScrollCount := WheelDelta div WHEEL_DELTA * ClientWidth
         else
           ScrollCount := WheelDelta div WHEEL_DELTA;
+        Logger.Send(lcScroll,'ScrollCount',ScrollCount);
         SetOffsetX(FOffsetX + RTLFactor * ScrollCount * Integer(FIndent));
       end;
     end;
   end;
+  Logger.ExitMethod(lcScroll,'CMMouseWheel');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17156,12 +17166,14 @@ procedure TBaseVirtualTree.WMVScroll(var Message: TLMVScroll);
       GetScrollInfo(Handle, Code, SI);
     {$endif UseFlatScrollbars}
     Result := SI.nTrackPos;
+    Logger.Send(lcScroll,'GetRealScrollPosition',Result);
   end;
 
   //--------------- end local functions ---------------------------------------
 
 begin
-  Logger.EnterMethod(lcMessages,'WMVScroll');
+  Logger.EnterMethod(lcScroll,'WMVScroll');
+  Logger.SendCallStack(lcScroll,'CallStack');
   case Message.ScrollCode of
     SB_BOTTOM:
       SetOffsetY(-Integer(FRoot.TotalHeight));
@@ -17195,7 +17207,7 @@ begin
       SetOffsetY(0);
   end;
   Message.Result := 0;
-  Logger.ExitMethod(lcMessages,'WMVScroll');
+  Logger.ExitMethod(lcScroll,'WMVScroll');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -19440,6 +19452,9 @@ var
   R: TRect;
 
 begin
+  Logger.EnterMethod(lcScroll,'DoSetOffsetXY');
+  Logger.Send(lcScroll,'Value',Value);
+  Logger.SendCallStack(lcScroll,'CallStack');
   // Range check, order is important here.
   if Value.X < (ClientWidth - Integer(FRangeX)) then
     Value.X := ClientWidth - Integer(FRangeX);
@@ -19453,12 +19468,14 @@ begin
   if Value.Y > 0 then
     Value.Y := 0;
   DeltaY := Value.Y - FOffsetY;
-
+  Logger.Send(lcScroll,'FOffsetX: %d FOffsetY: %d',[FOffsetX,FOffsetY]);
+  Logger.Send(lcScroll,'DeltaX: %d DeltaY: %d',[DeltaX,DeltaY]);
   Result := (DeltaX <> 0) or (DeltaY <> 0);
   if Result then
   begin
     FOffsetX := Value.X;
     FOffsetY := Value.Y;
+    //todo: remove this assignment?
     Result := True;
 
     Application.CancelHint;
@@ -19538,6 +19555,7 @@ begin
 
     DoScroll(DeltaX, DeltaY);
   end;
+  Logger.ExitMethod(lcScroll,'DoSetOffsetXY');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

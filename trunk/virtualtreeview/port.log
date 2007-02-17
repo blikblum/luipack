@@ -87,6 +87,7 @@ Port started in 26/01/07
 * Fixed bug in LCL.GetScrollPos
 * Fixed  Draw problems due to TCanvas.Color
 * Fixed Align problems of TVirtualNode (Hint from original port)
+* Fixed MouseWheel
 
 
 #Major Tasks#
@@ -171,4 +172,5 @@ Port started in 26/01/07
 < > Why there's a extra 1 in the NodeBitmap that clears the backGround
 < > See code duplicate in TBitmap.SetWidthHeight
 < > Document problem of TCanvas.Color
+< > Document differences between WMMouseWheel
 
