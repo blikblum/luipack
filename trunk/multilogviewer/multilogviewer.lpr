@@ -8,7 +8,8 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, fmain, sharedlogger,filechannel, atbinhex_lcl;
+  { add your units here }, fmain, sharedlogger,filechannel, atbinhex_lcl,
+  miscutils_package;
 
 begin
   {$ifdef DEBUG_MULTILOGVIEWER}

@@ -7,7 +7,7 @@ unit miscutils_package;
 interface
 
 uses
-  dbutils, domutils, miscutils, oleutils, timerutils, delphicompat; 
+  domutils, miscutils, oleutils, timerutils, delphicompat; 
 
 implementation
 

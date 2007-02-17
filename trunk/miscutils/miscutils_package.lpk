@@ -17,31 +17,27 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="6">
+    <Files Count="5">
       <Item1>
-        <Filename Value="dbutils.pas"/>
-        <UnitName Value="dbutils"/>
-      </Item1>
-      <Item2>
         <Filename Value="domutils.pas"/>
         <UnitName Value="domutils"/>
-      </Item2>
-      <Item3>
+      </Item1>
+      <Item2>
         <Filename Value="miscutils.pas"/>
         <UnitName Value="miscutils"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="oleutils.pas"/>
         <UnitName Value="oleutils"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="timerutils.pas"/>
         <UnitName Value="timerutils"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="delphicompat.pas"/>
         <UnitName Value="delphicompat"/>
-      </Item6>
+      </Item5>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
