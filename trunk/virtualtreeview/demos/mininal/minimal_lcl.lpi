@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="\"/>
+    <Version Value="5"/>
+    <General>
+      <MainUnit Value="0"/>
+      <IconPath Value="./"/>
+      <TargetFileExt Value=".exe"/>
+      <ActiveEditorIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+      <Language Value=""/>
+      <CharSet Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="3">
+      <Item1>
+        <PackageName Value="virtualtreeview_package"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="miscutils_package"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
+    </RequiredPackages>
+    <Units Count="11">
+      <Unit0>
+        <Filename Value="minimal_lcl.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="minimal_lcl"/>
+        <CursorPos X="76" Y="11"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="8"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="fmain.pas"/>
+        <ComponentName Value="Form1"/>
+        <IsPartOfProject Value="True"/>
+        <ResourceFilename Value="fmain.lrs"/>
+        <UnitName Value="fmain"/>
+        <CursorPos X="7" Y="2"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="28"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="Main.pas"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <IsPartOfProject Value="True"/>
+        <ResourceFilename Value="Main.lrs"/>
+        <UnitName Value="Main"/>
+        <CursorPos X="21" Y="155"/>
+        <TopLine Value="146"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\vtlogger.pas"/>
+        <UnitName Value="vtlogger"/>
+        <CursorPos X="29" Y="28"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\..\..\..\..\..\work\lazarus\Delphi2LazDB\vcl_properties.txt"/>
+        <CursorPos X="54" Y="12"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="6"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+        <SyntaxHighlighter Value="None"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\..\..\..\..\lazarus\lcl\stdctrls.pp"/>
+        <UnitName Value="StdCtrls"/>
+        <CursorPos X="39" Y="1324"/>
+        <TopLine Value="1304"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\..\..\..\..\lazarus\lcl\dirsel.pas"/>
+        <ComponentName Value="DirSelDlg"/>
+        <HasResources Value="True"/>
+        <UnitName Value="DirSel"/>
+        <CursorPos X="20" Y="41"/>
+        <TopLine Value="28"/>
+        <UsageCount Value="14"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\..\..\..\..\lazarus\lcl\buttons.pp"/>
+        <UnitName Value="Buttons"/>
+        <CursorPos X="3" Y="105"/>
+        <TopLine Value="88"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\..\VirtualTrees.pas"/>
+        <UnitName Value="VirtualTrees"/>
+        <CursorPos X="19" Y="21"/>
+        <TopLine Value="17"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\..\..\..\..\fpc\rtl\objpas\classes\classesh.inc"/>
+        <CursorPos X="11" Y="1597"/>
+        <TopLine Value="1580"/>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="..\..\..\multilog\multilog.pas"/>
+        <UnitName Value="multilog"/>
+        <CursorPos X="58" Y="552"/>
+        <TopLine Value="523"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit10>
+    </Units>
+    <JumpHistory Count="0" HistoryIndex="-1"/>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="5"/>
+    <PathDelim Value="\"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="E:\subversion\luipack\trunk\virtualtreeview\"/>
+    </SearchPaths>
+    <CodeGeneration>
+      <Generate Value="Faster"/>
+    </CodeGeneration>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Source Value="..\..\..\..\..\..\repositories\luipack\trunk\virtualtreeview\VirtualTrees.pas"/>
+        <Line Value="14991"/>
+      </Item1>
+    </BreakPoints>
+    <Watches Count="9">
+      <Item1>
+        <Expression Value="NodeBitmap.Fmage.FSaveStream"/>
+      </Item1>
+      <Item2>
+        <Expression Value="FImage.FSaveStream"/>
+      </Item2>
+      <Item3>
+        <Expression Value="FColor"/>
+      </Item3>
+      <Item4>
+        <Expression Value="PaintInfo.Canvas.FBrush.FColor"/>
+      </Item4>
+      <Item5>
+        <Expression Value="PaintInfo.Canvas.FFont.FColor"/>
+      </Item5>
+      <Item6>
+        <Expression Value="HitInfo.HitColumn"/>
+      </Item6>
+      <Item7>
+        <Expression Value="HitInfo.HitNode"/>
+      </Item7>
+      <Item8>
+        <Expression Value="HitInfo.HitPositions"/>
+      </Item8>
+      <Item9>
+        <Expression Value="Message"/>
+      </Item9>
+    </Watches>
+    <Exceptions Count="2">
+      <Item1>
+        <Name Value="ECodetoolError"/>
+      </Item1>
+      <Item2>
+        <Name Value="EFOpenError"/>
+      </Item2>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
