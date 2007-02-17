@@ -1,6 +1,7 @@
 unit Main;
 
 {$MODE Delphi}
+{$define DEBUG}
 
 // Demonstration project for TVirtualStringTree to generally show how to get started.
 // Written by Mike Lischke.
@@ -8,6 +9,9 @@ unit Main;
 interface
 
 uses
+  {$ifdef DEBUG}
+  vtlogger, ipcchannel,
+  {$endif}
   LCLIntf, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   VirtualTrees, StdCtrls, ExtCtrls, LResources, Buttons;
 
@@ -54,6 +58,12 @@ type
 procedure TMainForm.FormCreate(Sender: TObject);
 
 begin
+  {$ifdef DEBUG}
+  Logger.ActiveClasses:=[lcScroll];
+  Logger.Channels.Add(TIPCChannel.Create);
+  Logger.Clear;
+  Logger.MaxStackCount:=10;
+  {$endif}
   // Let the tree know how much data space we need.
   VST.NodeDataSize := SizeOf(TMyRec);
   // Set an initial number of nodes.
