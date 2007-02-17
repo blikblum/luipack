@@ -23,21 +23,24 @@
         <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="virtualtreeslcl"/>
-        <MinVersion Major="4" Release="17" Build="20" Valid="True"/>
+        <PackageName Value="miscutils_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="virtualtreeslcl"/>
+        <MinVersion Major="4" Release="17" Build="20" Valid="True"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="multiloglaz"/>
       </Item3>
       <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
+      <Item5>
         <PackageName Value="atbinhex_lcl"/>
         <MinVersion Major="1" Minor="5" Release="6" Valid="True"/>
-      </Item4>
+      </Item5>
     </RequiredPackages>
     <Units Count="3">
       <Unit0>
