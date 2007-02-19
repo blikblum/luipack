@@ -7,7 +7,7 @@ unit multiloglaz;
 interface
 
 uses
-  registermultilog, LazarusPackageIntf; 
+  registermultilog, multiloglcl, LazarusPackageIntf; 
 
 implementation
 

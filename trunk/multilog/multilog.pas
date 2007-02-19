@@ -136,7 +136,7 @@ type
     function RectToStr(const ARect: TRect): String; //inline
     function PointToStr(const APoint: TPoint): String; //inline
     //Send functions
-    //todo: Add sendPointer
+    //todo: Add SendHex
     procedure Send(const AText: String); //inline;
     procedure Send(AClass: TDebugClass; const AText: String);
     procedure Send(const AText: String; Args: array of const); //inline;
