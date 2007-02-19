@@ -34,7 +34,10 @@ const
   WM_ERASEBKGND = LM_ERASEBKGND;
   WM_VSCROLL = LM_VSCROLL;
   WM_HSCROLL = LM_HSCROLL;
-
+  WM_CHAR = LM_CHAR;
+  WM_KEYDOWN = LM_KEYDOWN;
+  WM_KILLFOCUS = LM_KILLFOCUS;
+  
   //Misc Constants
   MAXSHORT = $7FFF;
   
@@ -43,7 +46,9 @@ type
   TMessage = TLMessage;
   TWMHScroll = TLMHScroll;
   TWMVScroll = TLMVScroll;
-
+  TWMChar = TLMChar;
+  TWMKeyDown = TLMKeyDown;
+  TWMKillFocus = TLMKillFocus;
 //Unicode functions
 
 function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
