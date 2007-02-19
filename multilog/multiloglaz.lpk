@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="2">
+    <PathDelim Value="\"/>
     <Name Value="multiloglaz"/>
     <CompilerOptions>
       <Version Value="5"/>
+      <PathDelim Value="\"/>
       <CodeGeneration>
         <Generate Value="Faster"/>
       </CodeGeneration>
@@ -16,7 +18,7 @@
     <License Value="LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="4">
+    <Files Count="5">
       <Item1>
         <Filename Value="multilog.pas"/>
         <AddToUsesPkgSection Value="False"/>
@@ -37,6 +39,9 @@
         <AddToUsesPkgSection Value="False"/>
         <UnitName Value="sharedlogger"/>
       </Item4>
+      <Item5>
+        <Filename Value="multiloglcl.pas"/>
+      </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
@@ -45,10 +50,11 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgDir)/"/>
+      <UnitPath Value="$(PkgDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
+      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
