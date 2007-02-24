@@ -15,9 +15,9 @@ type
   private
   public
     procedure SendBitmap(const AText: String; ABitmap: TBitmap); //inline;
-    procedure SendBitmap(AClass: TDebugClass; const AText: String; ABitmap: TBitmap);
+    procedure SendBitmap(Classes: TDebugClasses; const AText: String; ABitmap: TBitmap);
     procedure SendColor(const AText: String; AColor: TColor); //inline;
-    procedure SendColor(AClass: TDebugClass; const AText: String; AColor: TColor);
+    procedure SendColor(Classes: TDebugClasses; const AText: String; AColor: TColor);
   end;
   
   function ColorToStr(Color: TColor): String;
@@ -99,15 +99,15 @@ end;
 
 procedure TLCLLogger.SendBitmap(const AText: String; ABitmap: TBitmap);
 begin
-  SendBitmap(DefaultClass,AText,ABitmap);
+  SendBitmap(DefaultClasses,AText,ABitmap);
 end;
 
-procedure TLCLLogger.SendBitmap(AClass: TDebugClass; const AText: String;
+procedure TLCLLogger.SendBitmap(Classes: TDebugClasses; const AText: String;
   ABitmap: TBitmap);
 var
   AStream: TStream;
 begin
-  if not (AClass in ActiveClasses) then Exit;
+  if Classes * ActiveClasses = [] then Exit;
   if ABitmap <> nil then
   begin
     AStream:=TMemoryStream.Create;
@@ -124,13 +124,13 @@ end;
 
 procedure TLCLLogger.SendColor(const AText: String; AColor: TColor);
 begin
-  SendColor(DefaultClass,AText,AColor);
+  SendColor(DefaultClasses,AText,AColor);
 end;
 
-procedure TLCLLogger.SendColor(AClass: TDebugClass; const AText: String;
+procedure TLCLLogger.SendColor(Classes: TDebugClasses; const AText: String;
   AColor: TColor);
 begin
-  if not (AClass in ActiveClasses) then Exit;
+  if Classes * ActiveClasses = [] then Exit;
   SendStream(ltValue,AText+' = '+ColorToStr(AColor),nil);
 end;
 
