@@ -26,7 +26,7 @@ unit delphicompat;
 interface
 
 uses
-  LMessages,LCLIntf, Types, LCLType;
+  LMessages, Types, LCLType;
 
 const
   //Messages
@@ -49,6 +49,7 @@ type
   TWMChar = TLMChar;
   TWMKeyDown = TLMKeyDown;
   TWMKillFocus = TLMKillFocus;
+  
 //Unicode functions
 
 function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
@@ -68,12 +69,106 @@ function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5, p6: PInte
 
 function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
 
+//timer
 
+type
+  TTimerNotify = procedure (TimerId: LongWord) of Object;
+
+  TLMTimer = record
+    Msg: Cardinal;
+    TimerID: LongWord;
+    TimerProc: LPARAM; //TTimerNotify;
+    Result: LRESULT;
+  end;
+
+
+function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 
 implementation
 
-{$i delphicompat.inc}
+uses
+{$i uses.inc}
+  maps, LCLIntf;
 
+type
+  TTimerRecord = record
+    Control: Pointer;
+    Notify: TTimerNotify;
+  end;
+
+  { TTimerList }
+
+  TTimerList = class
+  private
+    FHandleList: TMap;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: Pointer);
+    function GetTimerInfo(Handle: hWnd; idEvent:LongWord; out TimerInfo: TTimerRecord):Boolean;
+  end;
+
+var
+  FTimerList: TTimerList;
+  
+{ TTimerList }
+
+constructor TTimerList.Create;
+begin
+  //todo: see 64bit (itu8??)
+  FHandleList:=TMap.Create(itu4,SizeOf(TMap));
+end;
+
+destructor TTimerList.Destroy;
+begin
+  FHandleList.Destroy;
+  inherited Destroy;
+end;
+
+procedure TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: Pointer);
+var
+  AIDList: TMap;
+  ATimerRec: TTimerRecord;
+begin
+  ATimerRec.Notify:= NotifyFunc;
+  ATimerRec.Control:= WinControl;
+  with FHandleList do
+  begin
+    if GetData(hWnd,AIDList) then
+    begin
+      if AIDList.HasId(ID) then
+        AIDList.SetData(ID,ATimerRec)
+      else
+        AIDList.Add(ID,ATimerRec);
+    end
+    else
+    begin
+      AIDList:=TMap.Create(itu4,SizeOf(TTimerRecord));
+      Add(hWnd,AIDList);
+      AIDList.Add(ID,ATimerRec);
+    end;
+  end;
+end;
+
+function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
+  TimerInfo: TTimerRecord): Boolean;
+var
+  AIDList: TMap;
+begin
+  Result:=False;
+  if FHandleList.GetData(Handle,AIDList) then
+    if AIDList.GetData(idEvent,TimerInfo) then
+      Result:=True;
+end;
+
+{$i delphicompat.inc}
+{$i timer.inc}
+
+initialization
+  FTimerList:=TTimerList.Create;
+
+finalization
+  FTimerList.Free;
 
 end.
 
