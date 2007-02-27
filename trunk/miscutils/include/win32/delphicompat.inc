@@ -1,8 +1,4 @@
 
-
-uses
-  Windows;
-  
   
 function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
   Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;

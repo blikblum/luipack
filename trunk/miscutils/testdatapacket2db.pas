@@ -1,14 +1,14 @@
-program delphi2fpc;
+program testdatapacket2db;
 
 {$mode objfpc}
 {$H+}
 
 uses 
-  sysutils,classes,dbutils, sqliteds;
+  sysutils, classes, dbutils, sqlite3ds;
   
 var 
   ConvertDb: TDatapacketDumper;  
-  ADb:TSqliteDataSet;  
+  ADb:TSqlite3DataSet;
 
 procedure CreateTable;
 begin
@@ -16,27 +16,27 @@ begin
 end;  
 
 begin
-  ADb:=TSqliteDataSet.Create(nil);
+  ADb:=TSqlite3DataSet.Create(nil);
   with ADb do
   begin
-    FileName:='categoria.db';
-    TableName:='categoria';
-    PrimaryKey:='CodCategoria';
+    FileName:='customers.db';
+    TableName:='customers';
+    PrimaryKey:='CustNo';
     SaveOnClose:=True;   
   end;  
   
-	ConvertDb:= TDatapacketDumper.Create;
-	with ConvertDb do
-	begin
-	  SourceFile:='categoria.xml';
-	  DataSet:=ADb;
-	  DumpFieldDefs:=True;
-	  AfterDumpFieldDefs:= @CreateTable;
-	  try
-	    DumpData;
-	  finally
-	    Destroy;
-	    ADb.Destroy;
-	  end;	  
-	end; 	
+  ConvertDb:= TDatapacketDumper.Create;
+  with ConvertDb do
+  begin
+    SourceFile:='test.xml';
+    DataSet:=ADb;
+    DumpFieldDefs:=True;
+    AfterDumpFieldDefs:= @CreateTable;
+    try
+      DumpData;
+    finally
+      Destroy;
+      ADb.Destroy;
+    end;
+  end;
 end.
