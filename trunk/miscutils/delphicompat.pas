@@ -84,15 +84,17 @@ type
 
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 
+function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
+
 implementation
 
 uses
 {$i uses.inc}
-  maps, LCLIntf;
+  maps, LCLProc, LCLMessageGlue, Controls;
 
 type
   TTimerRecord = record
-    Control: Pointer;
+    Control: TControl;
     Notify: TTimerNotify;
   end;
 
@@ -100,69 +102,61 @@ type
 
   TTimerList = class
   private
-    FHandleList: TMap;
+    FList: TMap;
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: Pointer);
+    procedure Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl);
     function GetTimerInfo(Handle: hWnd; idEvent:LongWord; out TimerInfo: TTimerRecord):Boolean;
   end;
 
 var
   FTimerList: TTimerList;
   
+  
+function MakeQWord(d1, d2: dword): QWord;
+begin
+  Result:=(QWord(d2) shl 32) or d1;
+end;
+  
 { TTimerList }
 
 constructor TTimerList.Create;
 begin
-  //todo: see 64bit (itu8??)
-  FHandleList:=TMap.Create(itu4,SizeOf(TMap));
+  //todo: see 64bit (itu16??)
+  FList:=TMap.Create(itu8,SizeOf(TTimerRecord));
 end;
 
 destructor TTimerList.Destroy;
 begin
-  FHandleList.Destroy;
+  FList.Destroy;
   inherited Destroy;
 end;
 
-procedure TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: Pointer);
+procedure TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl);
 var
-  AIDList: TMap;
+  AID: QWord;
   ATimerRec: TTimerRecord;
 begin
   ATimerRec.Notify:= NotifyFunc;
   ATimerRec.Control:= WinControl;
-  with FHandleList do
+  AId:=MakeQWord(hWnd,ID);
+  with FList do
   begin
-    if GetData(hWnd,AIDList) then
-    begin
-      if AIDList.HasId(ID) then
-        AIDList.SetData(ID,ATimerRec)
-      else
-        AIDList.Add(ID,ATimerRec);
-    end
+    if HasId(AID) then
+      SetData(AID, ATimerRec)
     else
-    begin
-      AIDList:=TMap.Create(itu4,SizeOf(TTimerRecord));
-      Add(hWnd,AIDList);
-      AIDList.Add(ID,ATimerRec);
-    end;
+      Add(AID,ATimerRec);
   end;
 end;
 
 function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
   TimerInfo: TTimerRecord): Boolean;
-var
-  AIDList: TMap;
 begin
-  Result:=False;
-  if FHandleList.GetData(Handle,AIDList) then
-    if AIDList.GetData(idEvent,TimerInfo) then
-      Result:=True;
+  Result:= FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
 end;
 
 {$i delphicompat.inc}
-{$i timer.inc}
 
 initialization
   FTimerList:=TTimerList.Create;
