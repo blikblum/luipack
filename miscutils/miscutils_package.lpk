@@ -39,7 +39,6 @@
       </Item3>
       <Item4>
         <Filename Value="delphicompat.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="delphicompat"/>
       </Item4>
     </Files>
