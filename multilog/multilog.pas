@@ -121,7 +121,10 @@ type
     FLogStack: TStrings;
     FCheckList: TStrings;
     FOnCustomData: TCustomDataNotify;
+    FLastActiveClasses: TDebugClasses;
     procedure GetCallStack(AStream:TStream);
+    procedure SetActive(AValue: Boolean);
+    function GetActive: Boolean;
     procedure SetMaxStackCount(const AValue: Integer);
   protected
     procedure SendStream(AMsgType: Integer;const AText:String; AStream: TStream);
@@ -210,10 +213,13 @@ type
     procedure Watch(Classes: TDebugClasses; const AText,AValue: String);
     procedure Watch(const AText: String; AValue: Integer); //inline;
     procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Integer);
+    procedure Watch(const AText: String; AValue: Cardinal); //inline;
+    procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Cardinal);
     procedure Watch(const AText: String; AValue: Double); //inline;
     procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Double);
     procedure Watch(const AText: String; AValue: Boolean); //inline;
     procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Boolean);
+    property Active: Boolean read GetActive write SetActive;
     property Channels: TChannelList read FChannels;
     property LogStack: TStrings read FLogStack;
     property MaxStackCount: Integer read FMaxStackCount write SetMaxStackCount;
@@ -284,6 +290,25 @@ begin
    except
      { prevent endless dump if an exception occured }
    end;
+end;
+
+procedure TLogger.SetActive(AValue: Boolean);
+begin
+  if AValue then
+  begin
+    if ActiveClasses = [] then
+      ActiveClasses:= FLastActiveClasses;
+  end
+  else
+  begin
+    FLastActiveClasses:=ActiveClasses;
+    ActiveClasses:=[];
+  end;
+end;
+
+function TLogger.GetActive: Boolean;
+begin
+  Result:=ActiveClasses<>[];
 end;
 
 procedure TLogger.SendStream(AMsgType: Integer; const AText: String;
@@ -864,6 +889,18 @@ end;
 
 procedure TLogger.Watch(Classes: TDebugClasses; const AText: String;
   AValue: Integer);
+begin
+  if Classes * ActiveClasses = [] then Exit;
+  SendStream(ltWatch,AText+'='+IntToStr(AValue),nil);
+end;
+
+procedure TLogger.Watch(const AText: String; AValue: Cardinal);
+begin
+  Watch(DefaultClasses,AText,AValue);
+end;
+
+procedure TLogger.Watch(Classes: TDebugClasses; const AText: String;
+  AValue: Cardinal);
 begin
   if Classes * ActiveClasses = [] then Exit;
   SendStream(ltWatch,AText+'='+IntToStr(AValue),nil);
