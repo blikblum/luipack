@@ -25,14 +25,13 @@
     </RunParams>
     <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="miscutils_package"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="virtualtreeslcl"/>
-        <MinVersion Major="4" Release="17" Build="20" Valid="True"/>
+        <PackageName Value="multiloglaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="miscutils_package"/>
       </Item3>
       <Item4>
         <PackageName Value="LCL"/>
@@ -75,6 +74,11 @@
       <Debugging>
         <UseHeaptrc Value="True"/>
       </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
     </Linking>
     <Other>
       <CompilerPath Value="$(CompPath)"/>

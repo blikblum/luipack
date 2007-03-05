@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Grids, StdCtrls, multilog, VirtualStringTree,VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
+  Grids, StdCtrls, multilog, VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
   Menus, ATBinHex;
 
 type
@@ -251,8 +251,8 @@ end;
 
 procedure TfrmMain.ImgViewerPaint(Sender: TObject);
 begin
-  with ImgViewer.Picture.Bitmap do
-    ImgViewer.Canvas.DrawFocusRect(Rect(0,0,Width,Height));
+  //with ImgViewer.Picture.Bitmap do
+  //  ImgViewer.Canvas.DrawFocusRect(Rect(0,0,Width,Height));
 end;
 
 procedure TfrmMain.ImgViewerResize(Sender: TObject);
