@@ -41,6 +41,16 @@ const
   //Misc Constants
   MAXSHORT = $7FFF;
   
+  IMAGE_BITMAP = 0;
+  IMAGE_CURSOR = 2;
+  IMAGE_ENHMETAFILE = 1;
+  IMAGE_ICON = 1;
+  LR_COPYDELETEORG = 8;
+  LR_COPYRETURNORG = 4;
+  LR_MONOCHROME = 1;
+  LR_CREATEDIBSECTION = 8192;
+  LR_DEFAULTSIZE = 64;
+  
 type
   //TWM* types
   TMessage = TLMessage;
@@ -63,11 +73,57 @@ function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: 
 
 function GetTextExtentExPointW(DC: HDC; p2: PWideChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
 
+function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
+
 //GDI Functions
 
 function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
 
 function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
+
+function GetTextAlign(hDC:HDC): LongWord;
+
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): BOOLEAN;
+
+function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
+
+function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
+
+function GdiFlush: Boolean;
+
+function GetWindowDC(hWnd:THandle):HDC;
+
+function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
+
+function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
+
+function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
+
+function GetBkColor(DC:HDC):COLORREF;
+
+
+
+//misc
+
+function CopyImage(hImage:THANDLE; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
+
+function SystemParametersInfo(uiAction, uiParam:LongWord; pvParam:Pointer; fWinIni:LongWord):Boolean;
+
+function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
+
+function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord):longint;
+
+function ImageList_DragShowNolock(fShow: Boolean): Boolean;
+
+function BeginDeferWindowPos(nNumWindows:longint):THandle;
+
+function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
+
+function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
+
+function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
+
+function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
 
 //timer
 
