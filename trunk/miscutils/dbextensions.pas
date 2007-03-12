@@ -1,4 +1,4 @@
-unit dbutils;
+unit dbextensions;
 
 { Auxiliary classes or functions for database handling
 
@@ -23,11 +23,11 @@ unit dbutils;
 
 {$Mode ObjFpc}
 {$H+}
-{ $Define DEBUG}
+{.$Define DEBUG}
 
 interface
 uses 
-  sysutils,classes,sax,sax_html,db, customsqliteds;
+  sysutils, classes, sax, sax_html, db;
 
 type
   TFieldArray = array of string;
@@ -66,47 +66,6 @@ type
     property DumpFieldDefs: Boolean read FDumpFieldDefs write FDumpFieldDefs;
     property OnAppendRecord: TProcedure read FOnApendRecord write FOnApendRecord;   
     property AfterDumpFieldDefs: TProcedure read FAfterDumpFieldDefs write FAfterDumpFieldDefs;
-  end;
-
-
-  { TSqliteTree }
-  TSqliteTree = class;
-
-  TRecordNotify = procedure (Sender: TSqliteTree; HasChild: Boolean) of Object;
-  TParentChangeNotify = procedure (Sender: TSqliteTree; Parent: Integer) of Object;
-
-  TSqliteTree = class (TComponent)
-  private
-    FBreakRecursion: Boolean;
-    FDataset: TCustomSqliteDataset;
-    FFilter: String;
-    FIndexFieldName: String;
-    FInitialParent: Integer;
-    FLevel: Integer;
-    FOnParentChange: TParentChangeNotify;
-    FOnRecord: TRecordNotify;
-    FParentFieldName: String;
-    FParentField: TField;
-    FIndexField: TField;
-    FTableName: String;
-    FSqlTemplate: String;
-    FHasChildSql: String;
-    FData: Pointer;
-    procedure GetChild(Parent: Integer);
-  public
-    //constructor Create (AOwner: TComponent); override;
-    procedure Iterate(Recurse: Boolean = True);
-    property Dataset: TCustomSqliteDataset read FDataset write FDataset;
-    property TableName: String read FTableName write FTableName;
-    property ParentFieldName: String read FParentFieldName write FParentFieldName;
-    property IndexFieldName: String read FIndexFieldName write FIndexFieldName;
-    property Filter: String read FFilter write FFilter;
-    property Level: Integer read FLevel;
-    property InitialParent: Integer read FInitialParent write FInitialParent;
-    property Data: Pointer read FData write FData;
-    property BreakRecursion: Boolean read FBreakRecursion write FBreakRecursion;
-    property OnRecord: TRecordNotify read FOnRecord write FOnRecord;
-    property OnParentChange: TParentChangeNotify read FOnParentChange write FOnParentChange;
   end;
 
 implementation
@@ -271,66 +230,5 @@ begin
   end;
 end;
 }
- 
-{ TSqliteTree }
-
-procedure TSqliteTree.GetChild(Parent: Integer);
-var
-  i,CurrentLinkValue: Integer;
-  HasChildList: TFpList;
-  HasChild: Boolean;
-begin
-  if Assigned(FOnParentChange) then
-    FOnParentChange(Self,Parent);
-  HasChildList:=TFPList.Create;
-  with FDataset do
-  begin
-    Sql:=FSqlTemplate + IntToStr(Parent) + FFilter;
-    RefetchData;
-    while not Eof do
-    begin
-      CurrentLinkValue:=FIndexField.AsInteger;
-      ExecuteDirect(FHasChildSql + IntToStr(CurrentLinkValue) + ' Limit 1');
-      HasChild:=ReturnCode = 100 {SQLITE_ROW};
-      FOnRecord(Self,HasChild);
-      if HasChild then
-        HasChildList.Add(Pointer(PtrInt(CurrentLinkValue)));
-      Next;
-    end;
-  end;
-  inc(FLevel);
-  for i:= 0 to HasChildList.Count - 1 do
-    if not FBreakRecursion then
-      GetChild(PtrInt(HasChildList[i]));
-  dec(FLevel);
-  HasChildList.Destroy;
-end;
-
-{
-constructor TSqliteTree.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-end;
-}
-
-procedure TSqliteTree.Iterate(Recurse: Boolean = True);
-begin
-  if not Assigned(FOnRecord) then
-    Raise Exception.Create('OnRecord notify function not set');
-  with Dataset do
-  begin
-    FSqlTemplate:='Select * from '+FTableName+ ' Where '+ FParentFieldName + ' = ';
-    FHasChildSql:='Select _ROWID_ from '+ FTableName+ ' Where '+FParentFieldName+ ' = ';
-    //dummy open to allow refetchdata
-    Sql:= 'Select * from '+FTableName+ ' Where 1 = 0';
-    Close;
-    Open;
-    FParentField:=FieldByName(FParentFieldName);
-    FIndexField:=FieldByName(FIndexFieldName);
-    FLevel:=0;
-    FBreakRecursion:=not Recurse;
-    GetChild(FInitialParent);
-  end;
-end;
 
 end.
