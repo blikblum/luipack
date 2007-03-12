@@ -19515,12 +19515,12 @@ begin
             R := ClientRect;
             R.Left := Header.Columns.GetVisibleFixedWidth;
 
-            ScrollWindow(Handle, DeltaX, 0, @R, @R);
+            Windows.ScrollWindow(Handle, DeltaX, 0, @R, @R);
             if DeltaY <> 0 then
-              ScrollWindow(Handle, 0, DeltaY, ClipRect, ClipRect);
+              Windows.ScrollWindow(Handle, 0, DeltaY, ClipRect, ClipRect);
           end
           else
-            ScrollWindow(Handle, DeltaX, DeltaY, ClipRect, ClipRect);
+            Windows.ScrollWindow(Handle, DeltaX, DeltaY, ClipRect, ClipRect);
         end;
       end;
 

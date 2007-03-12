@@ -101,7 +101,9 @@ function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
 
 function GetBkColor(DC:HDC):COLORREF;
 
+function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
 
+function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
 
 //misc
 
@@ -124,6 +126,14 @@ function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
+
+function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
+
+function GetACP:LongWord;
+
+function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
+
+function GetKeyboardLayout(dwLayout:DWORD):THandle;
 
 //timer
 

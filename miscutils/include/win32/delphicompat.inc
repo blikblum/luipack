@@ -97,6 +97,16 @@ begin
   Result:=Windows.GetBkColor(DC);
 end;
 
+function GetDCEx(hWnd: THandle; hrgnClip: HRGN; flags: DWORD): HDC;
+begin
+  Result:=Windows.GetDCEx(hWnd,hrgnClip,flags);
+end;
+
+function SetBrushOrgEx(DC: HDC; nXOrg, nYOrg: longint; lppt: PPOINT): Boolean;
+begin
+  Result:=Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
+end;
+
 function CopyImage(hImage: THANDLE; uType: LongWord; cxDesired,
   cyDesired: LongInt; fuFlags: LongWord): THandle;
 begin
@@ -151,6 +161,29 @@ function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect
   ): BOOLEAN;
 begin
   Result:=Windows.SubtractRect(lprcDst,lprcSrc1,lprcSrc2);
+end;
+
+function GetLocaleInfo(Locale, LCType: LongWord; lpLCData: PChar;
+  cchData: longint): longint;
+begin
+  Result:=Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
+end;
+
+function GetACP: LongWord;
+begin
+  Result:=Windows.GetACP;
+end;
+
+function MultiByteToWideChar(CodePage, dwFlags: DWORD; lpMultiByteStr: PChar;
+  cchMultiByte: longint; lpWideCharStr: PWideChar; cchWideChar: longint
+  ): longint;
+begin
+  Result:=Windows.MultiByteToWideChar(CodePage,dwFlags,lpMultiByteStr,cchMultiByte,lpWideCharStr,cchWideChar);
+end;
+
+function GetKeyboardLayout(dwLayout: DWORD): THandle;
+begin
+  Result:=Windows.GetKeyboardLayout(dwLayout);
 end;
 
 procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;

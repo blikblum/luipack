@@ -24,7 +24,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="4">
+    <Files Count="5">
       <Item1>
         <Filename Value="domutils.pas"/>
         <UnitName Value="domutils"/>
@@ -41,6 +41,10 @@
         <Filename Value="delphicompat.pas"/>
         <UnitName Value="delphicompat"/>
       </Item4>
+      <Item5>
+        <Filename Value="dbextensions.pas"/>
+        <UnitName Value="dbextensions"/>
+      </Item5>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

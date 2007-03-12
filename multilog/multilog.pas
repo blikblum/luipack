@@ -361,6 +361,7 @@ begin
   FLogStack:=TStringList.Create;
   FCheckList:=TStringList.Create;
   ActiveClasses:=[0];
+  DefaultClasses:=[0];
 end;
 
 destructor TLogger.Destroy;
