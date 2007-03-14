@@ -5,10 +5,13 @@ unit sqlite3wrapper;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, sqlite3;
+  
+const
+  SQLITE_OK = sqlite3.SQLITE_OK;
+  SQLITE_ROW = sqlite3.SQLITE_ROW;
 
 type
-
   TSqlite3DataReader = class;
 
   { TSqlite3Connection }
@@ -18,13 +21,14 @@ type
     FFileName: String;
     FHandle: Pointer;
     FReturnCode: Integer;
+    FSharedHandle: Boolean;
     procedure SetFileName(const AValue: String);
-    procedure SetHandle(const AValue: Pointer);
+    procedure SetHandle(AValue: Pointer);
   protected
   public
     destructor Destroy; override;
     procedure Close;
-    procedure Open;
+    function Open: Boolean;
     procedure ExecSql (const SQL: String);
     procedure Prepare (const SQL: String; Reader: TSqlite3DataReader);
     function ReturnString: String;
@@ -40,8 +44,9 @@ type
     FFieldCount: Integer;
     FStatement: Pointer;
     FFieldList: TStringList;
+    function GetFieldNames(Index: Integer): String;
   protected
-    procedure ResetFieldList;
+    procedure Reset(stm: Pointer);
   public
     constructor Create;
     destructor Destroy; override;
@@ -53,12 +58,10 @@ type
     function GetString(const FieldName: String): String;
     function Step: Boolean;
     property FieldCount: Integer read FFieldCount;
+    property FieldNames[Index: Integer]: String read GetFieldNames;
   end;
 
 implementation
-
-uses
-  sqlite3;
 
 { TSqlite3Connection }
 
@@ -71,12 +74,13 @@ begin
   end;
 end;
 
-procedure TSqlite3Connection.SetHandle(const AValue: Pointer);
+procedure TSqlite3Connection.SetHandle(AValue: Pointer);
 begin
   if (FHandle <> AValue) and (FHandle <> nil) then
   begin
     Close;
-    FHandle:=AValue;
+    FHandle:= AValue;
+    FSharedHandle:= True;
   end;
 end;
 
@@ -88,17 +92,36 @@ end;
 
 procedure TSqlite3Connection.Close;
 begin
-  if FHandle <> nil then
+  if (FHandle <> nil) then
   begin
-    sqlite3_close(FHandle);
+    if not FSharedHandle then
+      sqlite3_close(FHandle);
     FHandle:=nil;
   end;
 end;
 
-procedure TSqlite3Connection.Open;
+function TSqlite3Connection.Open: Boolean;
+var
+  stm: Pointer;
 begin
-  if (FHandle = nil) and FileExists(FFileName) then
+  if FHandle <> nil then
+  begin
+    Result:=True;
+    Exit;
+  end;
+  Result:=False;
+  if FileExists(FFileName) then
+  begin
     FReturnCode:= sqlite3_open(PChar(FFileName),@FHandle);
+    //additional check
+    if FReturnCode = SQLITE_OK then
+    begin
+      FReturnCode:= sqlite3_prepare(FHandle,'Select Name from sqlite_master LIMIT 1',-1, @stm,nil);
+      sqlite3_finalize(stm);
+      Result:= FReturnCode = SQLITE_OK;
+    end;
+    FSharedHandle:= False;
+  end;
 end;
 
 procedure TSqlite3Connection.ExecSql(const SQL: String);
@@ -106,17 +129,22 @@ var
   stm: Pointer;
 begin
   FReturnCode:=sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
-  if FReturnCode <> SQLITE_OK then
+  if FReturnCode = SQLITE_OK then
+  begin
+    FReturnCode:=sqlite3_step(stm);
+    sqlite3_finalize(stm);
+  end
+  else
     raise Exception.Create('Error in ExecSql: '+ReturnString);
-  FReturnCode:=sqlite3_step(stm);
-  sqlite3_finalize(stm);
 end;
 
 procedure TSqlite3Connection.Prepare(const SQL: String; Reader: TSqlite3DataReader);
+var
+  stm: Pointer;
 begin
-  FReturnCode:= sqlite3_prepare(FHandle,PChar(SQL),-1,@Reader.FStatement,nil);
+  FReturnCode:= sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
   if FReturnCode = SQLITE_OK then
-    Reader.ResetFieldList
+    Reader.Reset(stm)
   else
     raise Exception.Create('Error in Prepare: '+ReturnString);
 end;
@@ -169,10 +197,20 @@ begin
   Result:=FFieldList.IndexOf(UpperCase(FieldName));
 end;
 
-procedure TSqlite3DataReader.ResetFieldList;
+function TSqlite3DataReader.GetFieldNames(Index: Integer): String;
+begin
+  if (Index >= 0) and (Index < FFieldCount) then
+    Result:= FFieldList[Index]
+  else
+    raise Exception.Create('GetFieldNames - Index out of bounds');
+end;
+
+procedure TSqlite3DataReader.Reset(stm: Pointer);
 var
   i: Integer;
 begin
+  Finalize;
+  FStatement:= stm;
   FFieldList.Clear;
   FFieldCount:= sqlite3_column_count(FStatement);
   for i:= 0 to FFieldCount - 1 do
@@ -186,13 +224,18 @@ end;
 
 destructor TSqlite3DataReader.Destroy;
 begin
+  Finalize;
   FFieldList.Destroy;
   inherited Destroy;
 end;
 
 procedure TSqlite3DataReader.Finalize;
 begin
-  sqlite3_finalize(FStatement);
+  if FStatement <> nil then
+  begin
+    sqlite3_finalize(FStatement);
+    FStatement := nil;
+  end;
 end;
 
 function TSqlite3DataReader.GetInteger(AFieldIndex: Integer): Integer;
