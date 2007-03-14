@@ -190,7 +190,7 @@ procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD)
 var
   TimerInfo: TTimerRecord;
 begin
-  DebugLn('Executing Timer to Handle %d - ID: %d',[Handle, idEvent]);
+  //DebugLn('Executing Timer to Handle %d - ID: %d',[Handle, idEvent]);
   if FTimerList.GetTimerInfo(Handle,idEvent,TimerInfo) then
   with TimerInfo do
   begin
@@ -210,12 +210,12 @@ function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc
 var
   WinInfo: PWindowInfo;
 begin
-  DebugLn('Adding Timer to Handle %d - ID: %d',[hWnd,nIDEvent]);
+  //DebugLn('Adding Timer to Handle %d - ID: %d',[hWnd,nIDEvent]);
   WinInfo:=GetWindowInfo(hWnd);
   FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
   //todo: see the best way to set result when handle is 0
   Result:=Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
-  DebugLn('SetTimer result %d',[Result]);
+  //DebugLn('SetTimer result %d',[Result]);
 end;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
