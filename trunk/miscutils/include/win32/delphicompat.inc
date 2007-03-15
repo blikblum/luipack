@@ -186,6 +186,13 @@ begin
   Result:=Windows.GetKeyboardLayout(dwLayout);
 end;
 
+function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT
+  ): Integer;
+begin
+  Result:=Windows.MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
+end;
+
+
 procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
 var
   TimerInfo: TTimerRecord;

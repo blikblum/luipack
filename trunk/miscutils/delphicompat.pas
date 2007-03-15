@@ -26,7 +26,7 @@ unit delphicompat;
 interface
 
 uses
-  LMessages, Types, LCLType;
+  LMessages, Types, LCLType, Classes;
 
 const
   //Messages
@@ -135,6 +135,14 @@ function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchM
 
 function GetKeyboardLayout(dwLayout:DWORD):THandle;
 
+function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
+
+function MAKEROP4(fore,back : longint) : DWORD;
+
+function INDEXTOOVERLAYMASK(i : longint) : longint;
+
+procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
+
 //timer
 
 type
@@ -221,6 +229,27 @@ function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
 begin
   Result:= FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
 end;
+
+
+procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
+begin
+  case Alignment of
+  taLeftJustify: Alignment := taRightJustify;
+  taRightJustify: Alignment := taLeftJustify;
+  end;
+end;
+
+function INDEXTOOVERLAYMASK(i : longint) : longint;
+{ return type might be wrong }
+begin
+  Result:=i shl 8;
+end;
+
+function MAKEROP4(fore,back : longint) : DWORD;
+begin
+   Result:=DWORD((DWORD(back shl 8) and $FF000000) or DWORD(fore));
+end;
+
 
 {$i delphicompat.inc}
 
