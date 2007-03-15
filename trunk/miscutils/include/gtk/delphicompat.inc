@@ -126,6 +126,11 @@ begin
   //todo
 end;
 
+function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer;
+begin
+  //todo
+end;
+
 
 function CopyImage(hImage:THANDLE; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 begin
