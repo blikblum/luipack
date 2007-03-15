@@ -53,7 +53,7 @@
   <CompilerOptions>
     <Version Value="5"/>
     <SearchPaths>
-      <LCLWidgetType Value="gtk2"/>
+      <LCLWidgetType Value="qt"/>
     </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>

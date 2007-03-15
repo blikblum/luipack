@@ -20,7 +20,6 @@ type
     OpenDialog1: TOpenDialog;
     PanelLeft: TPanel;
     RadioGroupMode: TRadioGroup;
-    Splitter1: TSplitter;
     procedure ButChooseFontClick(Sender: TObject);
     procedure ButOpenFileClick(Sender: TObject);
     procedure ChangeMode(Sender: TObject);
