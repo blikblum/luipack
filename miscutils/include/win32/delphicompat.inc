@@ -107,6 +107,8 @@ begin
   Result:=Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
 end;
 
+function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall; external 'GDI32.DLL';
+
 function CopyImage(hImage: THANDLE; uType: LongWord; cxDesired,
   cyDesired: LongInt; fuFlags: LongWord): THandle;
 begin

@@ -105,7 +105,7 @@ function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
 
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
 
-function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer;
+function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 
 //misc
 
