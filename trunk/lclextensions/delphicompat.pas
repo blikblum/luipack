@@ -51,6 +51,11 @@ const
   LR_CREATEDIBSECTION = 8192;
   LR_DEFAULTSIZE = 64;
   
+  //drawedge constants
+  EDGE_SUNKEN = 10;
+  BF_RECT = 15;
+  BF_ADJUST = 8192;
+  
 type
   //TWM* types
   TMessage = TLMessage;
