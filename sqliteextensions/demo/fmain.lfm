@@ -1,0 +1,57 @@
+object Form1: TForm1
+  Left = 251
+  Height = 467
+  Top = 212
+  Width = 571
+  HorzScrollBar.Page = 570
+  VertScrollBar.Page = 466
+  ActiveControl = ListTables
+  Caption = 'Form1'
+  object LabelRecordCount: TLabel
+    Left = 176
+    Height = 15
+    Top = 344
+    Width = 90
+    Color = clNone
+    ParentColor = False
+  end
+  object ListTables: TListBox
+    Left = 8
+    Height = 284
+    Top = 56
+    Width = 153
+    OnSelectionChange = ListTablesSelectionChange
+    TabOrder = 0
+  end
+  object GridTableData: TStringGrid
+    Left = 176
+    Height = 284
+    Top = 56
+    Width = 387
+    ColCount = 1
+    FixedColor = clBtnFace
+    FixedCols = 0
+    GridLineWidth = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
+    RowCount = 1
+    ScrollBars = ssAutoBoth
+    TabOrder = 1
+    TabStop = True
+  end
+  object ButOpenFile: TButton
+    Left = 8
+    Height = 25
+    Top = 16
+    Width = 75
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Open File'
+    OnClick = ButOpenFileClick
+    TabOrder = 2
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open existing file'
+    FilterIndex = 0
+    left = 12
+    top = 148
+  end
+end
