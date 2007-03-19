@@ -1,3 +1,3 @@
 
-  LCLIntf,
+  LCLIntf, Graphics,
 
