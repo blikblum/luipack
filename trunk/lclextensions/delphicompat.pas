@@ -171,7 +171,7 @@ implementation
 
 uses
 {$i uses.inc}
-  maps, LCLProc, LCLMessageGlue, Controls;
+  maps, LCLProc, LCLMessageGlue, Controls, multiloglcl, filechannel, ipcchannel;
 
 type
   TTimerRecord = record
@@ -193,6 +193,7 @@ type
 
 var
   FTimerList: TTimerList;
+  Logger: TLCLLogger;
   
   
 function MakeQWord(d1, d2: dword): QWord;
@@ -262,9 +263,13 @@ end;
 
 initialization
   FTimerList:=TTimerList.Create;
+  Logger:= TLCLLogger.Create;
+  Logger.Channels.Add(TFileChannel.Create('delphicompat.log'));
+  //Logger.Channels.Add(TIPCChannel.Create);
+  Logger.MaxStackCount:=5;
 
 finalization
   FTimerList.Free;
-
+  Logger.Free;
 end.
 
