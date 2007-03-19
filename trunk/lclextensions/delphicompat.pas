@@ -264,9 +264,10 @@ end;
 initialization
   FTimerList:=TTimerList.Create;
   Logger:= TLCLLogger.Create;
+  {$ifdef DEBUG_DELPHICOMPAT}
   Logger.Channels.Add(TFileChannel.Create('delphicompat.log'));
-  //Logger.Channels.Add(TIPCChannel.Create);
   Logger.MaxStackCount:=5;
+  {$endif}
 
 finalization
   FTimerList.Free;
