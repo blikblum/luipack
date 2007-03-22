@@ -169,9 +169,15 @@ function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
 
 implementation
 
+
 uses
 {$i uses.inc}
   maps, LCLProc, LCLMessageGlue, Controls, multiloglcl, filechannel, ipcchannel;
+
+const
+  //Logger  classes
+  lcInfo = 0;
+  lcStack = 1;
 
 type
   TTimerRecord = record
@@ -266,7 +272,10 @@ initialization
   Logger:= TLCLLogger.Create;
   {$ifdef DEBUG_DELPHICOMPAT}
   Logger.Channels.Add(TFileChannel.Create('delphicompat.log'));
-  Logger.MaxStackCount:=5;
+  Logger.ActivateClasses:=[lcInfo,lcStack];
+  Logger.MaxStackCount:=3;
+  {$else}
+  Logger.ActiveClasses:=[];
   {$endif}
 
 finalization
