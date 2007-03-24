@@ -58,16 +58,11 @@ type
 
   TSqlite3DataReader = class
   private
-    FFieldCount: Integer;
     FStatement: Pointer;
-    FFieldList: TStringList;
     function GetFieldNames(Index: Integer): String;
-    procedure InitFieldProperties;
   protected
     function GetFieldCount: Integer;
-    procedure Reset(stm: Pointer);
   public
-    constructor Create;
     destructor Destroy; override;
     procedure Finalize;
     function GetFieldIndex(const FieldName: String): Integer;
@@ -179,13 +174,9 @@ begin
 end;
 
 procedure TSqlite3Connection.Prepare(const SQL: String; Reader: TSqlite3DataReader);
-var
-  stm: Pointer;
 begin
-  FReturnCode:= sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
-  if FReturnCode = SQLITE_OK then
-    Reader.Reset(stm)
-  else
+  FReturnCode:= sqlite3_prepare(FHandle,PChar(SQL),-1,@Reader.FStatement,nil);
+  if FReturnCode <> SQLITE_OK then
     raise Exception.Create('Error in Prepare: '+ReturnString);
 end;
 
@@ -233,54 +224,34 @@ begin
 end;
 
 function TSqlite3DataReader.GetFieldIndex(const FieldName: String): Integer;
+var
+  i: Integer;
 begin
-  InitFieldProperties;
-  Result:=FFieldList.IndexOf(UpperCase(FieldName));
+  for i:= 0 to FieldCount - 1 do
+    if stricomp(PChar(FieldName),sqlite3_column_name(FStatement,i)) = 0 then
+    begin
+      Result:=i;
+      Exit;
+    end;
+  Result:= -1;
 end;
 
 function TSqlite3DataReader.GetFieldNames(Index: Integer): String;
 begin
-  InitFieldProperties;
-  if (Index >= 0) and (Index < FFieldCount) then
-    Result:= FFieldList[Index]
+  if (Index >= 0) and (Index < FieldCount) then
+    Result:=sqlite3_column_name(FStatement,Index)
   else
     raise Exception.Create('GetFieldNames - Index out of bounds');
 end;
 
-procedure TSqlite3DataReader.InitFieldProperties;
-var
-  i: Integer;
-begin
-  if FFieldCount = -1 then
-  begin
-    FFieldList.Clear;
-    FFieldCount:= sqlite3_column_count(FStatement);
-    for i:= 0 to FFieldCount - 1 do
-      FFieldList.Add(UpperCase(sqlite3_column_name(FStatement,i)));
-  end;
-end;
-
 function TSqlite3DataReader.GetFieldCount: Integer;
 begin
-  InitFieldProperties;
-  Result:=FFieldCount;
-end;
-
-procedure TSqlite3DataReader.Reset(stm: Pointer);
-begin
-  FFieldCount:= -1;
-  FStatement:= stm;
-end;
-
-constructor TSqlite3DataReader.Create;
-begin
-  FFieldList:=TStringList.Create;
+  Result:=sqlite3_column_count(FStatement);
 end;
 
 destructor TSqlite3DataReader.Destroy;
 begin
   Finalize;
-  FFieldList.Destroy;
   inherited Destroy;
 end;
 
@@ -302,7 +273,7 @@ function TSqlite3DataReader.GetInteger(const FieldName: String): Integer;
 var
   i: Integer;
 begin
-  i:= FFieldList.IndexOf(UpperCase(FieldName));
+  i:= GetFieldIndex(FieldName);
   if i <> -1 then
     Result:= sqlite3_column_int(FStatement,i)
   else
@@ -318,7 +289,7 @@ function TSqlite3DataReader.GetString(const FieldName: String): String;
 var
   i: Integer;
 begin
-  i:= FFieldList.IndexOf(UpperCase(FieldName));
+  i:= GetFieldIndex(FieldName);
   if i <> -1 then
     Result:= StrPas(sqlite3_column_text(FStatement,i))
   else
