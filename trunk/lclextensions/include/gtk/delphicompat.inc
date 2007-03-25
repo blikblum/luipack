@@ -39,11 +39,24 @@ end;
 
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 var
- TempStr: UTF8String;
+  TempStr: UTF8String;
+  TempRect: TRect;
+  TextHeight: Integer;
+  TM: TTextMetric;
 begin
   Logger.Send('DrawTextW');
+  TempRect:=lpRect;
+  //fix position under gtk
+  if (uFormat and DT_VCENTER) > 0 then
+  begin
+    GetTextMetrics(hDC, TM);
+    //gtk overestimate height
+    TextHeight := TM.tmHeight - 2;
+    TempRect.Top:= (TempRect.Top + TempRect.Bottom - TextHeight) div 2;
+  end;
   TempStr:=UTF8Encode(WideString(lpString));
-  Result:=DrawText(hDC,PChar(TempStr),Length(TempStr),lpRect,uFormat);
+  Result:=DrawText(hDC,PChar(TempStr),Length(TempStr),TempRect,uFormat);
+  Logger.Send('Rect',TempRect);
 end;
 
 function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5,
