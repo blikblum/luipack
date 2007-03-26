@@ -19,13 +19,12 @@ type
   TSqlite3Query = class
   private
     FStatement: Pointer;
-    procedure Reset(stm: Pointer);
+    procedure Reset;
   public
-    destructor Destroy; override;
-    function GetInteger: Integer;
-    procedure GetList(List: TStrings; FillObjects: Boolean = False);
-    function GetString: String;
-    function IsNull: Boolean;
+    function GetInteger(Finalize: Boolean = True): Integer;
+    procedure GetList(List: TStrings; FillObjects: Boolean = False; Finalize: Boolean = True);
+    function GetString(Finalize: Boolean = True): String;
+    function IsNull(Finalize: Boolean = False): Boolean;
   end;
 
   { TSqlite3Connection }
@@ -122,14 +121,12 @@ begin
 end;
 
 function TSqlite3Connection.Query(const SQL: String): TSqlite3Query;
-var
-  stm: Pointer;
 begin
-  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
+  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@FQuery.FStatement,nil);
   if FReturnCode = SQLITE_OK then
   begin
-    FQuery.Reset(stm);
     Result:=FQuery;
+    FQuery.Reset;
   end
   else
     raise Exception.Create('Error in Query: '+ReturnString);
@@ -298,38 +295,37 @@ end;
 
 { TSqlite3Query }
 
-procedure TSqlite3Query.Reset(stm: Pointer);
+procedure TSqlite3Query.Reset;
 begin
-  if FStatement <> nil then
-    sqlite3_finalize(FStatement);
-  FStatement:=stm;
   sqlite3_step(FStatement);
 end;
 
-destructor TSqlite3Query.Destroy;
+function TSqlite3Query.GetInteger(Finalize: Boolean = True): Integer;
 begin
-  if FStatement <> nil then
+  Result:= sqlite3_column_int(FStatement,0);
+  if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
-function TSqlite3Query.GetInteger: Integer;
-begin
-  Result:= sqlite3_column_int(FStatement,0);
-end;
-
-procedure TSqlite3Query.GetList(List: TStrings; FillObjects: Boolean);
+procedure TSqlite3Query.GetList(List: TStrings; FillObjects: Boolean;Finalize: Boolean = True);
 begin
   //todo
+  if Finalize then
+    sqlite3_finalize(FStatement);
 end;
 
-function TSqlite3Query.GetString: String;
+function TSqlite3Query.GetString(Finalize: Boolean = True): String;
 begin
   Result:= StrPas(sqlite3_column_text(FStatement,0));
+  if Finalize then
+    sqlite3_finalize(FStatement);
 end;
 
-function TSqlite3Query.IsNull: Boolean;
+function TSqlite3Query.IsNull(Finalize: Boolean = False): Boolean;
 begin
   Result:= sqlite3_column_type(FStatement,0) = SQLITE_NULL;
+  if Finalize then
+    sqlite3_finalize(FStatement);
 end;
 
 end.
