@@ -19,6 +19,7 @@ type
   private
     FBreakRecursion: Boolean;
     FFilter: String;
+    FFieldNames: String;
     FIndexFieldName: String;
     FLevel: Integer;
     FOnParentChange: TParentChangeNotify;
@@ -32,8 +33,10 @@ type
     procedure GetChild(Parent: Integer);
   public
     Data: Pointer;
+    constructor Create(AOwner: TComponent);
     procedure Run (Parent: Integer; Recurse: Boolean = True); virtual; abstract;
     property TableName: String read FTableName write FTableName;
+    property FieldNames: String read FFieldNames write FFieldNames;
     property ParentFieldName: String read FParentFieldName write FParentFieldName;
     property IndexFieldName: String read FIndexFieldName write FIndexFieldName;
     property Filter: String read FFilter write FFilter;
@@ -51,7 +54,6 @@ type
     FIndexField: TField;
   protected
     procedure DoBrowseRecords(Parent: Integer; ChildList: TFpList); override;
-    procedure BuildSqlTemplate;
   public
     procedure Run (Parent: Integer; Recurse: Boolean = True); override;
     property Dataset: TCustomSqliteDataset read FDataset write FDataset;
@@ -62,7 +64,6 @@ type
 
   TSqlite3TreeIterator = class (TCustomTreeIterator)
   private
-    FFieldNames: String;
     FConnection: TSqlite3Connection;
     FIndexField: Integer;
     FReader: TSqlite3DataReader;
@@ -71,7 +72,6 @@ type
   public
     constructor Create(AOwner: TComponent);
     destructor Destroy; override;
-    property FieldNames: String read FFieldNames write FFieldNames;
     procedure Run (Parent: Integer; Recurse: Boolean = True); override;
     property Connection: TSqlite3Connection read FConnection write FConnection;
     property Reader: TSqlite3DataReader read FReader;
@@ -81,10 +81,6 @@ type
 implementation
 
 { TDatasetTreeIterator }
-
-type
-  TCustomSqliteAccess = class (TCustomSqliteDataset)
-  end;
 
 procedure TDatasetTreeIterator.DoBrowseRecords(Parent: Integer; ChildList: TFpList);
 var
@@ -108,25 +104,6 @@ begin
   end;
 end;
 
-procedure TDatasetTreeIterator.BuildSqlTemplate;
-var
-  i: Integer;
-begin
-  if FTableName = Dataset.TableName then
-    FSqlTemplate:=TCustomSqliteAccess(Dataset).FSelectSqlStr+' Where '
-  else
-  begin
-    with Dataset do
-    begin
-      FSqlTemplate:='SELECT ';
-      for i:= 0 to FieldDefs.Count - 2 do
-        FSqlTemplate:=FSqlTemplate+FieldDefs[i].Name+',';
-      FSqlTemplate:=FSqlTemplate+FieldDefs[FieldDefs.Count - 1].Name+
-        ' FROM '+FTableName+' Where ';
-    end;
-  end;
-end;
-
 procedure TDatasetTreeIterator.Run (Parent: Integer; Recurse: Boolean = True);
 var
   OldSaveOnRefetch,OldActive: Boolean;
@@ -142,17 +119,18 @@ begin
     SaveOnRefetch:=False;
     OldSql:=Sql;
     OldActive:=Active;
-    //prepare template
-    FSqlTemplate:='';
     if OldActive then
     begin
       ApplyUpdates;
       OldRecNo:=RecNo;
-      BuildSqlTemplate;
-    end
+    end;
+    //prepare template
+    if FFieldNames = '' then
+      FSqlTemplate:='Select * from '
     else
-      FSqlTemplate:='Select * from '+FTableName+ ' Where ';
-    FHasChildSql:='Select _ROWID_ from '+ FTableName + ' Where ' + FParentFieldName + ' = ';
+      FSqlTemplate:='Select ' + FFieldNames + ' from ';
+    FSqlTemplate:=FSqlTemplate + FTableName + ' Where ';
+    FHasChildSql:='Select _ROWID_ from ' + FTableName + ' Where ' + FParentFieldName + ' = ';
     DisableControls;
     //dummy open to allow refetchdata
     Sql:= FSqlTemplate + '1 = 0';
@@ -168,9 +146,12 @@ begin
     //restore ds state
     SaveOnRefetch:=OldSaveOnRefetch;
     Sql:=OldSql;
-    Active:=OldActive;
-    if Active then
+    Close;
+    if OldActive then
+    begin
+      Open;
       RecNo:=OldRecNo;
+    end;
     EnableControls;
   end;
 end;
@@ -253,6 +234,12 @@ begin
       GetChild(PtrInt(HasChildList[i]));
   dec(FLevel);
   HasChildList.Destroy;
+end;
+
+constructor TCustomTreeIterator.Create(AOwner: TComponent);
+begin
+  //todo: see is necessary this constructor
+  inherited Create(AOwner);
 end;
 
 end.
