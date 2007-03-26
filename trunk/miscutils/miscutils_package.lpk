@@ -20,12 +20,10 @@
     <Files Count="3">
       <Item1>
         <Filename Value="domutils.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="domutils"/>
       </Item1>
       <Item2>
         <Filename Value="miscutils.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="miscutils"/>
       </Item2>
       <Item3>

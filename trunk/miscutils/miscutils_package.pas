@@ -7,7 +7,7 @@ unit miscutils_package;
 interface
 
 uses
-  dbextensions; 
+  domutils, miscutils, dbextensions; 
 
 implementation
 
