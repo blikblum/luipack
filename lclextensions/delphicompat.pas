@@ -56,6 +56,9 @@ const
   BF_RECT = 15;
   BF_ADJUST = 8192;
   
+  //systemparametersinfo
+  SPI_GETWORKAREA = 48;
+  
 type
   //TWM* types
   TMessage = TLMessage;
