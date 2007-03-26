@@ -45,12 +45,13 @@ type
     FSubTree:THtmlSubTree;
     FBookmarkStrings:TStringList;
     FBookmarkIndexes:TIndexedList;
+    procedure ResetNodes;
     procedure SetTitle(AName:String);
   public
     constructor Create;
     destructor Destroy;
-    //procedure LoadFromFile(const AFileName:String);   
     procedure SaveToFile(const AFileName:String);
+    procedure Clear;
     function CreateText(const AText:String): TDomNode;
     procedure AddBookmark(ANode:TDomNode;const AText: String);
     procedure AddBookmark(ANode:TDomNode;const AIndex: Integer);
@@ -176,12 +177,7 @@ uses
 constructor THtmlTree.Create;
 begin
   FDocHandle:= TXMLDocument.Create;
-  FRootNode:=FDocHandle.CreateElement('html');
-  FHeadNode:=FDocHandle.CreateElement('head');
-  FBodyNode:=FDocHandle.CreateElement('body');
-  FRootNode.AppendChild(FHeadNode);
-  FRootNode.AppendChild(FBodyNode);
-  FDocHandle.AppendChild(FRootNode);
+  ResetNodes;
   FSubTree:=THtmlSubTree.Create(Self);
   FBookmarkStrings:=TStringList.Create;
   FBookmarkIndexes:=TIndexedList.Create;
@@ -200,7 +196,16 @@ end;
 procedure THtmlTree.SaveToFile(const AFileName:String);
 begin
   WriteXMLFile(FDocHandle,AFileName);
-end;  
+end;
+
+procedure THtmlTree.Clear;
+begin
+  FDocHandle.RemoveChild(FRootNode);
+  ResetNodes;
+  SubTree.Clear;
+  FBookmarkIndexes.Clear;
+  FBookmarkStrings.Clear;
+end;
 
 procedure THtmlTree.AddCssLink(const AFilePath:String);
 var
@@ -232,7 +237,17 @@ begin
   TempNode:=FDocHandle.CreateElement('title');
   TempNode.AppendChild(FDocHandle.CreateTextNode(AName));
   FHeadNode.AppendChild(TempNode);
-end;  
+end;
+
+procedure THtmlTree.ResetNodes;
+begin
+  FRootNode:=FDocHandle.CreateElement('html');
+  FHeadNode:=FDocHandle.CreateElement('head');
+  FBodyNode:=FDocHandle.CreateElement('body');
+  FRootNode.AppendChild(FHeadNode);
+  FRootNode.AppendChild(FBodyNode);
+  FDocHandle.AppendChild(FRootNode);
+end;
 
 function THtmlTree.CreateText(const AText: String): TDomNode;
 begin
