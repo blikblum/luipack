@@ -153,6 +153,10 @@ function INDEXTOOVERLAYMASK(i : longint) : longint;
 
 procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 
+//clipboard
+
+function CF_UNICODETEXT: TClipboardFormat;
+
 //timer
 
 type

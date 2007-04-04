@@ -281,6 +281,18 @@ begin
   Logger.SendCallStack('Dummy WinAPI Implementaion');
 end;
 
+var
+  CachedUnicodeFormat: TClipboardFormat;
+  
+function CF_UNICODETEXT: TClipboardFormat;
+begin
+  //todo: see what mime type gtk expects for utf16
+  if CachedUnicodeFormat = 0 then
+    CachedUnicodeFormat:= gdk_atom_intern('text/utf16',GdkFalse);
+  Result := CachedUnicodeFormat;
+end;
+
+
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 begin
   Logger.SendCallStack('Dummy WinAPI Implementaion');
