@@ -39,19 +39,13 @@ implementation
 procedure TForm1.ButOpenFileClick(Sender: TObject);
 begin
   if OpenDialog1.Execute then
-  begin
     BinHexViewer.Open(OpenDialog1.FileName);
-  end;
 end;
 
 procedure TForm1.ButChooseFontClick(Sender: TObject);
 begin
-  {.$ifdef Windows}
   if FontDialog1.Execute then
-  begin
     BinHexViewer.Font:=FontDialog1.Font;
-  end;
-  {.$endif}
 end;
 
 procedure TForm1.ChangeMode(Sender: TObject);
