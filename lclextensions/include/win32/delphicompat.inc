@@ -194,6 +194,10 @@ begin
   Result:=Windows.MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
 end;
 
+function CF_UNICODETEXT: TClipboardFormat;
+begin
+  Result:=Windows.CF_UNICODETEXT;
+end;
 
 procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
 var
