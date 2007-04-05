@@ -1,3 +1,3 @@
 
-  LCLIntf, Graphics, gtkdef, gdkmain,
+  LCLIntf, Graphics, gtkdef, gdk,
 
