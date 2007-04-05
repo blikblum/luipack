@@ -163,22 +163,22 @@ begin
   FImgList:=TImageList.Create(nil);
   with FImgList do
   begin
-    AddFromLazarusResource('info');
-    AddFromLazarusResource('error');
-    AddFromLazarusResource('warning');
-    AddFromLazarusResource('value');
-    AddFromLazarusResource('entermethod');
-    AddFromLazarusResource('exitmethod');
-    AddFromLazarusResource('whatisthis');  //conditional
-    AddFromLazarusResource('check');
-    AddFromLazarusResource('strings');
-    AddFromLazarusResource('callstack');
-    AddFromLazarusResource('object');
-    AddFromLazarusResource('error');
-    AddFromLazarusResource('image');
-    AddFromLazarusResource('whatisthis');   //heap
-    AddFromLazarusResource('whatisthis');   //memory
-    AddFromLazarusResource('whatisthis');   //custom data
+    AddLazarusResource('info');
+    AddLazarusResource('error');
+    AddLazarusResource('warning');
+    AddLazarusResource('value');
+    AddLazarusResource('entermethod');
+    AddLazarusResource('exitmethod');
+    AddLazarusResource('whatisthis');  //conditional
+    AddLazarusResource('check');
+    AddLazarusResource('strings');
+    AddLazarusResource('callstack');
+    AddLazarusResource('object');
+    AddLazarusResource('error');
+    AddLazarusResource('image');
+    AddLazarusResource('whatisthis');   //heap
+    AddLazarusResource('whatisthis');   //memory
+    AddLazarusResource('whatisthis');   //custom data
   end;
   Images:=FImgList;
 end;
