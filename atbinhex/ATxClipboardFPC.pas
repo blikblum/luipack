@@ -30,7 +30,7 @@ function SCopyToClipboardW_NT(const S: WideString; DoClear: boolean): boolean;
 var
   DataSize: integer;
 begin
-  DataSize:= Length(S)*2 + 1;
+  DataSize:= (Length(S)+1) * 2;
   if DoClear then
     Clipboard.Clear;
   //CF_UNICODETEXT returns Windows.CF_UNICODETEXT
