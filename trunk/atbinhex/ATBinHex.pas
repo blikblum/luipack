@@ -29,8 +29,8 @@ LCL port: Luiz Americo Pereira Camara
                 
 //{.$define DEBUG_FORM}
                 //Show debug form. Must be commented in release!
+                
 {.$define DEBUG_ATBINHEX}
-{.$define ENABLE_PRINT}
 
 unit ATBinHex;
 
@@ -40,7 +40,9 @@ interface
 uses
   LCLIntf, LCLType, Types, SysUtils, Classes, Controls, Graphics,
   StdCtrls, ExtCtrls,
+  {$ifdef DEBUG_ATBINHEX}
   SharedLogger, IPCChannel,
+  {$endif}
   {$ifdef NOTIF} ATFileNotification, {$endif}
   Menus,
   DelphiCompat;
@@ -304,9 +306,7 @@ type
     procedure Scroll(const APos: Int64; AIndentVert, AIndentHorz: integer);
     procedure SelectAll;
     procedure SelectNone(AFireEvent: boolean = true);
-    {$ifdef ENABLE_PRINT}
     procedure Print(ASelectionOnly: boolean; ACopies: word = 1);
-    {$endif}
     property PosPercent: word read GetPosPercent write SetPosPercent;
     property PosOffset: Int64 read GetPosOffset write SetPosOffset_;
     property SearchCallback: TATSearchCallback read FSearchCallback write FSearchCallback;
@@ -358,9 +358,7 @@ procedure Register;
 implementation
 
 uses
-  {$ifdef ENABLE_PRINT}
   Printers,
-  {$endif}
   Forms,
   {$ifdef DEBUG_FORM} TntStdCtrls, {$endif}
   ATxSProcFPC, ATxSHexFPC, ATxFProcFPC, ATxClipboardFPC, ATViewerMsgFPC;
@@ -1373,20 +1371,16 @@ begin
 
   SetScrollInfo(Handle, SB_HORZ, si, true);
 end;
-{
-procedure TATBinHex.Resize;
-begin
-  //Logger.Send('Resize',Self);
-  inherited;
-  //if not (csLoading in ComponentState) then
-  //  Redraw;
-end;
-}
+
 procedure TATBinHex.Paint;
 begin
+  {$ifdef DEBUG_ATBINHEX}
   Logger.EnterMethod(Self,'Paint');
+  {$endif}
   Canvas.Draw(0, 0, FBitmap);
+  {$ifdef DEBUG_ATBINHEX}
   Logger.ExitMethod(Self,'Paint');
+  {$endif}
 end;
 
 procedure TATBinHex.Click;
@@ -1997,7 +1991,6 @@ end;
 
 procedure TATBinHex.WMEraseBkgnd(var Message: TMessage);
 begin
-  Logger.Send('WMEraseBkgnd');
   Message.Result:= 1;
 end;
 
@@ -2238,7 +2231,6 @@ begin
   end;
 end;
 
-{$ifdef ENABLE_PRINT}
 procedure TATBinHex.Print(ASelectionOnly: boolean; ACopies: word = 1);
 const
   BlockSize = 64*1024;
@@ -2248,18 +2240,17 @@ var
   BytesRead: DWORD;
   SBuffer: string;
   LenAll, Len: Int64;
-  f: TextFile;
+  Written: Integer;
 begin
-  //todo
-
   if ACopies=0 then Inc(ACopies);
-
   Printer.Copies:= ACopies;
-  Printer.Canvas.Font:= Self.Font; //Not ActiveFont! We always use ANSI font here, because Windows
+  
+  //Printer.Canvas.Font:= Self.Font; //Not ActiveFont! We always use ANSI font here, because Windows
                                    //doesn't allow to print by OEM fonts in most cases
                                    //(it substitutes other font instead of given one).
-  Printer.Title:= MsgViewerCaption+': '+FFileName;
 
+  Printer.Title:= MsgViewerCaption+': '+FFileName;
+  Printer.RawMode:= True;
   if ASelectionOnly then
     begin
     PosStart:= FSelStart;
@@ -2272,8 +2263,7 @@ begin
     end;
 
   try
-    AssignPrn(f);
-    Rewrite(f);
+    Printer.BeginDoc;
     try
       repeat
         if not ReadSource(PosStart, @Buffer, BlockSize, BytesRead) then
@@ -2291,17 +2281,16 @@ begin
         if FEncoding=vencOEM then
           SBuffer:= ToANSI(SBuffer);
 
-        Write(f, SBuffer);
+        Printer.Write(SBuffer[1],Length(SBuffer),Written);
 
         Inc(PosStart, BlockSize);
       until (BytesRead<BlockSize) or (LenAll<=BytesRead);
     finally
-      CloseFile(f);
+      Printer.EndDoc;
     end;
   except
   end;
 end;
-{$endif}
 
 procedure TATBinHex.CopyToClipboard(AsHex: boolean = false);
 var

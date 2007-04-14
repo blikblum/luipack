@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 211
+  Left = 372
   Height = 557
-  Top = 150
+  Top = 169
   Width = 719
   HorzScrollBar.Page = 718
   VertScrollBar.Page = 556
@@ -71,6 +71,16 @@ object Form1: TForm1
       Caption = 'Choose Font'
       OnClick = ButChooseFontClick
       TabOrder = 2
+    end
+    object ButPrint: TButton
+      Left = 8
+      Height = 25
+      Top = 277
+      Width = 96
+      BorderSpacing.InnerBorder = 4
+      Caption = 'Print'
+      OnClick = ButPrintClick
+      TabOrder = 3
     end
   end
   object OpenDialog1: TOpenDialog

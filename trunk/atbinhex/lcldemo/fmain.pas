@@ -16,12 +16,14 @@ type
     BinHexViewer: TATBinHex;
     ButOpenFile: TButton;
     ButChooseFont: TButton;
+    ButPrint: TButton;
     FontDialog1: TFontDialog;
     OpenDialog1: TOpenDialog;
     PanelLeft: TPanel;
     RadioGroupMode: TRadioGroup;
     procedure ButChooseFontClick(Sender: TObject);
     procedure ButOpenFileClick(Sender: TObject);
+    procedure ButPrintClick(Sender: TObject);
     procedure ChangeMode(Sender: TObject);
   private
     { private declarations }
@@ -40,6 +42,11 @@ procedure TForm1.ButOpenFileClick(Sender: TObject);
 begin
   if OpenDialog1.Execute then
     BinHexViewer.Open(OpenDialog1.FileName);
+end;
+
+procedure TForm1.ButPrintClick(Sender: TObject);
+begin
+  BinHexViewer.Print(True,1);
 end;
 
 procedure TForm1.ButChooseFontClick(Sender: TObject);
