@@ -1,21 +1,19 @@
 object Form1: TForm1
-  Left = 183
-  Height = 566
-  Top = 76
-  Width = 752
-  HorzScrollBar.Page = 751
-  VertScrollBar.Page = 565
+  Left = 211
+  Height = 557
+  Top = 150
+  Width = 719
+  HorzScrollBar.Page = 718
+  VertScrollBar.Page = 556
   ActiveControl = ButOpenFile
   Caption = 'ATBinHex for LCL demo'
   object BinHexViewer: TATBinHex
     Cursor = crIBeam
     Left = 170
-    Height = 566
-    Width = 582
+    Height = 557
+    Width = 549
     Align = alClient
-    BevelOuter = bvNone
     BorderStyle = bsSingle
-    Caption = 'BinHexViewer'
     Font.Height = -13
     Font.Name = 'Courier New'
     ParentColor = False
@@ -25,7 +23,7 @@ object Form1: TForm1
     FontOEM.Name = 'Terminal'
   end
   object PanelLeft: TPanel
-    Height = 566
+    Height = 557
     Width = 170
     Align = alLeft
     TabOrder = 1

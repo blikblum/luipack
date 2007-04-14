@@ -106,7 +106,7 @@ type
 
   { TATBinHex }
 
-  TATBinHex = class(TPanel)
+  TATBinHex = class(TCustomControl)
   private
     FFileName: WideString;
     FFileHandle: THandle;
@@ -279,7 +279,6 @@ type
     procedure Click; override;
     procedure DblClick; override;
     procedure DoOnResize; override;
-    //procedure Resize; override;
     procedure Paint; override;
     procedure WMGetDlgCode(var Message: TMessage); message WM_GETDLGCODE;
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
@@ -321,6 +320,13 @@ type
     property FileUnicodeFormat: TATUnicodeFormat read FFileUnicodeFmt;
     property FileReadOK: boolean read FFileOK;
   published
+    property Align;
+    property Anchors;
+    property BorderSpacing;
+    property BorderStyle;
+    property Font;
+    property ParentColor;
+    property TabOrder;
     property FontOEM: TFont read FFontOEM write SetFontOEM;
     property Mode: TATBinHexMode read FMode write SetMode default vbmodeText;
     property TextEncoding: TATEncoding read FEncoding write SetEncoding default vencANSI;
@@ -804,11 +810,8 @@ constructor TATBinHex.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   //Init inherited properties
-  Caption:= '';
-  //Width:= 200;
-  //Height:= 150;
-  BevelOuter:= bvNone;
-  BorderStyle:= bsSingle;
+  Width:= 200;
+  Height:= 150;
   Color:= clWindow;
   Cursor:= crIBeam;
   ControlStyle:= ControlStyle + [csOpaque];
