@@ -299,6 +299,12 @@ begin
   Logger.SendCallStack('Dummy WinAPI Implementaion');
 end;
 
+function GetDoubleClickTime: UINT;
+begin
+  //todo: see if gtk has a value. Use Windows default for now
+  Result:=500;
+end;  
+
 var
   CachedUnicodeFormat: TClipboardFormat;
   
