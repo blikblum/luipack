@@ -42,6 +42,8 @@ procedure ILimitMin(var N: integer; Value: integer);
 procedure ILimitMax(var N: integer; Value: integer);
 procedure WLimitMin(var N: word; Value: word);
 procedure WLimitMax(var N: word; Value: word);
+procedure I64LimitMin(var N: Int64; const Value: Int64);
+procedure I64LimitMax(var N: Int64; const Value: Int64);
 
 
 implementation
@@ -361,6 +363,17 @@ begin
   if N>Value then N:= Value;
 end;
 
+procedure I64LimitMin(var N: Int64; const Value: Int64);
+begin
+  if N < Value then
+    N := Value;
+end;
+
+procedure I64LimitMax(var N: Int64; const Value: Int64);
+begin
+  if N > Value then
+    N := Value;
+end;
 
 end.
 
