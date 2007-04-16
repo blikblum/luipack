@@ -41,7 +41,7 @@ end;
 
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
 begin
-  Result:=Windows.InvertRect(hDC, lprc);
+  Result:=Windows.InvertRect(DC, PRect(@lprc)^);
 end;
 
 function GetTextAlign(hDC: HDC): LongWord;
@@ -193,6 +193,12 @@ function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT
 begin
   Result:=Windows.MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
 end;
+
+function GetDoubleClickTime: UINT;
+begin
+  Result:=Windows.GetDoubleClickTime;
+end;
+
 
 function CF_UNICODETEXT: TClipboardFormat;
 begin
