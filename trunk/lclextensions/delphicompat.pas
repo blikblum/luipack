@@ -87,7 +87,7 @@ function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: T
 
 function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5, p6: PInteger; var p7: TSize): BOOL;
 
-function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
+function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
 
 function GetTextAlign(hDC:HDC): LongWord;
 

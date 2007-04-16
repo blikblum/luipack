@@ -72,10 +72,28 @@ begin
   Logger.SendCallStack('Dummy WinAPI Implementaion');
 end;
 
-function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
+function InvertRect(DC: HDC; const lprc: TRect): Boolean;
+var
+  DCOrigin: TPoint;
+  Values: TGdkGCValues;
 begin
-  Result:=False;
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  //todo: see the windows result when rect is invalid
+  Result := GTKWidgetSet.IsValidDC(DC) and (lprc.Bottom > lprc.Top)
+    and (lprc.Right > lprc.Left);
+  if Result then
+  begin
+    with TDeviceContext(DC) do
+    begin
+      DCOrigin := GetDCOffset(TDeviceContext(DC));
+      //todo: see if is necessary store old function
+      gdk_gc_get_values(GC, @Values);
+      gdk_gc_set_function(GC,GDK_INVERT);
+      gdk_draw_rectangle(Drawable,GC,GdkTrue,
+        DCOrigin.X + lprc.Left, DCOrigin.Y + lprc.Top,
+        lprc.Right - lprc.Left, lprc.Bottom - lprc.Top);
+      gdk_gc_set_function(GC,Values.thefunction);
+    end;
+  end;
 end;
 
 function GetTextAlign(hDC:HDC): LongWord;

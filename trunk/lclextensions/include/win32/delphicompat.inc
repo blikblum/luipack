@@ -39,7 +39,7 @@ begin
   Result:=Windows.DrawTextW(hDC,lpString,nCount,lpRect,uFormat);
 end;
 
-function InvertRect(hDC: HDC; var lprc: TRECT): Boolean;
+function InvertRect(DC: HDC; const lprc: TRect): Boolean;
 begin
   Result:=Windows.InvertRect(hDC, lprc);
 end;
