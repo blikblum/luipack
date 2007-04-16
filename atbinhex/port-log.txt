@@ -3,14 +3,15 @@
 * Created include file with mising functions
 * Removed windows specific routines used to open, close and read files
 * Removed windows depedencies from ATxSProc, ATxSHex, ATxFProc, ATxClipboard, ATViewerMsg
-
+* Implement GetFileSize in unix
+* Implement Clipboard
+* Implement Printing
+* Descends  from TCustomControl instead of TPanel
+* Updated to 1.6.0
 
 [Tasks]
-[ ] Implement Selection draw
+[ ] Implement Selection draw in gtk
 [ ] Implement ToAnsi platform independent
-[ ] Implement GetFileSize in unix
-[ ] Implement Clipboard
-[ ] Implement Printing
-
+[ ] Add regular expressions
 
 
