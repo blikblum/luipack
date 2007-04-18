@@ -161,7 +161,7 @@ type
     {$endif}
     procedure AllocBuffer;
     procedure RedrawEmpty;
-    procedure Redraw;
+    procedure Redraw(DoPaintBitmap: Boolean = True);
     function SourceAssigned: Boolean;
     function ReadSource(const APos: Int64; ABuffer: Pointer; ABufferSize: DWORD; var AReadSize: DWORD): Boolean;
     procedure ReadBuffer;
@@ -1078,7 +1078,7 @@ begin
   end;
 end;
 
-procedure TATBinHex.Redraw;
+procedure TATBinHex.Redraw(DoPaintBitmap: Boolean = True);
 var
   Dx: TStringExtent; //TStringExtent is huge, so
                      //this isn't SelectLine local
@@ -1140,7 +1140,11 @@ begin
     HideScrollBar(false);
     HideScrollBar(true);
     RedrawEmpty;
-    Paint;
+    if DoPaintBitmap then
+      Paint;
+    {$ifdef DEBUG_ATBINHEX}
+    Logger.ExitMethod(Self,'Redraw');
+    {$endif}
     Exit;
   end;
 
@@ -1372,7 +1376,8 @@ begin
   //Update scrollbars and force paint
   SetVScrollBar(PageSize);
   SetHScrollBar;
-  Paint;
+  if DoPaintBitmap then
+    Paint;
 
   finally
     Unlock;
@@ -1396,10 +1401,12 @@ begin
      ((not AHorz) and FScrollVertVisible) then
     si.fMask := si.fMask or SIF_DISABLENOSCROLL;
     }
-  si.nMin := 0;
+  //not necessary. FillChar already set all fields to 0
+  {si.nMin := 0;
   si.nMax := 0;
   si.nPage := 0;
   si.nPos := 0;
+  }
   SetScrollInfo(Handle, ScrollTypes[AHorz], si, True);
 end;
 
@@ -1434,7 +1441,7 @@ begin
   FillChar(si, SizeOf(si), 0);
   si.cbSize := SizeOf(si);
   si.fMask := SIF_ALL;
-  si.nMin := 0;
+  //si.nMin := 0;
   si.nMax := Max;
   si.nPage := Page;
   si.nPos := Pos;
@@ -1476,7 +1483,7 @@ begin
   FillChar(si, SizeOf(si), 0);
   si.cbSize := SizeOf(si);
   si.fMask := SIF_ALL;
-  si.nMin := 0;
+  //si.nMin := 0;
   si.nMax := Max;
   si.nPage := Page;
   si.nPos := Pos;
@@ -1538,17 +1545,22 @@ end;
 
 procedure TATBinHex.DoOnResize;
 begin
+  {$ifdef DEBUG_ATBINHEX}
+  Logger.EnterMethod(Self,'DoOnResize');
+  {$endif}
   //there's a problem redrawing in Resize under LCL
   inherited;
   if HandleAllocated then
-    Redraw;
+    Redraw(False);
+  {$ifdef DEBUG_ATBINHEX}
+  Logger.ExitMethod(Self,'DoOnResize');
+  {$endif}
 end;
 
 procedure TATBinHex.ContextPopup(Sender: TObject; MousePos: TPoint; var Handled: boolean);
 begin
   FMousePopupPos:= MousePos;
 end;
-
 
 function TATBinHex.SourceAssigned: boolean;
 begin
