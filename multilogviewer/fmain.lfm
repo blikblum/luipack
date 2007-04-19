@@ -61,7 +61,7 @@ object frmMain: TfrmMain
         Top = 18
         Width = 599
         Align = alClient
-        PageIndex = 2
+        PageIndex = 1
         ShowTabs = False
         object pageNull: TPage
           Caption = 'pageNull'
@@ -69,8 +69,8 @@ object frmMain: TfrmMain
         object pageText: TPage
           Caption = 'pageText'
           object memoViewer: TMemo
-            Height = 131
-            Width = 507
+            Height = 149
+            Width = 591
             Align = alClient
             Lines.Strings = (
               ''
@@ -143,9 +143,7 @@ object frmMain: TfrmMain
             Top = 14
             Width = 591
             Align = alClient
-            BevelOuter = bvNone
             BorderStyle = bsSingle
-            Caption = 'BinHexViewer'
             Font.Height = -13
             Font.Name = 'Courier New'
             ParentColor = False

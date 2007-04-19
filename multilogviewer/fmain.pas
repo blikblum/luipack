@@ -95,7 +95,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ImgViewerPaint(Sender: TObject);
-    procedure ImgViewerResize(Sender: TObject);
     procedure nbWatchesPageChanged(Sender: TObject);
     procedure QuitApplication(Sender: TObject);
     procedure vtreeMessagesFocusChanged(Sender: TBaseVirtualTree;
@@ -208,6 +207,8 @@ begin
   //memoViewer.Lines.Clear;
   nbViewer.ActivePageComponent:=pageNull;
   FMessageCount:=0;
+  FLastNode:=nil;
+  FLastParent:=nil;
 end;
 
 procedure TfrmMain.butFilterClick(Sender: TObject);
@@ -253,11 +254,6 @@ procedure TfrmMain.ImgViewerPaint(Sender: TObject);
 begin
   //with ImgViewer.Picture.Bitmap do
   //  ImgViewer.Canvas.DrawFocusRect(Rect(0,0,Width,Height));
-end;
-
-procedure TfrmMain.ImgViewerResize(Sender: TObject);
-begin
-
 end;
 
 procedure TfrmMain.nbWatchesPageChanged(Sender: TObject);
