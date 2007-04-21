@@ -1,0 +1,1 @@
+{$i ../gtk/lclext.inc}
