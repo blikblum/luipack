@@ -505,6 +505,9 @@ end;
 
 procedure InvertRect(Canvas: TCanvas; const Rect: TRect);
 begin
+  {$ifdef DEBUG_ATBINHEX}
+  Logger.Send('InvertRect',Rect);
+  {$endif}
   DelphiCompat.InvertRect(Canvas.Handle, Rect);
 end;
 
@@ -572,6 +575,9 @@ begin
       if Str[i] = #9 then
         Inc(j, TabSize - 1);
       Ext[i] := Dx^[j];
+      {$ifdef DEBUG_ATBINHEX}
+      Logger.Send('StringExtent Ext[%d]: %d',[i,Ext[i]]);
+      {$endif}
       end;
     end;
 
@@ -2600,10 +2606,15 @@ var
 begin
   {$ifdef DEBUG_ATBINHEX}
   Logger.EnterMethod('MouseMoveAction');
+  Logger.Send('FMouseStart',FMouseStart);
+  Logger.Send('Ax/Ay',Point(Ax,Ay));
   {$endif}
   APosStart:= FMouseStart;
   if APosStart<0 then Exit;
   APosEnd:= MousePosition(AX, AY);
+  {$ifdef DEBUG_ATBINHEX}
+  Logger.Send('APosEnd',FMouseStart);
+  {$endif}
   if APosEnd<0 then Exit;
   if APosStart>APosEnd then
     SwapInt64(APosStart, APosEnd);
