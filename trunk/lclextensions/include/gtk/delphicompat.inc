@@ -59,17 +59,75 @@ begin
   Logger.Send('Rect',TempRect);
 end;
 
-function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5,
-  p6: PInteger; var p7: TSize): BOOL;
+function GetTextExtentExPoint(DC: HDC; Str: PChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+var
+  lbearing, rbearing, width, ascent,descent: LongInt;
+  UseFont : PGDKFont;
+  IsDBCSFont: Boolean;
+  NewCount,Accumulator,i: Integer;
 begin
-  {$INFO Implement GetTextExtentExPoint}
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  //based in lcl code
+  Result := GTKWidgetSet.IsValidDC(DC);
+  if Result then
+  with TDeviceContext(DC) do
+  begin
+    if (CurrentFont = nil) or (CurrentFont^.GDIFontObject = nil)
+    then begin
+      UseFont := GTKWidgetSet.GetDefaultGtkFont(false);
+    end
+    else begin
+      UseFont := CurrentFont^.GDIFontObject;
+    end;
+    If UseFont = nil then
+      DebugLn('WARNING: [TGtkWidgetSet.GetTextExtentPoint] Missing font')
+    else begin
+      descent:=0;
+      {
+      UpdateDCTextMetric(TDeviceContext(DC));
+      IsDBCSFont:=TDeviceContext(DC).DCTextMetric.IsDoubleByteChar;
+
+      if IsDBCSFont then begin
+        NewCount:=Count*2;
+        if FExtUTF8OutCacheSize<NewCount then begin
+          ReAllocMem(FExtUTF8OutCache,NewCount);
+          FExtUTF8OutCacheSize:=NewCount;
+        end;
+        NewCount:=UTF8ToDoubleByte(Str,Count,FExtUTF8OutCache)*2;
+        gdk_text_extents(UseFont, FExtUTF8OutCache, NewCount,
+                         @lbearing, @rBearing, @width, @ascent, @descent);
+      end else begin
+        gdk_text_extents(UseFont, Str, Count,
+                         @lbearing, @rBearing, @width, @ascent, @descent);
+      end;
+      }
+      gdk_text_extents(UseFont, Str, Count,@lbearing, @rBearing, @width, @ascent, @descent);
+      Size.cX := Width;
+      Size.cY := ascent+descent;
+      if PartialWidths <> nil then
+      begin
+        Accumulator:=0;
+        for i:= 0 to Count - 1 do
+        begin
+          Inc(Accumulator,gdk_char_width(UseFont,(Str+i)^));
+          PartialWidths[i]:=Accumulator;
+        end;
+      end;
+    end;
+  end;
 end;
 
-function GetTextExtentExPointW(DC: HDC; p2: PWideChar; p3, p4: Integer; p5,
-  p6: PInteger; var p7: TSize): BOOL;
+function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+var
+  TempStr: UTF8String;
 begin
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  Logger.Send('GetTextExtentExPointW');
+  TempStr:=UTF8Encode(WideString(Str));
+  Result:=DelphiCompat.GetTextExtentExPoint(DC, PChar(TempStr),
+  Length(TempStr), MaxWidth, MaxCount, PartialWidths,Size);
 end;
 
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
