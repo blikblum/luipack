@@ -59,6 +59,7 @@ begin
   Logger.Send('Rect',TempRect);
 end;
 
+{$ifndef GTK2}
 function GetTextExtentExPoint(DC: HDC; Str: PChar;
   Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
   var Size: TSize): BOOL;
@@ -117,6 +118,8 @@ begin
     end;
   end;
 end;
+{$endif}
+
 
 function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
   Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
@@ -146,10 +149,14 @@ begin
       //todo: see if is necessary store old function
       gdk_gc_get_values(GC, @Values);
       gdk_gc_set_function(GC,GDK_INVERT);
-      gdk_draw_rectangle(Drawable,GC,GdkTrue,
+      gdk_draw_rectangle(Drawable,GC,1,
         DCOrigin.X + lprc.Left, DCOrigin.Y + lprc.Top,
         lprc.Right - lprc.Left, lprc.Bottom - lprc.Top);
+      {$ifdef GTK2}
+      gdk_gc_set_function(GC,Values._function);
+      {$else}
       gdk_gc_set_function(GC,Values.thefunction);
+      {$endif}
     end;
   end;
 end;
