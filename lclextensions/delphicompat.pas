@@ -121,7 +121,7 @@ function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 
 //misc
 
-function CopyImage(hImage:THANDLE; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
+function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 
 function SystemParametersInfo(uiAction, uiParam:LongWord; pvParam:Pointer; fWinIni:LongWord):Boolean;
 

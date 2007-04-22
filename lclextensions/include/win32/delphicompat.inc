@@ -21,16 +21,18 @@ begin
   Result:=Windows.GetTextExtentPointW(DC, Str, Count, Size);
 end;
 
-function GetTextExtentExPoint(DC: HDC; p2: PChar; p3, p4: Integer; p5,
-  p6: PInteger; var p7: TSize): BOOL;
+function GetTextExtentExPoint(DC: HDC; Str: PChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
 begin
-  Result:=Windows.GetTextExtentExPoint(DC, p2, p3, p4, p5, p6,  p7);
+  Result:=Windows.GetTextExtentExPoint(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
 end;
 
-function GetTextExtentExPointW(DC: HDC; p2: PWideChar; p3, p4: Integer; p5,
-  p6: PInteger; var p7: TSize): BOOL;
+function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
 begin
-  Result:=Windows.GetTextExtentExPointW(DC, p2, p3, p4, p5, p6,  p7);
+  Result:=Windows.GetTextExtentExPointW(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
 end;
 
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer;
