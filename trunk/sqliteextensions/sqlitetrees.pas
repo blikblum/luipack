@@ -33,7 +33,7 @@ type
     procedure GetChild(Parent: Integer);
   public
     Data: Pointer;
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
     procedure Run (Parent: Integer; Recurse: Boolean = True); virtual; abstract;
     property TableName: String read FTableName write FTableName;
     property FieldNames: String read FFieldNames write FFieldNames;
@@ -53,6 +53,7 @@ type
     FDataset: TCustomSqliteDataset;
     FIndexField: TField;
   protected
+    property IndexField: TField read FIndexField;
     procedure DoBrowseRecords(Parent: Integer; ChildList: TFpList); override;
   public
     procedure Run (Parent: Integer; Recurse: Boolean = True); override;
@@ -68,9 +69,10 @@ type
     FIndexField: Integer;
     FReader: TSqlite3DataReader;
   protected
+    property IndexField: Integer read FIndexField;
     procedure DoBrowseRecords(Parent: Integer; ChildList: TFpList); override;
   public
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Run (Parent: Integer; Recurse: Boolean = True); override;
     property Connection: TSqlite3Connection read FConnection write FConnection;
