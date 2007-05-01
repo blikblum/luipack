@@ -89,7 +89,7 @@ end;
 
 procedure TSqlite3Connection.SetHandle(AValue: Pointer);
 begin
-  if (FHandle <> AValue) and (FHandle <> nil) then
+  if FHandle <> AValue then
   begin
     Close;
     FHandle:= AValue;
