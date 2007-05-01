@@ -22,12 +22,20 @@
 "/>
     <License Value="Mozilla Public License Version 1.1"/>
     <Version Major="1" Minor="6"/>
-    <Files Count="1">
+    <Files Count="3">
       <Item1>
         <Filename Value="ATBinHex.pas"/>
-        <HasRegisterProc Value="True"/>
         <UnitName Value="ATBinHex"/>
       </Item1>
+      <Item2>
+        <Filename Value="registeratbinhex.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="registeratbinhex"/>
+      </Item2>
+      <Item3>
+        <Filename Value="ideicons.lrs"/>
+        <Type Value="LRS"/>
+      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
