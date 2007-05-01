@@ -366,8 +366,6 @@ type
 
 function TextIncreaseFontSize(AFont: TFont; ACanvas: TCanvas; AIncrement: Boolean): Boolean;
 
-procedure Register;
-
 implementation
 
 uses
@@ -3255,14 +3253,6 @@ begin
   ILimitMin(AValue, cMaxClipboardDataSizeMbMin);
   ILimitMax(AValue, MaxInt div (1024 * 1024));
   FMaxClipboardDataSizeMb := AValue;
-end;
-
-
-{ Registration }
-
-procedure Register;
-begin
-  RegisterComponents('Samples', [TATBinHex]);
 end;
 
 initialization

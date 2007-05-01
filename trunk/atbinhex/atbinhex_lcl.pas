@@ -7,13 +7,13 @@ unit atbinhex_lcl;
 interface
 
 uses
-  ATBinHex, LazarusPackageIntf; 
+  ATBinHex, registeratbinhex, LazarusPackageIntf; 
 
 implementation
 
 procedure Register; 
 begin
-  RegisterUnit('ATBinHex', @ATBinHex.Register); 
+  RegisterUnit('registeratbinhex', @registeratbinhex.Register); 
 end; 
 
 initialization
