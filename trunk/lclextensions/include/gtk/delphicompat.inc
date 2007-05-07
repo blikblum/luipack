@@ -220,15 +220,12 @@ function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
 var
   Log: TLogBrush;
 begin
-  //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
-  //dummy implementation
   with Log do
   begin
-    lbColor:=COLORREF(clBlack);
-    lbHatch:=0;
-    lbStyle:=BS_SOLID;
-    Result:=CreateBrushIndirect(Log);
+    lbColor := 0;
+    lbHatch := hbmp;
+    lbStyle := BS_PATTERN;
+    Result := CreateBrushIndirect(Log);
   end;
 end;
 
