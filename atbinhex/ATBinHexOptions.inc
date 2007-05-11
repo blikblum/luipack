@@ -18,7 +18,7 @@
                 
 //lcl
 
-{$define DEBUG_ATBINHEX}
+{.$define DEBUG_ATBINHEX}
 {$ifdef Windows}
   {$define EnableSelection}
 {$endif}
