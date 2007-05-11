@@ -1195,7 +1195,10 @@ begin
             PosTextX := cPositionX0;
             PosTextY := cPositionY0 + (i - 1) * FontHeight(Canvas);
             StringOut(Canvas, PosTextX - FHViewPos, PosTextY, LineText, FTabSize, GetAnsiDecode);
+            //Selecting text under gtk is crash prone
+            {$ifdef EnableSelection}
             SelectLine(LineText, PosTextX - FHViewPos, PosTextY, Pos);
+            {$endif}
             Strings.Add(LineText, PosTextX - FHViewPos, PosTextY, Pos);
 
             //Move to next line
@@ -1259,8 +1262,9 @@ begin
 
                 LineW := LineA;
                 StringOut(Canvas, X - FHViewPos, Y, LineW, FTabSize, GetAnsiDecode);
+                {$ifdef EnableSelection}
                 SelectLine(LineW, X - FHViewPos, Y, FBufferPos + Pos + j, True);
-
+                {$endif}
                 Inc(X, 3 * CellWidth);
                 if j = (FTextWidthHex div 2 - 1) then
                   Inc(X, CellWidth); //Space
@@ -1287,7 +1291,9 @@ begin
             PosTextX := X;
             PosTextY := Y;
             StringOut(Canvas, PosTextX - FHViewPos, PosTextY, LineText, FTabSize, GetAnsiDecode);
+            {$ifdef EnableSelection}
             SelectLine(LineText, PosTextX - FHViewPos, PosTextY, FBufferPos + Pos);
+            {$endif}
             Strings.Add(LineText, PosTextX - FHViewPos, PosTextY, FBufferPos + Pos);
 
             //Draw lines
@@ -1335,7 +1341,9 @@ begin
             PosTextX := cPositionX0;
             PosTextY := cPositionY0 + (i - 1) * FontHeight(Canvas);
             StringOut(Canvas, PosTextX - FHViewPos, PosTextY, LineText, FTabSize, GetAnsiDecode);
+            {$ifdef EnableSelection}
             SelectLine(LineText, PosTextX - FHViewPos, PosTextY, FBufferPos + Pos);
+            {$endif}
             Strings.Add(LineText, PosTextX - FHViewPos, PosTextY, FBufferPos + Pos);
           end;
 
@@ -2537,8 +2545,12 @@ end;
 
 function TATBinHex.MousePosition(AX, AY: integer): Int64;
 begin
+  {$ifdef EnableSelection}
   Result := TStrPositions(FStrings).GetPosFromCoord(
     FBitmap.Canvas, AX, AY, FTabSize, GetAnsiDecode);
+  {$else}
+  Result := -1;
+  {$endif}
 end;
 
 procedure TATBinHex.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
