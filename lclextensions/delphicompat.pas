@@ -36,6 +36,7 @@ const
   WM_HSCROLL = LM_HSCROLL;
   WM_CHAR = LM_CHAR;
   WM_KEYDOWN = LM_KEYDOWN;
+  WM_KEYUP = LM_KEYUP;
   WM_KILLFOCUS = LM_KILLFOCUS;
   
   //Misc Constants
@@ -66,6 +67,7 @@ type
   TWMVScroll = TLMVScroll;
   TWMChar = TLMChar;
   TWMKeyDown = TLMKeyDown;
+  TWMKeyUp = TLMKeyUp;
   TWMKillFocus = TLMKillFocus;
   
 //Unicode functions
