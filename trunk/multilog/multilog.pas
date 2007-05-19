@@ -117,14 +117,15 @@ type
   TLogger = class
   private
     FMaxStackCount: Integer;
-    FChannels:TChannelList;
+    FChannels: TChannelList;
     FLogStack: TStrings;
     FCheckList: TStrings;
+    FCounterList: TStrings;
     FOnCustomData: TCustomDataNotify;
     FLastActiveClasses: TDebugClasses;
     procedure GetCallStack(AStream:TStream);
-    procedure SetActive(AValue: Boolean);
-    function GetActive: Boolean;
+    procedure SetEnabled(AValue: Boolean);
+    function GetEnabled: Boolean;
     procedure SetMaxStackCount(const AValue: Integer);
   protected
     procedure SendStream(AMsgType: Integer;const AText:String; AStream: TStream);
@@ -197,6 +198,13 @@ type
     procedure AddCheckPoint(Classes: TDebugClasses);
     procedure AddCheckPoint(const CheckName: String);
     procedure AddCheckPoint(Classes: TDebugClasses; const CheckName: String);
+    procedure IncCounter(const CounterName: String);
+    procedure IncCounter(Classes: TDebugClasses; const CounterName: String);
+    procedure DecCounter(const CounterName: String);
+    procedure DecCounter(Classes: TDebugClasses; const CounterName: String);
+    procedure ResetCounter(const CounterName: String);
+    procedure ResetCounter(Classes: TDebugClasses; const CounterName: String);
+    function GetCounter(const CounterName: String): Integer;
     procedure ResetCheckPoint;
     procedure ResetCheckPoint(Classes: TDebugClasses);
     procedure ResetCheckPoint(const CheckName: String);
@@ -219,7 +227,7 @@ type
     procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Double);
     procedure Watch(const AText: String; AValue: Boolean); //inline;
     procedure Watch(Classes: TDebugClasses; const AText: String; AValue: Boolean);
-    property Active: Boolean read GetActive write SetActive;
+    property Enabled: Boolean read GetEnabled write SetEnabled;
     property Channels: TChannelList read FChannels;
     property LogStack: TStrings read FLogStack;
     property MaxStackCount: Integer read FMaxStackCount write SetMaxStackCount;
@@ -292,23 +300,23 @@ begin
    end;
 end;
 
-procedure TLogger.SetActive(AValue: Boolean);
+procedure TLogger.SetEnabled(AValue: Boolean);
 begin
   if AValue then
   begin
     if ActiveClasses = [] then
-      ActiveClasses:= FLastActiveClasses;
+      ActiveClasses := FLastActiveClasses;
   end
   else
   begin
-    FLastActiveClasses:=ActiveClasses;
-    ActiveClasses:=[];
+    FLastActiveClasses := ActiveClasses;
+    ActiveClasses := [];
   end;
 end;
 
-function TLogger.GetActive: Boolean;
+function TLogger.GetEnabled: Boolean;
 begin
-  Result:=ActiveClasses<>[];
+  Result:=ActiveClasses <> [];
 end;
 
 procedure TLogger.SendStream(AMsgType: Integer; const AText: String;
@@ -356,12 +364,13 @@ end;
 
 constructor TLogger.Create;
 begin
-  FChannels:=TChannelList.Create;
-  FMaxStackCount:=20;
-  FLogStack:=TStringList.Create;
-  FCheckList:=TStringList.Create;
-  ActiveClasses:=[0];
-  DefaultClasses:=[0];
+  FChannels := TChannelList.Create;
+  FMaxStackCount := 20;
+  FLogStack := TStringList.Create;
+  FCheckList := TStringList.Create;
+  FCounterList := TStringList.Create;
+  ActiveClasses := [0];
+  DefaultClasses := [0];
 end;
 
 destructor TLogger.Destroy;
@@ -774,6 +783,83 @@ begin
     j:=0;
   end;
   SendStream(ltCheckpoint,CheckName+' #'+IntToStr(j),nil);
+end;
+
+procedure TLogger.IncCounter(const CounterName: String);
+begin
+  IncCounter(DefaultClasses,CounterName);
+end;
+
+procedure TLogger.IncCounter(Classes: TDebugClasses; const CounterName: String
+  );
+var
+  i, j: Integer;
+begin
+  if Classes * ActiveClasses = [] then Exit;
+  i := FCounterList.IndexOf(CounterName);
+  if i <> -1 then
+  begin
+    j := PtrInt(FCounterList.Objects[i]) + 1;
+    FCounterList.Objects[i] := TObject(j);
+  end
+  else
+  begin
+    FCounterList.AddObject(CounterName, TObject(1));
+    j := 1;
+  end;
+  SendStream(ltWatch,CounterName+'='+IntToStr(j),nil);
+end;
+
+procedure TLogger.DecCounter(const CounterName: String);
+begin
+  DecCounter(DefaultClasses,CounterName);
+end;
+
+procedure TLogger.DecCounter(Classes: TDebugClasses; const CounterName: String
+  );
+var
+  i, j: Integer;
+begin
+  if Classes * ActiveClasses = [] then Exit;
+  i := FCounterList.IndexOf(CounterName);
+  if i <> -1 then
+  begin
+    j := PtrInt(FCounterList.Objects[i]) - 1;
+    FCounterList.Objects[i] := TObject(j);
+  end
+  else
+  begin
+    FCounterList.AddObject(CounterName, TObject(-1));
+    j := -1;
+  end;
+  SendStream(ltWatch,CounterName+'='+IntToStr(j),nil);
+end;
+
+procedure TLogger.ResetCounter(const CounterName: String);
+begin
+  ResetCounter(DefaultClasses,CounterName);
+end;
+
+procedure TLogger.ResetCounter(Classes: TDebugClasses; const CounterName: String
+  );
+var
+  i: Integer;
+begin
+  if Classes * ActiveClasses = [] then Exit;
+  i := FCounterList.IndexOf(CounterName);
+  if i <> -1 then
+    FCounterList.Objects[i] := TObject(0);
+end;
+
+function TLogger.GetCounter(const CounterName: String): Integer;
+var
+  i: Integer;
+begin
+  i := FCounterList.IndexOf(CounterName);
+  if i <> -1 then
+    Result := PtrInt(FCounterList.Objects[i])
+  else
+    Result := 0;
 end;
 
 procedure TLogger.ResetCheckPoint;
