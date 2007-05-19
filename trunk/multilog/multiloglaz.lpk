@@ -3,6 +3,7 @@
   <Package Version="2">
     <PathDelim Value="\"/>
     <Name Value="multiloglaz"/>
+    <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="5"/>
       <PathDelim Value="\"/>
@@ -13,11 +14,10 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="Multilog package
+    <Description Value="Multilog provides an easy way to use log messages in a fpc application"/>
+    <License Value="Modified LGPL
 "/>
-    <License Value="LGPL
-"/>
-    <Version Minor="1"/>
+    <Version Minor="4"/>
     <Files Count="5">
       <Item1>
         <Filename Value="multilog.pas"/>
@@ -41,6 +41,7 @@
       </Item4>
       <Item5>
         <Filename Value="multiloglcl.pas"/>
+        <UnitName Value="multiloglcl"/>
       </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>
