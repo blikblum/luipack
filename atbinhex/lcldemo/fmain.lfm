@@ -1,12 +1,14 @@
 object Form1: TForm1
-  Left = 372
+  Left = 285
   Height = 557
-  Top = 169
+  Top = 243
   Width = 719
   HorzScrollBar.Page = 718
   VertScrollBar.Page = 556
   ActiveControl = ButOpenFile
   Caption = 'ATBinHex for LCL demo'
+  ClientHeight = 557
+  ClientWidth = 719
   object BinHexViewer: TATBinHex
     Cursor = crIBeam
     Left = 170
@@ -26,12 +28,14 @@ object Form1: TForm1
     Height = 557
     Width = 170
     Align = alLeft
+    ClientHeight = 557
+    ClientWidth = 170
     TabOrder = 1
     object ButOpenFile: TButton
       Left = 8
       Height = 25
       Top = 8
-      Width = 96
+      Width = 104
       BorderSpacing.InnerBorder = 4
       Caption = 'Open File'
       OnClick = ButOpenFileClick
@@ -66,7 +70,7 @@ object Form1: TForm1
       Left = 8
       Height = 25
       Top = 48
-      Width = 96
+      Width = 104
       BorderSpacing.InnerBorder = 4
       Caption = 'Choose Font'
       OnClick = ButChooseFontClick
@@ -76,7 +80,7 @@ object Form1: TForm1
       Left = 8
       Height = 25
       Top = 277
-      Width = 96
+      Width = 104
       BorderSpacing.InnerBorder = 4
       Caption = 'Print'
       OnClick = ButPrintClick
@@ -85,7 +89,7 @@ object Form1: TForm1
   end
   object OpenDialog1: TOpenDialog
     Title = 'Open existing file'
-    Filter = 'Text Files|*.txt|All|*.*'
+    Filter = 'All|*.*|Text Files|*.txt'
     FilterIndex = 0
     left = 80
     top = 88
