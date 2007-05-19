@@ -378,6 +378,7 @@ begin
   FChannels.Destroy;
   FLogStack.Destroy;
   FCheckList.Destroy;
+  FCounterList.Destroy;
 end;
 
 function TLogger.CalledBy(const AMethodName: String): Boolean;
