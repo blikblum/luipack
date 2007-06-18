@@ -65,11 +65,28 @@ const
   
   //drawedge constants
   EDGE_SUNKEN = 10;
-  BF_RECT = 15;
+  //BF_RECT = 15;
   BF_ADJUST = 8192;
+  //BDR_RAISEDINNER =
+  //BF_MIDDLE =
   
   //systemparametersinfo
   SPI_GETWORKAREA = 48;
+  
+  { EnumObjects, GetCurrentObject, GetObjectType  }
+  OBJ_BRUSH = 2;
+  OBJ_PEN = 1;
+  OBJ_PAL = 5;
+  OBJ_FONT = 6;
+  OBJ_BITMAP = 7;
+  OBJ_EXTPEN = 11;
+  OBJ_REGION = 8;
+  OBJ_DC = 3;
+  OBJ_MEMDC = 10;
+  OBJ_METAFILE = 9;
+  OBJ_METADC = 4;
+  OBJ_ENHMETAFILE = 13;
+  OBJ_ENHMETADC = 12;
   
 type
   //TWM* types
@@ -87,6 +104,8 @@ function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
   Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
 
 function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
+
+function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
 
 function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
 
