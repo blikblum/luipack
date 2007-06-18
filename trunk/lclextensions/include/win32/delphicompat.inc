@@ -45,6 +45,11 @@ begin
   Result:=Windows.TextOutW(DC,X,Y,Str,Count);
 end;
 
+function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
+begin
+  Result := Windows.GetCurrentObject(hdc, uObjectType);
+end;
+
 function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
 begin
   Result:=Windows.GetTextExtentPointW(DC, Str, Count, Size);
