@@ -51,6 +51,21 @@ begin
   TextOut(DC,X,Y,PChar(TempStr),Length(TempStr));
 end;
 
+function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
+begin
+  Result := 0;
+  if GTKWidgetSet.IsValidDC(hdc) then
+  with TDeviceContext(hdc) do
+  begin
+    case uObjectType of
+      OBJ_BITMAP: Result := HGDIOBJ(CurrentBitmap);
+      OBJ_BRUSH: Result := HGDIOBJ(CurrentBrush);
+      OBJ_FONT: Result := HGDIOBJ(CurrentFont);
+      OBJ_PEN: Result := HGDIOBJ(CurrentPen);
+    end;
+  end;
+end;
+
 function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
 var
   TempStr: UTF8String;
@@ -264,8 +279,10 @@ end;
 
 function GetBkColor(DC:HDC):COLORREF;
 begin
-  //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  if GTKWidgetSet.IsValidDC(DC) then
+    Result := TDeviceContext(DC).CurrentBackColor.ColorRef
+  else
+    Result := CLR_INVALID;
 end;
 
 
