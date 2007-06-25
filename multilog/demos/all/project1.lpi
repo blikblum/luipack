@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -51,6 +51,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="treeviewchannel"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="..\..\winipc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="winipc"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

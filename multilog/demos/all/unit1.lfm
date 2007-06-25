@@ -1,5 +1,5 @@
 object Form1: TForm1
-  Left = 240
+  Left = 209
   Height = 359
   Top = 288
   Width = 807
@@ -7,6 +7,8 @@ object Form1: TForm1
   VertScrollBar.Page = 358
   ActiveControl = LogTreeView1
   Caption = 'Test Multilog'
+  ClientHeight = 359
+  ClientWidth = 807
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object LogTreeView1: TLogTreeView
@@ -24,8 +26,11 @@ object Form1: TForm1
     Width = 459
     Align = alLeft
     PageIndex = 0
+    TabOrder = 1
     object pageGeneral: TPage
       Caption = 'General'
+      ClientWidth = 451
+      ClientHeight = 333
       object butClear: TButton
         Left = 12
         Height = 27
@@ -116,6 +121,8 @@ object Form1: TForm1
     end
     object pageVariables: TPage
       Caption = 'Variables'
+      ClientWidth = 451
+      ClientHeight = 333
       object editString: TEdit
         Left = 100
         Height = 23
@@ -185,6 +192,7 @@ object Form1: TForm1
         Top = 190
         Width = 100
         AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        ItemHeight = 13
         ItemIndex = 0
         Items.Strings = (
           'False'
@@ -215,12 +223,15 @@ object Form1: TForm1
     end
     object pageMethods: TPage
       Caption = 'Method Tracking'
+      ClientWidth = 451
+      ClientHeight = 333
       object comboEnterMethod: TComboBox
         Left = 116
         Height = 21
         Top = 34
         Width = 164
         AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        ItemHeight = 13
         MaxLength = 0
         TabOrder = 0
       end
@@ -272,6 +283,8 @@ object Form1: TForm1
     end
     object pageSpecialized: TPage
       Caption = 'Specialized Info'
+      ClientWidth = 451
+      ClientHeight = 333
       object butCallStack: TButton
         Left = 35
         Height = 25
@@ -325,6 +338,8 @@ object Form1: TForm1
     end
     object pageWatches: TPage
       Caption = 'Watches/CheckPoints'
+      ClientWidth = 451
+      ClientHeight = 333
       object butWatchInteger: TButton
         Left = 20
         Height = 25
@@ -389,6 +404,8 @@ object Form1: TForm1
     end
     object PageBitmap: TPage
       Caption = 'Bitmap'
+      ClientWidth = 451
+      ClientHeight = 333
       object Image1: TImage
         Left = 12
         Height = 100
