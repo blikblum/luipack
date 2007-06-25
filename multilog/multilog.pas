@@ -264,6 +264,7 @@ end;
 { TLogger }
 
 procedure TLogger.GetCallStack(AStream: TStream);
+{$ifdef fpc}
 var
   i : Longint;
   prevbp : Pointer;
@@ -271,6 +272,7 @@ var
   caller_addr,
   bp : Pointer;
   S:String;
+{$endif}
 begin
   {$ifdef fpc}
   //routine adapted from fpc source
@@ -556,19 +558,18 @@ var
   AStream: TStream;
 begin
   if Classes * ActiveClasses = [] then Exit;
-  TempStr:=AText+' (';
+  AStream := nil;
+  TempStr := AText+' (';
   if AObject <> nil then
   begin
     if AObject is TComponent then
     begin
-      TempStr:= TempStr+ ('"'+TComponent(AObject).Name+'"/');
-      AStream:=TMemoryStream.Create;
+      TempStr := TempStr+ ('"'+TComponent(AObject).Name+'"/');
+      AStream := TMemoryStream.Create;
       AStream.WriteComponent(TComponent(AObject));
     end;
-    TempStr:=TempStr+(AObject.ClassName+'/');
-  end
-  else
-    AStream:=nil;	
+    TempStr := TempStr+(AObject.ClassName+'/');
+  end;
   TempStr := TempStr+('$'+IntToHex(PtrInt(AObject),SizeOf(PtrInt)*2)+')');
   //SendStream free AStream
   SendStream(ltObject,TempStr,AStream);
@@ -610,10 +611,12 @@ end;
 
 procedure TLogger.SendException(Classes: TDebugClasses; const AText: String;
   AException: Exception);
+{$ifdef fpc}
 var
   i: Integer;
   Frames: PPointer;
   S:String;
+{$endif}
 begin
   {$ifdef fpc}
   if Classes * ActiveClasses = [] then Exit;
@@ -633,8 +636,10 @@ begin
 end;
 
 procedure TLogger.SendHeapInfo(Classes: TDebugClasses; const AText: String);
+{$ifdef fpc}
 var
   S: String;
+{$endif}
 begin
   {$ifdef fpc}
   if Classes * ActiveClasses = [] then Exit;

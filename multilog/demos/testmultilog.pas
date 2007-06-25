@@ -1,6 +1,7 @@
 program testmultilog;
-
+{$ifdef fpc}
 {$mode objfpc}{$H+}
+{$endif}
 
 uses
   Classes, SysUtils
@@ -14,7 +15,7 @@ begin
     Channels.Add(TFileChannel.Create('test.log'));
     Channels.Add(TIPCChannel.Create);
     ActiveClasses:=[0,1];
-    DefaultClass:=1;
+    DefaultClasses:= [1];
     Send('An empty StringList',AList);
     Send('A Text Message');
     Send('Another Text Message');   
@@ -30,16 +31,16 @@ begin
     Send('AText inside DoIt');
     SendWarning('A Warning');
     Send('A String','sadjfgadsfbmsandfb');
-    Send('AInteger',4957);
+    Send('AInteger',Integer(4957));
     Send('A Boolean',True);
     SendCallStack('A CallStack example');
     ExitMethod('DoIt');
     Send('A StringList',AList);
-    DefaultClass:=2;
+    DefaultClasses:=[2];
     Send('This Text Should NOT be logged');
-    Send(1,'This Text Should be logged');
+    Send([1],'This Text Should be logged');
     ActiveClasses:=[0];
-    Send(1,'But This Text Should NOT');
+    Send([1],'But This Text Should NOT');
   end;
   AList.Destroy;
 end.

@@ -1,6 +1,8 @@
 unit sharedloggerlcl;
 
+{$ifdef fpc}
 {$mode objfpc}{$H+}
+{$endif}
 
 interface
 
