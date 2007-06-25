@@ -16,13 +16,14 @@ unit ipcchannel;
   along with this library; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-
+{$ifdef fpc}
 {$mode objfpc}{$H+}
+{$endif}
 
 interface
 
 uses
-  Classes, SysUtils,simpleipc,multilog;
+  Classes, SysUtils, {$ifdef fpc}simpleipc{$else}winipc{$endif}, multilog;
 
 type
 
@@ -30,7 +31,11 @@ type
 
   TIPCChannel = class (TLogChannel)
   private
+    {$ifdef fpc}
     FClient: TSimpleIPCClient;
+    {$else}
+    FClient: TWinIPCClient;
+    {$endif}
     FBuffer: TMemoryStream;
     FClearMessage: TLogMessage;
   public
@@ -42,6 +47,9 @@ type
 
 
 implementation
+
+const
+  ZeroBuf: Integer = 0;
 
 { TIPCChannel }
 
@@ -56,19 +64,22 @@ begin
     //Those are already nil
   end;
   FBuffer:=TMemoryStream.Create;
-  FClient:=TSimpleIPCClient.Create(nil);
+  {$ifdef fpc}
+  FClient := TSimpleIPCClient.Create(nil);
+  {$else}
+  FClient := TWinIPCClient.Create(nil);
+  {$endif}
   with FClient do
   begin
     ServerID:='ipc_log_server';
     //todo: Start server only when channel is active
     if ServerRunning then
     begin
-      Self.Active:=True;
-      Active:=True;
-      Connect;
+      Self.Active := True;
+      Active := True;
     end
     else
-      Self.Active:=False;
+      Active := False;
   end;
 end;
 
@@ -85,7 +96,7 @@ end;
 
 procedure TIPCChannel.Deliver(const AMsg: TLogMessage);
 var
-  TextSize, DataSize:Integer;
+  TextSize, DataSize: Integer;
 begin
   with FBuffer do
   begin
@@ -97,15 +108,15 @@ begin
     WriteBuffer(AMsg.MsgText[1],TextSize);
     if AMsg.Data <> nil then
     begin
-      DataSize:=AMsg.Data.Size;
+      DataSize := AMsg.Data.Size;
       //WriteLn('[IPCChannel] Size Of Stream: ',DataSize);
       WriteBuffer(DataSize,SizeOf(Integer));
-      AMsg.Data.Position:=0;
+      AMsg.Data.Position := 0;
       CopyFrom(AMsg.Data,DataSize);
       //WriteLn('DataCopied: ',CopyFrom(AMsg.Data,DataSize));
     end
     else
-      WriteBuffer(Integer(0),SizeOf(Integer));//necessary?
+      WriteBuffer(ZeroBuf,SizeOf(Integer));//necessary?
   end;
   FClient.SendMessage(mtUnknown,FBuffer);
 end;

@@ -109,7 +109,7 @@ begin
   begin
     Channels.Add(LogTreeView1.Channel);
     Channels.Add(TIPCChannel.Create);
-    DefaultClass:=lcDebug;
+    DefaultClasses := [lcDebug];
   end;
 end;
 
@@ -134,12 +134,12 @@ begin
     AList.Destroy;
     SendError('A Error Message');
     SubLogClick(butSubLog);
-    DefaultClass:=lcWarning;
+    DefaultClasses := [lcWarning];
     ActiveClasses:=[lcDebug,lcInfo];
     Send('This Text Should NOT be logged');
-    Send(lcDebug,'This Text Should be logged');
+    Send([lcDebug],'This Text Should be logged');
     ActiveClasses:=[];
-    Send(lcDebug,'But This Text Should NOT');
+    Send([lcDebug],'But This Text Should NOT');
     //Exitmethod is called even if not active if there's a unpaired EnterMethod
     ExitMethod(Sender,'TestLogClick');
     ActiveClasses:=lcAll;

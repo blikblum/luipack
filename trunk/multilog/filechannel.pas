@@ -16,13 +16,14 @@ unit filechannel;
   along with this library; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-
+{$ifdef fpc}
 {$mode objfpc}{$H+}
+{$endif}
 
 interface
 
 uses
-  Classes, SysUtils, multilog;
+  {$ifndef fpc}fpccompat,{$endif} Classes, SysUtils, multilog;
 
 type
 
@@ -31,8 +32,10 @@ type
   TFileChannel = class (TLogChannel)
   private
     FFileHandle: Text;
+    FFileName: String;
     FRelativeIdent: Integer;
     FBaseIdent: Integer;
+    FShowHeader: Boolean;
     FShowTime: Boolean;
     FShowPrefix: Boolean;
     FShowStrings: Boolean;
@@ -45,6 +48,8 @@ type
     destructor Destroy; override;
     procedure Clear; override;
     procedure Deliver(const AMsg: TLogMessage);override;
+    procedure Init; override;
+    property ShowHeader: Boolean read FShowHeader write FShowHeader;
     property ShowPrefix: Boolean read FShowPrefix write FShowPrefix;
     property ShowTime: Boolean read FShowTime write SetShowTime;
   end;
@@ -120,18 +125,11 @@ end;
 
 constructor TFileChannel.Create(const AFileName: String);
 begin
-  FShowPrefix:=True;
-  FShowTime:=True;
-  FShowStrings:=True;
-  Active:=True;
-  Assign(FFileHandle,AFileName);
-  if FileExists(AFileName) then
-    Append(FFileHandle)
-  else
-    Rewrite(FFileHandle);
-  WriteLn(FFileHandle,'=== Log Session Started at ',DateTimeToStr(Now),' by ',ApplicationName,' ===');
-  Close(FFileHandle);
-  UpdateIdentation;
+  FShowPrefix := True;
+  FShowTime := True;
+  FShowStrings := True;
+  Active := True;
+  FFileName := AFileName;
 end;
 
 destructor TFileChannel.Destroy;
@@ -168,6 +166,19 @@ begin
   //Update enter method identation
   if AMsg.MsgType = ltEnterMethod then
     Inc(FRelativeIdent,2);
+end;
+
+procedure TFileChannel.Init;
+begin
+  Assign(FFileHandle,FFileName);
+  if FileExists(FFileName) then
+    Append(FFileHandle)
+  else
+    Rewrite(FFileHandle);
+  if FShowHeader then
+    WriteLn(FFileHandle,'=== Log Session Started at ',DateTimeToStr(Now),' by ',ApplicationName,' ===');
+  Close(FFileHandle);
+  UpdateIdentation;
 end;
 
 end.
