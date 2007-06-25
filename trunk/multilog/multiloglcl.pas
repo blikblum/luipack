@@ -112,9 +112,6 @@ begin
   begin
     AStream:=TMemoryStream.Create;
     ABitmap.SaveToStream(AStream);
-    //hack to avoid keeping a copy in ABitmap
-    ABitmap.Canvas.Changing;
-    ABitmap.Canvas.Changed;
   end
   else
     AStream:=nil;
