@@ -246,6 +246,69 @@ begin
   Result:=Windows.CF_UNICODETEXT;
 end;
 
+type
+  TTimerRecord = record
+    Control: TControl;
+    Notify: TTimerNotify;
+  end;
+
+  { TTimerList }
+
+  TTimerList = class
+  private
+    FList: TMap;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl);
+    function GetTimerInfo(Handle: hWnd; idEvent:LongWord; out TimerInfo: TTimerRecord):Boolean;
+  end;
+
+var
+  FTimerList: TTimerList;
+  
+function MakeQWord(d1, d2: dword): QWord;
+begin
+  Result:=(QWord(d2) shl 32) or d1;
+end;
+  
+{ TTimerList }
+
+constructor TTimerList.Create;
+begin
+  //todo: see 64bit (itu16??)
+  FList:=TMap.Create(itu8,SizeOf(TTimerRecord));
+end;
+
+destructor TTimerList.Destroy;
+begin
+  FList.Destroy;
+  inherited Destroy;
+end;
+
+procedure TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl);
+var
+  AID: QWord;
+  ATimerRec: TTimerRecord;
+begin
+  ATimerRec.Notify:= NotifyFunc;
+  ATimerRec.Control:= WinControl;
+  AId:=MakeQWord(hWnd,ID);
+  with FList do
+  begin
+    if HasId(AID) then
+      SetData(AID, ATimerRec)
+    else
+      Add(AID,ATimerRec);
+  end;
+end;
+
+function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
+  TimerInfo: TTimerRecord): Boolean;
+begin
+  Result:= FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
+end;
+
 procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
 var
   TimerInfo: TTimerRecord;
@@ -263,7 +326,7 @@ begin
     end;
   end
   else
-    DebugLn('Warning - No TimerInfo found for %d-%d',[Handle,idEvent]);
+    DebugLn('Warning - No TimerInfo found for Hwnd: %d Id: %d',[Handle,idEvent]);
 end;
 
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;

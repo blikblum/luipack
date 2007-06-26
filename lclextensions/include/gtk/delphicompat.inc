@@ -427,15 +427,138 @@ begin
   Result := CachedUnicodeFormat;
 end;
 
+type
+  TTimerRecord = record
+    Control: TControl;
+    Notify: TTimerNotify;
+    Id: LongWord;
+    TimerHandle: guint;
+  end;
+  PTimerRecord = ^TTimerRecord;
+
+  { TTimerList }
+
+  TTimerList = class
+  private
+    FList: TMap;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl):PTimerRecord;
+    function GetTimerInfo(Handle: hWnd; idEvent:LongWord; out TimerInfo: TTimerRecord):Boolean;
+    function GetTimerInfoPtr(Handle: hWnd; idEvent:LongWord): PTimerRecord;
+  end;
+
+var
+  FTimerList: TTimerList;
+
+function MakeQWord(d1, d2: dword): QWord;
+begin
+  Result:=(QWord(d2) shl 32) or d1;
+end;
+
+{ TTimerList }
+
+constructor TTimerList.Create;
+begin
+  //todo: see 64bit (itu16??)
+  FList:=TMap.Create(itu8,SizeOf(TTimerRecord));
+end;
+
+destructor TTimerList.Destroy;
+begin
+  FList.Destroy;
+  inherited Destroy;
+end;
+
+function TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl):PTimerRecord;
+var
+  AID: QWord;
+  ATimerRec: TTimerRecord;
+begin
+  ATimerRec.Notify := NotifyFunc;
+  ATimerRec.Control := WinControl;
+  ATimerRec.Id := ID;
+  AId:=MakeQWord(hWnd,ID);
+  with FList do
+  begin
+    if HasId(AID) then
+      SetData(AID, ATimerRec)
+    else
+      Add(AID, ATimerRec);
+    Result := GetDataPtr(AID);
+  end;
+end;
+
+function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
+  TimerInfo: TTimerRecord): Boolean;
+begin
+  Result:= FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
+end;
+
+function TTimerList.GetTimerInfoPtr(Handle: hWnd; idEvent: LongWord
+  ): PTimerRecord;
+begin
+  Result := FList.GetDataPtr(MakeQWord(Handle,idEvent));
+end;
+
+function gtkTimerCB(Data: gPointer): {$IFDEF Gtk2}gBoolean{$ELSE}gint{$ENDIF}; cdecl;
+begin
+  Result := GdkFalse;  // assume: timer will stop
+  with PTimerRecord(Data)^ do
+  begin
+    DebugLn('gtkTimerCalled for TimerHandle: %d',[TimerHandle]);
+    if TimerHandle <> 0 then
+    begin
+      if Notify <> nil then
+      begin
+        Notify(Id);
+        Result := GdkTrue;
+      end
+      else
+      begin
+        if Control <> nil then
+        begin
+          LCLSendTimerMsg(Control,Id,0);
+          Result := GdkTrue;
+        end;
+      end;
+    end;
+  end;
+end;
 
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
+var
+  TimerInfo: PTimerRecord;
+  TimerHandle: guint;
+  Control: TControl;
 begin
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  //todo: properly set Result
+  //todo: make a custom GetLCLObject
+  if hWnd <> 0 then
+    Control := TControl(GetLCLObject(PGtkWidget(hWnd)))
+  else
+    Control := nil;
+  TimerInfo := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
+  TimerInfo^.TimerHandle := gtk_timeout_add(uElapse, @gtkTimerCB, TimerInfo);
+  DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
 end;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
+var
+  TimerInfo: PTimerRecord;
 begin
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  TimerInfo := FTimerList.GetTimerInfoPtr(hWnd,nIDEvent);
+  if TimerInfo <> nil then
+  begin
+    DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
+    gtk_timeout_remove(TimerInfo^.TimerHandle);
+    //next time gtkTimerCB be called the timeout will be destroied automatically
+    //todo: see if is really necessary to set TimerHandle to 0 and check in gtkTimerCB
+    TimerInfo^.TimerHandle := 0;
+  end
+  else
+    DebugLn('KillTimer Could not find the timer info of HWnd: %d ID: %d',[hWnd,nIDEvent]);
 end;
 
 
