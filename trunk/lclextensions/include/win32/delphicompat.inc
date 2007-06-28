@@ -31,156 +31,25 @@
 
 }
 
-
-
-  
-function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
-  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
+function BeginDeferWindowPos(nNumWindows: longint): THandle;
 begin
-  Result:=Windows.ExtTextOutW(DC, X, Y, Options, Rect,Str, Count, Dx);
+  Result:=Windows.BeginDeferWindowPos(nNumWindows);
 end;
 
-function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
+function CF_UNICODETEXT: TClipboardFormat;
 begin
-  Result:=Windows.TextOutW(DC,X,Y,Str,Count);
+  Result:=Windows.CF_UNICODETEXT;
 end;
-
-function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
-begin
-  Result := Windows.GetCurrentObject(hdc, uObjectType);
-end;
-
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-begin
-  Result:=Windows.GetTextExtentPointW(DC, Str, Count, Size);
-end;
-
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-begin
-  Result:=Windows.GetTextExtentPointW(DC, Str, Count, Size);
-end;
-
-function GetTextExtentExPoint(DC: HDC; Str: PChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
-begin
-  Result:=Windows.GetTextExtentExPoint(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
-end;
-
-function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
-begin
-  Result:=Windows.GetTextExtentExPointW(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
-end;
-
-function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer;
-  var lpRect: TRect; uFormat: LongWord): Integer;
-begin
-  Result:=Windows.DrawTextW(hDC,lpString,nCount,lpRect,uFormat);
-end;
-
-function InvertRect(DC: HDC; const lprc: TRect): Boolean;
-begin
-  Result:=Windows.InvertRect(DC, PRect(@lprc)^);
-end;
-
-function GetTextAlign(hDC: HDC): LongWord;
-begin
-  Result:=Windows.GetTextAlign(hDC);
-end;
-
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord
-  ): BOOLEAN;
-begin
-  Result:=Windows.DrawFrameControl(DC,Rect,uType,uState);
-end;
-
-function ScrollDC(hDC: HDC; dx: longint; dy: longint; var lprcScroll: TRECT;
-  var lprcClip: TRECT; hrgnUpdate: HRGN; lprcUpdate: PRECT): Boolean;
-begin
-  Result:=Windows.ScrollDC(hDC,dx,dy,lprcScroll,lprcClip,hrgnUpdate,lprcUpdate);
-end;
-
-function OffsetRgn(hrgn: HRGN; nxOffset, nYOffset: longint): longint;
-begin
-  Result:=Windows.OffsetRgn(hrgn,nxOffset,nYOffset);
-end;
-
-function GdiFlush: Boolean;
-begin
-  Result:=Windows.GdiFlush;
-end;
-
-function GetWindowDC(hWnd: THandle): HDC;
-begin
-  Result:=Windows.GetWindowDC(hWnd);
-end;
-
-function RedrawWindow(hWnd: THandle; lprcUpdate: PRECT; hrgnUpdate: HRGN;
-  flags: LongWord): BOOLEAN;
-begin
-  Result:=Windows.RedrawWindow(hWnd,lprcUpdate,hrgnUpdate,flags);
-end;
-
-function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
-begin
-  Result:=Windows.LPToDP(DC,Points,Count);
-end;
-
-function CreatePatternBrush(hbmp: HBITMAP): HBRUSH;
-begin
-  Result:=Windows.CreatePatternBrush(hbmp);
-end;
-
-function GetBkColor(DC: HDC): LCLType.COLORREF;
-begin
-  Result:=Windows.GetBkColor(DC);
-end;
-
-function GetDCEx(hWnd: THandle; hrgnClip: HRGN; flags: DWORD): HDC;
-begin
-  Result:=Windows.GetDCEx(hWnd,hrgnClip,flags);
-end;
-
-function SetBrushOrgEx(DC: HDC; nXOrg, nYOrg: longint; lppt: PPOINT): Boolean;
-begin
-  Result:=Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
-end;
-
-function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall; external 'GDI32.DLL';
 
 function CopyImage(hImage: THANDLE; uType: LongWord; cxDesired,
   cyDesired: LongInt; fuFlags: LongWord): THandle;
 begin
-  Result:=Windows.CopyImage(hImage,uType,cxDesired,cyDesired,fuFlags);
+  Result := Windows.CopyImage(hImage,uType,cxDesired,cyDesired,fuFlags);
 end;
 
-function SystemParametersInfo(uiAction, uiParam: LongWord; pvParam: Pointer;
-  fWinIni: LongWord): Boolean;
+function CreatePatternBrush(hbmp: HBITMAP): HBRUSH;
 begin
-  Result:=Windows.SystemParametersInfo(uiAction,uiParam,pvParam,fWinIni);
-end;
-
-function GetKeyboardState(lpKeyState: PBYTE): BOOLEAN;
-begin
-  Result:=Windows.GetKeyboardState(lpKeyState);
-end;
-
-function ToAscii(uVirtKey, uScanCode: LongWord; lpKeyState: PBYTE;
-  lpChar: PWORD; uFlags: LongWord): longint;
-begin
-  Result:=Windows.ToAscii(uVirtKey,uScanCode,lpKeyState,lpChar,uFlags);
-end;
-
-function ImageList_DragShowNolock(fShow: Boolean): Boolean;
-begin
-  Result:=Windows.ImageList_DragShowNolock(fShow);
-end;
-
-function BeginDeferWindowPos(nNumWindows: longint): THandle;
-begin
-  Result:=Windows.BeginDeferWindowPos(nNumWindows);
+  Result := Windows.CreatePatternBrush(hbmp);
 end;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter: THandle; x, y, cx,
@@ -189,9 +58,159 @@ begin
   Result:=Windows.DeferWindowPos(hWinPosInfo,hWnd,hWndInsertAfter,x,y,cx,cy,uFlags);
 end;
 
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord
+  ): BOOLEAN;
+begin
+  Result := Windows.DrawFrameControl(DC,Rect,uType,uState);
+end;
+
+function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer;
+  var lpRect: TRect; uFormat: LongWord): Integer;
+begin
+  Result := Windows.DrawTextW(hDC,lpString,nCount,lpRect,uFormat);
+end;
+  
 function EndDeferWindowPos(hWinPosInfo: THandle): Boolean;
 begin
   Result:=Windows.EndDeferWindowPos(hWinPosInfo);
+end;
+
+function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
+  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
+begin
+  Result := Windows.ExtTextOutW(DC, X, Y, Options, Rect,Str, Count, Dx);
+end;
+
+function GdiFlush: Boolean;
+begin
+  Result := Windows.GdiFlush;
+end;
+
+function GetACP: LongWord;
+begin
+  Result:=Windows.GetACP;
+end;
+
+function GetBkColor(DC: HDC): LCLType.COLORREF;
+begin
+  Result := Windows.GetBkColor(DC);
+end;
+
+function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
+begin
+  Result := Windows.GetCurrentObject(hdc, uObjectType);
+end;
+
+function GetDCEx(hWnd: THandle; hrgnClip: HRGN; flags: DWORD): HDC;
+begin
+  Result:=Windows.GetDCEx(hWnd,hrgnClip,flags);
+end;
+
+function GetDoubleClickTime: UINT;
+begin
+  Result:=Windows.GetDoubleClickTime;
+end;
+
+function GetKeyboardLayout(dwLayout: DWORD): THandle;
+begin
+  Result:=Windows.GetKeyboardLayout(dwLayout);
+end;
+
+function GetKeyboardState(lpKeyState: PBYTE): BOOLEAN;
+begin
+  Result:=Windows.GetKeyboardState(lpKeyState);
+end;
+
+function GetLocaleInfo(Locale, LCType: LongWord; lpLCData: PChar;
+  cchData: longint): longint;
+begin
+  Result:=Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
+end;
+
+function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall; external 'GDI32.DLL';
+
+function GetTextAlign(hDC: HDC): LongWord;
+begin
+  Result := Windows.GetTextAlign(hDC);
+end;
+
+function GetTextExtentExPoint(DC: HDC; Str: PChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+begin
+  Result := Windows.GetTextExtentExPoint(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
+end;
+
+function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+begin
+  Result := Windows.GetTextExtentExPointW(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
+end;
+
+function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+begin
+  Result := Windows.GetTextExtentPointW(DC, Str, Count, Size);
+end;
+
+function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+begin
+  Result := Windows.GetTextExtentPointW(DC, Str, Count, Size);
+end;
+
+function GetWindowDC(hWnd: THandle): HDC;
+begin
+  Result := Windows.GetWindowDC(hWnd);
+end;
+
+function ImageList_DragShowNolock(fShow: Boolean): Boolean;
+begin
+  Result:=Windows.ImageList_DragShowNolock(fShow);
+end;
+
+function InvertRect(DC: HDC; const lprc: TRect): Boolean;
+begin
+  Result := Windows.InvertRect(DC, PRect(@lprc)^);
+end;
+
+function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
+begin
+  Result := Windows.LPToDP(DC,Points,Count);
+end;
+
+function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT
+  ): Integer;
+begin
+  Result:=Windows.MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
+end;
+
+function MultiByteToWideChar(CodePage, dwFlags: DWORD; lpMultiByteStr: PChar;
+  cchMultiByte: longint; lpWideCharStr: PWideChar; cchWideChar: longint
+  ): longint;
+begin
+  Result := Windows.MultiByteToWideChar(CodePage,dwFlags,lpMultiByteStr,cchMultiByte,lpWideCharStr,cchWideChar);
+end;
+
+function OffsetRgn(hrgn: HRGN; nxOffset, nYOffset: longint): longint;
+begin
+  Result := Windows.OffsetRgn(hrgn,nxOffset,nYOffset);
+end;
+
+function RedrawWindow(hWnd: THandle; lprcUpdate: PRECT; hrgnUpdate: HRGN;
+  flags: LongWord): BOOLEAN;
+begin
+  Result := Windows.RedrawWindow(hWnd,lprcUpdate,hrgnUpdate,flags);
+end;
+
+function SetBrushOrgEx(DC: HDC; nXOrg, nYOrg: longint; lppt: PPOINT): Boolean;
+begin
+  Result:=Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
+end;
+
+function ScrollDC(hDC: HDC; dx: longint; dy: longint; var lprcScroll: TRECT;
+  var lprcClip: TRECT; hrgnUpdate: HRGN; lprcUpdate: PRECT): Boolean;
+begin
+  Result := Windows.ScrollDC(hDC,dx,dy,lprcScroll,lprcClip,hrgnUpdate,lprcUpdate);
 end;
 
 function ScrollWindow(hWnd: THandle; XAmount, YAmount: longint; lpRect: PRECT;
@@ -206,44 +225,15 @@ begin
   Result:=Windows.SubtractRect(lprcDst,lprcSrc1,lprcSrc2);
 end;
 
-function GetLocaleInfo(Locale, LCType: LongWord; lpLCData: PChar;
-  cchData: longint): longint;
+function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
 begin
-  Result:=Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
+  Result := Windows.TextOutW(DC,X,Y,Str,Count);
 end;
 
-function GetACP: LongWord;
+function ToAscii(uVirtKey, uScanCode: LongWord; lpKeyState: PBYTE;
+  lpChar: PWORD; uFlags: LongWord): longint;
 begin
-  Result:=Windows.GetACP;
-end;
-
-function MultiByteToWideChar(CodePage, dwFlags: DWORD; lpMultiByteStr: PChar;
-  cchMultiByte: longint; lpWideCharStr: PWideChar; cchWideChar: longint
-  ): longint;
-begin
-  Result:=Windows.MultiByteToWideChar(CodePage,dwFlags,lpMultiByteStr,cchMultiByte,lpWideCharStr,cchWideChar);
-end;
-
-function GetKeyboardLayout(dwLayout: DWORD): THandle;
-begin
-  Result:=Windows.GetKeyboardLayout(dwLayout);
-end;
-
-function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT
-  ): Integer;
-begin
-  Result:=Windows.MapWindowPoints(hWndFrom,hWndTo,lpPoints,cPoints);
-end;
-
-function GetDoubleClickTime: UINT;
-begin
-  Result:=Windows.GetDoubleClickTime;
-end;
-
-
-function CF_UNICODETEXT: TClipboardFormat;
-begin
-  Result:=Windows.CF_UNICODETEXT;
+  Result := Windows.ToAscii(uVirtKey,uScanCode,lpKeyState,lpChar,uFlags);
 end;
 
 type
