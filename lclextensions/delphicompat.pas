@@ -33,6 +33,7 @@ unit delphicompat;
 }
 
 {$mode objfpc}{$H+}
+{.$define DEBUG_DELPHICOMPAT}
 
 interface
 
@@ -98,107 +99,8 @@ type
   TWMKeyUp = TLMKeyUp;
   TWMKillFocus = TLMKillFocus;
   
-//Unicode functions
-
-function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
-  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
-
-function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
-
-function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
-
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-
-function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
-
-function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
-
-//GDI Functions
-
-function GetTextExtentExPoint(DC: HDC; Str: PChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
-
-function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
-
-function GetTextAlign(hDC:HDC): LongWord;
-
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): BOOLEAN;
-
-function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
-
-function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
-
-function GdiFlush: Boolean;
-
-function GetWindowDC(hWnd:THandle):HDC;
-
-function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
-
-function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
-
-function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
-
-function GetBkColor(DC:HDC):COLORREF;
-
-function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
-
-function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
-
-function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
-
-//misc
-
-function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
-
-function SystemParametersInfo(uiAction, uiParam:LongWord; pvParam:Pointer; fWinIni:LongWord):Boolean;
-
-function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
-
-function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord):longint;
-
-function ImageList_DragShowNolock(fShow: Boolean): Boolean;
-
-function BeginDeferWindowPos(nNumWindows:longint):THandle;
-
-function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
-
-function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
-
-function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
-
-function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
-
-function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
-
-function GetACP:LongWord;
-
-function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
-
-function GetKeyboardLayout(dwLayout:DWORD):THandle;
-
-function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
-
-function MAKEROP4(fore,back : longint) : DWORD;
-
-function INDEXTOOVERLAYMASK(i : longint) : longint;
-
-procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
-
-function  GetDoubleClickTime: UINT;
-
-//clipboard
-
-function CF_UNICODETEXT: TClipboardFormat;
-
-//timer
-
-type
-  TTimerNotify = procedure (TimerId: LongWord) of Object;
+  //timer
+  TTimerNotify = procedure (TimerId: LongWord) of object;
 
   TLMTimer = record
     Msg: Cardinal;
@@ -207,10 +109,67 @@ type
     Result: LRESULT;
   end;
 
+function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
 
-function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
+function CF_UNICODETEXT: TClipboardFormat;
+procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
+function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
+function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
+
+function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): BOOLEAN;
+function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
+
+function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
+function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
+  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
+
+function GdiFlush: Boolean;
+function GetACP:LongWord;
+function GetBkColor(DC:HDC):COLORREF;
+function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
+function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
+function GetDoubleClickTime: UINT;
+function GetKeyboardLayout(dwLayout:DWORD):THandle;
+function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
+function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
+function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
+function GetTextAlign(hDC:HDC): LongWord;
+function GetTextExtentExPoint(DC: HDC; Str: PChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  var Size: TSize): BOOL;
+function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetWindowDC(hWnd:THandle):HDC;
+
+function ImageList_DragShowNolock(fShow: Boolean): Boolean;
+function INDEXTOOVERLAYMASK(i : longint) : longint;
+function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
+
+function LPtoDP(DC: HDC; var Points; Count: Integer):Boolean;
+
+function MAKEROP4(fore,back : longint) : DWORD;
+function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
+function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
+
+function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
+
+function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
+
+function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
+function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
+function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
+function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
+function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
+
+function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
+function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord):longint;
+
 
 implementation
 
@@ -219,10 +178,12 @@ uses
 {$i uses.inc}
   maps, LCLProc, LCLMessageGlue, Controls, multiloglcl, filechannel;
 
+{$ifdef DEBUG_DELPHICOMPAT}
 const
   //Logger  classes
   lcInfo = 0;
   lcStack = 1;
+{$endif}
 
 var
   Logger: TLCLLogger;
@@ -231,38 +192,40 @@ var
 procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 begin
   case Alignment of
-  taLeftJustify: Alignment := taRightJustify;
-  taRightJustify: Alignment := taLeftJustify;
+    taLeftJustify: Alignment := taRightJustify;
+    taRightJustify: Alignment := taLeftJustify;
   end;
 end;
 
-function INDEXTOOVERLAYMASK(i : longint) : longint;
+function INDEXTOOVERLAYMASK(i : longint) : LongInt;
 { return type might be wrong }
 begin
-  Result:=i shl 8;
+  Result := i shl 8;
 end;
 
 function MAKEROP4(fore,back : longint) : DWORD;
 begin
-   Result:=DWORD((DWORD(back shl 8) and $FF000000) or DWORD(fore));
+   Result := DWORD((DWORD(back shl 8) and $FF000000) or DWORD(fore));
 end;
 
 
 {$i delphicompat.inc}
 
 initialization
-  FTimerList:=TTimerList.Create;
-  Logger:= TLCLLogger.Create;
+  FTimerList := TTimerList.Create;
   {$ifdef DEBUG_DELPHICOMPAT}
+  Logger := TLCLLogger.Create;
   Logger.Channels.Add(TFileChannel.Create('delphicompat.log'));
-  Logger.ActivateClasses:=[lcInfo,lcStack];
-  Logger.MaxStackCount:=3;
+  Logger.ActivateClasses := [lcInfo,lcStack];
+  Logger.MaxStackCount := 3;
   {$else}
   Logger.ActiveClasses:=[];
   {$endif}
 
 finalization
   FTimerList.Free;
+  {$ifdef DEBUG_DELPHICOMPAT}
   Logger.Free;
+  {$endif}
 end.
 

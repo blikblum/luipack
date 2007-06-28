@@ -313,13 +313,6 @@ begin
 end;
 
 
-function SystemParametersInfo(uiAction, uiParam:LongWord; pvParam:Pointer; fWinIni:LongWord):Boolean;
-begin
-  //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
-end;
-
-
 function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
 begin
   //todo
@@ -413,7 +406,7 @@ end;
 function GetDoubleClickTime: UINT;
 begin
   //todo: see if gtk has a value. Use Windows default for now
-  Result:=500;
+  Result := 500;
 end;  
 
 var
