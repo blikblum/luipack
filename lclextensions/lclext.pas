@@ -45,7 +45,6 @@ function OSSupportsUTF16: Boolean;
 
 implementation
 
-uses
 {$i uses_lclext.inc}
 
 
