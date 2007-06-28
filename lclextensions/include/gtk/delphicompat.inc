@@ -452,7 +452,7 @@ type
 var
   FTimerList: TTimerList;
 
-function MakeQWord(d1, d2: dword): QWord;
+function MakeQWord(d1, d2: dword): QWord; inline;
 begin
   Result:=(QWord(d2) shl 32) or d1;
 end;

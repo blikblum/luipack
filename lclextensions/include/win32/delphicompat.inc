@@ -251,6 +251,8 @@ type
     Control: TControl;
     Notify: TTimerNotify;
   end;
+  
+  PTimerRecord = ^TTimerRecord;
 
   { TTimerList }
 
@@ -262,14 +264,15 @@ type
     destructor Destroy; override;
     procedure Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl);
     function GetTimerInfo(Handle: hWnd; idEvent:LongWord; out TimerInfo: TTimerRecord):Boolean;
+    function GetTimerInfoPtr(Handle: hWnd; idEvent:LongWord): PTimerRecord;
   end;
 
 var
   FTimerList: TTimerList;
   
-function MakeQWord(d1, d2: dword): QWord;
+function MakeQWord(d1, d2: dword): QWord; inline;
 begin
-  Result:=(QWord(d2) shl 32) or d1;
+  Result := (QWord(d2) shl 32) or d1;
 end;
   
 { TTimerList }
@@ -291,31 +294,38 @@ var
   AID: QWord;
   ATimerRec: TTimerRecord;
 begin
-  ATimerRec.Notify:= NotifyFunc;
-  ATimerRec.Control:= WinControl;
-  AId:=MakeQWord(hWnd,ID);
+  ATimerRec.Notify := NotifyFunc;
+  ATimerRec.Control := WinControl;
+  AId := MakeQWord(hWnd,ID);
   with FList do
   begin
     if HasId(AID) then
       SetData(AID, ATimerRec)
     else
-      Add(AID,ATimerRec);
+      Add(AID, ATimerRec);
   end;
 end;
 
 function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
   TimerInfo: TTimerRecord): Boolean;
 begin
-  Result:= FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
+  Result := FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
+end;
+
+function TTimerList.GetTimerInfoPtr(Handle: hWnd; idEvent: LongWord
+  ): PTimerRecord;
+begin
+  Result := FList.GetDataPtr(MakeQWord(Handle,idEvent));
 end;
 
 procedure TimerCallBack(Handle: hwnd; Msg : DWORD; idEvent: UINT; dwTime: DWORD); stdcall;
 var
-  TimerInfo: TTimerRecord;
+  TimerInfo: PTimerRecord;
 begin
   //DebugLn('Executing Timer to Handle %d - ID: %d',[Handle, idEvent]);
-  if FTimerList.GetTimerInfo(Handle,idEvent,TimerInfo) then
-  with TimerInfo do
+  TimerInfo := FTimerList.GetTimerInfoPtr(Handle,idEvent);
+  if TimerInfo <> nil then
+  with TimerInfo^ do
   begin
     if Notify <> nil then
       Notify(idEvent)
@@ -333,15 +343,15 @@ function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc
 var
   WinInfo: PWindowInfo;
 begin
-  //DebugLn('Adding Timer to Handle %d - ID: %d',[hWnd,nIDEvent]);
-  WinInfo:=GetWindowInfo(hWnd);
+  WinInfo := GetWindowInfo(hWnd);
   FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
   //todo: see the best way to set result when handle is 0
-  Result:=Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
-  //DebugLn('SetTimer result %d',[Result]);
+  Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+  //DebugLn('SetTimer - Handle %d - ID: %d - Result: %d',[hWnd,nIDEvent,Result]);
 end;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
 begin
-  Result:=Windows.KillTimer(hWnd,nIDEvent);
+  Result := Windows.KillTimer(hWnd,nIDEvent);
+  //DebugLn('KillTimer - Handle %d - ID: %d',[hWnd,nIDEvent]);
 end;
