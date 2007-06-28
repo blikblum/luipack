@@ -37,7 +37,9 @@ unit lclext;
 interface
 
 uses
-  Classes, SysUtils; 
+  Classes, SysUtils, LCLType, Graphics;
+
+function CreateBitmapMask(BitmapDC: HDC; Width, Height: Integer; TransparentColor: TColor): HBITMAP;
 
 function OSSupportsUTF16: Boolean;
 
@@ -45,7 +47,7 @@ implementation
 
 uses
 {$i uses_lclext.inc}
-  LCLType;
+
 
 {$i lclext.inc}
 
