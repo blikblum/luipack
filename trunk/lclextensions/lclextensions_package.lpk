@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="2">
-    <PathDelim Value="\"/>
     <Name Value="lclextensions_package"/>
-    <Author Value="Luiz Américo Pereira Câmara"/>
+    <Author Value="Luiz Americo Pereira Camara"/>
     <CompilerOptions>
       <Version Value="5"/>
-      <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="include\$(LCLWidgetType)\"/>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <IncludeFiles Value="include/$(LCLWidgetType)/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -18,9 +16,11 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="LCL Extensions provides additional functions to be used together with LCL"/>
-    <License Value="Modified LGPL"/>
-    <Version Minor="1"/>
+    <Description Value="LCL Extensions provides additional functions to be used together with LCL
+"/>
+    <License Value="Modified LGPL
+"/>
+    <Version Minor="2"/>
     <Files Count="3">
       <Item1>
         <Filename Value="delphicompat.pas"/>
@@ -36,20 +36,16 @@
       </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="2">
+    <RequiredPkgs Count="1">
       <Item1>
-        <PackageName Value="multiloglaz"/>
-      </Item1>
-      <Item2>
         <PackageName Value="LCL"/>
-      </Item2>
+      </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)/"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>

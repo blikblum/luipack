@@ -117,7 +117,7 @@ function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongIn
 function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): BOOLEAN;
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 
 function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
@@ -176,18 +176,21 @@ implementation
 
 uses
 {$i uses.inc}
-  maps, LCLProc, LCLMessageGlue, Controls, multiloglcl, filechannel;
+  maps, LCLProc, LCLMessageGlue, Controls
+  {$ifdef DEBUG_DELPHICOMPAT}
+  ,multiloglcl, filechannel
+  {$endif}
+  ;
 
 {$ifdef DEBUG_DELPHICOMPAT}
 const
   //Logger  classes
   lcInfo = 0;
   lcStack = 1;
-{$endif}
 
 var
   Logger: TLCLLogger;
-  
+{$endif}
 
 procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 begin
@@ -218,8 +221,6 @@ initialization
   Logger.Channels.Add(TFileChannel.Create('delphicompat.log'));
   Logger.ActivateClasses := [lcInfo,lcStack];
   Logger.MaxStackCount := 3;
-  {$else}
-  Logger.ActiveClasses:=[];
   {$endif}
 
 finalization

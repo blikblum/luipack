@@ -37,7 +37,7 @@ function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
 var
  TempStr: UTF8String;
 begin
-  Logger.Send('ExtTextOutW');
+  //Logger.Send('ExtTextOutW');
   TempStr:=UTF8Encode(WideString(Str));
   Result:= ExtTextOut(DC, X, Y, Options, Rect, PChar(TempStr), Length(TempStr), Dx);
 end;
@@ -46,7 +46,7 @@ function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boo
 var
   TempStr: UTF8String;
 begin
-  Logger.Send('TextOutW');
+  //Logger.Send('TextOutW');
   TempStr:=UTF8Encode(WideString(Str));
   TextOut(DC,X,Y,PChar(TempStr),Length(TempStr));
 end;
@@ -70,7 +70,7 @@ function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size
 var
   TempStr: UTF8String;
 begin
-  Logger.Send('GetTextExtentPoint32W');
+  //Logger.Send('GetTextExtentPoint32W');
   TempStr:=UTF8Encode(WideString(Str));
   Result:=GetTextExtentPoint(DC, PChar(TempStr), Length(TempStr), Size);
 end;
@@ -79,7 +79,7 @@ function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: 
 var
   TempStr: UTF8String;
 begin
-  Logger.Send('GetTextExtentPointW');
+  //Logger.Send('GetTextExtentPointW');
   TempStr:=UTF8Encode(WideString(Str));
   Result:=GetTextExtentPoint(DC, PChar(TempStr), Length(TempStr), Size);
 end;
@@ -91,9 +91,9 @@ var
   TextHeight: Integer;
   TM: TTextMetric;
 begin
-  Logger.Send('DrawTextW');
+  //Logger.Send('DrawTextW');
   TempRect:=lpRect;
-  //fix position under gtk
+  //fix position under gtk (lcl bug 8565)
   if (uFormat and DT_VCENTER) > 0 then
   begin
     GetTextMetrics(hDC, TM);
@@ -103,7 +103,7 @@ begin
   end;
   TempStr:=UTF8Encode(WideString(lpString));
   Result:=DrawText(hDC,PChar(TempStr),Length(TempStr),TempRect,uFormat);
-  Logger.Send('Rect',TempRect);
+  //Logger.Send('Rect',TempRect);
 end;
 
 {$ifndef GTK2}
@@ -174,7 +174,7 @@ function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
 var
   TempStr: UTF8String;
 begin
-  Logger.Send('GetTextExtentExPointW');
+  //Logger.Send('GetTextExtentExPointW');
   TempStr:=UTF8Encode(WideString(Str));
   Result:=DelphiCompat.GetTextExtentExPoint(DC, PChar(TempStr),
   Length(TempStr), MaxWidth, MaxCount, PartialWidths,Size);
@@ -211,54 +211,53 @@ end;
 function GetTextAlign(hDC:HDC): LongWord;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): BOOLEAN;
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
-  //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
 end;
 
 function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GdiFlush: Boolean;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GetWindowDC(hWnd:THandle):HDC;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
@@ -289,68 +288,68 @@ end;
 function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function CopyImage(hImage:THANDLE; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord):longint;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function ImageList_DragShowNolock(fShow: Boolean): Boolean;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function BeginDeferWindowPos(nNumWindows:longint):THandle;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
 begin
-Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
   //todo
 end;
 
@@ -358,49 +357,49 @@ end;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GetACP:LongWord;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function GetKeyboardLayout(dwLayout:DWORD):THandle;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 
 function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
 begin
   //todo
-  Logger.SendCallStack('Dummy WinAPI Implementaion');
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
 function GetDoubleClickTime: UINT;
@@ -500,7 +499,7 @@ begin
   Result := GdkFalse;  // assume: timer will stop
   with PTimerRecord(Data)^ do
   begin
-    DebugLn('gtkTimerCalled for TimerHandle: %d',[TimerHandle]);
+    //DebugLn('gtkTimerCalled for TimerHandle: %d',[TimerHandle]);
     if TimerHandle <> 0 then
     begin
       if Notify <> nil then
@@ -523,7 +522,6 @@ end;
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 var
   TimerInfo: PTimerRecord;
-  TimerHandle: guint;
   Control: TControl;
 begin
   //todo: properly set Result
@@ -534,7 +532,7 @@ begin
     Control := nil;
   TimerInfo := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
   TimerInfo^.TimerHandle := gtk_timeout_add(uElapse, @gtkTimerCB, TimerInfo);
-  DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
+  //DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
 end;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
@@ -544,14 +542,14 @@ begin
   TimerInfo := FTimerList.GetTimerInfoPtr(hWnd,nIDEvent);
   if TimerInfo <> nil then
   begin
-    DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
+    //DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
     gtk_timeout_remove(TimerInfo^.TimerHandle);
     //next time gtkTimerCB be called the timeout will be destroied automatically
     //todo: see if is really necessary to set TimerHandle to 0 and check in gtkTimerCB
     TimerInfo^.TimerHandle := 0;
-  end
-  else
-    DebugLn('KillTimer Could not find the timer info of HWnd: %d ID: %d',[hWnd,nIDEvent]);
+  end;
+  //else
+  //  DebugLn('KillTimer Could not find the timer info of HWnd: %d ID: %d',[hWnd,nIDEvent]);
 end;
 
 
