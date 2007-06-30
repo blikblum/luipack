@@ -216,7 +216,8 @@ end;
 
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
-  Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
+  //todo: There's a bug in gtk intf. Skip for now.
+  //Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
 end;
 
 function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
