@@ -148,6 +148,7 @@ function GetDoubleClickTime: UINT;
 function GetKeyboardLayout(dwLayout:DWORD):THandle;
 function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
 function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
+function GetMapMode(DC: HDC): LongInt;
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 function GetTextAlign(hDC:HDC): LongWord;
 function GetTextExtentExPoint(DC: HDC; Str: PChar;
@@ -179,6 +180,7 @@ function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:Lon
 function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
+function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
 

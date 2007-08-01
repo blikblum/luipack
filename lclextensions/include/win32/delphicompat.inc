@@ -103,28 +103,33 @@ end;
 
 function GetDCEx(hWnd: THandle; hrgnClip: HRGN; flags: DWORD): HDC;
 begin
-  Result:=Windows.GetDCEx(hWnd,hrgnClip,flags);
+  Result := Windows.GetDCEx(hWnd,hrgnClip,flags);
 end;
 
 function GetDoubleClickTime: UINT;
 begin
-  Result:=Windows.GetDoubleClickTime;
+  Result := Windows.GetDoubleClickTime;
 end;
 
 function GetKeyboardLayout(dwLayout: DWORD): THandle;
 begin
-  Result:=Windows.GetKeyboardLayout(dwLayout);
+  Result := Windows.GetKeyboardLayout(dwLayout);
 end;
 
 function GetKeyboardState(lpKeyState: PBYTE): BOOLEAN;
 begin
-  Result:=Windows.GetKeyboardState(lpKeyState);
+  Result := Windows.GetKeyboardState(lpKeyState);
 end;
 
 function GetLocaleInfo(Locale, LCType: LongWord; lpLCData: PChar;
   cchData: longint): longint;
 begin
-  Result:=Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
+  Result := Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
+end;
+
+function GetMapMode(DC: HDC): LongInt;
+begin
+  Result := Windows.GetMapMode(DC);
 end;
 
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall; external 'GDI32.DLL';
@@ -204,7 +209,12 @@ end;
 
 function SetBrushOrgEx(DC: HDC; nXOrg, nYOrg: longint; lppt: PPOINT): Boolean;
 begin
-  Result:=Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
+  Result := Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
+end;
+
+function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
+begin
+  Result := Windows.SetMapMode(DC, fnMapMode);
 end;
 
 function ScrollDC(hDC: HDC; dx: longint; dy: longint; var lprcScroll: TRECT;
@@ -216,13 +226,13 @@ end;
 function ScrollWindow(hWnd: THandle; XAmount, YAmount: longint; lpRect: PRECT;
   lpClipRect: PRECT): Boolean;
 begin
-  Result:=Windows.ScrollWindow(hWnd,XAmount,YAmount,lpRect,lpClipRect);
+  Result := Windows.ScrollWindow(hWnd,XAmount,YAmount,lpRect,lpClipRect);
 end;
 
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect
   ): BOOLEAN;
 begin
-  Result:=Windows.SubtractRect(lprcDst,lprcSrc1,lprcSrc2);
+  Result := Windows.SubtractRect(lprcDst,lprcSrc1,lprcSrc2);
 end;
 
 function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
