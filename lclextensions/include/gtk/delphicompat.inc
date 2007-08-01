@@ -31,24 +31,51 @@
 
 }
 
-  
-function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
-  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
-var
- TempStr: UTF8String;
+{$define HAS_INVERTRECT}
+{$define HAS_DRAWTEXTW}
+{$define HAS_GETCURRENTOBJECT}
+{$define HAS_GETBKCOLOR}
+{$define HAS_GETTEXTEXTENTEXPOINT}
+{$define HAS_DRAWFRAMECONTROL}
+
+{$i ../generic/stubs.inc}
+{$i ../generic/independentfunctions.inc}
+{$i ../generic/unicodefunctions.inc}
+
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
-  //Logger.Send('ExtTextOutW');
-  TempStr:=UTF8Encode(WideString(Str));
-  Result:= ExtTextOut(DC, X, Y, Options, Rect, PChar(TempStr), Length(TempStr), Dx);
+  //todo: There's a bug in gtk intf. Skip for now.
+  //Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
 end;
 
-function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
+function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 var
   TempStr: UTF8String;
+  TempRect: TRect;
+  TextHeight: Integer;
+  TM: TTextMetric;
 begin
-  //Logger.Send('TextOutW');
-  TempStr:=UTF8Encode(WideString(Str));
-  TextOut(DC,X,Y,PChar(TempStr),Length(TempStr));
+  //Logger.Send('DrawTextW');
+  TempRect := lpRect;
+  //fix position under gtk (lcl bug 8565)
+  if (uFormat and DT_VCENTER) > 0 then
+  begin
+    GetTextMetrics(hDC, TM);
+    //gtk overestimate height
+    TextHeight := TM.tmHeight - 2;
+    TempRect.Top := (TempRect.Top + TempRect.Bottom - TextHeight) div 2;
+  end;
+  TempStr := UTF8Encode(WideString(lpString));
+  Result := DrawText(hDC,PChar(TempStr),Length(TempStr),TempRect,uFormat);
+  //Logger.Send('Rect',TempRect);
+end;
+
+function GetBkColor(DC:HDC):COLORREF;
+begin
+  if GTKWidgetSet.IsValidDC(DC) then
+    Result := TDeviceContext(DC).CurrentBackColor.ColorRef
+  else
+    Result := CLR_INVALID;
 end;
 
 function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
@@ -64,46 +91,6 @@ begin
       OBJ_PEN: Result := HGDIOBJ(CurrentPen);
     end;
   end;
-end;
-
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-var
-  TempStr: UTF8String;
-begin
-  //Logger.Send('GetTextExtentPoint32W');
-  TempStr:=UTF8Encode(WideString(Str));
-  Result:=GetTextExtentPoint(DC, PChar(TempStr), Length(TempStr), Size);
-end;
-
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-var
-  TempStr: UTF8String;
-begin
-  //Logger.Send('GetTextExtentPointW');
-  TempStr:=UTF8Encode(WideString(Str));
-  Result:=GetTextExtentPoint(DC, PChar(TempStr), Length(TempStr), Size);
-end;
-
-function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
-var
-  TempStr: UTF8String;
-  TempRect: TRect;
-  TextHeight: Integer;
-  TM: TTextMetric;
-begin
-  //Logger.Send('DrawTextW');
-  TempRect:=lpRect;
-  //fix position under gtk (lcl bug 8565)
-  if (uFormat and DT_VCENTER) > 0 then
-  begin
-    GetTextMetrics(hDC, TM);
-    //gtk overestimate height
-    TextHeight := TM.tmHeight - 2;
-    TempRect.Top:= (TempRect.Top + TempRect.Bottom - TextHeight) div 2;
-  end;
-  TempStr:=UTF8Encode(WideString(lpString));
-  Result:=DrawText(hDC,PChar(TempStr),Length(TempStr),TempRect,uFormat);
-  //Logger.Send('Rect',TempRect);
 end;
 
 {$ifndef GTK2}
@@ -167,19 +154,6 @@ begin
 end;
 {$endif}
 
-
-function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
-var
-  TempStr: UTF8String;
-begin
-  //Logger.Send('GetTextExtentExPointW');
-  TempStr:=UTF8Encode(WideString(Str));
-  Result:=DelphiCompat.GetTextExtentExPoint(DC, PChar(TempStr),
-  Length(TempStr), MaxWidth, MaxCount, PartialWidths,Size);
-end;
-
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
 var
   DCOrigin: TPoint;
@@ -207,218 +181,6 @@ begin
     end;
   end;
 end;
-
-function GetTextAlign(hDC:HDC): LongWord;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
-begin
-  //todo: There's a bug in gtk intf. Skip for now.
-  //Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
-end;
-
-function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GdiFlush: Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GetWindowDC(hWnd:THandle):HDC;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
-begin
-  //todo: see if there's a better way of doing this
-  Result := LCLIntf.InvalidateRect(hWnd, lprcUpdate, (RDW_ERASE and flags) > 0);
-end;
-
-
-function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-
-function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
-var
-  Log: TLogBrush;
-begin
-  with Log do
-  begin
-    lbColor := 0;
-    lbHatch := hbmp;
-    lbStyle := BS_PATTERN;
-    Result := CreateBrushIndirect(Log);
-  end;
-end;
-
-
-function GetBkColor(DC:HDC):COLORREF;
-begin
-  if GTKWidgetSet.IsValidDC(DC) then
-    Result := TDeviceContext(DC).CurrentBackColor.ColorRef
-  else
-    Result := CLR_INVALID;
-end;
-
-
-function GetDCEx(hWnd:THandle; hrgnClip:HRGN; flags:DWORD):HDC;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function CopyImage(hImage:THANDLE; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord):longint;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function ImageList_DragShowNolock(fShow: Boolean): Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function BeginDeferWindowPos(nNumWindows:longint):THandle;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
-begin
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-  //todo
-end;
-
-
-function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function GetMapMode(DC: HDC): LongInt;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GetACP:LongWord;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function GetKeyboardLayout(dwLayout:DWORD):THandle;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-
-function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
-function GetDoubleClickTime: UINT;
-begin
-  //todo: see if gtk has a value. Use Windows default for now
-  Result := 500;
-end;  
 
 var
   CachedUnicodeFormat: TClipboardFormat;
