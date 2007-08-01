@@ -99,21 +99,25 @@ type
 
   TCSVFile = class
   private
+    FFileHandle: Text;
     FDelimiter: Char;
     FFilename: String;
     FOnColumn: TCSVColumnNotify;
     FOnHeader: TCSVHeaderNotify;
     FOnStartRow: TCSVRowNotify;
     FOnEndRow: TCSVRowNotify;
-    procedure SetOnHeader(const AValue: TCSVHeaderNotify);
+    procedure ReadHeader;
+    procedure SetFilename(const AValue: String);
   public
-    procedure Parse(HasHeader: Boolean = True);
+    constructor Create;
+    procedure Parse(WithHeader: Boolean = True);
+    procedure GetHeader;
     property OnStartRow: TCSVRowNotify read FOnStartRow write FOnStartRow;
     property OnEndRow: TCSVRowNotify read FOnEndRow write FOnEndRow;
     property OnColumn: TCSVColumnNotify read FOnColumn write FOnColumn;
-    property OnHeader: TCSVHeaderNotify read FOnHeader write SetOnHeader;
+    property OnHeader: TCSVHeaderNotify read FOnHeader write FOnHeader;
     property Delimiter: Char read FDelimiter write FDelimiter;
-    property Filename: String read FFilename write FFilename;
+    property Filename: String read FFilename write SetFilename;
   end;
 
 procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
@@ -372,50 +376,61 @@ end;
 
 { TCSVFile }
 
-procedure TCSVFile.SetOnHeader(const AValue: TCSVHeaderNotify);
+procedure TCSVFile.ReadHeader;
+var
+  HeaderValues: array of String;
+  ColCount, Pos1, Pos2: Integer;
+  CSVStr: String;
 begin
-  if FOnHeader=AValue then exit;
-  FOnHeader:=AValue;
+  ReadLn(FFileHandle, CSVStr);
+  if Assigned(FOnHeader) then
+  begin
+    ColCount:=0;
+    pos1:=1;
+    pos2:=pos(FDelimiter, CSVStr);
+    while pos1 < pos2 do
+    begin
+      SetLength(HeaderValues, ColCount+1);
+      HeaderValues[ColCount]:=Copy(CSVStr, pos1, pos2-pos1);
+      pos1:=pos2+1;
+      pos2:=posex(FDelimiter, CSVStr, pos1);
+      Inc(ColCount);
+    end;
+    if pos1 < length(Trim(CSVStr)) then
+    begin
+      SetLength(HeaderValues, ColCount+1);
+      HeaderValues[ColCount]:=Copy(CSVStr, pos1, succ(length(CSVStr)-pos1)
+        );
+      Inc(ColCount);
+    end;
+    FOnHeader(HeaderValues, ColCount);
+  end;
 end;
 
-procedure TCSVFile.Parse(HasHeader: Boolean = True);
+procedure TCSVFile.SetFilename(const AValue: String);
+begin
+  FFilename := AValue;
+  Assign(FFileHandle,FFilename);
+end;
+
+constructor TCSVFile.Create;
+begin
+  FDelimiter := ';';
+end;
+
+procedure TCSVFile.Parse(WithHeader: Boolean = True);
 var
   pos1,pos2,RowCount,ColCount:Integer;
-  FileHandle: Text;
   CSVStr: String;
-  HeaderValues: array of String;
 begin
-  Assign(FileHandle,FFilename);
-  Reset(FileHandle);
-  if HasHeader then
-  begin
-    ReadLn(FileHandle,CSVStr);
-    if Assigned(FOnHeader) then
-    begin
-      ColCount:=0;
-      pos1:=1;
-      pos2:=pos(FDelimiter,CSVStr);
-      while pos1 < pos2 do
-      begin
-        SetLength(HeaderValues,ColCount+1);
-        HeaderValues[ColCount]:=Copy(CSVStr,pos1,pos2-pos1);
-        pos1:=pos2+1;
-        pos2:=posex(FDelimiter,CSVStr,pos1);
-        Inc(ColCount);
-      end;
-      if pos1 < length(Trim(CSVStr)) then
-      begin
-        SetLength(HeaderValues,ColCount+1);
-        HeaderValues[ColCount]:=Copy(CSVStr,pos1,succ(length(CSVStr)-pos1));
-        Inc(ColCount);
-      end;
-      FOnHeader(HeaderValues,ColCount);
-    end;
-  end;
-  RowCount:=1;
-  ReadLn(FileHandle,CSVStr);
-  while not EOF(FileHandle) do
-  begin
+  //Assign(FFileHandle,FFilename);
+  Reset(FFileHandle);
+  if WithHeader then
+    ReadHeader;
+  RowCount := 1;
+  if not EOF(FFileHandle) then
+  repeat
+    ReadLn(FFileHandle,CSVStr);
     if Assigned(FOnStartRow) then 
       FOnStartRow(RowCount);
     pos1:=1;
@@ -423,20 +438,27 @@ begin
     ColCount:=0;
     while pos1 < pos2 do
     begin
-      if Assigned (FOnColumn) then
+      if Assigned(FOnColumn) then
         FOnColumn(Copy(CSVStr,pos1,pos2-pos1),ColCount);
       pos1:=pos2+1;
       pos2:=posex(FDelimiter,CSVStr,pos1);
       Inc(ColCount);
     end;
-    if pos1 < length(Trim(CSVStr)) then
+    if (pos1 < length(Trim(CSVStr))) and Assigned(FOnColumn) then
       FOnColumn(Copy(CSVStr,pos1,succ(length(CSVStr)-pos1)),ColCount);
     if Assigned(FOnEndRow) then
       FOnEndRow(RowCount);
     Inc(RowCount);
-    ReadLn(FileHandle,CSVStr);
-  end;
-  Close(FileHandle);
+  until EOF(FFileHandle);
+  Close(FFileHandle);
+end;
+
+procedure TCSVFile.GetHeader;
+begin
+  //Assign(FFileHandle,FFilename);
+  Reset(FFileHandle);
+  ReadHeader;
+  Close(FFileHandle);
 end;
 
 end.

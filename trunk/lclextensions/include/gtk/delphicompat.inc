@@ -361,6 +361,17 @@ begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
+function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
+begin
+  //todo
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
+end;
+
+function GetMapMode(DC: HDC): LongInt;
+begin
+  //todo
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
+end;
 
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOLEAN;
 begin
