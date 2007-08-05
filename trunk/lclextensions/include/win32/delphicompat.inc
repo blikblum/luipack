@@ -58,6 +58,11 @@ begin
   Result:=Windows.DeferWindowPos(hWinPosInfo,hWnd,hWndInsertAfter,x,y,cx,cy,uFlags);
 end;
 
+function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
+begin
+  Result := Windows.DrawEdge(DC, qrc, edge, grfFlags);
+end;
+
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord
   ): BOOLEAN;
 begin

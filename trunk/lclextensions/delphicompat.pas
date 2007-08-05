@@ -50,6 +50,7 @@ const
   WM_KEYDOWN = LM_KEYDOWN;
   WM_KEYUP = LM_KEYUP;
   WM_KILLFOCUS = LM_KILLFOCUS;
+  WM_SIZE = LM_SIZE;
   
   //Misc Constants
   MAXSHORT = $7FFF;
@@ -113,6 +114,7 @@ type
   TWMKeyDown = TLMKeyDown;
   TWMKeyUp = TLMKeyUp;
   TWMKillFocus = TLMKillFocus;
+  TWMSize = TLMSize;
   
   //timer
   TTimerNotify = procedure (TimerId: LongWord) of object;
@@ -132,6 +134,7 @@ function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongIn
 function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
+function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 
@@ -175,7 +178,7 @@ function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchM
 
 function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
 
-function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord): Boolean;
+function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
 
 function ScrollDC(hDC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
