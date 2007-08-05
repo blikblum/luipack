@@ -29,6 +29,7 @@
 // and is written by Peter Sulek
 // (mailto:virtualdbgrid@virtualdbgrid.wz.cz)
 //----------------------------------------------------------------------------------------------------------------------
+// LCL port: Luiz Americo Pereira Camara
 
 unit VirtualDBGrid;
 
@@ -41,7 +42,7 @@ interface
 {.$I Compilers.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
+  LCLType, types, delphicompat, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
   Variants, contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons;
 
 const
@@ -777,33 +778,10 @@ type
   function NullVar2Date(Value: Variant): tdate;
   function NullVar2Time(Value: Variant): ttime;
 
-
-{$IFNDEF COMPILER_6_UP}
-type
-  TValueRelationship = -1..1;
-
-const
-  LessThanValue = Low(TValueRelationship);
-  EqualsValue = 0;
-  GreaterThanValue = High(TValueRelationship);
-
-
-  function CompareValue(const A, B: Extended; Epsilon: Extended = 0): TValueRelationship; overload;
-  function CompareValue(const A, B: Double; Epsilon: Double = 0): TValueRelationship; overload;
-  function CompareValue(const A, B: Single; Epsilon: Single = 0): TValueRelationship; overload;
-  function CompareValue(const A, B: Integer): TValueRelationship; overload;
-  function CompareValue(const A, B: Int64): TValueRelationship; overload;
-
-  function SameValue(const A, B: Extended; Epsilon: Extended = 0): Boolean; overload;
-  function SameValue(const A, B: Double; Epsilon: Double = 0): Boolean; overload;
-  function SameValue(const A, B: Single; Epsilon: Single = 0): Boolean; overload;
-{$ENDIF}
-
 implementation
 
-uses Math, DBConst
-     {$IFDEF COMPILER_6_UP},Types{$ENDIF}
-     ;
+uses
+  Math;
 
 
 function VarToWideStr(Value: Variant): WideString;
@@ -919,96 +897,6 @@ begin
     end;
   }
 end;
-
-
-
-{$IFNDEF COMPILER_6_UP}
-const
-  FuzzFactor = 1000;
-  ExtendedResolution = 1E-19 * FuzzFactor;
-  DoubleResolution   = 1E-15 * FuzzFactor;
-  SingleResolution   = 1E-7 * FuzzFactor;
-  
-function CompareValue(const A, B: Extended; Epsilon: Extended): TValueRelationship;
-begin
-  if SameValue(A, B, Epsilon) then
-    Result := EqualsValue
-  else if A < B then
-    Result := LessThanValue
-  else
-    Result := GreaterThanValue;
-end;
-
-function CompareValue(const A, B: Double; Epsilon: Double): TValueRelationship;
-begin
-  if SameValue(A, B, Epsilon) then
-    Result := EqualsValue
-  else if A < B then
-    Result := LessThanValue
-  else
-    Result := GreaterThanValue;
-end;
-
-function CompareValue(const A, B: Single; Epsilon: Single): TValueRelationship;
-begin
-  if SameValue(A, B, Epsilon) then
-    Result := EqualsValue
-  else if A < B then
-    Result := LessThanValue
-  else
-    Result := GreaterThanValue;
-end;
-
-function CompareValue(const A, B: Integer): TValueRelationship;
-begin
-  if A = B then
-    Result := EqualsValue
-  else if A < B then
-    Result := LessThanValue
-  else
-    Result := GreaterThanValue;
-end;
-
-function CompareValue(const A, B: Int64): TValueRelationship;
-begin
-  if A = B then
-    Result := EqualsValue
-  else if A < B then
-    Result := LessThanValue
-  else
-    Result := GreaterThanValue;
-end;
-
-function SameValue(const A, B: Extended; Epsilon: Extended): Boolean;
-begin
-  if Epsilon = 0 then
-    Epsilon := Max(Min(Abs(A), Abs(B)) * ExtendedResolution, ExtendedResolution);
-  if A > B then
-    Result := (A - B) <= Epsilon
-  else
-    Result := (B - A) <= Epsilon;
-end;
-
-function SameValue(const A, B: Double; Epsilon: Double): Boolean;
-begin
-  if Epsilon = 0 then
-    Epsilon := Max(Min(Abs(A), Abs(B)) * DoubleResolution, DoubleResolution);
-  if A > B then
-    Result := (A - B) <= Epsilon
-  else
-    Result := (B - A) <= Epsilon;
-end;
-
-function SameValue(const A, B: Single; Epsilon: Single): Boolean;
-begin
-  if Epsilon = 0 then
-    Epsilon := Max(Min(Abs(A), Abs(B)) * SingleResolution, SingleResolution);
-  if A > B then
-    Result := (A - B) <= Epsilon
-  else
-    Result := (B - A) <= Epsilon;
-end;
-{$ENDIF}
 
 
 { ============================================================================ }

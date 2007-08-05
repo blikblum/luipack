@@ -16,6 +16,12 @@ begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
+function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
+begin
+  //todo
+  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
+end;
+
 function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
 begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
