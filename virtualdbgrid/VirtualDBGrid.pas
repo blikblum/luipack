@@ -32,16 +32,17 @@
 
 unit VirtualDBGrid;
 
+{$mode delphi}
+
 interface
 
-{$R 'VirtualDBGrid.res'}
+{.$R 'VirtualDBGrid.res'}
 
-{$I Compilers.inc}
+{.$I Compilers.inc}
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
-  {$IFDEF COMPILER_6_UP}Variants,{$ENDIF}
-  contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons;
+  Variants, contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons;
 
 const
       ResBMP_ARROWFIRST   = 'ARROWFIRST';
@@ -563,11 +564,13 @@ type
     property BackgroundOffsetX;
     property BackgroundOffsetY;
     property BiDiMode;
+    {
     property BevelEdges;
     property BevelInner;
     property BevelOuter;
     property BevelKind;
     property BevelWidth;
+    }
     property BorderStyle;
     property ButtonFillMode;
     property ButtonStyle;
@@ -798,7 +801,7 @@ const
 
 implementation
 
-uses Math, DBConsts
+uses Math, DBConst
      {$IFDEF COMPILER_6_UP},Types{$ENDIF}
      ;
 
@@ -888,6 +891,8 @@ end;
 
 function NullVar2Date(Value: Variant): tdate;
 begin
+  //todo: conflict between Controls.TDate and other type?
+  {
  if (VarIsNull(Value))
     then Result:= 0
     else begin
@@ -897,10 +902,12 @@ begin
         Result:= 0;
       end;
     end;
+  }
 end;
 
 function NullVar2Time(Value: Variant): ttime;
 begin
+ {
  if (VarIsNull(Value))
     then Result:= 0
     else begin
@@ -910,6 +917,7 @@ begin
          Result:= 0;
        end;
     end;
+  }
 end;
 
 
