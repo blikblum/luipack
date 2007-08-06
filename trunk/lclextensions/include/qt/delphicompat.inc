@@ -300,8 +300,6 @@ begin
     //MM_ISOTROPIC:
   end;
 
-  Matrix := QPainter_matrix(QtDC.Widget);
-
   if QPainter_worldMatrixEnabled(QtDC.Widget) then
   begin
     Matrix := QPainter_worldMatrix(QtDC.Widget);
