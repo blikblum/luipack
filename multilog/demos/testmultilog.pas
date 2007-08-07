@@ -16,22 +16,30 @@ begin
     Channels.Add(TIPCChannel.Create);
     ActiveClasses:=[0,1];
     DefaultClasses:= [1];
+	IncCounter('Counter1');
+	Watch('AStrWatch','XXXX');
     Send('An empty StringList',AList);
-    Send('A Text Message');
-    Send('Another Text Message');   
+    IncCounter('CounteR1');
+	Watch('AIntWatch',123);
+	Send('A Text Message');    	
+	IncCounter('CounTER1');	
+	Send('Another Text Message');   
     with AList do
     begin
       Add('aaaaaa');
       Add('bbbbbb');
       Add('cccccc'); 
     end;
-      
+	DecCounter('Counter1');
+	Watch('AIntWatch',321);  
     SendError('A Error Message');
-    EnterMethod('DoIt');
+	ResetCounter('Counter1');
+    Watch('ASTRWatch','YYYY');
+	EnterMethod('DoIt');
     Send('AText inside DoIt');
     SendWarning('A Warning');
     Send('A String','sadjfgadsfbmsandfb');
-    Send('AInteger',Integer(4957));
+    Send('AInteger',4957);
     Send('A Boolean',True);
     SendCallStack('A CallStack example');
     ExitMethod('DoIt');
