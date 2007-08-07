@@ -57,7 +57,7 @@ type
 implementation
 
 const
-  LogPrefixes: array [ltInfo..ltWatch] of String = (
+  LogPrefixes: array [ltInfo..ltCounter] of String = (
     'INFO',
     'ERROR',
     'WARNING',
@@ -74,7 +74,8 @@ const
     'HEAP INFO',
     'MEMORY',
     '','','','','',
-    'WATCH');
+    'WATCH',
+    'COUNTER');
 
 { TFileChannel }
 

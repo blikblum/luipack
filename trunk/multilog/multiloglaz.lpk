@@ -7,6 +7,9 @@
     <CompilerOptions>
       <Version Value="5"/>
       <PathDelim Value="\"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
       </CodeGeneration>
@@ -14,14 +17,14 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="Multilog provides an easy way to use log messages in a fpc application"/>
+    <Description Value="Multilog provides an easy way to use log messages in a fpc application
+"/>
     <License Value="Modified LGPL
 "/>
     <Version Minor="4"/>
-    <Files Count="5">
+    <Files Count="7">
       <Item1>
         <Filename Value="multilog.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="multilog"/>
       </Item1>
       <Item2>
@@ -36,13 +39,20 @@
       </Item3>
       <Item4>
         <Filename Value="sharedlogger.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="sharedlogger"/>
       </Item4>
       <Item5>
         <Filename Value="multiloglcl.pas"/>
         <UnitName Value="multiloglcl"/>
       </Item5>
+      <Item6>
+        <Filename Value="filechannel.pas"/>
+        <UnitName Value="filechannel"/>
+      </Item6>
+      <Item7>
+        <Filename Value="ipcchannel.pas"/>
+        <UnitName Value="ipcchannel"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
@@ -51,7 +61,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgDir)\"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
