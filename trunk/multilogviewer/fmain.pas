@@ -24,7 +24,7 @@ unit fmain;
 {$mode objfpc}{$H+}
 
 interface
-//todo: - Use only one StringGrid for Watches
+//todo: - Use only one StringGrid for Watches (???)
 //      - Optimize Watch update (Cache current values?)
 
 uses
@@ -34,6 +34,7 @@ uses
 
 type
   TMessageSet = 0..31;
+
   { TfrmMain }
 
   TfrmMain = class(TForm)
@@ -56,20 +57,30 @@ type
     checkObject: TCheckBox;
     checkException: TCheckBox;
     checkCallStack: TCheckBox;
+    ComboWatchHistory: TComboBox;
     editTitleFilter: TEdit;
+    imgToolbar: TImageList;
     ImgViewer: TImage;
     imgMessages: TImageList;
     Label1: TLabel;
     lbMemorySize: TLabel;
+    MainMenu1: TMainMenu;
     memoViewer: TMemo;
+    MISep1: TMenuItem;
+    MIClearAll: TMenuItem;
+    MIExit: TMenuItem;
+    MIHelp: TMenuItem;
+    MIFile: TMenuItem;
     nbWatches: TNotebook;
     nbViewer: TNotebook;
+    PageHistory: TPage;
     PageBitmap: TPage;
     PageHexViewer: TPage;
     pageNull: TPage;
     pageText: TPage;
     pageSelected: TPage;
     pageLastest: TPage;
+    PanelImageViewer: TPanel;
     panelFilter: TPanel;
     panelMessages: TPanel;
     panelViewer: TPanel;
@@ -82,6 +93,7 @@ type
     gridSelectedWatch: TStringGrid;
     Splitter4: TSplitter;
     Splitter5: TSplitter;
+    GridWatchHistory: TStringGrid;
     StringGridBitmap: TStringGrid;
     TabControl1: TTabControl;
     toolbarMain: TToolBar;
@@ -92,10 +104,13 @@ type
     procedure butToggleFilterClick(Sender: TObject);
     procedure butUnSelectAllClick(Sender: TObject);
     procedure ClearMessages(Sender: TObject);
+    procedure ComboWatchHistorySelect(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure ImgViewerPaint(Sender: TObject);
+    procedure ImgViewerDblClick(Sender: TObject);
+    procedure MIExitClick(Sender: TObject);
     procedure nbWatchesPageChanged(Sender: TObject);
+    procedure PanelImageViewerDblClick(Sender: TObject);
     procedure QuitApplication(Sender: TObject);
     procedure vtreeMessagesFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
@@ -129,10 +144,12 @@ type
     procedure FilterCallback(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
     procedure SetupFilters;
     procedure ToggleFilterSelected(CheckState:Boolean);
-    procedure WatchCallback(const AVariable,AValue: String);
+    procedure WatchUpdateCallback(const AVariable,AValue: String);
+    procedure NewWatchVariable(const AVariable: String; AIndex: PtrInt);
     procedure ReceiveMessage(Sender: TObject);
     procedure UpdateCallStack(var ANode: PVirtualNode);
     procedure UpdateWatches;
+    procedure UpdateWatchHistory;
     procedure ShowBitmapInfo(ABitmap: TBitmap);
     {$ifdef unix}
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
@@ -147,7 +164,7 @@ var
 implementation
 
 uses
-  StrUtils;
+  StrUtils, Math;
 
 type
   TNodeData = record
@@ -182,15 +199,15 @@ procedure TfrmMain.butToggleFilterClick(Sender: TObject);
 begin
   if FFilterVisible then
   begin
-    butToggleFilter.Caption:='More Options';
+    butToggleFilter.Caption := 'More Options';
     panelFilter.Height:=editTitleFilter.Top+editTitleFilter.Height+4;
   end
   else
   begin
-    butToggleFilter.Caption:='Less Options';
+    butToggleFilter.Caption := 'Less Options';
     panelFilter.Height:=checkValue.Top+checkValue.Height+4;
   end;
-  FFilterVisible:=not FFilterVisible;
+  FFilterVisible := not FFilterVisible;
 end;
 
 procedure TfrmMain.butUnSelectAllClick(Sender: TObject);
@@ -201,14 +218,22 @@ end;
 procedure TfrmMain.ClearMessages(Sender: TObject);
 begin
   vtreeMessages.Clear;
-  gridCallStack.RowCount:=1;
-  gridLastestWatch.RowCount:=1;
-  gridSelectedWatch.RowCount:=1;
+  gridCallStack.RowCount := 1;
+  gridLastestWatch.RowCount := 1;
+  gridSelectedWatch.RowCount := 1;
+  GridWatchHistory.RowCount := 1;
+  FWatches.Clear;
+  ComboWatchHistory.Clear;
   //memoViewer.Lines.Clear;
   nbViewer.ActivePageComponent:=pageNull;
   FMessageCount:=0;
   FLastNode:=nil;
   FLastParent:=nil;
+end;
+
+procedure TfrmMain.ComboWatchHistorySelect(Sender: TObject);
+begin
+  UpdateWatchHistory;
 end;
 
 procedure TfrmMain.butFilterClick(Sender: TObject);
@@ -226,19 +251,19 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   {$ifdef unix}
-  Application.OnIdle:=@ApplicationIdle;
+  Application.OnIdle := @ApplicationIdle;
   {$endif}
-  FFilterVisible:=True;
-  vtreeMessages.NodeDataSize:=SizeOf(TNodeData);
-  //TabControl1.BorderStyle:=bsNone;
-  FWatches:=TWatchList.Create;
-  FWatches.OnUpdate:=@WatchCallback;
-  FIPCServer:=TSimpleIPCServer.Create(nil);
+  FFilterVisible := True;
+  vtreeMessages.NodeDataSize := SizeOf(TNodeData);
+  FWatches := TWatchList.Create;
+  FWatches.OnUpdate := @WatchUpdateCallback;
+  FWatches.OnNewVariable := @NewWatchVariable;
+  FIPCServer := TSimpleIPCServer.Create(nil);
   with FIPCServer do
   begin
-    ServerID:='ipc_log_server';
-    Global:=True;
-    OnMessage:=@ReceiveMessage;
+    ServerID := 'ipc_log_server';
+    Global := True;
+    OnMessage := @ReceiveMessage;
     StartServer;
   end;
   SetupFilters;
@@ -250,16 +275,28 @@ begin
   FWatches.Destroy;
 end;
 
-procedure TfrmMain.ImgViewerPaint(Sender: TObject);
+procedure TfrmMain.ImgViewerDblClick(Sender: TObject);
 begin
-  //with ImgViewer.Picture.Bitmap do
-  //  ImgViewer.Canvas.DrawFocusRect(Rect(0,0,Width,Height));
+  with ImgViewer.Picture.Bitmap do
+    PanelImageViewer.Canvas.DrawFocusRect(Rect(0,0,Width + 1,Height + 1));
+end;
+
+procedure TfrmMain.MIExitClick(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TfrmMain.nbWatchesPageChanged(Sender: TObject);
 begin
-  if vtreeMessages.FocusedNode <> nil then
-    UpdateWatches;
+  UpdateWatches;
+end;
+
+procedure TfrmMain.PanelImageViewerDblClick(Sender: TObject);
+begin
+  if PanelImageViewer.Color = clBtnFace then
+    PanelImageViewer.Color := clWhite
+  else
+    PanelImageViewer.Color := clBtnFace;
 end;
 
 procedure TfrmMain.QuitApplication(Sender: TObject);
@@ -361,7 +398,7 @@ begin
     MsgType:=FCurrentMsg.MsgType;
     //In fast computers two or more messages can have the same TimeStamp
     //This leads to conflicts when determining the Watches values
-    //Uses an unique index instead
+    //Use an unique index instead
     Index:= FMessageCount;
     //Show only what matches filter criterias
     Sender.IsVisible[Node]:= (MsgType in [ltEnterMethod,ltExitMethod]) or
@@ -383,19 +420,19 @@ var
   i: Integer;
 begin
   //Set Active Messages set used to filter
-    FActiveMessages:=[4,5];//always show Enter/ExitMethod
-    with panelFilter do
-    for i:= 0 to ControlCount - 1 do
-    begin
-      AControl:=Controls[i];
-      if (AControl is TCheckBox) and (TCheckBox(AControl)).Checked then
-        Include(FActiveMessages, AControl.Tag);
-    end;
-    //Set Title Filter
-    FTitleFilter:=Trim(editTitleFilter.Text)+'*';
-    if Length(FTitleFilter) > 1 then //editFilter is not empty
-      FTitleFilter:='*'+FTitleFilter;
-    //writeln('FFilter:', FTitleFilter);
+  FActiveMessages:=[4,5];//always show Enter/ExitMethod
+  with panelFilter do
+  for i:= 0 to ControlCount - 1 do
+  begin
+    AControl:=Controls[i];
+    if (AControl is TCheckBox) and (TCheckBox(AControl)).Checked then
+      Include(FActiveMessages, AControl.Tag);
+  end;
+  //Set Title Filter
+  FTitleFilter:=Trim(editTitleFilter.Text)+'*';
+  if Length(FTitleFilter) > 1 then //editFilter is not empty
+    FTitleFilter:='*'+FTitleFilter;
+  //writeln('FFilter:', FTitleFilter);
 end;
 
 procedure TfrmMain.ToggleFilterSelected(CheckState:Boolean);
@@ -412,7 +449,7 @@ begin
    end;
 end;
 
-procedure TfrmMain.WatchCallback(const AVariable, AValue: String);
+procedure TfrmMain.WatchUpdateCallback(const AVariable, AValue: String);
 begin
   with FActiveWatch do
   begin
@@ -420,6 +457,11 @@ begin
     Cells[0,RowCount-1]:=AVariable;
     Cells[1,RowCount-1]:=AValue;
   end;
+end;
+
+procedure TfrmMain.NewWatchVariable(const AVariable: String; AIndex: PtrInt);
+begin
+  ComboWatchHistory.Items.AddObject(AVariable,TObject(AIndex));
 end;
 
 procedure TfrmMain.ReceiveMessage(Sender: TObject);
@@ -469,9 +511,9 @@ begin
       end;
       vtreeMessages.ValidateNode(FLastNode,False);
     end;
-    ltWatch:
+    ltWatch, ltCounter:
     begin
-      FWatches.Add(FCurrentMsg.MsgText,FMessageCount);
+      FWatches.Add(FCurrentMsg.MsgText, FMessageCount, FCurrentMsg.MsgType = ltCounter);
       UpdateWatches;
     end;
     ltClear:
@@ -514,32 +556,58 @@ procedure TfrmMain.UpdateWatches;
 var
   TempIndex: LongWord;
 begin
-  if nbWatches.ActivePageComponent = pageLastest then
-  begin
-    FActiveWatch:=gridLastestWatch;
-    TempIndex:=FMessageCount;
-  end
-  else
-  begin
-    FActiveWatch:=gridSelectedWatch;
-    if vtreeMessages.FocusedNode <> nil then
-      TempIndex:=PNodeData(vtreeMessages.GetNodeData(vtreeMessages.FocusedNode))^.Index
-    else
-      TempIndex:=0;
+  case nbWatches.PageIndex of
+    0{Last},1{Selected}:
+    begin
+      if nbWatches.PageIndex = 0 then
+      begin
+        FActiveWatch := gridLastestWatch;
+        TempIndex := FMessageCount;
+      end
+      else
+      begin
+        FActiveWatch := gridSelectedWatch;
+        if vtreeMessages.FocusedNode <> nil then
+          TempIndex := PNodeData(vtreeMessages.GetNodeData(vtreeMessages.FocusedNode))^.Index
+        else
+          TempIndex := 0;
+      end;
+      FActiveWatch.RowCount:=1;
+      FWatches.Update(TempIndex);
+    end;
+    2{History}:
+    begin
+      UpdateWatchHistory;
+    end;
   end;
-  FActiveWatch.RowCount:=1;
-  FWatches.Update(TempIndex);
+end;
+
+procedure TfrmMain.UpdateWatchHistory;
+var
+  i: Integer;
+begin
+  with ComboWatchHistory do
+  begin
+    if ItemIndex = -1 then
+      Exit;
+    with FWatches[PtrInt(Items.Objects[ItemIndex])] do
+    begin
+      GridWatchHistory.RowCount := Count + 1;
+      for i := 1 to Count do
+        GridWatchHistory.Cells[0,i] := Values[i-1];
+    end;
+  end;
 end;
 
 procedure TfrmMain.ShowBitmapInfo(ABitmap: TBitmap);
 begin
   with StringGridBitmap, ABitmap do
   begin
-    Cells[1,0]:=IntToStr(Height);
-    Cells[1,1]:=IntToStr(Width);
-    Cells[1,2]:=PixelFormatNames[PixelFormat];
-    Cells[1,3]:=HandleTypeNames[HandleType];
-    Cells[1,4]:='$'+IntToHex(TransparentColor,8);
+    Cells[1,0] := IntToStr(Height);
+    Cells[1,1] := IntToStr(Width);
+    Cells[1,2] := PixelFormatNames[PixelFormat];
+    Cells[1,3] := HandleTypeNames[HandleType];
+    Cells[1,4] := '$'+IntToHex(TransparentColor,8);
   end;
 end;
 

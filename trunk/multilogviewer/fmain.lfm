@@ -1,57 +1,69 @@
 object frmMain: TfrmMain
-  Left = 108
+  Left = 97
   Height = 597
-  Top = 55
+  Top = 101
   Width = 890
   HorzScrollBar.Page = 889
-  VertScrollBar.Page = 596
+  VertScrollBar.Page = 577
   ActiveControl = vtreeMessages
-  Caption = 'Multilog Viewer'
+  Caption = 'Multilog Viewer 0.3'
+  ClientHeight = 578
+  ClientWidth = 890
+  Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object toolbarMain: TToolBar
-    Left = 1
-    Height = 28
-    Top = 1
-    Width = 888
-    BorderSpacing.Around = 1
-    ButtonHeight = 28
-    ButtonWidth = 28
+    Left = 4
+    Height = 38
+    Width = 886
+    BorderSpacing.Left = 4
+    ButtonHeight = 36
+    ButtonWidth = 36
     Caption = 'toolbarMain'
     Color = clBtnFace
     EdgeBorders = []
+    Flat = True
+    Images = imgToolbar
     ParentColor = False
-    ShowCaptions = True
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 2
     Wrapable = False
     object tbutClear: TToolButton
       Left = 1
       Caption = 'Clear'
+      ImageIndex = 0
       OnClick = ClearMessages
     end
   end
   object panelLeft: TPanel
     Left = 291
-    Height = 567
-    Top = 30
+    Height = 540
+    Top = 38
     Width = 599
     Align = alClient
     BevelOuter = bvNone
+    ClientHeight = 540
+    ClientWidth = 599
     TabOrder = 0
     object panelViewer: TPanel
       Height = 175
-      Top = 392
+      Top = 365
       Width = 599
       Align = alBottom
       BevelOuter = bvNone
+      ClientHeight = 175
+      ClientWidth = 599
       TabOrder = 0
       object Label1: TLabel
         AnchorSideLeft.Control = nbViewer
         AnchorSideBottom.Control = nbViewer
+        Left = 4
         Height = 18
-        Width = 599
+        Width = 595
         Align = alTop
         Anchors = [akLeft, akBottom]
+        BorderSpacing.Left = 4
         Caption = 'Data Viewer'
         Color = clNone
         ParentColor = False
@@ -61,15 +73,18 @@ object frmMain: TfrmMain
         Top = 18
         Width = 599
         Align = alClient
-        PageIndex = 1
+        PageIndex = 0
         ShowTabs = False
+        TabOrder = 0
         object pageNull: TPage
           Caption = 'pageNull'
         end
         object pageText: TPage
           Caption = 'pageText'
+          ClientWidth = 591
+          ClientHeight = 131
           object memoViewer: TMemo
-            Height = 149
+            Height = 131
             Width = 591
             Align = alClient
             Lines.Strings = (
@@ -82,12 +97,8 @@ object frmMain: TfrmMain
         end
         object PageBitmap: TPage
           Caption = 'PageBitmap'
-          object ImgViewer: TImage
-            Height = 100
-            Width = 100
-            AutoSize = True
-            OnPaint = ImgViewerPaint
-          end
+          ClientWidth = 591
+          ClientHeight = 131
           object StringGridBitmap: TStringGrid
             Left = 427
             Height = 149
@@ -97,7 +108,6 @@ object frmMain: TfrmMain
             FixedColor = clBtnFace
             FixedCols = 0
             FixedRows = 0
-            GridLineWidth = 0
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
             RowCount = 5
             ScrollBars = ssAutoBoth
@@ -126,9 +136,30 @@ object frmMain: TfrmMain
               'TransparentColor'
             )
           end
+          object PanelImageViewer: TPanel
+            Height = 149
+            Width = 427
+            Align = alClient
+            BevelOuter = bvNone
+            ClientHeight = 149
+            ClientWidth = 427
+            ParentColor = False
+            TabOrder = 1
+            OnDblClick = PanelImageViewerDblClick
+            object ImgViewer: TImage
+              Left = 1
+              Height = 100
+              Top = 1
+              Width = 100
+              AutoSize = True
+              OnDblClick = ImgViewerDblClick
+            end
+          end
         end
         object PageHexViewer: TPage
           Caption = 'PageHexViewer'
+          ClientWidth = 591
+          ClientHeight = 131
           object lbMemorySize: TLabel
             Height = 14
             Width = 591
@@ -159,23 +190,25 @@ object frmMain: TfrmMain
     object Splitter2: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 387
+      Top = 360
       Width = 599
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
-      Height = 387
+      Height = 360
       Width = 599
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
+      ClientHeight = 360
+      ClientWidth = 599
       TabOrder = 1
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
         AnchorSideTop.Side = asrBottom
-        Height = 241
+        Height = 214
         Top = 146
         Width = 599
         Align = alClient
@@ -198,8 +231,11 @@ object frmMain: TfrmMain
         Width = 599
         Align = alTop
         BevelOuter = bvNone
+        ClientHeight = 122
+        ClientWidth = 599
         TabOrder = 1
         object editTitleFilter: TEdit
+          Left = 2
           Height = 23
           Top = 2
           Width = 299
@@ -207,6 +243,7 @@ object frmMain: TfrmMain
           TabOrder = 0
         end
         object checkInfo: TCheckBox
+          Left = 2
           Height = 13
           Top = 34
           Width = 38
@@ -217,6 +254,7 @@ object frmMain: TfrmMain
         end
         object checkError: TCheckBox
           Tag = 1
+          Left = 2
           Height = 13
           Top = 58
           Width = 42
@@ -227,6 +265,7 @@ object frmMain: TfrmMain
         end
         object checkValue: TCheckBox
           Tag = 3
+          Left = 2
           Height = 13
           Top = 106
           Width = 47
@@ -336,6 +375,7 @@ object frmMain: TfrmMain
         end
         object checkWarning: TCheckBox
           Tag = 2
+          Left = 2
           Height = 13
           Top = 82
           Width = 60
@@ -411,21 +451,26 @@ object frmMain: TfrmMain
     end
   end
   object panelRight: TPanel
-    Height = 567
-    Top = 30
+    Height = 540
+    Top = 38
     Width = 286
     Align = alLeft
     BevelOuter = bvNone
+    ClientHeight = 540
+    ClientWidth = 286
     TabOrder = 1
     object nbWatches: TNotebook
       Height = 175
-      Top = 392
+      Top = 365
       Width = 286
       Align = alBottom
       OnPageChanged = nbWatchesPageChanged
       PageIndex = 0
+      TabOrder = 0
       object pageLastest: TPage
         Caption = 'Last'
+        ClientWidth = 278
+        ClientHeight = 149
         object gridLastestWatch: TStringGrid
           Height = 149
           Width = 278
@@ -443,7 +488,6 @@ object frmMain: TfrmMain
             end>
           FixedColor = clBtnFace
           FixedCols = 0
-          GridLineWidth = 0
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
           RowCount = 1
           ScrollBars = ssAutoBoth
@@ -453,24 +497,25 @@ object frmMain: TfrmMain
       end
       object pageSelected: TPage
         Caption = 'Selected'
+        ClientWidth = 278
+        ClientHeight = 149
         object gridSelectedWatch: TStringGrid
-          Height = 163
-          Width = 281
+          Height = 149
+          Width = 278
           Align = alClient
           AutoFillColumns = True
           ColCount = 2
           Columns = <          
             item
               Title.Caption = 'Variable'
-              Width = 140
+              Width = 139
             end          
             item
               Title.Caption = 'Value'
-              Width = 140
+              Width = 139
             end>
           FixedColor = clBtnFace
           FixedCols = 0
-          GridLineWidth = 0
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
           RowCount = 1
           ScrollBars = ssAutoBoth
@@ -478,11 +523,50 @@ object frmMain: TfrmMain
           TabStop = True
         end
       end
+      object PageHistory: TPage
+        Caption = 'History'
+        ClientWidth = 278
+        ClientHeight = 149
+        object ComboWatchHistory: TComboBox
+          Height = 21
+          Width = 278
+          Align = alTop
+          AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+          ItemHeight = 13
+          MaxLength = 0
+          OnSelect = ComboWatchHistorySelect
+          Style = csDropDownList
+          TabOrder = 0
+        end
+        object GridWatchHistory: TStringGrid
+          Height = 128
+          Top = 21
+          Width = 278
+          Align = alClient
+          ColCount = 1
+          FixedColor = clBtnFace
+          FixedCols = 0
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
+          RowCount = 1
+          ScrollBars = ssAutoBoth
+          TabOrder = 1
+          TabStop = True
+          ColWidths = (
+            233
+          )
+          Cells = (
+            1
+            0
+            0
+            'Values'
+          )
+        end
+      end
     end
     object Splitter1: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 387
+      Top = 360
       Width = 286
       Align = alBottom
       Beveled = True
@@ -490,7 +574,7 @@ object frmMain: TfrmMain
     end
     object gridCallStack: TStringGrid
       Left = 5
-      Height = 387
+      Height = 360
       Width = 281
       Align = alClient
       AutoFillColumns = True
@@ -502,7 +586,6 @@ object frmMain: TfrmMain
         end>
       FixedColor = clBtnFace
       FixedCols = 0
-      GridLineWidth = 0
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
       RowCount = 1
       ScrollBars = ssAutoBoth
@@ -510,14 +593,14 @@ object frmMain: TfrmMain
       TabStop = True
     end
     object Splitter4: TSplitter
-      Height = 387
+      Height = 360
       Width = 5
     end
   end
   object Splitter5: TSplitter
     Left = 286
-    Height = 567
-    Top = 30
+    Height = 540
+    Top = 38
     Width = 5
     Beveled = True
   end
@@ -988,5 +1071,64 @@ object frmMain: TfrmMain
       FFFFFFFFFFFFFFFFFFFF874A20874A20874A20874A20874A20874A20874A2087
       4A20FFFFFFFFFFFFFFFFFFFFFFFF
     }
+  end
+  object imgToolbar: TImageList
+    Height = 24
+    Width = 24
+    top = 544
+    Bitmap = {
+      6C69010000001800000018000000B10300002F2A2058504D202A2F0A73746174
+      69632063686172202A677261706869635B5D203D207B0A223234203234203135
+      2031222C0A222E2063204E6F6E65222C0A222C20632023464144374345222C0A
+      222D20632023464137313435222C0A222A20632023463138323636222C0A2261
+      20632023464233353033222C0A226220632023464446364630222C0A22632063
+      2023463735413239222C0A226420632023454641393938222C0A226520632023
+      444533323037222C0A226620632023444343364245222C0A2267206320234633
+      46334633222C0A226820632023453443444431222C0A22692063202345314444
+      4337222C0A226A20632023454345334430222C0A226B20632023454145414543
+      222C0A222E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E222C0A22
+      2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E222C0A222E2C2D2D
+      2C2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E222C0A222E2A6161612C2E2E
+      2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E222C0A222E2A616161612C2E2E2E2E2E
+      2E2E2E2E2E2E2E2E2E2E2E2E222C0A222E6263616161612C2E2E2E2E2E2E2E2E
+      2E2E64612C2E2E2E222C0A222E2E6263616161612C2E2E2E2E2E2E2E622D612D
+      2E2E2E2E222C0A222E2E2E2E2A616161612C2E2E2E2E2E2C63612A2E2E2E2E2E
+      222C0A222E2E2E2E2E2A616561612C2E2E2E6461612A2E2E2E2E2E2E222C0A22
+      2E2E2E2E2E2E64616165612C622A61612A2E2E2E2E2E2E2E222C0A222E2E2E2E
+      2E2E2E64656165616361652A2E2E2E2E2E2E2E2E222C0A222E2E2E2E2E2E2E2E
+      6665616565612A2E2E2E2E2E2E2E2E2E222C0A222E2E2E2E2E2E2E2E2E2A6565
+      61652C2E2E2E2E2E2E2E2E2E222C0A222E2E2E2E2E2E2E622D6561656565652C
+      2E2E2E2E2E2E2E2E222C0A222E2E2E2E2E2E2C6365656564636565652C2E2E2E
+      2E2E2E2E222C0A222E2E2E2E2E6465656565642E67636565652C2E2E2E2E2E2E
+      222C0A222E2E2E2E2A65656565642E2E2E2E2A6565652C2E2E2E2E2E222C0A22
+      2E2E676365656565642E2E2E2E2E2E2A6565652C2E2E2E2E222C0A222E626565
+      656565662E2E2E2E2E2E2E2E646565652C2E2E2E222C0A222E68656565652C2E
+      2E2E2E2E2E2E2E2E2E646565652C2E2E222C0A222E62656565692E2E2E2E2E2E
+      2E2E2E2E2E2E686565652C2E222C0A222E2E6A686B2E2E2E2E2E2E2E2E2E2E2E
+      2E2E2E2C6565652E222C0A222E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E
+      2C63642E222C0A222E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E2E
+      227D0A
+    }
+  end
+  object MainMenu1: TMainMenu
+    left = 19
+    top = 149
+    object MIFile: TMenuItem
+      Caption = 'File'
+      object MIClearAll: TMenuItem
+        Caption = 'Clear'
+        OnClick = ClearMessages
+      end
+      object MISep1: TMenuItem
+        Caption = '-'
+      end
+      object MIExit: TMenuItem
+        Caption = 'Exit'
+        OnClick = MIExitClick
+      end
+    end
+    object MIHelp: TMenuItem
+      Caption = 'Help'
+    end
   end
 end
