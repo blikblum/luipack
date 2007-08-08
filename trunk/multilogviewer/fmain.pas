@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Grids, StdCtrls, multilog, VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
-  Menus, ATBinHex;
+  Menus, ATBinHex, togglelabel;
 
 type
   TMessageSet = 0..31;
@@ -40,7 +40,6 @@ type
   TfrmMain = class(TForm)
     BinHexViewer: TATBinHex;
     butFilter: TButton;
-    butToggleFilter: TButton;
     butSelectAll: TButton;
     butUnSelectAll: TButton;
     checkHeapInfo: TCheckBox;
@@ -96,12 +95,12 @@ type
     GridWatchHistory: TStringGrid;
     StringGridBitmap: TStringGrid;
     TabControl1: TTabControl;
+    ToggleOptions: TToggleLabel;
     toolbarMain: TToolBar;
     tbutClear: TToolButton;
     vtreeMessages: TVirtualStringTree;
     procedure butFilterClick(Sender: TObject);
     procedure butSelectAllClick(Sender: TObject);
-    procedure butToggleFilterClick(Sender: TObject);
     procedure butUnSelectAllClick(Sender: TObject);
     procedure ClearMessages(Sender: TObject);
     procedure ComboWatchHistorySelect(Sender: TObject);
@@ -112,6 +111,7 @@ type
     procedure nbWatchesPageChanged(Sender: TObject);
     procedure PanelImageViewerDblClick(Sender: TObject);
     procedure QuitApplication(Sender: TObject);
+    procedure ToggleOptionsChange(Sender: TObject);
     procedure vtreeMessagesFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
     procedure vtreeMessagesFocusChanging(Sender: TBaseVirtualTree;
@@ -138,7 +138,6 @@ type
     FCurrentMsg: TLogMessage;
     FLastParent: PVirtualNode;
     FLastNode: PVirtualNode;
-    FFilterVisible: Boolean;
     FIPCServer: TSimpleIPCServer;
     FWatches: TWatchList;
     procedure FilterCallback(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
@@ -195,21 +194,6 @@ const
   
 { TfrmMain }
 
-procedure TfrmMain.butToggleFilterClick(Sender: TObject);
-begin
-  if FFilterVisible then
-  begin
-    butToggleFilter.Caption := 'More Options';
-    panelFilter.Height:=editTitleFilter.Top+editTitleFilter.Height+4;
-  end
-  else
-  begin
-    butToggleFilter.Caption := 'Less Options';
-    panelFilter.Height:=checkValue.Top+checkValue.Height+4;
-  end;
-  FFilterVisible := not FFilterVisible;
-end;
-
 procedure TfrmMain.butUnSelectAllClick(Sender: TObject);
 begin
   ToggleFilterSelected(False);
@@ -253,7 +237,6 @@ begin
   {$ifdef unix}
   Application.OnIdle := @ApplicationIdle;
   {$endif}
-  FFilterVisible := True;
   vtreeMessages.NodeDataSize := SizeOf(TNodeData);
   FWatches := TWatchList.Create;
   FWatches.OnUpdate := @WatchUpdateCallback;
@@ -302,6 +285,14 @@ end;
 procedure TfrmMain.QuitApplication(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfrmMain.ToggleOptionsChange(Sender: TObject);
+begin
+  if ToggleOptions.Expanded then
+    panelFilter.Height := checkValue.Top + checkValue.Height + 4
+  else
+    panelFilter.Height := editTitleFilter.Top + editTitleFilter.Height + 4;
 end;
 
 procedure TfrmMain.vtreeMessagesFocusChanged(Sender: TBaseVirtualTree;
