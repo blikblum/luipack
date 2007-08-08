@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
-  Left = 97
+  Left = 223
   Height = 597
-  Top = 101
+  Top = 187
   Width = 890
   HorzScrollBar.Page = 889
   VertScrollBar.Page = 577
@@ -65,7 +65,6 @@ object frmMain: TfrmMain
         Anchors = [akLeft, akBottom]
         BorderSpacing.Left = 4
         Caption = 'Data Viewer'
-        Color = clNone
         ParentColor = False
       end
       object nbViewer: TNotebook
@@ -82,7 +81,7 @@ object frmMain: TfrmMain
         object pageText: TPage
           Caption = 'pageText'
           ClientWidth = 591
-          ClientHeight = 131
+          ClientHeight = 149
           object memoViewer: TMemo
             Height = 131
             Width = 591
@@ -98,7 +97,7 @@ object frmMain: TfrmMain
         object PageBitmap: TPage
           Caption = 'PageBitmap'
           ClientWidth = 591
-          ClientHeight = 131
+          ClientHeight = 149
           object StringGridBitmap: TStringGrid
             Left = 427
             Height = 149
@@ -159,13 +158,12 @@ object frmMain: TfrmMain
         object PageHexViewer: TPage
           Caption = 'PageHexViewer'
           ClientWidth = 591
-          ClientHeight = 131
+          ClientHeight = 149
           object lbMemorySize: TLabel
             Height = 14
             Width = 591
             Align = alTop
             Caption = 'Size:'
-            Color = clNone
             ParentColor = False
           end
           object BinHexViewer: TATBinHex
@@ -234,6 +232,16 @@ object frmMain: TfrmMain
         ClientHeight = 122
         ClientWidth = 599
         TabOrder = 1
+        object ToggleOptions: TToggleLabel
+          Left = 397
+          Height = 14
+          Top = 8
+          Width = 74
+          Caption = 'More Options'
+          ExpandedCaption = 'Less Options'
+          Expanded = True
+          OnChange = ToggleOptionsChange
+        end
         object editTitleFilter: TEdit
           Left = 2
           Height = 23
@@ -276,7 +284,7 @@ object frmMain: TfrmMain
         end
         object checkConditional: TCheckBox
           Tag = 6
-          Left = 120
+          Left = 101
           Height = 13
           Top = 34
           Width = 72
@@ -287,7 +295,7 @@ object frmMain: TfrmMain
         end
         object checkCheckPoint: TCheckBox
           Tag = 7
-          Left = 120
+          Left = 101
           Height = 13
           Top = 58
           Width = 75
@@ -298,7 +306,7 @@ object frmMain: TfrmMain
         end
         object checkStrings: TCheckBox
           Tag = 8
-          Left = 120
+          Left = 101
           Height = 13
           Top = 82
           Width = 52
@@ -309,7 +317,7 @@ object frmMain: TfrmMain
         end
         object checkObject: TCheckBox
           Tag = 10
-          Left = 232
+          Left = 213
           Height = 13
           Top = 34
           Width = 51
@@ -320,7 +328,7 @@ object frmMain: TfrmMain
         end
         object checkException: TCheckBox
           Tag = 11
-          Left = 232
+          Left = 213
           Height = 13
           Top = 58
           Width = 67
@@ -331,7 +339,7 @@ object frmMain: TfrmMain
         end
         object checkCallStack: TCheckBox
           Tag = 9
-          Left = 120
+          Left = 101
           Height = 13
           Top = 106
           Width = 65
@@ -342,7 +350,7 @@ object frmMain: TfrmMain
         end
         object checkMemory: TCheckBox
           Tag = 14
-          Left = 320
+          Left = 306
           Height = 13
           Top = 34
           Width = 57
@@ -353,7 +361,7 @@ object frmMain: TfrmMain
         end
         object checkCustomData: TCheckBox
           Tag = 15
-          Left = 320
+          Left = 306
           Height = 13
           Top = 58
           Width = 81
@@ -364,7 +372,7 @@ object frmMain: TfrmMain
         end
         object checkBitmap: TCheckBox
           Tag = 12
-          Left = 232
+          Left = 213
           Height = 13
           Top = 82
           Width = 52
@@ -385,55 +393,48 @@ object frmMain: TfrmMain
           TabOrder = 13
         end
         object butFilter: TButton
-          Left = 320
-          Height = 25
+          AnchorSideLeft.Control = editTitleFilter
+          AnchorSideLeft.Side = asrBottom
+          Left = 306
+          Height = 23
           Top = 2
           Width = 82
+          BorderSpacing.Left = 5
           BorderSpacing.InnerBorder = 4
           Caption = 'Filter'
           OnClick = butFilterClick
           TabOrder = 14
         end
-        object butToggleFilter: TButton
-          Left = 432
-          Height = 25
-          Top = 2
-          Width = 80
-          BorderSpacing.InnerBorder = 4
-          Caption = 'Less Options'
-          OnClick = butToggleFilterClick
-          TabOrder = 15
-        end
         object checkHeapInfo: TCheckBox
           Tag = 13
-          Left = 232
+          Left = 213
           Height = 13
           Top = 106
           Width = 64
           Caption = 'HeapInfo'
           Checked = True
           State = cbChecked
-          TabOrder = 16
+          TabOrder = 15
         end
         object butSelectAll: TButton
-          Left = 320
+          Left = 397
           Height = 25
-          Top = 94
-          Width = 82
+          Top = 58
+          Width = 80
           BorderSpacing.InnerBorder = 4
           Caption = 'Select All'
           OnClick = butSelectAllClick
-          TabOrder = 17
+          TabOrder = 16
         end
         object butUnSelectAll: TButton
-          Left = 432
+          Left = 397
           Height = 25
-          Top = 94
+          Top = 90
           Width = 80
           BorderSpacing.InnerBorder = 4
           Caption = 'Unselect All'
           OnClick = butUnSelectAllClick
-          TabOrder = 18
+          TabOrder = 17
         end
       end
       object TabControl1: TTabControl
