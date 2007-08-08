@@ -34,7 +34,6 @@
       </Item2>
       <Item3>
         <Filename Value="logtreeview.pas"/>
-        <AddToUsesPkgSection Value="False"/>
         <UnitName Value="logtreeview"/>
       </Item3>
       <Item4>
