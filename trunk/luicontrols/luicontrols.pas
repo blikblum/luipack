@@ -2,12 +2,12 @@
 This source is only used to compile and install the package.
  }
 
-unit misccontrols_package; 
+unit luicontrols; 
 
 interface
 
 uses
-  ToggleLabel, registermisccontrols, MenuButton, LazarusPackageIntf; 
+  ToggleLabel, MenuButton, registermisccontrols, LazarusPackageIntf; 
 
 implementation
 
@@ -17,5 +17,5 @@ begin
 end; 
 
 initialization
-  RegisterPackage('misccontrols_package', @Register); 
+  RegisterPackage('luicontrols', @Register); 
 end.
