@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms
   { add your units here }, fmain, sharedlogger {$ifdef DEBUG_MULTILOGVIEWER},filechannel{$endif},
-  misccontrols_package;
+  luicontrols;
 
 begin
   {$ifdef DEBUG_MULTILOGVIEWER}

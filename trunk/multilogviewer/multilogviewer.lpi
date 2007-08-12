@@ -34,8 +34,7 @@
         <PackageName Value="miscutils_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="misccontrols_package"/>
-        <MinVersion Valid="True"/>
+        <PackageName Value="luicontrols"/>
       </Item4>
       <Item5>
         <PackageName Value="LCL"/>
