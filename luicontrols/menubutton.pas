@@ -1,7 +1,7 @@
 unit MenuButton;
 
 {$mode objfpc}{$H+}
-{. define DEBUG_MENUBUTTON}
+{.define DEBUG_MENUBUTTON}
 interface
 
 
@@ -41,7 +41,6 @@ type
     FBottom: TPoint;
     procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   protected
-    procedure DoAfterClick; override;
     procedure Paint; override;
   public
     property OnMouseEnter;
@@ -54,7 +53,7 @@ type
   private
     FMenu: TPopupMenu;
     FArrowButton: TArrowButton;
-    FShowButton: Boolean;
+    FShowArrow: Boolean;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
     procedure ArrowClicked(Sender: TObject);
@@ -73,9 +72,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure Click; override;
   published
     property Menu: TPopupMenu read FMenu write SetMenu;
-    property ShowArrow: Boolean read FShowButton write SetShowArrow;
+    property ShowArrow: Boolean read FShowArrow write SetShowArrow;
     property Action;
     property Align;
     property Anchors;
@@ -125,7 +125,6 @@ end;
 
 { TMenuButton }
 
-
 procedure TMenuButton.ShowMenu;
 var
   P: TPoint;
@@ -143,7 +142,7 @@ var
 begin
   if csLoading in ComponentState then
     Exit;
-  if FShowButton then
+  if FShowArrow then
   begin
     if FArrowButton = nil then
     begin
@@ -160,7 +159,7 @@ begin
         ArrowWidth := Max(Self.Width div 3, 10);
         if odd(ArrowWidth) then
           Inc(ArrowWidth);
-        SetBounds(Self.Left + Self.Width, Self.Top, ArrowWidth , Self.Height);
+        SetBounds(Self.Left + Self.Width, Self.Top, ArrowWidth, Self.Height);
       end;
     end;
     ToggleMode := False;
@@ -255,9 +254,9 @@ end;
 
 procedure TMenuButton.SetShowArrow(const AValue: Boolean);
 begin
-  if AValue <> FShowButton then
+  if AValue <> FShowArrow then
   begin
-    FShowButton := AValue;
+    FShowArrow := AValue;
     UpdateArrowState;
   end;
 end;
@@ -272,6 +271,13 @@ destructor TMenuButton.Destroy;
 begin
   FArrowButton.Free;
   inherited Destroy;
+end;
+
+procedure TMenuButton.Click;
+begin
+  //skips Click event when there's no arrow
+  if FShowArrow then
+    inherited Click;
 end;
 
 { TArrowButton }
@@ -295,11 +301,6 @@ begin
   FBottom.y := ArrowTop + (ArrowWidth div 2);
 end;
 
-procedure TArrowButton.DoAfterClick;
-begin
-  inherited DoAfterClick;
-end;
-
 procedure TArrowButton.Paint;
 begin
   inherited Paint;
@@ -320,14 +321,16 @@ begin
   {$ifdef DEBUG_MENUBUTTON}
   Logger.EnterMethod('WMLButton');
   {$endif}
+  Include(FControlState, csClicked);
   if not FToggleMode then
-    inherited WMLButtonDown(Message)
+  begin
+    //Note: this calls TControl.WMLButtonDown and not TCustomSpeedButton one
+    inherited WMLButtonDown(Message);
+  end
   else
   begin
     if FUpdatingStatus then
       Exit;
-
-    Include(FControlState, csClicked);
 
     if Enabled then
     begin
