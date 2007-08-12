@@ -3,11 +3,12 @@
   <Package Version="2">
     <PathDelim Value="\"/>
     <Name Value="luicontrols"/>
+    <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="5"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -16,6 +17,12 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
+    <Description Value="Set of miscellaneous controls. Current controls:
+TToggleLabel
+TMenuButton
+"/>
+    <License Value="Modified LGPL"/>
+    <Version Minor="1"/>
     <Files Count="3">
       <Item1>
         <Filename Value="togglelabel.pas"/>
@@ -38,7 +45,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
