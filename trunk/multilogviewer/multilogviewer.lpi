@@ -25,17 +25,17 @@
     </RunParams>
     <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="misccontrols_package"/>
-        <MinVersion Valid="True"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="multiloglaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="miscutils_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="miscutils_package"/>
+        <PackageName Value="misccontrols_package"/>
+        <MinVersion Valid="True"/>
       </Item4>
       <Item5>
         <PackageName Value="LCL"/>
