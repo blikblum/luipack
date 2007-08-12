@@ -511,13 +511,13 @@ end;
 
 procedure TLogger.Send(const AText: String; AValue: Boolean);
 begin
-  Send(DefaultClasses,AText,AValue);
+  Send(DefaultClasses, AText, AValue);
 end;
 
 procedure TLogger.Send(Classes: TDebugClasses; const AText: String; AValue: Boolean);
 begin
   if Classes * ActiveClasses = [] then Exit;
-  SendStream(ltValue,AText+' = '+BoolToStr(AValue),nil);
+  SendStream(ltValue, AText + ' = ' + BoolToStr(AValue, True), nil);
 end;
 
 procedure TLogger.Send(const AText: String; const ARect: TRect);
