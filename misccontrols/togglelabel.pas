@@ -1,4 +1,4 @@
-unit togglelabel;
+unit ToggleLabel;
 
 {$mode objfpc}{$H+}
 
