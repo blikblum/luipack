@@ -7,7 +7,7 @@ interface
 
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
-  togglelabel;
+  ToggleLabel, MenuButton;
   
 procedure Register;
 
@@ -18,10 +18,17 @@ begin
   RegisterComponents('Misc', [TToggleLabel]);
 end;  
 
+procedure RegisterUnitMenuButton;
+begin
+  RegisterComponents('Misc', [TMenuButton]);
+end;
+
+
 procedure Register;
 
 begin
-  RegisterUnit('togglelabel',@RegisterUnitToggleLabel);
+  RegisterUnit('ToggleLabel',@RegisterUnitToggleLabel);
+  RegisterUnit('MenuButton',@RegisterUnitMenuButton);
 end; 
 
 initialization

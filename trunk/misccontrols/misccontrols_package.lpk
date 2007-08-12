@@ -7,7 +7,7 @@
       <Version Value="5"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -16,7 +16,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="2">
+    <Files Count="3">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="togglelabel"/>
@@ -26,6 +26,10 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="registermisccontrols"/>
       </Item2>
+      <Item3>
+        <Filename Value="menubutton.pas"/>
+        <UnitName Value="menubutton"/>
+      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">

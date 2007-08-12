@@ -7,7 +7,7 @@ unit misccontrols_package;
 interface
 
 uses
-  togglelabel, registermisccontrols, LazarusPackageIntf; 
+  ToggleLabel, registermisccontrols, MenuButton, LazarusPackageIntf; 
 
 implementation
 
