@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
-  Left = 394
+  Left = 343
   Height = 300
-  Top = 242
+  Top = 311
   Width = 400
   HorzScrollBar.Page = 399
   VertScrollBar.Page = 299
@@ -87,6 +87,7 @@ object frmMain: TfrmMain
           20874A20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF874A20874A20874A2087
           4A20874A20874A20874A20874A20FFFFFFFFFFFFFFFFFFFFFFFF
         }
+        NumGlyphs = 0
         OnClick = MenuButton1Click
       end
       object MenuButton2: TMenuButton
@@ -140,12 +141,13 @@ object frmMain: TfrmMain
           0D0D0D0D0D0D0D0D0D0D0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B080808080808
           0808080808080808080803040404040404040404040404040405
         }
+        NumGlyphs = 0
         OnClick = MenuButton1Click
       end
       object MenuButton3: TMenuButton
         Left = 26
         Height = 22
-        Top = 135
+        Top = 111
         Width = 23
         Menu = PopupMenu3
         ShowArrow = True
@@ -179,12 +181,13 @@ object frmMain: TfrmMain
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFF04733A04763CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
+        NumGlyphs = 0
         OnClick = MenuButton1Click
       end
       object MenuButton4: TMenuButton
         Left = 108
         Height = 22
-        Top = 135
+        Top = 111
         Width = 23
         Menu = PopupMenu4
         Color = clBtnFace
@@ -217,12 +220,13 @@ object frmMain: TfrmMain
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF04763C04
           733AFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
+        NumGlyphs = 0
         OnClick = MenuButton1Click
       end
       object Label1: TLabel
         Left = 27
         Height = 14
-        Top = 106
+        Top = 82
         Width = 63
         Caption = 'Flat Buttons:'
         ParentColor = False
@@ -234,6 +238,17 @@ object frmMain: TfrmMain
         Width = 74
         Caption = 'Normal Buttons'
         ParentColor = False
+      end
+      object MenuButton5: TMenuButton
+        Left = 23
+        Height = 22
+        Top = 193
+        Width = 133
+        Menu = PopupMenu5
+        Caption = 'Combo Button'
+        Color = clBtnFace
+        Flat = True
+        NumGlyphs = 0
       end
     end
   end
@@ -331,5 +346,26 @@ object frmMain: TfrmMain
       FFFFFFFF874A20874A20874A20874A20874A20874A20874A20874A20FFFFFFFF
       FFFFFFFFFFFFFFFF
     }
+  end
+  object PopupMenu5: TPopupMenu
+    OnClose = nil
+    left = 241
+    top = 229
+    object MenuItem15: TMenuItem
+      Caption = 'New Item1'
+      OnClick = MenuItem15Click
+    end
+    object MenuItem18: TMenuItem
+      Caption = 'New Item4'
+      OnClick = MenuItem15Click
+    end
+    object MenuItem17: TMenuItem
+      Caption = 'New Item3'
+      OnClick = MenuItem15Click
+    end
+    object MenuItem16: TMenuItem
+      Caption = 'New Item2'
+      OnClick = MenuItem15Click
+    end
   end
 end

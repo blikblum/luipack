@@ -20,12 +20,17 @@ type
     MenuButton2: TMenuButton;
     MenuButton3: TMenuButton;
     MenuButton4: TMenuButton;
+    MenuButton5: TMenuButton;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
     MenuItem14: TMenuItem;
+    MenuItem15: TMenuItem;
+    MenuItem16: TMenuItem;
+    MenuItem17: TMenuItem;
+    MenuItem18: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -42,9 +47,11 @@ type
     PopupMenu2: TPopupMenu;
     PopupMenu3: TPopupMenu;
     PopupMenu4: TPopupMenu;
+    PopupMenu5: TPopupMenu;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
     procedure MenuButton1Click(Sender: TObject);
+    procedure MenuItem15Click(Sender: TObject);
     procedure ToggleLabel2Change(Sender: TObject);
   private
     { private declarations }
@@ -68,6 +75,12 @@ procedure TfrmMain.MenuButton1Click(Sender: TObject);
 begin
   with TMenuButton(Sender) do
     ShowMessage('Clicked - (Flat: ' + BoolToStr(Flat, True)+ ')');
+end;
+
+procedure TfrmMain.MenuItem15Click(Sender: TObject);
+begin
+  with TMenuItem(Sender) do
+    MenuButton5.Caption := Caption;
 end;
 
 initialization
