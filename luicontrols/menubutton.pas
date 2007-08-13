@@ -51,7 +51,7 @@ type
   private
     FInternalDown: Boolean;
     FToggleMode: Boolean;
-    FUpdatingStatus: Boolean;
+    FUpdateLocked: Boolean;
     FForceInvalidate: Boolean;
     procedure WMLButtonDown(var Message: TLMLButtonDown); message LM_LBUTTONDOWN;
   protected
@@ -94,7 +94,7 @@ type
     FShowArrow: Boolean;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
-    procedure DelayedUpdate(Data: PtrInt);
+    procedure DelayedUnlock(Data: PtrInt);
     procedure MenuClosed(Sender: TObject);
     procedure SetMenu(const AValue: TPopupMenu);
     procedure SetShowArrow(const AValue: Boolean);
@@ -167,6 +167,9 @@ begin
   //Logger.SendCallStack('ShowMenu');
   if FMenu = nil then
     Exit;
+  //necessary to avoid Click eat when hitting multiple menubuttons successively
+  //This will unlock update of previous clicked menubutton
+  Application.ProcessMessages;
   P := ClientToScreen(Point(0,Height));
   FMenu.PopUp(P.X, P.Y);
 end;
@@ -247,13 +250,13 @@ begin
   inherited MouseLeave;
 end;
 
-procedure TMenuButton.DelayedUpdate(Data: PtrInt);
+procedure TMenuButton.DelayedUnlock(Data: PtrInt);
 begin
   if csDestroying in ComponentState then
     Exit;
-  if ShowArrow then
-    FArrowButton.ResetState;
-  ResetState;
+  FUpdateLocked := False;
+  if FShowArrow then
+    FArrowButton.FUpdateLocked := False;
 end;
 
 procedure TMenuButton.MenuClosed(Sender: TObject);
@@ -261,8 +264,17 @@ begin
   {$ifdef DEBUG_MENUBUTTON}
   Logger.EnterMethod('MenuClosed');
   {$endif}
-  FUpdatingStatus := True;
-  Application.QueueAsyncCall(@DelayedUpdate, 0);
+  if FShowArrow then
+  begin
+    FArrowButton.FUpdateLocked := True;
+    FArrowButton.ResetState
+  end
+  else
+  begin
+    FUpdateLocked := True;
+    ResetState;
+  end;
+  Application.QueueAsyncCall(@DelayedUnlock, 0);
   {$ifdef DEBUG_MENUBUTTON}
   Logger.ExitMethod('MenuClosed');
   {$endif}
@@ -271,7 +283,8 @@ end;
 procedure TMenuButton.SetMenu(const AValue: TPopupMenu);
 begin
   FMenu := AValue;
-  FMenu.OnClose := @MenuClosed;
+  if FMenu <> nil then
+    FMenu.OnClose := @MenuClosed;
 end;
 
 procedure TMenuButton.SetShowArrow(const AValue: Boolean);
@@ -351,9 +364,11 @@ begin
   end
   else
   begin
-    if FUpdatingStatus then
+    if FUpdateLocked then
+    begin
+      FUpdateLocked := False;
       Exit;
-
+    end;
     if Enabled then
     begin
       FInternalDown := not FInternalDown;
@@ -364,7 +379,6 @@ begin
         TCustomAction(Action).Checked := FInternalDown;
       UpdateState(True);
       DoButtonDown;
-
       //FDragging := True;
     end;
   end;
@@ -377,7 +391,7 @@ end;
 procedure TToggleSpeedButton.Invalidate;
 begin
   inherited Invalidate;
-  Logger.SendCallStack(Self.ClassName);
+  Logger.SendCallStack(Self.ClassName + '.Invalidate');
 end;
 {$endif}
 
@@ -397,7 +411,6 @@ end;
 
 procedure TToggleSpeedButton.ResetState;
 begin
-  FUpdatingStatus := False;
   FInternalDown := False;
   UpdateState(True);
 end;
@@ -406,8 +419,6 @@ procedure TToggleSpeedButton.UpdateState(InvalidateOnChange: boolean);
 var
   OldState: TButtonState;
 begin
-  if FUpdatingStatus then
-    Exit;
   {$ifdef DEBUG_MENUBUTTON}
   Logger.EnterMethod('UpdateState');
   //Logger.SendCallStack('Stack');
