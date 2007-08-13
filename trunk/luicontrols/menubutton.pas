@@ -43,6 +43,8 @@ uses
 
 type
 
+  TMenuButton = class;
+
   { TToggleSpeedButton }
 
   TToggleSpeedButton = class (TCustomSpeedButton)
@@ -60,7 +62,7 @@ type
     procedure MouseLeave; override;
     procedure ResetState;
     procedure UpdateState(InvalidateOnChange: Boolean); override;
-    procedure DoAfterClick; virtual;
+    procedure DoButtonDown; virtual; abstract;
   public
     property ToggleMode: Boolean read FToggleMode write FToggleMode;
   end;
@@ -69,13 +71,16 @@ type
 
   TArrowButton = class (TToggleSpeedButton)
   private
+    FMainButton: TMenuButton;
     FUpperLeft: TPoint;
     FUpperRight: TPoint;
     FBottom: TPoint;
     procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   protected
+    procedure DoButtonDown; override;
     procedure Paint; override;
   public
+    property MainButton: TMenuButton read FMainButton write FMainButton;
     property OnMouseEnter;
     property OnMouseLeave;
   end;
@@ -89,21 +94,18 @@ type
     FShowArrow: Boolean;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
-    procedure ArrowClicked(Sender: TObject);
     procedure DelayedUpdate(Data: PtrInt);
-    procedure HideMenu;
     procedure MenuClosed(Sender: TObject);
     procedure SetMenu(const AValue: TPopupMenu);
     procedure SetShowArrow(const AValue: Boolean);
     procedure ShowMenu;
     procedure UpdateArrowState;
   protected
-    procedure DoAfterClick; override;
+    procedure DoButtonDown; override;
     procedure Loaded; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
   public
-    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Click; override;
   published
@@ -183,14 +185,14 @@ begin
       with FArrowButton do
       begin
         //ControlStyle := ControlStyle + [csNoDesignSelectable];
+        MainButton := Self;
         OnMouseEnter := @ArrowEntered;
         OnMouseLeave := @ArrowLeaved;
-        OnClick := @ArrowClicked;
         ToggleMode := True;
         Parent := Self.Parent;
         Flat := Self.Flat;
         ArrowWidth := Max(Self.Width div 3, 10);
-        if odd(ArrowWidth) then
+        if Odd(ArrowWidth) then
           Inc(ArrowWidth);
         SetBounds(Self.Left + Self.Width, Self.Top, ArrowWidth, Self.Height);
       end;
@@ -206,7 +208,7 @@ begin
   end;
 end;
 
-procedure TMenuButton.DoAfterClick;
+procedure TMenuButton.DoButtonDown;
 begin
   if ShowArrow then
     Click
@@ -245,12 +247,6 @@ begin
   inherited MouseLeave;
 end;
 
-procedure TMenuButton.ArrowClicked(Sender: TObject);
-begin
-  if FArrowButton.FInternalDown then
-    ShowMenu;
-end;
-
 procedure TMenuButton.DelayedUpdate(Data: PtrInt);
 begin
   if csDestroying in ComponentState then
@@ -258,13 +254,6 @@ begin
   if ShowArrow then
     FArrowButton.ResetState;
   ResetState;
-end;
-
-procedure TMenuButton.HideMenu;
-begin
-  if FMenu = nil then
-    Exit;
-  FMenu.Close;
 end;
 
 procedure TMenuButton.MenuClosed(Sender: TObject);
@@ -292,12 +281,6 @@ begin
     FShowArrow := AValue;
     UpdateArrowState;
   end;
-end;
-
-constructor TMenuButton.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  ToggleMode := True;
 end;
 
 destructor TMenuButton.Destroy;
@@ -332,6 +315,12 @@ begin
   FUpperRight.y := ArrowTop;
   FBottom.x := FUpperLeft.x + (ArrowWidth div 2);
   FBottom.y := ArrowTop + (ArrowWidth div 2);
+end;
+
+procedure TArrowButton.DoButtonDown;
+begin
+  if FInternalDown then
+    MainButton.ShowMenu;
 end;
 
 procedure TArrowButton.Paint;
@@ -374,7 +363,7 @@ begin
       if (Action is TCustomAction) then
         TCustomAction(Action).Checked := FInternalDown;
       UpdateState(True);
-      DoAfterClick;
+      DoButtonDown;
 
       //FDragging := True;
     end;
@@ -441,11 +430,6 @@ begin
   {$ifdef DEBUG_MENUBUTTON}
   Logger.ExitMethod('UpdateState');
   {$endif}
-end;
-
-procedure TToggleSpeedButton.DoAfterClick;
-begin
-
 end;
 
 end.
