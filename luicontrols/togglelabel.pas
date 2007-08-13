@@ -174,7 +174,6 @@ begin
   if Assigned(FOnChange) then
     FOnChange(Self);
   TextChanged;
-  Invalidate;
   inherited WMLButtonDown(Message);
 end;
 
