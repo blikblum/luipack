@@ -45,6 +45,14 @@ type
 
   TMenuButton = class;
 
+  TMenuButtonOption =
+  (
+    mboShowArrowButton,  // Shows an arrow button in the right side
+    mboPopupOnMouseUp    // The menu is popped when in MouseUp event
+  );
+  
+  TMenuButtonOptions = set of TMenuButtonOption;
+
   { TToggleSpeedButton }
 
   TToggleSpeedButton = class (TCustomSpeedButton)
@@ -78,6 +86,8 @@ type
     procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   protected
     procedure DoButtonDown; override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+      X, Y: Integer); override;
     procedure Paint; override;
   public
     property MainButton: TMenuButton read FMainButton write FMainButton;
@@ -91,13 +101,13 @@ type
   private
     FMenu: TPopupMenu;
     FArrowButton: TArrowButton;
-    FShowArrow: Boolean;
+    FOptions: TMenuButtonOptions;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
     procedure DelayedUnlock(Data: PtrInt);
     procedure MenuClosed(Sender: TObject);
     procedure SetMenu(const AValue: TPopupMenu);
-    procedure SetShowArrow(const AValue: Boolean);
+    procedure SetOptions(const AValue: TMenuButtonOptions);
     procedure ShowMenu;
     procedure UpdateArrowState;
   protected
@@ -105,12 +115,14 @@ type
     procedure Loaded; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+      X, Y: Integer); override;
   public
     destructor Destroy; override;
     procedure Click; override;
   published
     property Menu: TPopupMenu read FMenu write SetMenu;
-    property ShowArrow: Boolean read FShowArrow write SetShowArrow;
+    property Options: TMenuButtonOptions read FOptions write SetOptions;
     property Action;
     property Align;
     property Anchors;
@@ -180,7 +192,7 @@ var
 begin
   if csLoading in ComponentState then
     Exit;
-  if FShowArrow then
+  if mboShowArrowButton in FOptions then
   begin
     if FArrowButton = nil then
     begin
@@ -213,10 +225,10 @@ end;
 
 procedure TMenuButton.DoButtonDown;
 begin
-  if ShowArrow then
+  if mboShowArrowButton in FOptions then
     Click
   else
-    if FInternalDown then
+    if FInternalDown and not (mboPopupOnMouseUp in FOptions) then
       ShowMenu;
 end;
 
@@ -240,6 +252,14 @@ begin
     FArrowButton.MouseLeave;
 end;
 
+procedure TMenuButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+  if FInternalDown and (mboPopupOnMouseUp in FOptions) and (Button = mbLeft) then
+    ShowMenu;
+end;
+
 procedure TMenuButton.ArrowEntered(Sender: TObject);
 begin
   inherited MouseEnter;
@@ -255,7 +275,7 @@ begin
   if csDestroying in ComponentState then
     Exit;
   FUpdateLocked := False;
-  if FShowArrow then
+  if mboShowArrowButton in FOptions then
     FArrowButton.FUpdateLocked := False;
 end;
 
@@ -264,7 +284,7 @@ begin
   {$ifdef DEBUG_MENUBUTTON}
   Logger.EnterMethod('MenuClosed');
   {$endif}
-  if FShowArrow then
+  if mboShowArrowButton in FOptions then
   begin
     FArrowButton.FUpdateLocked := True;
     FArrowButton.ResetState
@@ -287,13 +307,12 @@ begin
     FMenu.OnClose := @MenuClosed;
 end;
 
-procedure TMenuButton.SetShowArrow(const AValue: Boolean);
+procedure TMenuButton.SetOptions(const AValue: TMenuButtonOptions);
 begin
-  if AValue <> FShowArrow then
-  begin
-    FShowArrow := AValue;
-    UpdateArrowState;
-  end;
+  if FOptions = AValue then
+    Exit;
+  FOptions := AValue;
+  UpdateArrowState;
 end;
 
 destructor TMenuButton.Destroy;
@@ -305,7 +324,7 @@ end;
 procedure TMenuButton.Click;
 begin
   //skips Click event when there's no arrow
-  if FShowArrow then
+  if mboShowArrowButton in FOptions then
     inherited Click;
 end;
 
@@ -332,7 +351,15 @@ end;
 
 procedure TArrowButton.DoButtonDown;
 begin
-  if FInternalDown then
+  if FInternalDown and not (mboPopupOnMouseUp in MainButton.Options) then
+    MainButton.ShowMenu;
+end;
+
+procedure TArrowButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+  if (Button = mbLeft) and (mboPopupOnMouseUp in MainButton.Options) then
     MainButton.ShowMenu;
 end;
 

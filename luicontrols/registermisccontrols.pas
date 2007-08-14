@@ -13,14 +13,17 @@ procedure Register;
 
 implementation
 
+const
+  ComponentPage = 'Lui Controls';
+
 procedure RegisterUnitToggleLabel;
 begin
-  RegisterComponents('Misc', [TToggleLabel]);
+  RegisterComponents(ComponentPage, [TToggleLabel]);
 end;  
 
 procedure RegisterUnitMenuButton;
 begin
-  RegisterComponents('Misc', [TMenuButton]);
+  RegisterComponents(ComponentPage, [TMenuButton]);
 end;
 
 
