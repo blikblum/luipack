@@ -57,7 +57,7 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu1
-        ShowArrow = True
+        Options = [mboShowArrowButton]
         Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -150,7 +150,7 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu3
-        ShowArrow = True
+        Options = [mboShowArrowButton, mboPopupOnMouseUp]
         Color = clBtnFace
         Flat = True
         Glyph.Data = {
@@ -190,6 +190,7 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu4
+        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Flat = True
         Glyph.Data = {
