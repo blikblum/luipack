@@ -23,7 +23,7 @@ TMenuButton
 "/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -37,6 +37,10 @@ TMenuButton
         <HasRegisterProc Value="True"/>
         <UnitName Value="registermisccontrols"/>
       </Item3>
+      <Item4>
+        <Filename Value="searchedit.pas"/>
+        <UnitName Value="searchedit"/>
+      </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">

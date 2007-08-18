@@ -7,7 +7,8 @@ unit luicontrols;
 interface
 
 uses
-  ToggleLabel, MenuButton, registermisccontrols, LazarusPackageIntf; 
+  ToggleLabel, MenuButton, registermisccontrols, searchedit, 
+    LazarusPackageIntf; 
 
 implementation
 

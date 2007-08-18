@@ -53,6 +53,8 @@ type
     procedure SetExpanded(const AValue: Boolean);
     procedure SetExpandedCaption(const AValue: String);
   protected
+    procedure DoMeasureTextPosition(var TextTop: integer;
+      var TextLeft: integer); override;
     function GetLabelText: string; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
@@ -132,6 +134,13 @@ begin
   end;
 end;
 
+procedure TToggleLabel.DoMeasureTextPosition(var TextTop: integer;
+  var TextLeft: integer);
+begin
+  inherited DoMeasureTextPosition(TextTop, TextLeft);
+  Inc(TextLeft, FTextOffset);
+end;
+
 function TToggleLabel.GetLabelText: string;
 begin
   if FExpanded then
@@ -162,7 +171,7 @@ begin
   if FMouseInControl then
   begin
     FMouseInControl := False;
-    //todo: Update only the glyph area
+    //todo: Update only the glyph area ??
     if Enabled then
       Invalidate;
   end;
@@ -191,63 +200,11 @@ begin
 end;
 
 procedure TToggleLabel.Paint;
-var
-  TR: TTextStyle;
-  R: TRect;
-  TextLeft, TextTop, lTextHeight, lTextWidth: Integer;
-  LabelText: String;
 
 begin
-  //There's no way to change the left text position.
-  // So i copied the original LCL code until a better option exists
-  R := Rect(0,0,Width,Height);
+  inherited Paint;
   with Canvas do
   begin
-    if Enabled then
-      Color := Self.Color
-    else
-      Color := clNone;
-    Font := Self.Font;
-    if (Color<>clNone) and not Transparent then
-    begin
-      Brush.Style:=bsSolid;
-      FillRect(R);
-    end
-    else
-      Brush.Style:=bsClear;
-
-    FillChar(TR,SizeOf(TR),0);
-    with TR do
-    begin
-      Alignment := Self.Alignment;
-      WordBreak := WordWrap;
-      SingleLine:= not WordWrap and not HasMultiLine;
-      Clipping := True;
-      ShowPrefix := ShowAccelChar;
-      SystemFont := False;
-      RightToLeft := UseRightToLeftReading;
-    end;
-    //DoMeasureTextPosition(TextTop, TextLeft);
-
-    TextLeft := FTextOffset; //here's the my change to original code
-    if Layout = tlTop then begin
-      TextTop := 0;
-    end else begin
-      CalcSize(lTextWidth, lTextHeight);
-      case Layout of
-        tlCenter: TextTop := (Height - lTextHeight) div 2;
-        tlBottom: TextTop := Height - lTextHeight;
-      end;
-    end;
-
-    LabelText := GetLabelText;
-    if not Enabled then begin
-      Font.Color := clBtnHighlight;
-      TextRect(R, TextLeft + 1, TextTop + 1, LabelText, TR);
-      Font.color := clBtnShadow;
-    end;
-    TextRect(R, TextLeft, TextTop, LabelText, TR);
-
     //Paint Toggle button
     //todo: see what todo when not Enabled or color = clNone
     Brush.Style := bsSolid;
