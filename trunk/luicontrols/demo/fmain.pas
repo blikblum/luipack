@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons;
+  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit;
 
 type
 
@@ -40,6 +40,7 @@ type
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
     NotebookMain: TNotebook;
+    PageSearchEdit: TPage;
     PageMenuButton: TPage;
     PageToggleLabel: TPage;
     Panel1: TPanel;
@@ -48,6 +49,7 @@ type
     PopupMenu3: TPopupMenu;
     PopupMenu4: TPopupMenu;
     PopupMenu5: TPopupMenu;
+    SearchEdit1: TSearchEdit;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
     procedure MenuButton1Click(Sender: TObject);
