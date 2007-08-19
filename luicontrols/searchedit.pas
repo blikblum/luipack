@@ -9,23 +9,37 @@ uses
 
 type
 
+  TSearchEditOption = (
+    seoExecuteEmpty,
+    seoExecuteOnEditDone
+  );
+  
+  TSearchEditOptions = set of TSearchEditOption;
+  
   { TSearchEdit }
 
   TSearchEdit = class (TCustomEdit)
   private
     FIsEmpty: Boolean;
     FEmptyText: String;
+    FOnExecute: TNotifyEvent;
+    FOptions: TSearchEditOptions;
     procedure SetEmptyText(const AValue: String);
+    procedure SetOptions(const AValue: TSearchEditOptions);
   protected
-    function RealGetText: TCaption; virtual;
-    procedure RealSetText(const Value: TCaption); virtual;
+    procedure EditingDone; override;
+    function RealGetText: TCaption; override;
+    procedure RealSetText(const Value: TCaption); override;
     procedure TextChanged; override;
     procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
     procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
   public
+    procedure Execute;
   published
     property EmptyText: String read FEmptyText write SetEmptyText;
     property IsEmpty: Boolean read FIsEmpty;
+    property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
+    property Options: TSearchEditOptions read FOptions write SetOptions;
   end;
 
 implementation
@@ -36,6 +50,19 @@ procedure TSearchEdit.SetEmptyText(const AValue: String);
 begin
   if FEmptyText=AValue then exit;
   FEmptyText:=AValue;
+end;
+
+procedure TSearchEdit.SetOptions(const AValue: TSearchEditOptions);
+begin
+  if FOptions=AValue then exit;
+  FOptions:=AValue;
+end;
+
+procedure TSearchEdit.EditingDone;
+begin
+  inherited EditingDone;
+  if seoExecuteOnEditDone in FOptions then
+    Execute;
 end;
 
 function TSearchEdit.RealGetText: TCaption;
@@ -80,6 +107,12 @@ begin
     Font.Color := clGray;
     inherited RealSetText(FEmptyText);
   end;
+end;
+
+procedure TSearchEdit.Execute;
+begin
+  if (FOnExecute <> nil) and (not FIsEmpty or (seoExecuteEmpty in FOptions)) then
+    FOnExecute(Self);
 end;
 
 end.
