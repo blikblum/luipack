@@ -39,7 +39,8 @@ interface
 
 
 uses
-  Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics {$ifdef DEBUG_MENUBUTTON}, sharedlogger {$endif};
+  LCLType, Types, Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics
+  {$ifdef DEBUG_MENUBUTTON}, sharedlogger {$endif};
 
 type
 
@@ -47,20 +48,27 @@ type
 
   TMenuButtonOption =
   (
-    mboShowArrowButton,  // Shows an arrow button in the right side
-    mboPopupOnMouseUp    // The menu is popped when in MouseUp event
+    mboPopupOnMouseUp,    // The menu is popped when in MouseUp event
+    mboShowIndicator
   );
+  
+  TMenuButtonStyle = (mbsSingle, mbsCombo);
   
   TMenuButtonOptions = set of TMenuButtonOption;
 
+  TArrowCoordinates = (acLeft, acRight, acBottom);
+  TArrowPoints = array[TArrowCoordinates] of TPoint;
+  
   { TToggleSpeedButton }
 
   TToggleSpeedButton = class (TCustomSpeedButton)
   private
+    FArrowPoints: TArrowPoints;
     FInternalDown: Boolean;
     FToggleMode: Boolean;
     FUpdateLocked: Boolean;
     FForceInvalidate: Boolean;
+    procedure CalculateArrowPoints(XOffset, AWidth, AHeight: Integer);
     procedure WMLButtonDown(var Message: TLMLButtonDown); message LM_LBUTTONDOWN;
   protected
     {$ifdef DEBUG_MENUBUTTON}
@@ -80,9 +88,6 @@ type
   TArrowButton = class (TToggleSpeedButton)
   private
     FMainButton: TMenuButton;
-    FUpperLeft: TPoint;
-    FUpperRight: TPoint;
-    FBottom: TPoint;
     procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   protected
     procedure DoButtonDown; override;
@@ -102,14 +107,18 @@ type
     FMenu: TPopupMenu;
     FArrowButton: TArrowButton;
     FOptions: TMenuButtonOptions;
+    FArrowOffset: Integer;
+    FStyle: TMenuButtonStyle;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
     procedure DelayedUnlock(Data: PtrInt);
     procedure MenuClosed(Sender: TObject);
     procedure SetMenu(const AValue: TPopupMenu);
     procedure SetOptions(const AValue: TMenuButtonOptions);
+    procedure SetStyle(const AValue: TMenuButtonStyle);
     procedure ShowMenu;
-    procedure UpdateArrowState;
+    procedure UpdateArrowPosition;
+    procedure UpdateStyle;
   protected
     procedure DoButtonDown; override;
     procedure Loaded; override;
@@ -117,12 +126,16 @@ type
     procedure MouseLeave; override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
+    procedure Paint; override;
+    procedure RealSetText(const Value: TCaption); override;
   public
     destructor Destroy; override;
     procedure Click; override;
   published
     property Menu: TPopupMenu read FMenu write SetMenu;
     property Options: TMenuButtonOptions read FOptions write SetOptions;
+    property Style: TMenuButtonStyle read FStyle write SetStyle;
+    //TSpeedButton properties
     property Action;
     property Align;
     property Anchors;
@@ -186,13 +199,20 @@ begin
   FMenu.PopUp(P.X, P.Y);
 end;
 
-procedure TMenuButton.UpdateArrowState;
+procedure TMenuButton.UpdateArrowPosition;
+var
+  TextSize: TSize;
+begin
+  TextSize := GetTextSize(ClientRect);
+  FArrowOffset := TextSize.cx + ((Width - TextSize.cx) div 2) + 2;
+  CalculateArrowPoints(FArrowOffset,10,Height);
+end;
+
+procedure TMenuButton.UpdateStyle;
 var
   ArrowWidth: Integer;
 begin
-  if csLoading in ComponentState then
-    Exit;
-  if mboShowArrowButton in FOptions then
+  if FStyle = mbsCombo then
   begin
     if FArrowButton = nil then
     begin
@@ -225,7 +245,7 @@ end;
 
 procedure TMenuButton.DoButtonDown;
 begin
-  if mboShowArrowButton in FOptions then
+  if FStyle = mbsCombo then
     Click
   else
     if FInternalDown and not (mboPopupOnMouseUp in FOptions) then
@@ -235,7 +255,7 @@ end;
 procedure TMenuButton.Loaded;
 begin
   inherited Loaded;
-  UpdateArrowState;
+  UpdateStyle;
 end;
 
 procedure TMenuButton.MouseEnter;
@@ -260,6 +280,30 @@ begin
     ShowMenu;
 end;
 
+procedure TMenuButton.Paint;
+begin
+  inherited Paint;
+  if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
+  begin
+    with Canvas do
+    begin
+      Brush.Color := clBlack;
+      if FState = bsDown then
+        Polygon([SuccPoint(FArrowPoints[acLeft]), SuccPoint(FArrowPoints[acRight]),
+          SuccPoint(FArrowPoints[acBottom])])
+      else
+        Polygon([FArrowPoints[acLeft], FArrowPoints[acRight], FArrowPoints[acBottom]]);
+    end;
+  end;
+end;
+
+procedure TMenuButton.RealSetText(const Value: TCaption);
+begin
+  inherited RealSetText(Value);
+  if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
+    UpdateArrowPosition;
+end;
+
 procedure TMenuButton.ArrowEntered(Sender: TObject);
 begin
   inherited MouseEnter;
@@ -275,7 +319,7 @@ begin
   if csDestroying in ComponentState then
     Exit;
   FUpdateLocked := False;
-  if mboShowArrowButton in FOptions then
+  if FStyle = mbsCombo then
     FArrowButton.FUpdateLocked := False;
 end;
 
@@ -284,7 +328,7 @@ begin
   {$ifdef DEBUG_MENUBUTTON}
   Logger.EnterMethod('MenuClosed');
   {$endif}
-  if mboShowArrowButton in FOptions then
+  if FStyle = mbsCombo then
   begin
     FArrowButton.FUpdateLocked := True;
     FArrowButton.ResetState
@@ -312,7 +356,16 @@ begin
   if FOptions = AValue then
     Exit;
   FOptions := AValue;
-  UpdateArrowState;
+  UpdateStyle;
+end;
+
+procedure TMenuButton.SetStyle(const AValue: TMenuButtonStyle);
+begin
+  if FStyle = AValue then
+    Exit;
+  FStyle := AValue;
+  if not (csLoading in ComponentState) then
+    UpdateStyle;
 end;
 
 destructor TMenuButton.Destroy;
@@ -323,30 +376,17 @@ end;
 
 procedure TMenuButton.Click;
 begin
-  //skips Click event when there's no arrow
-  if mboShowArrowButton in FOptions then
+  //skips Click event in mbsSingle style
+  if FStyle = mbsCombo then
     inherited Click;
 end;
 
 { TArrowButton }
 
-
 procedure TArrowButton.DoSetBounds(ALeft, ATop, AWidth, AHeight: integer);
-var
-  ArrowTop, ArrowWidth: Integer;
 begin
   inherited;
-  //CalculateArrowPoints;
-   ArrowWidth := (Width - 1) div 2;
-  if Odd(ArrowWidth) then
-    Dec(ArrowWidth);
-  ArrowTop := (Height - (ArrowWidth div 2)) div 2;
-  FUpperLeft.x := ((Width - ArrowWidth) div 2) - 1;
-  FUpperLeft.y := ArrowTop;
-  FUpperRight.x := FUpperLeft.x + ArrowWidth;
-  FUpperRight.y := ArrowTop;
-  FBottom.x := FUpperLeft.x + (ArrowWidth div 2);
-  FBottom.y := ArrowTop + (ArrowWidth div 2);
+  CalculateArrowPoints(0, AWidth, AHeight);
 end;
 
 procedure TArrowButton.DoButtonDown;
@@ -359,7 +399,7 @@ procedure TArrowButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X,
   Y: Integer);
 begin
   inherited MouseUp(Button, Shift, X, Y);
-  if (Button = mbLeft) and (mboPopupOnMouseUp in MainButton.Options) then
+  if FInternalDown and (Button = mbLeft) and (mboPopupOnMouseUp in MainButton.Options) then
     MainButton.ShowMenu;
 end;
 
@@ -370,13 +410,40 @@ begin
   begin
     Brush.Color := clBlack;
     if FState = bsDown then
-      Polygon([SuccPoint(FUpperLeft), SuccPoint(FUpperRight), SuccPoint(FBottom)])
+      Polygon([SuccPoint(FArrowPoints[acLeft]), SuccPoint(FArrowPoints[acRight]),
+        SuccPoint(FArrowPoints[acBottom])])
     else
-      Polygon([FUpperLeft, FUpperRight, FBottom]);
+      Polygon([FArrowPoints[acLeft], FArrowPoints[acRight], FArrowPoints[acBottom]]);
   end;
 end;
 
 { TToggleSpeedButton }
+
+procedure TToggleSpeedButton.CalculateArrowPoints(XOffset, AWidth,
+  AHeight: Integer);
+var
+  ArrowTop, ArrowWidth: Integer;
+begin
+  ArrowWidth := (AWidth - 1) div 2;
+  if Odd(ArrowWidth) then
+    Dec(ArrowWidth);
+  ArrowTop := (AHeight - (ArrowWidth div 2)) div 2;
+  with FArrowPoints[acLeft] do
+  begin
+    X := ((AWidth - ArrowWidth) div 2) - 1 + XOffset;
+    Y := ArrowTop;
+  end;
+  with FArrowPoints[acRight] do
+  begin
+    X := FArrowPoints[acLeft].X + ArrowWidth;
+    Y := ArrowTop;
+  end;
+  with FArrowPoints[acBottom] do
+  begin
+    X := FArrowPoints[acLeft].X + (ArrowWidth div 2);
+    Y := ArrowTop + (ArrowWidth div 2);
+  end;
+end;
 
 procedure TToggleSpeedButton.WMLButtonDown(var Message: TLMLButtonDown);
 begin

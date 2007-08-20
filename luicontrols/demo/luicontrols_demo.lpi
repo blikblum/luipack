@@ -28,11 +28,11 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="luicontrols"/>
-        <MinVersion Valid="True"/>
+        <PackageName Value="LCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicontrols"/>
+        <MinVersion Valid="True"/>
       </Item2>
     </RequiredPackages>
     <Units Count="2">
