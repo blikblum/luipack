@@ -121,6 +121,7 @@ type
     procedure UpdateStyle;
   protected
     procedure DoButtonDown; override;
+    function GetTextSize(PaintRect: TRect): TSize; override;
     procedure Loaded; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
@@ -203,8 +204,8 @@ procedure TMenuButton.UpdateArrowPosition;
 var
   TextSize: TSize;
 begin
-  TextSize := GetTextSize(ClientRect);
-  FArrowOffset := TextSize.cx + ((Width - TextSize.cx) div 2) + 2;
+  TextSize := inherited GetTextSize(ClientRect);
+  FArrowOffset := TextSize.cx + ((Width - TextSize.cx) div 2);
   CalculateArrowPoints(FArrowOffset,10,Height);
 end;
 
@@ -250,6 +251,12 @@ begin
   else
     if FInternalDown and not (mboPopupOnMouseUp in FOptions) then
       ShowMenu;
+end;
+
+function TMenuButton.GetTextSize(PaintRect: TRect): TSize;
+begin
+  Result := inherited GetTextSize(PaintRect);
+  Inc(Result.cx,12);
 end;
 
 procedure TMenuButton.Loaded;
