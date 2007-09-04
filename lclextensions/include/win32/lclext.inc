@@ -12,7 +12,7 @@ begin
   OldObj := Windows.SelectObject(MaskDC,Result);
   OldColor := Windows.SetBkColor(BitmapDC, Windows.COLORREF(ColorToRGB(TransparentColor)));
 
-  Windows.BitBlt(MaskDC,0,0,Width,Height,BitmapDC,0,0,NOTSRCCOPY);
+  Windows.BitBlt(MaskDC,0,0,Width,Height,BitmapDC,0,0,SRCCOPY);
 
   Windows.SetBkColor(BitmapDC,OldColor);
   Windows.SelectObject(MaskDC,OldObj);
