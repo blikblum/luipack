@@ -128,6 +128,8 @@ procedure CSVToStrings(const ACSVStr: String; AStrList: TStrings; Delimiter: Cha
 
 function StringsToCSV(AStrList:TStrings; Delimiter: Char = ';'):String;
 
+function ValidMail(const AMail: String): Boolean;
+
 implementation
 uses
   StrUtils;
@@ -195,6 +197,21 @@ begin
   Result:='';
   for i:= 0 to AStrList.Count - 1 do
     Result:=Result+AStrList[i]+Delimiter;
+end;
+
+function ValidMail(const AMail: String): Boolean;
+var
+  PosArroba: Integer;
+  Trimmed: String;
+begin
+  Result := False;
+  Trimmed := Trim(AMail);
+  if Pos(' ', Trimmed) = 0 then
+  begin
+    PosArroba := Pos('@',Trimmed);
+    if PosArroba <> 0 then
+      Result := posex('.', Trimmed, PosArroba) <> 0;
+  end;
 end;
 
 {TIndexedList}
