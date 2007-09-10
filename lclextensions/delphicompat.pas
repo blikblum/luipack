@@ -1,4 +1,4 @@
-unit delphicompat;
+unit DelphiCompat;
 
 { Delphi Compatibility Unit
 

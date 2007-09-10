@@ -7,7 +7,7 @@ unit lclextensions_package;
 interface
 
 uses
-  delphicompat, oleutils, lclext, LazarusPackageIntf; 
+  DelphiCompat, oleutils, LclExt, LazarusPackageIntf; 
 
 implementation
 

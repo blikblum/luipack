@@ -1,4 +1,4 @@
-unit lclext;
+unit LclExt;
 
 { LCL Extension Unit
 
