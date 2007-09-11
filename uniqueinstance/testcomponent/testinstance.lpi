@@ -35,14 +35,14 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="14">
       <Unit0>
         <Filename Value="testinstance.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="testinstance"/>
         <CursorPos X="1" Y="15"/>
         <TopLine Value="1"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -52,8 +52,8 @@
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="ftesform.lrs"/>
         <UnitName Value="ftesform"/>
-        <CursorPos X="25" Y="12"/>
-        <TopLine Value="1"/>
+        <CursorPos X="9" Y="41"/>
+        <TopLine Value="7"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
@@ -126,8 +126,43 @@
           <Item0 X="1" Y="32" ID="0"/>
         </Bookmarks>
       </Unit11>
+      <Unit12>
+        <Filename Value="../uniqueinstance.pas"/>
+        <UnitName Value="uniqueinstance"/>
+        <CursorPos X="33" Y="146"/>
+        <TopLine Value="101"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="../../../lazarus/lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <CursorPos X="16" Y="813"/>
+        <TopLine Value="812"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit13>
     </Units>
-    <JumpHistory Count="0" HistoryIndex="-1"/>
+    <JumpHistory Count="4" HistoryIndex="3">
+      <Position1>
+        <Filename Value="ftesform.pas"/>
+        <Caret Line="18" Column="30" TopLine="9"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../uniqueinstance.pas"/>
+        <Caret Line="138" Column="18" TopLine="101"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../../../lazarus/lcl/forms.pp"/>
+        <Caret Line="1101" Column="29" TopLine="1079"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../uniqueinstance.pas"/>
+        <Caret Line="92" Column="5" TopLine="44"/>
+      </Position4>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
