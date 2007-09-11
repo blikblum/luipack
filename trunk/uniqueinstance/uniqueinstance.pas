@@ -21,6 +21,9 @@ type
     FOnOtherInstance: TOnOtherInstance;
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
+    {$ifdef unix}
+    procedure AppIdle(Sender: TObject; var Done: Boolean);
+    {$endif}
   protected
     procedure Loaded; override;
   public
@@ -83,6 +86,11 @@ begin
   end;
 end;
 
+procedure TUniqueInstance.AppIdle(Sender: TObject; var Done: Boolean);
+begin
+  FIPCServer.PeekMessage(1, True);
+end;
+
 function TUniqueInstance.GetServerId: String;
 begin
   if FIdentifier <> '' then
@@ -133,7 +141,10 @@ end;
 constructor TUniqueInstance.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FIPCClient:=TSimpleIPCClient.Create(Self);
+  FIPCClient := TSimpleIPCClient.Create(Self);
+  {$ifdef unix}
+  Application.OnIdle := @AppIdle;
+  {$endif}
 end;
 
 

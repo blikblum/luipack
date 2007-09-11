@@ -38,10 +38,8 @@ var
 begin
   Label1.Caption:='A new instance was created. '+ IntToStr(Count)+' Parameters';
   ListBox1.Clear;
-  for i:= 0 to Count - 1 do
-  begin
+  for i := 0 to Count - 1 do
     ListBox1.Items.Add(Parameters[i]);
-  end;
   BringToFront;
 end;
 
