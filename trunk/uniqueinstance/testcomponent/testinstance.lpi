@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <PathDelim Value="/"/>
+    <Version Value="5"/>
+    <General>
+      <MainUnit Value="0"/>
+      <IconPath Value="./"/>
+      <TargetFileExt Value=".exe"/>
+      <ActiveEditorIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <ProjectVersion Value=""/>
+      <Language Value=""/>
+      <CharSet Value=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="2">
+      <Item1>
+        <PackageName Value="lcluniqueinstance"/>
+        <MinVersion Minor="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+    </RequiredPackages>
+    <Units Count="12">
+      <Unit0>
+        <Filename Value="testinstance.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="testinstance"/>
+        <CursorPos X="1" Y="15"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="ftesform.pas"/>
+        <ComponentName Value="Form1"/>
+        <IsPartOfProject Value="True"/>
+        <ResourceFilename Value="ftesform.lrs"/>
+        <UnitName Value="ftesform"/>
+        <CursorPos X="25" Y="12"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="0"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="uniqueinstance.pas"/>
+        <UnitName Value="uniqueinstance"/>
+        <CursorPos X="40" Y="125"/>
+        <TopLine Value="109"/>
+        <UsageCount Value="11"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../../../subversion/fpc/fcl/inc/simpleipc.pp"/>
+        <UnitName Value="simpleipc"/>
+        <CursorPos X="3" Y="147"/>
+        <TopLine Value="147"/>
+        <UsageCount Value="11"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../../subversion/lazarus/lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <CursorPos X="12" Y="960"/>
+        <TopLine Value="957"/>
+        <UsageCount Value="11"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../../subversion/lazarus/lcl/include/application.inc"/>
+        <CursorPos X="5" Y="1555"/>
+        <TopLine Value="1542"/>
+        <UsageCount Value="11"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../../subversion/lazarus/lcl/interfaces/win32/win32int.pp"/>
+        <UnitName Value="Win32Int"/>
+        <CursorPos X="22" Y="182"/>
+        <TopLine Value="166"/>
+        <UsageCount Value="11"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../../subversion/lazarus/lcl/interfaces/win32/win32object.inc"/>
+        <CursorPos X="3" Y="177"/>
+        <TopLine Value="173"/>
+        <UsageCount Value="11"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../../subversion/fpc/rtl/objpas/classes/classesh.inc"/>
+        <CursorPos X="15" Y="1314"/>
+        <TopLine Value="1298"/>
+        <UsageCount Value="11"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="../../../subversion/fpc/rtl/objpas/classes/compon.inc"/>
+        <CursorPos X="3" Y="220"/>
+        <TopLine Value="217"/>
+        <UsageCount Value="11"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../../../subversion/lazarus/lcl/include/customform.inc"/>
+        <CursorPos X="1" Y="1312"/>
+        <TopLine Value="1280"/>
+        <UsageCount Value="11"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="uniqueinstanceraw.pas"/>
+        <UnitName Value="uniqueinstanceraw"/>
+        <CursorPos X="23" Y="22"/>
+        <TopLine Value="1"/>
+        <UsageCount Value="11"/>
+        <Bookmarks Count="1">
+          <Item0 X="1" Y="32" ID="0"/>
+        </Bookmarks>
+      </Unit11>
+    </Units>
+    <JumpHistory Count="0" HistoryIndex="-1"/>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="5"/>
+    <SearchPaths>
+      <SrcPath Value="$(LazarusDir)/lcl/;$(LazarusDir)/lcl/interfaces/$(LCLWidgetType)/"/>
+    </SearchPaths>
+    <CodeGeneration>
+      <Generate Value="Faster"/>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="2">
+      <Item1>
+        <Name Value="ECodetoolError"/>
+      </Item1>
+      <Item2>
+        <Name Value="EFOpenError"/>
+      </Item2>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
