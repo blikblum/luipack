@@ -7,7 +7,7 @@
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -43,7 +43,7 @@
         <CursorPos X="1" Y="15"/>
         <TopLine Value="1"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -53,9 +53,9 @@
         <ResourceFilename Value="ftesform.lrs"/>
         <UnitName Value="ftesform"/>
         <CursorPos X="9" Y="41"/>
-        <TopLine Value="7"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="0"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
@@ -128,9 +128,9 @@
       </Unit11>
       <Unit12>
         <Filename Value="../uniqueinstance.pas"/>
-        <UnitName Value="uniqueinstance"/>
-        <CursorPos X="33" Y="146"/>
-        <TopLine Value="101"/>
+        <UnitName Value="UniqueInstance"/>
+        <CursorPos X="31" Y="7"/>
+        <TopLine Value="1"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>

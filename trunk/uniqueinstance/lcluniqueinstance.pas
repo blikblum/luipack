@@ -7,7 +7,7 @@ unit lcluniqueinstance;
 interface
 
 uses
-  registeruniqueinstance, uniqueinstance, LazarusPackageIntf; 
+  registeruniqueinstance, UniqueInstance, LazarusPackageIntf; 
 
 implementation
 
