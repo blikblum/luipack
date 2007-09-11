@@ -1,0 +1,34 @@
+object Form1: TForm1
+  Left = 356
+  Height = 300
+  Top = 187
+  Width = 400
+  HorzScrollBar.Page = 399
+  VertScrollBar.Page = 299
+  ActiveControl = ListBox1
+  Caption = 'Form1'
+  object Label1: TLabel
+    Left = 112
+    Height = 17
+    Top = 22
+    Width = 49
+    Caption = 'Label1'
+    Color = clNone
+    ParentColor = False
+  end
+  object ListBox1: TListBox
+    Left = 112
+    Height = 192
+    Top = 40
+    Width = 192
+    TabOrder = 0
+    TopIndex = -1
+  end
+  object UniqueInstance1: TUniqueInstance
+    Enabled = True
+    Identifier = 'test0.1'
+    OnOtherInstance = UniqueInstance1OtherInstance
+    left = 32
+    top = 24
+  end
+end
