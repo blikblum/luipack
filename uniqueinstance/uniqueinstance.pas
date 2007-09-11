@@ -119,10 +119,12 @@ begin
   end;
 end;
 
+{$ifdef unix}
 procedure TUniqueInstance.AppIdle(Sender: TObject; var Done: Boolean);
 begin
   FIPCServer.PeekMessage(1, True);
 end;
+{$endif}
 
 function TUniqueInstance.GetServerId: String;
 begin
