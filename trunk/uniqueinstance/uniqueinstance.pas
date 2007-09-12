@@ -38,9 +38,10 @@ unit UniqueInstance;
 interface
 
 uses
-  Forms, Classes, SysUtils, simpleipc;
+  Forms, Classes, SysUtils, simpleipc, ExtCtrls;
   
 type
+
   TOnOtherInstance = procedure (Sender : TObject; ParamCount: Integer; Parameters: array of String) of object;
 
   { TUniqueInstance }
@@ -52,10 +53,15 @@ type
     FIPCServer: TSimpleIPCServer;
     FIPCClient: TSimpleIPCClient;
     FOnOtherInstance: TOnOtherInstance;
+    {$ifdef unix}
+    FTimer: TTimer;
+    {$endif}
+    FUpdateInterval: Cardinal;
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
+    procedure SetUpdateInterval(const AValue: Cardinal);
     {$ifdef unix}
-    procedure AppIdle(Sender: TObject; var Done: Boolean);
+    procedure CheckMessage(Sender: TObject);
     {$endif}
   protected
     procedure Loaded; override;
@@ -64,6 +70,7 @@ type
   published
     property Enabled: Boolean read FEnabled write FEnabled;
     property Identifier: String read FIdentifier write FIdentifier;
+    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval default 1000;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
   end;
 
@@ -86,52 +93,54 @@ var
   var
     pos1,pos2:Integer;
   begin
-    //count num of params
-    Count:=0;
-    pos1:=1;
-    pos2:=pos('|',AStr);
-    while pos1 < pos2 do
-    begin
-      pos1:=pos2+1;
-      pos2:=posex('|',AStr,pos1);
-      Inc(Count);
-    end;
     SetLength(TempArray,Count);
     //fill params
-    Count:=0;
+    i := 0;
     pos1:=1;
     pos2:=pos('|',AStr);
     while pos1 < pos2 do
     begin
-      TempArray[Count]:=Copy(AStr,pos1,pos2-pos1);
+      TempArray[i]:=Copy(AStr,pos1,pos2-pos1);
       pos1:=pos2+1;
       pos2:=posex('|',AStr,pos1);
-      Inc(Count);
+      inc(i);
     end;
   end;
 
 begin
   if Assigned(FOnOtherInstance) then
   begin
+    //MsgType stores ParamCount
+    Count := FIPCServer.MsgType;
     GetParams(FIPCServer.StringMessage);
-    FOnOtherInstance(Self,Count,TempArray);
-    SetLength(TempArray,0);
+    FOnOtherInstance(Self, Count, TempArray);
+    SetLength(TempArray, 0);
   end;
 end;
 
 {$ifdef unix}
-procedure TUniqueInstance.AppIdle(Sender: TObject; var Done: Boolean);
+procedure TUniqueInstance.CheckMessage(Sender: TObject);
 begin
   FIPCServer.PeekMessage(1, True);
 end;
 {$endif}
 
+procedure TUniqueInstance.SetUpdateInterval(const AValue: Cardinal);
+begin
+  if FUpdateInterval = AValue then
+    Exit;
+  FUpdateInterval := AValue;
+  {$ifdef unix}
+  FTimer.Interval := AValue;
+  {$endif}
+end;
+
 function TUniqueInstance.GetServerId: String;
 begin
   if FIdentifier <> '' then
-    Result:=BaseServerId+FIdentifier
+    Result := BaseServerId + FIdentifier
   else
-    Result:=BaseServerId+ExtractFileName(ParamStr(0));
+    Result := BaseServerId + ExtractFileName(ParamStr(0));
 end;
 
 
@@ -149,10 +158,10 @@ begin
       //Send a message and then exit
       TempStr:='';
       for i:= 1 to ParamCount do
-        TempStr:=TempStr+ParamStr(i)+'|';
-      FIPCClient.Active:=True;
-      FIPCClient.SendStringMessage(TempStr);
-      Application.ShowMainForm:=False;
+        TempStr := TempStr+ParamStr(i)+'|';
+      FIPCClient.Active := True;
+      FIPCClient.SendStringMessage(ParamCount, TempStr);
+      Application.ShowMainForm := False;
       Application.Terminate;
     end
     else
@@ -169,8 +178,10 @@ begin
       end;
       //there's no more need for FIPCClient
       FIPCClient.Free;
+      FTimer.Enabled := True;
     end;
   end;//if
+  inherited;
 end;
 
 constructor TUniqueInstance.Create(AOwner: TComponent);
@@ -178,7 +189,11 @@ begin
   inherited Create(AOwner);
   FIPCClient := TSimpleIPCClient.Create(Self);
   {$ifdef unix}
-  Application.OnIdle := @AppIdle;
+  FTimer := TTimer.Create(Self);
+  //somehow FUpdatetInterval is not updated
+  //FTimer.Interval := FUpdateInterval;
+  FTimer.Interval := 1000;
+  FTimer.OnTimer := @CheckMessage;
   {$endif}
 end;
 
