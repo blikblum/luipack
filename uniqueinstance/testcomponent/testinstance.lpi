@@ -4,19 +4,19 @@
     <PathDelim Value="/"/>
     <Version Value="5"/>
     <General>
+      <Flags>
+        <AlwaysBuild Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="1"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
-      <Language Value=""/>
-      <CharSet Value=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -35,16 +35,11 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="2">
       <Unit0>
         <Filename Value="testinstance.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="testinstance"/>
-        <CursorPos X="1" Y="15"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="22"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="ftesform.pas"/>
@@ -52,117 +47,8 @@
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="ftesform.lrs"/>
         <UnitName Value="ftesform"/>
-        <CursorPos X="9" Y="41"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="0"/>
-        <UsageCount Value="22"/>
-        <Loaded Value="True"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="uniqueinstance.pas"/>
-        <UnitName Value="uniqueinstance"/>
-        <CursorPos X="40" Y="125"/>
-        <TopLine Value="109"/>
-        <UsageCount Value="11"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="../../../subversion/fpc/fcl/inc/simpleipc.pp"/>
-        <UnitName Value="simpleipc"/>
-        <CursorPos X="3" Y="147"/>
-        <TopLine Value="147"/>
-        <UsageCount Value="11"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="../../../subversion/lazarus/lcl/forms.pp"/>
-        <UnitName Value="Forms"/>
-        <CursorPos X="12" Y="960"/>
-        <TopLine Value="957"/>
-        <UsageCount Value="11"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="../../../subversion/lazarus/lcl/include/application.inc"/>
-        <CursorPos X="5" Y="1555"/>
-        <TopLine Value="1542"/>
-        <UsageCount Value="11"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="../../../subversion/lazarus/lcl/interfaces/win32/win32int.pp"/>
-        <UnitName Value="Win32Int"/>
-        <CursorPos X="22" Y="182"/>
-        <TopLine Value="166"/>
-        <UsageCount Value="11"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="../../../subversion/lazarus/lcl/interfaces/win32/win32object.inc"/>
-        <CursorPos X="3" Y="177"/>
-        <TopLine Value="173"/>
-        <UsageCount Value="11"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="../../../subversion/fpc/rtl/objpas/classes/classesh.inc"/>
-        <CursorPos X="15" Y="1314"/>
-        <TopLine Value="1298"/>
-        <UsageCount Value="11"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="../../../subversion/fpc/rtl/objpas/classes/compon.inc"/>
-        <CursorPos X="3" Y="220"/>
-        <TopLine Value="217"/>
-        <UsageCount Value="11"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="../../../subversion/lazarus/lcl/include/customform.inc"/>
-        <CursorPos X="1" Y="1312"/>
-        <TopLine Value="1280"/>
-        <UsageCount Value="11"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="uniqueinstanceraw.pas"/>
-        <UnitName Value="uniqueinstanceraw"/>
-        <CursorPos X="23" Y="22"/>
-        <TopLine Value="1"/>
-        <UsageCount Value="11"/>
-        <Bookmarks Count="1">
-          <Item0 X="1" Y="32" ID="0"/>
-        </Bookmarks>
-      </Unit11>
-      <Unit12>
-        <Filename Value="../uniqueinstance.pas"/>
-        <UnitName Value="UniqueInstance"/>
-        <CursorPos X="31" Y="7"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="1"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="../../../lazarus/lcl/forms.pp"/>
-        <UnitName Value="Forms"/>
-        <CursorPos X="16" Y="813"/>
-        <TopLine Value="812"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit13>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
-      <Position1>
-        <Filename Value="ftesform.pas"/>
-        <Caret Line="18" Column="30" TopLine="9"/>
-      </Position1>
-      <Position2>
-        <Filename Value="../uniqueinstance.pas"/>
-        <Caret Line="138" Column="18" TopLine="101"/>
-      </Position2>
-      <Position3>
-        <Filename Value="../../../lazarus/lcl/forms.pp"/>
-        <Caret Line="1101" Column="29" TopLine="1079"/>
-      </Position3>
-      <Position4>
-        <Filename Value="../uniqueinstance.pas"/>
-        <Caret Line="92" Column="5" TopLine="44"/>
-      </Position4>
-    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
@@ -186,14 +72,4 @@
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="2">
-      <Item1>
-        <Name Value="ECodetoolError"/>
-      </Item1>
-      <Item2>
-        <Name Value="EFOpenError"/>
-      </Item2>
-    </Exceptions>
-  </Debugging>
 </CONFIG>
