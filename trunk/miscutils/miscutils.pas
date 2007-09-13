@@ -452,7 +452,6 @@ begin
       FOnStartRow(RowCount);
     pos1:=1;
     pos2:=pos(FDelimiter,CSVStr);
-    WriteLn('Initial: Pos1:',Pos1,' Pos2:',Pos2);
     ColCount:=0;
     while pos1 <= pos2 do
     begin
@@ -460,7 +459,6 @@ begin
         FOnColumn(Copy(CSVStr,pos1,pos2-pos1),ColCount);
       pos1:=pos2 + 1;
       pos2:=posex(FDelimiter,CSVStr,pos1);
-      WriteLn('After row Pos1:',Pos1,' Pos2:',Pos2);
       Inc(ColCount);
     end;
     if (pos1 < length(Trim(CSVStr))) and Assigned(FOnColumn) then
