@@ -14,7 +14,7 @@ implementation
 
 procedure RegisterUnitUniqueInstance;
 begin
-  RegisterComponents('Misc',[TUniqueInstance]);
+  RegisterComponents('System',[TUniqueInstance]);
 end;  
 
 procedure Register;

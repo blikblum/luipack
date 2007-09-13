@@ -70,7 +70,7 @@ type
   published
     property Enabled: Boolean read FEnabled write FEnabled;
     property Identifier: String read FIdentifier write FIdentifier;
-    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval default 1000;
+    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
   end;
 
@@ -81,6 +81,7 @@ uses
 
 const
   BaseServerId = 'tuniqueinstance_';
+  Separator = '|';
 
 { TUniqueInstance }
 
@@ -93,16 +94,16 @@ var
   var
     pos1,pos2:Integer;
   begin
-    SetLength(TempArray,Count);
+    SetLength(TempArray, Count);
     //fill params
     i := 0;
     pos1:=1;
-    pos2:=pos('|',AStr);
+    pos2:=pos(Separator, AStr);
     while pos1 < pos2 do
     begin
-      TempArray[i]:=Copy(AStr,pos1,pos2-pos1);
-      pos1:=pos2+1;
-      pos2:=posex('|',AStr,pos1);
+      TempArray[i] := Copy(AStr, pos1, pos2 - pos1);
+      pos1 := pos2+1;
+      pos2 := posex(Separator, AStr, pos1);
       inc(i);
     end;
   end;
@@ -158,7 +159,7 @@ begin
       //Send a message and then exit
       TempStr:='';
       for i:= 1 to ParamCount do
-        TempStr := TempStr+ParamStr(i)+'|';
+        TempStr := TempStr + ParamStr(i) + Separator;
       FIPCClient.Active := True;
       FIPCClient.SendStringMessage(ParamCount, TempStr);
       Application.ShowMainForm := False;
@@ -168,17 +169,19 @@ begin
     begin
       //It's the first instance. Init the server
       if FIPCServer = nil then
-        FIPCServer:=TSimpleIPCServer.Create(Self);
+        FIPCServer := TSimpleIPCServer.Create(Self);
       with FIPCServer do
       begin
-        ServerID:=GetServerId;
-        Global:=True;
-        OnMessage:=@ReceiveMessage;
+        ServerID := GetServerId;
+        Global := True;
+        OnMessage: = @ReceiveMessage;
         StartServer;
       end;
       //there's no more need for FIPCClient
       FIPCClient.Free;
+      {$ifdef unix}
       FTimer.Enabled := True;
+      {$endif}
     end;
   end;//if
   inherited;
@@ -188,11 +191,9 @@ constructor TUniqueInstance.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FIPCClient := TSimpleIPCClient.Create(Self);
+  FUpdateInterval := 1000;
   {$ifdef unix}
   FTimer := TTimer.Create(Self);
-  //somehow FUpdatetInterval is not updated
-  //FTimer.Interval := FUpdateInterval;
-  FTimer.Interval := 1000;
   FTimer.OnTimer := @CheckMessage;
   {$endif}
 end;
