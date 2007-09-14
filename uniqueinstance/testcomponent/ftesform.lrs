@@ -5,12 +5,13 @@ LazarusResources.Add('TForm1','FORMDATA',[
   +'dth'#3'T'#1#18'HorzScrollBar.Page'#3'S'#1#18'VertScrollBar.Page'#3#23#1#13
   +'ActiveControl'#7#8'ListBox1'#7'Caption'#6#19'Test UniqueInstance'#12'Client'
   +'Height'#3#24#1#11'ClientWidth'#3'T'#1#0#6'TLabel'#6'Label1'#4'Left'#2#8#6'H'
-  +'eight'#2#14#3'Top'#2#16#5'Width'#2' '#7'Caption'#6#6'Label1'#11'ParentColor'
+  +'eight'#2#17#3'Top'#2#16#5'Width'#2'1'#7'Caption'#6#6'Label1'#11'ParentColor'
   +#8#0#0#8'TListBox'#8'ListBox1'#4'Left'#2#8#6'Height'#3#192#0#3'Top'#2' '#5'W'
-  +'idth'#3#248#0#8'TabOrder'#2#0#0#0#7'TButton'#11'ButCrashApp'#4'Left'#2#8#6
-  +'Height'#2#25#3'Top'#3#240#0#5'Width'#2'x'#25'BorderSpacing.InnerBorder'#2#4
-  +#7'Caption'#6#17'Crash Application'#7'OnClick'#7#16'ButCrashAppClick'#8'TabO'
-  +'rder'#2#1#0#0#15'TUniqueInstance'#15'UniqueInstance1'#7'Enabled'#9#10'Ident'
-  +'ifier'#6#7'test0.1'#14'UpdateInterval'#3' '#3#15'OnOtherInstance'#7#28'Uniq'
-  +'ueInstance1OtherInstance'#4'left'#3#8#1#3'top'#2' '#0#0#0
+  +'idth'#3#248#0#8'TabOrder'#2#0#8'TopIndex'#2#255#0#0#7'TButton'#11'ButCrashA'
+  +'pp'#4'Left'#2#8#6'Height'#2#25#3'Top'#3#240#0#5'Width'#3#136#0#25'BorderSpa'
+  +'cing.InnerBorder'#2#4#7'Caption'#6#17'Crash Application'#7'OnClick'#7#16'Bu'
+  +'tCrashAppClick'#8'TabOrder'#2#1#0#0#15'TUniqueInstance'#15'UniqueInstance1'
+  +#7'Enabled'#9#10'Identifier'#6#7'test0.1'#14'UpdateInterval'#3' '#3#15'OnOth'
+  +'erInstance'#7#28'UniqueInstance1OtherInstance'#4'left'#3#8#1#3'top'#2' '#0#0
+  +#0
 ]);

@@ -12,26 +12,26 @@ object frmMain: TfrmMain
     Height = 300
     Width = 400
     Align = alClient
-    PageIndex = 1
+    PageIndex = 0
     TabOrder = 0
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 396
+      ClientHeight = 266
       object ToggleLabel1: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 17
         Top = 10
-        Width = 102
+        Width = 149
         ExpandedCaption = 'State2 (Expanded)'
         Caption = 'State1 (Collapsed)'
         ParentColor = False
       end
       object ToggleLabel2: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 17
         Top = 62
-        Width = 68
+        Width = 100
         ExpandedCaption = 'Hide Panel'
         OnChange = ToggleLabel2Change
         Caption = 'Show Panel'
@@ -49,8 +49,8 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 396
+      ClientHeight = 266
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
@@ -227,17 +227,17 @@ object frmMain: TfrmMain
       end
       object Label1: TLabel
         Left = 27
-        Height = 14
+        Height = 17
         Top = 82
-        Width = 63
+        Width = 93
         Caption = 'Flat Buttons:'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 26
-        Height = 14
+        Height = 17
         Top = 10
-        Width = 74
+        Width = 114
         Caption = 'Normal Buttons'
         ParentColor = False
       end
@@ -255,17 +255,17 @@ object frmMain: TfrmMain
       end
       object Label3: TLabel
         Left = 26
-        Height = 14
+        Height = 17
         Top = 162
-        Width = 129
+        Width = 190
         Caption = 'Buttons with inlined arrow:'
         ParentColor = False
       end
       object MenuButton6: TMenuButton
-        Left = 186
+        Left = 166
         Height = 22
         Top = 191
-        Width = 130
+        Width = 160
         Menu = PopupMenu6
         Options = [mboShowIndicator]
         Caption = 'Text and Glyph'
@@ -301,7 +301,7 @@ object frmMain: TfrmMain
         NumGlyphs = 0
       end
       object MenuButton7: TMenuButton
-        Left = 324
+        Left = 334
         Height = 22
         Top = 191
         Width = 48
@@ -341,8 +341,8 @@ object frmMain: TfrmMain
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 396
+      ClientHeight = 266
       object SearchEdit1: TSearchEdit
         Left = 20
         Height = 23

@@ -157,11 +157,14 @@ begin
     begin
       //A instance is already running
       //Send a message and then exit
-      TempStr:='';
-      for i:= 1 to ParamCount do
-        TempStr := TempStr + ParamStr(i) + Separator;
-      FIPCClient.Active := True;
-      FIPCClient.SendStringMessage(ParamCount, TempStr);
+      if Assigned(FOnOtherInstance) then
+      begin
+        TempStr:='';
+        for i:= 1 to ParamCount do
+          TempStr := TempStr + ParamStr(i) + Separator;
+        FIPCClient.Active := True;
+        FIPCClient.SendStringMessage(ParamCount, TempStr);
+      end;
       Application.ShowMainForm := False;
       Application.Terminate;
     end
@@ -174,13 +177,14 @@ begin
       begin
         ServerID := GetServerId;
         Global := True;
-        OnMessage: = @ReceiveMessage;
+        OnMessage := @ReceiveMessage;
         StartServer;
       end;
       //there's no more need for FIPCClient
       FIPCClient.Free;
       {$ifdef unix}
-      FTimer.Enabled := True;
+      if Assigned(FOnOtherInstance) then
+        FTimer.Enabled := True;
       {$endif}
     end;
   end;//if

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,
-  uniqueinstance, StdCtrls, ExtCtrls;
+  UniqueInstance, StdCtrls, ExtCtrls;
 
 type
 
@@ -53,6 +53,8 @@ begin
   x := 0;
   d := 1 / x;
 end;
+
+
 
 initialization
   {$I ftesform.lrs}
