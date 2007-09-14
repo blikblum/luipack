@@ -16,11 +16,14 @@ type
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     MenuButton1: TMenuButton;
     MenuButton2: TMenuButton;
     MenuButton3: TMenuButton;
     MenuButton4: TMenuButton;
     MenuButton5: TMenuButton;
+    MenuButton6: TMenuButton;
+    MenuButton7: TMenuButton;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
@@ -31,7 +34,14 @@ type
     MenuItem16: TMenuItem;
     MenuItem17: TMenuItem;
     MenuItem18: TMenuItem;
+    MenuItem19: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItem20: TMenuItem;
+    MenuItem21: TMenuItem;
+    MenuItem22: TMenuItem;
+    MenuItem23: TMenuItem;
+    MenuItem24: TMenuItem;
+    MenuItem25: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
     MenuItem5: TMenuItem;
@@ -49,6 +59,8 @@ type
     PopupMenu3: TPopupMenu;
     PopupMenu4: TPopupMenu;
     PopupMenu5: TPopupMenu;
+    PopupMenu6: TPopupMenu;
+    PopupMenu7: TPopupMenu;
     SearchEdit1: TSearchEdit;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
