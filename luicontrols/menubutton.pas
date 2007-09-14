@@ -39,7 +39,7 @@ interface
 
 
 uses
-  LCLType, Types, Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics
+  LCLType, LCLProc, Types, Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics
   {$ifdef DEBUG_MENUBUTTON}, sharedlogger {$endif};
 
 type
@@ -107,7 +107,8 @@ type
     FMenu: TPopupMenu;
     FArrowButton: TArrowButton;
     FOptions: TMenuButtonOptions;
-    FArrowOffset: Integer;
+    FClientWidth: Integer;
+    FContentWidth: Integer;
     FStyle: TMenuButtonStyle;
     procedure ArrowEntered(Sender: TObject);
     procedure ArrowLeaved(Sender: TObject);
@@ -121,6 +122,7 @@ type
     procedure UpdateStyle;
   protected
     procedure DoButtonDown; override;
+    function GetGlyphSize(PaintRect: TRect): TSize; override;
     function GetTextSize(PaintRect: TRect): TSize; override;
     procedure Loaded; override;
     procedure MouseEnter; override;
@@ -128,7 +130,6 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure Paint; override;
-    procedure RealSetText(const Value: TCaption); override;
   public
     destructor Destroy; override;
     procedure Click; override;
@@ -202,11 +203,14 @@ end;
 
 procedure TMenuButton.UpdateArrowPosition;
 var
-  TextSize: TSize;
+  XOffset: Integer;
 begin
-  TextSize := inherited GetTextSize(ClientRect);
-  FArrowOffset := TextSize.cx + ((Width - TextSize.cx) div 2);
-  CalculateArrowPoints(FArrowOffset,10,Height);
+  XOffset := (FClientWidth - FContentWidth) div 2;
+  if XOffset >= 6 then
+    Dec(XOffset, 1)
+  else
+    Dec(XOffset, 2);
+  CalculateArrowPoints(FContentWidth + XOffset, 10, Height)
 end;
 
 procedure TMenuButton.UpdateStyle;
@@ -253,10 +257,34 @@ begin
       ShowMenu;
 end;
 
+function TMenuButton.GetGlyphSize(PaintRect: TRect): TSize;
+begin
+  Result := inherited GetGlyphSize(PaintRect);
+  if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
+  begin
+    FClientWidth := PaintRect.Right - PaintRect.Left;
+    if Layout in [blGlyphLeft, blGlyphRight] then
+      Inc(FContentWidth, Result.cx);
+    if not ShowCaption or (Caption = '') then
+      Inc(Result.Cx, 6);
+  end;
+end;
+
 function TMenuButton.GetTextSize(PaintRect: TRect): TSize;
 begin
   Result := inherited GetTextSize(PaintRect);
-  Inc(Result.cx,12);
+  if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
+  begin
+    Inc(FContentWidth, Result.Cx);
+    if Result.cx > 0 then
+    begin
+      //if no glyph the returned text width must be smaller
+      if Result.cx = FContentWidth then
+        Inc(Result.cx, 6)
+      else
+        Inc(Result.cx, 12);
+    end;
+  end;
 end;
 
 procedure TMenuButton.Loaded;
@@ -289,9 +317,11 @@ end;
 
 procedure TMenuButton.Paint;
 begin
+  FContentWidth := 0;
   inherited Paint;
   if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
   begin
+    UpdateArrowPosition;
     with Canvas do
     begin
       Brush.Color := clBlack;
@@ -302,13 +332,6 @@ begin
         Polygon([FArrowPoints[acLeft], FArrowPoints[acRight], FArrowPoints[acBottom]]);
     end;
   end;
-end;
-
-procedure TMenuButton.RealSetText(const Value: TCaption);
-begin
-  inherited RealSetText(Value);
-  if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
-    UpdateArrowPosition;
 end;
 
 procedure TMenuButton.ArrowEntered(Sender: TObject);
