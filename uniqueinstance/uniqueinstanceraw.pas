@@ -39,7 +39,7 @@ interface
 uses
   Classes, SysUtils, simpleipc;
   
-  function InstanceRunning(const Identifier: String): Boolean;
+  function InstanceRunning(const Identifier: String; SendParameters: Boolean = False): Boolean;
 
   function InstanceRunning: Boolean;
 
@@ -47,37 +47,49 @@ implementation
 
 const
   BaseServerId = 'tuniqueinstance_';
+  Separator = '|';
 
 var
   FIPCServer: TSimpleIPCServer;
   
-function InstanceRunning(const Identifier: String): Boolean;
+function InstanceRunning(const Identifier: String; SendParameters: Boolean = False): Boolean;
 
   function GetServerId: String;
   begin
     if Identifier <> '' then
-      Result:=BaseServerId+Identifier
+      Result := BaseServerId + Identifier
     else
-      Result:=BaseServerId+ExtractFileName(ParamStr(0));
+      Result := BaseServerId + ExtractFileName(ParamStr(0));
   end;
+  
+var
+  TempStr: String;
+  i: Integer;
   
 begin
   with TSimpleIPCClient.Create(nil) do
   try
-    ServerId:=GetServerId;
-    Result:=ServerRunning;
+    ServerId := GetServerId;
+    Result := ServerRunning;
     if not Result then
     begin
       //It's the first instance. Init the server
       if FIPCServer = nil then
-        FIPCServer:=TSimpleIPCServer.Create(nil);
-      with FIPCServer do
+        FIPCServer := TSimpleIPCServer.Create(nil);
+      FIPCServer.ServerID := ServerId;
+      FIPCServer.Global := True;
+      FIPCServer.StartServer;
+    end
+    else
+      // an instance already exists
+      if SendParameters then
       begin
-        ServerID:=GetServerId;
-        Global:=True;
-        StartServer;
+        TempStr := '';
+        for i := 1 to ParamCount do
+          TempStr := TempStr + ParamStr(i) + Separator;
+        Active := True;
+        SendStringMessage(ParamCount, TempStr);
       end;
-    end;
   finally
     Free;
   end;
@@ -85,7 +97,7 @@ end;
 
 function InstanceRunning: Boolean;
 begin
-  InstanceRunning('');
+  Result := InstanceRunning('');
 end;
 
 finalization  
