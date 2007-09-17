@@ -147,20 +147,20 @@ end;
 
 procedure TUniqueInstance.Loaded;
 var
-  TempStr:String;
-  i:Integer;
+  TempStr: String;
+  i: Integer;
 begin
   if not (csDesigning in ComponentState) and FEnabled then
   begin
-    FIPCClient.ServerId:=GetServerId;
+    FIPCClient.ServerId := GetServerId;
     if FIPCClient.ServerRunning then
     begin
       //A instance is already running
       //Send a message and then exit
       if Assigned(FOnOtherInstance) then
       begin
-        TempStr:='';
-        for i:= 1 to ParamCount do
+        TempStr := '';
+        for i := 1 to ParamCount do
           TempStr := TempStr + ParamStr(i) + Separator;
         FIPCClient.Active := True;
         FIPCClient.SendStringMessage(ParamCount, TempStr);
@@ -175,7 +175,7 @@ begin
         FIPCServer := TSimpleIPCServer.Create(Self);
       with FIPCServer do
       begin
-        ServerID := GetServerId;
+        ServerID := FIPCClient.ServerId;
         Global := True;
         OnMessage := @ReceiveMessage;
         StartServer;
