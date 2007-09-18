@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, ftesform, lcluniqueinstance;
+  { add your units here }, ftesform, uniqueinstance_package;
 
 begin
   Application.Initialize;
