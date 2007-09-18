@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, Unit1, uniqueinstanceraw, lcluniqueinstance;
+  { add your units here }, Unit1, uniqueinstanceraw, uniqueinstance_package;
 
 begin
   if not InstanceRunning('project1ver3') then
