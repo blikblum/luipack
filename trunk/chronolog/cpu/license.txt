@@ -1,0 +1,79 @@
+Source License v1.0 (14. May 2000)
+
+Terms and conditions
+====================
+
+0) Definitions
+
+  Throughout  this  license,  the  terms 'package', 'source', 'code',
+  'work' and  'source files' refer  to  the  set  of files  which claim
+  to be distributed under this license, be they named as alpha, beta or
+  final release.
+
+  'You' refers to  the licensee, or person using these sources, where
+  'using' is a generic term including compiling the package's source
+  code as  well as linking it  to form a  'program' or `executable'.
+  This  program is  referred to  as  'a program  using this package'.
+
+  This  license applies  to all packages distributed  under this license,
+  including  all  source   code,  binaries  and  documentation,  unless
+  otherwise  stated   in  the  file  in  its original, unmodified form
+  as  distributed in the original archive. If you are  unsure whether
+  or not a particular  file is covered by this license, you must contact
+  me to verify this.
+
+  This package is copyright (C) 2000, Thomas Schatzl. All rights
+  reserved except as specified below.
+
+
+1) Warranty
+
+  THIS PACKAGE IS PROVIDED `AS IS' WITHOUT  WARRANTY OF ANY KIND, EITHER
+  EXPRESSED OR  IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES  OF
+  MERCHANTABILITY   AND  FITNESS  FOR  A  PARTICULAR PURPOSE.  IN NO EVENT
+  WILL ANY OF THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE  FOR ANY DAMAGES
+  CAUSED  BY THE USE OR  THE INABILITY TO USE, OF THIS PACKAGE.
+
+  As  you have  not signed  this license,  you are  not  required to
+  accept  it.   However,  as  this package  is  copyrighted
+  material, only  this license, or  another one contracted  with the
+  author, grants you  the right to use, distribute,  and modify it.
+  Therefore,  by  using,  distributing,  or modifying  the  package
+  you indicate that you understand and accept all the terms of this
+  license.
+
+2) Redistribution
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+    o Redistribution  of source code  must retain this  license file
+      (`license.txt') unaltered; any additions, deletions or changes
+      to   the  original   files  must   be  clearly   indicated  in
+      accompanying  documentation.   The  copyright notices  of  the
+      unaltered, original  files must be preserved in  all copies of
+      source files.
+
+    o Redistribution in binary form must provide a  disclaimer  that
+      states  that  the software is based in part of the work of me,
+      in  the  distribution  documentation.  You are encouraged
+      to put an URL to my web web page  in  your documentation,
+      though this isn't mandatory.
+
+  These conditions  apply to any  software derived from or  based on
+  this code, not just  the unmodified files.  If you use this
+  work, you  must acknowledge me.  However,  no fee need  be paid.
+
+3) Contacts
+
+There are some ways to get updated versions of this code or have
+questions about it answered:
+
+	o Send an e-mail to tom_at_work@yline.com
+
+  or
+
+  	o visit the web site at
+  	http://members.yline.com/~tom_at_work/index.html
+
