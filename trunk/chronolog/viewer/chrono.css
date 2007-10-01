@@ -1,0 +1,67 @@
+.menu_views 
+{
+  width:10.2em;
+  position:fixed;
+  top:0;
+  left:0;
+  padding-left:1%;
+  padding-right:1%;
+  margin-left:0;
+  margin-right:0;
+}
+
+.menu_views li
+{
+          cursor: pointer;
+}
+
+
+.content {
+        margin-left:10.2em;
+        padding-left:1em;
+}
+
+#allresults{
+  display: block;
+}
+
+#summary{
+  display: none;
+}
+
+#views{
+  display: none;
+}
+
+table{
+	font-size : 9pt;
+	margin-top : 10pt;
+	background-color : Black;
+	font-family : Tahoma;
+}
+td{
+	background-color : White;
+}
+body{
+	font-size : small;
+	margin-left: 5%;
+	background-color : White;
+	font-family : Tahoma;
+}
+.columntitle td{
+	font-weight:bold;
+	text-align:center;
+	font-size : 11pt;
+	border-top : 0px none Black;
+	background-color : Black;
+	color : White;
+}
+.subtitle{
+     font-size : 12pt;
+     font-weight:bold;
+}
+.tabletitle{
+	text-align: center;
+	font-weight: bolder;
+	font-size: 14px;
+}
