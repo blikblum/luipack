@@ -29,73 +29,63 @@ function SaveLogToDb(ALog: TChronoLog;const AFilename: String):boolean;
 implementation
 
 uses
-   sqliteds, db;
+   sqlite3ds, db;
    
 function SaveLogToDb(ALog: TChronoLog; const AFilename: String): boolean;
 var
-  ADb:TSqliteDataset;
+  ADb:TSqlite3Dataset;
   i,LastSessionId:Integer;
 begin
-  ADb:=TSqliteDataset.Create(nil);
+  ADb := TSqlite3Dataset.Create(nil);
   with ADb do
   begin
-    FileName:=AFilename;
+    FileName := AFilename;
     if FileExists(Filename) then
     begin
-      //todo:add tableexists(Table) to sqliteds
-      TableName:='sessions';
-      if not TableExists then
+      if (not TableExists('sessions')) or (not TableExists('results')) then
       begin
         Destroy;
-        raise Exception.Create(AFilename+' is not a valid database');
-      end;
-      TableName:='results';
-      if not TableExists then
-      begin
-        Destroy;
-        raise Exception.Create(AFilename+' is not a valid database');
+        raise Exception.Create(AFilename + ' is not a valid database');
       end;
     end
     else
     begin
       //Create Sessions Table
-      TableName:='sessions';
       FieldDefs.Clear;
       FieldDefs.Add('Code',ftAutoInc);
       FieldDefs.Add('Name',ftString);
       FieldDefs.Add('Comments',ftString);
       FieldDefs.Add('SystemInfo',ftString);
       FieldDefs.Add('Date',ftDateTime);
-      CreateTable;
+      CreateTable('sessions');
       // Create Results table
-      TableName:='results';
       FieldDefs.Clear;
       FieldDefs.Add('Code',ftAutoInc);
       FieldDefs.Add('Action',ftString);
       FieldDefs.Add('Time',ftLargeInt);
       FieldDefs.Add('SessionId',ftInteger);
-      CreateTable;
+      CreateTable('results');
     end;
-    TableName:='sessions';
+    TableName := 'sessions';
     Open;
     Append;
-    FieldByName('Name').AsString:=ALog.SessionName;
-    FieldByName('Comments').AsString:=ALog.Comments;
-    FieldByName('Date').AsDateTime:=Now;
-    FieldByName('SystemInfo').AsString:=ALog.GetSystemInfo;
+    FieldByName('Name').AsString := ALog.SessionName;
+    FieldByName('Comments').AsString := ALog.Comments;
+    FieldByName('Date').AsDateTime := Now;
+    FieldByName('SystemInfo').AsString := ALog.GetSystemInfo;
     Post;
-    LastSessionId:=FieldByName('Code').AsInteger;
+    LastSessionId := FieldByName('Code').AsInteger;
     ApplyUpdates;
     Close;
-    Sql:='';
-    TableName:='results';
+    Sql := '';
+    TableName := 'results';
     Open;
     for i:= 0 to ALog.Count - 1 do
     begin
       Append;
-      FieldByName('Action').AsString:=ALog.GetActionStr(i);
-      TLargeintField(FieldByName('Time')).AsLargeInt:=ALog.AsMicroSecond(i);
-      FieldbyName('SessionId').AsInteger:=LastSessionId;
+      FieldByName('Action').AsString := ALog.GetActionStr(i);
+      TLargeintField(FieldByName('Time')).AsLargeInt := ALog.AsMicroSecond(i);
+      FieldbyName('SessionId').AsInteger := LastSessionId;
       Post;
     end;
     ApplyUpdates;

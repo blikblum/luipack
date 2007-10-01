@@ -1,0 +1,273 @@
+object frmMain: TfrmMain
+  Left = 360
+  Height = 521
+  Top = 171
+  Width = 717
+  HorzScrollBar.Page = 716
+  VertScrollBar.Page = 501
+  ActiveControl = listResults
+  Caption = 'ChronoView'
+  ClientHeight = 502
+  ClientWidth = 717
+  Menu = menuMain
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object nbMain: TNotebook
+    Height = 466
+    Top = 24
+    Width = 712
+    PageIndex = 0
+    TabOrder = 0
+    object pageResults: TPage
+      Caption = 'Results'
+      ClientWidth = 704
+      ClientHeight = 440
+      object gridResults: TDBGrid
+        Left = 148
+        Height = 416
+        Top = 10
+        Width = 544
+        DataSource = srcResults
+        FixedColor = clBtnFace
+        FixedHotColor = cl3DLight
+        Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+        OptionsExtra = [dgeAutoColumns, dgeCheckboxColumn]
+        ParentColor = False
+        Scrollbars = ssAutoBoth
+        TabOrder = 1
+        TabStop = True
+      end
+      object listResults: TListBox
+        Left = 4
+        Height = 192
+        Top = 10
+        Width = 132
+        OnSelectionChange = listMainSelectionChange
+        TabOrder = 0
+      end
+    end
+    object pageSummary: TPage
+      Caption = 'Summary'
+      ClientWidth = 704
+      ClientHeight = 440
+      object listSummary: TListBox
+        Left = 4
+        Height = 256
+        Top = 10
+        Width = 152
+        OnSelectionChange = listDetails2SelectionChange
+        TabOrder = 0
+      end
+      object gridSummary: TStringGrid
+        Left = 188
+        Height = 416
+        Top = 10
+        Width = 512
+        ColCount = 1
+        FixedColor = clBtnFace
+        FixedCols = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        RowCount = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+        TabStop = True
+      end
+    end
+    object pageCustomViews: TPage
+      Caption = 'Custom Views'
+      ClientWidth = 704
+      ClientHeight = 440
+      object gridCustomViews: TStringGrid
+        Left = 196
+        Height = 418
+        Top = 8
+        Width = 504
+        ColCount = 1
+        FixedColor = clBtnFace
+        FixedCols = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        RowCount = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 5
+        TabStop = True
+      end
+      object checkActions: TCheckListBox
+        Left = 12
+        Height = 186
+        Top = 34
+        Width = 130
+        TabOrder = 0
+      end
+      object butShowView: TButton
+        Left = 148
+        Height = 25
+        Top = 202
+        Width = 40
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Show'
+        OnClick = butShowViewClick
+        TabOrder = 1
+      end
+      object checkSessions: TCheckListBox
+        Left = 12
+        Height = 186
+        Top = 224
+        Width = 130
+        TabOrder = 2
+      end
+      object butSaveView: TButton
+        Left = 67
+        Height = 25
+        Top = 412
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Save As'
+        OnClick = butSaveViewClick
+        TabOrder = 3
+      end
+      object comboViews: TComboBox
+        Left = 12
+        Height = 21
+        Top = 8
+        Width = 130
+        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        ItemHeight = 13
+        MaxLength = 0
+        OnChange = comboViewsChange
+        Style = csDropDownList
+        TabOrder = 4
+      end
+    end
+    object pageReports: TPage
+      Caption = 'Reports'
+      ClientWidth = 704
+      ClientHeight = 440
+      object Label1: TLabel
+        Left = 50
+        Height = 14
+        Top = 66
+        Width = 108
+        Caption = 'Options will came here'
+        ParentColor = False
+      end
+      object butSaveToHtml: TButton
+        Left = 54
+        Height = 25
+        Top = 370
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Save To Html'
+        OnClick = butSaveToHtmlClick
+        TabOrder = 0
+      end
+    end
+    object PageCharts: TPage
+      Caption = 'Charts'
+      ClientWidth = 704
+      ClientHeight = 440
+      object Chart1: TChart
+        Left = 244
+        Height = 309
+        Top = 50
+        Width = 410
+        AutoUpdateXMin = True
+        AutoUpdateXMax = True
+        AutoUpdateYMin = True
+        AutoUpdateYMax = True
+        Legend.Alignment = laRight
+        Title.Brush.Color = clBtnFace
+        Title.Font.Color = clBlue
+        Title.Alignment = taCenter
+        Title.Text.Strings = (
+          'TAChart'
+        )
+        Foot.Brush.Color = clBtnFace
+        Foot.Font.Color = clBlue
+        AllowZoom = True
+        LeftAxis.Title.Angle = 90
+        LeftAxis.Grid.Style = psDot
+        LeftAxis.Grid.Visible = True
+        BottomAxis.Grid.Style = psDot
+        BottomAxis.Grid.Visible = True
+        Frame.Visible = True
+        BackColor = clBtnFace
+        AxisVisible = True
+        Color = clBtnFace
+        ParentColor = False
+      end
+    end
+  end
+  object comboGroupBy: TComboBox
+    Height = 21
+    Width = 136
+    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+    Enabled = False
+    ItemHeight = 13
+    Items.Strings = (
+      'Group by Session'
+      'Group by Action'
+    )
+    MaxLength = 0
+    OnChange = comboMainChange
+    Style = csDropDownList
+    TabOrder = 1
+  end
+  object comboScale: TComboBox
+    Left = 152
+    Height = 21
+    Width = 128
+    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+    Enabled = False
+    ItemHeight = 13
+    Items.Strings = (
+      'View Microseconds'
+      'View Miliseconds'
+      'View Seconds'
+    )
+    MaxLength = 0
+    OnChange = comboScaleChange
+    Style = csDropDownList
+    TabOrder = 2
+  end
+  object menuMain: TMainMenu
+    left = 16
+    top = 328
+    object MIFile: TMenuItem
+      Caption = 'File'
+      object MIOpen: TMenuItem
+        Caption = 'Open'
+        OnClick = MIOpenClick
+      end
+      object MIOpenRecent: TMenuItem
+        Caption = 'Open Recent'
+      end
+    end
+  end
+  object dlgOpenDatafile: TOpenDialog
+    Title = 'Open existing file'
+    Filter = 'Db files|*.db|All files|*.*'
+    FilterIndex = 0
+    left = 16
+    top = 368
+  end
+  object srcResults: TDatasource
+    DataSet = dsResults
+    left = 96
+    top = 328
+  end
+  object dlgSaveHtml: TSaveDialog
+    Title = 'Save file as'
+    FilterIndex = 0
+    left = 16
+    top = 408
+  end
+  object dsResults: TSqlite3Dataset
+    left = 56
+    top = 368
+  end
+  object dsCustomViews: TSqlite3Dataset
+    TableName = 'chrono_custom_views'
+    left = 56
+    top = 328
+  end
+end
