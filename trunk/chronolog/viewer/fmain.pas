@@ -54,6 +54,7 @@ type
     dlgSaveHtml: TSaveDialog;
     dsResults: TSqlite3Dataset;
     dsCustomViews: TSqlite3Dataset;
+    PanelTop: TPanel;
     srcResults: TDatasource;
     MIOpen: TMenuItem;
     MIFile: TMenuItem;
@@ -105,12 +106,12 @@ uses
   fsaveview, DomUtils;
 
 const
-  FAverageTemplate = 'Select ifnull(Round(Avg(Time)/%s),0)';
-  FMinTemplate = 'Select Round(Min(Time)/%s)';
-  FMaxTemplate = 'Select Round(Max(Time)/%s)';
-  FSessionFieldsTemplate = 'Select Action , Round(Time/%s), Date, Comments from Results, Sessions';
+  FAverageTemplate = 'Select ifnull(Cast (Round(Avg(Time)/%s) as Integer),0)';
+  FMinTemplate = 'Select Cast(Round(Min(Time)/%s) as Integer)';
+  FMaxTemplate = 'Select Cast(Round(Max(Time)/%s) as Integer)';
+  FSessionFieldsTemplate = 'Select Action , Cast (Round(Time/%s) as Integer), Date, Comments from Results, Sessions';
   FSessionWhereTemplate = ' Where Sessions.Name = "%s" and Sessions.Code = Results.SessionId Order by Time;';
-  FActionFieldsTemplate = 'Select Name , Round(Time/%s), Date, Comments from Results, Sessions';
+  FActionFieldsTemplate = 'Select Name , Cast(Round(Time/%s) as Integer), Date, Comments from Results, Sessions';
   FActionWhereTemplate = ' Where Results.Action = "%s" and Results.SessionId = Sessions.Code Order by Time;';
   FWhereTemplate = ' from results , sessions where  %s = "%s" and sessionid = sessions.code and %s = "%s";';
 

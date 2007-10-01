@@ -13,20 +13,22 @@ object frmMain: TfrmMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object nbMain: TNotebook
-    Height = 466
-    Top = 24
-    Width = 712
+    Height = 476
+    Top = 26
+    Width = 717
+    Align = alClient
     PageIndex = 0
     TabOrder = 0
     object pageResults: TPage
       Caption = 'Results'
-      ClientWidth = 704
-      ClientHeight = 440
+      ClientWidth = 709
+      ClientHeight = 450
       object gridResults: TDBGrid
         Left = 148
-        Height = 416
+        Height = 430
         Top = 10
-        Width = 544
+        Width = 552
+        Anchors = [akTop, akLeft, akRight, akBottom]
         DataSource = srcResults
         FixedColor = clBtnFace
         FixedHotColor = cl3DLight
@@ -48,8 +50,8 @@ object frmMain: TfrmMain
     end
     object pageSummary: TPage
       Caption = 'Summary'
-      ClientWidth = 704
-      ClientHeight = 440
+      ClientWidth = 709
+      ClientHeight = 450
       object listSummary: TListBox
         Left = 4
         Height = 256
@@ -59,10 +61,11 @@ object frmMain: TfrmMain
         TabOrder = 0
       end
       object gridSummary: TStringGrid
-        Left = 188
-        Height = 416
+        Left = 172
+        Height = 432
         Top = 10
-        Width = 512
+        Width = 528
+        Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
         FixedColor = clBtnFace
         FixedCols = 0
@@ -75,13 +78,14 @@ object frmMain: TfrmMain
     end
     object pageCustomViews: TPage
       Caption = 'Custom Views'
-      ClientWidth = 704
-      ClientHeight = 440
+      ClientWidth = 709
+      ClientHeight = 450
       object gridCustomViews: TStringGrid
         Left = 196
-        Height = 418
+        Height = 432
         Top = 8
         Width = 504
+        Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
         FixedColor = clBtnFace
         FixedCols = 0
@@ -140,8 +144,8 @@ object frmMain: TfrmMain
     end
     object pageReports: TPage
       Caption = 'Reports'
-      ClientWidth = 704
-      ClientHeight = 440
+      ClientWidth = 709
+      ClientHeight = 450
       object Label1: TLabel
         Left = 50
         Height = 14
@@ -163,8 +167,8 @@ object frmMain: TfrmMain
     end
     object PageCharts: TPage
       Caption = 'Charts'
-      ClientWidth = 704
-      ClientHeight = 440
+      ClientWidth = 709
+      ClientHeight = 450
       object Chart1: TChart
         Left = 244
         Height = 309
@@ -197,37 +201,48 @@ object frmMain: TfrmMain
       end
     end
   end
-  object comboGroupBy: TComboBox
-    Height = 21
-    Width = 136
-    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-    Enabled = False
-    ItemHeight = 13
-    Items.Strings = (
-      'Group by Session'
-      'Group by Action'
-    )
-    MaxLength = 0
-    OnChange = comboMainChange
-    Style = csDropDownList
+  object PanelTop: TPanel
+    Height = 26
+    Width = 717
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 26
+    ClientWidth = 717
     TabOrder = 1
-  end
-  object comboScale: TComboBox
-    Left = 152
-    Height = 21
-    Width = 128
-    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-    Enabled = False
-    ItemHeight = 13
-    Items.Strings = (
-      'View Microseconds'
-      'View Miliseconds'
-      'View Seconds'
-    )
-    MaxLength = 0
-    OnChange = comboScaleChange
-    Style = csDropDownList
-    TabOrder = 2
+    object comboScale: TComboBox
+      Left = 160
+      Height = 21
+      Top = 1
+      Width = 136
+      AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+      Enabled = False
+      ItemHeight = 13
+      Items.Strings = (
+        'View Microseconds'
+        'View Miliseconds'
+        'View Seconds'
+      )
+      MaxLength = 0
+      OnChange = comboScaleChange
+      Style = csDropDownList
+      TabOrder = 0
+    end
+    object comboGroupBy: TComboBox
+      Height = 21
+      Top = 1
+      Width = 144
+      AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+      Enabled = False
+      ItemHeight = 13
+      Items.Strings = (
+        'Group by Session'
+        'Group by Action'
+      )
+      MaxLength = 0
+      OnChange = comboMainChange
+      Style = csDropDownList
+      TabOrder = 1
+    end
   end
   object menuMain: TMainMenu
     left = 16
@@ -262,6 +277,7 @@ object frmMain: TfrmMain
     top = 408
   end
   object dsResults: TSqlite3Dataset
+    TableName = 'results'
     left = 56
     top = 368
   end
