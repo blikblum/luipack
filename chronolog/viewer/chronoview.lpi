@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
         <PackageName Value="LCL"/>
       </Item1>
@@ -38,8 +38,12 @@
         <PackageName Value="sqlite3laz"/>
         <MinVersion Minor="3" Valid="True"/>
       </Item4>
+      <Item5>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item5>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="5">
       <Unit0>
         <Filename Value="chronoview.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,6 +63,18 @@
         <ResourceFilename Value="fsaveview.lrs"/>
         <UnitName Value="fsaveview"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="chronodataprovider.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ChronoDataProvider"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="dmodule.pas"/>
+        <ComponentName Value="dmMain"/>
+        <IsPartOfProject Value="True"/>
+        <ResourceFilename Value="dmodule.lrs"/>
+        <UnitName Value="dmodule"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

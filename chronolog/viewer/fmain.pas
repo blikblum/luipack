@@ -24,17 +24,15 @@ unit fmain;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Menus, DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons,
-  TAGraph, sqlite3ds;
+  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Menus, DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons;
 
 type
   { TfrmMain }
-  //todo: isolate GUI code from logic
+  //todo(partial): isolate GUI code from logic
   TfrmMain = class(TForm)
     butShowView: TButton;
     butSaveView: TButton;
     butSaveToHtml: TButton;
-    Chart1: TChart;
     checkActions: TCheckListBox;
     checkSessions: TCheckListBox;
     comboViews: TComboBox;
@@ -52,10 +50,7 @@ type
     pageCustomViews: TPage;
     pageResults: TPage;
     dlgSaveHtml: TSaveDialog;
-    dsResults: TSqlite3Dataset;
-    dsCustomViews: TSqlite3Dataset;
     PanelTop: TPanel;
-    srcResults: TDatasource;
     MIOpen: TMenuItem;
     MIFile: TMenuItem;
     menuMain: TMainMenu;
@@ -77,19 +72,7 @@ type
     procedure MIOpenRecentClick(Sender: TObject);
   private
     RecentFileList:TStrings;
-    FGroupByFieldsStr: String;
-    FGroupByWhereStr : String;
-    FGroupByStr: String;
-    FWhereStr: String;
-    FScaleStr: String;
-    FAverageStr:String;
-    FMinStr:String;
-    FMaxStr:String;
-    FCountStr:String;
-    procedure UpdateSqlTemplates;
     procedure LoadRecentMenu;
-    procedure LoadSessions(List: TStrings);
-    procedure LoadActions(List: TStrings);
     function GetChecked(CheckBox:TCheckListBox;List:TStrings):Boolean;
     procedure SetChecked(CheckBox:TCheckListBox;List:TStrings);
     procedure OpenFile(const AFileName: String; UpdateRecentList: Boolean);
@@ -103,17 +86,7 @@ var
 implementation
 
 uses
-  fsaveview, DomUtils;
-
-const
-  FAverageTemplate = 'Select ifnull(Cast (Round(Avg(Time)/%s) as Integer),0)';
-  FMinTemplate = 'Select Cast(Round(Min(Time)/%s) as Integer)';
-  FMaxTemplate = 'Select Cast(Round(Max(Time)/%s) as Integer)';
-  FSessionFieldsTemplate = 'Select Action , Cast (Round(Time/%s) as Integer), Date, Comments from Results, Sessions';
-  FSessionWhereTemplate = ' Where Sessions.Name = "%s" and Sessions.Code = Results.SessionId Order by Time;';
-  FActionFieldsTemplate = 'Select Name , Cast(Round(Time/%s) as Integer), Date, Comments from Results, Sessions';
-  FActionWhereTemplate = ' Where Results.Action = "%s" and Results.SessionId = Sessions.Code Order by Time;';
-  FWhereTemplate = ' from results , sessions where  %s = "%s" and sessionid = sessions.code and %s = "%s";';
+  fsaveview, DomUtils, dmodule;
 
 { TfrmMain }
 
@@ -132,28 +105,14 @@ begin
   OpenFile(TMenuItem(Sender).Caption,True);
 end;
 
-procedure TfrmMain.LoadSessions(List: TStrings);
-begin
-  List.Clear;
-  dsResults.QuickQuery('Select Distinct Name from Sessions;',List);
-end;
-
-procedure TfrmMain.LoadActions(List: TStrings);
-begin
-  List.Clear;
-  dsResults.QuickQuery('Select Distinct Action from Results;',List);
-end;
-
 procedure TfrmMain.listMainSelectionChange(Sender: TObject; User: boolean);
 var
   i:Integer;
 begin
-  with dsResults do
+  with dmMain.ChronoData do
   begin
-    Sql:=Format(FGroupByStr,[listResults.Items[listResults.ItemIndex]]);
-    //Writeln('SQL: ',sql);
-    Close;
-    Open;
+    ActiveGroup := listResults.Items[listResults.ItemIndex];
+    RefreshDataset;
   end;
   with gridResults do
   begin
@@ -178,67 +137,33 @@ begin
   RecentFileList.Destroy;
 end;
 
-procedure TfrmMain.UpdateSqlTemplates;
-begin
-  FMinStr:=Format(FMinTemplate,[FScaleStr])+FWhereStr;
-  FMaxStr:=Format(FMaxTemplate,[FScaleStr])+FWhereStr;
-  FAverageStr:=Format(FAverageTemplate,[FScaleStr])+FWhereStr;
-  FCountStr:='Select Count(*)'+FWhereStr;
-  FGroupByStr:=Format(FGroupByFieldsStr,[FScaleStr])+FGroupByWhereStr;
-  //todo: Update queries here
-  {
-  writeln('FMinStr: ',FMinStr);
-  writeln('FMaxStr: ',FMaxStr);
-  writeln('FAverageStr: ',FAverageStr);
-  writeln('FGroupByStr: ',FGroupByStr);
-  }
-end;
 
 procedure TfrmMain.listDetails2SelectionChange(Sender: TObject; User: boolean);
 var
-  RowList:TStrings;
   i:Integer;
 begin
-  RowList:=TStringList.Create;
-  case comboGroupBy.ItemIndex of
-  0:
+  with dmMain.ChronoData, gridSummary do
   begin
-    LoadActions(RowList);
-  end;
-  1:
-  begin
-    LoadSessions(RowList);
-  end;
-  end;
-  
-  with gridSummary do
-  begin
-    ColCount:=5 ;
+    ColCount := 6 ;
     //todo:  Columns are not set at runtime. Do it at design?
     Cells[1,0]:='Count';
     Cells[2,0]:='Min';
     Cells[3,0]:='Max';
-    Cells[4,0]:='Average';
+    Cells[4,0]:='Median';
+    Cells[5,0]:='Average';
 
-    RowCount:=RowList.Count + 1;
-    for i:=1 to RowList.Count do
+    ActiveGroup := listSummary.Items[listSummary.ItemIndex];
+    RowCount := RowList.Count + 1;
+    for i := 1 to RowList.Count do
     begin
-      Cells[0,i]:=RowList[i-1];
-      //writeln('Sql: ',Format(FMinStr,[RowList[i-1],
-      // listSummary.Items[listSummary.ItemIndex]]));
-      //writeln('Result: ',dsResults.QuickQuery(Format(FMinStr,[RowList[i-1],
-      // listSummary.Items[listSummary.ItemIndex] ])));
-      Cells[1,i]:=dsResults.QuickQuery(Format(FCountStr,[RowList[i-1],
-       listSummary.Items[listSummary.ItemIndex] ]));
-      Cells[2,i]:=dsResults.QuickQuery(Format(FMinStr,[RowList[i-1],
-       listSummary.Items[listSummary.ItemIndex] ]));
-      Cells[3,i]:=dsResults.QuickQuery(Format(FMaxStr,[RowList[i-1],
-       listSummary.Items[listSummary.ItemIndex] ]));
-      Cells[4,i]:=dsResults.QuickQuery(Format(FAverageStr,[RowList[i-1],
-       listSummary.Items[listSummary.ItemIndex] ]));
+      Cells[0,i] := RowList[i-1];
+      Cells[1,i] := GetCount(i-1);
+      Cells[2,i] := GetMin(i-1);
+      Cells[3,i] := GetMax(i-1);
+      Cells[4,i] := GetMedian(i-1);
+      Cells[5,i] := GetAvg(i-1);
     end;
   end;
-  RowList.Destroy;
 end;
 
 procedure TfrmMain.butShowViewClick(Sender: TObject);
@@ -263,13 +188,13 @@ begin
   case comboGroupBy.ItemIndex of
   0:
   begin
-    GetChecked(checkActions,ColList);
-    GetChecked(checkSessions,RowList);
+    GetChecked(checkActions, ColList);
+    GetChecked(checkSessions, RowList);
   end;
   1:
   begin
-    GetChecked(checkActions,RowList);
-    GetChecked(checkSessions,ColList);
+    GetChecked(checkActions, RowList);
+    GetChecked(checkSessions, ColList);
   end;
   end;
 
@@ -277,28 +202,27 @@ begin
   begin
     if (ColList.Count > 0) and (RowList.Count > 0) then
     begin
-      ColCount:=ColList.Count+2;
-      Cells[ColCount-1,0]:='Total';
-      for i:=1 to ColList.Count do
-        Cells[i,0]:=ColList[i - 1];
+      ColCount := ColList.Count + 2;
+      Cells[ColCount-1,0] := 'Total';
+      for i := 1 to ColList.Count do
+        Cells[i,0] := ColList[i - 1];
 
-      RowCount:=RowList.Count+1;
+      RowCount := RowList.Count+1;
       for i:=1 to RowList.Count do
       begin
         Cells[0,i]:=RowList[i-1];
         for j:= 0 to ColList.Count - 1 do
         begin
-          //writeln('SQL: ',Format(FAverageStr,[ColList[j],RowList[i-1]]));
-          Cells[j+1,i]:=dsResults.QuickQuery(Format(FAverageStr,[ColList[j],RowList[i-1]]));
+          Cells[j+1,i] := dmMain.ChronoData.GetAvg(ColList[j], RowList[i-1]);
         end;
-        Cells[ColList.Count+1,i]:=GetTotal(i);
+        Cells[ColList.Count+1,i] := GetTotal(i);
       end;
     end
     else
     begin
-      ColCount:=1;
-      RowCount:=2;
-      Cells[0,1]:='';
+      ColCount := 1;
+      RowCount := 2;
+      Cells[0,1] := '';
     end;
   end;
   RowList.Destroy;
@@ -352,15 +276,15 @@ begin
     ShowMessage('File "'+AFileName+'" does not exists');
     Exit;
   end;
-  with dsResults do
+  with dmMain.dsResults do
   begin
     Close;
-    FileName:=AFileName;
+    FileName := AFileName;
   end;
-  with dsCustomViews do
+  with dmMain.dsCustomViews do
   begin
     Close;
-    FileName:=AFileName;
+    FileName := AFileName;
     if not TableExists then
     begin
       FieldDefs.Clear;
@@ -374,15 +298,14 @@ begin
     QuickQuery('Select Name,Code from chrono_custom_views',
       comboViews.Items,True);
   end;
-  //todo: remove hack after LCL combo.ItemIndex bug is closed
-  comboGroupBy.Enabled:=True;
-  comboGroupBy.ItemIndex:=0;
+  comboGroupBy.Enabled := True;
+  comboGroupBy.ItemIndex := 0;
   comboMainChange(nil);
-  comboScale.Enabled:=True;
-  comboScale.ItemIndex:=1; //Miliseconds
+  comboScale.Enabled := True;
+  comboScale.ItemIndex := 1; //Miliseconds
   comboScaleChange(nil);
-  LoadSessions(checkSessions.Items);
-  LoadActions(checkActions.Items);
+  checkActions.Items.Assign(dmMain.ChronoData.ActionList);
+  checkSessions.Items.Assign(dmMain.ChronoData.SessionList);
   Caption:='ChronoView - '+ AFileName;
   if UpdateRecentList then
   begin
@@ -398,33 +321,21 @@ end;
 
 procedure TfrmMain.comboMainChange(Sender: TObject);
 begin
-  case comboGroupBy.ItemIndex of
-  0:
+  with dmMain.ChronoData do
   begin
-    LoadSessions(listResults.Items);
-    LoadSessions(listSummary.Items);
-    FGroupByFieldsStr:=FSessionFieldsTemplate;
-    FGroupByWhereStr:=FSessionWhereTemplate;
-    FWhereStr:=Format(FWhereTemplate,['action','%s','name','%s']);
+    GroupIndex := comboGroupBy.ItemIndex;
+    listResults.Items.Assign(GroupList);
+    listSummary.Items.Assign(GroupList);
   end;
-  1:
-  begin
-    LoadActions(listResults.Items);
-    LoadActions(listSummary.Items);
-    FGroupByFieldsStr:=FActionFieldsTemplate;
-    FGroupByWhereStr:=FActionWhereTemplate;
-    FWhereStr:=Format(FWhereTemplate,['name','%s','action','%s']);
-  end;
-  end;
-  UpdateSqlTemplates;
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
   ini:TIniFile;
 begin
-  RecentFileList:=TStringList.Create;
-  ini:=TIniFile.Create('chronoview.ini');
+  gridResults.DataSource := dmMain.srcResults;
+  RecentFileList := TStringList.Create;
+  ini := TIniFile.Create('chronoview.ini');
   with ini do
   begin
     ReadSection('recentfiles',RecentFileList);
@@ -454,6 +365,7 @@ begin
     with TfrmSaveView.Create(nil) do
     try
       if ShowModal = mrOk then
+      with dmMain do
       begin
         dsCustomViews.Open;
         dsCustomViews.Append;
@@ -482,6 +394,7 @@ var
   i,j,PosEqual,Acumulator: Integer;
   ActionSessionStr,AAvgStr:String;
 begin
+  {
   if not dlgSaveHtml.Execute then
     Exit;
   ATree:=THtmlTree.Create;
@@ -642,43 +555,42 @@ begin
   ADbTable.Destroy;
   AGroupList.Destroy;
   ARowList.Destroy;
+  }
 end;
 
 procedure TfrmMain.comboViewsChange(Sender: TObject);
 var
-  ActionSessionStr:String;
-  PosEqual:Integer;
-  ActionList,SessionList:TStrings;
+  ActionSessionStr: String;
+  PosEqual: Integer;
+  ActionList,SessionList: TStrings;
 begin
-  ActionList:=TStringList.Create;
-  ActionList.Delimiter:=';';
-  SessionList:=TStringList.Create;
-  SessionList.Delimiter:=';';
-  dsCustomViews.Open;
-  with comboViews do
-  if dsCustomViews.Locate('Code',Integer(Items.Objects[ItemIndex]),[]) then
+  ActionList := TStringList.Create;
+  ActionList.Delimiter := ';';
+  SessionList := TStringList.Create;
+  SessionList.Delimiter := ';';
+  with dmMain do
   begin
-    ActionSessionStr:=dsCustomViews.FieldByName('ActionSession').AsString;
-    PosEqual:=Pos('=',ActionSessionStr);
-    ActionList.DelimitedText:=Copy(ActionSessionStr,1,PosEqual-1);
-    SessionList.DelimitedText:=Copy(ActionSessionStr,PosEqual+1,length(ActionSessionStr));
-    SetChecked(checkActions,ActionList);
-    SetChecked(checkSessions,SessionList);
-    butShowViewClick(nil);
-  end
-  else
-    ShowMessage('Error locating view');
-  dsCustomViews.Close;
+    dsCustomViews.Open;
+    with comboViews do
+    if dsCustomViews.Locate('Code',Integer(Items.Objects[ItemIndex]),[]) then
+    begin
+      ActionSessionStr := dsCustomViews.FieldByName('ActionSession').AsString;
+      PosEqual := Pos('=',ActionSessionStr);
+      ActionList.DelimitedText := Copy(ActionSessionStr,1,PosEqual-1);
+      SessionList.DelimitedText := Copy(ActionSessionStr,PosEqual+1,length(ActionSessionStr));
+      SetChecked(checkActions, ActionList);
+      SetChecked(checkSessions, SessionList);
+      butShowViewClick(nil);
+    end
+    else
+      ShowMessage('Error locating view');
+    dsCustomViews.Close;
+  end;
 end;
 
 procedure TfrmMain.comboScaleChange(Sender: TObject);
 begin
-  case comboScale.ItemIndex of
-    0:FScaleStr:='1';
-    1:FScaleStr:='1000';
-    2:FScaleStr:='1000000';
-  end;
-  UpdateSqlTemplates;
+  dmMain.ChronoData.ScaleIndex := comboScale.ItemIndex;
 end;
 
 initialization

@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
-  Left = 360
+  Left = 388
   Height = 521
-  Top = 171
+  Top = 304
   Width = 717
   HorzScrollBar.Page = 716
   VertScrollBar.Page = 501
@@ -17,7 +17,7 @@ object frmMain: TfrmMain
     Top = 26
     Width = 717
     Align = alClient
-    PageIndex = 0
+    PageIndex = 4
     TabOrder = 0
     object pageResults: TPage
       Caption = 'Results'
@@ -29,7 +29,6 @@ object frmMain: TfrmMain
         Top = 10
         Width = 552
         Anchors = [akTop, akLeft, akRight, akBottom]
-        DataSource = srcResults
         FixedColor = clBtnFace
         FixedHotColor = cl3DLight
         Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
@@ -167,38 +166,6 @@ object frmMain: TfrmMain
     end
     object PageCharts: TPage
       Caption = 'Charts'
-      ClientWidth = 709
-      ClientHeight = 450
-      object Chart1: TChart
-        Left = 244
-        Height = 309
-        Top = 50
-        Width = 410
-        AutoUpdateXMin = True
-        AutoUpdateXMax = True
-        AutoUpdateYMin = True
-        AutoUpdateYMax = True
-        Legend.Alignment = laRight
-        Title.Brush.Color = clBtnFace
-        Title.Font.Color = clBlue
-        Title.Alignment = taCenter
-        Title.Text.Strings = (
-          'TAChart'
-        )
-        Foot.Brush.Color = clBtnFace
-        Foot.Font.Color = clBlue
-        AllowZoom = True
-        LeftAxis.Title.Angle = 90
-        LeftAxis.Grid.Style = psDot
-        LeftAxis.Grid.Visible = True
-        BottomAxis.Grid.Style = psDot
-        BottomAxis.Grid.Visible = True
-        Frame.Visible = True
-        BackColor = clBtnFace
-        AxisVisible = True
-        Color = clBtnFace
-        ParentColor = False
-      end
     end
   end
   object PanelTop: TPanel
@@ -265,25 +232,10 @@ object frmMain: TfrmMain
     left = 16
     top = 368
   end
-  object srcResults: TDatasource
-    DataSet = dsResults
-    left = 96
-    top = 328
-  end
   object dlgSaveHtml: TSaveDialog
     Title = 'Save file as'
     FilterIndex = 0
     left = 16
     top = 408
-  end
-  object dsResults: TSqlite3Dataset
-    TableName = 'results'
-    left = 56
-    top = 368
-  end
-  object dsCustomViews: TSqlite3Dataset
-    TableName = 'chrono_custom_views'
-    left = 56
-    top = 328
   end
 end

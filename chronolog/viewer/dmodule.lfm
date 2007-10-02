@@ -1,0 +1,23 @@
+object dmMain: TdmMain
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Height = 300
+  HorizontalOffset = 531
+  VerticalOffset = 284
+  Width = 400
+  object dsResults: TSqlite3Dataset
+    TableName = 'results'
+    left = 40
+    top = 40
+  end
+  object dsCustomViews: TSqlite3Dataset
+    TableName = 'chrono_custom_views'
+    left = 40
+    top = 80
+  end
+  object srcResults: TDatasource
+    DataSet = dsResults
+    left = 80
+    top = 40
+  end
+end
