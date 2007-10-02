@@ -24,11 +24,11 @@ program ChronoView;
 uses
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, fmain, fsaveview, miscutils_package,
-  TAChartLazarusPkg, sqlite3laz;
+  { add your units here }, fmain, dmodule;
 
 begin
   Application.Initialize;
+  Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
