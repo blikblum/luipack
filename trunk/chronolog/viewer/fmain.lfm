@@ -79,6 +79,22 @@ object frmMain: TfrmMain
       Caption = 'Custom Views'
       ClientWidth = 709
       ClientHeight = 450
+      object Label4: TLabel
+        Left = 12
+        Height = 14
+        Top = 32
+        Width = 31
+        Caption = 'Rows:'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 12
+        Height = 14
+        Top = 224
+        Width = 45
+        Caption = 'Columns:'
+        ParentColor = False
+      end
       object gridCustomViews: TStringGrid
         Left = 196
         Height = 432
@@ -94,10 +110,10 @@ object frmMain: TfrmMain
         TabOrder = 5
         TabStop = True
       end
-      object checkActions: TCheckListBox
+      object CheckRows: TCheckListBox
         Left = 12
-        Height = 186
-        Top = 34
+        Height = 172
+        Top = 48
         Width = 130
         TabOrder = 0
       end
@@ -111,10 +127,10 @@ object frmMain: TfrmMain
         OnClick = butShowViewClick
         TabOrder = 1
       end
-      object checkSessions: TCheckListBox
+      object CheckColumns: TCheckListBox
         Left = 12
-        Height = 186
-        Top = 224
+        Height = 170
+        Top = 240
         Width = 130
         TabOrder = 2
       end
@@ -166,6 +182,55 @@ object frmMain: TfrmMain
     end
     object PageCharts: TPage
       Caption = 'Charts'
+      ClientWidth = 709
+      ClientHeight = 450
+      object Label2: TLabel
+        Left = 4
+        Height = 14
+        Top = 160
+        Width = 30
+        Caption = 'X Axis'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 4
+        Height = 14
+        Top = 8
+        Width = 56
+        Caption = 'Data Series'
+        ParentColor = False
+      end
+      object ImageChart: TImage
+        Left = 196
+        Height = 100
+        Top = 24
+        Width = 100
+        AutoSize = True
+      end
+      object CheckXAxis: TCheckListBox
+        Left = 4
+        Height = 136
+        Top = 176
+        Width = 100
+        TabOrder = 0
+      end
+      object CheckDataSeries: TCheckListBox
+        Left = 4
+        Height = 136
+        Top = 24
+        Width = 100
+        TabOrder = 1
+      end
+      object ButCreateChart: TButton
+        Left = 108
+        Height = 25
+        Top = 24
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Create Chart'
+        OnClick = ButCreateChartClick
+        TabOrder = 2
+      end
     end
   end
   object PanelTop: TPanel

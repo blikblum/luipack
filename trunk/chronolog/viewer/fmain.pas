@@ -33,13 +33,21 @@ type
     butShowView: TButton;
     butSaveView: TButton;
     butSaveToHtml: TButton;
-    checkActions: TCheckListBox;
-    checkSessions: TCheckListBox;
+    ButCreateChart: TButton;
+    CheckRows: TCheckListBox;
+    CheckDataSeries: TCheckListBox;
+    CheckXAxis: TCheckListBox;
+    CheckColumns: TCheckListBox;
     comboViews: TComboBox;
     comboScale: TComboBox;
     comboGroupBy: TComboBox;
     gridResults: TdbGrid;
+    ImageChart: TImage;
     Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
     listSummary: TListBox;
     listResults: TListBox;
     MIOpenRecent: TMenuItem;
@@ -58,6 +66,7 @@ type
     gridCustomViews: TStringGrid;
     gridSummary: TStringGrid;
     //Events
+    procedure ButCreateChartClick(Sender: TObject);
     procedure butSaveToHtmlClick(Sender: TObject);
     procedure butSaveViewClick(Sender: TObject);
     procedure comboViewsChange(Sender: TObject);
@@ -86,7 +95,7 @@ var
 implementation
 
 uses
-  fsaveview, DomUtils, dmodule;
+  fsaveview, DomUtils, dmodule, GnuPlotChart;
 
 { TfrmMain }
 
@@ -146,11 +155,11 @@ begin
   begin
     ColCount := 6 ;
     //todo:  Columns are not set at runtime. Do it at design?
-    Cells[1,0]:='Count';
-    Cells[2,0]:='Min';
-    Cells[3,0]:='Max';
-    Cells[4,0]:='Median';
-    Cells[5,0]:='Average';
+    Cells[1,0] := 'Count';
+    Cells[2,0] := 'Min';
+    Cells[3,0] := 'Max';
+    Cells[4,0] := 'Median';
+    Cells[5,0] := 'Average';
 
     ActiveGroup := listSummary.Items[listSummary.ItemIndex];
     RowCount := RowList.Count + 1;
@@ -175,28 +184,18 @@ var
   var
     k,x:Integer;
   begin
-    x:=0;
-    for k:=1 to ColList.Count do
-      x:=x+StrToInt(gridCustomViews.Cells[k,RowNo]);
-    Result:=IntToStr(x);
+    x := 0;
+    for k := 1 to ColList.Count do
+      x := x+StrToInt(gridCustomViews.Cells[k,RowNo]);
+    Result := IntToStr(x);
   end;
   
 begin
-  RowList:=TStringList.Create;
-  ColList:=TStringList.Create;
+  RowList := TStringList.Create;
+  ColList := TStringList.Create;
 
-  case comboGroupBy.ItemIndex of
-  0:
-  begin
-    GetChecked(checkActions, ColList);
-    GetChecked(checkSessions, RowList);
-  end;
-  1:
-  begin
-    GetChecked(checkActions, RowList);
-    GetChecked(checkSessions, ColList);
-  end;
-  end;
+  GetChecked(CheckRows, RowList);
+  GetChecked(CheckColumns, ColList);
 
   with gridCustomViews do
   begin
@@ -304,12 +303,10 @@ begin
   comboScale.Enabled := True;
   comboScale.ItemIndex := 1; //Miliseconds
   comboScaleChange(nil);
-  checkActions.Items.Assign(dmMain.ChronoData.ActionList);
-  checkSessions.Items.Assign(dmMain.ChronoData.SessionList);
   Caption:='ChronoView - '+ AFileName;
   if UpdateRecentList then
   begin
-    i:=RecentFileList.IndexOf(AFileName);
+    i := RecentFileList.IndexOf(AFileName);
     if i <> -1 then
       RecentFileList.Delete(i);
     RecentFileList.Insert(0,AFilename);
@@ -326,6 +323,12 @@ begin
     GroupIndex := comboGroupBy.ItemIndex;
     listResults.Items.Assign(GroupList);
     listSummary.Items.Assign(GroupList);
+    
+    CheckRows.Items.Assign(GroupList);
+    CheckColumns.Items.Assign(RowList);
+
+    CheckXAxis.Items.Assign(RowList);
+    CheckDataSeries.Items.Assign(GroupList);
   end;
 end;
 
@@ -359,8 +362,8 @@ begin
   ActionList.Delimiter:=';';
   SessionList:=TStringList.Create;
   SessionList.Delimiter:=';';
-  if GetChecked(checkActions,ActionList) and
-    GetChecked(checkSessions,SessionList) then
+  if GetChecked(CheckRows,ActionList) and
+    GetChecked(CheckColumns,SessionList) then
   begin
     with TfrmSaveView.Create(nil) do
     try
@@ -558,6 +561,43 @@ begin
   }
 end;
 
+procedure TfrmMain.ButCreateChartClick(Sender: TObject);
+var
+  Chart: TGnuPlotChart;
+  DataSeries: TStrings;
+  i, j: Integer;
+  ini: TIniFile;
+begin
+  DataSeries := TStringList.Create;
+  Chart := TGnuPlotChart.Create;
+  with Chart do
+  begin
+    ini := TIniFile.Create('chronoview.ini');
+    GnuPlotExe := ini.ReadString('gnuplot','path','');
+    ini.Destroy;
+    GetChecked(CheckDataSeries, DataSeries);
+    GetChecked(CheckXAxis, XAxisLabels);
+
+    if (XAxisLabels.Count > 0) and (DataSeries.Count > 0) then
+    begin
+      for i := 0 to DataSeries.Count - 1 do
+      begin
+        with Series[DataSeries[i]] do
+        begin
+          for j := 0 to XAxisLabels.Count - 1 do
+            Add(StrToFloat(dmMain.ChronoData.GetMedian(XAxisLabels[j], DataSeries[i])));
+        end;
+      end;
+      if SaveToFile(GetTempDir + 'chronoviewchart.png') then
+        ImageChart.Picture.LoadFromFile(GetTempDir + 'chronoviewchart.png')
+      else
+        ShowMessage('Error creating chart');
+    end;
+    Destroy;
+  end;
+  DataSeries.Destroy;
+end;
+
 procedure TfrmMain.comboViewsChange(Sender: TObject);
 var
   ActionSessionStr: String;
@@ -578,8 +618,8 @@ begin
       PosEqual := Pos('=',ActionSessionStr);
       ActionList.DelimitedText := Copy(ActionSessionStr,1,PosEqual-1);
       SessionList.DelimitedText := Copy(ActionSessionStr,PosEqual+1,length(ActionSessionStr));
-      SetChecked(checkActions, ActionList);
-      SetChecked(checkSessions, SessionList);
+      SetChecked(CheckRows, ActionList);
+      SetChecked(CheckColumns, SessionList);
       butShowViewClick(nil);
     end
     else

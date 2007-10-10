@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="miscutils_package"/>
     <CompilerOptions>
@@ -17,7 +17,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="domutils.pas"/>
         <UnitName Value="domutils"/>
@@ -30,14 +30,18 @@
         <Filename Value="dbextensions.pas"/>
         <UnitName Value="dbextensions"/>
       </Item3>
+      <Item4>
+        <Filename Value="gnuplotchart.pas"/>
+        <UnitName Value="gnuplotchart"/>
+      </Item4>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
