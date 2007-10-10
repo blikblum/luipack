@@ -168,6 +168,10 @@ type
 		brandString : String; // brand string as recommened by vendor (AMD/Intel only?)
 	end;
 
+type
+  TReadTimeFunction = function: Int64;
+
+
 { default cpu record, which is filled up at startup }
 
 var
@@ -211,14 +215,14 @@ type
 		mElapsedTime : Int64;
 
 		protected
-
+                ReadTime: TReadTimeFunction;
 		// Converts a timers' raw time point to its' real time point
 		// e.g. the one returned in resolution units of a second
 		function CalcRealTime(const rawtime : Int64) : Int64; virtual; abstract;
 		// Converts the real time duration to a timers' raw time
 		function CalcRawTime(const realtime : Int64) : Int64; virtual; abstract;
 
-		function ReadTime : Int64; virtual; abstract;
+
 		procedure SetScale(newscale : Int64); virtual;
 		procedure SetAutoReset(newreset : Bool32); virtual;
 
@@ -252,11 +256,9 @@ type
 		private
 
 		mRate : Float64;
-		mUseTSC : Bool32;
 
 		protected
 
-		function ReadTime : Int64; override;
 
 		function CalcRealTime(const rawtime : Int64) : Int64; override;
 		function CalcRawTime(const realtime : Int64) : Int64; override;
@@ -268,15 +270,16 @@ type
 		function Resolution : Float64; override;
 	end;
 
-	TSysTimer = class(TTimer)
+{ TSysTimer }
 
-		function ReadTime : Int64; override;
+TSysTimer = class(TTimer)
+
 
 		function CalcRealTime(const rawtime : Int64) : Int64; override;
 		function CalcRawTime(const realtime : Int64) : Int64; override;
 
 		public
-
+                constructor Create;
 		function Resolution : Float64; override;
 	end;
 
@@ -1040,7 +1043,6 @@ var
 begin
 	fpGetTimeOfDay(@tv, nil);
 	val := tv.tv_sec * timer_rate + tv.tv_usec;
-	result := true;
 end;
 {$ENDIF}
 {$IFDEF OS_OS2}
@@ -1285,9 +1287,7 @@ end;
 
 constructor TTimer.Create;
 begin
-	mScale := 1;
-	mAutoreset := false;
-	Reset;
+  mScale := 1;
 end;
 
 procedure TTimer.Reset;
@@ -1381,15 +1381,16 @@ end;
 {                                                                            }
 {****************************************************************************}
 
-function TZenTimer.ReadTime : Int64;
-var
-	q : Int64;
+//ReadTime funcions
+
+function ReadTimeTSC: Int64;
 begin
-	if (mUseTSC) then
-		GetTSCValue(q)
-	else
-		GetPITValue(q);
-	result := q;
+  GetTSCValue(Result);
+end;
+
+function ReadTimePIT: Int64;
+begin
+  GetPITValue(Result);
 end;
 
 function TZenTimer.CalcRealTime(const rawtime : Int64) : Int64;
@@ -1404,12 +1405,18 @@ end;
 
 constructor TZenTimer.Create;
 begin
-	inherited Create;
-	mUseTSC := cpusupports(capTSC);
-	if (mUseTSC) then
-		mRate := this_cpu.clockrate * 1000000
-	else
-		mRate := $1234DD;
+  inherited Create;
+
+  if cpusupports(capTSC) then
+  begin
+    mRate := this_cpu.clockrate * 1000000;
+    ReadTime := @ReadTimeTSC;
+  end
+  else
+  begin
+    mRate := timer_rate;
+    ReadTime := @ReadTimePIT;
+  end;
 end;
 
 function TZenTimer.Resolution : Float64;
@@ -1425,6 +1432,14 @@ end;
 {                                                                            }
 {****************************************************************************}
 
+function ReadTimeSys: Int64;
+var
+  hour, minute, second, sec100 : UInt16;
+begin
+  DecodeTime(Now, hour, minute, second, sec100);
+  Result := (sec100 + (second + (minute + hour * 60) * 60) * 100);
+end;
+
 function TSysTimer.CalcRealTime(const rawtime : Int64) : Int64;
 begin
 	result := round(rawTime / scale);
@@ -1435,18 +1450,17 @@ begin
 	result := realTime * scale;
 end;
 
+constructor TSysTimer.Create;
+begin
+  inherited;
+  ReadTime := @ReadTimeSys;
+end;
+
 function TSysTimer.Resolution : Float64;
 begin
 	result := 1e-2 * scale;
 end;
 
-function TSysTimer.ReadTime : Int64;
-var
-	hour, minute, second, sec100 : UInt16;
-begin
-	DecodeTime(Now, hour, minute, second, sec100);
-	result := (sec100 + (second + (minute + hour * 60) * 60) * 100);
-end;
 
 { RTL CPU unit compatibility functions }
 {$IFDEF PPC_FPC}
