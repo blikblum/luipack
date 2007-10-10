@@ -42,9 +42,11 @@ type
     destructor Destroy; override;
     procedure RefreshDataset;
     function GetCount(RowIndex: Integer): String;
+    function GetCount(const ARow, AGroup: String): String;
     function GetMin(RowIndex: Integer): String;
     function GetMax(RowIndex: Integer): String;
     function GetMedian(RowIndex: Integer): String;
+    function GetMedian(const ARow, AGroup: String): String;
     function GetAvg(RowIndex: Integer): String;
     function GetAvg(const ARow, AGroup: String): String;
     property Dataset: TSqlite3Dataset read FDataset write FDataset;
@@ -186,6 +188,11 @@ begin
   Result := FDataset.QuickQuery(Format(FCountStr, [FRowList[RowIndex], FActiveGroup]));
 end;
 
+function TChronoDataProvider.GetCount(const ARow, AGroup: String): String;
+begin
+  Result := FDataset.QuickQuery(Format(FCountStr, [ARow, AGroup]));
+end;
+
 function TChronoDataProvider.GetMin(RowIndex: Integer): String;
 begin
   Result := FDataset.QuickQuery(Format(FMinStr, [FRowList[RowIndex], FActiveGroup]));
@@ -199,7 +206,13 @@ end;
 function TChronoDataProvider.GetMedian(RowIndex: Integer): String;
 begin
   Result := FDataset.QuickQuery(Format(FMedianStr, [FRowList[RowIndex], FActiveGroup])+
-   ' order by time Limit 1 Offset '+GetCount(RowIndex)+'/2');
+   ' order by time Limit 1 Offset ' + GetCount(RowIndex) + '/2');
+end;
+
+function TChronoDataProvider.GetMedian(const ARow, AGroup: String): String;
+begin
+  Result := FDataset.QuickQuery(Format(FMedianStr, [ARow, AGroup])+
+   ' order by time Limit 1 Offset ' + GetCount(ARow, AGroup) + '/2');
 end;
 
 function TChronoDataProvider.GetAvg(RowIndex: Integer): String;
