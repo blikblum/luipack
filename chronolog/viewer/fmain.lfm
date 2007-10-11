@@ -1,28 +1,28 @@
 object frmMain: TfrmMain
-  Left = 388
-  Height = 521
-  Top = 304
-  Width = 717
-  HorzScrollBar.Page = 716
-  VertScrollBar.Page = 501
-  ActiveControl = listResults
+  Left = 362
+  Height = 546
+  Top = 247
+  Width = 733
+  HorzScrollBar.Page = 732
+  VertScrollBar.Page = 526
+  ActiveControl = butSaveToHtml
   Caption = 'ChronoView'
-  ClientHeight = 502
-  ClientWidth = 717
+  ClientHeight = 527
+  ClientWidth = 733
   Menu = menuMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object nbMain: TNotebook
-    Height = 476
+    Height = 501
     Top = 26
-    Width = 717
+    Width = 733
     Align = alClient
-    PageIndex = 4
+    PageIndex = 0
     TabOrder = 0
     object pageResults: TPage
       Caption = 'Results'
-      ClientWidth = 709
-      ClientHeight = 450
+      ClientWidth = 725
+      ClientHeight = 475
       object gridResults: TDBGrid
         Left = 148
         Height = 430
@@ -49,21 +49,22 @@ object frmMain: TfrmMain
     end
     object pageSummary: TPage
       Caption = 'Summary'
-      ClientWidth = 709
-      ClientHeight = 450
+      ClientWidth = 725
+      ClientHeight = 475
       object listSummary: TListBox
         Left = 4
-        Height = 256
+        Height = 192
         Top = 10
-        Width = 152
+        Width = 132
         OnSelectionChange = listDetails2SelectionChange
         TabOrder = 0
       end
       object gridSummary: TStringGrid
-        Left = 172
+        Left = 148
         Height = 432
         Top = 10
         Width = 528
+        Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
         FixedColor = clBtnFace
@@ -77,10 +78,10 @@ object frmMain: TfrmMain
     end
     object pageCustomViews: TPage
       Caption = 'Custom Views'
-      ClientWidth = 709
-      ClientHeight = 450
+      ClientWidth = 725
+      ClientHeight = 475
       object Label4: TLabel
-        Left = 12
+        Left = 4
         Height = 14
         Top = 32
         Width = 31
@@ -88,7 +89,7 @@ object frmMain: TfrmMain
         ParentColor = False
       end
       object Label5: TLabel
-        Left = 12
+        Left = 4
         Height = 14
         Top = 224
         Width = 45
@@ -111,31 +112,31 @@ object frmMain: TfrmMain
         TabStop = True
       end
       object CheckRows: TCheckListBox
-        Left = 12
+        Left = 4
         Height = 172
         Top = 48
-        Width = 130
+        Width = 132
         TabOrder = 0
       end
       object butShowView: TButton
-        Left = 148
+        Left = 140
         Height = 25
-        Top = 202
-        Width = 40
+        Top = 208
+        Width = 48
         BorderSpacing.InnerBorder = 4
         Caption = 'Show'
         OnClick = butShowViewClick
         TabOrder = 1
       end
       object CheckColumns: TCheckListBox
-        Left = 12
+        Left = 4
         Height = 170
         Top = 240
-        Width = 130
+        Width = 132
         TabOrder = 2
       end
       object butSaveView: TButton
-        Left = 67
+        Left = 61
         Height = 25
         Top = 412
         Width = 75
@@ -145,10 +146,10 @@ object frmMain: TfrmMain
         TabOrder = 3
       end
       object comboViews: TComboBox
-        Left = 12
+        Left = 4
         Height = 21
         Top = 8
-        Width = 130
+        Width = 132
         AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
         ItemHeight = 13
         MaxLength = 0
@@ -157,10 +158,62 @@ object frmMain: TfrmMain
         TabOrder = 4
       end
     end
+    object PageCharts: TPage
+      Caption = 'Charts'
+      ClientWidth = 725
+      ClientHeight = 475
+      object Label2: TLabel
+        Left = 4
+        Height = 14
+        Top = 200
+        Width = 30
+        Caption = 'X Axis'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 4
+        Height = 14
+        Top = 8
+        Width = 56
+        Caption = 'Data Series'
+        ParentColor = False
+      end
+      object ImageChart: TImage
+        Left = 148
+        Height = 100
+        Top = 8
+        Width = 100
+        AutoSize = True
+      end
+      object CheckXAxis: TCheckListBox
+        Left = 4
+        Height = 172
+        Top = 216
+        Width = 132
+        TabOrder = 0
+      end
+      object CheckDataSeries: TCheckListBox
+        Left = 4
+        Height = 172
+        Top = 24
+        Width = 132
+        TabOrder = 1
+      end
+      object ButCreateChart: TButton
+        Left = 61
+        Height = 25
+        Top = 392
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Create Chart'
+        OnClick = ButCreateChartClick
+        TabOrder = 2
+      end
+    end
     object pageReports: TPage
       Caption = 'Reports'
-      ClientWidth = 709
-      ClientHeight = 450
+      ClientWidth = 725
+      ClientHeight = 475
       object Label1: TLabel
         Left = 50
         Height = 14
@@ -180,72 +233,20 @@ object frmMain: TfrmMain
         TabOrder = 0
       end
     end
-    object PageCharts: TPage
-      Caption = 'Charts'
-      ClientWidth = 709
-      ClientHeight = 450
-      object Label2: TLabel
-        Left = 4
-        Height = 14
-        Top = 160
-        Width = 30
-        Caption = 'X Axis'
-        ParentColor = False
-      end
-      object Label3: TLabel
-        Left = 4
-        Height = 14
-        Top = 8
-        Width = 56
-        Caption = 'Data Series'
-        ParentColor = False
-      end
-      object ImageChart: TImage
-        Left = 196
-        Height = 100
-        Top = 24
-        Width = 100
-        AutoSize = True
-      end
-      object CheckXAxis: TCheckListBox
-        Left = 4
-        Height = 136
-        Top = 176
-        Width = 100
-        TabOrder = 0
-      end
-      object CheckDataSeries: TCheckListBox
-        Left = 4
-        Height = 136
-        Top = 24
-        Width = 100
-        TabOrder = 1
-      end
-      object ButCreateChart: TButton
-        Left = 108
-        Height = 25
-        Top = 24
-        Width = 75
-        BorderSpacing.InnerBorder = 4
-        Caption = 'Create Chart'
-        OnClick = ButCreateChartClick
-        TabOrder = 2
-      end
-    end
   end
   object PanelTop: TPanel
     Height = 26
-    Width = 717
+    Width = 733
     Align = alTop
     BevelOuter = bvNone
     ClientHeight = 26
-    ClientWidth = 717
+    ClientWidth = 733
     TabOrder = 1
     object comboScale: TComboBox
-      Left = 160
+      Left = 168
       Height = 21
       Top = 1
-      Width = 136
+      Width = 152
       AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
       ItemHeight = 13
@@ -262,7 +263,7 @@ object frmMain: TfrmMain
     object comboGroupBy: TComboBox
       Height = 21
       Top = 1
-      Width = 144
+      Width = 160
       AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
       ItemHeight = 13

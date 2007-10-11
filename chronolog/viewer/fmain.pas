@@ -294,8 +294,10 @@ begin
       CreateTable;
     end;
     comboViews.Items.Clear;
-    QuickQuery('Select Name,Code from chrono_custom_views',
-      comboViews.Items,True);
+    //avoid exception when the user has no write access to db file
+    if TableExists then
+      QuickQuery('Select Name,Code from chrono_custom_views',
+        comboViews.Items,True);
   end;
   comboGroupBy.Enabled := True;
   comboGroupBy.ItemIndex := 0;
@@ -325,10 +327,14 @@ begin
     listSummary.Items.Assign(GroupList);
     
     CheckRows.Items.Assign(GroupList);
+    SetChecked(CheckRows, GroupList);
     CheckColumns.Items.Assign(RowList);
-
+    SetChecked(CheckColumns, RowList);
+    
     CheckXAxis.Items.Assign(RowList);
+    SetChecked(CheckXAxis, RowList);
     CheckDataSeries.Items.Assign(GroupList);
+    SetChecked(CheckDataSeries, GroupList);
   end;
 end;
 
