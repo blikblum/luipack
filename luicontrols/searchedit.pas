@@ -66,7 +66,6 @@ type
     {$endif}
     procedure DisplayEmptyText;
     procedure SetEmptyText(const AValue: String);
-    procedure SetOptions(const AValue: TSearchEditOptions);
   protected
     procedure KeyUp(var Key: Word; Shift: TShiftState); override;
     procedure Loaded; override;
@@ -78,11 +77,11 @@ type
   public
     property AutoSelected;
     procedure Execute;
-    function IsEmpty: Boolean;
+    property IsEmpty: Boolean read FIsEmpty;
   published
     property EmptyText: String read FEmptyText write SetEmptyText;
     property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
-    property Options: TSearchEditOptions read FOptions write SetOptions;
+    property Options: TSearchEditOptions read FOptions write FOptions;
     //TEdit properties
     property Action;
     property Align;
@@ -134,6 +133,21 @@ implementation
 
 uses
   LCLType;
+  
+const
+  //work around to LCL bugs 9945, 9946
+  {$if defined(LCLGtk) or defined(LCLGtk2)}
+    {$ifdef LCLGtk}
+    EmptyTextColor = clGray;
+    NormalTextColor = clBlack;
+    {$else}
+    EmptyTextColor = clWindowText;
+    NormalTextColor = clWindowText;
+    {$endif}
+  {$else}
+  EmptyTextColor = clGray;
+  NormalTextColor = clWindowText;
+  {$endif}
 
 { TSearchEdit }
 
@@ -147,12 +161,12 @@ end;
 procedure TSearchEdit.ClearEmptyText;
 begin
   inherited RealSetText('');
-  Font.Color := clWindowText;
+  Font.Color := NormalTextColor;
 end;
 
 procedure TSearchEdit.DisplayEmptyText;
 begin
-  Font.Color := clGray;
+  Font.Color := EmptyTextColor;
   inherited RealSetText(FEmptyText);
 end;
 
@@ -162,12 +176,6 @@ begin
   FEmptyText := AValue;
   if FIsEmpty then
     inherited RealSetText(FEmptyText);
-end;
-
-procedure TSearchEdit.SetOptions(const AValue: TSearchEditOptions);
-begin
-  if FOptions=AValue then exit;
-  FOptions:=AValue;
 end;
 
 procedure TSearchEdit.KeyUp(var Key: Word; Shift: TShiftState);
@@ -254,11 +262,6 @@ procedure TSearchEdit.Execute;
 begin
   if (FOnExecute <> nil) and (not FIsEmpty or (seoExecuteEmpty in FOptions)) then
     FOnExecute(Self);
-end;
-
-function TSearchEdit.IsEmpty: Boolean;
-begin
-  Result := FIsEmpty;
 end;
 
 end.
