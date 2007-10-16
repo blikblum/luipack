@@ -5,7 +5,7 @@ object frmMain: TfrmMain
   Width = 733
   HorzScrollBar.Page = 732
   VertScrollBar.Page = 526
-  ActiveControl = butSaveToHtml
+  ActiveControl = listResults
   Caption = 'ChronoView'
   ClientHeight = 527
   ClientWidth = 733

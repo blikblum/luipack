@@ -403,7 +403,6 @@ var
   i,j,PosEqual,Acumulator: Integer;
   ActionSessionStr,AAvgStr:String;
 begin
-  {
   if not dlgSaveHtml.Execute then
     Exit;
   ATree:=THtmlTree.Create;
@@ -411,16 +410,10 @@ begin
   ADbTable:=TDBTree.Create(ATree);
   AGroupList:=TStringList.Create;
   ARowList:=TStringList.Create;
-  if comboGroupBy.ItemIndex = 0 then
-  begin
-    LoadSessions(AGroupList);
-    LoadActions(ARowList);
-  end
-  else
-  begin
-    LoadActions(AGroupList);
-    LoadSessions(ARowList);
-  end;
+
+  AGroupList.Assign(dmMain.ChronoData.GroupList);
+  ARowList.Assign(dmMain.ChronoData.RowList);
+
   with ATree do
   begin
     Title:='Chrono View Results';
@@ -447,13 +440,12 @@ begin
     end;
     with ADbTable do
     begin
-      Dataset:=dsResults;
-      for i:=0 to AGroupList.Count - 1 do
+      Dataset := dmMain.ChronoData.Dataset;
+      for i := 0 to AGroupList.Count - 1 do
       begin
-        dsResults.Sql:=Format(FGroupByStr,[AGroupList[i]]);
-        dsResults.Close;
-        dsResults.Open;
-        Title:=AGroupList[i];
+        dmMain.ChronoData.ActiveGroup :=  AGroupList[i];
+        dmMain.ChronoData.RefreshDataset;
+        Title := AGroupList[i];
         BuildTable;
         AttachTo(GetBookmark('div_results'));
       end;
@@ -465,15 +457,16 @@ begin
     SubTree.Last['id']:='summary';
     SubTree.Last['class']:='content';
     SubTree.Attach;
-    with ATable do
+    with ATable, dmMain.ChronoData do
     begin
       for i:=0 to AGroupList.Count - 1 do
       begin
+        ActiveGroup := AGroupList[i];
         //Add Table Title
         AddRow;
         Last['class']:='tabletitle';
         AddCol(AGroupList[i]);
-        Last['colspan']:='5';
+        Last['colspan']:='6';
 
         //Add column titles
         AddRow;
@@ -482,16 +475,18 @@ begin
         AddCol('Count');
         AddCol('Min');
         AddCol('Max');
+        AddCol('Median');
         AddCol('Average');
 
         for j:=0 to ARowList.Count -1 do
         begin
           AddRow;
           AddCol(ARowList[j]);
-          AddCol(dsResults.QuickQuery(Format(FCountStr,[ARowList[j],AGroupList[i]])));
-          AddCol(dsResults.QuickQuery(Format(FMinStr,[ARowList[j],AGroupList[i]])));
-          AddCol(dsResults.QuickQuery(Format(FMaxStr,[ARowList[j],AGroupList[i]])));
-          AddCol(dsResults.QuickQuery(Format(FAverageStr,[ARowList[j],AGroupList[i]])));
+          AddCol(GetCount(j));
+          AddCol(GetMin(j));
+          AddCol(GetMax(j));
+          AddCol(GetMedian(j));
+          AddCol(GetAvg(j));
         end;
 
         AttachTo(GetBookmark('div_summary'));
@@ -507,7 +502,7 @@ begin
     SubTree.Attach;
     AGroupList.Delimiter:=';';
     ARowList.Delimiter:=';';
-    with dsCustomViews do
+    with dmMain.dsCustomViews do
     begin
       Open;
       while not Eof do
@@ -545,8 +540,8 @@ begin
           Acumulator:=0;
           for j:= 0 to AGroupList.Count - 1 do
           begin
-            AAvgStr:=dsResults.QuickQuery(Format(FAverageStr,[AGroupList[j],ARowList[i]]));
-            Acumulator:=Acumulator+StrToInt(AAvgStr);
+            AAvgStr := dmMain.ChronoData.GetAvg(AGroupList[j],ARowList[i]);
+            Acumulator := Acumulator + StrToInt(AAvgStr);
             ATable.AddCol(AAvgStr);
           end;
           ATable.AddCol(IntToStr(Acumulator));
@@ -564,7 +559,6 @@ begin
   ADbTable.Destroy;
   AGroupList.Destroy;
   ARowList.Destroy;
-  }
 end;
 
 procedure TfrmMain.ButCreateChartClick(Sender: TObject);
