@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="luicontrols"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
@@ -17,12 +17,14 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="Set of miscellaneous controls. Current controls:
+    <Description Value="Set of miscellaneous controls:
 TToggleLabel
 TMenuButton
+TSearchEdit
 "/>
-    <License Value="Modified LGPL"/>
-    <Version Minor="1"/>
+    <License Value="Modified LGPL
+"/>
+    <Version Minor="2"/>
     <Files Count="4">
       <Item1>
         <Filename Value="togglelabel.pas"/>
@@ -39,7 +41,7 @@ TMenuButton
       </Item3>
       <Item4>
         <Filename Value="searchedit.pas"/>
-        <UnitName Value="searchedit"/>
+        <UnitName Value="SearchEdit"/>
       </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
