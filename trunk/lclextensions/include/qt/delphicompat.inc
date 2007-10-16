@@ -243,7 +243,7 @@ begin
     Exit;
   QtDC := TQtDeviceContext(DC);
   if lppt <> nil then
-    QtDC.brushOrigin(lppt);
+    QtDC.getBrushOrigin(lppt);
   QtDC.setBrushOrigin(nXorg, nYOrg);
   Result := True;
 end;
