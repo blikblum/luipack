@@ -137,16 +137,9 @@ uses
 const
   //work around to LCL bugs 9945, 9946
   {$if defined(LCLGtk) or defined(LCLGtk2)}
-    {$ifdef LCLGtk}
-    EmptyTextColor = clGray;
-    NormalTextColor = clBlack;
-    {$else}
-    EmptyTextColor = clWindowText;
-    NormalTextColor = clWindowText;
-    {$endif}
+  EmptyTextColor = clWindowText;
   {$else}
   EmptyTextColor = clGray;
-  NormalTextColor = clWindowText;
   {$endif}
 
 { TSearchEdit }
@@ -161,7 +154,7 @@ end;
 procedure TSearchEdit.ClearEmptyText;
 begin
   inherited RealSetText('');
-  Font.Color := NormalTextColor;
+  Font.Color := clWindowText;
 end;
 
 procedure TSearchEdit.DisplayEmptyText;
