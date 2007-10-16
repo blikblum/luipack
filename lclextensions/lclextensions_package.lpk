@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <Name Value="lclextensions_package"/>
     <Author Value="Luiz Americo Pereira Camara"/>
     <CompilerOptions>
@@ -24,7 +24,7 @@
     <Files Count="3">
       <Item1>
         <Filename Value="delphicompat.pas"/>
-        <UnitName Value="delphicompat"/>
+        <UnitName Value="DelphiCompat"/>
       </Item1>
       <Item2>
         <Filename Value="oleutils.pas"/>
@@ -32,7 +32,7 @@
       </Item2>
       <Item3>
         <Filename Value="lclext.pas"/>
-        <UnitName Value="lclext"/>
+        <UnitName Value="LclExt"/>
       </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
