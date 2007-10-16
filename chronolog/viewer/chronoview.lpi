@@ -23,7 +23,7 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="5">
+    <RequiredPackages Count="3">
       <Item1>
         <PackageName Value="LCL"/>
       </Item1>
@@ -31,17 +31,9 @@
         <PackageName Value="miscutils_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="TAChartLazarusPkg"/>
-        <MinVersion Valid="True"/>
-      </Item3>
-      <Item4>
         <PackageName Value="sqlite3laz"/>
         <MinVersion Minor="3" Valid="True"/>
-      </Item4>
-      <Item5>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item5>
+      </Item3>
     </RequiredPackages>
     <Units Count="5">
       <Unit0>

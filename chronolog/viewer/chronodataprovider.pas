@@ -149,7 +149,7 @@ begin
   FMedianStr := Format(FMedianTemplate,[FScaleStr]) + FFromTables + FWhereStr;
   FCountStr := 'Select Count(*)' + FFromTables + FWhereStr;
   FGroupByStr := Format(FGroupByFieldsStr,[FScaleStr]) + FGroupByWhereStr;
-  //todo: Update queries here
+  //todo: Update queries here  ??
   {
   writeln('FMinStr: ',FMinStr);
   writeln('FMaxStr: ',FMaxStr);
