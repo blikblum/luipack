@@ -57,6 +57,7 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu1
+        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Glyph.Data = {
@@ -96,6 +97,7 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu2
+        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
@@ -247,7 +249,7 @@ object frmMain: TfrmMain
         Top = 193
         Width = 133
         Menu = PopupMenu5
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Caption = 'Only Text'
         Color = clBtnFace
         Flat = True
@@ -267,7 +269,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 160
         Menu = PopupMenu6
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Caption = 'Text and Glyph'
         Color = clBtnFace
         Glyph.Data = {
@@ -306,7 +308,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 48
         Menu = PopupMenu7
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -344,13 +346,39 @@ object frmMain: TfrmMain
       ClientWidth = 396
       ClientHeight = 266
       object SearchEdit1: TSearchEdit
-        Left = 20
+        Left = 6
         Height = 23
-        Top = 38
-        Width = 128
+        Top = 8
+        Width = 168
         EmptyText = '<Search Here> '
+        OnExecute = SearchEdit1Execute
         Font.Color = clGray
         TabOrder = 0
+      end
+      object MemoSearchLog: TMemo
+        Left = 6
+        Height = 168
+        Top = 80
+        Width = 376
+        TabOrder = 1
+      end
+      object CheckExecuteEmpty: TCheckBox
+        Left = 190
+        Height = 23
+        Top = 8
+        Width = 90
+        Caption = 'Execute If Text Is Empty'
+        OnClick = CheckExecuteEmptyClick
+        TabOrder = 2
+      end
+      object CheckExecuteKillFocus: TCheckBox
+        Left = 190
+        Height = 23
+        Top = 40
+        Width = 90
+        Caption = 'Execute On KillFocus'
+        OnClick = CheckExecuteKillFocusClick
+        TabOrder = 3
       end
     end
   end

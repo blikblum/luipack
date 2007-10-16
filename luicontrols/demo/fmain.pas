@@ -13,10 +13,13 @@ type
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    CheckExecuteEmpty: TCheckBox;
+    CheckExecuteKillFocus: TCheckBox;
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    MemoSearchLog: TMemo;
     MenuButton1: TMenuButton;
     MenuButton2: TMenuButton;
     MenuButton3: TMenuButton;
@@ -64,8 +67,11 @@ type
     SearchEdit1: TSearchEdit;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
+    procedure CheckExecuteEmptyClick(Sender: TObject);
+    procedure CheckExecuteKillFocusClick(Sender: TObject);
     procedure MenuButton1Click(Sender: TObject);
     procedure MenuItem15Click(Sender: TObject);
+    procedure SearchEdit1Execute(Sender: TObject);
     procedure ToggleLabel2Change(Sender: TObject);
   private
     { private declarations }
@@ -91,10 +97,31 @@ begin
     ShowMessage('Clicked - (Flat: ' + BoolToStr(Flat, True)+ ')');
 end;
 
+procedure TfrmMain.CheckExecuteEmptyClick(Sender: TObject);
+begin
+  if CheckExecuteEmpty.Checked then
+    SearchEdit1.Options := SearchEdit1.Options + [seoExecuteEmpty]
+  else
+    SearchEdit1.Options := SearchEdit1.Options - [seoExecuteEmpty];
+end;
+
+procedure TfrmMain.CheckExecuteKillFocusClick(Sender: TObject);
+begin
+  if CheckExecuteKillFocus.Checked then
+    SearchEdit1.Options := SearchEdit1.Options + [seoExecuteOnKillFocus]
+  else
+    SearchEdit1.Options := SearchEdit1.Options - [seoExecuteOnKillFocus];
+end;
+
 procedure TfrmMain.MenuItem15Click(Sender: TObject);
 begin
   with TMenuItem(Sender) do
     MenuButton5.Caption := Caption;
+end;
+
+procedure TfrmMain.SearchEdit1Execute(Sender: TObject);
+begin
+  MemoSearchLog.Lines.Add('Search Executed - Text: "' + SearchEdit1.Text + '"');
 end;
 
 initialization
