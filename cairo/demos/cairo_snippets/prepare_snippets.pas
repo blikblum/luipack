@@ -7,7 +7,7 @@ uses
 
 const
   SampleDir = 'snippets' + PathDelim;
-  ExcludeFilters: array [0..1] of String = ('libsvg*','operator_*');
+  ExcludeFilters: array [0..2] of String = ('libsvg*','operator_*', '*arc*');
   
 var
   UnitFile: Text;
@@ -34,7 +34,7 @@ var
   i: Integer;
 begin
   Result := False;
-  for i := 0 to 1 do
+  for i := Low(ExcludeFilters) to High(ExcludeFilters) do
   begin
     if IsWild(FileName, ExcludeFilters[i], True) then
       Exit(True)
