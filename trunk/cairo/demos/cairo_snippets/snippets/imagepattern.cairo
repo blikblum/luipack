@@ -2,7 +2,7 @@ var
   w, h: Integer;
   image: Pcairo_surface_t;
   pattern: Pcairo_pattern_t;
-  matrix: Pcairo_matrix_t;
+  matrix: cairo_matrix_t;
 
 begin
   snippet_normalize (cr, width, height);
