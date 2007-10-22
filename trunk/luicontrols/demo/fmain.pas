@@ -13,6 +13,7 @@ type
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    CheckPopupOnMouseUp: TCheckBox;
     CheckExecuteEmpty: TCheckBox;
     CheckExecuteKillFocus: TCheckBox;
     ImageList1: TImageList;
@@ -69,6 +70,7 @@ type
     ToggleLabel2: TToggleLabel;
     procedure CheckExecuteEmptyClick(Sender: TObject);
     procedure CheckExecuteKillFocusClick(Sender: TObject);
+    procedure CheckPopupOnMouseUpChange (Sender: TObject );
     procedure MenuButton1Click(Sender: TObject);
     procedure MenuItem15Click(Sender: TObject);
     procedure SearchEdit1Execute(Sender: TObject);
@@ -111,6 +113,24 @@ begin
     SearchEdit1.Options := SearchEdit1.Options + [seoExecuteOnKillFocus]
   else
     SearchEdit1.Options := SearchEdit1.Options - [seoExecuteOnKillFocus];
+end;
+
+procedure TfrmMain.CheckPopupOnMouseUpChange (Sender: TObject );
+var
+  i: Integer;
+  AControl: TControl;
+begin
+  for i:= 0 to PageMenuButton.ControlCount - 1 do
+  begin
+    AControl := PageMenuButton.Controls[i];
+    if AControl is TMenuButton then
+    begin
+      if CheckPopupOnMouseUp.Checked then
+        TMenuButton(AControl).Options := TMenuButton(AControl).Options + [mboPopupOnMouseUp]
+      else
+        TMenuButton(AControl).Options := TMenuButton(AControl).Options - [mboPopupOnMouseUp];
+    end;
+  end;
 end;
 
 procedure TfrmMain.MenuItem15Click(Sender: TObject);
