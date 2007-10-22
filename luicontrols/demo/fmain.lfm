@@ -5,9 +5,10 @@ object frmMain: TfrmMain
   Width = 400
   HorzScrollBar.Page = 399
   VertScrollBar.Page = 299
-  Caption = 'Lui Controls Demo'
+  Caption = 'Lui Controls 0.2 Demo'
   ClientHeight = 300
   ClientWidth = 400
+  Position = poDesktopCenter
   object NotebookMain: TNotebook
     Height = 300
     Width = 400
@@ -16,22 +17,22 @@ object frmMain: TfrmMain
     TabOrder = 0
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
-      ClientWidth = 396
-      ClientHeight = 266
+      ClientWidth = 392
+      ClientHeight = 274
       object ToggleLabel1: TToggleLabel
         Left = 12
-        Height = 17
+        Height = 14
         Top = 10
-        Width = 149
+        Width = 102
         ExpandedCaption = 'State2 (Expanded)'
         Caption = 'State1 (Collapsed)'
         ParentColor = False
       end
       object ToggleLabel2: TToggleLabel
         Left = 12
-        Height = 17
+        Height = 14
         Top = 62
-        Width = 100
+        Width = 68
         ExpandedCaption = 'Hide Panel'
         OnChange = ToggleLabel2Change
         Caption = 'Show Panel'
@@ -49,15 +50,14 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 396
-      ClientHeight = 266
+      ClientWidth = 392
+      ClientHeight = 274
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
         Top = 34
         Width = 23
         Menu = PopupMenu1
-        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Glyph.Data = {
@@ -97,7 +97,6 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu2
-        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
@@ -152,7 +151,6 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu3
-        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Flat = True
@@ -193,7 +191,6 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu4
-        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Flat = True
         Glyph.Data = {
@@ -229,17 +226,17 @@ object frmMain: TfrmMain
       end
       object Label1: TLabel
         Left = 27
-        Height = 17
+        Height = 14
         Top = 82
-        Width = 93
+        Width = 63
         Caption = 'Flat Buttons:'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 26
-        Height = 17
+        Height = 14
         Top = 10
-        Width = 114
+        Width = 74
         Caption = 'Normal Buttons'
         ParentColor = False
       end
@@ -249,7 +246,7 @@ object frmMain: TfrmMain
         Top = 193
         Width = 133
         Menu = PopupMenu5
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
         Caption = 'Only Text'
         Color = clBtnFace
         Flat = True
@@ -257,9 +254,9 @@ object frmMain: TfrmMain
       end
       object Label3: TLabel
         Left = 26
-        Height = 17
+        Height = 14
         Top = 162
-        Width = 190
+        Width = 129
         Caption = 'Buttons with inlined arrow:'
         ParentColor = False
       end
@@ -269,7 +266,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 160
         Menu = PopupMenu6
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
         Caption = 'Text and Glyph'
         Color = clBtnFace
         Glyph.Data = {
@@ -308,7 +305,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 48
         Menu = PopupMenu7
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
         Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -340,11 +337,18 @@ object frmMain: TfrmMain
         }
         NumGlyphs = 0
       end
+      object CheckPopupOnMouseUp: TCheckBox
+        Left = 166
+        Height = 13
+        Top = 34
+        Width = 117
+        Caption = 'Popup On MouseUp'
+        OnChange = CheckPopupOnMouseUpChange
+        TabOrder = 0
+      end
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
-      ClientWidth = 396
-      ClientHeight = 266
       object SearchEdit1: TSearchEdit
         Left = 6
         Height = 23
