@@ -59,7 +59,7 @@ begin
   //the header
   WriteLn(UnitFile, 'unit snippets;', LineEnding);
   WriteLn(UnitFile, 'interface', LineEnding);
-  WriteLn(UnitFile, 'uses',LineEnding,'  cairo, math;',LineEnding);
+  WriteLn(UnitFile, 'uses', LineEnding,'  cairo;',LineEnding);
   WriteLn(UnitFile, 'const');
   WriteLn(UnitFile, '  snippet_count = ',SnippetList.Count, ';');
   WriteLn(UnitFile, '  snippet_name: array [0..', SnippetList.Count - 1, '] of String = (');
