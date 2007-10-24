@@ -124,6 +124,8 @@ procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
 
 procedure GetFileList(const AFilter: String; AStrList: TStrings);
 
+procedure GetFileTree(const ARootDir:String; const AFilter: String; AStrList: TStrings);
+
 procedure CSVToStrings(const ACSVStr: String; AStrList: TStrings; Delimiter: Char = ';');
 
 function StringsToCSV(AStrList:TStrings; Delimiter: Char = ';'):String;
@@ -157,12 +159,38 @@ procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
 begin  
   RecurseDir(ExcludeTrailingPathDelimiter(ARootDir));
 end; 
+
+procedure GetFileTree(const ARootDir:String; const AFilter: String; AStrList: TStrings);
   
+  procedure RecurseDir(const ADir:String);
+  var
+    RecInfo:TSearchRec;
+    OldDir:String;
+  begin
+    OldDir:=GetCurrentDir;
+    ChDir(ADir);
+    if FindFirst(OSWildCard,faDirectory,RecInfo) = 0 then
+    repeat
+      if (RecInfo.Attr and faDirectory > 0) then
+      begin
+        if (RecInfo.Name <> '.') and (RecInfo.Name <> '..') then
+          RecurseDir(ADir+PathDelim+RecInfo.Name);
+      end
+      else
+        AStrList.Add(ADir+PathDelim+RecInfo.Name);
+    until FindNext(RecInfo) <> 0;
+    FindClose(RecInfo);
+    ChDir(OldDir);
+  end;
+  
+begin
+  RecurseDir(ExcludeTrailingPathDelimiter(ARootDir));
+end;
+
 procedure GetFileList(const AFilter: String; AStrList: TStrings);
 var
   FileInfo: TSearchRec;
 begin
-  AStrList.Clear;
   if FindFirst(AFilter,faArchive,FileInfo) = 0 then
   repeat
     if (FileInfo.Attr and faArchive > 0) then
