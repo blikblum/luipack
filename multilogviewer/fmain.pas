@@ -30,7 +30,7 @@ interface
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Grids, StdCtrls, multilog, VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
-  Menus, ATBinHex, togglelabel;
+  Menus, ATBinHex, togglelabel, SearchEdit;
 
 type
   TMessageSet = 0..31;
@@ -39,7 +39,6 @@ type
 
   TfrmMain = class(TForm)
     BinHexViewer: TATBinHex;
-    butFilter: TButton;
     butSelectAll: TButton;
     butUnSelectAll: TButton;
     checkHeapInfo: TCheckBox;
@@ -57,7 +56,6 @@ type
     checkException: TCheckBox;
     checkCallStack: TCheckBox;
     ComboWatchHistory: TComboBox;
-    editTitleFilter: TEdit;
     imgToolbar: TImageList;
     ImgViewer: TImage;
     imgMessages: TImageList;
@@ -85,6 +83,7 @@ type
     panelViewer: TPanel;
     panelLeft: TPanel;
     panelRight: TPanel;
+    EditFilterMessages: TSearchEdit;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     gridCallStack: TStringGrid;
@@ -99,7 +98,8 @@ type
     toolbarMain: TToolBar;
     tbutClear: TToolButton;
     vtreeMessages: TVirtualStringTree;
-    procedure butFilterClick(Sender: TObject);
+    procedure EditFilterMessagesExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure butSelectAllClick(Sender: TObject);
     procedure butUnSelectAllClick(Sender: TObject);
     procedure ClearMessages(Sender: TObject);
@@ -130,6 +130,9 @@ type
       var InitialStates: TVirtualNodeInitStates);
   private
     { private declarations }
+    {$ifdef unix}
+    FTimer: TTimer;
+    {$endif}
     FTitleFilter: String;
     FActiveMessages: set of TMessageSet;
     FExpandParent: Boolean;
@@ -151,7 +154,7 @@ type
     procedure UpdateWatchHistory;
     procedure ShowBitmapInfo(ABitmap: TBitmap);
     {$ifdef unix}
-    procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
+    procedure GetMessages(Sender: TObject);
     {$endif}
   public
     { public declarations }
@@ -163,7 +166,7 @@ var
 implementation
 
 uses
-  StrUtils, Math;
+  StrUtils;
 
 type
   TNodeData = record
@@ -220,11 +223,17 @@ begin
   UpdateWatchHistory;
 end;
 
-procedure TfrmMain.butFilterClick(Sender: TObject);
+procedure TfrmMain.EditFilterMessagesExecute(Sender: TObject);
 begin
   SetupFilters;
   //Scans all tree nodes
   vtreeMessages.IterateSubtree(nil,@FilterCallback,nil);
+end;
+
+procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+  if MessageDlg('Confirm exit', 'Quit Multilog Viewer?', mtConfirmation,mbYesNo,0) = mrNo then
+    CanClose := False;
 end;
 
 procedure TfrmMain.butSelectAllClick(Sender: TObject);
@@ -235,7 +244,10 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   {$ifdef unix}
-  Application.OnIdle := @ApplicationIdle;
+  FTimer := TTimer.Create(Self);
+  FTimer.Interval := 500;
+  FTimer.OnTimer := @GetMessages;
+  FTimer.Enabled := True;
   {$endif}
   vtreeMessages.NodeDataSize := SizeOf(TNodeData);
   FWatches := TWatchList.Create;
@@ -292,7 +304,7 @@ begin
   if ToggleOptions.Expanded then
     panelFilter.Height := checkValue.Top + checkValue.Height + 4
   else
-    panelFilter.Height := editTitleFilter.Top + editTitleFilter.Height + 4;
+    panelFilter.Height := EditFilterMessages.Top + EditFilterMessages.Height + 4;
 end;
 
 procedure TfrmMain.vtreeMessagesFocusChanged(Sender: TBaseVirtualTree;
@@ -420,7 +432,7 @@ begin
       Include(FActiveMessages, AControl.Tag);
   end;
   //Set Title Filter
-  FTitleFilter:=Trim(editTitleFilter.Text)+'*';
+  FTitleFilter:=Trim(EditFilterMessages.Text)+'*';
   if Length(FTitleFilter) > 1 then //editFilter is not empty
     FTitleFilter:='*'+FTitleFilter;
   //writeln('FFilter:', FTitleFilter);
@@ -603,9 +615,9 @@ begin
 end;
 
 {$ifdef unix}
-procedure TfrmMain.ApplicationIdle(Sender: TObject; var Done: Boolean);
+procedure TfrmMain.GetMessages(Sender: TObject);
 begin
-  FIPCServer.PeekMessage(1,True);
+  while FIPCServer.PeekMessage(1,True) do;
 end;
 {$endif}
 
