@@ -5,7 +5,7 @@ unit cairo_ft;
 interface
 
 uses
-  freetypeh;
+  cairo, freetypeh;
   
   
 function  cairo_ft_font_face_create_for_pattern(pattern:PFcPattern):Pcairo_font_face_t; cdecl; external LIB_CAIRO;
