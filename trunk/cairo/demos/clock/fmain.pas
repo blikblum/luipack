@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  cairo;
+  cairo14;
 
 const
   m_radius = 0.42;

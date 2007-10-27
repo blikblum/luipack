@@ -55,7 +55,7 @@
 
 {$Mode ObjFpc}
 
-unit cairo;
+unit cairo14;
 
 interface
 

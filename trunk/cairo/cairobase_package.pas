@@ -7,7 +7,7 @@ unit cairobase_package;
 interface
 
 uses
-  cairo, CairoClasses, cairo_win32; 
+  cairo_xlib, CairoClasses; 
 
 implementation
 
