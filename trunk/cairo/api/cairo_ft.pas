@@ -1,6 +1,6 @@
 unit cairo_ft; 
 
-{$mode objfpc}{$H+}
+{$mode objfpc}
 
 interface
 

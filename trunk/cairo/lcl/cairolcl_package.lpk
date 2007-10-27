@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <PathDelim Value="\"/>
+    <Name Value="cairolcl_package"/>
+    <Author Value="Luiz Américo Pereira Câmara"/>
+    <CompilerOptions>
+      <Version Value="5"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="include\$(LCLWidgetType)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Generate Value="Faster"/>
+      </CodeGeneration>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Description Value="Provide components to integrate cairo with LCL
+"/>
+    <License Value="Modified LGPL
+"/>
+    <Version Minor="1"/>
+    <Files Count="2">
+      <Item1>
+        <Filename Value="cairolcl.pas"/>
+        <UnitName Value="CairoLCL"/>
+      </Item1>
+      <Item2>
+        <Filename Value="register_cairolcl.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_cairolcl"/>
+      </Item2>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="cairobase_package"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
