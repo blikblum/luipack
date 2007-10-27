@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  cairo, cairo_win32;
+  cairo14, CairoLCL;
 
 { TForm1 }
 
@@ -66,7 +66,7 @@ begin
   TempBitmap := CreateCompatibleBitmap(PaintBoxMain.Canvas.Handle, PaintBoxMain.Width, PaintBoxMain.Height);
   OldBitmap := SelectObject(TempDC, TempBitmap);
 
-  surface := cairo_win32_surface_create (TempDC);
+  surface := CreateSurfaceFromDC(TempDC);
   cr := cairo_create (surface);
 
   cairo_save(cr);;

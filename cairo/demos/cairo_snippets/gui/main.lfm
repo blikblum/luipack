@@ -35,10 +35,8 @@ object Form1: TForm1
     ParentColor = False
     TabOrder = 1
     BookMarkOptions.Xoffset = -18
-    BookMarkOptions.OnChange = nil
     Gutter.AutoSize = True
     Gutter.Visible = False
-    Gutter.OnChange = nil
     Gutter.CodeFoldingWidth = 14
     Highlighter = SynPasSyn1
     Keystrokes = <    
@@ -362,7 +360,6 @@ object Form1: TForm1
         Command = 250
         ShortCut = 24642
       end>
-    SelectedColor.OnChange = nil
   end
   object SynPasSyn1: TSynPasSyn
     Enabled = False

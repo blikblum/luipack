@@ -6,6 +6,20 @@ interface
 
 uses
   cairo14, freetypeh;
+
+type
+  //todo: properly define FcPattern:
+  //see if ft requires X
+  (*
+  typedef struct _XftPattern {
+    int		    num;
+    int		    size;
+    XftPatternElt   *elts;
+   } XftPattern;
+   typedef FcPattern XftPattern;
+  *)
+  FcPattern = Pointer;
+  PFcPattern = ^FcPattern;
   
   
 function  cairo_ft_font_face_create_for_pattern(pattern:PFcPattern):Pcairo_font_face_t; cdecl; external LIB_CAIRO;

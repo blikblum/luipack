@@ -7,7 +7,7 @@ unit cairolcl_package;
 interface
 
 uses
-  CairoLCL, register_cairolcl, LazarusPackageIntf; 
+  register_cairolcl, CairoLCL, LazarusPackageIntf; 
 
 implementation
 
