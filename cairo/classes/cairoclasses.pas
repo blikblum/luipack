@@ -37,7 +37,7 @@ unit CairoClasses;
 interface
 
 uses
-  cairo;
+  cairo14;
   
 type
 

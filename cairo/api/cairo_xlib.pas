@@ -3,7 +3,7 @@ unit cairo_xlib;
 interface
 
 uses
-  cairo, x, xlib, xrender;
+  cairo14, x, xlib, xrender;
   
 function  cairo_xlib_surface_create(dpy:PDisplay; drawable:TDrawable; visual:PVisual; width:longint; height:longint):Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_xlib_surface_create_for_bitmap(dpy:PDisplay; bitmap:TPixmap; screen:PScreen; width:longint; height:longint):Pcairo_surface_t; cdecl; external LIB_CAIRO;

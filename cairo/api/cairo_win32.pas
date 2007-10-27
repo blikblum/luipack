@@ -3,7 +3,7 @@ unit cairo_win32;
 interface
 
 uses
-  cairo, windows;
+  cairo14, windows;
 
 {
  Translation of cairo-win32.h version 1.4
