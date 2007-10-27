@@ -38,7 +38,7 @@ unit CairoLCL;
 interface
 
 uses
-  {$i uses.inc}
+  {$i uses.inc} cairo14,
   LCLIntf, Classes, SysUtils, LCLType, CairoClasses, Controls, Graphics, LMessages;
 
 type
@@ -76,9 +76,11 @@ type
     property BorderStyle;
   end;
 
+function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
+
 implementation
 
-  {$i dcsurface.inc}
+  {$i cairolcl.inc}
 
 { TCairoControl }
 
@@ -152,6 +154,13 @@ begin
     CreateContext;
   DoDraw;
   Invalidate;
+end;
+
+{ TCairoDCSurface }
+
+constructor TCairoDCSurface.Create(DC: HDC);
+begin
+  FHandle := CreateSurfaceFromDC(DC);
 end;
 
 end.

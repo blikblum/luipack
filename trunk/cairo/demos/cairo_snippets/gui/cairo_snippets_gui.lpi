@@ -7,7 +7,7 @@
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <ActiveEditorIndexAtStart Value="8"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
@@ -28,14 +28,14 @@
     </RunParams>
     <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="cairolcl_package"/>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item1>
       <Item2>
         <PackageName Value="LCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="cairolcl_package"/>
       </Item3>
     </RequiredPackages>
     <Units Count="25">
@@ -55,8 +55,8 @@
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="main.lrs"/>
         <UnitName Value="main"/>
-        <CursorPos X="21" Y="36"/>
-        <TopLine Value="36"/>
+        <CursorPos X="8" Y="77"/>
+        <TopLine Value="50"/>
         <EditorIndex Value="0"/>
         <UsageCount Value="32"/>
         <Bookmarks Count="1">
@@ -67,7 +67,7 @@
       <Unit2>
         <Filename Value="..\snippets.pas"/>
         <UnitName Value="snippets"/>
-        <CursorPos X="22" Y="6"/>
+        <CursorPos X="10" Y="6"/>
         <TopLine Value="1"/>
         <EditorIndex Value="8"/>
         <UsageCount Value="17"/>
@@ -235,7 +235,7 @@
         <Loaded Value="True"/>
       </Unit24>
     </Units>
-    <JumpHistory Count="12" HistoryIndex="11">
+    <JumpHistory Count="14" HistoryIndex="13">
       <Position1>
         <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
         <Caret Line="25" Column="3" TopLine="9"/>
@@ -284,6 +284,14 @@
         <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
         <Caret Line="121" Column="66" TopLine="99"/>
       </Position12>
+      <Position13>
+        <Filename Value="main.pas"/>
+        <Caret Line="69" Column="33" TopLine="57"/>
+      </Position13>
+      <Position14>
+        <Filename Value="main.pas"/>
+        <Caret Line="77" Column="8" TopLine="50"/>
+      </Position14>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

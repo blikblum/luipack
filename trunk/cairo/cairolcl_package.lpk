@@ -8,7 +8,8 @@
       <Version Value="5"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="include\$(LCLWidgetType)\"/>
+        <IncludeFiles Value="lcl\include\$(LCLWidgetType)\"/>
+        <OtherUnitFiles Value="lcl\"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -25,22 +26,22 @@
     <Version Minor="1"/>
     <Files Count="2">
       <Item1>
-        <Filename Value="cairolcl.pas"/>
-        <UnitName Value="CairoLCL"/>
-      </Item1>
-      <Item2>
         <Filename Value="register_cairolcl.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_cairolcl"/>
+      </Item1>
+      <Item2>
+        <Filename Value="lcl\cairolcl.pas"/>
+        <UnitName Value="CairoLCL"/>
       </Item2>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="cairobase_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="cairobase_package"/>
+        <PackageName Value="LCL"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

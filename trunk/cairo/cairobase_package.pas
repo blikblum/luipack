@@ -7,7 +7,7 @@ unit cairobase_package;
 interface
 
 uses
-  cairo_xlib, CairoClasses; 
+  cairo_ft, CairoClasses, targetunits; 
 
 implementation
 

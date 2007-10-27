@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="3">
+    <PathDelim Value="\"/>
     <Name Value="cairobase_package"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="5"/>
+      <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="api/;classes/"/>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+        <OtherUnitFiles Value="api\;classes\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -21,25 +23,19 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="4">
+    <Files Count="3">
       <Item1>
-        <Filename Value="api/cairo_ft.pas"/>
-        <AddToUsesPkgSection Value="False"/>
+        <Filename Value="api\cairo_ft.pas"/>
         <UnitName Value="cairo_ft"/>
       </Item1>
       <Item2>
-        <Filename Value="api/cairo_xlib.pas"/>
-        <UnitName Value="cairo_xlib"/>
+        <Filename Value="classes\cairoclasses.pas"/>
+        <UnitName Value="CairoClasses"/>
       </Item2>
       <Item3>
-        <Filename Value="classes/cairoclasses.pas"/>
-        <UnitName Value="CairoClasses"/>
+        <Filename Value="api\targetunits.pas"/>
+        <UnitName Value="targetunits"/>
       </Item3>
-      <Item4>
-        <Filename Value="api/cairo_win32.pas"/>
-        <AddToUsesPkgSection Value="False"/>
-        <UnitName Value="cairo_win32"/>
-      </Item4>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
@@ -48,10 +44,11 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)/"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
+      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
