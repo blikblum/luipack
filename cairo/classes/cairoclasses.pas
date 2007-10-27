@@ -78,6 +78,23 @@ type
     constructor CreateRGB(Red, Green, Blue: Double);
   end;
 
+  { TCairoRectangleList }
+
+  TCairoRectangleList = class
+    FNumRectangles: Integer;
+  private
+    FRectangleList: Pcairo_rectangle_list_t;
+    function GetNumRectangles: Integer;
+    function GetRectangles(Index: Integer): cairo_rectangle_t;
+    function GetStatus: cairo_status_t;
+  public
+    destructor Destroy; override;
+    property Status: cairo_status_t read GetStatus;
+    property Rectangles[Index: Integer]: cairo_rectangle_t read GetRectangles;
+    property NumRectangles: Integer read GetNumRectangles;
+  end;
+  
+
   { TCairoContext }
 
   TCairoContext = class
@@ -149,9 +166,7 @@ type
     procedure Clip;
     procedure ClipPreserve;
     procedure ClipExtents(X1, Y1, X2, Y2:  PDouble);
-    //create a TRectangleList object?
-    function  CopyClipRectangleList: Pcairo_rectangle_list_t;
-    procedure RectangleListDestroy(RectangleList: Pcairo_rectangle_list_t);
+    function  CopyClipRectangleList: TCairoRectangleList;
   end;
 
 implementation
@@ -430,15 +445,10 @@ begin
   cairo_clip_extents(FHandle, X1, Y1, X2, Y2);
 end;
 
-function TCairoContext.CopyClipRectangleList: Pcairo_rectangle_list_t;
+function TCairoContext.CopyClipRectangleList: TCairoRectangleList;
 begin
-  Result := cairo_copy_clip_rectangle_list(FHandle);
-end;
-
-procedure TCairoContext.RectangleListDestroy(
-  RectangleList: Pcairo_rectangle_list_t);
-begin
-  cairo_rectangle_list_destroy(RectangleList);
+  Result := TCairoRectangleList.Create;
+  Result.FRectangleList := cairo_copy_clip_rectangle_list(FHandle);
 end;
 
 constructor TCairoContext.Create(Target: TCairoSurface);
@@ -449,7 +459,6 @@ end;
 destructor TCairoContext.Destroy;
 begin
   cairo_destroy(FHandle);
-  inherited Destroy;
 end;
 
 function TCairoContext.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
@@ -517,13 +526,12 @@ end;
 destructor TCairoSurface.Destroy;
 begin
   cairo_surface_destroy(FHandle);
-  inherited Destroy;
 end;
 
 function TCairoSurface.Reference: TCairoSurface;
 begin
-  Result := TCairoSurface.Create;
-  Result.FHandle := cairo_surface_reference(FHandle);
+  Result := Self;
+  cairo_surface_reference(FHandle);
 end;
 
 procedure TCairoSurface.Finish;
@@ -607,6 +615,30 @@ procedure TCairoSurface.SetFallbackResolution(XPixelsPerInch,
   YPixelsPerInch: Double);
 begin
   cairo_surface_set_fallback_resolution(FHandle, XPixelsPerInch, YPixelsPerInch);
+end;
+
+{ TCairoRectangleList }
+
+function TCairoRectangleList.GetStatus: cairo_status_t;
+begin
+  Result := FRectangleList^.status;
+end;
+
+function TCairoRectangleList.GetRectangles(Index: Integer): cairo_rectangle_t;
+begin
+  if (Index < 0) or (Index >= NumRectangles) then
+    Exit;
+  Result := FRectangleList^.rectangles[Index];
+end;
+
+function TCairoRectangleList.GetNumRectangles: Integer;
+begin
+  Result := FRectangleList^.num_rectangles;
+end;
+
+destructor TCairoRectangleList.Destroy;
+begin
+  cairo_rectangle_list_destroy(FRectangleList);
 end;
 
 end.

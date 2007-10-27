@@ -7,14 +7,8 @@ unit cairobase_package;
 interface
 
 uses
-  cairo, CairoClasses, cairo_win32, LazarusPackageIntf; 
+  cairo, CairoClasses, cairo_win32; 
 
 implementation
 
-procedure Register; 
-begin
-end; 
-
-initialization
-  RegisterPackage('cairobase_package', @Register); 
 end.
