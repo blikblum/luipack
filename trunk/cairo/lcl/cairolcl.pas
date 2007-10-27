@@ -72,6 +72,8 @@ type
   published
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
     property Align;
+    property BorderSpacing;
+    property BorderStyle;
   end;
 
 implementation
