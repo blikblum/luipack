@@ -43,10 +43,15 @@
  *)
 
 
-{
-  Updated to version cairo 1.4
-  by Luiz Américo Pereira Câmara 2007
-}
+(*
+  - Updated to cairo version 1.4
+  - Grouped OS specific fuctions in separated units
+  - Organized the functions by group and ordered exactly as the c header
+  - Cleared parameter list syntax according to pascal standard
+
+  By Luiz Américo Pereira Câmara
+  October 2007
+*)
 
 {$Mode ObjFpc}
 
@@ -224,8 +229,6 @@ type
     CAIRO_SURFACE_TYPE_OS2
   );
 
-  FcPattern = Pointer;
-  PFcPattern = ^FcPattern;
   Pcairo_surface_t = ^cairo_surface_t;
   PPcairo_surface_t = ^Pcairo_surface_t;
   Pcairo_t = ^cairo_t;
@@ -246,9 +249,9 @@ type
   Pcairo_rectangle_t = ^cairo_rectangle_t;
   Pcairo_rectangle_list_t =^cairo_rectangle_list_t;
 
-  cairo_destroy_func_t = procedure (data: pointer); cdecl;
-  cairo_write_func_t = function (closure: pointer; data:Pbyte; length: LongWord):cairo_status_t; cdecl;
-  cairo_read_func_t = function (closure: pointer; data:Pbyte; length: LongWord):cairo_status_t; cdecl;
+  cairo_destroy_func_t = procedure (data: Pointer); cdecl;
+  cairo_write_func_t = function (closure: Pointer; data: PByte; length: LongWord): cairo_status_t; cdecl;
+  cairo_read_func_t = function (closure: Pointer; data: PByte; length: LongWord): cairo_status_t; cdecl;
 
   cairo_t              = record {OPAQUE} end;
   cairo_surface_t      = record {OPAQUE} end;
@@ -322,7 +325,7 @@ type
   end;
   
 function cairo_version: LongInt; cdecl; external LIB_CAIRO;
-function cairo_version_string: Pchar; cdecl; external LIB_CAIRO;
+function cairo_version_string: PChar; cdecl; external LIB_CAIRO;
 //Helper function to retrieve decoded version
 procedure cairo_version(out major, minor, micro: LongInt);
 
@@ -410,7 +413,7 @@ procedure cairo_fill_extents(cr: Pcairo_t; x1, y1, x2, y2: PDouble); cdecl; exte
 procedure cairo_reset_clip(cr: Pcairo_t); cdecl; external LIB_CAIRO;
 procedure cairo_clip(cr: Pcairo_t); cdecl; external LIB_CAIRO;
 procedure cairo_clip_preserve(cr: Pcairo_t); cdecl; external LIB_CAIRO;
-procedure cairo_clip_extents(cr: Pcairo_t; x1:  PDouble; y1:  PDouble; x2:  PDouble; y2:  PDouble); cdecl; external LIB_CAIRO;
+procedure cairo_clip_extents(cr: Pcairo_t; x1, y1, x2, y2:  PDouble); cdecl; external LIB_CAIRO;
 function  cairo_copy_clip_rectangle_list(cr: Pcairo_t): Pcairo_rectangle_list_t; cdecl; external LIB_CAIRO;
 procedure cairo_rectangle_list_destroy(rectangle_list: Pcairo_rectangle_list_t); cdecl; external LIB_CAIRO;
 
@@ -507,14 +510,14 @@ function  cairo_status_to_string(status: cairo_status_t): Pchar; cdecl; external
 
 (* Surface manipulation *)
 
-function  cairo_surface_create_similar(other: Pcairo_surface_t; content: cairo_content_t; width: LongInt; height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+function  cairo_surface_create_similar(other: Pcairo_surface_t; content: cairo_content_t; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_surface_reference(surface: Pcairo_surface_t): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 procedure cairo_surface_finish(surface: Pcairo_surface_t); cdecl; external LIB_CAIRO;
 procedure cairo_surface_destroy(surface: Pcairo_surface_t); cdecl; external LIB_CAIRO;
 function  cairo_surface_get_reference_count(surface: Pcairo_surface_t): LongWord; cdecl; external LIB_CAIRO;
 function  cairo_surface_status(surface: Pcairo_surface_t): cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_surface_get_type(surface: Pcairo_surface_t): cairo_surface_type_t; cdecl; external LIB_CAIRO;
-function  cairo_surface_get_content(surface: cairo_surface_t): cairo_content_t; cdecl; external LIB_CAIRO;
+function  cairo_surface_get_content(surface: Pcairo_surface_t): cairo_content_t; cdecl; external LIB_CAIRO;
 function  cairo_surface_write_to_png(surface: Pcairo_surface_t; filename: Pchar): cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_surface_write_to_png_stream(surface: Pcairo_surface_t; write_func: cairo_write_func_t; closure: pointer): cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_surface_get_user_data(surface: Pcairo_surface_t; key: Pcairo_user_data_key_t): pointer; cdecl; external LIB_CAIRO;
