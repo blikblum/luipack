@@ -7,7 +7,7 @@
       <Version Value="5"/>
       <SearchPaths>
         <OtherUnitFiles Value="cpu/"/>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -19,11 +19,15 @@
     <License Value="Modified LGPL + special license from cpu unit (see license.txt)
 "/>
     <Version Minor="1"/>
-    <Files Count="1">
+    <Files Count="2">
       <Item1>
         <Filename Value="chronolog.pas"/>
         <UnitName Value="chronolog"/>
       </Item1>
+      <Item2>
+        <Filename Value="chrono2db.pas"/>
+        <UnitName Value="chrono2db"/>
+      </Item2>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
