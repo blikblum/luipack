@@ -75,7 +75,46 @@ type
   private
     FHandle: Pcairo_pattern_t;
   public
-    constructor CreateRGB(Red, Green, Blue: Double);
+    destructor Destroy; override;
+  end;
+  
+  { TCairoSolidPattern }
+
+  TCairoSolidPattern = class (TCairoPattern)
+  public
+    constructor CreateRgb(Red, Green, Blue: Double);
+    constructor CreateRgba(Red, Green, Blue, Alpha: Double);
+  end;
+  
+  { TCairoGradient }
+
+  TCairoGradient = class (TCairoPattern)
+  public
+    procedure AddColorStopRgb(Offset, Red, Green, Blue: Double);
+    procedure AddColorStopRgba(Offset, Red, Green, Blue, Alpha: Double);
+    function  GetColorStopRgba(Index: LongInt; Offset, Red, Green, Blue, Alpha: PDouble): cairo_status_t;
+    function  GetColorStopCount(Count: PLongInt): cairo_status_t;
+  end;
+  
+  { TCairoLinearGradient }
+
+  TCairoLinearGradient = class (TCairoGradient)
+  public
+    constructor Create(X0, Y0, X1, Y1: Double);
+  end;
+
+  { TCairoRadialGradient }
+
+  TCairoRadialGradient = class (TCairoGradient)
+  public
+    constructor Create(Cx0, Cy0, Radius0, Cx1, Cy1, Radius1: Double);
+  end;
+
+  { TCairoSurfacePattern }
+
+  TCairoSurfacePattern = class (TCairoPattern)
+  public
+    constructor Create(Surface: TCairoSurface);
   end;
 
   { TCairoRectangleList }
@@ -510,9 +549,9 @@ end;
 
 { TCairoPattern }
 
-constructor TCairoPattern.CreateRGB(Red, Green, Blue: Double);
+destructor TCairoPattern.Destroy;
 begin
-  FHandle := cairo_pattern_create_rgb(Red, Green, Blue);
+  cairo_pattern_destroy(FHandle);
 end;
 
 { TCairoSurface }
@@ -639,6 +678,64 @@ end;
 destructor TCairoRectangleList.Destroy;
 begin
   cairo_rectangle_list_destroy(FRectangleList);
+end;
+
+{ TCairoSurfacePattern }
+
+constructor TCairoSurfacePattern.Create(Surface: TCairoSurface);
+begin
+  FHandle := cairo_pattern_create_for_surface(Surface.FHandle);
+end;
+
+{ TCairoSolidPattern }
+
+constructor TCairoSolidPattern.CreateRgb(Red, Green, Blue: Double);
+begin
+  FHandle := cairo_pattern_create_rgb(Red, Green, Blue);
+end;
+
+constructor TCairoSolidPattern.CreateRgba(Red, Green, Blue, Alpha: Double);
+begin
+  FHandle := cairo_pattern_create_rgba(Red, Green, Blue, Alpha);
+end;
+
+{ TCairoLinearGradient }
+
+constructor TCairoLinearGradient.Create(X0, Y0, X1, Y1: Double);
+begin
+  FHandle := cairo_pattern_create_linear(X0, Y0, X1, Y1);
+end;
+
+{ TCairoRadialGradient }
+
+constructor TCairoRadialGradient.Create(Cx0, Cy0, Radius0, Cx1, Cy1,
+  Radius1: Double);
+begin
+  FHandle := cairo_pattern_create_radial(Cx0, Cy0, Radius0, Cx1, Cy1, Radius1);
+end;
+
+{ TCairoGradient }
+
+procedure TCairoGradient.AddColorStopRgb(Offset, Red, Green, Blue: Double);
+begin
+  cairo_pattern_add_color_stop_rgb(FHandle, Offset, Red, Green, Blue);
+end;
+
+procedure TCairoGradient.AddColorStopRgba(Offset, Red, Green, Blue,
+  Alpha: Double);
+begin
+  cairo_pattern_add_color_stop_rgba(FHandle, Offset, Red, Green, Blue, Alpha);
+end;
+
+function TCairoGradient.GetColorStopRgba(Index: LongInt; Offset, Red, Green,
+  Blue, Alpha: PDouble): cairo_status_t;
+begin
+  Result := cairo_pattern_get_color_stop_rgba(FHandle, Index, Offset, Red, Green,  Blue, Alpha);
+end;
+
+function TCairoGradient.GetColorStopCount(Count: PLongInt): cairo_status_t;
+begin
+  Result := cairo_pattern_get_color_stop_count(FHandle, Count);
 end;
 
 end.
