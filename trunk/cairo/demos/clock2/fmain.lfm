@@ -1,0 +1,17 @@
+object Form1: TForm1
+  Left = 452
+  Height = 335
+  Top = 314
+  Width = 400
+  HorzScrollBar.Page = 399
+  VertScrollBar.Page = 334
+  Caption = 'Form1'
+  ClientHeight = 335
+  ClientWidth = 400
+  object CairoControl1: TCairoControl
+    Height = 335
+    Width = 400
+    OnDraw = CairoControl1Draw
+    Align = alClient
+  end
+end
