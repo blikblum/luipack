@@ -41,6 +41,14 @@ uses
   
 type
 
+  TCairoColor = record
+    Red: Double;
+    Green: Double;
+    Blue: Double;
+    Alpha: Double;
+  end;
+  
+  
   { TCairoSurface }
 
   TCairoSurface = class
@@ -134,6 +142,29 @@ type
   end;
   
 
+  { TCairoFontOptions }
+
+  TCairoFontOptions = class
+  private
+    FHandle: Pcairo_font_options_t;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function  Copy(Original: TCairoFontOptions): TCairoFontOptions;
+    function  Status: cairo_status_t;
+    procedure Merge(Other: TCairoFontOptions);
+    function  Equal(Other: TCairoFontOptions): Boolean;
+    function  Hash: LongWord;
+    procedure SetAntialias(Antialias: cairo_antialias_t);
+    function  GetAntialias: cairo_antialias_t;
+    procedure SetSubpixelOrder(SubpixelOrder: cairo_subpixel_order_t);
+    function  GetSubpixelOrder: cairo_subpixel_order_t;
+    procedure SetHintStyle(HintStyle: cairo_hint_style_t);
+    function  GetHintStyle: cairo_hint_style_t;
+    procedure SetHintMetrics(HintMetrics: cairo_hint_metrics_t);
+    function  GetHintMetrics: cairo_hint_metrics_t;
+  end;
+
   { TCairoContext }
 
   TCairoContext = class
@@ -154,8 +185,8 @@ type
     procedure PopGroupToSource;
     procedure SetOperator(Op: cairo_operator_t);
     procedure SetSource(Source: TCairoPattern);
-    procedure SetSourceRGB(Red, Green, Blue: Double);
-    procedure SetSourceRGBA(Red, Green, Blue, Alpha: Double);
+    procedure SetSourceRgb(Red, Green, Blue: Double);
+    procedure SetSourceRgba(Red, Green, Blue, Alpha: Double);
     procedure SetSourceSurface(Surface: TCairoSurface; X, Y: Double);
     procedure SetTolerance(Tolerance: Double);
     procedure SetAntialias(Antialias: cairo_antialias_t);
@@ -206,9 +237,45 @@ type
     procedure ClipPreserve;
     procedure ClipExtents(X1, Y1, X2, Y2:  PDouble);
     function  CopyClipRectangleList: TCairoRectangleList;
+    procedure SelectFontFace(const Family: String; Slant: cairo_font_slant_t; Weight: cairo_font_weight_t);
+    procedure SetFontSize(Size: Double);
+    procedure SetFontMatrix(Matrix: Pcairo_matrix_t);
+    procedure GetFontMatrix(Matrix: Pcairo_matrix_t);
+    procedure SetFontOptions(Options: Pcairo_font_options_t);
+    procedure GetFontOptions(Options: Pcairo_font_options_t);
+    procedure SetFontFace(FontFace: Pcairo_font_face_t);
+    function  GetFontFace: Pcairo_font_face_t;
+    procedure SetScaledFont(ScaledFont:Pcairo_scaled_font_t);
+    function  GetScaledFont: Pcairo_scaled_font_t;
+    procedure ShowText(const Text: String);
+    procedure ShowGlyphs(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
+    procedure TextPath(const Text: String);
+    procedure GlyphPath(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
+    procedure TextExtents(const Text: String; Extents: Pcairo_text_extents_t);
+    procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; Extents: Pcairo_text_extents_t);
+    procedure FontExtents(Extents: Pcairo_font_extents_t);
   end;
+  
+  function RGBToCairoColor(R, G, B: Byte): TCairoColor;
+  function RGBToCairoColor(RGB: Cardinal): TCairoColor;
 
 implementation
+
+function RGBToCairoColor(R, G, B: Byte): TCairoColor;
+begin
+  Result.Red := R/255;
+  Result.Green := G/255;
+  Result.Blue := B/255;
+  Result.Alpha := 1;
+end;
+
+function RGBToCairoColor(RGB: Cardinal): TCairoColor;
+begin
+  Result.Red := (RGB and $000000ff)/255;
+  Result.Green := ((RGB shr 8) and $000000ff)/255;
+  Result.Blue := ((RGB shr 16) and $000000ff)/255;
+  Result.Alpha := 1;
+end;
 
 { TCairoContext }
 
@@ -227,12 +294,12 @@ begin
   cairo_set_source(FHandle, Source.FHandle);
 end;
 
-procedure TCairoContext.SetSourceRGB(Red, Green, Blue: Double);
+procedure TCairoContext.SetSourceRgb(Red, Green, Blue: Double);
 begin
   cairo_set_source_rgb(FHandle, Red, Green, Blue);
 end;
 
-procedure TCairoContext.SetSourceRGBA(Red, Green, Blue, Alpha: Double);
+procedure TCairoContext.SetSourceRgba(Red, Green, Blue, Alpha: Double);
 begin
   cairo_set_source_rgba(FHandle, Red, Green, Blue, Alpha);
 end;
@@ -490,6 +557,94 @@ begin
   Result.FRectangleList := cairo_copy_clip_rectangle_list(FHandle);
 end;
 
+procedure TCairoContext.SelectFontFace(const Family: String;
+  Slant: cairo_font_slant_t; Weight: cairo_font_weight_t);
+begin
+  cairo_select_font_face(FHandle, PChar(Family), Slant, Weight);
+end;
+
+procedure TCairoContext.SetFontSize(Size: Double);
+begin
+  cairo_set_font_size(FHandle, Size);
+end;
+
+procedure TCairoContext.SetFontMatrix(Matrix: Pcairo_matrix_t);
+begin
+  cairo_set_font_matrix(FHandle, Matrix);
+end;
+
+procedure TCairoContext.GetFontMatrix(Matrix: Pcairo_matrix_t);
+begin
+  cairo_get_font_matrix(FHandle, Matrix);
+end;
+
+procedure TCairoContext.SetFontOptions(Options: Pcairo_font_options_t);
+begin
+  cairo_set_font_options(FHandle, Options);
+end;
+
+procedure TCairoContext.GetFontOptions(Options: Pcairo_font_options_t);
+begin
+  cairo_get_font_options(FHandle, Options);
+end;
+
+procedure TCairoContext.SetFontFace(FontFace: Pcairo_font_face_t);
+begin
+  cairo_set_font_face(FHandle, FontFace);
+end;
+
+function TCairoContext.GetFontFace: Pcairo_font_face_t;
+begin
+  Result := cairo_get_font_face(FHandle);
+end;
+
+procedure TCairoContext.SetScaledFont(ScaledFont: Pcairo_scaled_font_t);
+begin
+  cairo_set_scaled_font(FHandle, ScaledFont);
+end;
+
+function TCairoContext.GetScaledFont: Pcairo_scaled_font_t;
+begin
+  Result := cairo_get_scaled_font(FHandle);
+end;
+
+procedure TCairoContext.ShowText(const Text: String);
+begin
+  cairo_show_text(FHandle, PChar(Text));
+end;
+
+procedure TCairoContext.ShowGlyphs(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
+begin
+  cairo_show_glyphs(FHandle, Glyphs, NumGlyphs);
+end;
+
+procedure TCairoContext.TextPath(const Text: String);
+begin
+  cairo_text_path(FHandle, PChar(Text));
+end;
+
+procedure TCairoContext.GlyphPath(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
+begin
+  cairo_glyph_path(FHandle, Glyphs, NumGlyphs);
+end;
+
+procedure TCairoContext.TextExtents(const Text: String;
+  Extents: Pcairo_text_extents_t);
+begin
+  cairo_text_extents(FHandle, PChar(Text), Extents);
+end;
+
+procedure TCairoContext.GlyphExtents(Glyphs: Pcairo_glyph_t;
+  NumGlyphs: LongInt; Extents: Pcairo_text_extents_t);
+begin
+  cairo_glyph_extents(FHandle, Glyphs, NumGlyphs, Extents);
+end;
+
+procedure TCairoContext.FontExtents(Extents: Pcairo_font_extents_t);
+begin
+  cairo_font_extents(FHandle, Extents);
+end;
+
 constructor TCairoContext.Create(Target: TCairoSurface);
 begin
   FHandle := cairo_create(Target.FHandle);
@@ -736,6 +891,87 @@ end;
 function TCairoGradient.GetColorStopCount(Count: PLongInt): cairo_status_t;
 begin
   Result := cairo_pattern_get_color_stop_count(FHandle, Count);
+end;
+
+{ TCairoFontOptions }
+
+constructor TCairoFontOptions.Create;
+begin
+  FHandle := cairo_font_options_create;
+end;
+
+destructor TCairoFontOptions.Destroy;
+begin
+  cairo_font_options_destroy(FHandle);
+end;
+
+function TCairoFontOptions.Copy(Original: TCairoFontOptions
+  ): TCairoFontOptions;
+begin
+  if Assigned(FHandle) then
+    cairo_font_options_destroy(FHandle);
+  FHandle := cairo_font_options_copy(Original.FHandle);
+end;
+
+function TCairoFontOptions.Status: cairo_status_t;
+begin
+  Result := cairo_font_options_status(FHandle);
+end;
+
+procedure TCairoFontOptions.Merge(Other: TCairoFontOptions);
+begin
+  cairo_font_options_merge(FHandle, Other.FHandle);
+end;
+
+function TCairoFontOptions.Equal(Other: TCairoFontOptions): Boolean;
+begin
+  Result := Boolean(cairo_font_options_equal(FHandle, Other.FHandle))
+end;
+
+function TCairoFontOptions.Hash: LongWord;
+begin
+  Result := cairo_font_options_hash(FHandle);
+end;
+
+procedure TCairoFontOptions.SetAntialias(Antialias: cairo_antialias_t);
+begin
+  cairo_font_options_set_antialias(FHandle, Antialias);
+end;
+
+function TCairoFontOptions.GetAntialias: cairo_antialias_t;
+begin
+  Result := cairo_font_options_get_antialias(FHandle);
+end;
+
+procedure TCairoFontOptions.SetSubpixelOrder(
+  SubpixelOrder: cairo_subpixel_order_t);
+begin
+  cairo_font_options_set_subpixel_order(FHandle, SubpixelOrder);
+end;
+
+function TCairoFontOptions.GetSubpixelOrder: cairo_subpixel_order_t;
+begin
+  Result := cairo_font_options_get_subpixel_order(FHandle);
+end;
+
+procedure TCairoFontOptions.SetHintStyle(HintStyle: cairo_hint_style_t);
+begin
+  cairo_font_options_set_hint_style(FHandle, HintStyle);
+end;
+
+function TCairoFontOptions.GetHintStyle: cairo_hint_style_t;
+begin
+  Result := cairo_font_options_get_hint_style(FHandle);
+end;
+
+procedure TCairoFontOptions.SetHintMetrics(HintMetrics: cairo_hint_metrics_t);
+begin
+  cairo_font_options_set_hint_metrics(FHandle, HintMetrics);
+end;
+
+function TCairoFontOptions.GetHintMetrics: cairo_hint_metrics_t;
+begin
+  Result := cairo_font_options_get_hint_metrics(FHandle);
 end;
 
 end.

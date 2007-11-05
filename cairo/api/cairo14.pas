@@ -434,6 +434,10 @@ procedure cairo_font_options_set_hint_style(options: Pcairo_font_options_t; hint
 function  cairo_font_options_get_hint_style(options: Pcairo_font_options_t): cairo_hint_style_t; cdecl; external LIB_CAIRO;
 procedure cairo_font_options_set_hint_metrics(options: Pcairo_font_options_t; hint_metrics: cairo_hint_metrics_t); cdecl; external LIB_CAIRO;
 function  cairo_font_options_get_hint_metrics(options: Pcairo_font_options_t): cairo_hint_metrics_t; cdecl; external LIB_CAIRO;
+
+(* This interface is for dealing with text as text, not caring about the
+   font object inside the the cairo_t. *)
+
 procedure cairo_select_font_face(cr: Pcairo_t; family: Pchar; slant: cairo_font_slant_t; weight: cairo_font_weight_t); cdecl; external LIB_CAIRO;
 procedure cairo_set_font_size(cr: Pcairo_t; size: Double); cdecl; external LIB_CAIRO;
 procedure cairo_set_font_matrix(cr: Pcairo_t; matrix: Pcairo_matrix_t); cdecl; external LIB_CAIRO;
