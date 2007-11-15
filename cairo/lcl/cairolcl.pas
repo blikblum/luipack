@@ -90,7 +90,7 @@ var
 begin
   FBitmap.Width := Width;
   FBitmap.Height := Height;
-  FBitmap.Canvas.Color := Parent.Color;
+  FBitmap.Canvas.Brush.Color := Parent.Color;
   FBitmap.Canvas.FillRect(0, 0, Width, Height);
   //todo: make surface persistent ?
   Surface := TCairoDCSurface.Create(FBitmap.Canvas.Handle);
