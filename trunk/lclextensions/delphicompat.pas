@@ -140,7 +140,6 @@ function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
 function CF_UNICODETEXT: TClipboardFormat;
 procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
-function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
 function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
