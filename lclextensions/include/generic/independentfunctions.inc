@@ -1,17 +1,4 @@
 
-function CreatePatternBrush(hbmp:HBITMAP):HBRUSH;
-var
-  Log: TLogBrush;
-begin
-  with Log do
-  begin
-    lbColor := 0;
-    lbHatch := hbmp;
-    lbStyle := BS_PATTERN;
-    Result := CreateBrushIndirect(Log);
-  end;
-end;
-
 {$ifndef HAS_DRAWFRAMECONTROL}
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
