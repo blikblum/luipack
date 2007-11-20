@@ -37,31 +37,30 @@ unit VirtualDBGrid;
 
 interface
 
-{.$R 'VirtualDBGrid.res'}
-
-{.$I Compilers.inc}
-
 uses
   LCLType, types, delphicompat, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
-  Variants, contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons;
+  Variants, contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons, LResources;
 
 const
-      ResBMP_ARROWFIRST   = 'ARROWFIRST';
-      ResBMP_ARROWPRIOR   = 'ARROWPRIOR';
-      ResBMP_ARROWNEXT    = 'ARROWNEXT';
-      ResBMP_ARROWLAST    = 'ARROWLAST';
-      ResBMP_INDICATOR    = 'INDICATOR';
+  {
+  // navigator buttons
+  ResBMP_ARROWFIRST   = 'ARROWFIRST';
+  ResBMP_ARROWPRIOR   = 'ARROWPRIOR';
+  ResBMP_ARROWNEXT    = 'ARROWNEXT';
+  ResBMP_ARROWLAST    = 'ARROWLAST';
+  }
+  ResBMP_INDICATOR    = 'INDICATOR';
 
-      clWhiteSmoke  : TColor = $00F5F5F5;
-      clLightYellow : TColor = $00E0FFFF;
+  clWhiteSmoke  : TColor = $00F5F5F5;
+  clLightYellow : TColor = $00E0FFFF;
 
-      DefaultIndicatorColor = clBtnFace;
+  DefaultIndicatorColor = clBtnFace;
 
-      // FieldFlag constants
-      ffUndeclared=   high(byte);
-      ffDBField =     0;
-      ffCalculated =  1;
-      ffIndicator  =  2;
+  // FieldFlag constants
+  ffUndeclared=   high(byte);
+  ffDBField =     0;
+  ffCalculated =  1;
+  ffIndicator  =  2;
 
 type
   { --- Types --- }
@@ -2008,37 +2007,33 @@ begin
   inherited Header := Value;
 end;
 
-
-
 constructor TCustomVirtualDBGrid.Create(Owner: TComponent);
 begin
   inherited;
 
-  fDBNavigatorList:= TObjectList.Create(false);
+  fDBNavigatorList := TObjectList.Create(false);
 
+  fIndicatorBMP := TBitmap.Create;
+  fIndicatorBMP.LoadFromLazarusResource(ResBMP_INDICATOR);
+  fIndicatorBMP.TransparentMode := tmFixed;
+  fIndicatorBMP.TransparentColor := clFuchsia;
+  fIndicatorBMP.Transparent := True;
 
-  fIndicatorBMP:= TBitmap.Create;
-  fIndicatorBMP.Height:= 16;
-  fIndicatorBMP.Width:= 16;
-  fIndicatorBMP.LoadFromResourceName(HInstance, ResBMP_INDICATOR);
-  fIndicatorBMP.Transparent:= True;
-  fIndicatorBMP.TransparentColor:= clFuchsia;
-
-  NodeDataSize:= sizeof(TNodeData);
-  DefaultText:= '';
+  NodeDataSize := SizeOf(TNodeData);
+  //DefaultText := '';
   FInternalDataOffset := AllocateInternalDataArea( SizeOf(TNodeData));
-  fLoadingDataFlag:= 0;
-  fLastRecordCount:= 0;
+  //fLoadingDataFlag := 0;
+  //fLastRecordCount := 0;
 
 
-  Header.Options:= [hoColumnResize,hoDrag,hoHotTrack,hoShowHint,hoShowSortGlyphs,hoVisible];
-  Header.SortColumn:= -1;
-  Header.Style:= hsPlates;
-  Header.Font.Style:= [fsBold];
+  Header.Options := [hoColumnResize,hoDrag,hoHotTrack,hoShowHint,hoShowSortGlyphs,hoVisible];
+  Header.SortColumn := -1;
+  Header.Style := hsPlates;
+  Header.Font.Style := [fsBold];
 
   with TreeOptions do
   begin
-    AnimationOptions:= [];
+    //AnimationOptions:= [];
     AutoOptions:=      [toAutoDropExpand, toAutoScroll, toAutoTristateTracking,
                        toAutoDeleteMovedNodes];
     MiscOptions:=      [toAcceptOLEDrop, toGridExtensions, toInitOnSave,
@@ -2049,13 +2044,13 @@ begin
     StringOptions:=    [toSaveCaptions,toAutoAcceptEditChange];
   end;
 
+  //todo: replace this by Do* methods
   OnFreeNode:=        _OnFreeNode;
   OnGetText:=         _OnGetText;
   OnNewText:=         _OnNewText;
 
 
   fDBOptions := TVTDBOptions.Create(self);
-
 end;
 
 destructor TCustomVirtualDBGrid.Destroy;
@@ -3575,7 +3570,9 @@ begin
 
                       if (Idx = -1)
                          then begin
-                           Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
+                           //todo: see how to handle widestrings
+                           //original: Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
+                           Data.RecordData.Add(WFieldName, WField.Value, WField.DataType, ffDBField);
                          end
                          else begin
                            if (Idx <> I) then Data.RecordData.Exchange(Idx, I);
@@ -3970,6 +3967,8 @@ end;
 { --- TVirtualDBNavigatorLink --------------------------------------------------- }
 { ============================================================================ }
 
+initialization
+  {$i resources.lrs}
 
 end.
 
