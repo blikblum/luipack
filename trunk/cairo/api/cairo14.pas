@@ -462,7 +462,7 @@ function  cairo_font_face_reference(font_face: Pcairo_font_face_t): Pcairo_font_
 procedure cairo_font_face_destroy(font_face: Pcairo_font_face_t); cdecl; external LIB_CAIRO;
 function  cairo_font_face_get_reference_count (font_face: Pcairo_font_face_t):  LongWord; cdecl; external LIB_CAIRO;
 function  cairo_font_face_status(font_face: Pcairo_font_face_t): cairo_status_t; cdecl; external LIB_CAIRO;
-function  cairo_font_face_get_type(font_face:  cairo_font_face_t): cairo_font_type_t; cdecl; external LIB_CAIRO;
+function  cairo_font_face_get_type(font_face: Pcairo_font_face_t): cairo_font_type_t; cdecl; external LIB_CAIRO;
 function  cairo_font_face_get_user_data(font_face: Pcairo_font_face_t; key: Pcairo_user_data_key_t): pointer; cdecl; external LIB_CAIRO;
 function  cairo_font_face_set_user_data(font_face: Pcairo_font_face_t; key: Pcairo_user_data_key_t; user_data: pointer; destroy: cairo_destroy_func_t): cairo_status_t; cdecl; external LIB_CAIRO;
 

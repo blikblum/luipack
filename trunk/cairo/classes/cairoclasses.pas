@@ -150,7 +150,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function  Copy(Original: TCairoFontOptions): TCairoFontOptions;
+    procedure Copy(Original: TCairoFontOptions);
     function  Status: cairo_status_t;
     procedure Merge(Other: TCairoFontOptions);
     function  Equal(Other: TCairoFontOptions): Boolean;
@@ -165,11 +165,30 @@ type
     function  GetHintMetrics: cairo_hint_metrics_t;
   end;
 
+  { TCairoFontFace }
+
+  TCairoFontFace = class
+  private
+    FHandle: Pcairo_font_face_t;
+  public
+    //todo: move this to private??
+    constructor Create(AHandle: Pcairo_font_face_t);
+    //todo: see how and if wiil implement Destroy/Reference
+    //function  Reference: Pcairo_font_face_t;
+    //destructor Destroy;
+    function  GetReferenceCount: LongWord;
+    function  Status: cairo_status_t;
+    function  GetType: cairo_font_type_t;
+    function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+    function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+  end;
+
   { TCairoContext }
 
   TCairoContext = class
   private
     FHandle: Pcairo_t;
+    FFontFace: TCairoFontFace;
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
@@ -244,7 +263,7 @@ type
     procedure SetFontOptions(Options: Pcairo_font_options_t);
     procedure GetFontOptions(Options: Pcairo_font_options_t);
     procedure SetFontFace(FontFace: Pcairo_font_face_t);
-    function  GetFontFace: Pcairo_font_face_t;
+    function  GetFontFace: TCairoFontFace;
     procedure SetScaledFont(ScaledFont:Pcairo_scaled_font_t);
     function  GetScaledFont: Pcairo_scaled_font_t;
     procedure ShowText(const Text: String);
@@ -593,9 +612,11 @@ begin
   cairo_set_font_face(FHandle, FontFace);
 end;
 
-function TCairoContext.GetFontFace: Pcairo_font_face_t;
+function TCairoContext.GetFontFace: TCairoFontFace;
 begin
-  Result := cairo_get_font_face(FHandle);
+  if FFontFace = nil then
+    FFontFace := TCairoFontFace.Create(cairo_get_font_face(FHandle));
+  Result := FFontFace;
 end;
 
 procedure TCairoContext.SetScaledFont(ScaledFont: Pcairo_scaled_font_t);
@@ -653,6 +674,7 @@ end;
 destructor TCairoContext.Destroy;
 begin
   cairo_destroy(FHandle);
+  FFontFace.Free;
 end;
 
 function TCairoContext.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
@@ -905,8 +927,7 @@ begin
   cairo_font_options_destroy(FHandle);
 end;
 
-function TCairoFontOptions.Copy(Original: TCairoFontOptions
-  ): TCairoFontOptions;
+procedure TCairoFontOptions.Copy(Original: TCairoFontOptions);
 begin
   if Assigned(FHandle) then
     cairo_font_options_destroy(FHandle);
@@ -972,6 +993,51 @@ end;
 function TCairoFontOptions.GetHintMetrics: cairo_hint_metrics_t;
 begin
   Result := cairo_font_options_get_hint_metrics(FHandle);
+end;
+
+{ TCairoFontFace }
+
+{
+function TCairoFontFace.Reference: Pcairo_font_face_t;
+begin
+  Result := cairo_font_face_reference(FHandle);
+end;
+
+destructor TCairoFontFace.Destroy;
+begin
+  cairo_font_face_destroy(FHandle);
+end;
+}
+
+constructor TCairoFontFace.Create(AHandle: Pcairo_font_face_t);
+begin
+  FHandle := AHandle;
+end;
+
+function TCairoFontFace.GetReferenceCount: LongWord;
+begin
+  Result := cairo_font_face_get_reference_count(FHandle);
+end;
+
+function TCairoFontFace.Status: cairo_status_t;
+begin
+  Result := cairo_font_face_status(FHandle);
+end;
+
+function TCairoFontFace.GetType: cairo_font_type_t;
+begin
+  Result := cairo_font_face_get_type(FHandle);
+end;
+
+function TCairoFontFace.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+begin
+  Result := cairo_font_face_get_user_data(FHandle, Key);
+end;
+
+function TCairoFontFace.SetUserData(Key: Pcairo_user_data_key_t;
+  UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+begin
+  Result := cairo_font_face_set_user_data(FHandle, Key, UserData, destroy_func);
 end;
 
 end.
