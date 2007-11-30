@@ -74,6 +74,8 @@ type
     property Align;
     property BorderSpacing;
     property BorderStyle;
+    property OnMouseEnter;
+    property OnMouseLeave;
   end;
 
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
