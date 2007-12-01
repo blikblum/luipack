@@ -56,11 +56,9 @@ type
   protected
     FHandle: Pcairo_surface_t;
   public
-    constructor CreateSimilar(Other: TCairoSurface; Content: cairo_content_t; Width, Height: LongInt);
+    constructor Create(Other: TCairoSurface; Content: cairo_content_t; Width, Height: LongInt);
     destructor Destroy; override;
-    function  Reference: TCairoSurface;
     procedure Finish;
-    function  GetReferenceCount: LongWord;
     function  Status: cairo_status_t;
     function  GetType: cairo_surface_type_t;
     function  GetContent: cairo_content_t;
@@ -90,8 +88,8 @@ type
 
   TCairoSolidPattern = class (TCairoPattern)
   public
-    constructor CreateRgb(Red, Green, Blue: Double);
-    constructor CreateRgba(Red, Green, Blue, Alpha: Double);
+    constructor Create(Red, Green, Blue: Double);
+    constructor Create(Red, Green, Blue, Alpha: Double);
   end;
   
   { TCairoGradient }
@@ -171,17 +169,33 @@ type
   private
     FHandle: Pcairo_font_face_t;
   public
-    //todo: move this to private??
-    constructor Create(AHandle: Pcairo_font_face_t);
-    //todo: see how and if wiil implement Destroy/Reference
-    //function  Reference: Pcairo_font_face_t;
-    //destructor Destroy;
-    function  GetReferenceCount: LongWord;
     function  Status: cairo_status_t;
     function  GetType: cairo_font_type_t;
     function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
     function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
   end;
+
+  { TCairoScaledFont }
+
+  TCairoScaledFont = class
+  private
+    FHandle: Pcairo_scaled_font_t;
+  public
+    constructor Create(FontFace: TCairoFontFace; FontMatrix, Ctm: Pcairo_matrix_t; Options: TCairoFontOptions);
+    destructor Destroy; override;
+    function  Status: cairo_status_t;
+    function  GetType: cairo_font_type_t;
+    function  GetUserData (Key: Pcairo_user_data_key_t): Pointer;
+    function  SetUserData (Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+    procedure Extents(AExtents: Pcairo_font_extents_t);
+    procedure TextExtents(Utf8: PChar; AExtents: Pcairo_text_extents_t);
+    procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; AExtents: Pcairo_text_extents_t);
+    function  GetFontFace: Pcairo_font_face_t;
+    procedure GetFontMatrix(FontMatrix: Pcairo_matrix_t);
+    procedure GetCtm(Ctm: Pcairo_matrix_t);
+    procedure GetFontOptions (Options: Pcairo_font_options_t);
+  end;
+
 
   { TCairoContext }
 
@@ -192,8 +206,6 @@ type
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
-    procedure Reference;
-    function  GetReferenceCount: LongWord;
     function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
     function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; DestroyFunc: cairo_destroy_func_t): cairo_status_t;
     procedure Save;
@@ -298,10 +310,6 @@ end;
 
 { TCairoContext }
 
-function TCairoContext.GetReferenceCount: LongWord;
-begin
-  Result := cairo_get_reference_count(FHandle);
-end;
 
 procedure TCairoContext.SetOperator(Op: cairo_operator_t);
 begin
@@ -615,7 +623,10 @@ end;
 function TCairoContext.GetFontFace: TCairoFontFace;
 begin
   if FFontFace = nil then
-    FFontFace := TCairoFontFace.Create(cairo_get_font_face(FHandle));
+  begin
+    FFontFace := TCairoFontFace.Create;
+    FFontFace.FHandle := cairo_get_font_face(FHandle);
+  end;
   Result := FFontFace;
 end;
 
@@ -703,11 +714,6 @@ begin
   cairo_push_group_with_content(FHandle, content);
 end;
 
-procedure TCairoContext.Reference;
-begin
-  cairo_reference(FHandle);
-end;
-
 procedure TCairoContext.Restore;
 begin
   cairo_restore(FHandle);
@@ -733,7 +739,7 @@ end;
 
 { TCairoSurface }
 
-constructor TCairoSurface.CreateSimilar(Other: TCairoSurface;
+constructor TCairoSurface.Create(Other: TCairoSurface;
   Content: cairo_content_t; Width, Height: LongInt);
 begin
   FHandle := cairo_surface_create_similar(Other.FHandle, Content, Width, Height);
@@ -744,20 +750,9 @@ begin
   cairo_surface_destroy(FHandle);
 end;
 
-function TCairoSurface.Reference: TCairoSurface;
-begin
-  Result := Self;
-  cairo_surface_reference(FHandle);
-end;
-
 procedure TCairoSurface.Finish;
 begin
   cairo_surface_finish(FHandle);
-end;
-
-function TCairoSurface.GetReferenceCount: LongWord;
-begin
-  Result := cairo_surface_get_reference_count(FHandle);
 end;
 
 function TCairoSurface.Status: cairo_status_t;
@@ -866,12 +861,12 @@ end;
 
 { TCairoSolidPattern }
 
-constructor TCairoSolidPattern.CreateRgb(Red, Green, Blue: Double);
+constructor TCairoSolidPattern.Create(Red, Green, Blue: Double);
 begin
   FHandle := cairo_pattern_create_rgb(Red, Green, Blue);
 end;
 
-constructor TCairoSolidPattern.CreateRgba(Red, Green, Blue, Alpha: Double);
+constructor TCairoSolidPattern.Create(Red, Green, Blue, Alpha: Double);
 begin
   FHandle := cairo_pattern_create_rgba(Red, Green, Blue, Alpha);
 end;
@@ -997,28 +992,6 @@ end;
 
 { TCairoFontFace }
 
-{
-function TCairoFontFace.Reference: Pcairo_font_face_t;
-begin
-  Result := cairo_font_face_reference(FHandle);
-end;
-
-destructor TCairoFontFace.Destroy;
-begin
-  cairo_font_face_destroy(FHandle);
-end;
-}
-
-constructor TCairoFontFace.Create(AHandle: Pcairo_font_face_t);
-begin
-  FHandle := AHandle;
-end;
-
-function TCairoFontFace.GetReferenceCount: LongWord;
-begin
-  Result := cairo_font_face_get_reference_count(FHandle);
-end;
-
 function TCairoFontFace.Status: cairo_status_t;
 begin
   Result := cairo_font_face_status(FHandle);
@@ -1038,6 +1011,77 @@ function TCairoFontFace.SetUserData(Key: Pcairo_user_data_key_t;
   UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
 begin
   Result := cairo_font_face_set_user_data(FHandle, Key, UserData, destroy_func);
+end;
+
+{ TCairoScaledFont }
+
+constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; FontMatrix,
+  Ctm: Pcairo_matrix_t; Options: TCairoFontOptions);
+begin
+  FHandle := cairo_scaled_font_create(FontFace.FHandle, FontMatrix, Ctm, Options.FHandle)
+end;
+
+destructor TCairoScaledFont.Destroy;
+begin
+  cairo_scaled_font_destroy(FHandle);
+end;
+
+function TCairoScaledFont.Status: cairo_status_t;
+begin
+  Result := cairo_scaled_font_status(FHandle);
+end;
+
+function TCairoScaledFont.GetType: cairo_font_type_t;
+begin
+  Result := cairo_scaled_font_get_type(FHandle);
+end;
+
+function TCairoScaledFont.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+begin
+  Result := cairo_scaled_font_get_user_data(FHandle, Key);
+end;
+
+function TCairoScaledFont.SetUserData(Key: Pcairo_user_data_key_t;
+  UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+begin
+  Result := cairo_scaled_font_set_user_data(FHandle, Key, UserData, destroy_func);
+end;
+
+procedure TCairoScaledFont.Extents(AExtents: Pcairo_font_extents_t);
+begin
+  cairo_scaled_font_extents(FHandle, AExtents);
+end;
+
+procedure TCairoScaledFont.TextExtents(Utf8: PChar;
+  AExtents: Pcairo_text_extents_t);
+begin
+  cairo_scaled_font_text_extents(FHandle, Utf8, AExtents);
+end;
+
+procedure TCairoScaledFont.GlyphExtents(Glyphs: Pcairo_glyph_t;
+  NumGlyphs: LongInt; AExtents: Pcairo_text_extents_t);
+begin
+  cairo_scaled_font_glyph_extents(FHandle, Glyphs, NumGlyphs, AExtents);
+end;
+
+function TCairoScaledFont.GetFontFace: Pcairo_font_face_t;
+begin
+  Result := cairo_scaled_font_get_font_face(FHandle);
+end;
+
+procedure TCairoScaledFont.GetFontMatrix(FontMatrix: Pcairo_matrix_t);
+begin
+  cairo_scaled_font_get_font_matrix(FHandle, FontMatrix);
+end;
+
+procedure TCairoScaledFont.GetCtm(Ctm: Pcairo_matrix_t);
+begin
+  cairo_scaled_font_get_ctm(FHandle, Ctm);
+end;
+
+procedure TCairoScaledFont.GetFontOptions(Options: Pcairo_font_options_t);
+begin
+  cairo_scaled_font_get_font_options(FHandle, Options);
 end;
 
 end.
