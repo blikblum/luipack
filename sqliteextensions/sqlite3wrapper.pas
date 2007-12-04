@@ -44,7 +44,7 @@ type
     destructor Destroy; override;
     procedure Close;
     function Query(const SQL: String): TSqlite3Query;
-    function Open: Boolean;
+    procedure Open;
     procedure ExecSql (const SQL: String);
     procedure Prepare (const SQL: String; Reader: TSqlite3DataReader);
     function ReturnString: String;
@@ -132,27 +132,27 @@ begin
     raise Exception.Create('Error in Query: '+ReturnString);
 end;
 
-function TSqlite3Connection.Open: Boolean;
+procedure TSqlite3Connection.Open;
 var
   stm: Pointer;
+  ErrorStr: String;
 begin
   if FHandle <> nil then
-  begin
-    Result:=True;
     Exit;
-  end;
-  Result:=False;
-  if FileExists(FFileName) then
+  FReturnCode := sqlite3_open(PChar(FFileName), @FHandle);
+  if FReturnCode = SQLITE_OK then
   begin
-    FReturnCode:= sqlite3_open(PChar(FFileName),@FHandle);
-    //additional check
-    if FReturnCode = SQLITE_OK then
-    begin
-      FReturnCode:= sqlite3_prepare(FHandle,'Select Name from sqlite_master LIMIT 1',-1, @stm,nil);
-      sqlite3_finalize(stm);
-      Result:= FReturnCode = SQLITE_OK;
-    end;
-    FSharedHandle:= False;
+    FReturnCode := sqlite3_prepare(FHandle, 'Select Name from sqlite_master LIMIT 1', -1, @stm, nil);
+    sqlite3_finalize(stm);
+  end;
+  FSharedHandle := False;
+  if FReturnCode <> SQLITE_OK then
+  begin
+    //is necessary to get ReturnString before sqlite3_close call
+    ErrorStr := 'Error opening "' + FFileName + '": ' + ReturnString;
+    sqlite3_close(FHandle);
+    FHandle := nil;
+    raise Exception.Create(ErrorStr);
   end;
 end;
 

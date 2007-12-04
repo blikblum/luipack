@@ -1,20 +1,28 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TForm1','FORMDATA',[
-  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3#251#0#6'Height'#3#211#1#3'Top'#3#212#0#5
-  +'Width'#3';'#2#18'HorzScrollBar.Page'#3':'#2#18'VertScrollBar.Page'#3#210#1
-  +#13'ActiveControl'#7#10'ListTables'#7'Caption'#6#5'Form1'#0#6'TLabel'#16'Lab'
-  +'elRecordCount'#4'Left'#3#176#0#6'Height'#2#15#3'Top'#3'X'#1#5'Width'#2'Z'#5
-  +'Color'#7#6'clNone'#11'ParentColor'#8#0#0#8'TListBox'#10'ListTables'#4'Left'
-  +#2#8#6'Height'#3#28#1#3'Top'#2'8'#5'Width'#3#153#0#17'OnSelectionChange'#7#25
-  +'ListTablesSelectionChange'#8'TabOrder'#2#0#0#0#11'TStringGrid'#13'GridTable'
-  +'Data'#4'Left'#3#176#0#6'Height'#3#28#1#3'Top'#2'8'#5'Width'#3#131#1#8'ColCo'
-  +'unt'#2#1#10'FixedColor'#7#9'clBtnFace'#9'FixedCols'#2#0#13'GridLineWidth'#2
-  +#0#7'Options'#11#15'goFixedVertLine'#15'goFixedHorzLine'#10'goVertLine'#10'g'
-  +'oHorzLine'#13'goRangeSelect'#14'goSmoothScroll'#0#8'RowCount'#2#1#10'Scroll'
-  +'Bars'#7#10'ssAutoBoth'#8'TabOrder'#2#1#7'TabStop'#9#0#0#7'TButton'#11'ButOp'
-  +'enFile'#4'Left'#2#8#6'Height'#2#25#3'Top'#2#16#5'Width'#2'K'#25'BorderSpaci'
-  +'ng.InnerBorder'#2#4#7'Caption'#6#9'Open File'#7'OnClick'#7#16'ButOpenFileCl'
-  +'ick'#8'TabOrder'#2#2#0#0#11'TOpenDialog'#11'OpenDialog1'#5'Title'#6#18'Open'
-  +' existing file'#11'FilterIndex'#2#0#4'left'#2#12#3'top'#3#148#0#0#0#0
+  'TPF0'#6'TForm1'#5'Form1'#4'Left'#3's'#1#6'Height'#3#211#1#3'Top'#3#23#1#5'Wi'
+  +'dth'#3';'#2#18'HorzScrollBar.Page'#3':'#2#18'VertScrollBar.Page'#3#210#1#13
+  +'ActiveControl'#7#10'ListTables'#7'Caption'#6#20'Sqlite3 Wrapper Demo'#12'Cl'
+  +'ientHeight'#3#211#1#11'ClientWidth'#3';'#2#0#6'TLabel'#16'LabelRecordCount'
+  +#21'AnchorSideTop.Control'#7#13'GridTableData'#18'AnchorSideTop.Side'#7#9'as'
+  +'rBottom'#24'AnchorSideBottom.Control'#7#13'GridTableData'#4'Left'#3#176#0#6
+  +'Height'#2#17#3'Top'#3#170#1#5'Width'#2'\'#17'BorderSpacing.Top'#2#2#11'Pare'
+  +'ntColor'#8#0#0#6'TLabel'#6'Label1'#4'Left'#2#8#6'Height'#2#14#3'Top'#2'('#5
+  +'Width'#2#20#7'Caption'#6#3'SQL'#11'ParentColor'#8#0#0#8'TListBox'#10'ListTa'
+  +'bles'#4'Left'#2#8#6'Height'#3'P'#1#3'Top'#2'X'#5'Width'#3#153#0#7'Anchors'
+  +#11#5'akTop'#6'akLeft'#8'akBottom'#0#17'OnSelectionChange'#7#25'ListTablesSe'
+  +'lectionChange'#8'TabOrder'#2#0#0#0#11'TStringGrid'#13'GridTableData'#4'Left'
+  +#3#176#0#6'Height'#3'P'#1#3'Top'#2'X'#5'Width'#3#131#1#7'Anchors'#11#5'akTop'
+  +#6'akLeft'#7'akRight'#8'akBottom'#0#8'ColCount'#2#1#10'FixedColor'#7#9'clBtn'
+  +'Face'#9'FixedCols'#2#0#7'Options'#11#15'goFixedVertLine'#15'goFixedHorzLine'
+  +#10'goVertLine'#10'goHorzLine'#19'goDrawFocusSelected'#11'goColSizing'#11'go'
+  +'RowSelect'#14'goSmoothScroll'#0#8'RowCount'#2#1#10'ScrollBars'#7#10'ssAutoB'
+  +'oth'#8'TabOrder'#2#1#7'TabStop'#9#0#0#13'TFileNameEdit'#12'EditFileName'#4
+  +'Left'#2#8#6'Height'#2#23#3'Top'#2#9#5'Width'#3'@'#1#16'OnAcceptFileName'#7
+  +#26'EditFileNameAcceptFileName'#11'ButtonWidth'#2#23#9'NumGlyphs'#2#1#11'Par'
+  +'entColor'#8#8'TabOrder'#2#2#0#0#5'TEdit'#7'EditSQL'#4'Left'#2#8#6'Height'#2
+  +#23#3'Top'#2'8'#5'Width'#3#208#1#8'TabOrder'#2#3#0#0#7'TButton'#10'ButExecSq'
+  +'l'#4'Left'#3#232#1#6'Height'#2#25#3'Top'#2'7'#5'Width'#2'K'#7'Caption'#6#7
+  +'Execute'#7'Enabled'#8#7'OnClick'#7#15'ButExecSqlClick'#8'TabOrder'#2#4#0#0#0
 ]);
