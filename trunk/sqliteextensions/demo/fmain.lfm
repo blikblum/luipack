@@ -1,57 +1,83 @@
 object Form1: TForm1
-  Left = 251
+  Left = 371
   Height = 467
-  Top = 212
+  Top = 279
   Width = 571
   HorzScrollBar.Page = 570
   VertScrollBar.Page = 466
   ActiveControl = ListTables
-  Caption = 'Form1'
+  Caption = 'Sqlite3 Wrapper Demo'
+  ClientHeight = 467
+  ClientWidth = 571
   object LabelRecordCount: TLabel
+    AnchorSideTop.Control = GridTableData
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = GridTableData
     Left = 176
-    Height = 15
-    Top = 344
-    Width = 90
-    Color = clNone
+    Height = 17
+    Top = 426
+    Width = 92
+    BorderSpacing.Top = 2
+    ParentColor = False
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 14
+    Top = 40
+    Width = 20
+    Caption = 'SQL'
     ParentColor = False
   end
   object ListTables: TListBox
     Left = 8
-    Height = 284
-    Top = 56
+    Height = 336
+    Top = 88
     Width = 153
+    Anchors = [akTop, akLeft, akBottom]
     OnSelectionChange = ListTablesSelectionChange
     TabOrder = 0
   end
   object GridTableData: TStringGrid
     Left = 176
-    Height = 284
-    Top = 56
+    Height = 336
+    Top = 88
     Width = 387
+    Anchors = [akTop, akLeft, akRight, akBottom]
     ColCount = 1
     FixedColor = clBtnFace
     FixedCols = 0
-    GridLineWidth = 0
-    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goSmoothScroll]
     RowCount = 1
     ScrollBars = ssAutoBoth
     TabOrder = 1
     TabStop = True
   end
-  object ButOpenFile: TButton
+  object EditFileName: TFileNameEdit
     Left = 8
-    Height = 25
-    Top = 16
-    Width = 75
-    BorderSpacing.InnerBorder = 4
-    Caption = 'Open File'
-    OnClick = ButOpenFileClick
+    Height = 23
+    Top = 9
+    Width = 320
+    OnAcceptFileName = EditFileNameAcceptFileName
+    ButtonWidth = 23
+    NumGlyphs = 1
+    ParentColor = False
     TabOrder = 2
   end
-  object OpenDialog1: TOpenDialog
-    Title = 'Open existing file'
-    FilterIndex = 0
-    left = 12
-    top = 148
+  object EditSQL: TEdit
+    Left = 8
+    Height = 23
+    Top = 56
+    Width = 464
+    TabOrder = 3
+  end
+  object ButExecSql: TButton
+    Left = 488
+    Height = 25
+    Top = 55
+    Width = 75
+    Caption = 'Execute'
+    Enabled = False
+    OnClick = ButExecSqlClick
+    TabOrder = 4
   end
 end
