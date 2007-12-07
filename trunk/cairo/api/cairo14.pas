@@ -497,7 +497,7 @@ function  cairo_get_line_cap(cr: Pcairo_t): cairo_line_cap_t; cdecl; external LI
 function  cairo_get_line_join(cr: Pcairo_t): cairo_line_join_t; cdecl; external LIB_CAIRO;
 function  cairo_get_miter_limit(cr: Pcairo_t): Double; cdecl; external LIB_CAIRO;
 function  cairo_get_dash_count(cr: Pcairo_t): LongInt; cdecl; external LIB_CAIRO;
-procedure cairo_get_dash(cr: Pcairo_t; dashes: PDouble; offset: PDouble); cdecl; external LIB_CAIRO;
+procedure cairo_get_dash(cr: Pcairo_t; dashes, offset: PDouble); cdecl; external LIB_CAIRO;
 procedure cairo_get_matrix(cr: Pcairo_t; matrix: Pcairo_matrix_t); cdecl; external LIB_CAIRO;
 function  cairo_get_target(cr: Pcairo_t): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_get_group_target(cr: Pcairo_t): Pcairo_surface_t; cdecl; external LIB_CAIRO;
