@@ -53,9 +53,12 @@ type
 
   TCairoSurface = class
   private
+    //todo: remove shared and handle owned objects using a list/map
+    FShared: Boolean;
   protected
     FHandle: Pcairo_surface_t;
   public
+    constructor Create(AHandle: Pcairo_surface_t);
     constructor Create(Other: TCairoSurface; Content: cairo_content_t; Width, Height: LongInt);
     destructor Destroy; override;
     procedure Finish;
@@ -203,6 +206,10 @@ type
   private
     FHandle: Pcairo_t;
     FFontFace: TCairoFontFace;
+    //todo a group target can be more than one per context
+    //handle multiple call to GetGroupTarget
+    FGroupTarget: TCairoSurface;
+    FTarget: TCairoSurface;
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
@@ -285,6 +292,21 @@ type
     procedure TextExtents(const Text: String; Extents: Pcairo_text_extents_t);
     procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; Extents: Pcairo_text_extents_t);
     procedure FontExtents(Extents: Pcairo_font_extents_t);
+    function  GetOperator: cairo_operator_t;
+    function  GetSource: Pcairo_pattern_t;
+    function  GetTolerance: Double;
+    function  GetAntialias: cairo_antialias_t;
+    procedure GetCurrentPoint(X, Y: PDouble);
+    function  GetFillRule: cairo_fill_rule_t;
+    function  GetLineWidth: Double;
+    function  GetLineCap: cairo_line_cap_t;
+    function  GetLineJoin: cairo_line_join_t;
+    function  GetMiterLimit: Double;
+    function  GetDashCount: LongInt;
+    procedure GetDash(Dashes, Offset: PDouble);
+    procedure GetMatrix(Matrix: Pcairo_matrix_t);
+    function  GetTarget: TCairoSurface;
+    function  GetGroupTarget: TCairoSurface;
   end;
   
   function RGBToCairoColor(R, G, B: Byte): TCairoColor;
@@ -677,6 +699,92 @@ begin
   cairo_font_extents(FHandle, Extents);
 end;
 
+function TCairoContext.GetOperator: cairo_operator_t;
+begin
+  Result := cairo_get_operator(FHandle);
+end;
+
+function TCairoContext.GetSource: Pcairo_pattern_t;
+begin
+  //todo
+  //Result := cairo_get_source();
+end;
+
+function TCairoContext.GetTolerance: Double;
+begin
+  Result := cairo_get_tolerance(FHandle);
+end;
+
+function TCairoContext.GetAntialias: cairo_antialias_t;
+begin
+  Result := cairo_get_antialias(FHandle);
+end;
+
+procedure TCairoContext.GetCurrentPoint(X, Y: PDouble);
+begin
+  cairo_get_current_point(FHandle, X, Y);
+end;
+
+function TCairoContext.GetFillRule: cairo_fill_rule_t;
+begin
+  Result := cairo_get_fill_rule(FHandle);
+end;
+
+function TCairoContext.GetLineWidth: Double;
+begin
+  Result := cairo_get_line_width(FHandle);
+end;
+
+function TCairoContext.GetLineCap: cairo_line_cap_t;
+begin
+  Result := cairo_get_line_cap(FHandle);
+end;
+
+function TCairoContext.GetLineJoin: cairo_line_join_t;
+begin
+  Result := cairo_get_line_join(FHandle);
+end;
+
+function TCairoContext.GetMiterLimit: Double;
+begin
+  Result := cairo_get_miter_limit(FHandle);
+end;
+
+function TCairoContext.GetDashCount: LongInt;
+begin
+  Result := cairo_get_dash_count(FHandle);
+end;
+
+procedure TCairoContext.GetDash(Dashes, Offset: PDouble);
+begin
+  cairo_get_dash(FHandle, Dashes, Offset);
+end;
+
+procedure TCairoContext.GetMatrix(Matrix: Pcairo_matrix_t);
+begin
+  cairo_get_matrix(FHandle, Matrix);
+end;
+
+function TCairoContext.GetTarget: TCairoSurface;
+begin
+  if FTarget = nil then
+  begin
+    FTarget := TCairoSurface.Create(cairo_get_target(FHandle));
+    FTarget.FShared := True;
+  end;
+  Result := FTarget;
+end;
+
+function TCairoContext.GetGroupTarget: TCairoSurface;
+begin
+  if FGroupTarget = nil then
+  begin
+    FGroupTarget := TCairoSurface.Create(cairo_get_group_target(FHandle));
+    FGroupTarget.FShared := True;
+  end;
+  Result := FGroupTarget;
+end;
+
 constructor TCairoContext.Create(Target: TCairoSurface);
 begin
   FHandle := cairo_create(Target.FHandle);
@@ -686,6 +794,8 @@ destructor TCairoContext.Destroy;
 begin
   cairo_destroy(FHandle);
   FFontFace.Free;
+  FGroupTarget.Free;
+  FTarget.Free;
 end;
 
 function TCairoContext.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
@@ -739,6 +849,11 @@ end;
 
 { TCairoSurface }
 
+constructor TCairoSurface.Create(AHandle: Pcairo_surface_t);
+begin
+  FHandle := AHandle;
+end;
+
 constructor TCairoSurface.Create(Other: TCairoSurface;
   Content: cairo_content_t; Width, Height: LongInt);
 begin
@@ -747,7 +862,8 @@ end;
 
 destructor TCairoSurface.Destroy;
 begin
-  cairo_surface_destroy(FHandle);
+  if not FShared then
+    cairo_surface_destroy(FHandle);
 end;
 
 procedure TCairoSurface.Finish;
