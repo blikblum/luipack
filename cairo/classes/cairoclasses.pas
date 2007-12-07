@@ -78,6 +78,21 @@ type
     procedure SetFallbackResolution(XPixelsPerInch, YPixelsPerInch: Double);
   end;
   
+  { TCairoImageSurface }
+
+  TCairoImageSurface = class(TCairoSurface)
+  public
+    constructor Create(Format: cairo_format_t; width, height: LongInt);
+    constructor Create(Data: PByte; Format: cairo_format_t; Width, Height, Stride: LongInt);
+    constructor Create(const Filename: String);
+    constructor Create(ReadFunc: cairo_read_func_t; Closure: pointer);
+    function GetData: PChar;
+    function GetFormat: cairo_format_t;
+    function GetWidth: LongInt;
+    function GetHeight: LongInt;
+    function GetStride: LongInt;
+  end;
+  
   { TCairoPattern }
 
   TCairoPattern = class
@@ -85,6 +100,7 @@ type
     FHandle: Pcairo_pattern_t;
   public
     destructor Destroy; override;
+    procedure SetMatrix(Matrix: Pcairo_matrix_t);
   end;
   
   { TCairoSolidPattern }
@@ -847,6 +863,11 @@ begin
   cairo_pattern_destroy(FHandle);
 end;
 
+procedure TCairoPattern.SetMatrix(Matrix: Pcairo_matrix_t);
+begin
+  cairo_pattern_set_matrix(FHandle, Matrix);
+end;
+
 { TCairoSurface }
 
 constructor TCairoSurface.Create(AHandle: Pcairo_surface_t);
@@ -1198,6 +1219,56 @@ end;
 procedure TCairoScaledFont.GetFontOptions(Options: Pcairo_font_options_t);
 begin
   cairo_scaled_font_get_font_options(FHandle, Options);
+end;
+
+{ TCairoImageSurface }
+
+constructor TCairoImageSurface.Create(Format: cairo_format_t; Width,
+  Height: LongInt);
+begin
+  FHandle := cairo_image_surface_create(Format, Width, Height);
+end;
+
+constructor TCairoImageSurface.Create(Data: PByte; Format: cairo_format_t;
+  Width, Height, Stride: LongInt);
+begin
+  FHandle := cairo_image_surface_create_for_data(Data, Format, Width, Height, Stride);
+end;
+
+constructor TCairoImageSurface.Create(const Filename: String);
+begin
+  FHandle := cairo_image_surface_create_from_png(PChar(Filename));
+end;
+
+constructor TCairoImageSurface.Create(ReadFunc: cairo_read_func_t;
+  Closure: pointer);
+begin
+  FHandle := cairo_image_surface_create_from_png_stream(ReadFunc, Closure);
+end;
+
+function TCairoImageSurface.GetData: PChar;
+begin
+  Result := cairo_image_surface_get_data(FHandle);
+end;
+
+function TCairoImageSurface.GetFormat: cairo_format_t;
+begin
+  Result := cairo_image_surface_get_format(FHandle);
+end;
+
+function TCairoImageSurface.GetWidth: LongInt;
+begin
+  Result := cairo_image_surface_get_width(FHandle);
+end;
+
+function TCairoImageSurface.GetHeight: LongInt;
+begin
+  Result := cairo_image_surface_get_height(FHandle);
+end;
+
+function TCairoImageSurface.GetStride: LongInt;
+begin
+  Result := cairo_image_surface_get_stride(FHandle);
 end;
 
 end.

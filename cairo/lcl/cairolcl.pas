@@ -76,6 +76,7 @@ type
     property BorderStyle;
     property OnMouseEnter;
     property OnMouseLeave;
+    property OnResize;
   end;
 
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
@@ -112,7 +113,7 @@ end;
 
 procedure TCairoControl.DoOnResize;
 begin
-  //inherited DoOnResize;
+  inherited DoOnResize;
   FreeAndNil(FContext);
 end;
 

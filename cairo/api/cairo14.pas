@@ -188,7 +188,8 @@ type
   cairo_extend_t = (
     CAIRO_EXTEND_NONE,
     CAIRO_EXTEND_REPEAT,
-    CAIRO_EXTEND_REFLECT
+    CAIRO_EXTEND_REFLECT,
+    CAIRO_EXTEND_PAD
   );
 
   cairo_filter_t = (
@@ -537,7 +538,7 @@ procedure cairo_surface_set_fallback_resolution(surface: Pcairo_surface_t; x_pix
 (* Image-surface functions *)
 
 function  cairo_image_surface_create(format: cairo_format_t; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
-function  cairo_image_surface_create_for_data(data: Pbyte; format: cairo_format_t; width: LongInt; height: LongInt; stride: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+function  cairo_image_surface_create_for_data(data: Pbyte; format: cairo_format_t; width, height, stride: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_image_surface_get_data(surface: Pcairo_surface_t): PChar; cdecl; external LIB_CAIRO;
 function  cairo_image_surface_get_format(surface: Pcairo_surface_t): cairo_format_t; cdecl; external LIB_CAIRO;
 function  cairo_image_surface_get_width(surface: Pcairo_surface_t): LongInt; cdecl; external LIB_CAIRO;
