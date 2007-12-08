@@ -49,6 +49,26 @@ type
   end;
   
   
+  { TCairoMatrix }
+
+  TCairoMatrix = object
+  private
+    FData: cairo_matrix_t;
+  public
+    procedure Init(XX, YX, XY, YY, X0, Y0: Double);
+    procedure InitIdentity;
+    procedure InitTranslate(Tx, Ty: Double);
+    procedure InitScale(Sx, Sy: Double);
+    procedure InitRotate(Radians: Double);
+    procedure Translate(Tx, Ty: Double);
+    procedure Scale(Sx, Sy: Double);
+    procedure Rotate(Radians: Double);
+    function  Invert: cairo_status_t;
+    procedure Multiply(A, B: TCairoMatrix);
+    procedure MatrixTransformDistance(Dx, Dy: PDouble);
+    procedure TransformPoint(X, Y: PDouble);
+  end;
+  
   { TCairoSurface }
 
   TCairoSurface = class
@@ -100,7 +120,7 @@ type
     FHandle: Pcairo_pattern_t;
   public
     destructor Destroy; override;
-    procedure SetMatrix(Matrix: Pcairo_matrix_t);
+    procedure SetMatrix(const Matrix: TCairoMatrix);
   end;
   
   { TCairoSolidPattern }
@@ -200,7 +220,7 @@ type
   private
     FHandle: Pcairo_scaled_font_t;
   public
-    constructor Create(FontFace: TCairoFontFace; FontMatrix, Ctm: Pcairo_matrix_t; Options: TCairoFontOptions);
+    constructor Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix; const Ctm: TCairoMatrix; Options: TCairoFontOptions);
     destructor Destroy; override;
     function  Status: cairo_status_t;
     function  GetType: cairo_font_type_t;
@@ -210,8 +230,8 @@ type
     procedure TextExtents(Utf8: PChar; AExtents: Pcairo_text_extents_t);
     procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; AExtents: Pcairo_text_extents_t);
     function  GetFontFace: Pcairo_font_face_t;
-    procedure GetFontMatrix(FontMatrix: Pcairo_matrix_t);
-    procedure GetCtm(Ctm: Pcairo_matrix_t);
+    procedure GetFontMatrix(var FontMatrix: TCairoMatrix);
+    procedure GetCtm(var Ctm: TCairoMatrix);
     procedure GetFontOptions (Options: Pcairo_font_options_t);
   end;
 
@@ -253,8 +273,8 @@ type
     procedure Translate(Tx, Ty: Double);
     procedure Scale(Sx, Sy: Double);
     procedure Rotate(Angle: Double);
-    procedure Transform(Matrix: Pcairo_matrix_t);
-    procedure SetMatrix(Matrix: Pcairo_matrix_t);
+    procedure Transform(const Matrix: TCairoMatrix);
+    procedure SetMatrix(const Matrix: TCairoMatrix);
     procedure IdentityMatrix;
     procedure UserToDevice(X, Y: PDouble);
     procedure UserToDeviceDistance(Dx, Dy: PDouble);
@@ -293,8 +313,8 @@ type
     function  CopyClipRectangleList: TCairoRectangleList;
     procedure SelectFontFace(const Family: String; Slant: cairo_font_slant_t; Weight: cairo_font_weight_t);
     procedure SetFontSize(Size: Double);
-    procedure SetFontMatrix(Matrix: Pcairo_matrix_t);
-    procedure GetFontMatrix(Matrix: Pcairo_matrix_t);
+    procedure SetFontMatrix(const Matrix: TCairoMatrix);
+    procedure GetFontMatrix(const Matrix: TCairoMatrix);
     procedure SetFontOptions(Options: Pcairo_font_options_t);
     procedure GetFontOptions(Options: Pcairo_font_options_t);
     procedure SetFontFace(FontFace: Pcairo_font_face_t);
@@ -320,7 +340,7 @@ type
     function  GetMiterLimit: Double;
     function  GetDashCount: LongInt;
     procedure GetDash(Dashes, Offset: PDouble);
-    procedure GetMatrix(Matrix: Pcairo_matrix_t);
+    procedure GetMatrix(var Matrix: TCairoMatrix);
     function  GetTarget: TCairoSurface;
     function  GetGroupTarget: TCairoSurface;
   end;
@@ -430,14 +450,14 @@ begin
   cairo_rotate(FHandle, Angle);
 end;
 
-procedure TCairoContext.Transform(Matrix: Pcairo_matrix_t);
+procedure TCairoContext.Transform(const Matrix: TCairoMatrix);
 begin
-  cairo_transform(FHandle, Matrix);
+  cairo_transform(FHandle, @Matrix.FData);
 end;
 
-procedure TCairoContext.SetMatrix(Matrix: Pcairo_matrix_t);
+procedure TCairoContext.SetMatrix(const Matrix: TCairoMatrix);
 begin
-  cairo_set_matrix(FHandle, Matrix);
+  cairo_set_matrix(FHandle, @Matrix.FData);
 end;
 
 procedure TCairoContext.IdentityMatrix;
@@ -633,14 +653,14 @@ begin
   cairo_set_font_size(FHandle, Size);
 end;
 
-procedure TCairoContext.SetFontMatrix(Matrix: Pcairo_matrix_t);
+procedure TCairoContext.SetFontMatrix(const Matrix: TCairoMatrix);
 begin
-  cairo_set_font_matrix(FHandle, Matrix);
+  cairo_set_font_matrix(FHandle, @Matrix.FData);
 end;
 
-procedure TCairoContext.GetFontMatrix(Matrix: Pcairo_matrix_t);
+procedure TCairoContext.GetFontMatrix(const Matrix: TCairoMatrix);
 begin
-  cairo_get_font_matrix(FHandle, Matrix);
+  cairo_get_font_matrix(FHandle, @Matrix.FData);
 end;
 
 procedure TCairoContext.SetFontOptions(Options: Pcairo_font_options_t);
@@ -776,9 +796,9 @@ begin
   cairo_get_dash(FHandle, Dashes, Offset);
 end;
 
-procedure TCairoContext.GetMatrix(Matrix: Pcairo_matrix_t);
+procedure TCairoContext.GetMatrix(var Matrix: TCairoMatrix);
 begin
-  cairo_get_matrix(FHandle, Matrix);
+  cairo_get_matrix(FHandle, @Matrix.FData);
 end;
 
 function TCairoContext.GetTarget: TCairoSurface;
@@ -863,9 +883,9 @@ begin
   cairo_pattern_destroy(FHandle);
 end;
 
-procedure TCairoPattern.SetMatrix(Matrix: Pcairo_matrix_t);
+procedure TCairoPattern.SetMatrix(const Matrix: TCairoMatrix);
 begin
-  cairo_pattern_set_matrix(FHandle, Matrix);
+  cairo_pattern_set_matrix(FHandle, @Matrix.FData);
 end;
 
 { TCairoSurface }
@@ -1152,10 +1172,10 @@ end;
 
 { TCairoScaledFont }
 
-constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; FontMatrix,
-  Ctm: Pcairo_matrix_t; Options: TCairoFontOptions);
+constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix;
+  const Ctm: TCairoMatrix; Options: TCairoFontOptions);
 begin
-  FHandle := cairo_scaled_font_create(FontFace.FHandle, FontMatrix, Ctm, Options.FHandle)
+  FHandle := cairo_scaled_font_create(FontFace.FHandle, @FontMatrix.FData, @Ctm.FData, Options.FHandle)
 end;
 
 destructor TCairoScaledFont.Destroy;
@@ -1206,14 +1226,14 @@ begin
   Result := cairo_scaled_font_get_font_face(FHandle);
 end;
 
-procedure TCairoScaledFont.GetFontMatrix(FontMatrix: Pcairo_matrix_t);
+procedure TCairoScaledFont.GetFontMatrix(var FontMatrix: TCairoMatrix);
 begin
-  cairo_scaled_font_get_font_matrix(FHandle, FontMatrix);
+  cairo_scaled_font_get_font_matrix(FHandle, @FontMatrix.FData);
 end;
 
-procedure TCairoScaledFont.GetCtm(Ctm: Pcairo_matrix_t);
+procedure TCairoScaledFont.GetCtm(var Ctm: TCairoMatrix);
 begin
-  cairo_scaled_font_get_ctm(FHandle, Ctm);
+  cairo_scaled_font_get_ctm(FHandle, @Ctm.FData);
 end;
 
 procedure TCairoScaledFont.GetFontOptions(Options: Pcairo_font_options_t);
@@ -1269,6 +1289,68 @@ end;
 function TCairoImageSurface.GetStride: LongInt;
 begin
   Result := cairo_image_surface_get_stride(FHandle);
+end;
+
+{ TCairoMatrix }
+
+procedure TCairoMatrix.Init(XX, YX, XY, YY, X0, Y0: Double);
+begin
+  cairo_matrix_init(@FData, XX, YX, XY, YY, X0, Y0);
+end;
+
+procedure TCairoMatrix.InitIdentity;
+begin
+  cairo_matrix_init_identity(@FData);
+end;
+
+procedure TCairoMatrix.InitTranslate(Tx, Ty: Double);
+begin
+  cairo_matrix_init_translate(@FData, Tx, Ty);
+end;
+
+procedure TCairoMatrix.InitScale(Sx, Sy: Double);
+begin
+  cairo_matrix_init_scale(@FData, Sx, Sy);
+end;
+
+procedure TCairoMatrix.InitRotate(Radians: Double);
+begin
+  cairo_matrix_init_rotate(@FData, Radians);
+end;
+
+procedure TCairoMatrix.Translate(Tx, Ty: Double);
+begin
+  cairo_matrix_translate(@FData, Tx, Ty);
+end;
+
+procedure TCairoMatrix.Scale(Sx, Sy: Double);
+begin
+  cairo_matrix_scale(@FData, Sx, Sy);
+end;
+
+procedure TCairoMatrix.Rotate(Radians: Double);
+begin
+  cairo_matrix_rotate(@FData, Radians);
+end;
+
+function TCairoMatrix.Invert: cairo_status_t;
+begin
+  Result := cairo_matrix_invert(@FData);
+end;
+
+procedure TCairoMatrix.Multiply(A, B: TCairoMatrix);
+begin
+  cairo_matrix_multiply(@FData, @A.FData, @B.FData);
+end;
+
+procedure TCairoMatrix.MatrixTransformDistance(Dx, Dy: PDouble);
+begin
+  cairo_matrix_transform_distance(@FData, Dx, Dy);
+end;
+
+procedure TCairoMatrix.TransformPoint(X, Y: PDouble);
+begin
+  cairo_matrix_transform_point(@FData, X, Y);
 end;
 
 end.
