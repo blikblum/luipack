@@ -587,7 +587,7 @@ procedure cairo_matrix_translate(matrix: Pcairo_matrix_t; tx, ty: Double); cdecl
 procedure cairo_matrix_scale(matrix: Pcairo_matrix_t; sx, sy: Double); cdecl; external LIB_CAIRO;
 procedure cairo_matrix_rotate(matrix: Pcairo_matrix_t; radians: Double); cdecl; external LIB_CAIRO;
 function  cairo_matrix_invert(matrix: Pcairo_matrix_t): cairo_status_t; cdecl; external LIB_CAIRO;
-procedure cairo_matrix_multiply(result: Pcairo_matrix_t; a, b: Pcairo_matrix_t); cdecl; external LIB_CAIRO;
+procedure cairo_matrix_multiply(result, a, b: Pcairo_matrix_t); cdecl; external LIB_CAIRO;
 procedure cairo_matrix_transform_distance(matrix: Pcairo_matrix_t; dx, dy: PDouble); cdecl; external LIB_CAIRO;
 procedure cairo_matrix_transform_point(matrix: Pcairo_matrix_t; x, y: PDouble); cdecl; external LIB_CAIRO;
 
