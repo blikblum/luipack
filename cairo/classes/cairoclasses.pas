@@ -37,7 +37,7 @@ unit CairoClasses;
 interface
 
 uses
-  cairo14;
+  Classes, Cairo14, ObjectAvlTree;
   
 type
 
@@ -48,6 +48,7 @@ type
     Alpha: Double;
   end;
   
+  TReferenceNotify = procedure(Key: Pointer) of object;
   
   { TCairoMatrix }
 
@@ -72,16 +73,16 @@ type
   { TCairoSurface }
 
   TCairoSurface = class
-  private
-    //todo: remove shared and handle owned objects using a list/map
-    FShared: Boolean;
   protected
     FHandle: Pcairo_surface_t;
+    FHandleIsPrivate: Boolean;
+    FOnReference: TReferenceNotify;
   public
     constructor Create(AHandle: Pcairo_surface_t);
     constructor Create(Other: TCairoSurface; Content: cairo_content_t; Width, Height: LongInt);
     destructor Destroy; override;
     procedure Finish;
+    procedure Reference;
     function  Status: cairo_status_t;
     function  GetType: cairo_surface_type_t;
     function  GetContent: cairo_content_t;
@@ -118,8 +119,11 @@ type
   TCairoPattern = class
   private
     FHandle: Pcairo_pattern_t;
+    FHandleIsPrivate: Boolean;
+    FOnReference: TReferenceNotify;
   public
     destructor Destroy; override;
+    procedure Reference;
     procedure SetMatrix(const Matrix: TCairoMatrix);
   end;
   
@@ -241,11 +245,10 @@ type
   TCairoContext = class
   private
     FHandle: Pcairo_t;
-    FFontFace: TCairoFontFace;
-    //todo a group target can be more than one per context
-    //handle multiple call to GetGroupTarget
-    FGroupTarget: TCairoSurface;
-    FTarget: TCairoSurface;
+    FObjectTree: TPointerToPointerTree; //stores the private objects
+    procedure FreePrivateObjects;
+    procedure ObjectTreeNeeded;
+    procedure PrivateObjectReferenced(Key: Pointer);
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
@@ -329,7 +332,7 @@ type
     procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; Extents: Pcairo_text_extents_t);
     procedure FontExtents(Extents: Pcairo_font_extents_t);
     function  GetOperator: cairo_operator_t;
-    function  GetSource: Pcairo_pattern_t;
+    function  GetSource: TCairoPattern;
     function  GetTolerance: Double;
     function  GetAntialias: cairo_antialias_t;
     procedure GetCurrentPoint(X, Y: PDouble);
@@ -679,13 +682,18 @@ begin
 end;
 
 function TCairoContext.GetFontFace: TCairoFontFace;
+var
+  FontFaceHandle: Pcairo_font_face_t;
 begin
-  if FFontFace = nil then
+  ObjectTreeNeeded;
+  FontFaceHandle := cairo_get_font_face(FHandle);
+  Result := TCairoFontFace(FObjectTree[FontFaceHandle]);
+  if Result = nil then
   begin
-    FFontFace := TCairoFontFace.Create;
-    FFontFace.FHandle := cairo_get_font_face(FHandle);
+    Result := TCairoFontFace.Create;
+    Result.FHandle := FontFaceHandle;
+    FObjectTree[FontFaceHandle] := Result;
   end;
-  Result := FFontFace;
 end;
 
 procedure TCairoContext.SetScaledFont(ScaledFont: Pcairo_scaled_font_t);
@@ -740,10 +748,21 @@ begin
   Result := cairo_get_operator(FHandle);
 end;
 
-function TCairoContext.GetSource: Pcairo_pattern_t;
+function TCairoContext.GetSource: TCairoPattern;
+var
+  SourceHandle: Pcairo_pattern_t;
 begin
-  //todo
-  //Result := cairo_get_source();
+  ObjectTreeNeeded;
+  SourceHandle := cairo_get_source(FHandle);
+  Result := TCairoPattern(FObjectTree[SourceHandle]);
+  if Result = nil then
+  begin
+    Result := TCairoPattern.Create;
+    Result.FHandle := SourceHandle;
+    Result.FHandleIsPrivate := True;
+    Result.FOnReference := @PrivateObjectReferenced;
+    FObjectTree[SourceHandle] := Result;
+  end;
 end;
 
 function TCairoContext.GetTolerance: Double;
@@ -802,23 +821,64 @@ begin
 end;
 
 function TCairoContext.GetTarget: TCairoSurface;
+var
+  TargetHandle: Pcairo_surface_t;
 begin
-  if FTarget = nil then
+  ObjectTreeNeeded;
+  TargetHandle := cairo_get_target(FHandle);
+  Result := TCairoSurface(FObjectTree[TargetHandle]);
+  if Result = nil then
   begin
-    FTarget := TCairoSurface.Create(cairo_get_target(FHandle));
-    FTarget.FShared := True;
+    Result := TCairoSurface.Create(TargetHandle);
+    Result.FHandleIsPrivate := True;
+    Result.FOnReference := @PrivateObjectReferenced;
+    FObjectTree[TargetHandle] := Result;
   end;
-  Result := FTarget;
 end;
 
 function TCairoContext.GetGroupTarget: TCairoSurface;
+var
+  GroupTargetHandle: Pcairo_surface_t;
 begin
-  if FGroupTarget = nil then
+  ObjectTreeNeeded;
+  GroupTargetHandle := cairo_get_group_target(FHandle);
+  Result := TCairoSurface(FObjectTree[GroupTargetHandle]);
+  if Result = nil then
   begin
-    FGroupTarget := TCairoSurface.Create(cairo_get_group_target(FHandle));
-    FGroupTarget.FShared := True;
+    Result := TCairoSurface.Create(GroupTargetHandle);
+    Result.FHandleIsPrivate := True;
+    Result.FOnReference := @PrivateObjectReferenced;
+    FObjectTree[GroupTargetHandle] := Result;
   end;
-  Result := FGroupTarget;
+end;
+
+procedure TCairoContext.FreePrivateObjects;
+var
+  Key, NextKey, AnObject: Pointer;
+begin
+  if FObjectTree = nil then
+    Exit;
+  if FObjectTree.GetFirst(Key, AnObject) then
+  begin
+    TObject(AnObject).Free;
+    while FObjectTree.GetNext(Key, AnObject, NextKey) do
+    begin
+      TObject(AnObject).Free;
+      Key := NextKey;
+    end;
+  end;
+  FObjectTree.Destroy;
+end;
+
+procedure TCairoContext.ObjectTreeNeeded;
+begin
+  if FObjectTree = nil then
+    FObjectTree := TPointerToPointerTree.Create;
+end;
+
+procedure TCairoContext.PrivateObjectReferenced(Key: Pointer);
+begin
+  FObjectTree.Remove(Key);
 end;
 
 constructor TCairoContext.Create(Target: TCairoSurface);
@@ -828,10 +888,8 @@ end;
 
 destructor TCairoContext.Destroy;
 begin
+  FreePrivateObjects;
   cairo_destroy(FHandle);
-  FFontFace.Free;
-  FGroupTarget.Free;
-  FTarget.Free;
 end;
 
 function TCairoContext.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
@@ -880,7 +938,18 @@ end;
 
 destructor TCairoPattern.Destroy;
 begin
-  cairo_pattern_destroy(FHandle);
+  if not FHandleIsPrivate then
+    cairo_pattern_destroy(FHandle);
+end;
+
+procedure TCairoPattern.Reference;
+begin
+  if FHandleIsPrivate then
+  begin
+    FHandleIsPrivate := False;
+    cairo_pattern_reference(FHandle);
+    FOnReference(FHandle);
+  end;
 end;
 
 procedure TCairoPattern.SetMatrix(const Matrix: TCairoMatrix);
@@ -903,13 +972,23 @@ end;
 
 destructor TCairoSurface.Destroy;
 begin
-  if not FShared then
+  if not FHandleIsPrivate then
     cairo_surface_destroy(FHandle);
 end;
 
 procedure TCairoSurface.Finish;
 begin
   cairo_surface_finish(FHandle);
+end;
+
+procedure TCairoSurface.Reference;
+begin
+  if FHandleIsPrivate then
+  begin
+    FHandleIsPrivate := False;
+    cairo_surface_reference(FHandle);
+    FOnReference(FHandle);
+  end;
 end;
 
 function TCairoSurface.Status: cairo_status_t;
@@ -1352,6 +1431,7 @@ procedure TCairoMatrix.TransformPoint(X, Y: PDouble);
 begin
   cairo_matrix_transform_point(@FData, X, Y);
 end;
+
 
 end.
 
