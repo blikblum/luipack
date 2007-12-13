@@ -41,6 +41,8 @@ uses
 
 type
 
+  TChangingEvent = procedure(Sender: TObject; var Allow: Boolean) of object;
+
   { TToggleLabel }
 
   TToggleLabel = class (TCustomLabel)
@@ -49,7 +51,9 @@ type
     FExpandedCaption: String;
     FMouseInControl: Boolean;
     FOnChange: TNotifyEvent;
+    FOnChanging: TChangingEvent;
     FTextOffset: Integer;
+    function ChangeAllowed: Boolean;
     procedure SetExpanded(const AValue: Boolean);
     procedure SetExpandedCaption(const AValue: String);
   protected
@@ -68,6 +72,7 @@ type
     property ExpandedCaption: String read FExpandedCaption write SetExpandedCaption;
     property Expanded: Boolean read FExpanded write SetExpanded;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanging: TChangingEvent read FOnChanging write FOnChanging;
     property Align;
     property Alignment;
     property Anchors;
@@ -116,6 +121,13 @@ uses
 
 { TToggleLabel }
 
+function TToggleLabel.ChangeAllowed: Boolean;
+begin
+  Result := True;
+  if Assigned(FOnChanging) then
+    FOnChanging(Self, Result);
+end;
+
 procedure TToggleLabel.SetExpanded(const AValue: Boolean);
 begin
   if FExpanded <> AValue then
@@ -159,7 +171,8 @@ begin
   if not FMouseInControl and Enabled and (GetCapture = 0) then
   begin
     FMouseInControl := True;
-    Invalidate;
+    if ChangeAllowed then
+      Invalidate;
   end;
 end;
 
@@ -179,6 +192,13 @@ end;
 
 procedure TToggleLabel.WMLButtonDown(var Message: TLMLButtonDown);
 begin
+  if not ChangeAllowed then
+  begin
+    //todo: paint the arrow not hilighted here.
+    //Create a PaintArrow function
+    //Invalidate;
+    Exit;
+  end;
   FExpanded := not FExpanded;
   if Assigned(FOnChange) then
     FOnChange(Self);
