@@ -23,7 +23,7 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="api\cairo_ft.pas"/>
         <UnitName Value="cairo_ft"/>
@@ -36,6 +36,10 @@
         <Filename Value="api\targetunits.pas"/>
         <UnitName Value="targetunits"/>
       </Item3>
+      <Item4>
+        <Filename Value="classes\objectavltree.pas"/>
+        <UnitName Value="objectavltree"/>
+      </Item4>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
