@@ -573,7 +573,7 @@ function  cairo_pattern_get_rgba (pattern: Pcairo_pattern_t; red, green, blue, a
 function  cairo_pattern_get_surface (pattern: Pcairo_pattern_t; surface: PPcairo_surface_t): cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_pattern_get_color_stop_rgba(pattern: Pcairo_pattern_t; index: LongInt; offset, red, green, blue, alpha: PDouble):cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_pattern_get_color_stop_count(pattern: Pcairo_pattern_t; count: PLongInt):cairo_status_t; cdecl; external LIB_CAIRO;
-function  cairo_pattern_get_linear_points (pattern: Pcairo_pattern_t; x0, y0, x1, y1: PDouble): cairo_pattern_t; cdecl; external LIB_CAIRO;
+function  cairo_pattern_get_linear_points (pattern: Pcairo_pattern_t; x0, y0, x1, y1: PDouble): cairo_status_t; cdecl; external LIB_CAIRO;
 function  cairo_pattern_get_radial_circles (pattern: Pcairo_pattern_t; x0, y0, r0, x1, y1, r1:PDouble): cairo_status_t; cdecl; external LIB_CAIRO;
 
 (* Matrix functions *)

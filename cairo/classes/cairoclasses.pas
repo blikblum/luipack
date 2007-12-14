@@ -125,6 +125,15 @@ type
     destructor Destroy; override;
     procedure Reference;
     procedure SetMatrix(const Matrix: TCairoMatrix);
+    procedure GetMatrix(const Matrix: TCairoMatrix);
+    procedure SetExtend(Extend: cairo_extend_t);
+    function  GetExtend: cairo_extend_t;
+    procedure SetFilter(Filter: cairo_filter_t);
+    function  GetFilter: cairo_filter_t;
+    function  Status: cairo_status_t;
+    function  GetUserData (Key: Pcairo_user_data_key_t): Pointer;
+    function  SetUserData (Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+    function  GetType: cairo_pattern_type_t;
   end;
   
   { TCairoSolidPattern }
@@ -133,6 +142,7 @@ type
   public
     constructor Create(Red, Green, Blue: Double);
     constructor Create(Red, Green, Blue, Alpha: Double);
+    function  GetRgba (Red, Green, Blue, Alpha: PDouble): cairo_status_t;
   end;
   
   { TCairoGradient }
@@ -150,6 +160,7 @@ type
   TCairoLinearGradient = class (TCairoGradient)
   public
     constructor Create(X0, Y0, X1, Y1: Double);
+    function  GetLinearPoints (X0, Y0, X1, Y1: PDouble): cairo_status_t;
   end;
 
   { TCairoRadialGradient }
@@ -157,19 +168,23 @@ type
   TCairoRadialGradient = class (TCairoGradient)
   public
     constructor Create(Cx0, Cy0, Radius0, Cx1, Cy1, Radius1: Double);
+    function  GetRadialCircles (X0, Y0, R0, X1, Y1, R1: PDouble): cairo_status_t;
   end;
 
   { TCairoSurfacePattern }
 
   TCairoSurfacePattern = class (TCairoPattern)
+  private
+    FSurface: TCairoSurface;
   public
     constructor Create(Surface: TCairoSurface);
+    destructor Destroy; override;
+    function  GetSurface: TCairoSurface;
   end;
 
   { TCairoRectangleList }
 
   TCairoRectangleList = class
-    FNumRectangles: Integer;
   private
     FRectangleList: Pcairo_rectangle_list_t;
     function GetNumRectangles: Integer;
@@ -182,6 +197,14 @@ type
     property NumRectangles: Integer read GetNumRectangles;
   end;
   
+  { TCairoPath }
+
+  TCairoPath = class
+  private
+    FPath: Pcairo_path_t;
+  public
+    destructor Destroy; override;
+  end;
 
   { TCairoFontOptions }
 
@@ -343,13 +366,18 @@ type
     function  GetMiterLimit: Double;
     function  GetDashCount: LongInt;
     procedure GetDash(Dashes, Offset: PDouble);
-    procedure GetMatrix(var Matrix: TCairoMatrix);
+    procedure GetMatrix(const Matrix: TCairoMatrix);
     function  GetTarget: TCairoSurface;
     function  GetGroupTarget: TCairoSurface;
+    function  Status: cairo_status_t;
+    function  CopyPath: TCairoPath;
+    function  CopyPathFlat: TCairoPath;
+    procedure AppendPath(Path: TCairoPath);
   end;
   
   function RGBToCairoColor(R, G, B: Byte): TCairoColor;
   function RGBToCairoColor(RGB: Cardinal): TCairoColor;
+  function StatusToString(Status: cairo_status_t): String;
 
 implementation
 
@@ -367,6 +395,11 @@ begin
   Result.Green := ((RGB shr 8) and $000000ff)/255;
   Result.Blue := ((RGB shr 16) and $000000ff)/255;
   Result.Alpha := 1;
+end;
+
+function StatusToString(Status: cairo_status_t): String;
+begin
+  Result := StrPas(cairo_status_to_string(Status));
 end;
 
 { TCairoContext }
@@ -815,7 +848,7 @@ begin
   cairo_get_dash(FHandle, Dashes, Offset);
 end;
 
-procedure TCairoContext.GetMatrix(var Matrix: TCairoMatrix);
+procedure TCairoContext.GetMatrix(const Matrix: TCairoMatrix);
 begin
   cairo_get_matrix(FHandle, @Matrix.FData);
 end;
@@ -850,6 +883,28 @@ begin
     Result.FOnReference := @PrivateObjectReferenced;
     FObjectTree[GroupTargetHandle] := Result;
   end;
+end;
+
+function TCairoContext.Status: cairo_status_t;
+begin
+  Result := cairo_status(FHandle);
+end;
+
+function TCairoContext.CopyPath: TCairoPath;
+begin
+  Result := TCairoPath.Create;
+  Result.FPath := cairo_copy_path(FHandle);
+end;
+
+function TCairoContext.CopyPathFlat: TCairoPath;
+begin
+  Result := TCairoPath.Create;
+  Result.FPath := cairo_copy_path_flat(FHandle);
+end;
+
+procedure TCairoContext.AppendPath(Path: TCairoPath);
+begin
+  cairo_append_path(FHandle, Path.FPath);
 end;
 
 procedure TCairoContext.FreePrivateObjects;
@@ -955,6 +1010,52 @@ end;
 procedure TCairoPattern.SetMatrix(const Matrix: TCairoMatrix);
 begin
   cairo_pattern_set_matrix(FHandle, @Matrix.FData);
+end;
+
+procedure TCairoPattern.GetMatrix(const Matrix: TCairoMatrix);
+begin
+  cairo_pattern_get_matrix(FHandle, @Matrix.FData);
+end;
+
+procedure TCairoPattern.SetExtend(Extend: cairo_extend_t);
+begin
+  cairo_pattern_set_extend(FHandle, Extend);
+end;
+
+function TCairoPattern.GetExtend: cairo_extend_t;
+begin
+  Result := cairo_pattern_get_extend(FHandle);
+end;
+
+procedure TCairoPattern.SetFilter(Filter: cairo_filter_t);
+begin
+  cairo_pattern_set_filter(FHandle, Filter);
+end;
+
+function TCairoPattern.GetFilter: cairo_filter_t;
+begin
+  Result := cairo_pattern_get_filter(FHandle);
+end;
+
+function TCairoPattern.Status: cairo_status_t;
+begin
+  Result := cairo_pattern_status(FHandle);
+end;
+
+function TCairoPattern.GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+begin
+  Result := cairo_pattern_get_user_data(FHandle, Key);
+end;
+
+function TCairoPattern.SetUserData(Key: Pcairo_user_data_key_t;
+  UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+begin
+  Result := cairo_pattern_set_user_data(FHandle, Key, UserData, destroy_func);
+end;
+
+function TCairoPattern.GetType: cairo_pattern_type_t;
+begin
+  Result := cairo_pattern_get_type(FHandle);
 end;
 
 { TCairoSurface }
@@ -1095,6 +1196,25 @@ begin
   FHandle := cairo_pattern_create_for_surface(Surface.FHandle);
 end;
 
+destructor TCairoSurfacePattern.Destroy;
+begin
+  inherited Destroy;
+  FSurface.Free;
+end;
+
+function TCairoSurfacePattern.GetSurface: TCairoSurface;
+var
+  SurfaceHandle: Pcairo_surface_t;
+begin
+  if FSurface = nil then
+  begin
+    cairo_pattern_get_surface(FHandle, @SurfaceHandle);
+    FSurface := TCairoSurface.Create(SurfaceHandle);
+    FSurface.FHandleIsPrivate := True;
+  end;
+  Result := FSurface;
+end;
+
 { TCairoSolidPattern }
 
 constructor TCairoSolidPattern.Create(Red, Green, Blue: Double);
@@ -1107,11 +1227,23 @@ begin
   FHandle := cairo_pattern_create_rgba(Red, Green, Blue, Alpha);
 end;
 
+function TCairoSolidPattern.GetRgba(Red, Green, Blue, Alpha: PDouble
+  ): cairo_status_t;
+begin
+  Result := cairo_pattern_get_rgba(FHandle, Red, Green, Blue, Alpha);
+end;
+
 { TCairoLinearGradient }
 
 constructor TCairoLinearGradient.Create(X0, Y0, X1, Y1: Double);
 begin
   FHandle := cairo_pattern_create_linear(X0, Y0, X1, Y1);
+end;
+
+function TCairoLinearGradient.GetLinearPoints(X0, Y0, X1, Y1: PDouble
+  ): cairo_status_t;
+begin
+  Result := cairo_pattern_get_linear_points(FHandle, X0, Y0, X1, Y1);
 end;
 
 { TCairoRadialGradient }
@@ -1120,6 +1252,12 @@ constructor TCairoRadialGradient.Create(Cx0, Cy0, Radius0, Cx1, Cy1,
   Radius1: Double);
 begin
   FHandle := cairo_pattern_create_radial(Cx0, Cy0, Radius0, Cx1, Cy1, Radius1);
+end;
+
+function TCairoRadialGradient.GetRadialCircles(X0, Y0, R0, X1, Y1, R1: PDouble
+  ): cairo_status_t;
+begin
+  Result := cairo_pattern_get_radial_circles(FHandle, X0, Y0, R0, X1, Y1, R1);
 end;
 
 { TCairoGradient }
@@ -1432,6 +1570,13 @@ begin
   cairo_matrix_transform_point(@FData, X, Y);
 end;
 
+
+{ TCairoPath }
+
+destructor TCairoPath.Destroy;
+begin
+  cairo_path_destroy(FPath);
+end;
 
 end.
 
