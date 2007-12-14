@@ -555,6 +555,13 @@ begin
   UpdateState(True);
 end;
 
+const
+  UpState: array[Boolean] of TButtonState =
+  (
+{False} bsUp, // mouse in control = false
+{True } bsHot // mouse in contorl = true
+  );
+
 procedure TToggleSpeedButton.UpdateState(InvalidateOnChange: boolean);
 var
   OldState: TButtonState;
@@ -573,7 +580,7 @@ begin
       if FInternalDown then
         FState := bsDown
       else
-        FState := bsUp;
+        FState := UpState[MouseInControl];
     end;
     if InvalidateOnChange and ((OldState <> FState) or FForceInvalidate) then
       Invalidate;
