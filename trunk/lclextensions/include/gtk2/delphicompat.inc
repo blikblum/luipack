@@ -50,7 +50,7 @@ var
 begin
   Result := GTKWidgetSet.IsValidDC(DC);
   if Result then
-  with TDeviceContext(DC) do
+  with TGtkDeviceContext(DC) do
   begin
     if (CurrentFont = nil) or (CurrentFont^.GDIFontObject = nil) then
       layout := GTKWidgetSet.GetDefaultGtkFont(false)

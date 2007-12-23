@@ -73,7 +73,7 @@ end;
 function GetBkColor(DC:HDC):COLORREF;
 begin
   if GTKWidgetSet.IsValidDC(DC) then
-    Result := TDeviceContext(DC).CurrentBackColor.ColorRef
+    Result := TGtkDeviceContext(DC).CurrentBackColor.ColorRef
   else
     Result := CLR_INVALID;
 end;
@@ -82,7 +82,7 @@ function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
 begin
   Result := 0;
   if GTKWidgetSet.IsValidDC(hdc) then
-  with TDeviceContext(hdc) do
+  with TGtkDeviceContext(hdc) do
   begin
     case uObjectType of
       OBJ_BITMAP: Result := HGDIOBJ(CurrentBitmap);
@@ -106,7 +106,7 @@ begin
   //based in lcl code
   Result := GTKWidgetSet.IsValidDC(DC);
   if Result then
-  with TDeviceContext(DC) do
+  with TGtkDeviceContext(DC) do
   begin
     if (CurrentFont = nil) or (CurrentFont^.GDIFontObject = nil)
     then begin
@@ -164,9 +164,9 @@ begin
     and (lprc.Right > lprc.Left);
   if Result then
   begin
-    with TDeviceContext(DC) do
+    with TGtkDeviceContext(DC) do
     begin
-      DCOrigin := GetDCOffset(TDeviceContext(DC));
+      DCOrigin := Offset;
       //todo: see if is necessary store old function
       gdk_gc_get_values(GC, @Values);
       gdk_gc_set_function(GC,GDK_INVERT);
