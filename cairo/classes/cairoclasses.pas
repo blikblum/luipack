@@ -248,6 +248,7 @@ type
     FHandle: Pcairo_scaled_font_t;
   public
     constructor Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix; const Ctm: TCairoMatrix; Options: TCairoFontOptions);
+    constructor Create;
     destructor Destroy; override;
     function  Status: cairo_status_t;
     function  GetType: cairo_font_type_t;
@@ -272,6 +273,7 @@ type
     procedure FreePrivateObjects;
     procedure ObjectTreeNeeded;
     procedure PrivateObjectReferenced(Key: Pointer);
+    procedure SetColor(const Value: TCairoColor); inline;
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
@@ -374,6 +376,7 @@ type
     procedure UserToDevice(X, Y: PDouble);
     procedure UserToDeviceDistance(Dx, Dy: PDouble);
     //properties
+    property Color: TCairoColor write SetColor;
     {
     property Antialias: cairo_antialias_t read GetAntialias write SetAntialias;
     property DashCount: LongInt read GetDashCount;
@@ -387,11 +390,22 @@ type
     }
   end;
   
+  function CairoColor(Red, Green, Blue, Alpha: Double): TCairoColor;
   function RGBToCairoColor(R, G, B: Byte): TCairoColor;
   function RGBToCairoColor(RGB: Cardinal): TCairoColor;
+  function RGBAToCairoColor(R, G, B, A: Byte): TCairoColor;
+  function RGBAToCairoColor(RGBA: Cardinal): TCairoColor;
   function StatusToString(Status: cairo_status_t): String;
 
 implementation
+
+function CairoColor(Red, Green, Blue, Alpha: Double): TCairoColor;
+begin
+  Result.Red := Red;
+  Result.Green := Green;
+  Result.Blue := Blue;
+  Result.Alpha := Alpha;
+end;
 
 function RGBToCairoColor(R, G, B: Byte): TCairoColor;
 begin
@@ -407,6 +421,22 @@ begin
   Result.Green := ((RGB shr 8) and $000000ff)/255;
   Result.Blue := ((RGB shr 16) and $000000ff)/255;
   Result.Alpha := 1;
+end;
+
+function RGBAToCairoColor(R, G, B, A: Byte): TCairoColor;
+begin
+  Result.Red := R/255;
+  Result.Green := G/255;
+  Result.Blue := B/255;
+  Result.Alpha := A/255;
+end;
+
+function RGBAToCairoColor(RGBA: Cardinal): TCairoColor;
+begin
+  Result.Red := (RGBA and $000000ff)/255;
+  Result.Green := ((RGBA shr 8) and $000000ff)/255;
+  Result.Blue := ((RGBA shr 16) and $000000ff)/255;
+  Result.Alpha := ((RGBA shr 32) and $000000ff)/255;//Correct??
 end;
 
 function StatusToString(Status: cairo_status_t): String;
@@ -756,7 +786,7 @@ begin
   if Result = nil then
   begin
     Result := TCairoScaledFont.Create;
-    Result.FHandle := FontFaceHandle;
+    Result.FHandle := ScaledFontHandle;
     FObjectTree[ScaledFontHandle] := Result;
   end;
 end;
@@ -956,6 +986,12 @@ end;
 procedure TCairoContext.PrivateObjectReferenced(Key: Pointer);
 begin
   FObjectTree.Remove(Key);
+end;
+
+procedure TCairoContext.SetColor(const Value: TCairoColor);
+begin
+  with Value do
+    SetSourceRgba(Red, Green, Blue, Alpha);
 end;
 
 constructor TCairoContext.Create(Target: TCairoSurface);
@@ -1415,6 +1451,11 @@ constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; const FontMatrix: 
   const Ctm: TCairoMatrix; Options: TCairoFontOptions);
 begin
   FHandle := cairo_scaled_font_create(FontFace.FHandle, @FontMatrix.FData, @Ctm.FData, Options.FHandle)
+end;
+
+constructor TCairoScaledFont.Create;
+begin
+
 end;
 
 destructor TCairoScaledFont.Destroy;
