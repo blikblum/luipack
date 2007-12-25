@@ -83,7 +83,7 @@ begin
   if FFileName <> AValue then
   begin
     Close;
-    FFileName:=AValue;
+    FFileName := AValue;
   end;
 end;
 
@@ -92,15 +92,15 @@ begin
   if FHandle <> AValue then
   begin
     Close;
-    FHandle:= AValue;
-    FSharedHandle:= True;
+    FHandle := AValue;
+    FSharedHandle := True;
   end;
 end;
 
 constructor TSqlite3Connection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FQuery:=TSqlite3Query.Create;
+  FQuery := TSqlite3Query.Create;
 end;
 
 destructor TSqlite3Connection.Destroy;
@@ -116,7 +116,7 @@ begin
   begin
     if not FSharedHandle then
       sqlite3_close(FHandle);
-    FHandle:=nil;
+    FHandle := nil;
   end;
 end;
 
@@ -125,7 +125,7 @@ begin
   FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@FQuery.FStatement,nil);
   if FReturnCode = SQLITE_OK then
   begin
-    Result:=FQuery;
+    Result := FQuery;
     FQuery.Reset;
   end
   else
@@ -160,10 +160,10 @@ procedure TSqlite3Connection.ExecSql(const SQL: String);
 var
   stm: Pointer;
 begin
-  FReturnCode:=sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
+  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
   if FReturnCode = SQLITE_OK then
   begin
-    FReturnCode:=sqlite3_step(stm);
+    FReturnCode := sqlite3_step(stm);
     sqlite3_finalize(stm);
   end
   else
@@ -172,7 +172,7 @@ end;
 
 procedure TSqlite3Connection.Prepare(const SQL: String; Reader: TSqlite3DataReader);
 begin
-  FReturnCode:= sqlite3_prepare(FHandle,PChar(SQL),-1,@Reader.FStatement,nil);
+  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@Reader.FStatement,nil);
   if FReturnCode <> SQLITE_OK then
     raise Exception.Create('Error in Prepare: '+ReturnString);
 end;
@@ -212,38 +212,38 @@ begin
   else
     Result:='Unknow Return Value';
   end;
-  Result:=Result+' - '+sqlite3_errmsg(FHandle);
+  Result := Result+' - ' + sqlite3_errmsg(FHandle);
 end;
 
 function TSqlite3DataReader.Step: Boolean;
 begin
-  Result:= sqlite3_step(FStatement) = SQLITE_ROW;
+  Result := sqlite3_step(FStatement) = SQLITE_ROW;
 end;
 
 function TSqlite3DataReader.GetFieldIndex(const FieldName: String): Integer;
 var
   i: Integer;
 begin
-  for i:= 0 to FieldCount - 1 do
+  for i := 0 to FieldCount - 1 do
     if stricomp(PChar(FieldName),sqlite3_column_name(FStatement,i)) = 0 then
     begin
       Result:=i;
       Exit;
     end;
-  Result:= -1;
+  Result := -1;
 end;
 
 function TSqlite3DataReader.GetFieldNames(Index: Integer): String;
 begin
   if (Index >= 0) and (Index < FieldCount) then
-    Result:=sqlite3_column_name(FStatement,Index)
+    Result := sqlite3_column_name(FStatement,Index)
   else
     raise Exception.Create('GetFieldNames - Index out of bounds');
 end;
 
 function TSqlite3DataReader.GetFieldCount: Integer;
 begin
-  Result:=sqlite3_column_count(FStatement);
+  Result := sqlite3_column_count(FStatement);
 end;
 
 destructor TSqlite3DataReader.Destroy;
@@ -263,14 +263,14 @@ end;
 
 function TSqlite3DataReader.GetInteger(AFieldIndex: Integer): Integer;
 begin
-  Result:= sqlite3_column_int(FStatement,AFieldIndex);
+  Result := sqlite3_column_int(FStatement,AFieldIndex);
 end;
 
 function TSqlite3DataReader.GetInteger(const FieldName: String): Integer;
 var
   i: Integer;
 begin
-  i:= GetFieldIndex(FieldName);
+  i := GetFieldIndex(FieldName);
   if i <> -1 then
     Result:= sqlite3_column_int(FStatement,i)
   else
@@ -279,16 +279,16 @@ end;
 
 function TSqlite3DataReader.GetString(AFieldIndex: Integer): String;
 begin
-  Result:= StrPas(sqlite3_column_text(FStatement,AFieldIndex));
+  Result := StrPas(sqlite3_column_text(FStatement,AFieldIndex));
 end;
 
 function TSqlite3DataReader.GetString(const FieldName: String): String;
 var
   i: Integer;
 begin
-  i:= GetFieldIndex(FieldName);
+  i := GetFieldIndex(FieldName);
   if i <> -1 then
-    Result:= StrPas(sqlite3_column_text(FStatement,i))
+    Result := StrPas(sqlite3_column_text(FStatement,i))
   else
     raise Exception.Create('TSqlite3Wrapper - Field "'+FieldName+'" not found');
 end;
@@ -302,7 +302,7 @@ end;
 
 function TSqlite3Query.GetInteger(Finalize: Boolean = True): Integer;
 begin
-  Result:= sqlite3_column_int(FStatement,0);
+  Result := sqlite3_column_int(FStatement,0);
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
@@ -316,14 +316,14 @@ end;
 
 function TSqlite3Query.GetString(Finalize: Boolean = True): String;
 begin
-  Result:= StrPas(sqlite3_column_text(FStatement,0));
+  Result := StrPas(sqlite3_column_text(FStatement,0));
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
 function TSqlite3Query.IsNull(Finalize: Boolean = False): Boolean;
 begin
-  Result:= sqlite3_column_type(FStatement,0) = SQLITE_NULL;
+  Result := sqlite3_column_type(FStatement,0) = SQLITE_NULL;
   if Finalize then
     sqlite3_finalize(FStatement);
 end;

@@ -59,7 +59,7 @@ type
     FOnDraw: TNotifyEvent;
     procedure CreateContext;
   protected
-    procedure DoDraw;
+    procedure DoDraw; virtual;
     procedure DoOnResize; override;
     procedure PaintWindow(DC: HDC); override;
     procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
@@ -80,6 +80,7 @@ type
   end;
 
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
+function ColorToCairoColor(Color: TColor): TCairoColor; inline;
 
 implementation
 
