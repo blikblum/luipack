@@ -142,6 +142,7 @@ type
   public
     constructor Create(Red, Green, Blue: Double);
     constructor Create(Red, Green, Blue, Alpha: Double);
+    constructor Create(const Color: TCairoColor);
     function  GetRgba(Red, Green, Blue, Alpha: PDouble): cairo_status_t;
   end;
   
@@ -151,6 +152,7 @@ type
   public
     procedure AddColorStopRgb(Offset, Red, Green, Blue: Double);
     procedure AddColorStopRgba(Offset, Red, Green, Blue, Alpha: Double);
+    procedure AddColorStop(Offset: Double; const Color: TCairoColor);
     function  GetColorStopRgba(Index: LongInt; Offset, Red, Green, Blue, Alpha: PDouble): cairo_status_t;
     function  GetColorStopCount(Count: PLongInt): cairo_status_t;
   end;
@@ -274,6 +276,31 @@ type
     procedure ObjectTreeNeeded;
     procedure PrivateObjectReferenced(Key: Pointer);
     procedure SetColor(const Value: TCairoColor); inline;
+  protected
+    function  GetAntialias: cairo_antialias_t;
+    function  GetDashCount: LongInt;
+    function  GetFillRule: cairo_fill_rule_t;
+    function  GetFontFace: TCairoFontFace;
+    function  GetGroupTarget: TCairoSurface;
+    function  GetLineWidth: Double;
+    function  GetLineCap: cairo_line_cap_t;
+    function  GetLineJoin: cairo_line_join_t;
+    function  GetMiterLimit: Double;
+    function  GetScaledFont: TCairoScaledFont;
+    function  GetSource: TCairoPattern;
+    function  GetTarget: TCairoSurface;
+    function  GetTolerance: Double;
+    procedure SetAntialias(Antialias: cairo_antialias_t);
+    procedure SetFillRule(FillRule: cairo_fill_rule_t);
+    procedure SetFontFace(FontFace: TCairoFontFace);
+    procedure SetFontSize(Size: Double);
+    procedure SetLineWidth(Width: Double);
+    procedure SetLineCap(LineCap: cairo_line_cap_t);
+    procedure SetLineJoin(LineJoin: cairo_line_join_t);
+    procedure SetMiterLimit(Limit: Double);
+    procedure SetScaledFont(ScaledFont: TCairoScaledFont);
+    procedure SetSource(Source: TCairoPattern);
+    procedure SetTolerance(Tolerance: Double);
   public
     constructor Create(Target: TCairoSurface);
     destructor Destroy; override;
@@ -295,25 +322,12 @@ type
     procedure FillExtents(X1, Y1, X2, Y2: PDouble);
     procedure FillPreserve;
     procedure FontExtents(Extents: Pcairo_font_extents_t);
-    function  GetAntialias: cairo_antialias_t;
     procedure GetCurrentPoint(X, Y: PDouble);
     procedure GetDash(Dashes, Offset: PDouble);
-    function  GetDashCount: LongInt;
-    function  GetFillRule: cairo_fill_rule_t;
-    function  GetFontFace: TCairoFontFace;
     procedure GetFontMatrix(const Matrix: TCairoMatrix);
     procedure GetFontOptions(Options: TCairoFontOptions);
-    function  GetGroupTarget: TCairoSurface;
-    function  GetLineWidth: Double;
-    function  GetLineCap: cairo_line_cap_t;
-    function  GetLineJoin: cairo_line_join_t;
     procedure GetMatrix(const Matrix: TCairoMatrix);
-    function  GetMiterLimit: Double;
     function  GetOperator: cairo_operator_t;
-    function  GetScaledFont: TCairoScaledFont;
-    function  GetSource: TCairoPattern;
-    function  GetTarget: TCairoSurface;
-    function  GetTolerance: Double;
     function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
     procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; Extents: Pcairo_text_extents_t);
     procedure GlyphPath(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
@@ -344,25 +358,14 @@ type
     procedure ShowGlyphs(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt);
     procedure ShowText(const Text: String);
     procedure SelectFontFace(const Family: String; Slant: cairo_font_slant_t; Weight: cairo_font_weight_t);
-    procedure SetAntialias(Antialias: cairo_antialias_t);
     procedure SetDash(Dashes: PDouble; NumDashes: LongInt; Offset: Double);
-    procedure SetFillRule(FillRule: cairo_fill_rule_t);
-    procedure SetFontFace(FontFace: TCairoFontFace);
     procedure SetFontMatrix(const Matrix: TCairoMatrix);
     procedure SetFontOptions(Options: Pcairo_font_options_t);
-    procedure SetFontSize(Size: Double);
-    procedure SetLineWidth(Width: Double);
-    procedure SetLineCap(LineCap: cairo_line_cap_t);
-    procedure SetLineJoin(LineJoin: cairo_line_join_t);
     procedure SetMatrix(const Matrix: TCairoMatrix);
-    procedure SetMiterLimit(Limit: Double);
     procedure SetOperator(Op: cairo_operator_t);
-    procedure SetScaledFont(ScaledFont: TCairoScaledFont);
-    procedure SetSource(Source: TCairoPattern);
     procedure SetSourceRgb(Red, Green, Blue: Double);
     procedure SetSourceRgba(Red, Green, Blue, Alpha: Double);
     procedure SetSourceSurface(Surface: TCairoSurface; X, Y: Double);
-    procedure SetTolerance(Tolerance: Double);
     function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; DestroyFunc: cairo_destroy_func_t): cairo_status_t;
     procedure ShowPage;
     function  Status: cairo_status_t;
@@ -376,18 +379,22 @@ type
     procedure UserToDevice(X, Y: PDouble);
     procedure UserToDeviceDistance(Dx, Dy: PDouble);
     //properties
-    property Color: TCairoColor write SetColor;
-    {
     property Antialias: cairo_antialias_t read GetAntialias write SetAntialias;
+    property Color: TCairoColor write SetColor;
     property DashCount: LongInt read GetDashCount;
     property FillRule: cairo_fill_rule_t read GetFillRule write SetFillRule;
+    property FontFace: TCairoFontFace read GetFontFace write SetFontFace;
+    property FontSize: Double write SetFontSize;
+    property GroupTarget: TCairoSurface read GetGroupTarget;
     property LineWidth: Double read GetLineWidth write SetLineWidth;
     property LineCap: cairo_line_cap_t read GetLineCap write SetLineCap;
     property LineJoin: cairo_line_join_t read GetLineJoin write SetLineJoin;
     property MiterLimit: Double read GetMiterLimit write SetMiterLimit;
-    property Operator: cairo_operator_t read GetOperator;
+    //property Operator: cairo_operator_t read GetOperator;
+    property ScaledFont: TCairoScaledFont read GetScaledFont write SetScaledFont;
+    property Source: TCairoPattern read GetSource write SetSource;
+    property Target: TCairoSurface read GetTarget;
     property Tolerance: Double read GetTolerance write SetTolerance;
-    }
   end;
   
   function CairoColor(Red, Green, Blue, Alpha: Double): TCairoColor;
@@ -1285,6 +1292,12 @@ begin
   FHandle := cairo_pattern_create_rgba(Red, Green, Blue, Alpha);
 end;
 
+constructor TCairoSolidPattern.Create(const Color: TCairoColor);
+begin
+  with Color do
+    FHandle := cairo_pattern_create_rgba(Red, Green, Blue, Alpha);
+end;
+
 function TCairoSolidPattern.GetRgba(Red, Green, Blue, Alpha: PDouble
   ): cairo_status_t;
 begin
@@ -1329,6 +1342,13 @@ procedure TCairoGradient.AddColorStopRgba(Offset, Red, Green, Blue,
   Alpha: Double);
 begin
   cairo_pattern_add_color_stop_rgba(FHandle, Offset, Red, Green, Blue, Alpha);
+end;
+
+procedure TCairoGradient.AddColorStop(Offset: Double; const Color: TCairoColor
+  );
+begin
+  with Color do
+    cairo_pattern_add_color_stop_rgba(FHandle, Offset, Red, Green, Blue, Alpha);
 end;
 
 function TCairoGradient.GetColorStopRgba(Index: LongInt; Offset, Red, Green,
