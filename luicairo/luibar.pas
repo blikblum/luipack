@@ -14,7 +14,7 @@ type
   
   TCellInfo = class;
   
-  TLuiBarOption = (lboEmulateTab);
+  TLuiBarOption = (lboEmulateTab, lboSpanCells);
   
   TLuiBarOptions = set of TLuiBarOption;
   
@@ -102,24 +102,21 @@ type
 
   TCellInfoList = class
   private
-    FInnerRadius: Double;
     FList: TFpList;
-    FOuterRadius: Double;
     FOwner: TLuiBar;
-    procedure InitBounds(Cell: TCellInfo);
+    FRequiresUpdate: Boolean;
+    procedure InitBounds(Cell: TCellInfo; ALeft, AWidth: Integer);
     function GetCount: Integer;
     function GetItems(Index: Integer): TCellInfo; inline;
-    procedure SetInnerRadius(const AValue: Double);
-    procedure SetOuterRadius(const AValue: Double);
   public
     constructor Create(Owner: TLuiBar);
     destructor Destroy; override;
     function Add(const Title: String): TCellInfo;
     procedure Clear;
+    procedure UpdateCellBounds;
     property Count: Integer read GetCount;
-
     property Items[Index: Integer]: TCellInfo read GetItems; default;
-
+    property RequiresUpdate: Boolean read FRequiresUpdate;
   end;
   { TLuiBar }
 
@@ -141,9 +138,11 @@ type
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
     function GetCellHeight: Integer;
+    function GetTextWidth(const AText: String): Double;
     procedure SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
     procedure SetSelectedIndex(const AValue: Integer);
   protected
+    function DoCalculateCellWidth(Cell: TCellInfo): Integer;
     procedure DoDraw; override;
     procedure DoDrawBackground; virtual;
     procedure DoDrawCell(Cell: TCellInfo); virtual;
@@ -190,17 +189,6 @@ begin
   Result := TCellInfo(FList[Index]);
 end;
 
-procedure TCellInfoList.SetInnerRadius(const AValue: Double);
-begin
-  if FInnerRadius=AValue then exit;
-  FInnerRadius:=AValue;
-end;
-
-procedure TCellInfoList.SetOuterRadius(const AValue: Double);
-begin
-  if FOuterRadius=AValue then exit;
-  FOuterRadius:=AValue;
-end;
 
 constructor TCellInfoList.Create(Owner: TLuiBar);
 begin
@@ -208,18 +196,15 @@ begin
   FOwner := Owner;
 end;
 
-procedure TCellInfoList.InitBounds(Cell: TCellInfo);
+procedure TCellInfoList.InitBounds(Cell: TCellInfo; ALeft, AWidth: Integer);
 begin
   Cell.Bounds.Top := FOwner.Offset.Top;
   Cell.Bounds.Bottom := FOwner.Height - FOwner.Offset.Bottom;
-
-  if FList.Count > 0 then
-    Cell.Bounds.Left := Items[FList.Count - 1].Bounds.Right + FOwner.Spacing
-  else
-    Cell.Bounds.Left := FOwner.Offset.Left;
-  Cell.Bounds.Right := Cell.Bounds.Left + FOwner.CellWidth;
+  Cell.Bounds.Left := ALeft;
+  Cell.Bounds.Right := Cell.Bounds.Left + AWidth;
   Logger.Send('InitBounds of ' + Cell.Title, Cell.Bounds);
 end;
+
 
 function TCellInfoList.GetCount: Integer;
 begin
@@ -238,8 +223,8 @@ begin
   Result := TCellInfo.Create;
   Result.Title := Title;
   Result.Index := FList.Count;
-  InitBounds(Result);
   FList.Add(Result);
+  FRequiresUpdate := True;
 end;
 
 procedure TCellInfoList.Clear;
@@ -249,6 +234,38 @@ begin
   for i := 0 to FList.Count - 1 do
     TCellInfo(FList[i]).Destroy;
   FList.Clear;
+end;
+
+procedure TCellInfoList.UpdateCellBounds;
+var
+  i, NextLeft, NewWidth: Integer;
+  Cell: TCellInfo;
+begin
+  NextLeft := 0;
+  for i := 0 to FList.Count - 1 do
+  begin
+    Cell := Items[i];
+    Cell.Bounds.Left := NextLeft;
+    Cell.Bounds.Top := FOwner.Offset.Top;
+    Cell.Bounds.Bottom := FOwner.Height - FOwner.Offset.Bottom;
+    //get width
+    if lboSpanCells in FOwner.Options then
+    begin
+      //align the last tab to the control
+      if i = FList.Count - 1 then
+        Cell.Bounds.Right := FOwner.Width
+      else
+        Cell.Bounds.Right := Cell.Bounds.Left +
+          (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
+    end
+    else
+    begin
+      Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+    end;
+
+    NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+  end;
+  FRequiresUpdate := False;
 end;
 
 { TCellInfo }
@@ -304,6 +321,17 @@ end;
 function TLuiBar.GetCellHeight: Integer;
 begin
   Result := Height - (FOffset.Top + FOffset.Bottom);
+end;
+
+function TLuiBar.GetTextWidth(const AText: String): Double;
+var
+  Extents: cairo_text_extents_t;
+begin
+  with Context do
+  begin
+    TextExtents(AText, @Extents);
+    Result := Extents.width;
+  end;
 end;
 
 procedure TLuiBar.SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
@@ -377,12 +405,22 @@ begin
   Redraw;
 end;
 
+function TLuiBar.DoCalculateCellWidth(Cell: TCellInfo): Integer;
+begin
+  if FCellWidth > 0 then
+    Result := FCellWidth
+  else
+    Result := Round(GetTextWidth(Cell.Title)) + 16;
+end;
+
 procedure TLuiBar.DoDraw;
 var
   i: Integer;
 begin
   if FPatterns.RequiresUpdate then
     DoUpdatePatterns;
+  if FCells.RequiresUpdate then
+    FCells.UpdateCellBounds;
   DoDrawBackground;
   for i := 0 to FCells.Count - 1 do
     DoDrawCell(FCells[i]);
@@ -507,7 +545,6 @@ begin
   FCells := TCellInfoList.Create(Self);
   FPatterns := TLuiBarPatterns.Create;
   FHoverIndex := -1;
-  FCellWidth := 100;
   FSelectedIndex := -1;
 end;
 
