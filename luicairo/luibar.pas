@@ -5,7 +5,7 @@ unit LuiBar;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14;
+  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math;
 
 type
 
@@ -14,7 +14,7 @@ type
   
   TCellInfo = class;
   
-  TLuiBarOption = (lboEmulateTab, lboSpanCells);
+  TLuiBarOption = (lboEmulateTab, lboSpanCells, lboHoverAsSelected, lboOutLineClientArea);
   
   TLuiBarOptions = set of TLuiBarOption;
   
@@ -169,7 +169,7 @@ type
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
     //events
-    property OnGetDefaultPatterns: TGetDefaultPattern read FOnGetDefaultPatterns write SetOnGetDefaultPatterns;
+    property OnGetPatterns: TGetDefaultPattern read FOnGetDefaultPatterns write SetOnGetDefaultPatterns;
     property OnSelect: TLuiBarNotify read FOnSelect write FOnSelect;
   published
 
@@ -466,8 +466,20 @@ begin
 end;
 
 procedure TLuiBar.DoDrawBackground;
+
+  procedure DrawBaseLineSkipCell(Cell: TCellInfo);
+  begin
+    with Context do
+    begin
+      LineTo(Cell.Bounds.Left, Height - FOffset.Bottom);
+      Stroke;
+      MoveTo(Cell.Bounds.Right, Height - FOffset.Bottom);
+    end;
+  end;
+
 var
-  SelectedCell: TCellInfo;
+  SkipCells: array[0..1] of Integer = (-1, -1);
+  
 begin
   with Context do
   begin
@@ -480,19 +492,33 @@ begin
       Rectangle(0, Height - FOffset.Bottom, Width, FOffset.Bottom);
       Source := FPatterns.Selected;
       Fill;
-      //Draw outline
+      //Draw base outline
       LineWidth := FOutLineWidth;
       Source := FPatterns.OutLine;
       MoveTo(0, Height - FOffset.Bottom);
-      if FSelectedIndex <> -1 then
+
+      if (lboHoverAsSelected in FOptions) and
+        (FHoverIndex <> -1) and (FSelectedIndex <> FHoverIndex) then
       begin
-        SelectedCell := FCells[FSelectedIndex];
-        LineTo(SelectedCell.Bounds.Left, Height - FOffset.Bottom);
-        Stroke;
-        MoveTo(SelectedCell.Bounds.Right, Height - FOffset.Bottom);
-      end;
+        SkipCells[0] := Min(FSelectedIndex, FHoverIndex);
+        SkipCells[1] := Max(FSelectedIndex, FHoverIndex);
+      end
+      else
+        SkipCells[0] := FSelectedIndex;
+      if SkipCells[0] <> -1 then
+        DrawBaseLineSkipCell(FCells[SkipCells[0]]);
+      if SkipCells[1] <> -1 then
+        DrawBaseLineSkipCell(FCells[SkipCells[1]]);
+
       LineTo(Width, Height - FOffset.Bottom);
+      if lboOutLineClientArea in FOptions then
+      begin
+        LineTo(Width, Height);
+        LineTo(0, Height);
+        LineTo(0, Height - FOffset.Bottom);
+      end;
       Stroke;
+
     end;
     Restore;
   end;
