@@ -238,6 +238,11 @@ begin
         WriteLn(Script, 'set style data histogram');
         WriteLn(Script, 'set style fill solid border -1');
       end;
+    gpsArea
+      begin
+        WriteLn(Script, 'set style data filledcurves x1');
+        WriteLn(Script, 'set style fill solid border -1');
+      end;
   end;
 end;
 
@@ -258,7 +263,7 @@ begin
   case FStyle of
     gpsLine:
       Template := PlotLineTemplate;
-    gpsBar:
+    gpsBar, gpsArea:
       Template := PlotBarTemplate;
   end;
     
