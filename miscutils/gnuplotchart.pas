@@ -344,7 +344,7 @@ end;
 function TGnuPlotChart.SaveToFile(const FileName: String): Boolean;
 var
   ScriptFile: Text;
-  ScriptFilePath, OldDir: String;
+  ScriptFilePath: String;
 begin
   if not FileExists(FGnuPlotExe) then
     Exit(False);
@@ -366,15 +366,13 @@ begin
   WritePlotCommand(ScriptFile);
   Close(ScriptFile);
   //execute gnuplot
-  OldDir := GetCurrentDir;
-  SetCurrentDir(GetTempDir);
   with TProcess.Create(nil) do
   try
+    CurrentDirectory := GetTempDir;
     Options := [poWaitOnExit, poNoConsole];
     CommandLine := FGnuPlotExe + ' ' + ScriptFilePath;
     Execute;
   finally
-    SetCurrentDir(OldDir);
     Destroy;
   end;
   Result := FileExists(ExpandFileName(FileName));
