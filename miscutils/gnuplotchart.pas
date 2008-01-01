@@ -42,7 +42,9 @@ uses
 
 type
 
-  TGnuPlotStyle = (gpsLine, gpsArea, gpsAreaStacked, gpsBar, gpsBarStacked);
+  TGnuPlotChartStyle = (gpsLine, gpsArea, gpsAreaStacked, gpsBar, gpsBarStacked);
+
+  TGnuPlotChart = class;
 
   TDataSerieList = class;
   
@@ -73,18 +75,22 @@ type
   TDataSerieList = class
   private
     FList: TFpList;
+    FStackMode: Boolean;
+    FOwner: TGnuPlotChart;
     function GetCount: Integer; inline;
     function GetItems(const SerieName: String): TDataSerie;
     function FindSerie(Index: Integer): TDataSerie; inline;
     function FindSerie(const SerieName: String): TDataSerie;
     function GetYRange: TDataSerieRange;
   public
-    constructor Create;
+    constructor Create(AOwner: TGnuPlotChart);
     destructor Destroy; override;
     procedure Clear;
+    function GetValue(SerieIndex, XIndex: Integer): Double;
     function NewSerie(const SerieName: String): TDataSerie;
     property Items[SerieName: String]: TDataSerie read GetItems; default;
     property Count: Integer read GetCount;
+    property StackMode: Boolean read FStackMode write FStackMode;
     property YRange: TDataSerieRange read GetYRange;
   end;
   
@@ -94,13 +100,13 @@ type
   private
     FGnuPlotExe: String;
     FSeries: TDataSerieList;
-    FStyle: TGnuPlotStyle;
+    FStyle: TGnuPlotChartStyle;
     FXAxisLabels: TStrings;
     FXAxisTitle: String;
     FYAxisTitle: String;
     procedure BuildDataFile(const DataFilePath: String);
-    procedure SetStyle(const AValue: TGnuPlotStyle);
-    procedure WritePlotCommand(var Script: Text; const DataFilePath: String);
+    procedure SetStyle(const AValue: TGnuPlotChartStyle);
+    procedure WritePlotCommand(var Script: Text);
     procedure WriteStyleProperties(var Script: Text);
   public
     constructor Create;
@@ -108,7 +114,7 @@ type
     function SaveToFile(const FileName: String): Boolean;
     property GnuPlotExe: String read FGnuPlotExe write FGnuPlotExe;
     property Series: TDataSerieList read FSeries;
-    property Style: TGnuPlotStyle read FStyle write SetStyle;
+    property Style: TGnuPlotChartStyle read FStyle write SetStyle;
     property XAxisLabels: TStrings read FXAxisLabels;
     property XAxisTitle: String read FXAxisTitle write FXAxisTitle;
     property YAxisTitle: String read FYAxisTitle write FYAxisTitle;
@@ -136,18 +142,22 @@ end;
 
 function TDataSerieList.GetYRange: TDataSerieRange;
 var
-  i: Integer;
-  Serie: TDataSerie;
+  i,j: Integer;
+  AValue: Double;
 begin
   Result.Min := 0;
   Result.Max := 0;
-  for i:= 0 to FList.Count -1 do
+  for i := 0 to FList.Count -1 do
   begin
-    Serie := TDataSerie(FList[i]);
-    if Serie.FMaxValue > Result.Max then
-      Result.Max := Serie.FMaxValue;
-    if Serie.FMinValue < Result.Min then
-      Result.Min := Serie.FMinValue;
+    for j := 0 to FOwner.XAxisLabels.Count - 1 do
+    begin
+      AValue := GetValue(i, j);
+      if AValue < Result.Min then
+        Result.Min := AValue
+      else
+        if AValue > Result.Max then
+          Result.Max := AValue;
+    end
   end;
 end;
 
@@ -169,20 +179,41 @@ begin
   Result := FList.Count;
 end;
 
-constructor TDataSerieList.Create;
+constructor TDataSerieList.Create(AOwner: TGnuPlotChart);
 begin
   FList := TFPList.Create;
+  FOwner := AOwner;
 end;
 
 destructor TDataSerieList.Destroy;
 begin
+  Clear;
   FList.Destroy;
   inherited Destroy;
 end;
 
 procedure TDataSerieList.Clear;
+var
+  i: Integer;
 begin
+  for i := 0 to FList.Count - 1 do
+    TDataSerie(FList[i]).Destroy;
+  FList.Clear;
+end;
 
+function TDataSerieList.GetValue(SerieIndex, XIndex: Integer): Double;
+begin
+  if (not FStackMode) or (SerieIndex = 0) then
+    Result := FindSerie(SerieIndex).FYValues[XIndex]
+  else
+  begin
+    Result := 0;
+    while SerieIndex >= 0 do
+    begin
+      Result := Result + FindSerie(SerieIndex).FYValues[XIndex];
+      Dec(SerieIndex);
+    end;
+  end;
 end;
 
 function TDataSerieList.NewSerie(const SerieName: String): TDataSerie;
@@ -238,7 +269,7 @@ begin
         WriteLn(Script, 'set style data histogram');
         WriteLn(Script, 'set style fill solid border -1');
       end;
-    gpsArea
+    gpsArea, gpsAreaStacked:
       begin
         WriteLn(Script, 'set style data filledcurves x1');
         WriteLn(Script, 'set style fill solid border -1');
@@ -246,31 +277,43 @@ begin
   end;
 end;
 
-procedure TGnuPlotChart.SetStyle(const AValue: TGnuPlotStyle);
+procedure TGnuPlotChart.SetStyle(const AValue: TGnuPlotChartStyle);
 begin
-  if FStyle=AValue then exit;
-  FStyle:=AValue;
+  FStyle := AValue;
+  FSeries.StackMode := AValue in [gpsAreaStacked, gpsBarStacked];
 end;
 
-procedure TGnuPlotChart.WritePlotCommand(var Script: Text; const DataFilePath: String);
+procedure TGnuPlotChart.WritePlotCommand(var Script: Text);
 const
-  PlotLineTemplate = '''%s'' using 2:%d:xticlabels(1) title "%s"';
-  PlotBarTemplate =  '''%s'' using %d:xticlabels(1) title "%s"';
+  PlotLineTemplate = '''gnuplotchart.data'' using 2:%d:xticlabels(1) title "%s"';
+  PlotBarAndAreaTemplate =  '''gnuplotchart.data'' using %d:xticlabels(1) title "%s"';
+  PlotAreaStackedTemplate = '''gnuplotchart.data'' using 2:%d:%d:xticlabels(1) title "%s"';
 var
   Template: String;
   i: Integer;
 begin
-  case FStyle of
-    gpsLine:
-      Template := PlotLineTemplate;
-    gpsBar, gpsArea:
-      Template := PlotBarTemplate;
-  end;
-    
   Write(Script, 'plot ');
-  for i := 0 to FSeries.Count - 1 do
-    WriteLn(Script, Format(Template, [DataFilePath, i+3, FSeries.FindSerie(i).Name]),
-      IfThen(i < Pred(FSeries.Count), ',\'));
+  case FStyle of
+    gpsLine, gpsBar, gpsArea:
+      begin
+        if FStyle = gpsLine then
+          Template := PlotLineTemplate
+        else
+          Template := PlotBarAndAreaTemplate;
+        for i := 0 to FSeries.Count - 1 do
+          WriteLn(Script, Format(Template, [i+3, FSeries.FindSerie(i).Name]),
+            IfThen(i < Pred(FSeries.Count), ',\'));
+      end;
+    gpsAreaStacked:
+      begin
+        Template := PlotAreaStackedTemplate;
+        WriteLn(Script, '''gnuplotchart.data'' using 3:xticlabels(1) with filledcurves x1 title "',
+        FSeries.FindSerie(0).Name,'"',IfThen(FSeries.Count > 0, ',\'));
+        for i := 1 to FSeries.Count - 1 do
+          WriteLn(Script, Format(Template, [i+2, i+3, FSeries.FindSerie(i).Name]),
+            IfThen(i < Pred(FSeries.Count), ',\'));
+      end;
+  end;
 end;
 
 procedure TGnuPlotChart.BuildDataFile(const DataFilePath: String);
@@ -279,7 +322,6 @@ var
   i: Integer;
   DataFile: Text;
 begin
-  //build data file
   Assign(DataFile, DataFilePath);
   Rewrite(DataFile);
   for j := 0 to FXAxisLabels.Count - 1 do
@@ -287,7 +329,7 @@ begin
     Write(DataFile, '"', FXAxisLabels[j], '"');
     Write(DataFile, ' ', j);
     for i := 0 to FSeries.Count - 1 do
-      Write(DataFile, ' ', FloatToStr(FSeries.FindSerie(i).FYValues[j]));
+      Write(DataFile, ' ', FloatToStr(FSeries.GetValue(i,j)));
     WriteLn(DataFile);
   end;
   System.Close(DataFile);
@@ -295,7 +337,7 @@ end;
 
 constructor TGnuPlotChart.Create;
 begin
-  FSeries := TDataSerieList.Create;
+  FSeries := TDataSerieList.Create(Self);
   FXAxisLabels := TStringList.Create;
 end;
 
@@ -309,15 +351,16 @@ end;
 function TGnuPlotChart.SaveToFile(const FileName: String): Boolean;
 var
   ScriptFile: Text;
-  ScriptFilePath: String;
-  DataFilePath: String;
+  ScriptFilePath, OldDir: String;
 begin
   if not FileExists(FGnuPlotExe) then
     Exit(False);
+  if FSeries.Count = 0 then
+    Exit(False);
   if FileExists(FileName) then
     DeleteFile(FileName);
-  DataFilePath := GetTempDir + 'gnuplotchart.data';
-  BuildDataFile(DataFilePath);
+  //build data file
+  BuildDataFile(GetTempDir + 'gnuplotchart.data');
   //build script file
   ScriptFilePath := GetTempDir + 'gnuplotchart.plot';
   Assign(ScriptFile, ScriptFilePath);
@@ -328,15 +371,18 @@ begin
     WriteLn(ScriptFile, 'set yrange [', Math.Max(Min - 2, 0), ':',Max + 2,']');
   WriteLn(ScriptFile, 'set xtics');
   WriteStyleProperties(ScriptFile);
-  WritePlotCommand(ScriptFile, DataFilePath);
+  WritePlotCommand(ScriptFile);
   Close(ScriptFile);
   //execute gnuplot
+  OldDir := GetCurrentDir;
+  SetCurrentDir(GetTempDir);
   with TProcess.Create(nil) do
   try
-    Options := [poWaitOnExit];
+    Options := [poWaitOnExit, poNoConsole];
     CommandLine := FGnuPlotExe + ' ' + ScriptFilePath;
     Execute;
   finally
+    SetCurrentDir(OldDir);
     Destroy;
   end;
   Result := FileExists(ExpandFileName(FileName));
