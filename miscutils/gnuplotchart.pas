@@ -73,22 +73,20 @@ type
   TDataSerieList = class
   private
     FList: TFpList;
-    FStackMode: Boolean;
     FOwner: TGnuPlotChart;
     function GetCount: Integer; inline;
     function GetItems(const SerieName: String): TDataSerie;
     function FindSerie(Index: Integer): TDataSerie; inline;
     function FindSerie(const SerieName: String): TDataSerie;
+    function GetValue(SerieIndex, XIndex: Integer; DoGetAccumulated: Boolean = False): Double;
     function GetYRange: TDataSerieRange;
   public
     constructor Create(AOwner: TGnuPlotChart);
     destructor Destroy; override;
     procedure Clear;
-    function GetValue(SerieIndex, XIndex: Integer): Double;
     function NewSerie(const SerieName: String): TDataSerie;
     property Items[SerieName: String]: TDataSerie read GetItems; default;
     property Count: Integer read GetCount;
-    property StackMode: Boolean read FStackMode write FStackMode;
     property YRange: TDataSerieRange read GetYRange;
   end;
   
@@ -103,7 +101,6 @@ type
     FXAxisTitle: String;
     FYAxisTitle: String;
     procedure BuildDataFile(const DataFilePath: String);
-    procedure SetStyle(const AValue: TGnuPlotChartStyle);
     procedure WritePlotCommand(var Script: Text);
     procedure WriteStyleProperties(var Script: Text);
     procedure WriteYRange(var Script: Text; Range: TDataSerieRange);
@@ -113,7 +110,7 @@ type
     function SaveToFile(const FileName: String): Boolean;
     property GnuPlotExe: String read FGnuPlotExe write FGnuPlotExe;
     property Series: TDataSerieList read FSeries;
-    property Style: TGnuPlotChartStyle read FStyle write SetStyle;
+    property Style: TGnuPlotChartStyle read FStyle write FStyle;
     property XAxisLabels: TStrings read FXAxisLabels;
     property XAxisTitle: String read FXAxisTitle write FXAxisTitle;
     property YAxisTitle: String read FYAxisTitle write FYAxisTitle;
@@ -123,7 +120,7 @@ type
 implementation
 
 uses
-  strutils, process, math;
+  process, math;
 
 { TDataSerieList }
 
@@ -150,7 +147,7 @@ begin
   begin
     for j := 0 to FOwner.XAxisLabels.Count - 1 do
     begin
-      AValue := GetValue(i, j);
+      AValue := GetValue(i, j, FOwner.FStyle = gpsBarStacked);
       if AValue < Result.Min then
         Result.Min := AValue
       else
@@ -200,9 +197,9 @@ begin
   FList.Clear;
 end;
 
-function TDataSerieList.GetValue(SerieIndex, XIndex: Integer): Double;
+function TDataSerieList.GetValue(SerieIndex, XIndex: Integer; DoGetAccumulated: Boolean = False): Double;
 begin
-  if (not FStackMode) or (SerieIndex = 0) then
+  if (FOwner.FStyle <> gpsAreaStacked) and not DoGetAccumulated then
     Result := FindSerie(SerieIndex).FYValues[XIndex]
   else
   begin
@@ -260,20 +257,27 @@ begin
         WriteLn(Script, 'set style data filledcurves x1');
         WriteLn(Script, 'set style fill solid border -1');
       end;
+    gpsBarStacked:
+      begin
+        WriteLn(Script, 'set style data histogram');
+        WriteLn(Script, 'set style histogram rowstacked');
+        WriteLn(Script, 'set style fill solid border -1');
+        WriteLn(Script, 'set boxwidth 0.5');
+      end;
   end;
 end;
 
 procedure TGnuPlotChart.WriteYRange(var Script: Text; Range: TDataSerieRange);
+var
+  MaxInt, MinInt: Int64;
 begin
-  Range.Max := Trunc(Range.Max + (Range.Max * 0.2));
-  Range.Min := Max(0, Trunc(Range.Min - (Range.Min * 0.2)));
-  WriteLn(Script, 'set yrange [', FloatToStr(Range.Min), ':',FloatToStr(Range.Max),']');
-end;
-
-procedure TGnuPlotChart.SetStyle(const AValue: TGnuPlotChartStyle);
-begin
-  FStyle := AValue;
-  FSeries.StackMode := AValue in [gpsAreaStacked, gpsBarStacked];
+  MaxInt := Trunc(Range.Max + (Range.Max * 0.2));
+  if Odd(MaxInt) then
+    Inc(MaxInt);
+  MinInt := Max(0, Trunc(Range.Min - (Range.Min * 0.2)));
+  if Odd(MinInt) then
+    Dec(MinInt);
+  WriteLn(Script, 'set yrange [', MinInt, ':', MaxInt, ']');
 end;
 
 procedure TGnuPlotChart.WritePlotCommand(var Script: Text);
@@ -287,7 +291,7 @@ var
 begin
   Write(Script, 'plot ');
   case FStyle of
-    gpsLine, gpsBar, gpsArea:
+    gpsLine, gpsBar, gpsArea, gpsBarStacked:
       begin
         if FStyle = gpsLine then
           Template := PlotLineTemplate
