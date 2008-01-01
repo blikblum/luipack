@@ -56,8 +56,6 @@ type
     FCount: Integer;
     FCapacity: Integer;
     FYValues: array of Double;
-    FMaxValue: Double;
-    FMinValue: Double;
     procedure SetCapacity(NewCapacity: Integer);
   public
     constructor Create(const AName: String);
@@ -108,6 +106,7 @@ type
     procedure SetStyle(const AValue: TGnuPlotChartStyle);
     procedure WritePlotCommand(var Script: Text);
     procedure WriteStyleProperties(var Script: Text);
+    procedure WriteYRange(var Script: Text; Range: TDataSerieRange);
   public
     constructor Create;
     destructor Destroy; override;
@@ -242,19 +241,6 @@ begin
     SetCapacity(FCapacity + (FCapacity div 4));
   FYValues[FCount] := YValue;
   Inc(FCount);
-  //todo calculate this at runtime??
-  if FCount > 1 then
-  begin
-    if YValue < FMinValue then
-      FMinValue := YValue;
-    if YValue > FMaxValue then
-      FMaxValue := YValue;
-  end
-  else
-  begin
-    FMinValue := YValue;
-    FMaxValue := YValue;
-  end;
 end;
 
 { TGnuPlotChart }
@@ -275,6 +261,13 @@ begin
         WriteLn(Script, 'set style fill solid border -1');
       end;
   end;
+end;
+
+procedure TGnuPlotChart.WriteYRange(var Script: Text; Range: TDataSerieRange);
+begin
+  Range.Max := Trunc(Range.Max + (Range.Max * 0.2));
+  Range.Min := Max(0, Trunc(Range.Min - (Range.Min * 0.2)));
+  WriteLn(Script, 'set yrange [', FloatToStr(Range.Min), ':',FloatToStr(Range.Max),']');
 end;
 
 procedure TGnuPlotChart.SetStyle(const AValue: TGnuPlotChartStyle);
@@ -367,8 +360,7 @@ begin
   Rewrite(ScriptFile);
   WriteLn(ScriptFile, 'set terminal png');
   WriteLn(ScriptFile, 'set output ''', ExpandFileName(FileName), '''');
-  with FSeries.YRange do
-    WriteLn(ScriptFile, 'set yrange [', Math.Max(Min - 2, 0), ':',Max + 2,']');
+  WriteYRange(ScriptFile, FSeries.YRange);
   WriteLn(ScriptFile, 'set xtics');
   WriteStyleProperties(ScriptFile);
   WritePlotCommand(ScriptFile);
