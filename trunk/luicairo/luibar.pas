@@ -18,6 +18,8 @@ type
   
   TLuiBarOptions = set of TLuiBarOption;
   
+  TLuiBarPosition = (lbpTop, lbpLeft, lbpBottom, lbpRight);
+  
   TLuiBarNotify = procedure (Sender: TLuiBar) of object;
   
   TPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText, ptBackground, ptOutLine);
@@ -105,7 +107,6 @@ type
     FList: TFpList;
     FOwner: TLuiBar;
     FRequiresUpdate: Boolean;
-    procedure InitBounds(Cell: TCellInfo; ALeft, AWidth: Integer);
     function GetCount: Integer;
     function GetItems(Index: Integer): TCellInfo; inline;
   public
@@ -122,24 +123,30 @@ type
 
   TLuiBar = class(TCairoControl)
   private
+    FCellHeight: Integer;
     FCells: TCellInfoList;
     FCellWidth: Integer;
+    FInitialSpace: Integer;
+    FOuterOffset: Integer;
     //FColors: TLuiBarColors;
     FPatterns: TLuiBarPatterns;
     FInnerRadius: Double;
-    FOffset: TRect;
     FOnGetDefaultPatterns: TGetDefaultPattern;
     FOnSelect: TLuiBarNotify;
     FOptions: TLuiBarOptions;
     FOuterRadius: Double;
     FOutLineWidth: Integer;
+    FPosition: TLuiBarPosition;
     FSelectedIndex: Integer;
     FHoverIndex: Integer;
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
     function GetCellHeight: Integer;
     function GetTextWidth(const AText: String): Double;
+    procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
+    procedure SetOuterOffset(const AValue: Integer);
+    procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
   protected
     function DoCalculateCellWidth(Cell: TCellInfo): Integer;
@@ -158,14 +165,15 @@ type
     destructor Destroy; override;
     procedure Add(const CellTitle: String);
     property Cells: TCellInfoList read FCells;
-    property CellHeight: Integer read GetCellHeight;
+    property CellHeight: Integer read FCellHeight write FCellHeight;
     property CellWidth: Integer read FCellWidth write FCellWidth;
-    //property Colors: TLuiBarColors read FColors write FColors;
+    property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property InnerRadius: Double read FInnerRadius write FInnerRadius;
-    property Offset: TRect read FOffset write FOffset;
     property Options: TLuiBarOptions read FOptions write FOptions;
+    property OuterOffset: Integer read FOuterOffset write SetOuterOffset;
     property OuterRadius: Double read FOuterRadius write FOuterRadius;
     property OutLineWidth: Integer read FOutLineWidth write FOutLineWidth;
+    property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
     //events
@@ -195,16 +203,6 @@ begin
   FList := TFPList.Create;
   FOwner := Owner;
 end;
-
-procedure TCellInfoList.InitBounds(Cell: TCellInfo; ALeft, AWidth: Integer);
-begin
-  Cell.Bounds.Top := FOwner.Offset.Top;
-  Cell.Bounds.Bottom := FOwner.Height - FOwner.Offset.Bottom;
-  Cell.Bounds.Left := ALeft;
-  Cell.Bounds.Right := Cell.Bounds.Left + AWidth;
-  Logger.Send('InitBounds of ' + Cell.Title, Cell.Bounds);
-end;
-
 
 function TCellInfoList.GetCount: Integer;
 begin
@@ -241,13 +239,13 @@ var
   i, NextLeft, NewWidth: Integer;
   Cell: TCellInfo;
 begin
-  NextLeft := 0;
+  NextLeft := FOwner.InitialSpace;
   for i := 0 to FList.Count - 1 do
   begin
     Cell := Items[i];
     Cell.Bounds.Left := NextLeft;
-    Cell.Bounds.Top := FOwner.Offset.Top;
-    Cell.Bounds.Bottom := FOwner.Height - FOwner.Offset.Bottom;
+    Cell.Bounds.Top := FOwner.OuterOffset;
+    Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
     //get width
     if lboSpanCells in FOwner.Options then
     begin
@@ -320,7 +318,7 @@ end;
 
 function TLuiBar.GetCellHeight: Integer;
 begin
-  Result := Height - (FOffset.Top + FOffset.Bottom);
+  //Result := Height - (FOffset.Top + FOffset.Bottom);
 end;
 
 function TLuiBar.GetTextWidth(const AText: String): Double;
@@ -334,10 +332,28 @@ begin
   end;
 end;
 
+procedure TLuiBar.SetInitialSpace(const AValue: Integer);
+begin
+  if FInitialSpace=AValue then exit;
+  FInitialSpace:=AValue;
+end;
+
 procedure TLuiBar.SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
 begin
   FOnGetDefaultPatterns := AValue;
   FPatterns.FixedValues := AValue = nil;
+end;
+
+procedure TLuiBar.SetOuterOffset(const AValue: Integer);
+begin
+  if FOuterOffset=AValue then exit;
+  FOuterOffset:=AValue;
+end;
+
+procedure TLuiBar.SetPosition(const AValue: TLuiBarPosition);
+begin
+  if FPosition=AValue then exit;
+  FPosition:=AValue;
 end;
 
 procedure TLuiBar.DoUpdatePatterns;
@@ -471,9 +487,9 @@ procedure TLuiBar.DoDrawBackground;
   begin
     with Context do
     begin
-      LineTo(Cell.Bounds.Left, Height - FOffset.Bottom);
+      LineTo(Cell.Bounds.Left, FOuterOffset + FCellHeight);
       Stroke;
-      MoveTo(Cell.Bounds.Right, Height - FOffset.Bottom);
+      MoveTo(Cell.Bounds.Right, FOuterOffset + FCellHeight);
     end;
   end;
 
@@ -489,13 +505,13 @@ begin
     Fill;
     if lboEmulateTab in FOptions then
     begin
-      Rectangle(0, Height - FOffset.Bottom, Width, FOffset.Bottom);
+      Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
       Source := FPatterns.Selected;
       Fill;
       //Draw base outline
       LineWidth := FOutLineWidth;
       Source := FPatterns.OutLine;
-      MoveTo(0, Height - FOffset.Bottom);
+      MoveTo(0, FOuterOffset + FCellHeight);
 
       if (lboHoverAsSelected in FOptions) and
         (FHoverIndex <> -1) and (FSelectedIndex <> FHoverIndex) then
@@ -510,12 +526,12 @@ begin
       if SkipCells[1] <> -1 then
         DrawBaseLineSkipCell(FCells[SkipCells[1]]);
 
-      LineTo(Width, Height - FOffset.Bottom);
+      LineTo(Width, FOuterOffset + FCellHeight);
       if lboOutLineClientArea in FOptions then
       begin
         LineTo(Width, Height);
         LineTo(0, Height);
-        LineTo(0, Height - FOffset.Bottom);
+        LineTo(0, FOuterOffset + FCellHeight);
       end;
       Stroke;
 
@@ -570,6 +586,7 @@ begin
   inherited Create(AOwner);
   FCells := TCellInfoList.Create(Self);
   FPatterns := TLuiBarPatterns.Create;
+  FCellHeight := 20;
   FHoverIndex := -1;
   FSelectedIndex := -1;
 end;
