@@ -141,8 +141,10 @@ type
     FHoverIndex: Integer;
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
+    procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
     function GetCellHeight: Integer;
     function GetTextWidth(const AText: String): Double;
+
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
     procedure SetOuterOffset(const AValue: Integer);
@@ -153,7 +155,7 @@ type
     procedure DoDraw; override;
     procedure DoDrawBackground; virtual;
     procedure DoDrawCell(Cell: TCellInfo); virtual;
-    procedure DoDrawCellPath(AWidth, AHeight: Integer); virtual;
+    procedure DoDrawCellPath(Cell: TCellInfo); virtual;
     procedure DoSelect; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
@@ -316,6 +318,29 @@ begin
       Exit(i);
 end;
 
+procedure TLuiBar.DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
+begin
+  with Context do
+  begin
+    MoveTo(XStart + FInnerRadius, YStart);
+    CurveTo(XStart + FInnerRadius, YStart,
+      XStart, YStart,
+      XStart, YStart - FInnerRadius);
+    LineTo(XOuter1, YOuter1 - FOuterRadius);
+    CurveTo(XOuter1, YOuter1 - FOuterRadius,
+      XOuter1, YOuter1,
+      XOuter1 + FOuterRadius, YOuter1);
+    LineTo(XOuter2 - FOuterRadius, YOuter2);
+    CurveTo(XOuter2 - FOuterRadius, YOuter2,
+      XOuter2, YOuter2,
+      XOuter2, YOuter2 + FOuterRadius);
+    LineTo(XEnd, YEnd - FInnerRadius);
+    CurveTo(XEnd, YEnd - FInnerRadius,
+      XEnd, YEnd,
+      XEnd - FInnerRadius, YEnd);
+  end;
+end;
+
 function TLuiBar.GetCellHeight: Integer;
 begin
   //Result := Height - (FOffset.Top + FOffset.Bottom);
@@ -384,30 +409,16 @@ begin
   end;
 end;
 
-procedure TLuiBar.DoDrawCellPath(AWidth, AHeight: Integer);
+procedure TLuiBar.DoDrawCellPath(Cell: TCellInfo);
 begin
-  with Context do
-  begin
-    MoveTo(FInnerRadius, AHeight);
-    LineTo(FInnerRadius, AHeight);
-    CurveTo(FInnerRadius, AHeight,
-      0, AHeight,
-      0, AHeight - FInnerRadius);
-    LineTo(0, FOuterRadius);
-    CurveTo(0, FOuterRadius,
-      0, 0,
-      FOuterRadius, 0);
-    LineTo(AWidth - FOuterRadius, 0);
-    CurveTo(AWidth - FOuterRadius,
-      0, AWidth, 0,
-      AWidth, FOuterRadius);
-    LineTo(AWidth, AHeight - FInnerRadius);
-    CurveTo(AWidth, AHeight - FInnerRadius,
-      AWidth, AHeight,
-      AWidth - FInnerRadius, AHeight);
-    if not (lboEmulateTab in FOptions) then
-      ClosePath;
+  case FPosition of
+    lbpTop: DrawRoundedRect(0, Cell.Height, 0, 0, Cell.Width, 0, Cell.Width, Cell.Height);
+    lbpBottom: DrawRoundedRect(0, 0, 0, Cell.Height, Cell.Width, Cell.Height, Cell.Width, 0);
+    lbpLeft: DrawRoundedRect(Cell.Width, 0, 0, 0, 0, Cell.Height, Cell.Width, Cell.Height);
+    lbpRight: DrawRoundedRect(0, 0, Cell.Width, 0, Cell.Width, Cell.Height, 0, Cell.Height);
   end;
+  if not (lboEmulateTab in FOptions) then
+    Context.ClosePath;
 end;
 
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
@@ -450,7 +461,7 @@ begin
   begin
     Save;
     Translate(Cell.Bounds.Left, Cell.Bounds.Top);
-    DoDrawCellPath(Cell.Width, Cell.Height);
+    DoDrawCellPath(Cell);
     ClipPreserve;
     if Cell.Index = FSelectedIndex then
       Source := FPatterns.Selected
