@@ -128,7 +128,6 @@ type
     FCellWidth: Integer;
     FInitialSpace: Integer;
     FOuterOffset: Integer;
-    //FColors: TLuiBarColors;
     FPatterns: TLuiBarPatterns;
     FInnerRadius: Double;
     FOnGetDefaultPatterns: TGetDefaultPattern;
@@ -142,9 +141,7 @@ type
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
     procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
-    function GetCellHeight: Integer;
     function GetTextWidth(const AText: String): Double;
-
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
     procedure SetOuterOffset(const AValue: Integer);
@@ -238,32 +235,51 @@ end;
 
 procedure TCellInfoList.UpdateCellBounds;
 var
-  i, NextLeft, NewWidth: Integer;
+  i, NextLeft, NextTop, NewWidth: Integer;
   Cell: TCellInfo;
 begin
-  NextLeft := FOwner.InitialSpace;
-  for i := 0 to FList.Count - 1 do
-  begin
-    Cell := Items[i];
-    Cell.Bounds.Left := NextLeft;
-    Cell.Bounds.Top := FOwner.OuterOffset;
-    Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
-    //get width
-    if lboSpanCells in FOwner.Options then
+  case FOwner.Position of
+  lbpTop:
     begin
-      //align the last tab to the control
-      if i = FList.Count - 1 then
-        Cell.Bounds.Right := FOwner.Width
-      else
-        Cell.Bounds.Right := Cell.Bounds.Left +
-          (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
-    end
-    else
-    begin
-      Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
-    end;
+      NextLeft := FOwner.InitialSpace;
+      for i := 0 to FList.Count - 1 do
+      begin
+        Cell := Items[i];
+        Cell.Bounds.Left := NextLeft;
+        Cell.Bounds.Top := FOwner.OuterOffset;
+        Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+        //get width
+        if lboSpanCells in FOwner.Options then
+        begin
+          //align the last tab to the control
+          if i = FList.Count - 1 then
+            Cell.Bounds.Right := FOwner.Width
+          else
+            Cell.Bounds.Right := Cell.Bounds.Left +
+              (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
+        end
+        else
+        begin
+          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+        end;
 
-    NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+        NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+      end;
+    end;
+  lbpLeft:
+    begin
+      NextTop := FOwner.InitialSpace;
+      for i := 0 to FList.Count - 1 do
+      begin
+        Cell := Items[i];
+        Cell.Bounds.Top := NextTop;
+        Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+        Cell.Bounds.Left := FOwner.OuterOffset;
+        Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+        NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
+        Logger.Send('Cell.Bounds', Cell.Bounds);
+      end;
+    end;
   end;
   FRequiresUpdate := False;
 end;
@@ -339,11 +355,6 @@ begin
       XEnd, YEnd,
       XEnd - FInnerRadius, YEnd);
   end;
-end;
-
-function TLuiBar.GetCellHeight: Integer;
-begin
-  //Result := Height - (FOffset.Top + FOffset.Bottom);
 end;
 
 function TLuiBar.GetTextWidth(const AText: String): Double;
@@ -437,7 +448,12 @@ begin
   if FCellWidth > 0 then
     Result := FCellWidth
   else
-    Result := Round(GetTextWidth(Cell.Title)) + 16;
+  begin
+    if FPosition in [lbpTop, lbpBottom] then
+      Result := Round(GetTextWidth(Cell.Title)) + 16
+    else
+      Result := Width - FOuterOffset;
+  end;
 end;
 
 procedure TLuiBar.DoDraw;
@@ -498,9 +514,20 @@ procedure TLuiBar.DoDrawBackground;
   begin
     with Context do
     begin
-      LineTo(Cell.Bounds.Left, FOuterOffset + FCellHeight);
-      Stroke;
-      MoveTo(Cell.Bounds.Right, FOuterOffset + FCellHeight);
+      case FPosition of
+      lbpTop:
+        begin
+          LineTo(Cell.Bounds.Left, FOuterOffset + FCellHeight);
+          Stroke;
+          MoveTo(Cell.Bounds.Right, FOuterOffset + FCellHeight);
+        end;
+      lbpLeft:
+        begin
+          LineTo(FOuterOffset + FCellWidth, Cell.Bounds.Top);
+          Stroke;
+          MoveTo(FOuterOffset + FCellWidth, Cell.Bounds.Bottom);
+        end;
+      end;
     end;
   end;
 
@@ -516,13 +543,26 @@ begin
     Fill;
     if lboEmulateTab in FOptions then
     begin
-      Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
+      //todo: handle when there's no client area
+      //todo: store client area size
+      case FPosition of
+      lbpTop:
+        Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
+      lbpLeft:
+        Rectangle(FOuterOffset + FCellWidth, 0, Width , Height);
+      end;
       Source := FPatterns.Selected;
       Fill;
       //Draw base outline
       LineWidth := FOutLineWidth;
       Source := FPatterns.OutLine;
-      MoveTo(0, FOuterOffset + FCellHeight);
+      
+      case FPosition of
+      lbpTop:
+        MoveTo(0, FOuterOffset + FCellHeight);
+      lbpLeft:
+        MoveTo(FOuterOffset + FCellWidth, 0);
+      end;
 
       if (lboHoverAsSelected in FOptions) and
         (FHoverIndex <> -1) and (FSelectedIndex <> FHoverIndex) then
@@ -537,12 +577,30 @@ begin
       if SkipCells[1] <> -1 then
         DrawBaseLineSkipCell(FCells[SkipCells[1]]);
 
-      LineTo(Width, FOuterOffset + FCellHeight);
+      //todo remove all these case
+      case FPosition of
+      lbpTop:
+        LineTo(Width, FOuterOffset + FCellHeight);
+      lbpLeft:
+        LineTo(FOuterOffset + FCellWidth, Height);
+      end;
+
       if lboOutLineClientArea in FOptions then
       begin
-        LineTo(Width, Height);
-        LineTo(0, Height);
-        LineTo(0, FOuterOffset + FCellHeight);
+        case FPosition of
+        lbpTop:
+          begin
+            LineTo(Width, Height);
+            LineTo(0, Height);
+            LineTo(0, FOuterOffset + FCellHeight);
+          end;
+        lbpLeft:
+          begin
+            LineTo(Width, Height);
+            LineTo(Width, 0);
+            LineTo(FOuterOffset + FCellWidth, 0);
+          end;
+        end;
       end;
       Stroke;
 
