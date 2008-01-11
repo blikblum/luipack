@@ -68,6 +68,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Redraw;
+    property Bitmap: TBitmap read FBitmap;
     property Context: TCairoContext read FContext;
   published
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
