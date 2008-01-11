@@ -168,8 +168,8 @@ function GetTextExtentExPoint(DC: HDC; Str: PChar;
 function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
   Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
   var Size: TSize): BOOL;
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
+function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 function GetWindowDC(hWnd:THandle):HDC;
 
 function ImageList_DragShowNolock(fShow: Boolean): Boolean;
