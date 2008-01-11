@@ -18,7 +18,7 @@ begin
   Result := ExtTextOut(DC, X, Y, Options, Rect, PChar(TempStr), Length(TempStr), Dx);
 end;
 
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 var
   TempStr: UTF8String;
 begin
@@ -37,7 +37,7 @@ begin
     Length(TempStr), MaxWidth, MaxCount, PartialWidths,Size);
 end;
 
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 var
   TempStr: UTF8String;
 begin

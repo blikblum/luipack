@@ -158,12 +158,12 @@ begin
   Result := Windows.GetTextExtentExPointW(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
 end;
 
-function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 begin
   Result := Windows.GetTextExtentPointW(DC, Str, Count, Size);
 end;
 
-function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; var Size: TSize): Boolean;
+function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 begin
   Result := Windows.GetTextExtentPointW(DC, Str, Count, Size);
 end;
