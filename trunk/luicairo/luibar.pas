@@ -81,6 +81,7 @@ type
   TCellInfo = class
   private
     FBounds: TRect;
+    FImageIndex: Integer;
     FIndex: Integer;
     FPattern: TCairoPattern;
     FTitle: String;
@@ -89,6 +90,7 @@ type
   public
     destructor Destroy; override;
     property Height: Integer read GetHeight;
+    property ImageIndex: Integer read FImageIndex write FImageIndex;
     property Index: Integer read FIndex write FIndex;
     property Pattern: TCairoPattern read FPattern write FPattern;
     property Title: String read FTitle write FTitle;
@@ -108,7 +110,7 @@ type
   public
     constructor Create(Owner: TLuiBar);
     destructor Destroy; override;
-    function Add(const Title: String): TCellInfo;
+    function Add(const Title: String; ImageIndex: Integer): TCellInfo;
     procedure Clear;
     procedure UpdateCellBounds;
     property Count: Integer read GetCount;
@@ -122,6 +124,7 @@ type
     FCellHeight: Integer;
     FCells: TCellInfoList;
     FCellWidth: Integer;
+    FImages: TImageList;
     FInitialSpace: Integer;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
@@ -139,6 +142,7 @@ type
     procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
     function GetRealCellWidth: Integer;
     function GetTextWidth(const AText: String): Double;
+    procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetPatterns(const AValue: TLuiBarGetPattern);
     procedure SetOuterOffset(const AValue: Integer);
@@ -150,6 +154,7 @@ type
     procedure DoDrawBackground; virtual;
     procedure DoDrawCell(Cell: TCellInfo); virtual;
     procedure DoDrawCellPath(Cell: TCellInfo); virtual;
+    procedure DoDrawCellTitle(Cell: TCellInfo); virtual;
     procedure DoSelect; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
@@ -159,10 +164,11 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure Add(const CellTitle: String);
+    procedure Add(const CellTitle: String; ImageIndex: Integer = -1);
     property Cells: TCellInfoList read FCells;
     property CellHeight: Integer read FCellHeight write FCellHeight;
     property CellWidth: Integer read FCellWidth write FCellWidth;
+    property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property InnerRadius: Double read FInnerRadius write FInnerRadius;
     property Options: TLuiBarOptions read FOptions write FOptions;
@@ -184,8 +190,9 @@ implementation
 uses
   sharedlogger;
 
-{ TCellInfo }
-
+const
+  CellTitlePadding = 8;
+  
 { TCellInfoList }
 
 function TCellInfoList.GetItems(Index: Integer): TCellInfo;
@@ -211,11 +218,12 @@ begin
   FList.Destroy;
 end;
 
-function TCellInfoList.Add(const Title: String): TCellInfo;
+function TCellInfoList.Add(const Title: String; ImageIndex: Integer): TCellInfo;
 begin
   Result := TCellInfo.Create;
   Result.Title := Title;
   Result.Index := FList.Count;
+  Result.ImageIndex := ImageIndex;
   FList.Add(Result);
   FRequiresUpdate := True;
 end;
@@ -367,6 +375,12 @@ begin
   end;
 end;
 
+procedure TLuiBar.SetImages(const AValue: TImageList);
+begin
+  if FImages=AValue then exit;
+  FImages:=AValue;
+end;
+
 procedure TLuiBar.SetInitialSpace(const AValue: Integer);
 begin
   if FInitialSpace=AValue then exit;
@@ -435,6 +449,29 @@ begin
     Context.ClosePath;
 end;
 
+procedure TLuiBar.DoDrawCellTitle(Cell: TCellInfo);
+var
+  Extents: cairo_text_extents_t;
+begin
+  with Context do
+  begin
+    if Cell.Index = FSelectedIndex then
+      Source := FPatterns.SelectedText
+    else
+      Source := FPatterns.Text;
+    TextExtents(Cell.Title, @Extents);
+    if (Cell.ImageIndex >=0) and (FImages <> nil) then
+    begin
+      Extents.width := Extents.width - (FImages.Width + CellTitlePadding div 4);
+      FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + CellTitlePadding,
+        (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
+         Cell.ImageIndex, (Cell.Index = FSelectedIndex) or (Cell.Index = FHoverIndex));
+    end;
+    MoveTo((Cell.Width  - Extents.width) / 2 , (Cell.Height + Extents.height) / 2);
+    ShowText(Cell.Title);
+  end;
+end;
+
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
   if AValue >= FCells.Count then
@@ -451,7 +488,11 @@ begin
   if FPosition in [lbpTop, lbpBottom] then
   begin
     if lboVariableCellWidth in FOptions then
-      Result := Round(GetTextWidth(Cell.Title)) + 16
+    begin
+      Result := Round(GetTextWidth(Cell.Title)) + CellTitlePadding * 2;
+      if (Cell.ImageIndex >=0) and (FImages <> nil) then
+        Inc(Result, FImages.Width + CellTitlePadding div 4);
+    end
     else
     begin
       Result := GetRealCellWidth;
@@ -480,8 +521,6 @@ begin
 end;
 
 procedure TLuiBar.DoDrawCell(Cell: TCellInfo);
-var
-  Extents: cairo_text_extents_t;
 begin
   with Context do
   begin
@@ -500,14 +539,7 @@ begin
     LineWidth := FOutLineWidth;
     Source := FPatterns.OutLine;
     Stroke;
-    //draw text
-    if Cell.Index = FSelectedIndex then
-      Source := FPatterns.SelectedText
-    else
-      Source := FPatterns.Text;
-    TextExtents(Cell.Title, @Extents);
-    MoveTo((Cell.Width  - Extents.width) / 2 , (Cell.Height + Extents.height) / 2);
-    ShowText(Cell.Title);
+    DoDrawCellTitle(Cell);
     Restore;
   end;
 end;
@@ -715,11 +747,11 @@ begin
   inherited Destroy;
 end;
 
-procedure TLuiBar.Add(const CellTitle: String);
+procedure TLuiBar.Add(const CellTitle: String; ImageIndex: Integer = -1);
 var
   NewCell: TCellInfo;
 begin
-  NewCell := FCells.Add(CellTitle);
+  NewCell := FCells.Add(CellTitle, ImageIndex);
 end;
 
 { TLuiBarPatterns }
