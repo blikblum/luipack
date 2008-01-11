@@ -110,7 +110,7 @@ type
   public
     constructor Create(Owner: TLuiBar);
     destructor Destroy; override;
-    function Add(const Title: String; ImageIndex: Integer): TCellInfo;
+    function Add(const Title: String; ImageIndex: Integer = -1): TCellInfo;
     procedure Clear;
     procedure UpdateCellBounds;
     property Count: Integer read GetCount;
@@ -164,7 +164,6 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure Add(const CellTitle: String; ImageIndex: Integer = -1);
     property Cells: TCellInfoList read FCells;
     property CellHeight: Integer read FCellHeight write FCellHeight;
     property CellWidth: Integer read FCellWidth write FCellWidth;
@@ -218,7 +217,7 @@ begin
   FList.Destroy;
 end;
 
-function TCellInfoList.Add(const Title: String; ImageIndex: Integer): TCellInfo;
+function TCellInfoList.Add(const Title: String; ImageIndex: Integer = -1): TCellInfo;
 begin
   Result := TCellInfo.Create;
   Result.Title := Title;
@@ -747,18 +746,10 @@ begin
   inherited Destroy;
 end;
 
-procedure TLuiBar.Add(const CellTitle: String; ImageIndex: Integer = -1);
-var
-  NewCell: TCellInfo;
-begin
-  NewCell := FCells.Add(CellTitle, ImageIndex);
-end;
-
 { TLuiBarPatterns }
 
 procedure TLuiBarPatterns.SetBackGround(const AValue: TCairoPattern);
 begin
-  //if FBackGround=AValue then exit;
   FBackGround.Free;
   FBackGround := AValue;
 end;
@@ -770,42 +761,36 @@ end;
 
 procedure TLuiBarPatterns.SetHover(const AValue: TCairoPattern);
 begin
-  //if FHover=AValue then exit;
   FHover.Free;
   FHover := AValue;
 end;
 
 procedure TLuiBarPatterns.SetNormal(const AValue: TCairoPattern);
 begin
-  //if FNormal=AValue then exit;
   FNormal.Free;
   FNormal := AValue;
 end;
 
 procedure TLuiBarPatterns.SetOutLine(const AValue: TCairoPattern);
 begin
-  //if FOutLine=AValue then exit;
   FOutLine.Free;
   FOutLine := AValue;
 end;
 
 procedure TLuiBarPatterns.SetSelected(const AValue: TCairoPattern);
 begin
-  //if FSelected=AValue then exit;
   FSelected.Free;
   FSelected := AValue;
 end;
 
 procedure TLuiBarPatterns.SetSelectedText(const AValue: TCairoPattern);
 begin
-  //if FSelectedText=AValue then exit;
   FSelectedText.Free;
   FSelectedText := AValue;
 end;
 
 procedure TLuiBarPatterns.SetText(const AValue: TCairoPattern);
 begin
-  //if FText=AValue then exit;
   FText.Free;
   FText := AValue;
 end;
