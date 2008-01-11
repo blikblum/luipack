@@ -24,7 +24,7 @@ type
   
   TPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText, ptBackground, ptOutLine);
   
-  TGetDefaultPattern = procedure (Sender: TLuiBar; PatternType: TPatternType;
+  TLuiBarGetPattern = procedure (Sender: TLuiBar; PatternType: TPatternType;
     var Pattern: TCairoPattern; var Color: TCairoColor) of object;
   
   TGetCellPattern = procedure (Cell: TCellInfo; PatternType: TPatternType;
@@ -86,17 +86,13 @@ type
     FTitle: String;
     function GetHeight: Integer;
     function GetWidth: Integer;
-    procedure SetBounds(const AValue: TRect);
-    procedure SetIndex(const AValue: Integer);
-    procedure SetPattern(const AValue: TCairoPattern);
-    procedure SetTitle(const AValue: String);
   public
     destructor Destroy; override;
     property Height: Integer read GetHeight;
-    property Index: Integer read FIndex write SetIndex;
-    property Pattern: TCairoPattern read FPattern write SetPattern;
-    property Title: String read FTitle write SetTitle;
-    property Bounds: TRect read FBounds write SetBounds;
+    property Index: Integer read FIndex write FIndex;
+    property Pattern: TCairoPattern read FPattern write FPattern;
+    property Title: String read FTitle write FTitle;
+    property Bounds: TRect read FBounds write FBounds;
     property Width: Integer read GetWidth;
   end;
 
@@ -130,7 +126,7 @@ type
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
     FInnerRadius: Double;
-    FOnGetDefaultPatterns: TGetDefaultPattern;
+    FOnGetDefaultPatterns: TLuiBarGetPattern;
     FOnSelect: TLuiBarNotify;
     FOptions: TLuiBarOptions;
     FOuterRadius: Double;
@@ -143,7 +139,7 @@ type
     procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
     function GetTextWidth(const AText: String): Double;
     procedure SetInitialSpace(const AValue: Integer);
-    procedure SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
+    procedure SetOnGetPatterns(const AValue: TLuiBarGetPattern);
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
@@ -176,7 +172,7 @@ type
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
     //events
-    property OnGetPatterns: TGetDefaultPattern read FOnGetDefaultPatterns write SetOnGetDefaultPatterns;
+    property OnGetPatterns: TLuiBarGetPattern read FOnGetDefaultPatterns write SetOnGetPatterns;
     property OnSelect: TLuiBarNotify read FOnSelect write FOnSelect;
   published
 
@@ -208,7 +204,6 @@ begin
   Result := FList.Count;
 end;
 
-
 destructor TCellInfoList.Destroy;
 begin
   Clear;
@@ -239,62 +234,90 @@ var
   Cell: TCellInfo;
 begin
   case FOwner.Position of
-  lbpTop:
-    begin
-      NextLeft := FOwner.InitialSpace;
-      for i := 0 to FList.Count - 1 do
+    lbpTop:
       begin
-        Cell := Items[i];
-        Cell.Bounds.Left := NextLeft;
-        Cell.Bounds.Top := FOwner.OuterOffset;
-        Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
-        //get width
-        if lboSpanCells in FOwner.Options then
+        NextLeft := FOwner.InitialSpace;
+        for i := 0 to FList.Count - 1 do
         begin
-          //align the last tab to the control
-          if i = FList.Count - 1 then
-            Cell.Bounds.Right := FOwner.Width
+          Cell := Items[i];
+          Cell.Bounds.Left := NextLeft;
+          Cell.Bounds.Top := FOwner.OuterOffset;
+          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          //get width
+          if lboSpanCells in FOwner.Options then
+          begin
+            //align the last tab to the control
+            if i = FList.Count - 1 then
+              Cell.Bounds.Right := FOwner.Width
+            else
+              Cell.Bounds.Right := Cell.Bounds.Left +
+                (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
+          end
           else
-            Cell.Bounds.Right := Cell.Bounds.Left +
-              (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
-        end
-        else
-        begin
-          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
-        end;
+          begin
+            Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          end;
 
-        NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+          NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+        end;
       end;
-    end;
-  lbpLeft:
-    begin
-      NextTop := FOwner.InitialSpace;
-      for i := 0 to FList.Count - 1 do
+    lbpLeft:
       begin
-        Cell := Items[i];
-        Cell.Bounds.Top := NextTop;
-        Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
-        Cell.Bounds.Left := FOwner.OuterOffset;
-        Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
-        NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
-        Logger.Send('Cell.Bounds', Cell.Bounds);
+        NextTop := FOwner.InitialSpace;
+        for i := 0 to FList.Count - 1 do
+        begin
+          Cell := Items[i];
+          Cell.Bounds.Top := NextTop;
+          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          Cell.Bounds.Left := FOwner.OuterOffset;
+          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
+        end;
       end;
-    end;
+    lbpRight:
+      begin
+        NextTop := FOwner.InitialSpace;
+        for i := 0 to FList.Count - 1 do
+        begin
+          Cell := Items[i];
+          Cell.Bounds.Top := NextTop;
+          Cell.Bounds.Right := FOwner.Width - FOwner.OuterOffset;
+          Cell.Bounds.Left := Cell.Bounds.Right - FOwner.DoCalculateCellWidth(Cell);
+          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
+        end;
+      end;
+    lbpBottom:
+      begin
+        NextLeft := FOwner.InitialSpace;
+        for i := 0 to FList.Count - 1 do
+        begin
+          Cell := Items[i];
+          Cell.Bounds.Left := NextLeft;
+          Cell.Bounds.Bottom := FOwner.Height - FOwner.OuterOffset;
+          Cell.Bounds.Top := Cell.Bounds.Bottom - FOwner.CellHeight;
+          //get width
+          if lboSpanCells in FOwner.Options then
+          begin
+            //align the last tab to the control
+            if i = FList.Count - 1 then
+              Cell.Bounds.Right := FOwner.Width
+            else
+              Cell.Bounds.Right := Cell.Bounds.Left +
+                (FOwner.Width - (FOwner.Spacing * (FList.Count - 1))) div FList.Count;
+          end
+          else
+          begin
+            Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          end;
+          NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+        end;
+      end;
   end;
   FRequiresUpdate := False;
 end;
 
 { TCellInfo }
-
-procedure TCellInfo.SetPattern(const AValue: TCairoPattern);
-begin
-  FPattern := AValue;
-end;
-
-procedure TCellInfo.SetBounds(const AValue: TRect);
-begin
-  FBounds := AValue;
-end;
 
 function TCellInfo.GetWidth: Integer;
 begin
@@ -304,17 +327,6 @@ end;
 function TCellInfo.GetHeight: Integer;
 begin
   Result := Bounds.Bottom - Bounds.Top;
-end;
-
-procedure TCellInfo.SetIndex(const AValue: Integer);
-begin
-  if FIndex=AValue then exit;
-  FIndex:=AValue;
-end;
-
-procedure TCellInfo.SetTitle(const AValue: String);
-begin
-  FTitle := AValue;
 end;
 
 destructor TCellInfo.Destroy;
@@ -374,7 +386,7 @@ begin
   FInitialSpace:=AValue;
 end;
 
-procedure TLuiBar.SetOnGetDefaultPatterns(const AValue: TGetDefaultPattern);
+procedure TLuiBar.SetOnGetPatterns(const AValue: TLuiBarGetPattern);
 begin
   FOnGetDefaultPatterns := AValue;
   FPatterns.FixedValues := AValue = nil;
@@ -423,10 +435,14 @@ end;
 procedure TLuiBar.DoDrawCellPath(Cell: TCellInfo);
 begin
   case FPosition of
-    lbpTop: DrawRoundedRect(0, Cell.Height, 0, 0, Cell.Width, 0, Cell.Width, Cell.Height);
-    lbpBottom: DrawRoundedRect(0, 0, 0, Cell.Height, Cell.Width, Cell.Height, Cell.Width, 0);
-    lbpLeft: DrawRoundedRect(Cell.Width, 0, 0, 0, 0, Cell.Height, Cell.Width, Cell.Height);
-    lbpRight: DrawRoundedRect(0, 0, Cell.Width, 0, Cell.Width, Cell.Height, 0, Cell.Height);
+    lbpTop:
+      DrawRoundedRect(0, Cell.Height, 0, 0, Cell.Width, 0, Cell.Width, Cell.Height);
+    lbpBottom:
+      DrawRoundedRect(0, 0, 0, Cell.Height, Cell.Width, Cell.Height, Cell.Width, 0);
+    lbpLeft:
+      DrawRoundedRect(Cell.Width, 0, 0, 0, 0, Cell.Height, Cell.Width, Cell.Height);
+    lbpRight:
+      DrawRoundedRect(0, 0, Cell.Width, 0, Cell.Width, Cell.Height, 0, Cell.Height);
   end;
   if not (lboEmulateTab in FOptions) then
     Context.ClosePath;
@@ -515,18 +531,30 @@ procedure TLuiBar.DoDrawBackground;
     with Context do
     begin
       case FPosition of
-      lbpTop:
-        begin
-          LineTo(Cell.Bounds.Left, FOuterOffset + FCellHeight);
-          Stroke;
-          MoveTo(Cell.Bounds.Right, FOuterOffset + FCellHeight);
-        end;
-      lbpLeft:
-        begin
-          LineTo(FOuterOffset + FCellWidth, Cell.Bounds.Top);
-          Stroke;
-          MoveTo(FOuterOffset + FCellWidth, Cell.Bounds.Bottom);
-        end;
+        lbpTop:
+          begin
+            LineTo(Cell.Bounds.Left, FOuterOffset + FCellHeight);
+            Stroke;
+            MoveTo(Cell.Bounds.Right, FOuterOffset + FCellHeight);
+          end;
+        lbpLeft:
+          begin
+            LineTo(FOuterOffset + FCellWidth, Cell.Bounds.Top);
+            Stroke;
+            MoveTo(FOuterOffset + FCellWidth, Cell.Bounds.Bottom);
+          end;
+        lbpRight:
+          begin
+            LineTo(Width - (FOuterOffset + FCellWidth), Cell.Bounds.Top);
+            Stroke;
+            LineTo(Width - (FOuterOffset + FCellWidth), Cell.Bounds.Bottom);
+          end;
+        lbpBottom:
+          begin
+            LineTo(Cell.Bounds.Left, Height - (FOuterOffset + FCellHeight));
+            Stroke;
+            LineTo(Cell.Bounds.Right, Height - (FOuterOffset + FCellHeight));
+          end;
       end;
     end;
   end;
@@ -546,10 +574,14 @@ begin
       //todo: handle when there's no client area
       //todo: store client area size
       case FPosition of
-      lbpTop:
-        Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
-      lbpLeft:
-        Rectangle(FOuterOffset + FCellWidth, 0, Width , Height);
+        lbpTop:
+          Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
+        lbpLeft:
+          Rectangle(FOuterOffset + FCellWidth, 0, Width , Height);
+        lbpRight:
+          Rectangle(0, 0, Width - (FOuterOffset + FCellWidth), Height);
+        lbpBottom:
+          Rectangle(0, 0, Width, Height - (FOuterOffset + FCellHeight));
       end;
       Source := FPatterns.Selected;
       Fill;
@@ -558,10 +590,14 @@ begin
       Source := FPatterns.OutLine;
       
       case FPosition of
-      lbpTop:
-        MoveTo(0, FOuterOffset + FCellHeight);
-      lbpLeft:
-        MoveTo(FOuterOffset + FCellWidth, 0);
+        lbpTop:
+          MoveTo(0, FOuterOffset + FCellHeight);
+        lbpLeft:
+          MoveTo(FOuterOffset + FCellWidth, 0);
+        lbpRight:
+          MoveTo(Width - (FOuterOffset + FCellWidth), 0);
+        lbpBottom:
+          MoveTo(0, Height - (FOuterOffset + FCellHeight));
       end;
 
       if (lboHoverAsSelected in FOptions) and
@@ -579,31 +615,46 @@ begin
 
       //todo remove all these case
       case FPosition of
-      lbpTop:
-        LineTo(Width, FOuterOffset + FCellHeight);
-      lbpLeft:
-        LineTo(FOuterOffset + FCellWidth, Height);
+        lbpTop:
+          LineTo(Width, FOuterOffset + FCellHeight);
+        lbpLeft:
+          LineTo(FOuterOffset + FCellWidth, Height);
+        lbpRight:
+          LineTo(Width - (FOuterOffset + FCellWidth), Height);
+        lbpBottom:
+          LineTo(Width, Height - (FOuterOffset + FCellHeight));
       end;
 
       if lboOutLineClientArea in FOptions then
       begin
         case FPosition of
-        lbpTop:
-          begin
-            LineTo(Width, Height);
-            LineTo(0, Height);
-            LineTo(0, FOuterOffset + FCellHeight);
-          end;
-        lbpLeft:
-          begin
-            LineTo(Width, Height);
-            LineTo(Width, 0);
-            LineTo(FOuterOffset + FCellWidth, 0);
-          end;
+          lbpTop:
+            begin
+              LineTo(Width, Height);
+              LineTo(0, Height);
+              LineTo(0, FOuterOffset + FCellHeight);
+            end;
+          lbpLeft:
+            begin
+              LineTo(Width, Height);
+              LineTo(Width, 0);
+              LineTo(FOuterOffset + FCellWidth, 0);
+            end;
+          lbpRight:
+            begin
+              LineTo(0, Height);
+              LineTo(0, 0);
+              LineTo(Width - (FOuterOffset + FCellWidth), 0);
+            end;
+          lbpBottom:
+            begin
+              LineTo(Width, 0);
+              LineTo(0, 0);
+              LineTo(0, Height - (FOuterOffset + FCellHeight));
+            end;
         end;
       end;
       Stroke;
-
     end;
     Restore;
   end;
