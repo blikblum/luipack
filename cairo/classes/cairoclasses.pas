@@ -395,6 +395,8 @@ type
     property Source: TCairoPattern read GetSource write SetSource;
     property Target: TCairoSurface read GetTarget;
     property Tolerance: Double read GetTolerance write SetTolerance;
+
+    property Handle: Pcairo_t read FHandle;
   end;
   
   function CairoColor(Red, Green, Blue, Alpha: Double): TCairoColor;

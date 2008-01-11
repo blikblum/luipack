@@ -58,6 +58,7 @@ type
     FContext: TCairoContext;
     FOnDraw: TNotifyEvent;
     procedure CreateContext;
+    procedure InitBitmap;
   protected
     procedure DoDraw; virtual;
     procedure DoOnResize; override;
@@ -95,12 +96,16 @@ var
 begin
   FBitmap.Width := Width;
   FBitmap.Height := Height;
-  FBitmap.Canvas.Brush.Color := Parent.Color;
-  FBitmap.Canvas.FillRect(0, 0, Width, Height);
-  //todo: make surface persistent ?
+  InitBitmap;
   Surface := TCairoDCSurface.Create(FBitmap.Canvas.Handle);
   FContext := TCairoContext.Create(Surface);
   Surface.Destroy;
+end;
+
+procedure TCairoControl.InitBitmap;
+begin
+  FBitmap.Canvas.Brush.Color := Parent.Color;
+  FBitmap.Canvas.FillRect(0, 0, Width, Height);
 end;
 
 procedure TCairoControl.DoDraw;
@@ -157,6 +162,7 @@ procedure TCairoControl.Redraw;
 begin
   if not Assigned(FContext) then
     CreateContext;
+  InitBitmap;
   DoDraw;
   Invalidate;
 end;
