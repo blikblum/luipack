@@ -86,7 +86,13 @@ function ColorToCairoColor(Color: TColor): TCairoColor; inline;
 
 implementation
 
-  {$i cairolcl.inc}
+{$i cairolcl.inc}
+
+function ColorToCairoColor(Color: TColor): TCairoColor;
+begin
+  Result := RGBToCairoColor(ColorToRGB(Color));
+end;
+
 
 { TCairoControl }
 
