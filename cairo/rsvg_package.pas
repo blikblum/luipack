@@ -7,14 +7,8 @@ unit rsvg_package;
 interface
 
 uses
-  rsvg, RsvgClasses, LazarusPackageIntf; 
+  rsvg, RsvgClasses; 
 
 implementation
 
-procedure Register; 
-begin
-end; 
-
-initialization
-  RegisterPackage('rsvg_package', @Register); 
 end.
