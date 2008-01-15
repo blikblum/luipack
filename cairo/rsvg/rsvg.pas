@@ -8,7 +8,7 @@ uses
   glib2, gdk2pixbuf, Cairo14;
   
 const
-  RSVG_LIBNAME = 'rsvg';
+  RSVG_LIBNAME = 'rsvg-2';
 
 type
   GQuark = TGQuark;
