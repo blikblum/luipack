@@ -1,2 +1,2 @@
 
-  gtk, gtkdef, gtkint, cairo_xlib, gdk,
+  gtkdef, gtkint, cairo_xlib, gdk, GtkWSControls, WSLCLClasses,
