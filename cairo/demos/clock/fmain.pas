@@ -58,7 +58,7 @@ begin
     // the center of the window
     Scale(Width, Height);
     Translate(0.5, 0.5);
-    SetLineWidth(m_lineWidth);
+    LineWidth := m_lineWidth;
     Save;
     SetSourceRGBA(0.337, 0.612, 0.117, 0.9);   // green
     Paint;
@@ -75,12 +75,12 @@ begin
     begin
       inset := 0.05;
       Save;
-      SetLineCap(CAIRO_LINE_CAP_ROUND);
+      LineCap := CAIRO_LINE_CAP_ROUND;
 
       if (i div 3 <> 0) then
       begin
         inset := inset*0.8;
-        SetLineWidth(0.03);
+        LineWidth := 0.03;
       end;
 
       MoveTo( (m_radius - inset) * cos (i * PI / 6),
@@ -99,10 +99,10 @@ begin
     SecondAngle := Second * PI / 30;
 
     Save;
-    SetLineCap(CAIRO_LINE_CAP_ROUND);
+    LineCap := CAIRO_LINE_CAP_ROUND;
     // draw the seconds hand
     Save;
-    SetLineWidth(m_lineWidth / 3);
+    LineWidth := m_lineWidth / 3;
     SetSourceRGBA(0.7, 0.7, 0.7, 0.8); // gray
     MoveTo(0, 0);
     LineTo(sin(SecondAngle) * (m_radius * 0.9),
