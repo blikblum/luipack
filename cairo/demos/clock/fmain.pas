@@ -1,7 +1,8 @@
 unit fmain;
 
 {
-Based in cairomm example: http://gtkmm.org/docs/gtkmm-2.4/docs/tutorial/html/ch15s07.html
+  Based in cairomm example:
+  http://gtkmm.org/docs/gtkmm-2.4/docs/tutorial/html/sec-drawing-clock-example.html
 }
 
 {$mode objfpc}{$H+}
@@ -70,6 +71,7 @@ begin
     Restore;
     StrokePreserve;
     Clip;
+
     //clock ticks
     for i := 0 to 11 do
     begin
@@ -90,9 +92,10 @@ begin
       Stroke;
       Restore; (* stack-pen-size *)
     end;
-    // store the current time
 
+    // store the current time
     DecodeTime(Time, Hour, Minute, Second, MSecond);
+
     // compute the angles of the indicators of our clock
     MinuteAngle := Minute * PI / 30;
     HourAngle := hour * PI / 6;
@@ -100,6 +103,7 @@ begin
 
     Save;
     LineCap := CAIRO_LINE_CAP_ROUND;
+
     // draw the seconds hand
     Save;
     LineWidth := m_lineWidth / 3;
@@ -116,6 +120,7 @@ begin
     LineTo(sin(MinuteAngle + SecondAngle / 60) * (m_radius * 0.8),
             -cos(MinuteAngle + SecondAngle / 60) * (m_radius * 0.8));
     Stroke;
+
     // draw the hours hand
     SetSourceRGBA(0.337, 0.612, 0.117, 0.9);   // green
     MoveTo(0, 0);
