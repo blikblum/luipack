@@ -22,7 +22,9 @@ type
   
   TLuiBarCellAlign = (lbaDefault, lbaInvert, lbaCenter);
   
-  TLuiBarNotify = procedure (Sender: TLuiBar) of object;
+  TLuiBarEvent = procedure (Sender: TLuiBar) of object;
+  
+  TLuiBarDrawCellEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell) of object;
   
   TLuiBarPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText, ptBackground, ptOutLine);
   
@@ -130,10 +132,14 @@ type
     FCellWidth: Integer;
     FImages: TImageList;
     FInitialSpace: Integer;
+    FOnDrawBackground: TLuiBarEvent;
+    FOnDrawCell: TLuiBarDrawCellEvent;
+    FOnDrawCellPath: TLuiBarDrawCellEvent;
+    FOnDrawCellText: TLuiBarDrawCellEvent;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
     FOnGetDefaultPatterns: TLuiBarGetPattern;
-    FOnSelect: TLuiBarNotify;
+    FOnSelect: TLuiBarEvent;
     FOptions: TLuiBarOptions;
     FCellRoundRadius: Integer;
     FOutLineWidth: Integer;
@@ -159,7 +165,7 @@ type
     procedure DoDrawBackground; virtual;
     procedure DoDrawCell(Cell: TLuiBarCell); virtual;
     procedure DoDrawCellPath(Cell: TLuiBarCell); virtual;
-    procedure DoDrawCellTitle(Cell: TLuiBarCell); virtual;
+    procedure DoDrawCellText(Cell: TLuiBarCell); virtual;
     function DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType
       ): TCairoPattern; virtual;
     procedure DoSelect; virtual;
@@ -185,8 +191,12 @@ type
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
     //events
+    property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
+    property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
+    property OnDrawCellPath: TLuiBarDrawCellEvent read FOnDrawCellPath write FOnDrawCellPath;
+    property OnDrawCellText: TLuiBarDrawCellEvent read FOnDrawCellText write FOnDrawCellText;
     property OnGetPatterns: TLuiBarGetPattern read FOnGetDefaultPatterns write SetOnGetPatterns;
-    property OnSelect: TLuiBarNotify read FOnSelect write FOnSelect;
+    property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
   published
 
   end;
@@ -478,103 +488,111 @@ procedure TLuiBar.DoDrawCellPath(Cell: TLuiBarCell);
 var
   InnerRadius: Integer;
 begin
-  if lboEmulateTab in FOptions then
-    InnerRadius := 0
+  if Assigned(FOnDrawCellPath) then
+    FOnDrawCellPath(Self, Cell)
   else
-    InnerRadius := FCellRoundRadius;
-  case FPosition of
-    lbpTop:
-      with Context do
-      begin
-        //todo: use matrix manipulation to consolidate the procedures??
-        MoveTo(InnerRadius, Cell.Height);
-        CurveTo(InnerRadius, Cell.Height,
-          0, Cell.Height,
-          0, Cell.Height - InnerRadius);
-        LineTo(0, FCellRoundRadius);
-        CurveTo(0, FCellRoundRadius,
-          0, 0,
-          FCellRoundRadius, 0);
-        LineTo(Cell.Width - FCellRoundRadius, 0);
-        CurveTo(Cell.Width - FCellRoundRadius, 0,
-          Cell.Width, 0,
-          Cell.Width, FCellRoundRadius);
-        LineTo(Cell.Width, Cell.Height - InnerRadius);
-        CurveTo(Cell.Width, Cell.Height - InnerRadius,
-          Cell.Width, Cell.Height,
-          Cell.Width - InnerRadius, Cell.Height);
-      end;
-    lbpBottom:
-      with Context do
-      begin
-        MoveTo(InnerRadius, 0);
-        CurveTo(InnerRadius, 0,
-          0, 0,
-          0, InnerRadius);
-        LineTo(0, Cell.Height - FCellRoundRadius);
-        CurveTo(0, Cell.Height - FCellRoundRadius,
-          0, Cell.Height,
-          FCellRoundRadius, Cell.Height);
-        LineTo(Cell.Width - FCellRoundRadius, Cell.Height);
-        CurveTo(Cell.Width - FCellRoundRadius, Cell.Height,
-          Cell.Width, Cell.Height,
-          Cell.Width, Cell.Height - FCellRoundRadius);
-        LineTo(Cell.Width, InnerRadius);
-        CurveTo(Cell.Width, InnerRadius,
-          Cell.Width, 0,
-          Cell.Width - InnerRadius, 0);
-      end;
-    lbpLeft:
-      with Context do
-      begin
-        MoveTo(Cell.Width, InnerRadius);
-        CurveTo(Cell.Width, InnerRadius,
-          Cell.Width, 0,
-          Cell.Width - InnerRadius, 0);
-        LineTo(FCellRoundRadius, 0);
-        CurveTo(FCellRoundRadius, 0,
-          0, 0,
-          0, FCellRoundRadius);
-        LineTo(0, Cell.Height - FCellRoundRadius);
-        CurveTo(0, Cell.Height - FCellRoundRadius,
-          0, Cell.Height,
-          FCellRoundRadius, Cell.Height);
-        LineTo(Cell.Width - InnerRadius, Cell.Height);
-        CurveTo(Cell.Width - InnerRadius, Cell.Height,
-          Cell.Width, Cell.Height,
-          Cell.Width, Cell.Height - InnerRadius);
-      end;
-    lbpRight:
-      with Context do
-      begin
-        MoveTo(0, InnerRadius);
-        CurveTo(0, InnerRadius,
-          0, 0,
-          InnerRadius, 0);
-        LineTo(Cell.Width - FCellRoundRadius, 0);
-        CurveTo(Cell.Width - FCellRoundRadius, 0,
-          Cell.Width, 0,
-          Cell.Width, FCellRoundRadius);
-        LineTo(Cell.Width, Cell.Height - FCellRoundRadius);
-        CurveTo(Cell.Width, Cell.Height - FCellRoundRadius,
-          Cell.Width, Cell.Height,
-          Cell.Width - FCellRoundRadius, Cell.Height);
-        LineTo(InnerRadius, Cell.Height);
-        CurveTo(InnerRadius, Cell.Height,
-          0, Cell.Height,
-          0, Cell.Height - InnerRadius);
-      end;
+  begin
+    if lboEmulateTab in FOptions then
+      InnerRadius := 0
+    else
+      InnerRadius := FCellRoundRadius;
+    case FPosition of
+      lbpTop:
+        with Context do
+        begin
+          //todo: use matrix manipulation to consolidate the procedures??
+          MoveTo(InnerRadius, Cell.Height);
+          CurveTo(InnerRadius, Cell.Height,
+            0, Cell.Height,
+            0, Cell.Height - InnerRadius);
+          LineTo(0, FCellRoundRadius);
+          CurveTo(0, FCellRoundRadius,
+            0, 0,
+            FCellRoundRadius, 0);
+          LineTo(Cell.Width - FCellRoundRadius, 0);
+          CurveTo(Cell.Width - FCellRoundRadius, 0,
+            Cell.Width, 0,
+            Cell.Width, FCellRoundRadius);
+          LineTo(Cell.Width, Cell.Height - InnerRadius);
+          CurveTo(Cell.Width, Cell.Height - InnerRadius,
+            Cell.Width, Cell.Height,
+            Cell.Width - InnerRadius, Cell.Height);
+        end;
+      lbpBottom:
+        with Context do
+        begin
+          MoveTo(InnerRadius, 0);
+          CurveTo(InnerRadius, 0,
+            0, 0,
+            0, InnerRadius);
+          LineTo(0, Cell.Height - FCellRoundRadius);
+          CurveTo(0, Cell.Height - FCellRoundRadius,
+            0, Cell.Height,
+            FCellRoundRadius, Cell.Height);
+          LineTo(Cell.Width - FCellRoundRadius, Cell.Height);
+          CurveTo(Cell.Width - FCellRoundRadius, Cell.Height,
+            Cell.Width, Cell.Height,
+            Cell.Width, Cell.Height - FCellRoundRadius);
+          LineTo(Cell.Width, InnerRadius);
+          CurveTo(Cell.Width, InnerRadius,
+            Cell.Width, 0,
+            Cell.Width - InnerRadius, 0);
+        end;
+      lbpLeft:
+        with Context do
+        begin
+          MoveTo(Cell.Width, InnerRadius);
+          CurveTo(Cell.Width, InnerRadius,
+            Cell.Width, 0,
+            Cell.Width - InnerRadius, 0);
+          LineTo(FCellRoundRadius, 0);
+          CurveTo(FCellRoundRadius, 0,
+            0, 0,
+            0, FCellRoundRadius);
+          LineTo(0, Cell.Height - FCellRoundRadius);
+          CurveTo(0, Cell.Height - FCellRoundRadius,
+            0, Cell.Height,
+            FCellRoundRadius, Cell.Height);
+          LineTo(Cell.Width - InnerRadius, Cell.Height);
+          CurveTo(Cell.Width - InnerRadius, Cell.Height,
+            Cell.Width, Cell.Height,
+            Cell.Width, Cell.Height - InnerRadius);
+        end;
+      lbpRight:
+        with Context do
+        begin
+          MoveTo(0, InnerRadius);
+          CurveTo(0, InnerRadius,
+            0, 0,
+            InnerRadius, 0);
+          LineTo(Cell.Width - FCellRoundRadius, 0);
+          CurveTo(Cell.Width - FCellRoundRadius, 0,
+            Cell.Width, 0,
+            Cell.Width, FCellRoundRadius);
+          LineTo(Cell.Width, Cell.Height - FCellRoundRadius);
+          CurveTo(Cell.Width, Cell.Height - FCellRoundRadius,
+            Cell.Width, Cell.Height,
+            Cell.Width - FCellRoundRadius, Cell.Height);
+          LineTo(InnerRadius, Cell.Height);
+          CurveTo(InnerRadius, Cell.Height,
+            0, Cell.Height,
+            0, Cell.Height - InnerRadius);
+        end;
+    end;
+    if not (lboEmulateTab in FOptions) then
+      Context.ClosePath;
   end;
-  if not (lboEmulateTab in FOptions) then
-    Context.ClosePath;
 end;
 
-procedure TLuiBar.DoDrawCellTitle(Cell: TLuiBarCell);
+procedure TLuiBar.DoDrawCellText(Cell: TLuiBarCell);
 var
   Extents: cairo_text_extents_t;
 const
   TextPatternMap: array[Boolean] of TLuiBarPatternType = (ptText, ptSelectedText);
 begin
+  if Assigned(FOnDrawCellText) then
+    FOnDrawCellText(Self, Cell)
+  else
   with Context do
   begin
     Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index = FSelectedIndex]);
@@ -677,6 +695,7 @@ end;
 procedure TLuiBar.DoDraw;
 var
   i: Integer;
+  Cell: TLuiBarCell;
 begin
   if FPatterns.RequiresUpdate then
     DoUpdatePatterns;
@@ -684,24 +703,30 @@ begin
     FCells.UpdateCellBounds;
   DoDrawBackground;
   for i := 0 to FCells.Count - 1 do
-    DoDrawCell(FCells[i]);
+  with Context do
+  begin
+    Cell := FCells[i];
+    Save;
+    Translate(Cell.Bounds.Left, Cell.Bounds.Top);
+    DoDrawCell(Cell);
+    DoDrawCellText(Cell);
+    Restore;
+  end;
 end;
 
 procedure TLuiBar.DoDrawCell(Cell: TLuiBarCell);
 begin
+  if Assigned(FOnDrawCell) then
+    FOnDrawCell(Self, Cell)
+  else
   with Context do
   begin
-    Save;
-    Translate(Cell.Bounds.Left, Cell.Bounds.Top);
     DoDrawCellPath(Cell);
-    //ClipPreserve;
     Source := DoGetCellPattern(Cell, IndexToPatternType(Cell.Index));
     FillPreserve;
     LineWidth := FOutLineWidth;
     Source := DoGetCellPattern(Cell, ptOutLine);
     Stroke;
-    DoDrawCellTitle(Cell);
-    Restore;
   end;
 end;
 
@@ -751,17 +776,22 @@ var
   SkipCells: array[0..1] of Integer = (-1, -1);
   
 begin
+
   with Context do
   begin
     Save;
-    Source := FPatterns.Background;
-    Rectangle(0, 0, Width, Height);
-    Fill;
+    if Assigned(FOnDrawBackground) then
+      FOnDrawBackground(Self)
+    else
+    begin
+      Source := FPatterns.Background;
+      Rectangle(0, 0, Width, Height);
+      Fill;
+    end;
     if lboEmulateTab in FOptions then
     begin
       //todo: handle when there's no client area
       //todo: store client area size
-
         case FPosition of
           lbpTop:
             Rectangle(0, FOuterOffset + FCellHeight, Width, Height - (FOuterOffset + FCellHeight));
@@ -774,7 +804,6 @@ begin
         end;
         Source := FPatterns.Selected;
         Fill;
-
 
       //Draw base outline
       LineWidth := FOutLineWidth;
