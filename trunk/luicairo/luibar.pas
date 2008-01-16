@@ -20,6 +20,8 @@ type
   
   TLuiBarPosition = (lbpTop, lbpLeft, lbpBottom, lbpRight);
   
+  TLuiBarCellAlign = (lbaDefault, lbaInvert, lbaCenter);
+  
   TLuiBarNotify = procedure (Sender: TLuiBar) of object;
   
   TPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText, ptBackground, ptOutLine);
@@ -121,6 +123,7 @@ type
 
   TLuiBar = class(TCairoControl)
   private
+    FCellAlign: TLuiBarCellAlign;
     FCellHeight: Integer;
     FCells: TCellInfoList;
     FCellWidth: Integer;
@@ -140,8 +143,10 @@ type
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
     procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
+    function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
     function GetRealCellWidth: Integer;
     function GetTextWidth(const AText: String): Double;
+    procedure SetCellAlign(const AValue: TLuiBarCellAlign);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetPatterns(const AValue: TLuiBarGetPattern);
@@ -165,6 +170,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     property Cells: TCellInfoList read FCells;
+    property CellAlign: TLuiBarCellAlign read FCellAlign write SetCellAlign;
     property CellHeight: Integer read FCellHeight write FCellHeight;
     property CellWidth: Integer read FCellWidth write FCellWidth;
     property Images: TImageList read FImages write SetImages;
@@ -238,13 +244,13 @@ end;
 
 procedure TCellInfoList.UpdateCellBounds;
 var
-  i, NextLeft, NextTop, NewWidth: Integer;
+  i, NextLeft, NextTop, NewWidth, AlignOffset: Integer;
   Cell: TCellInfo;
 begin
   case FOwner.Position of
     lbpTop:
       begin
-        NextLeft := FOwner.InitialSpace;
+        NextLeft := 0;
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
@@ -254,10 +260,16 @@ begin
           Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextLeft := Cell.Bounds.Right + FOwner.Spacing;
         end;
+        AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Right, FOwner.Width);
+        if AlignOffset > 0 then
+        begin
+          for i := 0 to FList.Count - 1 do
+            OffsetRect(Items[i].Bounds, AlignOffset, 0);
+        end;
       end;
     lbpLeft:
       begin
-        NextTop := FOwner.InitialSpace;
+        NextTop := 0;
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
@@ -267,10 +279,16 @@ begin
           Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
         end;
+        AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Bottom, FOwner.Height);
+        if AlignOffset > 0 then
+        begin
+          for i := 0 to FList.Count - 1 do
+            OffsetRect(Items[i].Bounds, 0, AlignOffset);
+        end;
       end;
     lbpRight:
       begin
-        NextTop := FOwner.InitialSpace;
+        NextTop := 0;
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
@@ -280,10 +298,16 @@ begin
           Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
           NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
         end;
+        AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Bottom, FOwner.Height);
+        if AlignOffset > 0 then
+        begin
+          for i := 0 to FList.Count - 1 do
+            OffsetRect(Items[i].Bounds, 0, AlignOffset);
+        end;
       end;
     lbpBottom:
       begin
-        NextLeft := FOwner.InitialSpace;
+        NextLeft := 0;
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
@@ -292,6 +316,12 @@ begin
           Cell.Bounds.Top := Cell.Bounds.Bottom - FOwner.CellHeight;
           Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextLeft := Cell.Bounds.Right + FOwner.Spacing;
+        end;
+        AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Right, FOwner.Width);
+        if AlignOffset > 0 then
+        begin
+          for i := 0 to FList.Count - 1 do
+            OffsetRect(Items[i].Bounds, AlignOffset, 0);
         end;
       end;
   end;
@@ -350,6 +380,18 @@ begin
   end;
 end;
 
+function TLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
+begin
+  case FCellAlign of
+    lbaDefault:
+      Result := FInitialSpace;
+    lbaInvert:
+      Result := ControlSize - (CellSize + FInitialSpace);
+    lbaCenter:
+      Result := (ControlSize - CellSize) div 2;
+  end;
+end;
+
 function TLuiBar.GetRealCellWidth: Integer;
 begin
   if FCellWidth > 0 then
@@ -372,6 +414,12 @@ begin
     TextExtents(AText, @Extents);
     Result := Extents.width;
   end;
+end;
+
+procedure TLuiBar.SetCellAlign(const AValue: TLuiBarCellAlign);
+begin
+  if FCellAlign=AValue then exit;
+  FCellAlign:=AValue;
 end;
 
 procedure TLuiBar.SetImages(const AValue: TImageList);
