@@ -131,18 +131,16 @@ type
     FInitialSpace: Integer;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
-    FInnerRadius: Double;
     FOnGetDefaultPatterns: TLuiBarGetPattern;
     FOnSelect: TLuiBarNotify;
     FOptions: TLuiBarOptions;
-    FOuterRadius: Double;
+    FCellRoundRadius: Integer;
     FOutLineWidth: Integer;
     FPosition: TLuiBarPosition;
     FSelectedIndex: Integer;
     FHoverIndex: Integer;
     FSpacing: Integer;
     function CellInPoint(const P: TPoint): Integer;
-    procedure DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
     function GetRealCellWidth: Integer;
     function GetTextWidth(const AText: String): Double;
@@ -175,10 +173,9 @@ type
     property CellWidth: Integer read FCellWidth write FCellWidth;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
-    property InnerRadius: Double read FInnerRadius write FInnerRadius;
     property Options: TLuiBarOptions read FOptions write FOptions;
     property OuterOffset: Integer read FOuterOffset write SetOuterOffset;
-    property OuterRadius: Double read FOuterRadius write FOuterRadius;
+    property CellRoundRadius: Integer read FCellRoundRadius write FCellRoundRadius;
     property OutLineWidth: Integer read FOutLineWidth write FOutLineWidth;
     property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
@@ -357,29 +354,6 @@ begin
       Exit(i);
 end;
 
-procedure TLuiBar.DrawRoundedRect(XStart, YStart, XOuter1, YOuter1, XOuter2, YOuter2, XEnd, YEnd: Integer);
-begin
-  with Context do
-  begin
-    MoveTo(XStart + FInnerRadius, YStart);
-    CurveTo(XStart + FInnerRadius, YStart,
-      XStart, YStart,
-      XStart, YStart - FInnerRadius);
-    LineTo(XOuter1, YOuter1 - FOuterRadius);
-    CurveTo(XOuter1, YOuter1 - FOuterRadius,
-      XOuter1, YOuter1,
-      XOuter1 + FOuterRadius, YOuter1);
-    LineTo(XOuter2 - FOuterRadius, YOuter2);
-    CurveTo(XOuter2 - FOuterRadius, YOuter2,
-      XOuter2, YOuter2,
-      XOuter2, YOuter2 + FOuterRadius);
-    LineTo(XEnd, YEnd - FInnerRadius);
-    CurveTo(XEnd, YEnd - FInnerRadius,
-      XEnd, YEnd,
-      XEnd - FInnerRadius, YEnd);
-  end;
-end;
-
 function TLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
 begin
   case FCellAlign of
@@ -481,16 +455,95 @@ begin
 end;
 
 procedure TLuiBar.DoDrawCellPath(Cell: TCellInfo);
+var
+  InnerRadius: Integer;
 begin
+  if lboEmulateTab in FOptions then
+    InnerRadius := 0
+  else
+    InnerRadius := FCellRoundRadius;
   case FPosition of
     lbpTop:
-      DrawRoundedRect(0, Cell.Height, 0, 0, Cell.Width, 0, Cell.Width, Cell.Height);
+      with Context do
+      begin
+        //todo: use matrix manipulation to consolidate the procedures??
+        MoveTo(InnerRadius, Cell.Height);
+        CurveTo(InnerRadius, Cell.Height,
+          0, Cell.Height,
+          0, Cell.Height - InnerRadius);
+        LineTo(0, FCellRoundRadius);
+        CurveTo(0, FCellRoundRadius,
+          0, 0,
+          FCellRoundRadius, 0);
+        LineTo(Cell.Width - FCellRoundRadius, 0);
+        CurveTo(Cell.Width - FCellRoundRadius, 0,
+          Cell.Width, 0,
+          Cell.Width, FCellRoundRadius);
+        LineTo(Cell.Width, Cell.Height - InnerRadius);
+        CurveTo(Cell.Width, Cell.Height - InnerRadius,
+          Cell.Width, Cell.Height,
+          Cell.Width - InnerRadius, Cell.Height);
+      end;
     lbpBottom:
-      DrawRoundedRect(0, 0, 0, Cell.Height, Cell.Width, Cell.Height, Cell.Width, 0);
+      with Context do
+      begin
+        MoveTo(InnerRadius, 0);
+        CurveTo(InnerRadius, 0,
+          0, 0,
+          0, InnerRadius);
+        LineTo(0, Cell.Height - FCellRoundRadius);
+        CurveTo(0, Cell.Height - FCellRoundRadius,
+          0, Cell.Height,
+          FCellRoundRadius, Cell.Height);
+        LineTo(Cell.Width - FCellRoundRadius, Cell.Height);
+        CurveTo(Cell.Width - FCellRoundRadius, Cell.Height,
+          Cell.Width, Cell.Height,
+          Cell.Width, Cell.Height - FCellRoundRadius);
+        LineTo(Cell.Width, InnerRadius);
+        CurveTo(Cell.Width, InnerRadius,
+          Cell.Width, 0,
+          Cell.Width - InnerRadius, 0);
+      end;
     lbpLeft:
-      DrawRoundedRect(Cell.Width, 0, 0, 0, 0, Cell.Height, Cell.Width, Cell.Height);
+      with Context do
+      begin
+        MoveTo(Cell.Width, InnerRadius);
+        CurveTo(Cell.Width, InnerRadius,
+          Cell.Width, 0,
+          Cell.Width - InnerRadius, 0);
+        LineTo(FCellRoundRadius, 0);
+        CurveTo(FCellRoundRadius, 0,
+          0, 0,
+          0, FCellRoundRadius);
+        LineTo(0, Cell.Height - FCellRoundRadius);
+        CurveTo(0, Cell.Height - FCellRoundRadius,
+          0, Cell.Height,
+          FCellRoundRadius, Cell.Height);
+        LineTo(Cell.Width - InnerRadius, Cell.Height);
+        CurveTo(Cell.Width - InnerRadius, Cell.Height,
+          Cell.Width, Cell.Height,
+          Cell.Width, Cell.Height - InnerRadius);
+      end;
     lbpRight:
-      DrawRoundedRect(0, 0, Cell.Width, 0, Cell.Width, Cell.Height, 0, Cell.Height);
+      with Context do
+      begin
+        MoveTo(0, InnerRadius);
+        CurveTo(0, InnerRadius,
+          0, 0,
+          InnerRadius, 0);
+        LineTo(Cell.Width - FCellRoundRadius, 0);
+        CurveTo(Cell.Width - FCellRoundRadius, 0,
+          Cell.Width, 0,
+          Cell.Width, FCellRoundRadius);
+        LineTo(Cell.Width, Cell.Height - FCellRoundRadius);
+        CurveTo(Cell.Width, Cell.Height - FCellRoundRadius,
+          Cell.Width, Cell.Height,
+          Cell.Width - FCellRoundRadius, Cell.Height);
+        LineTo(InnerRadius, Cell.Height);
+        CurveTo(InnerRadius, Cell.Height,
+          0, Cell.Height,
+          0, Cell.Height - InnerRadius);
+      end;
   end;
   if not (lboEmulateTab in FOptions) then
     Context.ClosePath;
