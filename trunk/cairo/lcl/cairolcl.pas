@@ -180,9 +180,5 @@ begin
   FHandle := CreateSurfaceFromDC(DC);
 end;
 
-initialization
-  {$if defined(LCLGtk) or defined(LCLGtk2)}
-  RegisterWSComponent(TCairoControl, TGtkWSCustomControl);
-  {$endif}
 end.
 
