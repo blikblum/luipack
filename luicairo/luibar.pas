@@ -33,7 +33,7 @@ type
   TLuiBarDrawCellEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell) of object;
   
   TLuiBarPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText,
-    ptBackground, ptOutLine, ptClientArea);
+    ptBackground, ptOutLine, ptClientArea, ptSelectedOutLine);
   
   TLuiBarGetPattern = procedure (Sender: TLuiBar; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern; var Color: TCairoColor) of object;
@@ -54,6 +54,7 @@ type
     FNormal: TCairoPattern;
     FOutLine: TCairoPattern;
     FSelected: TCairoPattern;
+    FSelectedOutLine: TCairoPattern;
     FSelectedText: TCairoPattern;
     FText: TCairoPattern;
     function GetRequiresUpdate: Boolean;
@@ -63,6 +64,7 @@ type
     procedure SetNormal(const AValue: TCairoPattern);
     procedure SetOutLine(const AValue: TCairoPattern);
     procedure SetSelected(const AValue: TCairoPattern);
+    procedure SetSelectedOutLine(const AValue: TCairoPattern);
     procedure SetSelectedText(const AValue: TCairoPattern);
     procedure SetText(const AValue: TCairoPattern);
   public
@@ -70,16 +72,18 @@ type
     destructor Destroy; override;
     procedure Invalidate;
     procedure Updated;
-    property ClientArea: TCairoPattern read FClientArea write SetClientArea;
-    property Normal: TCairoPattern read FNormal write SetNormal;
-    property Hover: TCairoPattern read FHover write SetHover;
-    property Selected: TCairoPattern read FSelected write SetSelected;
-    property BackGround: TCairoPattern read FBackGround write SetBackGround;
-    property Text: TCairoPattern read FText write SetText;
-    property SelectedText: TCairoPattern read FSelectedText write SetSelectedText;
-    property OutLine: TCairoPattern read FOutLine write SetOutLine;
     property RequiresUpdate: Boolean read GetRequiresUpdate;
     property FixedValues: Boolean read FFixedValues write FFixedValues;
+    //patterns
+    property BackGround: TCairoPattern read FBackGround write SetBackGround;
+    property ClientArea: TCairoPattern read FClientArea write SetClientArea;
+    property Hover: TCairoPattern read FHover write SetHover;
+    property Normal: TCairoPattern read FNormal write SetNormal;
+    property OutLine: TCairoPattern read FOutLine write SetOutLine;
+    property Text: TCairoPattern read FText write SetText;
+    property Selected: TCairoPattern read FSelected write SetSelected;
+    property SelectedOutLine: TCairoPattern read FSelectedOutLine write SetSelectedOutLine;
+    property SelectedText: TCairoPattern read FSelectedText write SetSelectedText;
   end;
   
   { TCellInfo }
@@ -490,6 +494,7 @@ begin
     BackGround := DoGetPattern(ptBackground, CairoColor(1, 1, 1, 1));
     Text := DoGetPattern(ptText, CairoColor(1, 1, 1, 1));
     OutLine := DoGetPattern(ptOutLine, CairoColor(0, 0, 0, 1));
+    SelectedOutLine := DoGetPattern(ptSelectedOutLine, CairoColor(0, 0, 0, 1));;
     SelectedText := DoGetPattern(ptSelectedText, CairoColor(1, 1, 1, 1));
     Updated;
   end;
@@ -580,6 +585,13 @@ begin
           Result := FPatterns.OutLine
         else
           Result := Cell.Patterns.OutLine;
+      end;
+      ptSelectedOutLine:
+      begin
+        if Cell.Patterns.SelectedOutLine = nil then
+          Result := FPatterns.SelectedOutLine
+        else
+          Result := Cell.Patterns.SelectedOutLine;
       end;
       ptText:
       begin
@@ -731,7 +743,7 @@ begin
       begin
         //Draw base outline
         LineWidth := FOutLineWidth;
-        Source := FPatterns.OutLine;
+        Source := FPatterns.SelectedOutLine;
 
         case FPosition of
           lbpTop:
@@ -860,6 +872,8 @@ begin
 end;
 
 procedure TLuiBar.DefaultDrawCell(Cell: TLuiBarCell);
+const
+  OutLinePatternMap: array[Boolean] of TLuiBarPatternType = (ptOutLine, ptSelectedOutLine);
 begin
   with Context do
   begin
@@ -867,7 +881,7 @@ begin
     Source := DoGetCellPattern(Cell, IndexToPatternType(Cell.Index));
     FillPreserve;
     LineWidth := FOutLineWidth;
-    Source := DoGetCellPattern(Cell, ptOutLine);
+    Source := DoGetCellPattern(Cell, OutLinePatternMap[Cell.Index = FSelectedIndex]);
     Stroke;
   end;
 end;
@@ -1009,7 +1023,7 @@ end;
 
 procedure TLuiBarPatterns.SetClientArea(const AValue: TCairoPattern);
 begin
-  if FClientArea = AValue then exit;
+  FClientArea.Free;
   FClientArea := AValue;
 end;
 
@@ -1040,6 +1054,12 @@ procedure TLuiBarPatterns.SetSelected(const AValue: TCairoPattern);
 begin
   FSelected.Free;
   FSelected := AValue;
+end;
+
+procedure TLuiBarPatterns.SetSelectedOutLine(const AValue: TCairoPattern);
+begin
+  FSelectedOutLine.Free;
+  FSelectedOutLine := AValue;
 end;
 
 procedure TLuiBarPatterns.SetSelectedText(const AValue: TCairoPattern);
