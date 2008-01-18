@@ -161,6 +161,7 @@ end;
 destructor TCairoControl.Destroy;
 begin
   FBitmap.Destroy;
+  FContext.Free;
   inherited Destroy;
 end;
 
@@ -179,6 +180,3 @@ constructor TCairoDCSurface.Create(DC: HDC);
 begin
   FHandle := CreateSurfaceFromDC(DC);
 end;
-
-end.
-
