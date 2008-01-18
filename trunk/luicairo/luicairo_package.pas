@@ -7,12 +7,13 @@ unit luicairo_package;
 interface
 
 uses
-  LuiBar, LazarusPackageIntf; 
+  LuiBar, register_luicairo, LazarusPackageIntf; 
 
 implementation
 
 procedure Register; 
 begin
+  RegisterUnit('register_luicairo', @register_luicairo.Register); 
 end; 
 
 initialization

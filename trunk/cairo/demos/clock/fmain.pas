@@ -18,9 +18,9 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    CairoControl1: TCairoControl;
+    CairoPaintBox1: TCairoPaintBox;
     Timer1: TTimer;
-    procedure CairoControl1Draw(Sender: TObject);
+    procedure CairoPaintBox1Draw(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
@@ -44,16 +44,16 @@ const
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
-  CairoControl1.Redraw;
+  CairoPaintBox1.Redraw;
 end;
 
-procedure TForm1.CairoControl1Draw(Sender: TObject);
+procedure TForm1.CairoPaintBox1Draw(Sender: TObject);
 var
   i : Integer;
   Hour, Second, Minute, MSecond: Word;
   inset, HourAngle, MinuteAngle, SecondAngle: Double;
 begin
-  with CairoControl1, Context do
+  with CairoPaintBox1, Context do
   begin
     // scale to unit square and translate (0, 0) to be (0.5, 0.5), i.e.
     // the center of the window

@@ -5,13 +5,13 @@ object Form1: TForm1
   Width = 400
   HorzScrollBar.Page = 399
   VertScrollBar.Page = 334
-  Caption = 'Form1'
+  Caption = 'Cairo Clock Demo 2'
   ClientHeight = 335
   ClientWidth = 400
-  object CairoControl1: TCairoControl
+  object CairoPaintBox1: TCairoPaintBox
     Height = 335
     Width = 400
-    OnDraw = CairoControl1Draw
+    OnDraw = CairoPaintBox1Draw
     Align = alClient
   end
 end

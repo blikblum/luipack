@@ -13,13 +13,13 @@ implementation
 
 procedure RegisterUnitCairoLCL;
 begin
-  RegisterComponents('Cairo', [TCairoControl]);
+  RegisterComponents('Cairo', [TCairoPaintBox]);
 end;
 
 procedure Register;
 
 begin
-  RegisterUnit('CairoLCL',@RegisterUnitCairoLCL);
+  RegisterUnit('CairoLCL', @RegisterUnitCairoLCL);
 end;
 
 end.

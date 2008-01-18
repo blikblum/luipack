@@ -138,7 +138,7 @@ type
   
   { TLuiBar }
 
-  TLuiBar = class(TCairoControl)
+  TLuiBar = class(TCustomCairoControl)
   private
     FCellAlign: TLuiBarCellAlign;
     FCellHeight: Integer;
@@ -205,6 +205,7 @@ type
     property CellWidth: Integer read FCellWidth write FCellWidth;
     property ClientBounds: TRect read FClientBounds;
     property Colors: TLuiBarColors read FColors write FColors;
+    property Context;
     property HoverIndex: Integer read FHoverIndex;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
@@ -224,7 +225,8 @@ type
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
   published
-
+    property Align;
+    property BorderSpacing;
   end;
 
 implementation
@@ -882,6 +884,7 @@ begin
     Background := clWhite;
     OutLine := clWhite;
   end;
+  SetInitialBounds(0, 0, 100, 30);
 end;
 
 procedure TLuiBar.DefaultDrawCell(Cell: TLuiBarCell);
