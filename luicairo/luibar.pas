@@ -5,7 +5,7 @@ unit LuiBar;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math;
+  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math, Graphics;
 
 type
 
@@ -36,11 +36,22 @@ type
     ptBackground, ptOutLine, ptClientArea, ptSelectedOutLine);
   
   TLuiBarGetPattern = procedure (Sender: TLuiBar; PatternType: TLuiBarPatternType;
-    var Pattern: TCairoPattern; var Color: TCairoColor) of object;
+    var Pattern: TCairoPattern) of object;
   
   TLuiBarGetCellPattern = procedure (Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern) of object;
   
+  TLuiBarColors = record
+    Normal: TColor;
+    Selected: TColor;
+    Hover: TColor;
+    Text: TColor;
+    SelectedText: TColor;
+    OutLine: TColor;
+    SelectedOutLine: TColor;
+    Background: TColor;
+    ClientArea: TColor;
+  end;
   
   { TLuiBarPatterns }
 
@@ -137,7 +148,8 @@ type
     FCellHeight: Integer;
     FCells: TLuiBarCellList;
     FCellWidth: Integer;
-    FClientArea: TRect;
+    FClientBounds: TRect;
+    FColors: TLuiBarColors;
     FImages: TImageList;
     FInitialSpace: Integer;
     FOnDrawBackground: TLuiBarEvent;
@@ -195,7 +207,9 @@ type
     property CellHeight: Integer read FCellHeight write FCellHeight;
     property CellRoundRadius: Integer read FCellRoundRadius write FCellRoundRadius;
     property CellWidth: Integer read FCellWidth write FCellWidth;
-    property ClientArea: TRect read FClientArea;
+    property ClientBounds: TRect read FClientBounds;
+    property Colors: TLuiBarColors read FColors write FColors;
+    property HoverIndex: Integer read FHoverIndex;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property Options: TLuiBarOptions read FOptions write FOptions;
@@ -294,10 +308,10 @@ begin
           for i := 0 to FList.Count - 1 do
             OffsetRect(Items[i].Bounds, AlignOffset, 0);
         end;
-        FOwner.FClientArea.Top := FOwner.OuterOffset + FOwner.CellHeight;
-        FOwner.FClientArea.Bottom := FOwner.Height;
-        FOwner.FClientArea.Left := 0;
-        FOwner.FClientArea.Right := FOwner.Width;
+        FOwner.FClientBounds.Top := FOwner.OuterOffset + FOwner.CellHeight;
+        FOwner.FClientBounds.Bottom := FOwner.Height;
+        FOwner.FClientBounds.Left := 0;
+        FOwner.FClientBounds.Right := FOwner.Width;
       end;
     lbpLeft:
       begin
@@ -317,10 +331,10 @@ begin
           for i := 0 to FList.Count - 1 do
             OffsetRect(Items[i].Bounds, 0, AlignOffset);
         end;
-        FOwner.FClientArea.Top := 0;
-        FOwner.FClientArea.Bottom := FOwner.Height;
-        FOwner.FClientArea.Left := Cell.Bounds.Right; //hack
-        FOwner.FClientArea.Right := FOwner.Width;
+        FOwner.FClientBounds.Top := 0;
+        FOwner.FClientBounds.Bottom := FOwner.Height;
+        FOwner.FClientBounds.Left := Cell.Bounds.Right; //hack
+        FOwner.FClientBounds.Right := FOwner.Width;
       end;
     lbpRight:
       begin
@@ -340,10 +354,10 @@ begin
           for i := 0 to FList.Count - 1 do
             OffsetRect(Items[i].Bounds, 0, AlignOffset);
         end;
-        FOwner.FClientArea.Top := 0;
-        FOwner.FClientArea.Bottom := FOwner.Height;
-        FOwner.FClientArea.Left := 0;
-        FOwner.FClientArea.Right := FOwner.Width - (FOwner.OuterOffset +
+        FOwner.FClientBounds.Top := 0;
+        FOwner.FClientBounds.Bottom := FOwner.Height;
+        FOwner.FClientBounds.Left := 0;
+        FOwner.FClientBounds.Right := FOwner.Width - (FOwner.OuterOffset +
           FOwner.DoCalculateCellWidth(Cell));
       end;
     lbpBottom:
@@ -364,13 +378,13 @@ begin
           for i := 0 to FList.Count - 1 do
             OffsetRect(Items[i].Bounds, AlignOffset, 0);
         end;
-        FOwner.FClientArea.Top := 0;
-        FOwner.FClientArea.Bottom := FOwner.Height - (FOwner.CellHeight + FOwner.OuterOffset);
-        FOwner.FClientArea.Left := 0;
-        FOwner.FClientArea.Right := FOwner.Width;
+        FOwner.FClientBounds.Top := 0;
+        FOwner.FClientBounds.Bottom := FOwner.Height - (FOwner.CellHeight + FOwner.OuterOffset);
+        FOwner.FClientBounds.Left := 0;
+        FOwner.FClientBounds.Right := FOwner.Width;
       end;
   end;
-  Logger.Send('ClientArea', FOwner.ClientArea);
+  Logger.Send('ClientArea', FOwner.ClientBounds);
   FRequiresUpdate := False;
 end;
 
@@ -492,32 +506,29 @@ begin
 end;
 
 procedure TLuiBar.DoUpdatePatterns;
-var
-  TempColor: TCairoColor;
-  TempPattern: TCairoPattern;
-  
-  function DoGetPattern(AType: TLuiBarPatternType; DefaultColor: TCairoColor): TCairoPattern;
+
+  function DoGetPattern(AType: TLuiBarPatternType; DefaultColor: TColor): TCairoPattern;
   begin
     Result := nil;
     if Assigned(FOnGetPattern) then
-      FOnGetPattern(Self, AType, Result, DefaultColor);
+      FOnGetPattern(Self, AType, Result);
     if Result = nil then
-      Result := TCairoSolidPattern.Create(DefaultColor);
+      Result := TCairoSolidPattern.Create(ColorToCairoColor(DefaultColor));
   end;
   
 begin
   with FPatterns do
   begin
     //todo: find a way to set default similar patterns (ClientArea = Selected)
-    Normal := DoGetPattern(ptNormal, CairoColor(1, 0, 0, 0.4));
-    Selected := DoGetPattern(ptSelected, CairoColor(1, 0, 0, 1));
-    ClientArea := DoGetPattern(ptClientArea, CairoColor(1, 0, 0, 1));
-    Hover := DoGetPattern(ptHover, CairoColor(1, 0, 0, 0.7));
-    BackGround := DoGetPattern(ptBackground, CairoColor(1, 1, 1, 1));
-    Text := DoGetPattern(ptText, CairoColor(1, 1, 1, 1));
-    OutLine := DoGetPattern(ptOutLine, CairoColor(0, 0, 0, 1));
-    SelectedOutLine := DoGetPattern(ptSelectedOutLine, CairoColor(0, 0, 0, 1));;
-    SelectedText := DoGetPattern(ptSelectedText, CairoColor(1, 1, 1, 1));
+    Normal := DoGetPattern(ptNormal, FColors.Normal);
+    Selected := DoGetPattern(ptSelected, FColors.Selected);
+    ClientArea := DoGetPattern(ptClientArea, FColors.ClientArea);
+    Hover := DoGetPattern(ptHover, FColors.Hover);
+    BackGround := DoGetPattern(ptBackground, FColors.Background);
+    Text := DoGetPattern(ptText, FColors.Text);
+    OutLine := DoGetPattern(ptOutLine, FColors.OutLine);
+    SelectedOutLine := DoGetPattern(ptSelectedOutLine, FColors.SelectedOutLine);;
+    SelectedText := DoGetPattern(ptSelectedText, FColors.SelectedText);
     Updated;
   end;
 end;
@@ -543,8 +554,8 @@ begin
   with Context do
   begin
     Save;
-    Translate(FClientArea.Left, FClientArea.Top);
-    Rectangle(0, 0, FClientArea.Right - FClientArea.Left, FClientArea.Bottom - FClientArea.Top);
+    Translate(FClientBounds.Left, FClientBounds.Top);
+    Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left, FClientBounds.Bottom - FClientBounds.Top);
     Source := FPatterns.ClientArea;
     Fill;
     Restore;
@@ -693,27 +704,27 @@ procedure TLuiBar.DoDrawBackground;
       case FPosition of
         lbpTop:
           begin
-            LineTo(Cell.Bounds.Left, FClientArea.Top);
+            LineTo(Cell.Bounds.Left, FClientBounds.Top);
             Stroke;
-            MoveTo(Cell.Bounds.Right, FClientArea.Top);
+            MoveTo(Cell.Bounds.Right, FClientBounds.Top);
           end;
         lbpLeft:
           begin
-            LineTo(FClientArea.Left, Cell.Bounds.Top);
+            LineTo(FClientBounds.Left, Cell.Bounds.Top);
             Stroke;
-            MoveTo(FClientArea.Left, Cell.Bounds.Bottom);
+            MoveTo(FClientBounds.Left, Cell.Bounds.Bottom);
           end;
         lbpRight:
           begin
-            LineTo(FClientArea.Right, Cell.Bounds.Top);
+            LineTo(FClientBounds.Right, Cell.Bounds.Top);
             Stroke;
-            LineTo(FClientArea.Right, Cell.Bounds.Bottom);
+            LineTo(FClientBounds.Right, Cell.Bounds.Bottom);
           end;
         lbpBottom:
           begin
-            LineTo(Cell.Bounds.Left, FClientArea.Bottom);
+            LineTo(Cell.Bounds.Left, FClientBounds.Bottom);
             Stroke;
-            LineTo(Cell.Bounds.Right, FClientArea.Bottom);
+            LineTo(Cell.Bounds.Right, FClientBounds.Bottom);
           end;
       end;
     end;
@@ -749,13 +760,13 @@ begin
 
         case FPosition of
           lbpTop:
-            MoveTo(0, FClientArea.Top);
+            MoveTo(0, FClientBounds.Top);
           lbpLeft:
-            MoveTo(FClientArea.Left, 0);
+            MoveTo(FClientBounds.Left, 0);
           lbpRight:
-            MoveTo(FClientArea.Right, 0);
+            MoveTo(FClientBounds.Right, 0);
           lbpBottom:
-            MoveTo(0, FClientArea.Bottom);
+            MoveTo(0, FClientBounds.Bottom);
         end;
 
         if (lboHoverAsSelected in FOptions) and
@@ -774,13 +785,13 @@ begin
         //todo remove all these case
         case FPosition of
           lbpTop:
-            LineTo(Width, FClientArea.Top);
+            LineTo(Width, FClientBounds.Top);
           lbpLeft:
-            LineTo(FClientArea.Left, Height);
+            LineTo(FClientBounds.Left, Height);
           lbpRight:
-            LineTo(FClientArea.Right, Height);
+            LineTo(FClientBounds.Right, Height);
           lbpBottom:
-            LineTo(Width, FClientArea.Bottom);
+            LineTo(Width, FClientBounds.Bottom);
         end;
       end;
       //todo: move this to DoDrawClientArea
@@ -791,25 +802,25 @@ begin
             begin
               LineTo(Width, Height);
               LineTo(0, Height);
-              LineTo(0, FClientArea.Top);
+              LineTo(0, FClientBounds.Top);
             end;
           lbpLeft:
             begin
               LineTo(Width, Height);
               LineTo(Width, 0);
-              LineTo(FClientArea.Left, 0);
+              LineTo(FClientBounds.Left, 0);
             end;
           lbpRight:
             begin
               LineTo(0, Height);
               LineTo(0, 0);
-              LineTo(FClientArea.Right, 0);
+              LineTo(FClientBounds.Right, 0);
             end;
           lbpBottom:
             begin
               LineTo(Width, 0);
               LineTo(0, 0);
-              LineTo(0, FClientArea.Bottom);
+              LineTo(0, FClientBounds.Bottom);
             end;
         end;
       end;
@@ -871,6 +882,19 @@ begin
   FCellHeight := 20;
   FHoverIndex := -1;
   FSelectedIndex := -1;
+  //todo: find more sensible colors
+  with FColors do
+  begin
+    Normal := clSkyBlue;
+    Selected := clBlue;
+    Hover := clBlue;
+    Text := clBlack;
+    SelectedText := clWhite;
+    ClientArea := Selected;
+    Background := clWhite;
+    OutLine := clWhite;
+    SelectedOutLine := clWhite;
+  end;
 end;
 
 procedure TLuiBar.DefaultDrawCell(Cell: TLuiBarCell);
