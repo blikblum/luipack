@@ -1021,6 +1021,7 @@ end;
 destructor TLuiBar.Destroy;
 begin
   FCells.Destroy;
+  FPatterns.Destroy;
   inherited Destroy;
 end;
 
@@ -1092,6 +1093,7 @@ begin
   FSelected.Free;
   FHover.Free;
   FText.Free;
+  FSelectedText.Free;
   FOutLine.Free;
   FBackGround.Free;
 end;
