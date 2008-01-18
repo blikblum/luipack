@@ -14,8 +14,8 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    CairoControl1: TCairoControl;
-    procedure CairoControl1Draw(Sender: TObject);
+    CairoPaintBox1: TCairoPaintBox;
+    procedure CairoPaintBox1Draw(Sender: TObject);
   private
     { private declarations }
     FDrawShadow: Boolean;
@@ -31,15 +31,16 @@ implementation
 
 { TForm1 }
 
-procedure TForm1.CairoControl1Draw(Sender: TObject);
+procedure TForm1.CairoPaintBox1Draw(Sender: TObject);
 begin
 
-  with CairoControl1.Context do
+  {
+  with CairoPaintBox1.Context do
   begin
     SetSourceRGB(1,1,1);
     Paint;
   end;
-  
+  }
   DrawAnalogueClock;
 end;
 
@@ -50,7 +51,7 @@ var
   base_color, bg_color, fg_color: array [0..2] of Double;
   TempColor: TColor;
 begin
-  with CairoControl1.Context do
+  with CairoPaintBox1.Context do
   begin
     (* Draw a Tango-style analogue clock face *)
     
@@ -91,16 +92,16 @@ begin
     fg_color[1] := Green(TempColor)/255;
     fg_color[2] := Blue(TempColor)/255;
 
-    awidth := CairoControl1.Width;
-    aheight := CairoControl1.Height;
+    awidth := CairoPaintBox1.Width;
+    aheight := CairoPaintBox1.Height;
     if FDrawShadow then
       // aheight -= aheight/20;
       aheight := aheight - (aheight div 20);
     size := MIN (awidth, aheight);
 
-    SetOperator (CAIRO_OPERATOR_CLEAR);
-    Paint;
-    SetOperator (CAIRO_OPERATOR_SOURCE);
+    //SetOperator (CAIRO_OPERATOR_CLEAR);
+    //Paint;
+    //SetOperator (CAIRO_OPERATOR_SOURCE);
 
     (* Draw shadow *)
     if FDrawShadow then
@@ -115,7 +116,7 @@ begin
               0, 0, 0, shadow_radius);
       Pattern.AddColorStopRgba (0, 0, 0, 0, 0.5);
       Pattern.AddColorStopRgba (1, 0, 0, 0, 0);
-      SetSource (Pattern);
+      Source := Pattern;
       Fill;
       Pattern.Destroy;
       IdentityMatrix;
@@ -136,7 +137,7 @@ begin
             bg_color[1], bg_color[2]);
     Pattern.AddColorStopRgb (1, bg_color[0]/1.15,
             bg_color[1]/1.15, bg_color[2]/1.15);
-    SetSource (pattern);
+    Source := Pattern;
     Fill;
     Pattern.Destroy;
 
@@ -159,7 +160,7 @@ begin
     NewPath;
     Arc(awidth/2, aheight/2, size/35, 0, 2 * PI);
     ClosePath;
-    SetLineWidth (size/60);
+    LineWidth := size/60;
     Stroke;
 
 
@@ -179,8 +180,8 @@ begin
             bg_color[1]/2, bg_color[2]/2);
     Pattern.AddColorStopRgb ( 1, bg_color[0]*2,
             bg_color[1]*2, bg_color[2]*2);
-    SetSource (pattern);
-    SetLineWidth (thickness);
+    Source := pattern;
+    LineWidth := thickness;
     Stroke;
     Pattern.Destroy;
 
@@ -197,7 +198,7 @@ begin
             base_color[1], base_color[2]);
     Pattern.AddColorStopRgb ( 1, base_color[0]/1.2,
             base_color[1]/1.2, base_color[2]/1.2);
-    SetSource (pattern);
+    Source := pattern;
     Stroke;
     Pattern.Destroy;
 
@@ -210,7 +211,7 @@ begin
     ClosePath;
     SetSourceRGB (base_color[0]/2,
             base_color[1]/2, base_color[2]/2);
-    SetLineWidth ( thickness);
+    LineWidth := thickness;
     Stroke ;
 
     (* Draw less dark inner outline frame *)
@@ -221,7 +222,7 @@ begin
     ClosePath ;
     SetSourceRGB ( base_color[0]/1.5,
             base_color[1]/1.5, base_color[2]/1.5);
-    SetLineWidth (thickness);
+    LineWidth := thickness;
     Stroke;
   end;
 end;

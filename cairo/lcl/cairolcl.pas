@@ -50,28 +50,40 @@ type
     constructor Create(DC: HDC);
   end;
 
-  { TCairoControl }
+  { TCustomCairoControl }
 
-  TCairoControl = class(TWinControl)
+  TCustomCairoControl = class(TWinControl)
   private
     FBitmap: TBitmap;
     FContext: TCairoContext;
-    FOnDraw: TNotifyEvent;
-    procedure CreateContext;
     procedure InitBitmap;
   protected
-    procedure DoDraw; virtual;
+    procedure DoCreateContext; virtual;
+    procedure DoDraw; virtual; abstract;
     procedure DoOnResize; override;
     procedure PaintWindow(DC: HDC); override;
     procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
     procedure WMPaint(var Msg: TLMPaint); message LM_PAINT;
+    property Bitmap: TBitmap read FBitmap;
+    property Context: TCairoContext read FContext;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Redraw;
-    property Bitmap: TBitmap read FBitmap;
-    property Context: TCairoContext read FContext;
+  end;
+  
+  { TCairoPaintBox }
+
+  TCairoPaintBox = class (TCustomCairoControl)
+  private
+    FOnDraw: TNotifyEvent;
+  protected
+    procedure DoDraw; override;
+  public
+    property Bitmap;
+    property Context;
   published
+    constructor Create(AOwner: TComponent); override;
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
     property Align;
     property BorderSpacing;
@@ -94,9 +106,9 @@ begin
 end;
 
 
-{ TCairoControl }
+{ TCustomCairoControl }
 
-procedure TCairoControl.CreateContext;
+procedure TCustomCairoControl.DoCreateContext;
 var
   Surface: TCairoDCSurface;
 begin
@@ -108,43 +120,33 @@ begin
   Surface.Destroy;
 end;
 
-procedure TCairoControl.InitBitmap;
+procedure TCustomCairoControl.InitBitmap;
 begin
   FBitmap.Canvas.Brush.Color := Parent.Color;
   FBitmap.Canvas.FillRect(0, 0, Width, Height);
 end;
 
-procedure TCairoControl.DoDraw;
-begin
-  if Assigned(FOnDraw) then
-  begin
-    FContext.Save;
-    OnDraw(Self);
-    FContext.Restore;
-  end;
-end;
-
-procedure TCairoControl.DoOnResize;
+procedure TCustomCairoControl.DoOnResize;
 begin
   inherited DoOnResize;
   FreeAndNil(FContext);
 end;
 
-procedure TCairoControl.PaintWindow(DC: HDC);
+procedure TCustomCairoControl.PaintWindow(DC: HDC);
 begin
   BitBlt(DC, 0, 0, Width, Height, FBitmap.Canvas.Handle, 0, 0, SRCCOPY);
 end;
 
-procedure TCairoControl.WMEraseBkgnd(var Message: TLMEraseBkgnd);
+procedure TCustomCairoControl.WMEraseBkgnd(var Message: TLMEraseBkgnd);
 begin
   // for now do nothing
 end;
 
-procedure TCairoControl.WMPaint(var Msg: TLMPaint);
+procedure TCustomCairoControl.WMPaint(var Msg: TLMPaint);
 begin
   if not Assigned(FContext) then
   begin
-    CreateContext;
+    DoCreateContext;
     DoDraw;
   end;
   Include(FControlState, csCustomPaint);
@@ -152,23 +154,23 @@ begin
   Exclude(FControlState, csCustomPaint);
 end;
 
-constructor TCairoControl.Create(AOwner: TComponent);
+constructor TCustomCairoControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBitmap := TBitmap.Create;
 end;
 
-destructor TCairoControl.Destroy;
+destructor TCustomCairoControl.Destroy;
 begin
   FContext.Free;
   FBitmap.Destroy;
   inherited Destroy;
 end;
 
-procedure TCairoControl.Redraw;
+procedure TCustomCairoControl.Redraw;
 begin
   if not Assigned(FContext) then
-    CreateContext;
+    DoCreateContext;
   InitBitmap;
   DoDraw;
   Invalidate;
@@ -179,6 +181,33 @@ end;
 constructor TCairoDCSurface.Create(DC: HDC);
 begin
   FHandle := CreateSurfaceFromDC(DC);
+end;
+
+{ TCairoPaintBox }
+
+procedure TCairoPaintBox.DoDraw;
+const
+  Dash: Double = 2;
+begin
+  if csDesigning in ComponentState then
+  begin
+    Context.SetDash(@Dash, 1, 0);
+    Context.Rectangle(0, 0, Width, Height);
+    Context.Stroke;
+    Exit;
+  end;
+  if Assigned(FOnDraw) then
+  begin
+    FContext.Save;
+    OnDraw(Self);
+    FContext.Restore;
+  end;
+end;
+
+constructor TCairoPaintBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SetInitialBounds(0, 0, 105, 105);
 end;
 
 end.
