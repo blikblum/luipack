@@ -7,7 +7,7 @@ unit luicairo_package;
 interface
 
 uses
-  LuiBar, register_luicairo, LazarusPackageIntf; 
+  LuiBar, register_luicairo, LuiImage, LazarusPackageIntf; 
 
 implementation
 
