@@ -16,7 +16,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="2">
+    <Files Count="3">
       <Item1>
         <Filename Value="luibar.pas"/>
         <UnitName Value="LuiBar"/>
@@ -26,18 +26,22 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_luicairo"/>
       </Item2>
+      <Item3>
+        <Filename Value="luiimage.pas"/>
+        <UnitName Value="luiimage"/>
+      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="multiloglaz"/>
       </Item1>
       <Item2>
         <PackageName Value="cairolcl_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item3>
     </RequiredPkgs>
     <UsageOptions>
