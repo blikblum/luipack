@@ -5,7 +5,7 @@ unit LuiImage;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, Graphics;
+  Classes, SysUtils, CairoClasses, CairoLCL, Graphics, LCLProc;
 
 type
 
@@ -13,9 +13,15 @@ type
   
   TLuiImageEvent = procedure (Sender: TLuiImage) of object;
 
-  TLuiImageOption = (lioAutoSize, lioStretch);
+  TLuiImageOption = (lioAutoSize);
 
   TLuiImageOptions = set of TLuiImageOption;
+
+  TLuiImageState = (lisAutoSizePending);
+
+  TLuiImageStates = set of TLuiImageState;
+
+  TLuiImageViewStyle = (livNormal, livCenter, livScale, livAutoScale, livZoom, livTile);
 
   TLuiImageColors = record
     Background: TColor;
@@ -45,7 +51,6 @@ type
     //patterns
     property BackGround: TCairoPattern read FBackGround write SetBackGround;
     property OutLine: TCairoPattern read FOutLine write SetOutLine;
-    
   end;
 
   { TLuiImage }
@@ -61,42 +66,52 @@ type
     FOnGetPattern: TLuiImageGetPattern;
     FOptions: TLuiImageOptions;
     FOutLineWidth: Integer;
+    FPadding: TRect;
     FPatterns: TLuiImagePatterns;
     FPicture: TPicture;
     FRoundEdgeRadius: Integer;
+    FStates: TLuiImageStates;
+    FViewStyle: TLuiImageViewStyle;
+    FUpdateCount: Integer;
+    procedure Changed;
+    function ImageWidth: Integer;
+    function ImageHeight: Integer;
     procedure InternalAutoSize;
     procedure PictureChanged(Sender: TObject);
     procedure ResetImageSurface;
-    procedure SetOnAfterDraw(const AValue: TLuiImageEvent);
-    procedure SetOnBeforeDraw(const AValue: TLuiImageEvent);
-    procedure SetOnDrawClipPath(const AValue: TLuiImageEvent);
-    procedure SetOnGetPattern(const AValue: TLuiImageGetPattern);
-    procedure SetOptions(const AValue: TLuiImageOptions);
-    procedure SetOutLineWidth(const AValue: Integer);
-    procedure SetRoundEdgeRadius(const AValue: Integer);
+    procedure SetOptions(AValue: TLuiImageOptions);
+    procedure SetOutLineWidth(AValue: Integer);
+    procedure SetPadding(const AValue: TRect);
+    procedure SetRoundEdgeRadius(AValue: Integer);
+    procedure SetViewStyle(AValue: TLuiImageViewStyle);
     procedure UpdatePatterns;
   protected
     procedure DoAfterDraw; virtual;
     procedure DoBeforeDraw; virtual;
     procedure DoDraw; override;
     procedure DoDrawClipPath; virtual;
+    procedure DoSetSource; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure BeginUpdate;
     procedure DefaultAfterDraw;
     procedure DefaultBeforeDraw;
+    procedure EndUpdate;
     property Colors: TLuiImageColors read FColors write FColors;
     property Context;
+    property Padding: TRect read FPadding write SetPadding;
   published
-    property OnAfterDraw: TLuiImageEvent read FOnAfterDraw write SetOnAfterDraw;
-    property OnBeforeDraw: TLuiImageEvent read FOnBeforeDraw write SetOnBeforeDraw;
-    property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write SetOnDrawClipPath;
-    property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write SetOnGetPattern;
+    property OnAfterDraw: TLuiImageEvent read FOnAfterDraw write FOnAfterDraw;
+    property OnBeforeDraw: TLuiImageEvent read FOnBeforeDraw write FOnBeforeDraw;
+    property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write FOnDrawClipPath;
+    property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write FOnGetPattern;
     property Options: TLuiImageOptions read FOptions write SetOptions;
     property OutLineWidth: Integer read FOutLineWidth write SetOutLineWidth;
     property Patterns: TLuiImagePatterns read FPatterns;
     property Picture: TPicture read FPicture;
     property RoundEdgeRadius: Integer read FRoundEdgeRadius write SetRoundEdgeRadius;
+    property ViewStyle: TLuiImageViewStyle read FViewStyle write SetViewStyle;
   end;
 
 implementation
@@ -128,15 +143,48 @@ end;
 
 { TLuiImage }
 
+procedure TLuiImage.Changed;
+begin
+  if (FUpdateCount = 0) and not (csLoading in ComponentState) then
+  begin
+    if lisAutoSizePending in FStates then
+      InternalAutoSize;
+    Redraw;
+  end;
+end;
+
+function TLuiImage.ImageWidth: Integer;
+begin
+  case FViewStyle of
+    livNormal:
+      Result := FCurrentBitmap.Width;
+    livAutoScale:
+      Result := Width - FPadding.Left - FPadding.Right - (FOutLineWidth * 2);
+  end;
+end;
+
+function TLuiImage.ImageHeight: Integer;
+begin
+  case FViewStyle of
+    livNormal:
+      Result := FCurrentBitmap.Height;
+    livAutoScale:
+      Result := Height - FPadding.Top - FPadding.Bottom - (FOutLineWidth * 2);
+  end;
+end;
+
 procedure TLuiImage.InternalAutoSize;
 var
   DesiredWidth, DesiredHeight: Integer;
 begin
   //todo: move to default LCL AutoSize ????
-  DesiredWidth := FCurrentBitmap.Width + FOutLineWidth * 2;
-  DesiredHeight := FCurrentBitmap.Height + FOutLineWidth * 2;
+  DesiredWidth := FCurrentBitmap.Width + FPadding.Left +
+    FPadding.Right + (FOutLineWidth * 2);
+  DesiredHeight := FCurrentBitmap.Height + FPadding.Top +
+    FPadding.Bottom + (FOutLineWidth * 2);
   if (DesiredHeight <> Height) or (DesiredWidth <> Width) then
     SetBounds(Left, Top, DesiredWidth, DesiredHeight);
+  Exclude(FStates, lisAutoSizePending);
 end;
 
 procedure TLuiImage.PictureChanged(Sender: TObject);
@@ -154,7 +202,7 @@ begin
     ResetImageSurface;
   end;
   if lioAutoSize in FOptions then
-    InternalAutoSize;
+    Include(FStates, lisAutoSizePending);
   Redraw;
 end;
 
@@ -164,46 +212,45 @@ begin
   FImageSurface := TCairoDCSurface.Create(FCurrentBitmap.Canvas.Handle);
 end;
 
-procedure TLuiImage.SetOnAfterDraw(const AValue: TLuiImageEvent);
+procedure TLuiImage.SetOptions(AValue: TLuiImageOptions);
 begin
-  if FOnAfterDraw=AValue then exit;
-  FOnAfterDraw:=AValue;
+  if FOptions = AValue then exit;
+  if lioAutoSize in (AValue - FOptions) then
+    Include(FStates, lisAutoSizePending);
+  FOptions := AValue;
+  Changed;
 end;
 
-procedure TLuiImage.SetOnBeforeDraw(const AValue: TLuiImageEvent);
+procedure TLuiImage.SetOutLineWidth(AValue: Integer);
 begin
-  if FOnBeforeDraw=AValue then exit;
-  FOnBeforeDraw:=AValue;
+  if FOutLineWidth = AValue then exit;
+  FOutLineWidth := AValue;
+  if lioAutoSize in FOptions then
+    Include(FStates, lisAutoSizePending);
+  Changed;
 end;
 
-procedure TLuiImage.SetOnDrawClipPath(const AValue: TLuiImageEvent);
+procedure TLuiImage.SetPadding(const AValue: TRect);
 begin
-  if FOnDrawClipPath=AValue then exit;
-  FOnDrawClipPath:=AValue;
+  if CompareRect(@FPadding, @AValue) then exit;
+  FPadding := AValue;
+  if lioAutoSize in FOptions then
+    Include(FStates, lisAutoSizePending);
+  Changed;
 end;
 
-procedure TLuiImage.SetOnGetPattern(const AValue: TLuiImageGetPattern);
+procedure TLuiImage.SetRoundEdgeRadius(AValue: Integer);
 begin
-  if FOnGetPattern=AValue then exit;
-  FOnGetPattern:=AValue;
+  if FRoundEdgeRadius = AValue then exit;
+  FRoundEdgeRadius := AValue;
+  Changed;
 end;
 
-procedure TLuiImage.SetOptions(const AValue: TLuiImageOptions);
+procedure TLuiImage.SetViewStyle(AValue: TLuiImageViewStyle);
 begin
-  if FOptions=AValue then exit;
-  FOptions:=AValue;
-end;
-
-procedure TLuiImage.SetOutLineWidth(const AValue: Integer);
-begin
-  if FOutLineWidth=AValue then exit;
-  FOutLineWidth:=AValue;
-end;
-
-procedure TLuiImage.SetRoundEdgeRadius(const AValue: Integer);
-begin
-  if FRoundEdgeRadius=AValue then exit;
-  FRoundEdgeRadius:=AValue;
+  if FViewStyle = AValue then exit;
+  FViewStyle := AValue;
+  Changed;
 end;
 
 procedure TLuiImage.UpdatePatterns;
@@ -220,6 +267,8 @@ procedure TLuiImage.UpdatePatterns;
 begin
   with FPatterns do
   begin
+    if FColors.Background = clNone then
+      FColors.Background := Parent.Color;
     BackGround := DoGetPattern(ptBackground, FColors.Background);
     OutLine := DoGetPattern(ptOutLine, FColors.OutLine);
     Updated;
@@ -261,7 +310,8 @@ begin
   begin
     Save;
     DoBeforeDraw;
-    SetSourceSurface(FImageSurface, FOutLineWidth, FOutLineWidth);
+    DoSetSource;
+    Translate(FPadding.Left, FPadding.Top);
     Paint;
     DoAfterDraw;
     Restore;
@@ -281,8 +331,30 @@ begin
     else
       PosOffset := FOutLineWidth / 2;
     RoundedRectangle(Context, PosOffset, PosOffset,
-      FCurrentBitmap.Width + FOutLineWidth, FCurrentBitmap.Height + FOutLineWidth, FRoundEdgeRadius);
+      ImageWidth + FOutLineWidth, ImageHeight + FOutLineWidth, FRoundEdgeRadius);
   end;
+end;
+
+procedure TLuiImage.DoSetSource;
+var
+  TempPattern: TCairoPattern;
+  Matrix: TCairoMatrix;
+begin
+  if (FViewStyle = livNormal) or (lioAutoSize in FOptions) then
+    Context.SetSourceSurface(FImageSurface, FOutLineWidth, FOutLineWidth)
+  else
+    case FViewStyle of
+      livAutoScale:
+        begin
+          TempPattern := TCairoSurfacePattern.Create(FImageSurface);
+          Matrix.InitScale(FCurrentBitmap.Width /  ImageWidth,
+            FCurrentBitmap.Height / ImageHeight);
+          Matrix.Translate(-FOutLineWidth, -FOutLineWidth);
+          TempPattern.SetMatrix(Matrix);
+          Context.Source := TempPattern;
+          TempPattern.Destroy;
+        end;
+    end;
 end;
 
 constructor TLuiImage.Create(AOwner: TComponent);
@@ -294,7 +366,7 @@ begin
   with FColors do
   begin
     OutLine := clBlack;
-    Background := clWhite;
+    Background := clNone;
   end;
   SetInitialBounds(0, 0, 105, 105);
 end;
@@ -305,6 +377,11 @@ begin
   FPicture.Destroy;
   inherited Destroy;
   FImageSurface.Free;
+end;
+
+procedure TLuiImage.BeginUpdate;
+begin
+  Inc(FUpdateCount);
 end;
 
 procedure TLuiImage.DefaultAfterDraw;
@@ -327,6 +404,12 @@ begin
   //Context.Source := FPatterns.BackGround;
   //Context.FillPreserve;
   Context.Clip;
+end;
+
+procedure TLuiImage.EndUpdate;
+begin
+  Dec(FUpdateCount);
+  Changed;
 end;
 
 { TLuiImagePatterns }
