@@ -1,0 +1,158 @@
+object MainForm: TMainForm
+  Left = 123
+  Height = 541
+  Top = 124
+  Width = 828
+  HorzScrollBar.Page = 827
+  VertScrollBar.Page = 540
+  ActiveControl = FileNameEdit
+  Caption = 'LuiImage Demo'
+  ClientHeight = 541
+  ClientWidth = 828
+  OnCreate = FormCreate
+  object FileInfoPanel: TPanel
+    Left = 8
+    Height = 72
+    Top = 8
+    Width = 494
+    ClientHeight = 72
+    ClientWidth = 494
+    TabOrder = 0
+    object FileNameEdit: TFileNameEdit
+      Left = 27
+      Height = 23
+      Top = 10
+      Width = 328
+      OnAcceptFileName = FileNameEditAcceptFileName
+      ButtonWidth = 23
+      NumGlyphs = 1
+      ParentColor = False
+      TabOrder = 0
+    end
+  end
+  object ImagePanel: TPanel
+    Left = 277
+    Height = 422
+    Top = 90
+    Width = 363
+    ClientHeight = 422
+    ClientWidth = 363
+    TabOrder = 1
+    object Image: TLuiImage
+      Left = 11
+      Height = 250
+      Top = 14
+      Width = 250
+    end
+  end
+  object ImageOptionsNotebook: TNotebook
+    Left = 8
+    Height = 407
+    Top = 105
+    Width = 247
+    PageIndex = 0
+    TabOrder = 2
+    object BasicOptionsPage: TPage
+      Caption = 'Basic'
+      ClientWidth = 243
+      ClientHeight = 376
+      object Label1: TLabel
+        Left = 5
+        Height = 20
+        Top = 18
+        Width = 114
+        Caption = 'RoundEdgeRadius'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 6
+        Height = 20
+        Top = 68
+        Width = 89
+        Caption = 'OutLine Width'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 38
+        Height = 20
+        Top = 178
+        Width = 36
+        Caption = 'Width'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 31
+        Height = 20
+        Top = 221
+        Width = 43
+        Caption = 'Height'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 17
+        Height = 20
+        Top = 141
+        Width = 66
+        Caption = 'View Style'
+        ParentColor = False
+      end
+      object RoundEdgeRadiusSpinEdit: TSpinEdit
+        Left = 133
+        Height = 23
+        Top = 18
+        Width = 49
+        OnChange = RoundEdgeRadiusSpinEditChange
+        TabOrder = 0
+      end
+      object OutlineWidthSpinEdit: TSpinEdit
+        Left = 133
+        Height = 23
+        Top = 65
+        Width = 50
+        OnChange = OutlineWidthSpinEditChange
+        TabOrder = 1
+      end
+      object AutoSizeCheckBox: TCheckBox
+        Left = 14
+        Height = 22
+        Top = 114
+        Width = 85
+        Caption = 'Auto Size'
+        OnChange = AutoSizeCheckBoxChange
+        TabOrder = 2
+      end
+      object WidthSpinEdit: TSpinEdit
+        Left = 84
+        Height = 23
+        Top = 176
+        Width = 50
+        MaxValue = 600
+        MinValue = 10
+        TabOrder = 3
+        Value = 250
+      end
+      object HeightSpinEdit: TSpinEdit
+        Left = 85
+        Height = 23
+        Top = 218
+        Width = 50
+        MaxValue = 600
+        MinValue = 10
+        TabOrder = 4
+        Value = 250
+      end
+      object ViewStyleComboBox: TComboBox
+        Left = 94
+        Height = 25
+        Top = 138
+        Width = 136
+        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        MaxLength = 0
+        OnSelect = ViewStyleComboBoxSelect
+        Style = csDropDownList
+        TabOrder = 5
+        Text = 'ViewStyleComboBox'
+      end
+    end
+  end
+end
