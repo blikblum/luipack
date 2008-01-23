@@ -133,7 +133,7 @@ end;
 
 procedure TMainForm.RoundEdgeRadiusSpinEditChange(Sender: TObject);
 begin
-  Image.RoundEdgeRadius := RoundEdgeRadiusSpinEdit.Value;
+  Image.RoundRectRadius := RoundEdgeRadiusSpinEdit.Value;
 end;
 
 procedure TMainForm.VerticalScaleSpinEditChange(Sender: TObject);
@@ -145,11 +145,10 @@ procedure TMainForm.ViewStyleComboBoxSelect(Sender: TObject);
 begin
   case ViewStyleComboBox.ItemIndex of
     0: Image.ViewStyle := livNormal;
-    1: Image.ViewStyle := livCenter;
+    1: Image.ViewStyle := livFitImage;
     2: Image.ViewStyle := livScale;
     3: Image.ViewStyle := livStretch;
-    4: Image.ViewStyle := livZoom;
-    5: Image.ViewStyle := livTile;
+    4: Image.ViewStyle := livTile;
   end;
 end;
 
@@ -163,10 +162,9 @@ begin
   with ViewStyleComboBox.Items do
   begin
     Add('Normal');
-    Add('Center');
+    Add('Fit Image');
     Add('Scale');
     Add('Stretch');
-    Add('Zoom');
     Add('Tile');
   end;
   ViewStyleComboBox.ItemIndex := 0;

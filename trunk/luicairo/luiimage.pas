@@ -17,11 +17,11 @@ type
 
   TLuiImageOptions = set of TLuiImageOption;
 
-  TLuiImageState = (lisAutoSizePending);
+  TLuiImageState = (lisAutoSizePending, lisPaddingCalcPending, lisScaleCalcPending);
 
   TLuiImageStates = set of TLuiImageState;
 
-  TLuiImageViewStyle = (livNormal, livCenter, livScale, livStretch, livZoom, livTile);
+  TLuiImageViewStyle = (livNormal, livFitImage, livScale, livStretch, livTile);
 
   TLuiImageColors = record
     Background: TColor;
@@ -72,7 +72,7 @@ type
     property Horizontal: Double read FHorizontal write SetHorizontal;
     property Vertical: Double read FVertical write SetVertical;
   end;
-
+  
   { TLuiImagePatterns }
 
   TLuiImagePatterns = class
@@ -99,9 +99,13 @@ type
   private
     FColors: TLuiImageColors;
     FCurrentBitmap: TBitmap;
+    FEffectivePadding: TRect;
+    FEffectiveXScale: Double;
+    FEffectiveYScale: Double;
     FImageSurface: TCairoDCSurface;
     FOnAfterDraw: TLuiImageEvent;
     FOnBeforeDraw: TLuiImageEvent;
+    FOnDrawBackground: TLuiImageEvent;
     FOnDrawClipPath: TLuiImageEvent;
     FOnGetPattern: TLuiImageGetPattern;
     FOpacity: Double;
@@ -110,13 +114,13 @@ type
     FPadding: TLuiImagePadding;
     FPatterns: TLuiImagePatterns;
     FPicture: TPicture;
-    FRoundEdgeRadius: Integer;
+    FRoundRectRadius: Integer;
     FScaleFactor: TLuiImageScaleFactor;
     FStates: TLuiImageStates;
     FViewStyle: TLuiImageViewStyle;
     FUpdateCount: Integer;
-    procedure CalculateScale(out XScale, YScale: Double);
     procedure Changed;
+    procedure CheckStates;
     function GetImageHeight: Integer;
     function GetImageWidth: Integer;
     procedure InternalAutoSize;
@@ -127,26 +131,33 @@ type
     procedure SetOutLineWidth(AValue: Integer);
     procedure SetRoundEdgeRadius(AValue: Integer);
     procedure SetViewStyle(AValue: TLuiImageViewStyle);
+    procedure UpdateEffectivePadding;
+    procedure UpdateEffectiveScale;
     procedure UpdatePatterns;
   protected
-    procedure ChangeBounds(ALeft, ATop, AWidth, AHeight: integer) override;
+    procedure ChangeBounds(ALeft, ATop, AWidth, AHeight: Integer) override;
     procedure DoAfterDraw; virtual;
     procedure DoBeforeDraw; virtual;
     procedure DoDraw; override;
+    procedure DoDrawBackground; virtual;
     procedure DoDrawClipPath; virtual;
+    procedure DoOnResize; override;
     procedure DoSetSource; virtual;
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure BeginUpdate;
     procedure DefaultAfterDraw;
     procedure DefaultBeforeDraw;
+    procedure DefaultDrawBackground;
     procedure EndUpdate;
     property Colors: TLuiImageColors read FColors write FColors;
     property Context;
   published
     property OnAfterDraw: TLuiImageEvent read FOnAfterDraw write FOnAfterDraw;
     property OnBeforeDraw: TLuiImageEvent read FOnBeforeDraw write FOnBeforeDraw;
+    property OnDrawBackground: TLuiImageEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write FOnDrawClipPath;
     property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write FOnGetPattern;
     property OnResize;
@@ -156,7 +167,7 @@ type
     property Padding: TLuiImagePadding read FPadding;
     property Patterns: TLuiImagePatterns read FPatterns;
     property Picture: TPicture read FPicture;
-    property RoundEdgeRadius: Integer read FRoundEdgeRadius write SetRoundEdgeRadius;
+    property RoundRectRadius: Integer read FRoundRectRadius write SetRoundEdgeRadius;
     property ViewStyle: TLuiImageViewStyle read FViewStyle write SetViewStyle;
     property ScaleFactor: TLuiImageScaleFactor read FScaleFactor;
   end;
@@ -190,23 +201,7 @@ end;
 
 { TLuiImage }
 
-procedure TLuiImage.CalculateScale(out XScale, YScale: Double);
-begin
-  case FViewStyle of
-    livStretch:
-      begin
-        XScale := FCurrentBitmap.Width /  GetImageWidth;
-        YScale := FCurrentBitmap.Height / GetImageHeight;
-      end;
-    livScale:
-      begin
-        XScale := 1 / FScaleFactor.Horizontal;
-        YScale := 1 / FScaleFactor.Vertical;
-      end;
-  end;
-end;
-
-procedure TLuiImage.ChangeBounds(ALeft, ATop, AWidth, AHeight: integer);
+procedure TLuiImage.ChangeBounds(ALeft, ATop, AWidth, AHeight: Integer);
 begin
   if not (lioAutoSize in FOptions) then
     inherited ChangeBounds(ALeft, ATop, AWidth, AHeight);
@@ -216,10 +211,19 @@ procedure TLuiImage.Changed;
 begin
   if (FUpdateCount = 0) and not (csLoading in ComponentState) then
   begin
-    if lisAutoSizePending in FStates then
-      InternalAutoSize;
+    CheckStates;
     Redraw;
   end;
+end;
+
+procedure TLuiImage.CheckStates;
+begin
+  if lisScaleCalcPending in FStates then
+    UpdateEffectiveScale;
+  if lisPaddingCalcPending in FStates then
+    UpdateEffectivePadding;
+  if lisAutoSizePending in FStates then
+    InternalAutoSize;
 end;
 
 function TLuiImage.GetImageWidth: Integer;
@@ -228,9 +232,11 @@ begin
     livNormal:
       Result := FCurrentBitmap.Width;
     livStretch:
-      Result := Width - FPadding.Left - FPadding.Right - (FOutLineWidth * 2);
+      Result := Width - FEffectivePadding.Left - FEffectivePadding.Right - (FOutLineWidth * 2);
     livScale:
       Result := Round(FCurrentBitmap.Width * FScaleFactor.Horizontal);
+    livFitImage:
+      Result := Round(FCurrentBitmap.Width * FEffectiveXScale);
   end;
 end;
 
@@ -240,9 +246,11 @@ begin
     livNormal:
       Result := FCurrentBitmap.Height;
     livStretch:
-      Result := Height - FPadding.Top - FPadding.Bottom - (FOutLineWidth * 2);
+      Result := Height - FEffectivePadding.Top - FEffectivePadding.Bottom - (FOutLineWidth * 2);
     livScale:
       Result := Round(FCurrentBitmap.Height * FScaleFactor.Vertical);
+    livFitImage:
+      Result := Round(FCurrentBitmap.Height * FEffectiveYScale);
   end;
 end;
 
@@ -261,8 +269,8 @@ begin
     DesiredWidth := FCurrentBitmap.Width;
     DesiredHeight := FCurrentBitmap.Height;
   end;
-  Inc(DesiredWidth, FPadding.Left + FPadding.Right + (FOutLineWidth * 2));
-  Inc(DesiredHeight, FPadding.Top + FPadding.Bottom + (FOutLineWidth * 2));
+  Inc(DesiredWidth, FEffectivePadding.Left + FEffectivePadding.Right + (FOutLineWidth * 2));
+  Inc(DesiredHeight, FEffectivePadding.Top + FEffectivePadding.Bottom + (FOutLineWidth * 2));
   if (DesiredHeight <> Height) or (DesiredWidth <> Width) then
     inherited ChangeBounds(Left, Top, DesiredWidth, DesiredHeight);
   Exclude(FStates, lisAutoSizePending);
@@ -306,7 +314,10 @@ begin
   if FOptions = AValue then
     Exit;
   if lioAutoSize in (AValue - FOptions) then
+  begin
     Include(FStates, lisAutoSizePending);
+    Include(FStates, lisPaddingCalcPending);
+  end;
   FOptions := AValue;
   Changed;
 end;
@@ -317,21 +328,83 @@ begin
   FOutLineWidth := AValue;
   if lioAutoSize in FOptions then
     Include(FStates, lisAutoSizePending);
+  Include(FStates, lisScaleCalcPending);
+  Include(FStates, lisPaddingCalcPending);
   Changed;
 end;
 
 procedure TLuiImage.SetRoundEdgeRadius(AValue: Integer);
 begin
-  if FRoundEdgeRadius = AValue then exit;
-  FRoundEdgeRadius := AValue;
+  if FRoundRectRadius = AValue then exit;
+  FRoundRectRadius := AValue;
   Changed;
 end;
 
 procedure TLuiImage.SetViewStyle(AValue: TLuiImageViewStyle);
 begin
-  if FViewStyle = AValue then exit;
+  if FViewStyle = AValue then
+    Exit;
+  Include(FStates, lisPaddingCalcPending);
+  Include(FStates, lisScaleCalcPending);
   FViewStyle := AValue;
   Changed;
+end;
+
+procedure TLuiImage.UpdateEffectivePadding;
+begin
+  if FViewStyle = livFitImage then
+  begin
+    if lioAutoSize in FOptions then
+    begin
+      FEffectivePadding.Left := 0;
+      FEffectivePadding.Top := 0;
+      FEffectivePadding.Bottom := 0;
+      FEffectivePadding.Right := 0;
+    end
+    else
+    begin
+      FEffectivePadding.Left := (Width - (GetImageWidth + FOutLineWidth*2)) div 2;
+      FEffectivePadding.Top := (Height - (GetImageHeight + FOutLineWidth*2)) div 2;
+    end;
+  end
+  else
+  begin
+    FEffectivePadding.Left := FPadding.Left;
+    FEffectivePadding.Top := FPadding.Top;
+    FEffectivePadding.Right := FPadding.Right;
+    FEffectivePadding.Bottom  := FPadding.Bottom;
+  end;
+  Exclude(FStates, lisPaddingCalcPending);
+end;
+
+procedure TLuiImage.UpdateEffectiveScale;
+begin
+  case FViewStyle of
+    livStretch:
+      begin
+        FEffectiveXScale := GetImageWidth / FCurrentBitmap.Width;
+        FEffectiveYScale := GetImageHeight / FCurrentBitmap.Height;
+      end;
+    livScale:
+      begin
+        FEffectiveXScale := FScaleFactor.Horizontal;
+        FEffectiveYScale := FScaleFactor.Vertical;
+      end;
+    livFitImage:
+      begin
+        if (FCurrentBitmap.Width + FOutLineWidth*2) > Width then
+          FEffectiveXScale := (Width - FOutLineWidth*2) / FCurrentBitmap.Width
+        else
+          FEffectiveXScale := 1;
+        if (FCurrentBitmap.Height + FOutLineWidth*2) > Height then
+          FEffectiveYScale := (Height - FOutLineWidth*2) / FCurrentBitmap.Height
+        else
+          FEffectiveYScale := 1;
+        FEffectiveXScale := Min(FEffectiveXScale, FEffectiveYScale);
+        FEffectiveYScale := FEffectiveXScale;
+      end;
+  end;
+  Exclude(FStates, lisScaleCalcPending);
 end;
 
 procedure TLuiImage.UpdatePatterns;
@@ -383,19 +456,28 @@ begin
     Context.Stroke;
     Exit;
   end;
-  if FPatterns.RequiresUpdate then
-    UpdatePatterns;
   if FImageSurface = nil then
     Exit;
+  if FPatterns.RequiresUpdate then
+    UpdatePatterns;
   with Context do
   begin
     Save;
+    DoDrawBackground;
     DoBeforeDraw;
     DoSetSource;
     PaintWithAlpha(FOpacity);
     DoAfterDraw;
     Restore;
   end;
+end;
+
+procedure TLuiImage.DoDrawBackground;
+begin
+  if Assigned(FOnDrawBackground) then
+    FOnDrawBackground(Self)
+  else
+    DefaultDrawBackground;
 end;
 
 procedure TLuiImage.DoDrawClipPath;
@@ -410,8 +492,21 @@ begin
       PosOffset := (FOutLineWidth div 2) + 0.5
     else
       PosOffset := FOutLineWidth / 2;
-    RoundedRectangle(Context, PosOffset + FPadding.Left, PosOffset + FPadding.Top,
-      GetImageWidth + FOutLineWidth, GetImageHeight + FOutLineWidth, FRoundEdgeRadius);
+    RoundedRectangle(Context, PosOffset + FEffectivePadding.Left, PosOffset + FEffectivePadding.Top,
+      GetImageWidth + FOutLineWidth, GetImageHeight + FOutLineWidth, FRoundRectRadius);
+  end;
+end;
+
+procedure TLuiImage.DoOnResize;
+begin
+  inherited DoOnResize;
+  if not (lisAutoSizePending in FStates) and (FCurrentBitmap <> nil) then
+  begin
+    Include(FStates, lisPaddingCalcPending);
+    Include(FStates, lisScaleCalcPending);
+    if lioAutoSize in FOptions then
+      Include(FStates, lisAutoSizePending);
+    Changed;
   end;
 end;
 
@@ -423,22 +518,27 @@ var
 begin
   if (FViewStyle = livNormal) or
     ((lioAutoSize in FOptions) and (FViewStyle = livStretch)) then
-    Context.SetSourceSurface(FImageSurface, FOutLineWidth + FPadding.Left,
-      FOutLineWidth + FPadding.Top)
+    Context.SetSourceSurface(FImageSurface, FOutLineWidth + FEffectivePadding.Left,
+      FOutLineWidth + FEffectivePadding.Top)
   else
     case FViewStyle of
-      livStretch, livScale:
+      livStretch, livScale, livFitImage:
         begin
           TempPattern := TCairoSurfacePattern.Create(FImageSurface);
-          CalculateScale(XScale, YScale);
-          Matrix.InitScale(XScale, YScale);
-          Matrix.Translate(-(FOutLineWidth + FPadding.Left),
-            -(FOutLineWidth + FPadding.Top));
+          Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
+          Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
+            -(FOutLineWidth + FEffectivePadding.Top));
           TempPattern.SetMatrix(Matrix);
           Context.Source := TempPattern;
           TempPattern.Destroy;
         end;
     end;
+end;
+
+procedure TLuiImage.Loaded;
+begin
+  inherited Loaded;
+  CheckStates;
 end;
 
 constructor TLuiImage.Create(AOwner: TComponent);
@@ -450,6 +550,7 @@ begin
   FPicture := TPicture.Create;
   FPicture.OnChange := @PictureChanged;
   FScaleFactor := TLuiImageScaleFactor.Create(Self);
+  FStates := [lisPaddingCalcPending];
   with FColors do
   begin
     OutLine := clBlack;
@@ -490,9 +591,17 @@ end;
 procedure TLuiImage.DefaultBeforeDraw;
 begin
   DoDrawClipPath;
-  //Context.Source := FPatterns.BackGround;
-  //Context.FillPreserve;
   Context.Clip;
+end;
+
+procedure TLuiImage.DefaultDrawBackground;
+begin
+  with Context do
+  begin
+    Rectangle(0, 0, Width, Height);
+    Source := FPatterns.BackGround;
+    Fill;
+  end;
 end;
 
 procedure TLuiImage.EndUpdate;
@@ -544,6 +653,7 @@ begin
   begin
     if lioAutoSize in FOptions then
       Include(FStates, lisAutoSizePending);
+    Include(FStates, lisScaleCalcPending);
     Changed;
   end;
 end;
@@ -579,6 +689,7 @@ begin
   begin
     if lioAutoSize in Options then
       Include(FStates, lisAutoSizePending);
+    Include(FStates, lisPaddingCalcPending);
     Changed;
   end;
 end;
