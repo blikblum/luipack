@@ -10,7 +10,7 @@ function DirectMaskBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XS
 begin
   //todo: see if is possible todo it faster
   Result := GTKWidgetSet.StretchCopyArea(DestDC, X, Y, Width, Height, SrcDC, XSrc, YSrc, Width, Height,
-   Mask, 0, 0,  SRCCOPY);
+   Mask, XSrc, YSrc,  SRCCOPY);
 end;
 
 function OptimalPixelFormat: TPixelFormat;
