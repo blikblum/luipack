@@ -1,15 +1,23 @@
 object MainForm: TMainForm
-  Left = 123
+  Left = 115
   Height = 541
-  Top = 124
+  Top = 153
   Width = 828
   HorzScrollBar.Page = 827
   VertScrollBar.Page = 540
-  ActiveControl = FileNameEdit
+  ActiveControl = ImageOptionsNotebook
   Caption = 'LuiImage Demo'
   ClientHeight = 541
   ClientWidth = 828
   OnCreate = FormCreate
+  object Label5: TLabel
+    Left = 8
+    Height = 20
+    Top = 88
+    Width = 66
+    Caption = 'View Style'
+    ParentColor = False
+  end
   object FileInfoPanel: TPanel
     Left = 8
     Height = 72
@@ -24,6 +32,7 @@ object MainForm: TMainForm
       Top = 10
       Width = 328
       OnAcceptFileName = FileNameEditAcceptFileName
+      Filter = 'Image Files|*.png;*.xpm;*.bmp;*.jpeg;*.jpg|All Files|*.*'
       ButtonWidth = 23
       NumGlyphs = 1
       ParentColor = False
@@ -34,9 +43,10 @@ object MainForm: TMainForm
     Left = 277
     Height = 422
     Top = 90
-    Width = 363
+    Width = 547
+    Anchors = [akTop, akLeft, akRight, akBottom]
     ClientHeight = 422
-    ClientWidth = 363
+    ClientWidth = 547
     TabOrder = 1
     object Image: TLuiImage
       Left = 11
@@ -47,23 +57,117 @@ object MainForm: TMainForm
   end
   object ImageOptionsNotebook: TNotebook
     Left = 8
-    Height = 407
-    Top = 105
+    Height = 392
+    Top = 120
     Width = 247
     PageIndex = 0
     TabOrder = 2
-    object BasicOptionsPage: TPage
-      Caption = 'Basic'
+    object SizeOptionsPage: TPage
+      Caption = 'Size'
       ClientWidth = 243
-      ClientHeight = 376
-      object Label1: TLabel
-        Left = 5
+      ClientHeight = 361
+      object Label3: TLabel
+        Left = 38
         Height = 20
-        Top = 18
-        Width = 114
-        Caption = 'RoundEdgeRadius'
+        Top = 22
+        Width = 36
+        Caption = 'Width'
         ParentColor = False
       end
+      object Label4: TLabel
+        Left = 30
+        Height = 20
+        Top = 51
+        Width = 43
+        Caption = 'Height'
+        ParentColor = False
+      end
+      object AutoSizeCheckBox: TCheckBox
+        Left = 38
+        Height = 22
+        Top = 99
+        Width = 85
+        Caption = 'Auto Size'
+        OnChange = AutoSizeCheckBoxChange
+        TabOrder = 0
+      end
+      object WidthSpinEdit: TSpinEdit
+        Left = 78
+        Height = 23
+        Top = 19
+        Width = 50
+        Increment = 10
+        MaxValue = 600
+        MinValue = 10
+        OnChange = WidthSpinEditChange
+        TabOrder = 1
+        Value = 250
+      end
+      object HeightSpinEdit: TSpinEdit
+        Left = 78
+        Height = 23
+        Top = 51
+        Width = 50
+        Increment = 10
+        MaxValue = 600
+        MinValue = 10
+        OnChange = HeightSpinEditChange
+        TabOrder = 2
+        Value = 250
+      end
+      object ScaleFactorGroupBox: TGroupBox
+        Left = 6
+        Height = 105
+        Top = 123
+        Width = 224
+        Caption = 'Scale Factor'
+        ClientHeight = 86
+        ClientWidth = 220
+        TabOrder = 3
+        object Label6: TLabel
+          Left = 22
+          Height = 20
+          Top = 15
+          Width = 66
+          Caption = 'Horizontal'
+          ParentColor = False
+        end
+        object Label7: TLabel
+          Left = 26
+          Height = 20
+          Top = 52
+          Width = 48
+          Caption = 'Vertical'
+          ParentColor = False
+        end
+        object HorizontalScaleSpinEdit: TFloatSpinEdit
+          Left = 97
+          Height = 23
+          Top = 14
+          Width = 58
+          Increment = 0.10000000149011
+          MaxValue = 100
+          OnChange = HorizontalScaleSpinEditChange
+          TabOrder = 0
+          Value = 1
+        end
+        object VerticalScaleSpinEdit: TFloatSpinEdit
+          Left = 98
+          Height = 23
+          Top = 51
+          Width = 57
+          Increment = 0.10000000149011
+          MaxValue = 100
+          OnChange = VerticalScaleSpinEditChange
+          TabOrder = 1
+          Value = 1
+        end
+      end
+    end
+    object BorderOptionsPage: TPage
+      Caption = 'Border'
+      ClientWidth = 243
+      ClientHeight = 361
       object Label2: TLabel
         Left = 6
         Height = 20
@@ -72,37 +176,13 @@ object MainForm: TMainForm
         Caption = 'OutLine Width'
         ParentColor = False
       end
-      object Label3: TLabel
-        Left = 38
+      object Label1: TLabel
+        Left = 5
         Height = 20
-        Top = 178
-        Width = 36
-        Caption = 'Width'
-        ParentColor = False
-      end
-      object Label4: TLabel
-        Left = 31
-        Height = 20
-        Top = 221
-        Width = 43
-        Caption = 'Height'
-        ParentColor = False
-      end
-      object Label5: TLabel
-        Left = 17
-        Height = 20
-        Top = 141
-        Width = 66
-        Caption = 'View Style'
-        ParentColor = False
-      end
-      object RoundEdgeRadiusSpinEdit: TSpinEdit
-        Left = 133
-        Height = 23
         Top = 18
-        Width = 49
-        OnChange = RoundEdgeRadiusSpinEditChange
-        TabOrder = 0
+        Width = 122
+        Caption = 'Round Edge Radius'
+        ParentColor = False
       end
       object OutlineWidthSpinEdit: TSpinEdit
         Left = 133
@@ -110,49 +190,126 @@ object MainForm: TMainForm
         Top = 65
         Width = 50
         OnChange = OutlineWidthSpinEditChange
+        TabOrder = 0
+      end
+      object RoundEdgeRadiusSpinEdit: TSpinEdit
+        Left = 133
+        Height = 23
+        Top = 18
+        Width = 49
+        OnChange = RoundEdgeRadiusSpinEditChange
         TabOrder = 1
       end
-      object AutoSizeCheckBox: TCheckBox
-        Left = 14
-        Height = 22
-        Top = 114
-        Width = 85
-        Caption = 'Auto Size'
-        OnChange = AutoSizeCheckBoxChange
+      object PaddingGroupBox: TGroupBox
+        Left = 28
+        Height = 201
+        Top = 115
+        Width = 185
+        Caption = 'Padding'
+        ClientHeight = 182
+        ClientWidth = 181
         TabOrder = 2
-      end
-      object WidthSpinEdit: TSpinEdit
-        Left = 84
-        Height = 23
-        Top = 176
-        Width = 50
-        MaxValue = 600
-        MinValue = 10
-        TabOrder = 3
-        Value = 250
-      end
-      object HeightSpinEdit: TSpinEdit
-        Left = 85
-        Height = 23
-        Top = 218
-        Width = 50
-        MaxValue = 600
-        MinValue = 10
-        TabOrder = 4
-        Value = 250
-      end
-      object ViewStyleComboBox: TComboBox
-        Left = 94
-        Height = 25
-        Top = 138
-        Width = 136
-        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-        MaxLength = 0
-        OnSelect = ViewStyleComboBoxSelect
-        Style = csDropDownList
-        TabOrder = 5
-        Text = 'ViewStyleComboBox'
+        object Label10: TLabel
+          Left = 24
+          Height = 20
+          Top = 52
+          Width = 25
+          Caption = 'Left'
+          ParentColor = False
+        end
+        object Label9: TLabel
+          Left = 22
+          Height = 20
+          Top = 11
+          Width = 22
+          Caption = 'Top'
+          ParentColor = False
+        end
+        object Label8: TLabel
+          Left = 21
+          Height = 20
+          Top = 95
+          Width = 33
+          Caption = 'Right'
+          ParentColor = False
+        end
+        object Label11: TLabel
+          Left = 8
+          Height = 20
+          Top = 143
+          Width = 49
+          Caption = 'Bottom'
+          ParentColor = False
+        end
+        object PaddingTopSpinEdit: TSpinEdit
+          Left = 74
+          Height = 23
+          Top = 11
+          Width = 50
+          OnChange = PaddingTopSpinEditChange
+          TabOrder = 0
+        end
+        object PaddingLeftSpinEdit: TSpinEdit
+          Left = 75
+          Height = 23
+          Top = 49
+          Width = 50
+          OnChange = PaddingLeftSpinEditChange
+          TabOrder = 1
+        end
+        object PaddingRightSpinEdit: TSpinEdit
+          Left = 77
+          Height = 23
+          Top = 89
+          Width = 50
+          OnChange = PaddingRightSpinEditChange
+          TabOrder = 2
+        end
+        object PaddingBottomSpinEdit: TSpinEdit
+          Left = 78
+          Height = 23
+          Top = 140
+          Width = 50
+          OnChange = PaddingBottomSpinEditChange
+          TabOrder = 3
+        end
       end
     end
+    object EffectsPage: TPage
+      Caption = 'Effects'
+      ClientWidth = 243
+      ClientHeight = 361
+      object Label12: TLabel
+        Left = 29
+        Height = 20
+        Top = 32
+        Width = 49
+        Caption = 'Opacity'
+        ParentColor = False
+      end
+      object OpacitySpinEdit: TFloatSpinEdit
+        Left = 105
+        Height = 23
+        Top = 33
+        Width = 50
+        Increment = 0.10000000149011
+        MaxValue = 1
+        OnChange = OpacitySpinEditChange
+        TabOrder = 0
+        Value = 1
+      end
+    end
+  end
+  object ViewStyleComboBox: TComboBox
+    Left = 94
+    Height = 25
+    Top = 90
+    Width = 136
+    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+    MaxLength = 0
+    OnSelect = ViewStyleComboBoxSelect
+    Style = csDropDownList
+    TabOrder = 3
+    Text = 'ViewStyleComboBox'
   end
 end
