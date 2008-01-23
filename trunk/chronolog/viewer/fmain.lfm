@@ -4,16 +4,16 @@ object frmMain: TfrmMain
   Top = 247
   Width = 733
   HorzScrollBar.Page = 732
-  VertScrollBar.Page = 526
-  ActiveControl = listResults
+  VertScrollBar.Page = 517
+  ActiveControl = nbMain
   Caption = 'ChronoView'
-  ClientHeight = 527
+  ClientHeight = 518
   ClientWidth = 733
   Menu = menuMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object nbMain: TNotebook
-    Height = 501
+    Height = 492
     Top = 26
     Width = 733
     Align = alClient
@@ -21,13 +21,13 @@ object frmMain: TfrmMain
     TabOrder = 0
     object pageResults: TPage
       Caption = 'Results'
-      ClientWidth = 725
-      ClientHeight = 475
+      ClientWidth = 729
+      ClientHeight = 458
       object gridResults: TDBGrid
         Left = 148
-        Height = 430
+        Height = 413
         Top = 10
-        Width = 552
+        Width = 556
         Anchors = [akTop, akLeft, akRight, akBottom]
         FixedColor = clBtnFace
         FixedHotColor = cl3DLight
@@ -43,27 +43,29 @@ object frmMain: TfrmMain
         Height = 192
         Top = 10
         Width = 132
-        OnSelectionChange = listMainSelectionChange
+        OnSelectionChange = listResultsSelectionChange
         TabOrder = 0
+        TopIndex = -1
       end
     end
     object pageSummary: TPage
       Caption = 'Summary'
-      ClientWidth = 725
-      ClientHeight = 475
+      ClientWidth = 729
+      ClientHeight = 458
       object listSummary: TListBox
         Left = 4
         Height = 192
         Top = 10
         Width = 132
-        OnSelectionChange = listDetails2SelectionChange
+        OnSelectionChange = listSummarySelectionChange
         TabOrder = 0
+        TopIndex = -1
       end
       object gridSummary: TStringGrid
         Left = 148
-        Height = 432
+        Height = 415
         Top = 10
-        Width = 528
+        Width = 532
         Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
@@ -78,8 +80,8 @@ object frmMain: TfrmMain
     end
     object pageCustomViews: TPage
       Caption = 'Custom Views'
-      ClientWidth = 725
-      ClientHeight = 475
+      ClientWidth = 729
+      ClientHeight = 458
       object Label4: TLabel
         Left = 4
         Height = 14
@@ -98,9 +100,9 @@ object frmMain: TfrmMain
       end
       object gridCustomViews: TStringGrid
         Left = 196
-        Height = 432
+        Height = 415
         Top = 8
-        Width = 504
+        Width = 508
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
         FixedColor = clBtnFace
@@ -117,6 +119,7 @@ object frmMain: TfrmMain
         Top = 48
         Width = 132
         TabOrder = 0
+        TopIndex = -1
       end
       object butShowView: TButton
         Left = 140
@@ -134,6 +137,7 @@ object frmMain: TfrmMain
         Top = 240
         Width = 132
         TabOrder = 2
+        TopIndex = -1
       end
       object butSaveView: TButton
         Left = 61
@@ -151,7 +155,6 @@ object frmMain: TfrmMain
         Top = 8
         Width = 132
         AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-        ItemHeight = 13
         MaxLength = 0
         OnChange = comboViewsChange
         Style = csDropDownList
@@ -160,8 +163,8 @@ object frmMain: TfrmMain
     end
     object PageCharts: TPage
       Caption = 'Charts'
-      ClientWidth = 725
-      ClientHeight = 475
+      ClientWidth = 733
+      ClientHeight = 501
       object Label2: TLabel
         Left = 4
         Height = 14
@@ -184,6 +187,7 @@ object frmMain: TfrmMain
         Top = 8
         Width = 100
         AutoSize = True
+        Transparent = False
       end
       object CheckXAxis: TCheckListBox
         Left = 4
@@ -191,6 +195,7 @@ object frmMain: TfrmMain
         Top = 216
         Width = 132
         TabOrder = 0
+        TopIndex = -1
       end
       object CheckDataSeries: TCheckListBox
         Left = 4
@@ -198,6 +203,7 @@ object frmMain: TfrmMain
         Top = 24
         Width = 132
         TabOrder = 1
+        TopIndex = -1
       end
       object ButCreateChart: TButton
         Left = 61
@@ -212,8 +218,8 @@ object frmMain: TfrmMain
     end
     object pageReports: TPage
       Caption = 'Reports'
-      ClientWidth = 725
-      ClientHeight = 475
+      ClientWidth = 733
+      ClientHeight = 501
       object Label1: TLabel
         Left = 50
         Height = 14
@@ -249,7 +255,6 @@ object frmMain: TfrmMain
       Width = 152
       AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
-      ItemHeight = 13
       Items.Strings = (
         'View Microseconds'
         'View Miliseconds'
@@ -266,7 +271,6 @@ object frmMain: TfrmMain
       Width = 160
       AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
-      ItemHeight = 13
       Items.Strings = (
         'Group by Session'
         'Group by Action'
@@ -292,14 +296,12 @@ object frmMain: TfrmMain
     end
   end
   object dlgOpenDatafile: TOpenDialog
-    Title = 'Open existing file'
     Filter = 'Db files|*.db|All files|*.*'
     FilterIndex = 0
     left = 16
     top = 368
   end
   object dlgSaveHtml: TSaveDialog
-    Title = 'Save file as'
     FilterIndex = 0
     left = 16
     top = 408
