@@ -12,9 +12,9 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   object Label5: TLabel
     Left = 8
-    Height = 20
+    Height = 14
     Top = 88
-    Width = 66
+    Width = 50
     Caption = 'View Style'
     ParentColor = False
   end
@@ -53,6 +53,7 @@ object MainForm: TMainForm
       Height = 250
       Top = 14
       Width = 250
+      Opacity = 1
     end
   end
   object ImageOptionsNotebook: TNotebook
@@ -64,29 +65,29 @@ object MainForm: TMainForm
     TabOrder = 2
     object SizeOptionsPage: TPage
       Caption = 'Size'
-      ClientWidth = 243
-      ClientHeight = 361
+      ClientWidth = 239
+      ClientHeight = 366
       object Label3: TLabel
         Left = 38
-        Height = 20
+        Height = 14
         Top = 22
-        Width = 36
+        Width = 29
         Caption = 'Width'
         ParentColor = False
       end
       object Label4: TLabel
         Left = 30
-        Height = 20
+        Height = 14
         Top = 51
-        Width = 43
+        Width = 32
         Caption = 'Height'
         ParentColor = False
       end
       object AutoSizeCheckBox: TCheckBox
         Left = 38
-        Height = 22
+        Height = 19
         Top = 99
-        Width = 85
+        Width = 71
         Caption = 'Auto Size'
         OnChange = AutoSizeCheckBoxChange
         TabOrder = 0
@@ -121,7 +122,7 @@ object MainForm: TMainForm
         Top = 123
         Width = 224
         Caption = 'Scale Factor'
-        ClientHeight = 86
+        ClientHeight = 87
         ClientWidth = 220
         TabOrder = 3
         object Label6: TLabel
@@ -149,7 +150,7 @@ object MainForm: TMainForm
           MaxValue = 100
           OnChange = HorizontalScaleSpinEditChange
           TabOrder = 0
-          Value = 1
+          Value = 100
         end
         object VerticalScaleSpinEdit: TFloatSpinEdit
           Left = 98
@@ -160,7 +161,7 @@ object MainForm: TMainForm
           MaxValue = 100
           OnChange = VerticalScaleSpinEditChange
           TabOrder = 1
-          Value = 1
+          Value = 100
         end
       end
     end
@@ -206,8 +207,8 @@ object MainForm: TMainForm
         Top = 115
         Width = 185
         Caption = 'Padding'
-        ClientHeight = 182
-        ClientWidth = 181
+        ClientHeight = 201
+        ClientWidth = 185
         TabOrder = 2
         object Label10: TLabel
           Left = 24
@@ -302,14 +303,14 @@ object MainForm: TMainForm
   end
   object ViewStyleComboBox: TComboBox
     Left = 94
-    Height = 25
+    Height = 21
     Top = 90
     Width = 136
     AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+    ItemHeight = 13
     MaxLength = 0
     OnSelect = ViewStyleComboBoxSelect
     Style = csDropDownList
     TabOrder = 3
-    Text = 'ViewStyleComboBox'
   end
 end
