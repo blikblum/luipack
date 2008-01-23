@@ -24,7 +24,7 @@ unit fmain;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Menus, DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons;
+  Classes, SysUtils, LCLProc, LResources, Forms, Controls, Graphics, Dialogs, Menus, DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons;
 
 type
   { TfrmMain }
@@ -75,8 +75,8 @@ type
     procedure butShowViewClick(Sender: TObject);
     procedure comboScaleChange(Sender: TObject);
     procedure comboMainChange(Sender: TObject);
-    procedure listDetails2SelectionChange(Sender: TObject; User: boolean);
-    procedure listMainSelectionChange(Sender: TObject; User: boolean);
+    procedure listSummarySelectionChange(Sender: TObject; User: boolean);
+    procedure listResultsSelectionChange(Sender: TObject; User: boolean);
     procedure MIOpenClick(Sender: TObject);
     procedure MIOpenRecentClick(Sender: TObject);
   private
@@ -114,10 +114,12 @@ begin
   OpenFile(TMenuItem(Sender).Caption,True);
 end;
 
-procedure TfrmMain.listMainSelectionChange(Sender: TObject; User: boolean);
+procedure TfrmMain.listResultsSelectionChange(Sender: TObject; User: boolean);
 var
-  i:Integer;
+  i: Integer;
 begin
+  if listSummary.ItemIndex = -1 then
+    Exit;
   with dmMain.ChronoData do
   begin
     ActiveGroup := listResults.Items[listResults.ItemIndex];
@@ -126,7 +128,7 @@ begin
   with gridResults do
   begin
     for i:= 0 to Columns.Count - 1 do
-      Columns[i].Width:=100;
+      Columns[i].Width := 100;
   end;
 end;
 
@@ -147,10 +149,12 @@ begin
 end;
 
 
-procedure TfrmMain.listDetails2SelectionChange(Sender: TObject; User: boolean);
+procedure TfrmMain.listSummarySelectionChange(Sender: TObject; User: boolean);
 var
   i:Integer;
 begin
+  if listSummary.ItemIndex = -1 then
+    Exit;
   with dmMain.ChronoData, gridSummary do
   begin
     ColCount := 6 ;
@@ -362,7 +366,6 @@ end;
 procedure TfrmMain.butSaveViewClick(Sender: TObject);
 var
   ActionList,SessionList:TStrings;
-  ActionSessionStr:String;
 begin
   ActionList:=TStringList.Create;
   ActionList.Delimiter:=';';
