@@ -18,7 +18,6 @@
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
-      <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
@@ -30,11 +29,11 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="luicairo_package"/>
-        <MinVersion Valid="True"/>
+        <PackageName Value="LCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicairo_package"/>
+        <MinVersion Valid="True"/>
       </Item2>
     </RequiredPackages>
     <Units Count="2">
