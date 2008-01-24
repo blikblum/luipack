@@ -174,6 +174,9 @@ type
 
 implementation
 
+uses
+  cairo14;
+
 procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double; Radius: Double);
 begin
   with Context do
@@ -231,7 +234,7 @@ begin
   case FViewStyle of
     livNormal:
       Result := FCurrentBitmap.Width;
-    livStretch:
+    livStretch, livTile:
       Result := Width - FEffectivePadding.Left - FEffectivePadding.Right - (FOutLineWidth * 2);
     livScale:
       Result := Round(FCurrentBitmap.Width * FScaleFactor.Horizontal);
@@ -245,7 +248,7 @@ begin
   case FViewStyle of
     livNormal:
       Result := FCurrentBitmap.Height;
-    livStretch:
+    livStretch, livTile:
       Result := Height - FEffectivePadding.Top - FEffectivePadding.Bottom - (FOutLineWidth * 2);
     livScale:
       Result := Round(FCurrentBitmap.Height * FScaleFactor.Vertical);
@@ -522,12 +525,21 @@ begin
       FOutLineWidth + FEffectivePadding.Top)
   else
     case FViewStyle of
-      livStretch, livScale, livFitImage:
+      livStretch, livScale, livFitImage, livTile:
         begin
           TempPattern := TCairoSurfacePattern.Create(FImageSurface);
-          Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
-          Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
-            -(FOutLineWidth + FEffectivePadding.Top));
+          if FViewStyle = livTile then
+          begin
+            TempPattern.Extend := CAIRO_EXTEND_REPEAT;
+            Matrix.InitTranslate(-(FOutLineWidth + FEffectivePadding.Left),
+              -(FOutLineWidth + FEffectivePadding.Top));
+          end
+          else
+          begin
+            Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
+            Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
+              -(FOutLineWidth + FEffectivePadding.Top));
+          end;
           TempPattern.SetMatrix(Matrix);
           Context.Source := TempPattern;
           TempPattern.Destroy;
