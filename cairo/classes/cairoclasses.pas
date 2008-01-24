@@ -121,19 +121,21 @@ type
     FHandle: Pcairo_pattern_t;
     FHandleIsPrivate: Boolean;
     FOnReference: TReferenceNotify;
+    function  GetExtend: cairo_extend_t;
+    function  GetFilter: cairo_filter_t;
+    procedure SetExtend(Extend: cairo_extend_t);
+    procedure SetFilter(Filter: cairo_filter_t);
   public
     destructor Destroy; override;
     procedure Reference;
     procedure SetMatrix(const Matrix: TCairoMatrix);
     procedure GetMatrix(const Matrix: TCairoMatrix);
-    procedure SetExtend(Extend: cairo_extend_t);
-    function  GetExtend: cairo_extend_t;
-    procedure SetFilter(Filter: cairo_filter_t);
-    function  GetFilter: cairo_filter_t;
     function  Status: cairo_status_t;
-    function  GetUserData (Key: Pcairo_user_data_key_t): Pointer;
-    function  SetUserData (Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+    function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+    function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
     function  GetType: cairo_pattern_type_t;
+    property Extend: cairo_extend_t read GetExtend write SetExtend;
+    property Filter: cairo_filter_t read GetFilter write SetFilter;
   end;
   
   { TCairoSolidPattern }
