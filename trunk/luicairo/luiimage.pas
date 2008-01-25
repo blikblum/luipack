@@ -5,7 +5,7 @@ unit LuiImage;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, Graphics, LCLProc, math;
+  Classes, SysUtils, CairoClasses, CairoLCL, Graphics, LCLProc, math, CairoImaging;
 
 type
 
@@ -98,11 +98,9 @@ type
   TLuiImage = class(TCustomCairoControl)
   private
     FColors: TLuiImageColors;
-    FCurrentBitmap: TBitmap;
     FEffectivePadding: TRect;
     FEffectiveXScale: Double;
     FEffectiveYScale: Double;
-    FImageSurface: TCairoDCSurface;
     FOnAfterDraw: TLuiImageEvent;
     FOnBeforeDraw: TLuiImageEvent;
     FOnDrawBackground: TLuiImageEvent;
@@ -113,7 +111,7 @@ type
     FOutLineWidth: Integer;
     FPadding: TLuiImagePadding;
     FPatterns: TLuiImagePatterns;
-    FPicture: TPicture;
+    FPicture: TCairoImagingPicture;
     FRoundRectRadius: Integer;
     FScaleFactor: TLuiImageScaleFactor;
     FStates: TLuiImageStates;
@@ -125,7 +123,6 @@ type
     function GetImageWidth: Integer;
     procedure InternalAutoSize;
     procedure PictureChanged(Sender: TObject);
-    procedure ResetImageSurface;
     procedure SetOpacity(const AValue: Double);
     procedure SetOptions(AValue: TLuiImageOptions);
     procedure SetOutLineWidth(AValue: Integer);
@@ -166,7 +163,7 @@ type
     property OutLineWidth: Integer read FOutLineWidth write SetOutLineWidth;
     property Padding: TLuiImagePadding read FPadding;
     property Patterns: TLuiImagePatterns read FPatterns;
-    property Picture: TPicture read FPicture;
+    property Picture: TCairoImagingPicture read FPicture;
     property RoundRectRadius: Integer read FRoundRectRadius write SetRoundEdgeRadius;
     property ViewStyle: TLuiImageViewStyle read FViewStyle write SetViewStyle;
     property ScaleFactor: TLuiImageScaleFactor read FScaleFactor;
@@ -233,13 +230,13 @@ function TLuiImage.GetImageWidth: Integer;
 begin
   case FViewStyle of
     livNormal:
-      Result := FCurrentBitmap.Width;
+      Result := FPicture.Data.Width;
     livStretch, livTile:
       Result := Width - FEffectivePadding.Left - FEffectivePadding.Right - (FOutLineWidth * 2);
     livScale:
-      Result := Round(FCurrentBitmap.Width * FScaleFactor.Horizontal);
+      Result := Round(FPicture.Data.Width * FScaleFactor.Horizontal);
     livFitImage:
-      Result := Round(FCurrentBitmap.Width * FEffectiveXScale);
+      Result := Round(FPicture.Data.Width * FEffectiveXScale);
   end;
 end;
 
@@ -247,13 +244,13 @@ function TLuiImage.GetImageHeight: Integer;
 begin
   case FViewStyle of
     livNormal:
-      Result := FCurrentBitmap.Height;
+      Result := FPicture.Data.Height;
     livStretch, livTile:
       Result := Height - FEffectivePadding.Top - FEffectivePadding.Bottom - (FOutLineWidth * 2);
     livScale:
-      Result := Round(FCurrentBitmap.Height * FScaleFactor.Vertical);
+      Result := Round(FPicture.Data.Height * FScaleFactor.Vertical);
     livFitImage:
-      Result := Round(FCurrentBitmap.Height * FEffectiveYScale);
+      Result := Round(FPicture.Data.Height * FEffectiveYScale);
   end;
 end;
 
@@ -264,13 +261,13 @@ begin
   //todo: move to default LCL AutoSize ????
   if FViewStyle = livScale then
   begin
-    DesiredWidth := Round(FCurrentBitmap.Width * FScaleFactor.Horizontal);
-    DesiredHeight := Round(FCurrentBitmap.Height * FScaleFactor.Vertical);
+    DesiredWidth := Round(FPicture.Data.Width * FScaleFactor.Horizontal);
+    DesiredHeight := Round(FPicture.Data.Height * FScaleFactor.Vertical);
   end
   else
   begin
-    DesiredWidth := FCurrentBitmap.Width;
-    DesiredHeight := FCurrentBitmap.Height;
+    DesiredWidth := FPicture.Data.Width;
+    DesiredHeight := FPicture.Data.Height;
   end;
   Inc(DesiredWidth, FEffectivePadding.Left + FEffectivePadding.Right + (FOutLineWidth * 2));
   Inc(DesiredHeight, FEffectivePadding.Top + FEffectivePadding.Bottom + (FOutLineWidth * 2));
@@ -280,28 +277,11 @@ begin
 end;
 
 procedure TLuiImage.PictureChanged(Sender: TObject);
-var
-  NewBitmap: TBitmap;
 begin
-  if FPicture.Graphic <> nil then
-    NewBitmap := FPicture.Bitmap
-  else
-    NewBitmap := nil;
-    
-  if NewBitmap <> FCurrentBitmap then
-  begin
-    FCurrentBitmap := NewBitmap;
-    ResetImageSurface;
-  end;
   if lioAutoSize in FOptions then
     Include(FStates, lisAutoSizePending);
+  Changed;
   Redraw;
-end;
-
-procedure TLuiImage.ResetImageSurface;
-begin
-  FImageSurface.Free;
-  FImageSurface := TCairoDCSurface.Create(FCurrentBitmap.Canvas.Handle);
 end;
 
 procedure TLuiImage.SetOpacity(const AValue: Double);
@@ -385,8 +365,8 @@ begin
   case FViewStyle of
     livStretch:
       begin
-        FEffectiveXScale := GetImageWidth / FCurrentBitmap.Width;
-        FEffectiveYScale := GetImageHeight / FCurrentBitmap.Height;
+        FEffectiveXScale := GetImageWidth / FPicture.Data.Width;
+        FEffectiveYScale := GetImageHeight / FPicture.Data.Height;
       end;
     livScale:
       begin
@@ -395,12 +375,12 @@ begin
       end;
     livFitImage:
       begin
-        if (FCurrentBitmap.Width + FOutLineWidth*2) > Width then
-          FEffectiveXScale := (Width - FOutLineWidth*2) / FCurrentBitmap.Width
+        if (FPicture.Data.Width + FOutLineWidth*2) > Width then
+          FEffectiveXScale := (Width - FOutLineWidth*2) / FPicture.Data.Width
         else
           FEffectiveXScale := 1;
-        if (FCurrentBitmap.Height + FOutLineWidth*2) > Height then
-          FEffectiveYScale := (Height - FOutLineWidth*2) / FCurrentBitmap.Height
+        if (FPicture.Data.Height + FOutLineWidth*2) > Height then
+          FEffectiveYScale := (Height - FOutLineWidth*2) / FPicture.Data.Height
         else
           FEffectiveYScale := 1;
         FEffectiveXScale := Min(FEffectiveXScale, FEffectiveYScale);
@@ -459,7 +439,7 @@ begin
     Context.Stroke;
     Exit;
   end;
-  if FImageSurface = nil then
+  if FPicture.Surface = nil then
     Exit;
   if FPatterns.RequiresUpdate then
     UpdatePatterns;
@@ -503,7 +483,7 @@ end;
 procedure TLuiImage.DoOnResize;
 begin
   inherited DoOnResize;
-  if not (lisAutoSizePending in FStates) and (FCurrentBitmap <> nil) then
+  if not (lisAutoSizePending in FStates) and (FPicture.Data.Size <> 0) then
   begin
     Include(FStates, lisPaddingCalcPending);
     Include(FStates, lisScaleCalcPending);
@@ -521,13 +501,13 @@ var
 begin
   if (FViewStyle = livNormal) or
     ((lioAutoSize in FOptions) and (FViewStyle = livStretch)) then
-    Context.SetSourceSurface(FImageSurface, FOutLineWidth + FEffectivePadding.Left,
+    Context.SetSourceSurface(FPicture.Surface, FOutLineWidth + FEffectivePadding.Left,
       FOutLineWidth + FEffectivePadding.Top)
   else
     case FViewStyle of
       livStretch, livScale, livFitImage, livTile:
         begin
-          TempPattern := TCairoSurfacePattern.Create(FImageSurface);
+          TempPattern := TCairoSurfacePattern.Create(FPicture.Surface);
           if FViewStyle = livTile then
           begin
             TempPattern.Extend := CAIRO_EXTEND_REPEAT;
@@ -559,7 +539,7 @@ begin
   FOpacity := 1;
   FPadding := TLuiImagePadding.Create(Self);
   FPatterns := TLuiImagePatterns.Create;
-  FPicture := TPicture.Create;
+  FPicture := TCairoImagingPicture.Create;
   FPicture.OnChange := @PictureChanged;
   FScaleFactor := TLuiImageScaleFactor.Create(Self);
   FStates := [lisPaddingCalcPending];
@@ -578,7 +558,6 @@ begin
   FPicture.Destroy;
   FScaleFactor.Destroy;
   inherited Destroy;
-  FImageSurface.Free;
 end;
 
 procedure TLuiImage.BeginUpdate;
