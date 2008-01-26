@@ -14,6 +14,7 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    KeepAspectCheckBox: TCheckBox;
     Label14: TLabel;
     MaskColorButton: TColorButton;
     Label13: TLabel;
@@ -57,6 +58,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure HeightSpinEditChange(Sender: TObject);
     procedure HorizontalScaleSpinEditChange(Sender: TObject);
+    procedure KeepAspectCheckBoxChange(Sender: TObject);
     procedure MaskColorButtonColorChanged(Sender: TObject);
     procedure OpacitySpinEditChange(Sender: TObject);
     procedure OutlineWidthSpinEditChange(Sender: TObject);
@@ -101,6 +103,14 @@ end;
 procedure TMainForm.HorizontalScaleSpinEditChange(Sender: TObject);
 begin
   Image.ScaleFactor.Horizontal := HorizontalScaleSpinEdit.Value;
+end;
+
+procedure TMainForm.KeepAspectCheckBoxChange(Sender: TObject);
+begin
+  if KeepAspectCheckBox.Checked then
+    Image.Options := Image.Options + [lioKeepAspectOnStretch]
+  else
+    Image.Options := Image.Options - [lioKeepAspectOnStretch];
 end;
 
 procedure TMainForm.MaskColorButtonColorChanged(Sender: TObject);
