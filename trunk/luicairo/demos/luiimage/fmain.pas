@@ -14,6 +14,9 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    Label14: TLabel;
+    MaskColorButton: TColorButton;
+    Label13: TLabel;
     TransparencyModeCombo: TComboBox;
     Label12: TLabel;
     OpacitySpinEdit: TFloatSpinEdit;
@@ -54,6 +57,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure HeightSpinEditChange(Sender: TObject);
     procedure HorizontalScaleSpinEditChange(Sender: TObject);
+    procedure MaskColorButtonColorChanged(Sender: TObject);
     procedure OpacitySpinEditChange(Sender: TObject);
     procedure OutlineWidthSpinEditChange(Sender: TObject);
     procedure PaddingBottomSpinEditChange(Sender: TObject);
@@ -99,6 +103,13 @@ begin
   Image.ScaleFactor.Horizontal := HorizontalScaleSpinEdit.Value;
 end;
 
+procedure TMainForm.MaskColorButtonColorChanged(Sender: TObject);
+begin
+  with Image.Picture.MaskColor do
+    RedGreenBlue(ColorToRGB(MaskColorButton.ButtonColor), R, G, B);
+  Image.Picture.UpdateMask;
+end;
+
 procedure TMainForm.AutoSizeCheckBoxChange(Sender: TObject);
 begin
   if AutoSizeCheckBox.Checked then
@@ -132,6 +143,7 @@ begin
   Image.Padding.Top := PaddingTopSpinEdit.Value;
 end;
 
+
 procedure TMainForm.RoundEdgeRadiusSpinEditChange(Sender: TObject);
 begin
   Image.RoundRectRadius := RoundEdgeRadiusSpinEdit.Value;
@@ -139,14 +151,12 @@ end;
 
 procedure TMainForm.TransparencyModeComboSelect(Sender: TObject);
 begin
-
   case TransparencyModeCombo.ItemIndex of
     0: Image.Picture.TransparencyMode := citDefault;
     1: Image.Picture.TransparencyMode := citMaskNonAlpha;
     2: Image.Picture.TransparencyMode := citForceMaskColor;
     3: Image.Picture.TransparencyMode := citNone;
   end;
-
 end;
 
 procedure TMainForm.VerticalScaleSpinEditChange(Sender: TObject);

@@ -28,21 +28,24 @@
       </Item2>
       <Item3>
         <Filename Value="luiimage.pas"/>
-        <UnitName Value="luiimage"/>
+        <UnitName Value="LuiImage"/>
       </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="3">
+    <RequiredPkgs Count="4">
       <Item1>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="cairoimaging_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="cairolcl_package"/>
-      </Item2>
-      <Item3>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="cairolcl_package"/>
       </Item3>
+      <Item4>
+        <PackageName Value="multiloglaz"/>
+      </Item4>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
