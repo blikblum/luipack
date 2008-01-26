@@ -497,7 +497,6 @@ procedure TLuiImage.DoSetSource;
 var
   TempPattern: TCairoPattern;
   Matrix: TCairoMatrix;
-  XScale, YScale: Double;
 begin
   if (FViewStyle = livNormal) or
     ((lioAutoSize in FOptions) and (FViewStyle = livStretch)) then

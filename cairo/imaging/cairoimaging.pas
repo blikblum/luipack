@@ -11,24 +11,30 @@ uses
 
 type
 
-  TCairoImagingOption = (cioAutoTransparentColor);
+  TCairoImagingOption = (cioAutoMaskColor, cioAllowChangesAfterLoad);
 
   TCairoImagingOptions = set of TCairoImagingOption;
 
-  TCairoImagingTransparentMode = (citDefault, citMaskNonAlpha, citForceMaskColor, citNone);
+  TCairoImagingState = (cisReloadDataPending);
+
+  TCairoImagingStates = set of TCairoImagingState;
+
+  TCairoImagingTransparencyMode = (citDefault, citMaskNonAlpha, citForceMaskColor, citNone);
   
   { TCairoImagingPicture }
 
   TCairoImagingPicture = class
   private
     FData: TImageData;
+    FFormatInfo: TImageFormatInfo;
+    FOriginalData: TImageData;
     FOnChange: TNotifyEvent;
     FSurface: TCairoImageSurface;
-    FUseAlpha: Boolean;
     FOptions: TCairoImagingOptions;
     FTransparent: Boolean;
     FMaskColor: TColor24Rec;
-    FTransparentMode: TCairoImagingTransparentMode;
+    FStates: TCairoImagingStates;
+    FTransparencyMode: TCairoImagingTransparencyMode;
     procedure Changed;
     procedure CreateSurface;
     procedure FreeResources;
@@ -36,18 +42,17 @@ type
     procedure PrepareTransparency;
     procedure SetOptions(const AValue: TCairoImagingOptions);
     procedure SetMaskColor(const AValue: TColor24Rec);
-    procedure SetTransparentMode(const AValue: TCairoImagingTransparentMode);
+    procedure SetTransparencyMode(AValue: TCairoImagingTransparencyMode);
   public
     constructor Create;
     destructor Destroy; override;
     procedure LoadFromFile(const FileName: String);
     property Data: TImageData read FData;
     property Options: TCairoImagingOptions read FOptions write SetOptions;
-    property TransparentMode: TCairoImagingTransparentMode read FTransparentMode write SetTransparentMode;
+    property TransparencyMode: TCairoImagingTransparencyMode read FTransparencyMode write SetTransparencyMode;
     property MaskColor: TColor24Rec read FMaskColor write SetMaskColor;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Surface: TCairoImageSurface read FSurface;
-    
   end;
 
 implementation
@@ -95,6 +100,16 @@ end;
 
 procedure TCairoImagingPicture.Changed;
 begin
+  if cisReloadDataPending in FStates then
+  begin
+    //todo see a way to update the bits directly without need to free the surface or
+    //call CloneImage
+    //Move(FOriginalData.Bits^, FData.Bits^, FOriginalData.Size);
+    CloneImage(FOriginalData, FData);
+    PrepareTransparency;
+    FSurface.Free;
+    CreateSurface;
+  end;
   if Assigned(FOnChange) then
     FOnChange(Self);
 end;
@@ -112,6 +127,7 @@ begin
   FSurface.Free;
   FSurface := nil;
   FreeImage(FData);
+  FreeImage(FOriginalData);
 end;
 
 procedure TCairoImagingPicture.Mask(const AMaskColor: TColor24Rec; ClearAlpha: Boolean);
@@ -144,15 +160,14 @@ procedure TCairoImagingPicture.PrepareTransparency;
 const
   TransparentFormatMap: array[Boolean] of TImageFormat = (ifX8R8G8B8, ifA8R8G8B8);
 var
-  FormatInfo: TImageFormatInfo;
   AMaskColor: TColor24Rec;
+  UseAlpha: Boolean;
 begin
-  GetImageFormatInfo(FData.Format, FormatInfo);
-  FUseAlpha := FormatInfo.HasAlphaChannel;
-  case FTransparentMode of
+  UseAlpha := FFormatInfo.HasAlphaChannel;
+  case FTransparencyMode of
     citDefault:
       begin
-        FTransparent := FUseAlpha;
+        FTransparent := UseAlpha;
       end;
     citMaskNonAlpha:
       begin
@@ -160,7 +175,7 @@ begin
       end;
     citForceMaskColor:
       begin
-        FUseAlpha := False;
+        UseAlpha := False;
         FTransparent := True;
       end;
     citNone:
@@ -168,28 +183,43 @@ begin
         FTransparent := False;
       end;
   end;
-  ConvertImage(FData, TransparentFormatMap[FTransparent]);
   
+  ConvertImage(FData, TransparentFormatMap[FTransparent]);
+
   if FTransparent then
   begin
-    if FUseAlpha then
+    if UseAlpha then
       MultiplyAlphaChannel(FData.Bits, FData.Size)
     else
     begin
-      if cioAutoTransparentColor in FOptions then
+      if cioAutoMaskColor in FOptions then
         AMaskColor := GetPixel32(FData, 0, 0).Color24Rec
       else
         AMaskColor := FMaskColor;
-      Mask(AMaskColor, FormatInfo.HasAlphaChannel);
+      Mask(AMaskColor, FFormatInfo.HasAlphaChannel);
     end;
   end;
 end;
 
 procedure TCairoImagingPicture.SetOptions(
   const AValue: TCairoImagingOptions);
+var
+  EffectiveChange: Boolean;
 begin
-  if FOptions=AValue then exit;
-  FOptions:=AValue;
+  if FOptions = AValue then
+    Exit;
+  EffectiveChange := False;
+  if (cioAllowChangesAfterLoad in FOptions) and
+    ((cioAutoMaskColor in AValue) <> (cioAutoMaskColor in FOptions)) and
+    (FData.Size > 0) and
+    (FTransparencyMode in [citForceMaskColor, citMaskNonAlpha]) then
+  begin
+    EffectiveChange := True;
+    Include(FStates, cisReloadDataPending);
+  end;
+  FOptions := AValue;
+  if EffectiveChange then
+    Changed;
 end;
 
 procedure TCairoImagingPicture.SetMaskColor(const AValue: TColor24Rec);
@@ -197,11 +227,17 @@ begin
 
 end;
 
-procedure TCairoImagingPicture.SetTransparentMode(
-  const AValue: TCairoImagingTransparentMode);
+procedure TCairoImagingPicture.SetTransparencyMode(
+  AValue: TCairoImagingTransparencyMode);
 begin
-  if FTransparentMode=AValue then exit;
-  FTransparentMode:=AValue;
+  if FTransparencyMode = AValue then
+    Exit;
+  FTransparencyMode := AValue;
+  if (cioAllowChangesAfterLoad in FOptions) and (FData.Size > 0) then
+  begin
+    Include(FStates, cisReloadDataPending);
+    Changed;
+  end;
 end;
 
 constructor TCairoImagingPicture.Create;
@@ -224,6 +260,9 @@ begin
   FreeResources;
   if not LoadImageFromFile(FileName, FData) then
     raise Exception.Create('Error loading "' + FileName + '"');
+  GetImageFormatInfo(FData.Format, FFormatInfo);
+  if (cioAllowChangesAfterLoad in FOptions) and (FOriginalData.Size = 0) then
+    CloneImage(FData, FOriginalData);
   PrepareTransparency;
   CreateSurface;
   Changed;
