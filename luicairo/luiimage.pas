@@ -657,7 +657,7 @@ end;
 
 procedure TLuiImageScaleFactor.SetHorizontal(const AValue: Double);
 begin
-  if FHorizontal = AValue then
+  if (FHorizontal = AValue) or (AValue = 0) then
     Exit;
   FHorizontal := AValue;
   Changed;
@@ -665,7 +665,7 @@ end;
 
 procedure TLuiImageScaleFactor.SetVertical(const AValue: Double);
 begin
-  if FVertical = AValue then
+  if (FVertical = AValue) or (AValue = 0) then
     Exit;
   FVertical := AValue;
   Changed;

@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 389
+  Left = 303
   Height = 540
-  Top = 150
+  Top = 213
   Width = 828
   HorzScrollBar.Page = 827
   VertScrollBar.Page = 539
@@ -288,6 +288,32 @@ object MainForm: TMainForm
         Caption = 'Opacity'
         ParentColor = False
       end
+      object Label13: TLabel
+        Left = 4
+        Height = 14
+        Top = 97
+        Width = 103
+        Caption = 'Transparency Mode: '
+        ParentColor = False
+      end
+      object MaskColorButton: TColorButton
+        Left = 132
+        Height = 25
+        Top = 122
+        Width = 75
+        BorderWidth = 2
+        ButtonColorSize = 16
+        Color = clBtnFace
+        OnColorChanged = MaskColorButtonColorChanged
+      end
+      object Label14: TLabel
+        Left = 61
+        Height = 14
+        Top = 130
+        Width = 53
+        Caption = 'Mask Color'
+        ParentColor = False
+      end
       object OpacitySpinEdit: TFloatSpinEdit
         Left = 105
         Height = 23
@@ -301,10 +327,11 @@ object MainForm: TMainForm
       end
       object TransparencyModeCombo: TComboBox
         Left = 110
-        Height = 25
+        Height = 21
         Top = 93
         Width = 100
         AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+        ItemHeight = 13
         ItemIndex = 0
         Items.Strings = (
           'Default'

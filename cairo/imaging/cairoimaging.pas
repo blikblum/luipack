@@ -40,17 +40,18 @@ type
     procedure FreeResources;
     procedure Mask(const AMaskColor: TColor24Rec; ClearAlpha: Boolean);
     procedure PrepareTransparency;
-    procedure SetOptions(const AValue: TCairoImagingOptions);
-    procedure SetMaskColor(const AValue: TColor24Rec);
+    procedure Reload;
+    procedure SetOptions(AValue: TCairoImagingOptions);
     procedure SetTransparencyMode(AValue: TCairoImagingTransparencyMode);
   public
     constructor Create;
     destructor Destroy; override;
     procedure LoadFromFile(const FileName: String);
+    procedure UpdateMask;
     property Data: TImageData read FData;
     property Options: TCairoImagingOptions read FOptions write SetOptions;
     property TransparencyMode: TCairoImagingTransparencyMode read FTransparencyMode write SetTransparencyMode;
-    property MaskColor: TColor24Rec read FMaskColor write SetMaskColor;
+    property MaskColor: TColor24Rec read FMaskColor write FMaskColor;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Surface: TCairoImageSurface read FSurface;
   end;
@@ -60,35 +61,26 @@ implementation
 uses
   cairo14;
 
-type
-  TRGBA = record
-    Blue:  Byte;
-    Green: Byte;
-    Red:   Byte;
-    Alpha: Byte;
-  end;
-  PRGBA = ^TRGBA;
-  
-procedure MultiplyAlphaChannel(Pixel: PRGBA; ByteCount: PtrUInt);
+procedure MultiplyAlphaChannel(Pixel: PColor32Rec; ByteCount: PtrUInt);
 begin
   ByteCount := ByteCount shr 2;
   while ByteCount > 0 do
   begin
-    case Pixel^.Alpha of
+    case Pixel^.A of
       0:
         begin
-          Pixel^.Red   := 0;
-          Pixel^.Green := 0;
-          Pixel^.Blue  := 0;
+          Pixel^.R := 0;
+          Pixel^.G := 0;
+          Pixel^.B := 0;
         end;
       255:
         begin
           //do nothing
         end;
     else
-      Pixel^.Red   := (Pixel^.Red   * Pixel^.Alpha) div 255;
-      Pixel^.Green := (Pixel^.Green * Pixel^.Alpha) div 255;
-      Pixel^.Blue  := (Pixel^.Blue  * Pixel^.Alpha) div 255;
+      Pixel^.R := (Pixel^.R * Pixel^.A) div 255;
+      Pixel^.G := (Pixel^.G * Pixel^.A) div 255;
+      Pixel^.B := (Pixel^.B * Pixel^.A) div 255;
     end;
     Inc(Pixel);
     Dec(ByteCount);
@@ -109,6 +101,7 @@ begin
     PrepareTransparency;
     FSurface.Free;
     CreateSurface;
+    Exclude(FStates, cisReloadDataPending);
   end;
   if Assigned(FOnChange) then
     FOnChange(Self);
@@ -202,7 +195,7 @@ begin
 end;
 
 procedure TCairoImagingPicture.SetOptions(
-  const AValue: TCairoImagingOptions);
+  AValue: TCairoImagingOptions);
 var
   EffectiveChange: Boolean;
 begin
@@ -222,28 +215,20 @@ begin
     Changed;
 end;
 
-procedure TCairoImagingPicture.SetMaskColor(const AValue: TColor24Rec);
-begin
-
-end;
-
 procedure TCairoImagingPicture.SetTransparencyMode(
   AValue: TCairoImagingTransparencyMode);
 begin
   if FTransparencyMode = AValue then
     Exit;
   FTransparencyMode := AValue;
-  if (cioAllowChangesAfterLoad in FOptions) and (FData.Size > 0) then
-  begin
-    Include(FStates, cisReloadDataPending);
-    Changed;
-  end;
+  Reload;
 end;
 
 constructor TCairoImagingPicture.Create;
 begin
   with FMaskColor do
   begin
+    //fuchsia
     R := 255;
     //G := 0;
     B := 255;
@@ -267,6 +252,22 @@ begin
   CreateSurface;
   Changed;
 end;
+
+procedure TCairoImagingPicture.UpdateMask;
+begin
+  if FTransparencyMode in [citMaskNonAlpha, citForceMaskColor] then
+    Reload;
+end;
+
+procedure TCairoImagingPicture.Reload;
+begin
+  if (cioAllowChangesAfterLoad in FOptions) and (FData.Size > 0) then
+  begin
+    Include(FStates, cisReloadDataPending);
+    Changed;
+  end;
+end;
+
 
 end.
 
