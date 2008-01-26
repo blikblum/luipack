@@ -13,7 +13,7 @@ type
   
   TLuiImageEvent = procedure (Sender: TLuiImage) of object;
 
-  TLuiImageOption = (lioAutoSize);
+  TLuiImageOption = (lioAutoSize, lioKeepAspectOnStretch);
 
   TLuiImageOptions = set of TLuiImageOption;
 
@@ -231,11 +231,11 @@ begin
   case FViewStyle of
     livNormal:
       Result := FPicture.Data.Width;
-    livStretch, livTile:
+    livTile:
       Result := Width - FEffectivePadding.Left - FEffectivePadding.Right - (FOutLineWidth * 2);
     livScale:
       Result := Round(FPicture.Data.Width * FScaleFactor.Horizontal);
-    livFitImage:
+    livStretch, livFitImage:
       Result := Round(FPicture.Data.Width * FEffectiveXScale);
   end;
 end;
@@ -245,11 +245,11 @@ begin
   case FViewStyle of
     livNormal:
       Result := FPicture.Data.Height;
-    livStretch, livTile:
+    livTile:
       Result := Height - FEffectivePadding.Top - FEffectivePadding.Bottom - (FOutLineWidth * 2);
     livScale:
       Result := Round(FPicture.Data.Height * FScaleFactor.Vertical);
-    livFitImage:
+    livStretch, livFitImage:
       Result := Round(FPicture.Data.Height * FEffectiveYScale);
   end;
 end;
@@ -301,6 +301,12 @@ begin
     Include(FStates, lisAutoSizePending);
     Include(FStates, lisPaddingCalcPending);
   end;
+  if (FViewStyle = livStretch) and
+    ((lioKeepAspectOnStretch in FOptions) <> (lioKeepAspectOnStretch in AValue)) then
+  begin
+    Include(FStates, lisPaddingCalcPending);
+    Include(FStates, lisScaleCalcPending);
+  end;
   FOptions := AValue;
   Changed;
 end;
@@ -335,27 +341,34 @@ end;
 
 procedure TLuiImage.UpdateEffectivePadding;
 begin
-  if FViewStyle = livFitImage then
-  begin
-    if lioAutoSize in FOptions then
-    begin
-      FEffectivePadding.Left := 0;
-      FEffectivePadding.Top := 0;
-      FEffectivePadding.Bottom := 0;
-      FEffectivePadding.Right := 0;
-    end
+  case FViewStyle of
+    livFitImage:
+      begin
+        if lioAutoSize in FOptions then
+        begin
+          FEffectivePadding.Left := 0;
+          FEffectivePadding.Top := 0;
+          FEffectivePadding.Bottom := 0;
+          FEffectivePadding.Right := 0;
+        end
+        else
+        begin
+          FEffectivePadding.Left := (Width - (GetImageWidth + FOutLineWidth*2)) div 2;
+          FEffectivePadding.Top := (Height - (GetImageHeight + FOutLineWidth*2)) div 2;
+        end;
+      end;
     else
     begin
-      FEffectivePadding.Left := (Width - (GetImageWidth + FOutLineWidth*2)) div 2;
-      FEffectivePadding.Top := (Height - (GetImageHeight + FOutLineWidth*2)) div 2;
+      FEffectivePadding.Left := FPadding.Left;
+      FEffectivePadding.Top := FPadding.Top;
+      FEffectivePadding.Right := FPadding.Right;
+      FEffectivePadding.Bottom  := FPadding.Bottom;
     end;
-  end
-  else
+  end;
+  if (FViewStyle = livStretch) and (lioKeepAspectOnStretch in FOptions) then
   begin
-    FEffectivePadding.Left := FPadding.Left;
-    FEffectivePadding.Top := FPadding.Top;
-    FEffectivePadding.Right := FPadding.Right;
-    FEffectivePadding.Bottom  := FPadding.Bottom;
+    Inc(FEffectivePadding.Left, (Width - FPadding.Left - FPadding.Right - GetImageWidth) div 2);
+    Inc(FEffectivePadding.Top, (Height - FPadding.Top - FPadding.Bottom - GetImageHeight) div 2);
   end;
   Exclude(FStates, lisPaddingCalcPending);
 end;
@@ -365,8 +378,13 @@ begin
   case FViewStyle of
     livStretch:
       begin
-        FEffectiveXScale := GetImageWidth / FPicture.Data.Width;
-        FEffectiveYScale := GetImageHeight / FPicture.Data.Height;
+        FEffectiveXScale := (Width - FPadding.Left - FPadding.Right - (FOutLineWidth * 2)) / FPicture.Data.Width;
+        FEffectiveYScale := (Height - FPadding.Top - FPadding.Bottom - (FOutLineWidth * 2)) / FPicture.Data.Height;
+        if lioKeepAspectOnStretch in FOptions then
+        begin
+          FEffectiveXScale := Min(FEffectiveXScale, FEffectiveYScale);
+          FEffectiveYScale := FEffectiveXScale;
+        end;
       end;
     livScale:
       begin
@@ -679,6 +697,8 @@ begin
   begin
     if lioAutoSize in Options then
       Include(FStates, lisAutoSizePending);
+    if ViewStyle = livStretch then
+      Include(FStates, lisScaleCalcPending);
     Include(FStates, lisPaddingCalcPending);
     Changed;
   end;
