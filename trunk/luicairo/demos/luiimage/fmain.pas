@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  EditBtn, Spin, StdCtrls, LuiImage;
+  EditBtn, Spin, StdCtrls, LuiImage, CairoImaging;
 
 type
 
@@ -14,6 +14,7 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    TransparencyModeCombo: TComboBox;
     Label12: TLabel;
     OpacitySpinEdit: TFloatSpinEdit;
     Label11: TLabel;
@@ -60,12 +61,12 @@ type
     procedure PaddingRightSpinEditChange(Sender: TObject);
     procedure PaddingTopSpinEditChange(Sender: TObject);
     procedure RoundEdgeRadiusSpinEditChange(Sender: TObject);
+    procedure TransparencyModeComboSelect(Sender: TObject);
     procedure VerticalScaleSpinEditChange(Sender: TObject);
     procedure ViewStyleComboBoxSelect(Sender: TObject);
     procedure WidthSpinEditChange(Sender: TObject);
   private
     { private declarations }
-    procedure LoadViewStyleValues;
   public
     { public declarations }
   end; 
@@ -84,7 +85,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  LoadViewStyleValues;
+  Image.Picture.Options := [cioAllowChangesAfterLoad];
   Image.Colors.Background := clWhite;
 end;
 
@@ -136,6 +137,18 @@ begin
   Image.RoundRectRadius := RoundEdgeRadiusSpinEdit.Value;
 end;
 
+procedure TMainForm.TransparencyModeComboSelect(Sender: TObject);
+begin
+
+  case TransparencyModeCombo.ItemIndex of
+    0: Image.Picture.TransparencyMode := citDefault;
+    1: Image.Picture.TransparencyMode := citMaskNonAlpha;
+    2: Image.Picture.TransparencyMode := citForceMaskColor;
+    3: Image.Picture.TransparencyMode := citNone;
+  end;
+
+end;
+
 procedure TMainForm.VerticalScaleSpinEditChange(Sender: TObject);
 begin
   Image.ScaleFactor.Vertical := VerticalScaleSpinEdit.Value;
@@ -155,19 +168,6 @@ end;
 procedure TMainForm.WidthSpinEditChange(Sender: TObject);
 begin
   Image.Width :=  WidthSpinEdit.Value;
-end;
-
-procedure TMainForm.LoadViewStyleValues;
-begin
-  with ViewStyleComboBox.Items do
-  begin
-    Add('Normal');
-    Add('Fit Image');
-    Add('Scale');
-    Add('Stretch');
-    Add('Tile');
-  end;
-  ViewStyleComboBox.ItemIndex := 0;
 end;
 
 procedure TMainForm.OpacitySpinEditChange(Sender: TObject);
