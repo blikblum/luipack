@@ -32,6 +32,8 @@ type
   
   TLuiImageGetPattern = procedure (Sender: TLuiImage;
     PatternType: TLuiImagePatternType; var Pattern: TCairoPattern) of object;
+    
+  TLuiImagePrepareMatrix = procedure (Sender: TLuiImage; const Matrix: TCairoMatrix) of object;
 
   { TLuiImagePadding }
 
@@ -107,6 +109,7 @@ type
     FOnDrawClipPath: TLuiImageEvent;
     FOnGetPattern: TLuiImageGetPattern;
     FOnPaintImage: TLuiImageEvent;
+    FOnPrepareMatrix: TLuiImagePrepareMatrix;
     FOpacity: Double;
     FOptions: TLuiImageOptions;
     FOutLineWidth: Integer;
@@ -141,13 +144,14 @@ type
     procedure DoDrawClipPath; virtual;
     procedure DoOnResize; override;
     procedure DoPaintImage; virtual;
+    procedure DoPrepareMatrix(const Matrix: TCairoMatrix); virtual;
     procedure DoSetSource; virtual;
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure BeginUpdate;
-    procedure DefaultAfterDraw;
+    procedure DefaultAfterPaint;
     procedure DefaultBeforePaint;
     procedure DefaultDrawBackground;
     procedure EndUpdate;
@@ -160,6 +164,7 @@ type
     property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write FOnDrawClipPath;
     property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write FOnGetPattern;
     property OnPaintImage: TLuiImageEvent read FOnPaintImage write FOnPaintImage;
+    property OnPrepareMatrix: TLuiImagePrepareMatrix read FOnPrepareMatrix write FOnPrepareMatrix;
     property OnResize;
     property Opacity: Double read FOpacity write SetOpacity;
     property Options: TLuiImageOptions read FOptions write SetOptions;
@@ -303,6 +308,7 @@ begin
   begin
     Include(FStates, lisAutoSizePending);
     Include(FStates, lisPaddingCalcPending);
+    Include(FStates, lisScaleCalcPending);
   end;
   if (FViewStyle = livStretch) and
     ((lioKeepAspectOnStretch in FOptions) <> (lioKeepAspectOnStretch in AValue)) then
@@ -378,6 +384,12 @@ end;
 
 procedure TLuiImage.UpdateEffectiveScale;
 begin
+  if (lioAutoSize in FOptions) and (FViewStyle <> livScale) then
+  begin
+    FEffectiveXScale := 1;
+    FEffectiveYScale := 1;
+    Exit;
+  end;
   case FViewStyle of
     livStretch:
       begin
@@ -438,7 +450,7 @@ begin
   if Assigned(FOnAfterPaint) then
     FOnAfterPaint(Self)
   else
-    DefaultAfterDraw;
+    DefaultAfterPaint;
 end;
 
 procedure TLuiImage.DoBeforePaint;
@@ -521,37 +533,38 @@ begin
     Context.PaintWithAlpha(FOpacity);
 end;
 
+procedure TLuiImage.DoPrepareMatrix(const Matrix: TCairoMatrix);
+begin
+  if Assigned(FOnPrepareMatrix) then
+    FOnPrepareMatrix(Self, Matrix)
+  else
+  begin
+    if FViewStyle in [livTile, livNormal] then
+    begin
+      Matrix.InitTranslate(-(FOutLineWidth + FEffectivePadding.Left),
+        -(FOutLineWidth + FEffectivePadding.Top));
+    end
+    else
+    begin
+      Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
+      Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
+        -(FOutLineWidth + FEffectivePadding.Top));
+    end;
+  end;
+end;
+
 procedure TLuiImage.DoSetSource;
 var
   TempPattern: TCairoPattern;
   Matrix: TCairoMatrix;
 begin
-  if (FViewStyle = livNormal) or
-    ((lioAutoSize in FOptions) and (FViewStyle = livStretch)) then
-    Context.SetSourceSurface(FPicture.Surface, FOutLineWidth + FEffectivePadding.Left,
-      FOutLineWidth + FEffectivePadding.Top)
-  else
-    case FViewStyle of
-      livStretch, livScale, livFitImage, livTile:
-        begin
-          TempPattern := TCairoSurfacePattern.Create(FPicture.Surface);
-          if FViewStyle = livTile then
-          begin
-            TempPattern.Extend := CAIRO_EXTEND_REPEAT;
-            Matrix.InitTranslate(-(FOutLineWidth + FEffectivePadding.Left),
-              -(FOutLineWidth + FEffectivePadding.Top));
-          end
-          else
-          begin
-            Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
-            Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
-              -(FOutLineWidth + FEffectivePadding.Top));
-          end;
-          TempPattern.SetMatrix(Matrix);
-          Context.Source := TempPattern;
-          TempPattern.Destroy;
-        end;
-    end;
+  TempPattern := TCairoSurfacePattern.Create(FPicture.Surface);
+  if FViewStyle = livTile then
+    TempPattern.Extend := CAIRO_EXTEND_REPEAT;
+  DoPrepareMatrix(Matrix);
+  TempPattern.SetMatrix(Matrix);
+  Context.Source := TempPattern;
+  TempPattern.Destroy;
 end;
 
 procedure TLuiImage.Loaded;
@@ -592,7 +605,7 @@ begin
   Inc(FUpdateCount);
 end;
 
-procedure TLuiImage.DefaultAfterDraw;
+procedure TLuiImage.DefaultAfterPaint;
 begin
   if FOutLineWidth <= 0 then
     Exit;
