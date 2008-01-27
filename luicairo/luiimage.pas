@@ -101,11 +101,12 @@ type
     FEffectivePadding: TRect;
     FEffectiveXScale: Double;
     FEffectiveYScale: Double;
-    FOnAfterDraw: TLuiImageEvent;
-    FOnBeforeDraw: TLuiImageEvent;
+    FOnAfterPaint: TLuiImageEvent;
+    FOnBeforePaint: TLuiImageEvent;
     FOnDrawBackground: TLuiImageEvent;
     FOnDrawClipPath: TLuiImageEvent;
     FOnGetPattern: TLuiImageGetPattern;
+    FOnPaintImage: TLuiImageEvent;
     FOpacity: Double;
     FOptions: TLuiImageOptions;
     FOutLineWidth: Integer;
@@ -133,12 +134,13 @@ type
     procedure UpdatePatterns;
   protected
     procedure ChangeBounds(ALeft, ATop, AWidth, AHeight: Integer) override;
-    procedure DoAfterDraw; virtual;
-    procedure DoBeforeDraw; virtual;
+    procedure DoAfterPaint; virtual;
+    procedure DoBeforePaint; virtual;
     procedure DoDraw; override;
     procedure DoDrawBackground; virtual;
     procedure DoDrawClipPath; virtual;
     procedure DoOnResize; override;
+    procedure DoPaintImage; virtual;
     procedure DoSetSource; virtual;
     procedure Loaded; override;
   public
@@ -146,17 +148,18 @@ type
     destructor Destroy; override;
     procedure BeginUpdate;
     procedure DefaultAfterDraw;
-    procedure DefaultBeforeDraw;
+    procedure DefaultBeforePaint;
     procedure DefaultDrawBackground;
     procedure EndUpdate;
     property Colors: TLuiImageColors read FColors write FColors;
     property Context;
   published
-    property OnAfterDraw: TLuiImageEvent read FOnAfterDraw write FOnAfterDraw;
-    property OnBeforeDraw: TLuiImageEvent read FOnBeforeDraw write FOnBeforeDraw;
+    property OnAfterPaint: TLuiImageEvent read FOnAfterPaint write FOnAfterPaint;
+    property OnBeforePaint: TLuiImageEvent read FOnBeforePaint write FOnBeforePaint;
     property OnDrawBackground: TLuiImageEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write FOnDrawClipPath;
     property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write FOnGetPattern;
+    property OnPaintImage: TLuiImageEvent read FOnPaintImage write FOnPaintImage;
     property OnResize;
     property Opacity: Double read FOpacity write SetOpacity;
     property Options: TLuiImageOptions read FOptions write SetOptions;
@@ -353,8 +356,8 @@ begin
         end
         else
         begin
-          FEffectivePadding.Left := (Width - (GetImageWidth + FOutLineWidth*2)) div 2;
-          FEffectivePadding.Top := (Height - (GetImageHeight + FOutLineWidth*2)) div 2;
+          FEffectivePadding.Left := (Width - (GetImageWidth + FOutLineWidth * 2)) div 2;
+          FEffectivePadding.Top := (Height - (GetImageHeight + FOutLineWidth * 2)) div 2;
         end;
       end;
     else
@@ -367,8 +370,8 @@ begin
   end;
   if (FViewStyle = livStretch) and (lioKeepAspectOnStretch in FOptions) then
   begin
-    Inc(FEffectivePadding.Left, (Width - FPadding.Left - FPadding.Right - GetImageWidth) div 2);
-    Inc(FEffectivePadding.Top, (Height - FPadding.Top - FPadding.Bottom - GetImageHeight) div 2);
+    Inc(FEffectivePadding.Left, (Width - FPadding.Left - FPadding.Right - GetImageWidth - FOutLineWidth * 2) div 2);
+    Inc(FEffectivePadding.Top, (Height - FPadding.Top - FPadding.Bottom - GetImageHeight - FOutLineWidth * 2) div 2);
   end;
   Exclude(FStates, lisPaddingCalcPending);
 end;
@@ -393,12 +396,12 @@ begin
       end;
     livFitImage:
       begin
-        if (FPicture.Data.Width + FOutLineWidth*2) > Width then
-          FEffectiveXScale := (Width - FOutLineWidth*2) / FPicture.Data.Width
+        if (FPicture.Data.Width + FOutLineWidth * 2) > Width then
+          FEffectiveXScale := (Width - FOutLineWidth * 2) / FPicture.Data.Width
         else
           FEffectiveXScale := 1;
-        if (FPicture.Data.Height + FOutLineWidth*2) > Height then
-          FEffectiveYScale := (Height - FOutLineWidth*2) / FPicture.Data.Height
+        if (FPicture.Data.Height + FOutLineWidth * 2) > Height then
+          FEffectiveYScale := (Height - FOutLineWidth * 2) / FPicture.Data.Height
         else
           FEffectiveYScale := 1;
         FEffectiveXScale := Min(FEffectiveXScale, FEffectiveYScale);
@@ -430,20 +433,20 @@ begin
   end;
 end;
 
-procedure TLuiImage.DoAfterDraw;
+procedure TLuiImage.DoAfterPaint;
 begin
-  if Assigned(FOnAfterDraw) then
-    FOnAfterDraw(Self)
+  if Assigned(FOnAfterPaint) then
+    FOnAfterPaint(Self)
   else
     DefaultAfterDraw;
 end;
 
-procedure TLuiImage.DoBeforeDraw;
+procedure TLuiImage.DoBeforePaint;
 begin
-  if Assigned(FOnBeforeDraw) then
-    FOnBeforeDraw(Self)
+  if Assigned(FOnBeforePaint) then
+    FOnBeforePaint(Self)
   else
-    DefaultBeforeDraw;
+    DefaultBeforePaint;
 end;
 
 procedure TLuiImage.DoDraw;
@@ -457,20 +460,19 @@ begin
     Context.Stroke;
     Exit;
   end;
+
   if FPicture.Surface = nil then
     Exit;
   if FPatterns.RequiresUpdate then
     UpdatePatterns;
-  with Context do
-  begin
-    Save;
-    DoDrawBackground;
-    DoBeforeDraw;
-    DoSetSource;
-    PaintWithAlpha(FOpacity);
-    DoAfterDraw;
-    Restore;
-  end;
+    
+  Context.Save;
+  DoDrawBackground;
+  DoBeforePaint;
+  DoSetSource;
+  DoPaintImage;
+  DoAfterPaint;
+  Context.Restore;
 end;
 
 procedure TLuiImage.DoDrawBackground;
@@ -509,6 +511,14 @@ begin
       Include(FStates, lisAutoSizePending);
     Changed;
   end;
+end;
+
+procedure TLuiImage.DoPaintImage;
+begin
+  if Assigned(FOnPaintImage) then
+    FOnPaintImage(Self)
+  else
+    Context.PaintWithAlpha(FOpacity);
 end;
 
 procedure TLuiImage.DoSetSource;
@@ -596,7 +606,7 @@ begin
   end;
 end;
 
-procedure TLuiImage.DefaultBeforeDraw;
+procedure TLuiImage.DefaultBeforePaint;
 begin
   DoDrawClipPath;
   Context.Clip;

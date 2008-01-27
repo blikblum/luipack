@@ -354,11 +354,25 @@ object MainForm: TMainForm
         Text = 'Default'
       end
     end
+    object CustomPage: TPage
+      Caption = 'Custom'
+      ClientWidth = 239
+      ClientHeight = 366
+      object ReflectionButton: TButton
+        Left = 12
+        Height = 25
+        Top = 34
+        Width = 122
+        Caption = 'Reflection Effect'
+        OnClick = ReflectionButtonClick
+        TabOrder = 0
+      end
+    end
   end
   object ViewStyleComboBox: TComboBox
-    Left = 94
+    Left = 119
     Height = 21
-    Top = 90
+    Top = 88
     Width = 136
     AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
     ItemHeight = 13
