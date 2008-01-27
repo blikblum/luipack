@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  EditBtn, Spin, StdCtrls, LuiImage, CairoImaging;
+  EditBtn, Spin, StdCtrls, LuiImage, CairoImaging, CairoClasses, Math;
 
 type
 
@@ -14,10 +14,12 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    ReflectionButton: TButton;
     KeepAspectCheckBox: TCheckBox;
     Label14: TLabel;
     MaskColorButton: TColorButton;
     Label13: TLabel;
+    CustomPage: TPage;
     TransparencyModeCombo: TComboBox;
     Label12: TLabel;
     OpacitySpinEdit: TFloatSpinEdit;
@@ -54,6 +56,7 @@ type
     RoundEdgeRadiusSpinEdit: TSpinEdit;
     OutlineWidthSpinEdit: TSpinEdit;
     procedure AutoSizeCheckBoxChange(Sender: TObject);
+    procedure DrawReflection(Sender: TLuiImage);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure FormCreate(Sender: TObject);
     procedure HeightSpinEditChange(Sender: TObject);
@@ -66,6 +69,7 @@ type
     procedure PaddingLeftSpinEditChange(Sender: TObject);
     procedure PaddingRightSpinEditChange(Sender: TObject);
     procedure PaddingTopSpinEditChange(Sender: TObject);
+    procedure ReflectionButtonClick(Sender: TObject);
     procedure RoundEdgeRadiusSpinEditChange(Sender: TObject);
     procedure TransparencyModeComboSelect(Sender: TObject);
     procedure VerticalScaleSpinEditChange(Sender: TObject);
@@ -128,6 +132,25 @@ begin
     Image.Options := Image.Options - [lioAutoSize];
 end;
 
+procedure TMainForm.DrawReflection(Sender: TLuiImage);
+var
+  Gradient: TCairoLinearGradient;
+  Matrix: TCairoMatrix;
+begin
+  with Image, Context do
+  begin
+    ResetClip;
+    Rotate(PI);
+    Scale(-1, 1);
+    SetSourceSurface(Picture.Surface, 0, -Picture.Data.Height*2);
+    Gradient := TCairoLinearGradient.Create(0, -Picture.Data.Height, 0, -Picture.Data.Height*2);
+    Gradient.AddColorStopRgba(0, 0, 0, 0, 0.8);
+    Gradient.AddColorStopRgba(1, 0, 0, 0, 0);
+    Mask(Gradient);
+    Gradient.Destroy;
+  end;
+end;
+
 procedure TMainForm.OutlineWidthSpinEditChange(Sender: TObject);
 begin
   Image.OutLineWidth := OutlineWidthSpinEdit.Value;
@@ -153,6 +176,19 @@ begin
   Image.Padding.Top := PaddingTopSpinEdit.Value;
 end;
 
+procedure TMainForm.ReflectionButtonClick(Sender: TObject);
+begin
+  with Image do
+  begin
+    BeginUpdate;
+    AutoSizeCheckBox.Checked := False;
+    ViewStyleComboBox.ItemIndex := 0;
+    SetBounds(Left, Top, Width, Max(Height, Picture.Data.Height * 2));
+    OnAfterPaint := @DrawReflection;
+    EndUpdate;
+    OnAfterPaint := nil;
+  end;
+end;
 
 procedure TMainForm.RoundEdgeRadiusSpinEditChange(Sender: TObject);
 begin

@@ -29,14 +29,14 @@
     </RunParams>
     <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="cairoimaging_package"/>
+        <PackageName Value="LCL"/>
       </Item1>
       <Item2>
         <PackageName Value="luicairo_package"/>
         <MinVersion Valid="True"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="cairoimaging_package"/>
       </Item3>
     </RequiredPackages>
     <Units Count="2">
