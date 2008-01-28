@@ -61,7 +61,7 @@ object MainForm: TMainForm
     Height = 392
     Top = 120
     Width = 247
-    PageIndex = 0
+    PageIndex = 3
     TabOrder = 2
     object SizeOptionsPage: TPage
       Caption = 'Size'
@@ -366,6 +366,25 @@ object MainForm: TMainForm
         Caption = 'Reflection Effect'
         OnClick = ReflectionButtonClick
         TabOrder = 0
+      end
+      object RotateButton: TButton
+        Left = 12
+        Height = 25
+        Top = 84
+        Width = 88
+        Caption = 'Rotate'
+        OnClick = RotateButtonClick
+        TabOrder = 1
+      end
+      object RotateSpinEdit: TSpinEdit
+        Left = 132
+        Height = 23
+        Top = 84
+        Width = 50
+        Increment = 5
+        MaxValue = 360
+        MinValue = -360
+        TabOrder = 2
       end
     end
   end
