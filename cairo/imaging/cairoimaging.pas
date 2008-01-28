@@ -49,11 +49,13 @@ type
     procedure LoadFromFile(const FileName: String);
     procedure UpdateMask;
     property Data: TImageData read FData;
+    property Height: Integer read FData.Height;
     property Options: TCairoImagingOptions read FOptions write SetOptions;
     property TransparencyMode: TCairoImagingTransparencyMode read FTransparencyMode write SetTransparencyMode;
     property MaskColor: TColor24Rec read FMaskColor write FMaskColor;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Surface: TCairoImageSurface read FSurface;
+    property Width: Integer read FData.Width;
   end;
 
 implementation
