@@ -180,32 +180,7 @@ type
 implementation
 
 uses
-  cairo14;
-
-procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double; Radius: Double);
-begin
-  with Context do
-  begin
-    //Todo: add newpath??
-    MoveTo(X, Y + Radius);
-    CurveTo(X, Y + Radius,
-      X, Y,
-      X + Radius, Y);
-    LineTo(X + Width - Radius, Y);
-    CurveTo(X + Width - Radius,
-      Y, X + Width, Y,
-      X + Width, Y + Radius);
-    LineTo(X + Width, Y + Height - Radius);
-    CurveTo(X + Width, Y + Height - Radius,
-      X + Width, Y + Height,
-      Width + X - Radius, Y + Height);
-    LineTo(X + Radius, Y + Height);
-    CurveTo(X + Radius, Y + Height,
-      X, Y + Height,
-      X, Y + Height - Radius);
-    ClosePath;
-  end;
-end;
+  cairo14, CairoUtils;
 
 { TLuiImage }
 

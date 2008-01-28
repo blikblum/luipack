@@ -14,12 +14,14 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    RotateButton: TButton;
     ReflectionButton: TButton;
     KeepAspectCheckBox: TCheckBox;
     Label14: TLabel;
     MaskColorButton: TColorButton;
     Label13: TLabel;
     CustomPage: TPage;
+    RotateSpinEdit: TSpinEdit;
     TransparencyModeCombo: TComboBox;
     Label12: TLabel;
     OpacitySpinEdit: TFloatSpinEdit;
@@ -63,13 +65,16 @@ type
     procedure HorizontalScaleSpinEditChange(Sender: TObject);
     procedure KeepAspectCheckBoxChange(Sender: TObject);
     procedure MaskColorButtonColorChanged(Sender: TObject);
+    procedure NoClipPaint(Sender: TLuiImage);
     procedure OpacitySpinEditChange(Sender: TObject);
     procedure OutlineWidthSpinEditChange(Sender: TObject);
     procedure PaddingBottomSpinEditChange(Sender: TObject);
     procedure PaddingLeftSpinEditChange(Sender: TObject);
     procedure PaddingRightSpinEditChange(Sender: TObject);
     procedure PaddingTopSpinEditChange(Sender: TObject);
+    procedure SetRotateMatrix(Sender: TLuiImage; const Matrix: TCairoMatrix);
     procedure ReflectionButtonClick(Sender: TObject);
+    procedure RotateButtonClick(Sender: TObject);
     procedure RoundEdgeRadiusSpinEditChange(Sender: TObject);
     procedure TransparencyModeComboSelect(Sender: TObject);
     procedure VerticalScaleSpinEditChange(Sender: TObject);
@@ -85,6 +90,9 @@ var
   MainForm: TMainForm;
 
 implementation
+
+uses
+  CairoUtils;
 
 { TMainForm }
 
@@ -122,6 +130,11 @@ begin
   with Image.Picture.MaskColor do
     RedGreenBlue(ColorToRGB(MaskColorButton.ButtonColor), R, G, B);
   Image.Picture.UpdateMask;
+end;
+
+procedure TMainForm.NoClipPaint(Sender: TLuiImage);
+begin
+  //do nothing
 end;
 
 procedure TMainForm.AutoSizeCheckBoxChange(Sender: TObject);
@@ -177,6 +190,15 @@ begin
   Image.Padding.Top := PaddingTopSpinEdit.Value;
 end;
 
+procedure TMainForm.SetRotateMatrix(Sender: TLuiImage;
+  const Matrix: TCairoMatrix);
+begin
+  //todo: properly calculate necessary padding values
+  Matrix.InitTranslate(Max(Image.Picture.Width, Image.Picture.Height),
+    Max(Image.Picture.Width, Image.Picture.Height));
+  Matrix.Rotate(DegreeToRadian(RotateSpinEdit.Value));
+end;
+
 procedure TMainForm.ReflectionButtonClick(Sender: TObject);
 begin
   with Image do
@@ -191,6 +213,20 @@ begin
     OnAfterPaint := @DrawReflection;
     EndUpdate;
     OnAfterPaint := nil;
+  end;
+end;
+
+procedure TMainForm.RotateButtonClick(Sender: TObject);
+begin
+  with Image do
+  begin
+    BeginUpdate;
+    ViewStyleComboBox.ItemIndex := 0;
+    OnPrepareMatrix := @SetRotateMatrix;
+    OnBeforePaint := @NoClipPaint;
+    EndUpdate;
+    OnPrepareMatrix := nil;
+    OnBeforePaint := nil;
   end;
 end;
 
