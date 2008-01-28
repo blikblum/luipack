@@ -140,12 +140,13 @@ begin
   with Image, Context do
   begin
     ResetClip;
+    Translate(Padding.Left, (Picture.Data.Height*2 + Padding.Top + 1));
     Rotate(PI);
     Scale(-1, 1);
-    SetSourceSurface(Picture.Surface, 0, -Picture.Data.Height*2);
-    Gradient := TCairoLinearGradient.Create(0, -Picture.Data.Height, 0, -Picture.Data.Height*2);
-    Gradient.AddColorStopRgba(0, 0, 0, 0, 0.8);
-    Gradient.AddColorStopRgba(1, 0, 0, 0, 0);
+    SetSourceSurface(Picture.Surface, 0, 0);
+    Gradient := TCairoLinearGradient.Create(0, 0, 0, Picture.Data.Height);
+    Gradient.AddColorStopRgba(0, 0, 0, 0, 0);
+    Gradient.AddColorStopRgba(1, 0, 0, 0, 0.8);
     Mask(Gradient);
     Gradient.Destroy;
   end;
@@ -181,9 +182,12 @@ begin
   with Image do
   begin
     BeginUpdate;
-    AutoSizeCheckBox.Checked := False;
-    ViewStyleComboBox.ItemIndex := 0;
-    SetBounds(Left, Top, Width, Max(Height, Picture.Data.Height * 2));
+    AutoSizeCheckBox.Checked := True; //auto size
+    ViewStyleComboBox.ItemIndex := 0; //normal style
+    Padding.Bottom := Picture.Data.Height + 10; //area for reflection + padding
+    Padding.Top := 10;
+    Padding.Left := 10;
+    Padding.Right := 10;
     OnAfterPaint := @DrawReflection;
     EndUpdate;
     OnAfterPaint := nil;

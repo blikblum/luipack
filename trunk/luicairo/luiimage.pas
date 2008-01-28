@@ -479,10 +479,19 @@ begin
     UpdatePatterns;
     
   Context.Save;
+  //Draw background
   DoDrawBackground;
+  //Draw clip path and clip
   DoBeforePaint;
+  //Save state before setting the matrix
+  Context.Save;
+  //Set the matrix and the source
   DoSetSource;
+  //Paint the image
   DoPaintImage;
+  //Restore the previous matrix
+  Context.Restore;
+  //Draw outline
   DoAfterPaint;
   Context.Restore;
 end;
@@ -539,17 +548,10 @@ begin
     FOnPrepareMatrix(Self, Matrix)
   else
   begin
-    if FViewStyle in [livTile, livNormal] then
-    begin
-      Matrix.InitTranslate(-(FOutLineWidth + FEffectivePadding.Left),
-        -(FOutLineWidth + FEffectivePadding.Top));
-    end
-    else
-    begin
-      Matrix.InitScale(1/FEffectiveXScale, 1/FEffectiveYScale);
-      Matrix.Translate(-(FOutLineWidth + FEffectivePadding.Left),
-        -(FOutLineWidth + FEffectivePadding.Top));
-    end;
+    Matrix.InitTranslate(FOutLineWidth + FEffectivePadding.Left,
+      FOutLineWidth + FEffectivePadding.Top);
+    if not (FViewStyle in [livTile, livNormal]) then
+      Matrix.Scale(FEffectiveXScale, FEffectiveYScale);
   end;
 end;
 
@@ -562,7 +564,7 @@ begin
   if FViewStyle = livTile then
     TempPattern.Extend := CAIRO_EXTEND_REPEAT;
   DoPrepareMatrix(Matrix);
-  TempPattern.SetMatrix(Matrix);
+  Context.SetMatrix(Matrix);
   Context.Source := TempPattern;
   TempPattern.Destroy;
 end;
