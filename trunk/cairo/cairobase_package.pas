@@ -7,7 +7,7 @@ unit cairobase_package;
 interface
 
 uses
-  cairo_ft, CairoClasses, targetunits, ObjectAvlTree; 
+  cairo_ft, CairoClasses, targetunits, ObjectAvlTree, CairoUtils; 
 
 implementation
 
