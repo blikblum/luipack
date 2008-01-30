@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="3">
-    <Name Value="luicairo_package"/>
+    <PathDelim Value="\"/>
+    <Name Value="cairoimaging_package"/>
     <CompilerOptions>
       <Version Value="5"/>
+      <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+        <OtherUnitFiles Value="imaging\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -14,39 +17,24 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="1">
       <Item1>
-        <Filename Value="luibar.pas"/>
-        <UnitName Value="LuiBar"/>
+        <Filename Value="imaging\cairoimaging.pas"/>
+        <UnitName Value="CairoImaging"/>
       </Item1>
-      <Item2>
-        <Filename Value="register_luicairo.pas"/>
-        <HasRegisterProc Value="True"/>
-        <UnitName Value="register_luicairo"/>
-      </Item2>
-      <Item3>
-        <Filename Value="luiimage.pas"/>
-        <UnitName Value="LuiImage"/>
-      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="5">
+    <RequiredPkgs Count="3">
       <Item1>
         <PackageName Value="cairobase_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="VampyreImagingPackage"/>
       </Item2>
       <Item3>
-        <PackageName Value="cairolcl_package"/>
-      </Item3>
-      <Item4>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item4>
-      <Item5>
-        <PackageName Value="cairoimaging_package"/>
-      </Item5>
+      </Item3>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
