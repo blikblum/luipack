@@ -398,10 +398,10 @@ procedure TMenuButton.SetOptions(const AValue: TMenuButtonOptions);
 begin
   if FOptions = AValue then
     Exit;
-  {$ifdef FORCE_MOUSEUP}
-  include(FOptions, mboPopupOnMouseUp);
-  {$endif}
   FOptions := AValue;
+  {$ifdef FORCE_MOUSEUP}
+  Include(FOptions, mboPopupOnMouseUp);
+  {$endif}
   UpdateStyle;
 end;
 
