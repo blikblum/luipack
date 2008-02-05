@@ -122,8 +122,8 @@ object MainForm: TMainForm
         Top = 138
         Width = 224
         Caption = 'Scale Factor'
-        ClientHeight = 87
-        ClientWidth = 220
+        ClientHeight = 105
+        ClientWidth = 224
         TabOrder = 3
         object Label6: TLabel
           Left = 22
