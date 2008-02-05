@@ -1,4 +1,4 @@
-unit watchlist;
+unit WatchList;
 
 { Copyright (C) 2006 Luiz Américo Pereira Câmara
 

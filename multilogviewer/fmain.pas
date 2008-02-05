@@ -1,4 +1,4 @@
-unit fmain;
+unit fMain;
 
 { Viewer for Multilog messages
 
@@ -96,8 +96,12 @@ type
     TabControl1: TTabControl;
     ToggleOptions: TToggleLabel;
     toolbarMain: TToolBar;
-    tbutClear: TToolButton;
+    ButClear: TToolButton;
+    ButStop: TToolButton;
+    ButAlwaysOnTop: TToolButton;
     vtreeMessages: TVirtualStringTree;
+    procedure ButAlwaysOnTopClick(Sender: TObject);
+    procedure ButStopClick(Sender: TObject);
     procedure EditFilterMessagesExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure butSelectAllClick(Sender: TObject);
@@ -166,7 +170,7 @@ var
 implementation
 
 uses
-  StrUtils;
+   StrUtils, LCLIntf, LCLType;
 
 type
   TNodeData = record
@@ -230,9 +234,25 @@ begin
   vtreeMessages.IterateSubtree(nil,@FilterCallback,nil);
 end;
 
+procedure TfrmMain.ButStopClick(Sender: TObject);
+begin
+  if ButStop.Down then
+    FIPCServer.OnMessage := nil
+  else
+    FIPCServer.OnMessage := @ReceiveMessage;
+end;
+
+procedure TfrmMain.ButAlwaysOnTopClick(Sender: TObject);
+begin
+  if ButAlwaysOnTop.Down then
+    SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE)
+  else
+    SetWindowPos(Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE);
+end;
+
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
-  if MessageDlg('Confirm exit', 'Quit Multilog Viewer?', mtConfirmation,mbYesNo,0) = mrNo then
+  if MessageDlg('Confirm Exit', 'Quit Multilog Viewer?', mtConfirmation, mbYesNo, 0) = mrNo then
     CanClose := False;
 end;
 
@@ -343,7 +363,7 @@ begin
     end;
     ltMemory:
     begin
-      lbMemorySize.Caption:='Size: '+IntToStr(MsgData.Size);
+      lbMemorySize.Caption := 'Size: ' + IntToStr(MsgData.Size);
       BinHexViewer.OpenStream(MsgData);
       nbViewer.ActivePageComponent:=PageHexViewer;
     end;
