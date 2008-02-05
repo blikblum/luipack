@@ -103,6 +103,9 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  //workaround to LCL bug
+  VerticalScaleSpinEdit.Value := 1;
+  HorizontalScaleSpinEdit.Value := 1;
   Image.Picture.Options := [cioAllowChangesAfterLoad];
   Image.Colors.Background := clWhite;
 end;
