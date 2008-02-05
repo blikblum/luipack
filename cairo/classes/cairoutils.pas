@@ -11,7 +11,8 @@ function DegreeToRadian(const Angle: Double): Double;
 
 function RadianToDegree(const Angle: Double): Double;
 
-procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double; Radius: Double);
+procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double;
+  TopRadius: Double; BottomRadius: Double = -1);
 
 implementation
 
@@ -25,26 +26,29 @@ begin
   Result := Angle * (180 / PI);
 end;
 
-procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double; Radius: Double);
+procedure RoundedRectangle(Context: TCairoContext; X, Y, Width, Height: Double;
+  TopRadius: Double; BottomRadius: Double = -1);
 begin
+  if BottomRadius < 0 then
+    BottomRadius := TopRadius;
   with Context do
   begin
-    MoveTo(X, Y + Radius);
-    CurveTo(X, Y + Radius,
+    MoveTo(X, Y + TopRadius);
+    CurveTo(X, Y + TopRadius,
       X, Y,
-      X + Radius, Y);
-    LineTo(X + Width - Radius, Y);
-    CurveTo(X + Width - Radius,
+      X + TopRadius, Y);
+    LineTo(X + Width - TopRadius, Y);
+    CurveTo(X + Width - TopRadius,
       Y, X + Width, Y,
-      X + Width, Y + Radius);
-    LineTo(X + Width, Y + Height - Radius);
-    CurveTo(X + Width, Y + Height - Radius,
+      X + Width, Y + TopRadius);
+    LineTo(X + Width, Y + Height - BottomRadius);
+    CurveTo(X + Width, Y + Height - BottomRadius,
       X + Width, Y + Height,
-      Width + X - Radius, Y + Height);
-    LineTo(X + Radius, Y + Height);
-    CurveTo(X + Radius, Y + Height,
+      Width + X - BottomRadius, Y + Height);
+    LineTo(X + BottomRadius, Y + Height);
+    CurveTo(X + BottomRadius, Y + Height,
       X, Y + Height,
-      X, Y + Height - Radius);
+      X, Y + Height - BottomRadius);
     ClosePath;
   end;
 end;
