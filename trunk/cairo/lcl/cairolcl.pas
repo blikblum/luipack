@@ -49,6 +49,36 @@ type
   public
     constructor Create(DC: HDC);
   end;
+  
+  { TCairoLCLFont }
+
+  TCairoLCLFont = class(TCairoFontFace)
+  private
+    FCharSet: TFontCharSet;
+    FHeight: Integer;
+    FName: String;
+    FPitch: TFontPitch;
+    FSize: Integer;
+    FStyle: TFontStyles;
+    FUpdateCount: Integer;
+    procedure Changed;
+    procedure HandleNeeded;
+    procedure SetCharSet(const AValue: TFontCharSet);
+    procedure SetHeight(const AValue: Integer);
+    procedure SetName(const AValue: String);
+    procedure SetPitch(const AValue: TFontPitch);
+    procedure SetSize(const AValue: Integer);
+    procedure SetStyle(const AValue: TFontStyles);
+  public
+    procedure BeginUpdate;
+    procedure EndUpdate;
+    property CharSet: TFontCharSet read FCharSet write SetCharSet default DEFAULT_CHARSET;
+    property Height: Integer read FHeight write SetHeight;
+    property Name: String read FName write SetName;
+    property Pitch: TFontPitch read FPitch write SetPitch default fpDefault;
+    property Size: Integer read FSize write SetSize stored false;
+    property Style: TFontStyles read FStyle write SetStyle;
+  end;
 
   { TCustomCairoControl }
 
@@ -93,6 +123,7 @@ type
     property OnResize;
   end;
 
+function CreateFontFromLog(const LogFont: TLogFont): Pcairo_font_face_t;
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 function ColorToCairoColor(Color: TColor): TCairoColor; inline;
 
@@ -208,6 +239,122 @@ constructor TCairoPaintBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   SetInitialBounds(0, 0, 105, 105);
+end;
+
+{ TCairoLCLFont }
+
+procedure TCairoLCLFont.SetHeight(const AValue: Integer);
+begin
+  FHeight := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.Changed;
+begin
+  if FUpdateCount <= 0 then
+  begin
+    if FHandle <> nil then
+    begin
+      cairo_font_face_destroy(FHandle);
+      FHandle := nil;
+    end;
+  end;
+end;
+
+procedure TCairoLCLFont.HandleNeeded;
+//code borrowed from LCL
+const
+  LF_BOOL: array[Boolean] of Byte = (0, 255);
+  LF_WEIGHT: array[Boolean] of Integer = (FW_NORMAL, FW_BOLD);
+var
+  ALogFont: TLogFont;
+
+  procedure SetLogFontName(const NewName: string);
+  var
+    l: integer;
+    aName: string;
+  begin
+    if IsFontNameXLogicalFontDesc(NewName) then
+      aName := ExtractFamilyFromXLFDName(NewName)
+    else
+      aName := NewName;
+    l := High(ALogFont.lfFaceName) - Low(ALogFont.lfFaceName);
+    if l > length(aName) then
+      l := length(aName);
+    if l > 0 then
+      Move(aName[1], ALogFont.lfFaceName[Low(ALogFont.lfFaceName)], l);
+    ALogFont.lfFaceName[Low(ALogFont.lfFaceName) + l] := #0;
+  end;
+
+begin
+  if FHandle <> nil then
+    Exit;
+  FillChar(ALogFont, SizeOf(ALogFont), 0);
+  with ALogFont do
+  begin
+    lfHeight := FHeight;
+    //lfWidth := 0;
+    //lfEscapement := 0;
+    //lfOrientation := 0;
+    lfWeight := LF_WEIGHT[fsBold in FStyle];
+    lfItalic := LF_BOOL[fsItalic in FStyle];
+    lfUnderline := LF_BOOL[fsUnderline in FStyle];
+    lfStrikeOut := LF_BOOL[fsStrikeOut in FStyle];
+    lfCharSet := Byte(FCharset);
+    SetLogFontName(Name);
+
+    lfQuality := DEFAULT_QUALITY;
+    lfOutPrecision := OUT_DEFAULT_PRECIS;
+    lfClipPrecision := CLIP_DEFAULT_PRECIS;
+    case Pitch of
+      fpVariable: lfPitchAndFamily := VARIABLE_PITCH;
+      fpFixed: lfPitchAndFamily := FIXED_PITCH;
+    else
+      lfPitchAndFamily := DEFAULT_PITCH;
+    end;
+  end;
+  FHandle := CreateFontFromLog(ALogFont);
+end;
+
+procedure TCairoLCLFont.SetCharSet(const AValue: TFontCharSet);
+begin
+  FCharSet := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.SetName(const AValue: String);
+begin
+  FName := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.SetPitch(const AValue: TFontPitch);
+begin
+  FPitch := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.SetSize(const AValue: Integer);
+begin
+  FSize := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.SetStyle(const AValue: TFontStyles);
+begin
+  FStyle := AValue;
+  Changed;
+end;
+
+procedure TCairoLCLFont.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TCairoLCLFont.EndUpdate;
+begin
+  Dec(FUpdateCount);
+  Changed;
 end;
 
 end.

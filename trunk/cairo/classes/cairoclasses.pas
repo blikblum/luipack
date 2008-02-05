@@ -236,7 +236,7 @@ type
   { TCairoFontFace }
 
   TCairoFontFace = class
-  private
+  protected
     FHandle: Pcairo_font_face_t;
   public
     function  Status: cairo_status_t;
