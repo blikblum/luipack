@@ -18,3 +18,6 @@ begin
   end;
 end;
 
+function CreateFontFromLog(const LogFont: TLogFont): Pcairo_font_face_t;
+begin
+end;
