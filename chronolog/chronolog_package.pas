@@ -7,7 +7,7 @@ unit chronolog_package;
 interface
 
 uses
-  chronolog, chrono2db, LazarusPackageIntf; 
+  ChronoLog, chrono2db, LazarusPackageIntf; 
 
 implementation
 

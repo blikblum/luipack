@@ -1,4 +1,4 @@
-unit chronolog;
+unit ChronoLog;
 
 { Copyright (C) 2005 Luiz Américo Pereira Câmara
 
@@ -24,7 +24,7 @@ unit chronolog;
 interface
 
 uses 
-  classes,sysutils,cpu;
+  Classes, sysutils, cpu;
 
 type
   TInt64Array = array of Int64;
@@ -65,7 +65,7 @@ type
     function AsMicroSecondStr (Index: Integer): String;
     function GetActionStr(AIndex: Integer): String;
     function GetSystemInfo:String;
-    procedure SaveToText (const AFilename:String);
+    procedure SaveToText (const FileName: String; ClearFile: Boolean = False);
     property Average: Int64 read GetAverage;
     property LastResult: Int64 read GetLastResult;
     property Accumulated: Int64 read GetAccumulated;
@@ -157,7 +157,7 @@ end;
 
 function TChronoLog.AsMicroSecondStr (Index: Integer): String;
 begin
-  result:=FormatedString(FResults[Index]);
+  Result:=FormatedString(FResults[Index]);
 end;
 
 function TChronoLog.FormatedString (Value: Int64):String;
@@ -227,13 +227,13 @@ begin
   SetLength(FActions,Value);
 end;
 
-procedure TChronoLog.SaveToText (const AFilename:String);
+procedure TChronoLog.SaveToText (const FileName: String; ClearFile: Boolean = False);
 var
   AFile:Text;
-  Counter,Idx:Integer;
+  Counter, Idx:Integer;
 begin
-  Assign(AFile,AFilename);
-  if FileExists(AFilename) then
+  Assign(AFile, FileName);
+  if FileExists(FileName) and not ClearFile then
   begin
     Append(AFile);
     WriteLn(AFile);
@@ -260,8 +260,8 @@ begin
   end;
 
   WriteLn(AFile);
-  Writeln(AFile,'Accumulated (Miliseconds): ',FormatedString(Round(Accumulated/1000)):12);
-  Close(Afile);
+  Writeln(AFile, 'Accumulated (Miliseconds): ', FormatedString(Round(Accumulated/1000)):12);
+  Close(AFile);
 end;
 
 begin
