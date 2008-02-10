@@ -7,14 +7,8 @@ unit chronolog_package;
 interface
 
 uses
-  ChronoLog, chrono2db, LazarusPackageIntf; 
+  ChronoLog, Chrono2Db; 
 
 implementation
 
-procedure Register; 
-begin
-end; 
-
-initialization
-  RegisterPackage('chronolog_package', @Register); 
 end.

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
+    <PathDelim Value="\"/>
     <Version Value="6"/>
     <General>
       <Flags>
@@ -9,30 +9,31 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
+      <IconPath Value=".\"/>
       <TargetFileExt Value=".exe"/>
     </General>
     <PublishOptions>
       <Version Value="2"/>
+      <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="sqlite3laz"/>
+        <MinVersion Minor="3" Valid="True"/>
       </Item1>
       <Item2>
         <PackageName Value="miscutils_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="sqlite3laz"/>
-        <MinVersion Minor="3" Valid="True"/>
+        <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
     <Units Count="5">
@@ -46,14 +47,14 @@
         <ComponentName Value="frmMain"/>
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="fmain.lrs"/>
-        <UnitName Value="fmain"/>
+        <UnitName Value="fMain"/>
       </Unit1>
       <Unit2>
         <Filename Value="fsaveview.pas"/>
         <ComponentName Value="frmSaveView"/>
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="fsaveview.lrs"/>
-        <UnitName Value="fsaveview"/>
+        <UnitName Value="fSaveView"/>
       </Unit2>
       <Unit3>
         <Filename Value="chronodataprovider.pas"/>
@@ -71,8 +72,9 @@
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
+    <PathDelim Value="\"/>
     <SearchPaths>
-      <SrcPath Value="$(LazarusDir)/lcl/;$(LazarusDir)/lcl/interfaces/$(LCLWidgetType)/;$(ProjectDir)../outros/cpu/lib/;E:/work/pascal/chronolog/"/>
+      <SrcPath Value="$(LazarusDir)\lcl\;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)\;$(ProjectDir)..\outros\cpu\lib\;E:\work\pascal\chronolog\"/>
     </SearchPaths>
     <CodeGeneration>
       <Checks>

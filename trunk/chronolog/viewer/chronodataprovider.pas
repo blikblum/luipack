@@ -5,7 +5,7 @@ unit ChronoDataProvider;
 interface
 
 uses
-  Classes, SysUtils, sqlite3ds;
+  Classes, SysUtils, Sqlite3Ds;
 
 type
 
