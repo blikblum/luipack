@@ -3,6 +3,7 @@
   <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="miscutils_package"/>
+    <Author Value="Luiz Am,érico Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="5"/>
       <PathDelim Value="\"/>
@@ -17,6 +18,9 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
+    <Description Value="Miscellaneous functions and classes"/>
+    <License Value="Modified LGPL"/>
+    <Version Minor="1"/>
     <Files Count="4">
       <Item1>
         <Filename Value="domutils.pas"/>
@@ -37,11 +41,11 @@
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="LCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
