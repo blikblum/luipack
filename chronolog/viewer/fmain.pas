@@ -1,4 +1,4 @@
-unit fmain;
+unit fMain;
 
 { Copyright (C) 2005 Luiz Américo Pereira Câmara
 
@@ -111,14 +111,14 @@ end;
 
 procedure TfrmMain.MIOpenRecentClick(Sender: TObject);
 begin
-  OpenFile(TMenuItem(Sender).Caption,True);
+  OpenFile(TMenuItem(Sender).Caption, True);
 end;
 
 procedure TfrmMain.listResultsSelectionChange(Sender: TObject; User: boolean);
 var
   i: Integer;
 begin
-  if listSummary.ItemIndex = -1 then
+  if listResults.ItemIndex = -1 then
     Exit;
   with dmMain.ChronoData do
   begin
