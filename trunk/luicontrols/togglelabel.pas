@@ -47,8 +47,10 @@ type
 
   TToggleLabel = class (TCustomLabel)
   private
+    FArrowColor: TColor;
     FArrowTopOffset: Integer;
     FExpandedCaption: String;
+    FHighlightColor: TColor;
     FMouseInControl: Boolean;
     FOnChange: TNotifyEvent;
     FOnChanging: TChangingEvent;
@@ -57,8 +59,10 @@ type
     FPaintOnlyArrow: Boolean;
     function ChangeAllowed: Boolean;
     procedure InvalidateArrow;
+    procedure SetArrowColor(const AValue: TColor);
     procedure SetExpanded(const AValue: Boolean);
     procedure SetExpandedCaption(const AValue: String);
+    procedure SetHighlightColor(const AValue: TColor);
   protected
     procedure DoMeasureTextPosition(var TextTop: integer;
       var TextLeft: integer); override;
@@ -72,8 +76,10 @@ type
     procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer;
                                 Lock: boolean = true); override;
   published
+    property ArrowColor: TColor read FArrowColor write SetArrowColor default clBlack;
     property ExpandedCaption: String read FExpandedCaption write SetExpandedCaption;
     property Expanded: Boolean read FExpanded write SetExpanded;
+    property HighlightColor: TColor read FHighlightColor write SetHighlightColor default clWhite;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnChanging: TChangingEvent read FOnChanging write FOnChanging;
     property Align;
@@ -147,6 +153,14 @@ begin
     FExpandedCaption := AValue;
     TextChanged;
   end;
+end;
+
+procedure TToggleLabel.SetHighlightColor(const AValue: TColor);
+begin
+  if FHighlightColor = AValue then
+    Exit;
+  FHighlightColor := AValue;
+  InvalidateArrow;
 end;
 
 procedure TToggleLabel.DoMeasureTextPosition(var TextTop: Integer;
@@ -235,14 +249,24 @@ end;
 procedure TToggleLabel.Paint;
 
 begin
-  if not FPaintOnlyArrow then
-    inherited Paint;
   with Canvas do
   begin
+    if FPaintOnlyArrow then
+    begin
+      //paint background of the arrow area
+      if (Color <> clNone) and not Transparent then
+      begin
+        Brush.Color := Color;
+        Brush.Style := bsSolid;
+        FillRect(Rect(0, 0, FTextOffset, Height));
+      end;
+      FPaintOnlyArrow := False;
+    end
+    else
+      inherited Paint;
     //Paint Toggle button
-    //todo: see what do when not Enabled or color = clNone
     Brush.Style := bsSolid;
-    Pen.Color := clBlack;
+    Pen.Color := FArrowColor;
     {
     MoveTo(0,0);
     LineTo(Self.Width -1, 0);
@@ -251,9 +275,9 @@ begin
     LineTo(0,0);
     }
     if FMouseInControl and ChangeAllowed then
-      Brush.Color := clWhite
+      Brush.Color := FHighlightColor
     else
-      Brush.Color := clBlack;
+      Brush.Color := FArrowColor;
     if FExpanded then
       Polygon([Point(0, FArrowTopOffset),
         Point(8, FArrowTopOffset),
@@ -263,7 +287,6 @@ begin
         Point(6, FArrowTopOffset + 2),
         Point(2, FArrowTopOffset + 6)]);
   end;
-  FPaintOnlyArrow := False;
 end;
 
 procedure TToggleLabel.InvalidateArrow;
@@ -273,6 +296,14 @@ begin
   FPaintOnlyArrow := True;
   R := Rect(Left, Top, Left + FTextOffset, Top + Height);
   InvalidateRect(Parent.Handle, @R, False);
+end;
+
+procedure TToggleLabel.SetArrowColor(const AValue: TColor);
+begin
+  if FArrowColor = AValue then
+    Exit;
+  FArrowColor := AValue;
+  InvalidateArrow;
 end;
 
 end.

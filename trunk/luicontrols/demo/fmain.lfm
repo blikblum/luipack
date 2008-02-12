@@ -5,6 +5,7 @@ object frmMain: TfrmMain
   Width = 400
   HorzScrollBar.Page = 399
   VertScrollBar.Page = 299
+  ActiveControl = NotebookMain
   Caption = 'Lui Controls 0.3 Demo'
   ClientHeight = 300
   ClientWidth = 400
@@ -17,8 +18,8 @@ object frmMain: TfrmMain
     TabOrder = 0
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
-      ClientWidth = 400
-      ClientHeight = 300
+      ClientWidth = 392
+      ClientHeight = 274
       object ToggleLabel1: TToggleLabel
         Left = 12
         Height = 14
@@ -32,17 +33,54 @@ object frmMain: TfrmMain
       object ToggleLabel2: TToggleLabel
         Left = 12
         Height = 14
-        Top = 62
+        Top = 66
         Width = 68
         ExpandedCaption = 'Hide Panel'
         OnChange = ToggleLabel2Change
         Caption = 'Show Panel'
         ParentColor = False
       end
+      object ButtonLabelColor: TColorButton
+        Left = 244
+        Height = 25
+        Top = 2
+        Width = 139
+        BorderWidth = 2
+        ButtonColorSize = 16
+        Caption = 'Label Color     '
+        Color = clBtnFace
+        Layout = blGlyphRight
+        OnColorChanged = ButtonLabelColorColorChanged
+      end
+      object ButtonArrowColor: TColorButton
+        Left = 244
+        Height = 25
+        Top = 26
+        Width = 139
+        BorderWidth = 2
+        ButtonColorSize = 16
+        Caption = 'Arrow Color    '
+        Color = clBtnFace
+        Layout = blGlyphRight
+        OnColorChanged = ButtonArrowColorColorChanged
+      end
+      object ButtonHighlightColor: TColorButton
+        Left = 244
+        Height = 25
+        Top = 50
+        Width = 139
+        BorderWidth = 2
+        ButtonColorSize = 20
+        ButtonColor = clWhite
+        Caption = 'Highlight Color'
+        Color = clBtnFace
+        Layout = blGlyphRight
+        OnColorChanged = ButtonHighlightColorColorChanged
+      end
       object Panel1: TPanel
         Left = 12
         Height = 106
-        Top = 82
+        Top = 90
         Width = 253
         Caption = 'Panel1'
         TabOrder = 0
@@ -51,8 +89,8 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 400
-      ClientHeight = 300
+      ClientWidth = 392
+      ClientHeight = 274
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
@@ -344,9 +382,9 @@ object frmMain: TfrmMain
       end
       object CheckPopupOnMouseUp: TCheckBox
         Left = 166
-        Height = 13
+        Height = 19
         Top = 34
-        Width = 117
+        Width = 123
         Caption = 'Popup On MouseUp'
         OnChange = CheckPopupOnMouseUpChange
         TabOrder = 0
@@ -354,8 +392,8 @@ object frmMain: TfrmMain
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
-      ClientWidth = 400
-      ClientHeight = 300
+      ClientWidth = 392
+      ClientHeight = 274
       object SearchEdit1: TSearchEdit
         Left = 6
         Height = 23
@@ -363,6 +401,7 @@ object frmMain: TfrmMain
         Width = 168
         EmptyText = '<Search Here> '
         OnExecute = SearchEdit1Execute
+        Font.Color = clGray
         TabOrder = 0
       end
       object MemoSearchLog: TMemo
@@ -374,18 +413,18 @@ object frmMain: TfrmMain
       end
       object CheckExecuteEmpty: TCheckBox
         Left = 190
-        Height = 23
+        Height = 19
         Top = 8
-        Width = 90
+        Width = 141
         Caption = 'Execute If Text Is Empty'
         OnClick = CheckExecuteEmptyClick
         TabOrder = 2
       end
       object CheckExecuteKillFocus: TCheckBox
         Left = 190
-        Height = 23
+        Height = 19
         Top = 40
-        Width = 90
+        Width = 127
         Caption = 'Execute On KillFocus'
         OnClick = CheckExecuteKillFocusClick
         TabOrder = 3
@@ -394,8 +433,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu1: TPopupMenu
     OnClose = nil
-    left = 241
-    top = 48
+    left = 290
+    top = 120
     object MenuItem1: TMenuItem
       Caption = 'New Item1'
     end
@@ -411,8 +450,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu2: TPopupMenu
     OnClose = nil
-    left = 241
-    top = 88
+    left = 290
+    top = 160
     object MenuItem5: TMenuItem
       Caption = 'New Item1'
     end
@@ -425,8 +464,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu3: TPopupMenu
     OnClose = nil
-    left = 296
-    top = 48
+    left = 345
+    top = 120
     object MenuItem8: TMenuItem
       Caption = 'New Item1'
     end
@@ -436,8 +475,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu4: TPopupMenu
     OnClose = nil
-    left = 296
-    top = 88
+    left = 345
+    top = 160
     object MenuItem10: TMenuItem
       Caption = 'New Item1'
     end
@@ -455,8 +494,8 @@ object frmMain: TfrmMain
     end
   end
   object ImageList1: TImageList
-    left = 231
-    top = 162
+    left = 280
+    top = 234
     Bitmap = {
       4C69010000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00874A
       20FF874A20FF874A20FF874A20FF874A20FF874A20FF874A20FF874A20FFFFFF
@@ -495,8 +534,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu5: TPopupMenu
     OnClose = nil
-    left = 240
-    top = 128
+    left = 289
+    top = 200
     object MenuItem15: TMenuItem
       Caption = 'New Item1'
       OnClick = MenuItem15Click
@@ -516,8 +555,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu6: TPopupMenu
     OnClose = nil
-    left = 296
-    top = 128
+    left = 345
+    top = 200
     object MenuItem19: TMenuItem
       Caption = 'New Item1'
     end
@@ -533,8 +572,8 @@ object frmMain: TfrmMain
   end
   object PopupMenu7: TPopupMenu
     OnClose = nil
-    left = 296
-    top = 168
+    left = 345
+    top = 240
     object MenuItem23: TMenuItem
       Caption = 'New Item1'
     end
