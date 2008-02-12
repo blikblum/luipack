@@ -1,13 +1,12 @@
 object frmMain: TfrmMain
-  Left = 243
-  Height = 597
-  Top = 163
+  Left = 56
+  Height = 604
+  Top = 60
   Width = 890
   HorzScrollBar.Page = 889
-  VertScrollBar.Page = 577
-  ActiveControl = vtreeMessages
+  VertScrollBar.Page = 575
   Caption = 'Multilog Viewer 0.3'
-  ClientHeight = 578
+  ClientHeight = 576
   ClientWidth = 890
   FormStyle = fsStayOnTop
   Menu = MainMenu1
@@ -58,17 +57,17 @@ object frmMain: TfrmMain
   end
   object panelLeft: TPanel
     Left = 291
-    Height = 540
+    Height = 538
     Top = 38
     Width = 599
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 540
+    ClientHeight = 538
     ClientWidth = 599
     TabOrder = 0
     object panelViewer: TPanel
       Height = 175
-      Top = 365
+      Top = 363
       Width = 599
       Align = alBottom
       BevelOuter = bvNone
@@ -116,11 +115,11 @@ object frmMain: TfrmMain
         end
         object PageBitmap: TPage
           Caption = 'PageBitmap'
-          ClientWidth = 591
-          ClientHeight = 131
+          ClientWidth = 595
+          ClientHeight = 153
           object StringGridBitmap: TStringGrid
-            Left = 425
-            Height = 131
+            Left = 429
+            Height = 153
             Width = 166
             Align = alRight
             ColCount = 2
@@ -156,12 +155,12 @@ object frmMain: TfrmMain
             )
           end
           object PanelImageViewer: TPanel
-            Height = 131
-            Width = 425
+            Height = 153
+            Width = 429
             Align = alClient
             BevelOuter = bvNone
-            ClientHeight = 131
-            ClientWidth = 425
+            ClientHeight = 153
+            ClientWidth = 429
             ParentColor = False
             TabOrder = 1
             OnDblClick = PanelImageViewerDblClick
@@ -209,26 +208,26 @@ object frmMain: TfrmMain
     object Splitter2: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 360
+      Top = 358
       Width = 599
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
-      Height = 360
+      Height = 358
       Width = 599
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
-      ClientHeight = 360
+      ClientHeight = 358
       ClientWidth = 599
       TabOrder = 1
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
         AnchorSideTop.Side = asrBottom
-        Height = 214
-        Top = 146
+        Height = 236
+        Top = 122
         Width = 599
         Align = alClient
         BorderStyle = bsSingle
@@ -246,7 +245,6 @@ object frmMain: TfrmMain
       end
       object panelFilter: TPanel
         Height = 122
-        Top = 24
         Width = 599
         Align = alTop
         BevelOuter = bvNone
@@ -254,10 +252,12 @@ object frmMain: TfrmMain
         ClientWidth = 599
         TabOrder = 1
         object ToggleOptions: TToggleLabel
+          AnchorSideTop.Control = EditFilterMessages
+          AnchorSideTop.Side = asrCenter
           Left = 301
-          Height = 14
-          Top = 8
-          Width = 74
+          Height = 17
+          Top = 5
+          Width = 108
           ExpandedCaption = 'Less Options'
           Expanded = True
           OnChange = ToggleOptionsChange
@@ -266,9 +266,9 @@ object frmMain: TfrmMain
         end
         object checkInfo: TCheckBox
           Left = 2
-          Height = 19
-          Top = 34
-          Width = 44
+          Height = 24
+          Top = 28
+          Width = 51
           Caption = 'Info'
           Checked = True
           State = cbChecked
@@ -277,9 +277,9 @@ object frmMain: TfrmMain
         object checkError: TCheckBox
           Tag = 1
           Left = 2
-          Height = 19
-          Top = 58
-          Width = 48
+          Height = 24
+          Top = 52
+          Width = 59
           Caption = 'Error'
           Checked = True
           State = cbChecked
@@ -288,9 +288,9 @@ object frmMain: TfrmMain
         object checkValue: TCheckBox
           Tag = 3
           Left = 2
-          Height = 19
-          Top = 106
-          Width = 53
+          Height = 24
+          Top = 100
+          Width = 65
           Caption = 'Value'
           Checked = True
           State = cbChecked
@@ -299,9 +299,9 @@ object frmMain: TfrmMain
         object checkConditional: TCheckBox
           Tag = 6
           Left = 101
-          Height = 19
-          Top = 34
-          Width = 78
+          Height = 24
+          Top = 28
+          Width = 104
           Caption = 'Conditional'
           Checked = True
           State = cbChecked
@@ -310,9 +310,9 @@ object frmMain: TfrmMain
         object checkCheckPoint: TCheckBox
           Tag = 7
           Left = 101
-          Height = 19
-          Top = 58
-          Width = 81
+          Height = 24
+          Top = 52
+          Width = 107
           Caption = 'CheckPoint'
           Checked = True
           State = cbChecked
@@ -321,9 +321,9 @@ object frmMain: TfrmMain
         object checkStrings: TCheckBox
           Tag = 8
           Left = 101
-          Height = 19
-          Top = 82
-          Width = 58
+          Height = 24
+          Top = 76
+          Width = 74
           Caption = 'Strings'
           Checked = True
           State = cbChecked
@@ -332,9 +332,9 @@ object frmMain: TfrmMain
         object checkObject: TCheckBox
           Tag = 10
           Left = 213
-          Height = 19
-          Top = 34
-          Width = 57
+          Height = 24
+          Top = 28
+          Width = 72
           Caption = 'Object'
           Checked = True
           State = cbChecked
@@ -343,9 +343,9 @@ object frmMain: TfrmMain
         object checkException: TCheckBox
           Tag = 11
           Left = 213
-          Height = 19
-          Top = 58
-          Width = 73
+          Height = 24
+          Top = 52
+          Width = 95
           Caption = 'Exception'
           Checked = True
           State = cbChecked
@@ -354,9 +354,9 @@ object frmMain: TfrmMain
         object checkCallStack: TCheckBox
           Tag = 9
           Left = 101
-          Height = 19
-          Top = 106
-          Width = 71
+          Height = 24
+          Top = 100
+          Width = 92
           Caption = 'CallStack'
           Checked = True
           State = cbChecked
@@ -365,9 +365,9 @@ object frmMain: TfrmMain
         object checkMemory: TCheckBox
           Tag = 14
           Left = 306
-          Height = 19
-          Top = 34
-          Width = 63
+          Height = 24
+          Top = 28
+          Width = 82
           Caption = 'Memory'
           Checked = True
           State = cbChecked
@@ -376,9 +376,9 @@ object frmMain: TfrmMain
         object checkCustomData: TCheckBox
           Tag = 15
           Left = 306
-          Height = 19
-          Top = 58
-          Width = 87
+          Height = 24
+          Top = 52
+          Width = 121
           Caption = 'Custom Data'
           Checked = True
           State = cbChecked
@@ -387,9 +387,9 @@ object frmMain: TfrmMain
         object checkBitmap: TCheckBox
           Tag = 12
           Left = 213
-          Height = 19
-          Top = 82
-          Width = 58
+          Height = 24
+          Top = 76
+          Width = 75
           Caption = 'Bitmap'
           Checked = True
           State = cbChecked
@@ -398,9 +398,9 @@ object frmMain: TfrmMain
         object checkWarning: TCheckBox
           Tag = 2
           Left = 2
-          Height = 19
-          Top = 82
-          Width = 66
+          Height = 24
+          Top = 76
+          Width = 83
           Caption = 'Warning'
           Checked = True
           State = cbChecked
@@ -409,29 +409,29 @@ object frmMain: TfrmMain
         object checkHeapInfo: TCheckBox
           Tag = 13
           Left = 213
-          Height = 19
-          Top = 106
-          Width = 70
+          Height = 24
+          Top = 100
+          Width = 90
           Caption = 'HeapInfo'
           Checked = True
           State = cbChecked
           TabOrder = 13
         end
         object butSelectAll: TButton
-          Left = 397
+          Left = 429
           Height = 25
-          Top = 58
-          Width = 80
+          Top = 57
+          Width = 96
           BorderSpacing.InnerBorder = 4
           Caption = 'Select All'
           OnClick = butSelectAllClick
           TabOrder = 14
         end
         object butUnSelectAll: TButton
-          Left = 397
+          Left = 429
           Height = 25
           Top = 90
-          Width = 80
+          Width = 96
           BorderSpacing.InnerBorder = 4
           Caption = 'Unselect All'
           OnClick = butUnSelectAllClick
@@ -445,36 +445,23 @@ object frmMain: TfrmMain
           EmptyText = '<Filter Messages>'
           OnExecute = EditFilterMessagesExecute
           Options = [seoExecuteEmpty, seoExecuteOnKillFocus]
-          Font.Color = clGray
           TabOrder = 16
         end
-      end
-      object TabControl1: TTabControl
-        Height = 24
-        Width = 599
-        Align = alTop
-        Style = tsButtons
-        TabIndex = 0
-        TabOrder = 2
-        Tabs.Strings = (
-          'All'
-        )
-        TabStop = False
       end
     end
   end
   object panelRight: TPanel
-    Height = 540
+    Height = 538
     Top = 38
     Width = 286
     Align = alLeft
     BevelOuter = bvNone
-    ClientHeight = 540
+    ClientHeight = 538
     ClientWidth = 286
     TabOrder = 1
     object nbWatches: TNotebook
       Height = 175
-      Top = 365
+      Top = 363
       Width = 286
       Align = alBottom
       OnPageChanged = nbWatchesPageChanged
@@ -482,22 +469,22 @@ object frmMain: TfrmMain
       TabOrder = 0
       object pageLastest: TPage
         Caption = 'Last'
-        ClientWidth = 278
-        ClientHeight = 149
+        ClientWidth = 282
+        ClientHeight = 141
         object gridLastestWatch: TStringGrid
-          Height = 149
-          Width = 278
+          Height = 141
+          Width = 282
           Align = alClient
           AutoFillColumns = True
           ColCount = 2
           Columns = <          
             item
               Title.Caption = 'Variable'
-              Width = 137
+              Width = 140
             end          
             item
               Title.Caption = 'Value'
-              Width = 137
+              Width = 141
             end>
           FixedColor = clBtnFace
           FixedCols = 0
@@ -521,11 +508,11 @@ object frmMain: TfrmMain
           Columns = <          
             item
               Title.Caption = 'Variable'
-              Width = 139
+              Width = 140
             end          
             item
               Title.Caption = 'Value'
-              Width = 139
+              Width = 141
             end>
           FixedColor = clBtnFace
           FixedCols = 0
@@ -545,7 +532,6 @@ object frmMain: TfrmMain
           Width = 282
           Align = alTop
           AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-          ItemHeight = 13
           MaxLength = 0
           OnSelect = ComboWatchHistorySelect
           Style = csDropDownList
@@ -579,7 +565,7 @@ object frmMain: TfrmMain
     object Splitter1: TSplitter
       Cursor = crVSplit
       Height = 5
-      Top = 360
+      Top = 358
       Width = 286
       Align = alBottom
       Beveled = True
@@ -587,7 +573,7 @@ object frmMain: TfrmMain
     end
     object gridCallStack: TStringGrid
       Left = 5
-      Height = 360
+      Height = 358
       Width = 281
       Align = alClient
       AutoFillColumns = True
@@ -595,7 +581,7 @@ object frmMain: TfrmMain
       Columns = <      
         item
           Title.Caption = 'CallStack'
-          Width = 277
+          Width = 280
         end>
       FixedColor = clBtnFace
       FixedCols = 0
@@ -606,13 +592,13 @@ object frmMain: TfrmMain
       TabStop = True
     end
     object Splitter4: TSplitter
-      Height = 360
+      Height = 358
       Width = 5
     end
   end
   object Splitter5: TSplitter
     Left = 286
-    Height = 540
+    Height = 538
     Top = 38
     Width = 5
     Beveled = True
