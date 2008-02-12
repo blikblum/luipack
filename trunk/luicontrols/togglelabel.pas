@@ -47,13 +47,16 @@ type
 
   TToggleLabel = class (TCustomLabel)
   private
-    FExpanded: Boolean;
+    FArrowTopOffset: Integer;
     FExpandedCaption: String;
     FMouseInControl: Boolean;
     FOnChange: TNotifyEvent;
     FOnChanging: TChangingEvent;
     FTextOffset: Integer;
+    FExpanded: Boolean;
+    FPaintOnlyArrow: Boolean;
     function ChangeAllowed: Boolean;
+    procedure InvalidateArrow;
     procedure SetExpanded(const AValue: Boolean);
     procedure SetExpandedCaption(const AValue: String);
   protected
@@ -146,11 +149,27 @@ begin
   end;
 end;
 
-procedure TToggleLabel.DoMeasureTextPosition(var TextTop: integer;
-  var TextLeft: integer);
+procedure TToggleLabel.DoMeasureTextPosition(var TextTop: Integer;
+  var TextLeft: Integer);
+var
+  lTextHeight: Integer;
+  lTextWidth: Integer;
 begin
-  inherited DoMeasureTextPosition(TextTop, TextLeft);
-  Inc(TextLeft, FTextOffset);
+  //To calculate the position of the arrow is necessary to know the
+  //text height, so here GetPreferredSize is always called unlike TLabel
+  GetPreferredSize(lTextWidth, lTextHeight, True);
+  TextLeft := FTextOffset;
+  if Layout = tlTop then
+  begin
+    TextTop := 0;
+  end else
+  begin
+    case Layout of
+      tlCenter: TextTop := (Height - lTextHeight) div 2;
+      tlBottom: TextTop := Height - lTextHeight;
+    end;
+  end;
+  FArrowTopOffset := TextTop + ((lTextHeight - 1) div 2) - 2;
 end;
 
 function TToggleLabel.GetLabelText: string;
@@ -172,7 +191,7 @@ begin
   begin
     FMouseInControl := True;
     if ChangeAllowed then
-      Invalidate;
+      InvalidateArrow;
   end;
 end;
 
@@ -184,9 +203,8 @@ begin
   if FMouseInControl then
   begin
     FMouseInControl := False;
-    //todo: Update only the glyph area ??
     if Enabled then
-      Invalidate;
+      InvalidateArrow;
   end;
 end;
 
@@ -222,22 +240,44 @@ end;
 procedure TToggleLabel.Paint;
 
 begin
-  inherited Paint;
+  if not FPaintOnlyArrow then
+    inherited Paint;
   with Canvas do
   begin
     //Paint Toggle button
     //todo: see what todo when not Enabled or color = clNone
     Brush.Style := bsSolid;
     Pen.Color := clBlack;
+    {
+    MoveTo(0,0);
+    LineTo(Self.Width -1, 0);
+    LineTo(Self.Width -1, Self.Height-1);
+    LineTo(0, Self.Height-1);
+    LineTo(0,0);
+    }
     if FMouseInControl then
       Brush.Color := clWhite
     else
       Brush.Color := clBlack;
     if FExpanded then
-      Polygon([Point(0, 4), Point(8, 4), Point(4, 8)])
+      Polygon([Point(0, FArrowTopOffset),
+        Point(8, FArrowTopOffset),
+        Point(4, FArrowTopOffset + 4)])
     else
-      Polygon([Point(2, 2), Point(6, 6), Point(2, 10)]);
+      Polygon([Point(2, FArrowTopOffset - 2),
+        Point(6, FArrowTopOffset + 2),
+        Point(2, FArrowTopOffset + 6)]);
   end;
+  FPaintOnlyArrow := False;
+end;
+
+procedure TToggleLabel.InvalidateArrow;
+var
+  R: TRect;
+begin
+  FPaintOnlyArrow := True;
+  R := Rect(Left, Top, Left + FTextOffset, Top + Height);
+  InvalidateRect(Parent.Handle, @R, False);
 end;
 
 end.
