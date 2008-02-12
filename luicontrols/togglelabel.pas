@@ -211,12 +211,7 @@ end;
 procedure TToggleLabel.WMLButtonDown(var Message: TLMLButtonDown);
 begin
   if not ChangeAllowed then
-  begin
-    //todo: paint the arrow not hilighted here.
-    //Create a PaintArrow function
-    //Invalidate;
     Exit;
-  end;
   FExpanded := not FExpanded;
   if Assigned(FOnChange) then
     FOnChange(Self);
@@ -245,7 +240,7 @@ begin
   with Canvas do
   begin
     //Paint Toggle button
-    //todo: see what todo when not Enabled or color = clNone
+    //todo: see what do when not Enabled or color = clNone
     Brush.Style := bsSolid;
     Pen.Color := clBlack;
     {
@@ -255,7 +250,7 @@ begin
     LineTo(0, Self.Height-1);
     LineTo(0,0);
     }
-    if FMouseInControl then
+    if FMouseInControl and ChangeAllowed then
       Brush.Color := clWhite
     else
       Brush.Color := clBlack;
