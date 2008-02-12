@@ -5,7 +5,7 @@ object frmMain: TfrmMain
   Width = 400
   HorzScrollBar.Page = 399
   VertScrollBar.Page = 299
-  Caption = 'Lui Controls 0.2 Demo'
+  Caption = 'Lui Controls 0.3 Demo'
   ClientHeight = 300
   ClientWidth = 400
   Position = poDesktopCenter
@@ -17,8 +17,8 @@ object frmMain: TfrmMain
     TabOrder = 0
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 400
+      ClientHeight = 300
       object ToggleLabel1: TToggleLabel
         Left = 12
         Height = 14
@@ -26,6 +26,7 @@ object frmMain: TfrmMain
         Width = 102
         ExpandedCaption = 'State2 (Expanded)'
         Caption = 'State1 (Collapsed)'
+        Layout = tlBottom
         ParentColor = False
       end
       object ToggleLabel2: TToggleLabel
@@ -50,14 +51,15 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 400
+      ClientHeight = 300
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
         Top = 34
         Width = 23
         Menu = PopupMenu1
+        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Glyph.Data = {
@@ -97,6 +99,7 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu2
+        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
@@ -151,6 +154,7 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu3
+        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Flat = True
@@ -191,6 +195,7 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu4
+        Options = [mboPopupOnMouseUp]
         Color = clBtnFace
         Flat = True
         Glyph.Data = {
@@ -246,7 +251,7 @@ object frmMain: TfrmMain
         Top = 193
         Width = 133
         Menu = PopupMenu5
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Caption = 'Only Text'
         Color = clBtnFace
         Flat = True
@@ -266,7 +271,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 160
         Menu = PopupMenu6
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Caption = 'Text and Glyph'
         Color = clBtnFace
         Glyph.Data = {
@@ -305,7 +310,7 @@ object frmMain: TfrmMain
         Top = 191
         Width = 48
         Menu = PopupMenu7
-        Options = [mboShowIndicator]
+        Options = [mboPopupOnMouseUp, mboShowIndicator]
         Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -349,6 +354,8 @@ object frmMain: TfrmMain
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
+      ClientWidth = 400
+      ClientHeight = 300
       object SearchEdit1: TSearchEdit
         Left = 6
         Height = 23
@@ -356,7 +363,6 @@ object frmMain: TfrmMain
         Width = 168
         EmptyText = '<Search Here> '
         OnExecute = SearchEdit1Execute
-        Font.Color = clGray
         TabOrder = 0
       end
       object MemoSearchLog: TMemo

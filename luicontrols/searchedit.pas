@@ -165,7 +165,8 @@ end;
 
 procedure TSearchEdit.SetEmptyText(const AValue: String);
 begin
-  if FEmptyText = AValue then exit;
+  if FEmptyText = AValue then
+    Exit;
   FEmptyText := AValue;
   if FIsEmpty then
     inherited RealSetText(FEmptyText);
