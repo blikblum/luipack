@@ -16,6 +16,9 @@ type
     CheckPopupOnMouseUp: TCheckBox;
     CheckExecuteEmpty: TCheckBox;
     CheckExecuteKillFocus: TCheckBox;
+    ButtonLabelColor: TColorButton;
+    ButtonArrowColor: TColorButton;
+    ButtonHighlightColor: TColorButton;
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
@@ -68,6 +71,9 @@ type
     SearchEdit1: TSearchEdit;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
+    procedure ButtonArrowColorColorChanged(Sender: TObject);
+    procedure ButtonHighlightColorColorChanged(Sender: TObject);
+    procedure ButtonLabelColorColorChanged(Sender: TObject);
     procedure CheckExecuteEmptyClick(Sender: TObject);
     procedure CheckExecuteKillFocusClick(Sender: TObject);
     procedure CheckPopupOnMouseUpChange (Sender: TObject );
@@ -105,6 +111,24 @@ begin
     SearchEdit1.Options := SearchEdit1.Options + [seoExecuteEmpty]
   else
     SearchEdit1.Options := SearchEdit1.Options - [seoExecuteEmpty];
+end;
+
+procedure TfrmMain.ButtonLabelColorColorChanged(Sender: TObject);
+begin
+  ToggleLabel1.Color := ButtonLabelColor.ButtonColor;
+  ToggleLabel2.Color := ButtonLabelColor.ButtonColor;
+end;
+
+procedure TfrmMain.ButtonArrowColorColorChanged(Sender: TObject);
+begin
+  ToggleLabel1.ArrowColor := ButtonArrowColor.ButtonColor;
+  ToggleLabel2.ArrowColor := ButtonArrowColor.ButtonColor;
+end;
+
+procedure TfrmMain.ButtonHighlightColorColorChanged(Sender: TObject);
+begin
+  ToggleLabel1.HighlightColor := ButtonHighlightColor.ButtonColor;
+  ToggleLabel2.HighlightColor := ButtonHighlightColor.ButtonColor;
 end;
 
 procedure TfrmMain.CheckExecuteKillFocusClick(Sender: TObject);
