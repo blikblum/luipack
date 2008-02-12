@@ -93,7 +93,6 @@ type
     Splitter5: TSplitter;
     GridWatchHistory: TStringGrid;
     StringGridBitmap: TStringGrid;
-    TabControl1: TTabControl;
     ToggleOptions: TToggleLabel;
     toolbarMain: TToolBar;
     ButClear: TToolButton;
