@@ -21,7 +21,7 @@
     <Description Value="Miscellaneous functions and classes"/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="4">
+    <Files Count="5">
       <Item1>
         <Filename Value="domutils.pas"/>
         <UnitName Value="domutils"/>
@@ -38,14 +38,18 @@
         <Filename Value="gnuplotchart.pas"/>
         <UnitName Value="gnuplotchart"/>
       </Item4>
+      <Item5>
+        <Filename Value="sevenzipwrapper.pas"/>
+        <UnitName Value="sevenzipwrapper"/>
+      </Item5>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>

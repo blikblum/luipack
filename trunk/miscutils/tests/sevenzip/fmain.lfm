@@ -1,0 +1,63 @@
+object FormMain: TFormMain
+  Left = 389
+  Height = 526
+  Top = 237
+  Width = 606
+  HorzScrollBar.Page = 605
+  VertScrollBar.Page = 506
+  Caption = 'SevenZip Reader Basic Demo'
+  ClientHeight = 507
+  ClientWidth = 606
+  Menu = MainMenu1
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object Label1: TLabel
+    Left = 8
+    Height = 14
+    Top = 8
+    Width = 42
+    Caption = 'File Path'
+    ParentColor = False
+  end
+  object ListViewFiles: TListView
+    Left = 8
+    Height = 440
+    Top = 56
+    Width = 592
+    Columns = <    
+      item
+        Caption = 'Name'
+        Width = 200
+      end    
+      item
+        Caption = 'Size'
+      end    
+      item
+        Caption = 'Packed'
+      end    
+      item
+        Caption = 'CRC'
+      end>
+    TabOrder = 0
+    ViewStyle = vsReport
+  end
+  object EditFileName: TFileNameEdit
+    Left = 8
+    Height = 23
+    Top = 24
+    Width = 416
+    OnAcceptFileName = EditFileNameAcceptFileName
+    ButtonWidth = 23
+    NumGlyphs = 1
+    ParentColor = False
+    TabOrder = 1
+  end
+  object MainMenu1: TMainMenu
+    left = 499
+    top = 25
+    object MIOptions: TMenuItem
+      Caption = 'Options'
+      OnClick = MIOptionsClick
+    end
+  end
+end

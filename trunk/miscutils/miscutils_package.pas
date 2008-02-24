@@ -7,7 +7,7 @@ unit miscutils_package;
 interface
 
 uses
-  DomUtils, MiscUtils, DbExtensions, GnuPlotChart; 
+  DomUtils, MiscUtils, DbExtensions, GnuPlotChart, SevenZipWrapper; 
 
 implementation
 
