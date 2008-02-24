@@ -51,12 +51,20 @@ type
   
   TSevenZipReaderOptions = set of TSevenZipReaderOption;
   
+  TFileTypeInfo = record
+    FileListOffset: Integer;
+    EntriesPerFile: Integer;
+    SizeOffset: Integer;
+    CRCOffset: Integer;
+  end;
+  
   { TSevenZipReader }
 
   TSevenZipReader = class
   private
     FExecutable: String;
     FFileName: String;
+    FFileType: TFileTypeInfo;
     FOptions: TSevenZipReaderOptions;
     FPackedFiles: TSevenZipPackedFileList;
     FProcess: TProcessLineTalk;
@@ -65,6 +73,7 @@ type
     procedure SetExecutable(const AValue: String);
     procedure SetFileName(const AValue: String);
     procedure SetOptions(const AValue: TSevenZipReaderOptions);
+    procedure UpdateFileTypeInfo;
   public
     constructor Create;
     destructor Destroy; override;
@@ -163,6 +172,27 @@ begin
   FOptions:=AValue;
 end;
 
+const
+  FileTypes: array [0..2] of TFileTypeInfo =
+  (
+  (FileListOffset: 12; EntriesPerFile: 9; SizeOffset: 1; CRCOffset: 5),
+  (FileListOffset: 9; EntriesPerFile: 12; SizeOffset: 2; CRCOffset: 8),
+  (FileListOffset: 14; EntriesPerFile: 18; SizeOffset: 2; CRCOffset: 13)
+  );
+  
+procedure TSevenZipReader.UpdateFileTypeInfo;
+var
+  i: Integer;
+begin
+  i := AnsiIndexText(ExtractFileExt(FFileName), ['.7z', '.zip', '.rar']);
+  if i <> -1 then
+    FFileType := FileTypes[i]
+  else
+    raise Exception.Create('Unknow File Extension');
+  if szoGetDetails in FOptions then
+    Dec(FFileType.FileListOffset);
+end;
+
 procedure TSevenZipReader.ParseDefaultOutput;
 var
   LineCount: Integer;
@@ -171,7 +201,7 @@ var
   procedure ParseDefaultLine(const Line: String);
   begin
     Inc(LineCount);
-    if LineCount > 11 then
+    if LineCount >= FFileType.FileListOffset then
     begin
       //hack to avoid parsing after file list finished
       if Line[1] = '-' then
@@ -220,24 +250,33 @@ var
   end;
 
   procedure ParseDetailedLine(const Line: String);
+  var
+    EntryIndex: Integer;
   begin
     Inc(LineCount);
-    if (LineCount > 10) and (Line <> '') then
+    if (LineCount >= FFileType.FileListOffset) and (Line <> '') then
     begin
-      case (LineCount - 10) mod 9 of
-        1:
+      EntryIndex := (LineCount - FFileType.FileListOffset) mod FFileType.EntriesPerFile;
+      //path is always the first entry
+      if EntryIndex = 0 then
+      begin
+        NewFile := TSevenZipPackedFile.Create;
+        NewFile.Path := ExtractString(Line);
+        PackedFiles.Add(NewFile);
+      end
+      else
+        if EntryIndex = FFileType.SizeOffset then
         begin
-          NewFile := TSevenZipPackedFile.Create;
-          NewFile.Path := ExtractString(Line);
-          PackedFiles.Add(NewFile);
-        end;
-        2:
           NewFile.Size := ExtractInteger(Line);
-        3:
-          NewFile.PackedSize := ExtractInteger(Line);
-        6:
-          NewFile.CRC := ExtractString(Line);
-      end;
+        end
+        else
+          if EntryIndex = FFileType.SizeOffset + 1 then
+          begin
+            NewFile.PackedSize := ExtractInteger(Line);
+          end
+          else
+            if EntryIndex = FFileType.CRCOffset then
+              NewFile.CRC := ExtractString(Line);
     end;
   end;
 
@@ -274,6 +313,7 @@ end;
 procedure TSevenZipReader.Load;
 begin
   PackedFiles.Clear;
+  UpdateFileTypeInfo;
   with FProcess do
   try
     CommandLine := FExecutable + ' l '+ IfThen(szoGetDetails in FOptions, '-slt ') +
