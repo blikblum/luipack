@@ -47,6 +47,7 @@ object FormMain: TFormMain
     Top = 24
     Width = 416
     OnAcceptFileName = EditFileNameAcceptFileName
+    Filter = 'Supported Files|*.7z;*.zip;*.rar'
     ButtonWidth = 23
     NumGlyphs = 1
     ParentColor = False
