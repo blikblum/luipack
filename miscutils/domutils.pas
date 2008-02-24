@@ -49,7 +49,8 @@ type
   THtmlTree = class
 
   private
-    //Todo:implement AddCssLink and store files in a StringList same for JSFile
+    //Todo:implement AddCssLink OK
+    //and store files in a StringList ????? same for JSFile
     FTitle: String;
     FHeadNode: TDomElement;
     FBodyNode: TDomElement;
@@ -59,19 +60,19 @@ type
     FBookmarkStrings:TStringList;
     FBookmarkIndexes:TIndexedList;
     procedure ResetNodes;
-    procedure SetTitle(AName:String);
+    procedure SetTitle(const AName: String);
   public
     constructor Create;
     destructor Destroy;
-    procedure SaveToFile(const AFileName:String);
+    procedure SaveToFile(const AFileName: String);
     procedure Clear;
-    function CreateText(const AText:String): TDomNode;
-    procedure AddBookmark(ANode:TDomNode;const AText: String);
-    procedure AddBookmark(ANode:TDomNode;const AIndex: Integer);
-    function GetBookmark(const AText:String): TDomNode;
-    function GetBookmark(const AIndex:Integer): TDomNode;
-    procedure AddCssLink(const AFilePath:String);
-    procedure AddJSLink(const AFilePath:String);
+    function CreateText(const AText: String): TDomNode;
+    procedure AddBookmark(ANode:TDomNode; const AText: String);
+    procedure AddBookmark(ANode:TDomNode; const AIndex: Integer);
+    function GetBookmark(const AText: String): TDomNode;
+    function GetBookmark(const AIndex: Integer): TDomNode;
+    procedure AddCSSLink(const AFilePath: String);
+    procedure AddJSLink(const AFilePath: String);
     property BookmarkIndexes: TIndexedList read FBookmarkIndexes;
     property Title: String read FTitle write SetTitle;
     property HeadNode: TDOMElement read FHeadNode;
@@ -221,14 +222,14 @@ begin
   FBookmarkStrings.Clear;
 end;
 
-procedure THtmlTree.AddCssLink(const AFilePath:String);
+procedure THtmlTree.AddCSSLink(const AFilePath: String);
 var
-  LinkEl:TDOMElement;
+  LinkEl: TDOMElement;
 begin
   LinkEl:= FDocHandle.CreateElement('link');
-  LinkEl['rel']:='stylesheet';
-  LinkEl['type']:='text/css';
-  LinkEl['href']:=AFilePath;
+  LinkEl['rel'] := 'stylesheet';
+  LinkEl['type'] := 'text/css';
+  LinkEl['href'] := AFilePath;
   FHeadNode.AppendChild(LinkEl);  
 end; 
 
@@ -237,18 +238,19 @@ var
   LinkEl:TDOMElement;
 begin
   LinkEl:= FDocHandle.CreateElement('script');
-  LinkEl['language']:='JavaScript1.5';
-  LinkEl['type']:='text/javascript';
-  LinkEl['src']:=AFilePath;
+  LinkEl['language'] := 'JavaScript1.5';
+  LinkEl['type'] := 'text/javascript';
+  LinkEl['src'] := AFilePath;
+  LinkEl.AppendChild(FDocHandle.CreateTextNode(''));
   FHeadNode.AppendChild(LinkEl);  
 end;
 
-procedure THtmlTree.SetTitle(AName:String);
+procedure THtmlTree.SetTitle(const AName: String);
 var
-  TempNode:TDOMElement;
+  TempNode: TDOMElement;
 begin
-  FTitle:=AName;
-  TempNode:=FDocHandle.CreateElement('title');
+  FTitle := AName;
+  TempNode := FDocHandle.CreateElement('title');
   TempNode.AppendChild(FDocHandle.CreateTextNode(AName));
   FHeadNode.AppendChild(TempNode);
 end;
