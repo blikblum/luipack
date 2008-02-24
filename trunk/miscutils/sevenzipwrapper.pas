@@ -47,7 +47,7 @@ type
     property Items[Index: Integer]: TSevenZipPackedFile read GetItems; default;
   end;
 
-  TSevenZipReaderOption = (szoGetCRC);
+  TSevenZipReaderOption = (szoGetDetails);
   
   TSevenZipReaderOptions = set of TSevenZipReaderOption;
   
@@ -60,6 +60,8 @@ type
     FOptions: TSevenZipReaderOptions;
     FPackedFiles: TSevenZipPackedFileList;
     FProcess: TProcessLineTalk;
+    procedure ParseDefaultOutput;
+    procedure ParseDetailedOutput;
     procedure SetExecutable(const AValue: String);
     procedure SetFileName(const AValue: String);
     procedure SetOptions(const AValue: TSevenZipReaderOptions);
@@ -161,67 +163,14 @@ begin
   FOptions:=AValue;
 end;
 
-procedure TSevenZipReader.SetExecutable(const AValue: String);
-begin
-  if FExecutable=AValue then exit;
-  FExecutable:=AValue;
-end;
-
-constructor TSevenZipReader.Create;
-begin
-  FPackedFiles := TSevenZipPackedFileList.Create;
-  FProcess := TProcessLineTalk.Create(nil);
-  FProcess.Options := FProcess.Options + [poNoConsole];
-end;
-
-destructor TSevenZipReader.Destroy;
-begin
-  FPackedFiles.Destroy;
-  FProcess.Destroy;
-end;
-
-
-procedure TSevenZipReader.Load;
+procedure TSevenZipReader.ParseDefaultOutput;
 var
   LineCount: Integer;
   NewFile: TSevenZipPackedFile;
 
-  function ExtractString(const Line: String): String;
-  var
-    i: Integer;
+  procedure ParseDefaultLine(const Line: String);
   begin
-    i := Pos('=', Line);
-    Result := Copy(Line, i + 2, Length(Line) - i - 1);
-  end;
-
-  function ExtractInteger(const Line: String): Int64;
-  begin
-    Result := StrToInt64Def(ExtractString(Line), 0);
-  end;
-
-  procedure ParseLineWithCRC(const Line: String);
-  begin
-    if (LineCount > 10) and (Line <> '') then
-    begin
-      case (LineCount - 10) mod 9 of
-        1:
-        begin
-          NewFile := TSevenZipPackedFile.Create;
-          NewFile.Path := ExtractString(Line);
-          PackedFiles.Add(NewFile);
-        end;
-        2:
-          NewFile.Size := ExtractInteger(Line);
-        3:
-          NewFile.PackedSize := ExtractInteger(Line);
-        6:
-          NewFile.CRC := ExtractString(Line);
-      end;
-    end;
-  end;
-
-  procedure ParseLineDefault(const Line: String);
-  begin
+    Inc(LineCount);
     if LineCount > 11 then
     begin
       //hack to avoid parsing after file list finished
@@ -241,27 +190,99 @@ var
     end;
   end;
 
-  procedure ParseLine;
+begin
+  LineCount := 0;
+  with FProcess do
+  begin
+    while Running do
+      ParseDefaultLine(ReadLine);
+    while HasOutput do
+      ParseDefaultLine(ReadLine);
+  end;
+end;
+
+procedure TSevenZipReader.ParseDetailedOutput;
+var
+  LineCount: Integer;
+  NewFile: TSevenZipPackedFile;
+
+  function ExtractString(const Line: String): String;
+  var
+    i: Integer;
+  begin
+    i := Pos('=', Line);
+    Result := Copy(Line, i + 2, Length(Line) - i - 1);
+  end;
+
+  function ExtractInteger(const Line: String): Int64;
+  begin
+    Result := StrToInt64Def(ExtractString(Line), 0);
+  end;
+
+  procedure ParseDetailedLine(const Line: String);
   begin
     Inc(LineCount);
-    if szoGetCRC in FOptions then
-      ParseLineWithCRC(FProcess.ReadLine)
-    else
-      ParseLineDefault(FProcess.ReadLine);
+    if (LineCount > 10) and (Line <> '') then
+    begin
+      case (LineCount - 10) mod 9 of
+        1:
+        begin
+          NewFile := TSevenZipPackedFile.Create;
+          NewFile.Path := ExtractString(Line);
+          PackedFiles.Add(NewFile);
+        end;
+        2:
+          NewFile.Size := ExtractInteger(Line);
+        3:
+          NewFile.PackedSize := ExtractInteger(Line);
+        6:
+          NewFile.CRC := ExtractString(Line);
+      end;
+    end;
   end;
 
 begin
   LineCount := 0;
+  with FProcess do
+  begin
+    while Running do
+      ParseDetailedLine(ReadLine);
+    while HasOutput do
+      ParseDetailedLine(ReadLine);
+  end;
+end;
+
+procedure TSevenZipReader.SetExecutable(const AValue: String);
+begin
+  if FExecutable=AValue then exit;
+  FExecutable:=AValue;
+end;
+
+constructor TSevenZipReader.Create;
+begin
+  FPackedFiles := TSevenZipPackedFileList.Create;
+  FProcess := TProcessLineTalk.Create(nil);
+  FProcess.Options := FProcess.Options + [poNoConsole];
+end;
+
+destructor TSevenZipReader.Destroy;
+begin
+  FPackedFiles.Destroy;
+  FProcess.Destroy;
+end;
+
+procedure TSevenZipReader.Load;
+begin
   PackedFiles.Clear;
   with FProcess do
   try
-    CommandLine := FExecutable + ' l '+ IfThen(szoGetCRC in FOptions, '-slt ') +
+    CommandLine := FExecutable + ' l '+ IfThen(szoGetDetails in FOptions, '-slt ') +
       '"' + FFileName + '"';
     Execute;
-    while Running do
-      ParseLine;
-    while HasOutput do
-      ParseLine;
+    if szoGetDetails in FOptions then
+      ParseDetailedOutput
+    else
+      ParseDefaultOutput;
   except
     raise Exception.Create('Error executing "' + CommandLine + '"');
   end;

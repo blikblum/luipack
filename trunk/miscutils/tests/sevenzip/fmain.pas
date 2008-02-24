@@ -13,11 +13,13 @@ type
   { TFormMain }
 
   TFormMain = class(TForm)
+    CheckGetDetails: TCheckBox;
     EditFileName: TFileNameEdit;
     Label1: TLabel;
     ListViewFiles: TListView;
     MainMenu1: TMainMenu;
     MIOptions: TMenuItem;
+    procedure CheckGetDetailsChange(Sender: TObject);
     procedure EditFileNameAcceptFileName(Sender: TObject; var Value: String);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -90,6 +92,14 @@ begin
     end;
     EndUpdate;
   end;
+end;
+
+procedure TFormMain.CheckGetDetailsChange(Sender: TObject);
+begin
+  if CheckGetDetails.Checked then
+    Reader.Options := Reader.Options + [szoGetDetails]
+  else
+    Reader.Options := Reader.Options - [szoGetDetails];
 end;
 
 procedure TFormMain.FormDestroy(Sender: TObject);
