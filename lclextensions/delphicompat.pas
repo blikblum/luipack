@@ -51,6 +51,8 @@ const
   WM_KEYUP = LM_KEYUP;
   WM_KILLFOCUS = LM_KILLFOCUS;
   WM_SIZE = LM_SIZE;
+  WM_LBUTTONDBLCLK = LM_LBUTTONDBLCLK;
+  WM_LBUTTONDOWN = LM_LBUTTONDOWN;
   
   //Misc Constants
   MAXSHORT = $7FFF;
@@ -114,6 +116,32 @@ const
   MM_ISOTROPIC   = 7;
   MM_ANISOTROPIC = 8;
   
+  { DRAWITEMSTRUCT structure  }
+  ODT_BUTTON = 4;
+  ODT_COMBOBOX = 3;
+  ODT_LISTBOX = 2;
+  ODT_LISTVIEW = 102;
+  ODT_MENU = 1;
+  ODT_STATIC = 5;
+  ODT_TAB = 101;
+  ODT_HEADER = 100;
+  ODA_DRAWENTIRE = 1;
+  ODA_FOCUS = 4;
+  ODA_SELECT = 2;
+  ODS_SELECTED = 1;
+  ODS_GRAYED = 2;
+  ODS_DISABLED = 4;
+  ODS_CHECKED = 8;
+  ODS_FOCUS = 16;
+  ODS_DEFAULT = 32;
+  ODS_HOTLIGHT = $0040;
+  ODS_INACTIVE = $0080;
+  ODS_NOACCEL = $0100;
+  ODS_NOFOCUSRECT = $0200;
+  ODS_COMBOBOXEDIT = $1000;
+
+  BS_OWNERDRAW = $b;
+  
 type
   //TWM* types
   TMessage = TLMessage;
@@ -124,6 +152,9 @@ type
   TWMKeyUp = TLMKeyUp;
   TWMKillFocus = TLMKillFocus;
   TWMSize = TLMSize;
+  TWMLButtonDblClk = TLMLButtonDblClk;
+  TWMMeasureItem = TLMMeasureItem;
+  TWMDrawItem = TLMDrawItems;
   
   //timer
   TTimerNotify = procedure (TimerId: LongWord) of object;
