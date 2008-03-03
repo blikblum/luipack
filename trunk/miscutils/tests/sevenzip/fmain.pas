@@ -18,12 +18,17 @@ type
     Label1: TLabel;
     ListViewFiles: TListView;
     MainMenu1: TMainMenu;
+    MIExtract: TMenuItem;
     MIOptions: TMenuItem;
+    PopupFiles: TPopupMenu;
+    SelectDirectory: TSelectDirectoryDialog;
     procedure CheckGetDetailsChange(Sender: TObject);
     procedure EditFileNameAcceptFileName(Sender: TObject; var Value: String);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure MIExtractClick(Sender: TObject);
     procedure MIOptionsClick(Sender: TObject);
+    procedure PopupFilesPopup(Sender: TObject);
   private
     procedure UpdateExecutable;
     { private declarations }
@@ -52,6 +57,11 @@ begin
   finally
     Destroy;
   end;
+end;
+
+procedure TFormMain.PopupFilesPopup(Sender: TObject);
+begin
+  MIExtract.Enabled := ListViewFiles.SelCount > 0;
 end;
 
 procedure TFormMain.UpdateExecutable;
@@ -105,6 +115,14 @@ end;
 procedure TFormMain.FormDestroy(Sender: TObject);
 begin
   Reader.Destroy;
+end;
+
+procedure TFormMain.MIExtractClick(Sender: TObject);
+begin
+  if SelectDirectory.Execute then
+  begin
+    Reader.Extract(ListViewFiles.Selected.Index, SelectDirectory.FileName);
+  end;
 end;
 
 initialization

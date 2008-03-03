@@ -1,8 +1,14 @@
 { @author(Michalis Kamburelis) }
-{This is based in PasDoc_ProcessLineTalk from pasdoc project}
+
+{
+ This is based in PasDoc_ProcessLineTalk from pasdoc project
+ Clean up and improvements by Luiz Américo Pereira Câmara
+}
+
 unit ProcessLineTalk;
 
 {$mode objfpc}
+{$H+}
 
 interface
 
@@ -67,6 +73,7 @@ type
     procedure Execute; override;
     procedure WriteLine(const S: string);
     function ReadLine: string;
+    function ReadLine(SkipLines: Integer): String;
     function HasOutput: Boolean;
   end;
 
@@ -188,6 +195,17 @@ end;
 
 function TProcessLineTalk.ReadLine: string;
 begin
+  Result := OutputLineReader.Readln;
+end;
+
+function TProcessLineTalk.ReadLine(SkipLines: Integer): String;
+begin
+  while SkipLines > 0 do
+  begin
+    //ReadLine; //this does not compiles
+    OutputLineReader.Readln;
+    Dec(SkipLines);
+  end;
   Result := OutputLineReader.Readln;
 end;
 

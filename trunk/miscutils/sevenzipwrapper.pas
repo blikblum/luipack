@@ -51,6 +51,8 @@ type
   
   TSevenZipReaderOptions = set of TSevenZipReaderOption;
   
+  TSevenZipErrorEvent = procedure (const ErrorStr: String; Handled: Boolean) of object;
+  
   TFileTypeInfo = record
     FileListOffset: Integer;
     EntriesPerFile: Integer;
@@ -65,21 +67,27 @@ type
     FExecutable: String;
     FFileName: String;
     FFileType: TFileTypeInfo;
+    FOnError: TSevenZipErrorEvent;
     FOptions: TSevenZipReaderOptions;
     FPackedFiles: TSevenZipPackedFileList;
     FProcess: TProcessLineTalk;
+    function HandleError(const ErrorStr: String): Boolean;
     procedure ParseDefaultOutput;
     procedure ParseDetailedOutput;
     procedure SetExecutable(const AValue: String);
     procedure SetFileName(const AValue: String);
+    procedure SetOnError(const AValue: TSevenZipErrorEvent);
     procedure SetOptions(const AValue: TSevenZipReaderOptions);
     procedure UpdateFileTypeInfo;
   public
     constructor Create;
     destructor Destroy; override;
+    procedure Extract(Index: Integer; const Directory: String = '');
+    procedure Extract(const AFileName: String; const Directory: String = '');
     procedure Load;
     property Executable: String read FExecutable write SetExecutable;
     property FileName: String read FFileName write SetFileName;
+    property OnError: TSevenZipErrorEvent read FOnError write SetOnError;
     property Options: TSevenZipReaderOptions read FOptions write SetOptions;
     property PackedFiles: TSevenZipPackedFileList read FPackedFiles;
   end;
@@ -166,6 +174,12 @@ begin
   FFileName:=AValue;
 end;
 
+procedure TSevenZipReader.SetOnError(const AValue: TSevenZipErrorEvent);
+begin
+  if FOnError=AValue then exit;
+  FOnError:=AValue;
+end;
+
 procedure TSevenZipReader.SetOptions(const AValue: TSevenZipReaderOptions);
 begin
   if FOptions=AValue then exit;
@@ -193,14 +207,24 @@ begin
     Dec(FFileType.FileListOffset);
 end;
 
+function TSevenZipReader.HandleError(const ErrorStr: String): Boolean;
+begin
+  Result := False;
+  if Assigned(FOnError) then
+    FOnError(ErrorStr, Result);
+end;
+
 procedure TSevenZipReader.ParseDefaultOutput;
 var
   LineCount: Integer;
   NewFile: TSevenZipPackedFile;
-
+  ErrorStr: String;
+  
   procedure ParseDefaultLine(const Line: String);
   begin
     Inc(LineCount);
+    if LineCount = 6 then
+      ErrorStr := Line;
     if LineCount >= FFileType.FileListOffset then
     begin
       //hack to avoid parsing after file list finished
@@ -228,6 +252,9 @@ begin
       ParseDefaultLine(ReadLine);
     while HasOutput do
       ParseDefaultLine(ReadLine);
+    if ExitStatus <> 0 then
+      if not HandleError(ErrorStr) then
+        raise Exception.Create('Error In Load: ' + ErrorStr);
   end;
 end;
 
@@ -235,6 +262,7 @@ procedure TSevenZipReader.ParseDetailedOutput;
 var
   LineCount: Integer;
   NewFile: TSevenZipPackedFile;
+  ErrorStr: String;
 
   function ExtractString(const Line: String): String;
   var
@@ -254,6 +282,8 @@ var
     EntryIndex: Integer;
   begin
     Inc(LineCount);
+    if LineCount = 6 then
+      ErrorStr := Line;
     if (LineCount >= FFileType.FileListOffset) and (Line <> '') then
     begin
       EntryIndex := (LineCount - FFileType.FileListOffset) mod FFileType.EntriesPerFile;
@@ -288,6 +318,9 @@ begin
       ParseDetailedLine(ReadLine);
     while HasOutput do
       ParseDetailedLine(ReadLine);
+    if ExitStatus <> 0 then
+      if not HandleError(ErrorStr) then
+        raise Exception.Create('Error In Load: ' + ErrorStr);
   end;
 end;
 
@@ -310,12 +343,41 @@ begin
   FProcess.Destroy;
 end;
 
+procedure TSevenZipReader.Extract(Index: Integer; const Directory: String);
+begin
+  if (Index < 0) or (Index >= FPackedFiles.Count) then
+    raise Exception.Create('Error In Extract: Index Out Of Bounds');
+  Extract(FPackedFiles[Index].Path, Directory);
+end;
+
+procedure TSevenZipReader.Extract(const AFileName: String;
+  const Directory: String);
+var
+  ErrorStr: String;
+begin
+  with FProcess do
+  begin
+    Options := Options + [poWaitOnExit];
+    CommandLine := FExecutable + ' e "' + FFileName + '"' +
+      IfThen(Directory <> '', ' -o' + Directory) + ' -y "' + AFileName + '"';
+    Execute;
+    Options := Options - [poWaitOnExit];
+    if ExitStatus <> 0 then
+    begin
+      //grab the error str (the 6th line)
+      ErrorStr := ReadLine(5);
+      if not HandleError(ErrorStr) then
+        raise Exception.Create('Error In Extract: ' + ErrorStr);
+    end;
+  end;
+end;
+
 procedure TSevenZipReader.Load;
 begin
   PackedFiles.Clear;
   UpdateFileTypeInfo;
   with FProcess do
-  try
+  begin
     CommandLine := FExecutable + ' l '+ IfThen(szoGetDetails in FOptions, '-slt ') +
       '"' + FFileName + '"';
     Execute;
@@ -323,8 +385,6 @@ begin
       ParseDetailedOutput
     else
       ParseDefaultOutput;
-  except
-    raise Exception.Create('Error executing "' + CommandLine + '"');
   end;
 end;
 

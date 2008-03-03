@@ -127,7 +127,7 @@ type
     property OnColumn: TCSVColumnNotify read FOnColumn write FOnColumn;
     property OnHeader: TCSVHeaderNotify read FOnHeader write FOnHeader;
     property Delimiter: Char read FDelimiter write FDelimiter;
-    property Filename: String read FFilename write SetFilename;
+    property FileName: String read FFilename write SetFilename;
   end;
 
 procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
