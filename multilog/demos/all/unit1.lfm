@@ -16,7 +16,6 @@ object Form1: TForm1
     Height = 359
     Width = 343
     Align = alClient
-    BorderStyle = bsSingle
     DefaultItemHeight = 16
     ScrollBars = ssAutoBoth
     TabOrder = 0
@@ -412,6 +411,7 @@ object Form1: TForm1
         Top = 50
         Width = 100
         AutoSize = True
+        Transparent = False
       end
       object ButOpenImage: TButton
         Left = 12
@@ -441,7 +441,6 @@ object Form1: TForm1
     Width = 5
   end
   object OpenDialog1: TOpenDialog
-    Title = 'Open existing file'
     FilterIndex = 0
     left = 40
     top = 208

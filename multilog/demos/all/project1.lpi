@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectOptions>
     <PathDelim Value="\"/>
-    <Version Value="5"/>
+    <Version Value="6"/>
     <General>
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
@@ -26,14 +26,14 @@
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="multiloglaz"/>
-        <MinVersion Minor="1" Valid="True"/>
+        <PackageName Value="LCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="multiloglaz"/>
+        <MinVersion Minor="1" Valid="True"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="3">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -51,11 +51,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="treeviewchannel"/>
       </Unit2>
-      <Unit3>
-        <Filename Value="..\..\winipc.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="winipc"/>
-      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

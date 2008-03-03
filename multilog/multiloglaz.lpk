@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
+  <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="multiloglaz"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
@@ -17,12 +17,12 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Description Value="Multilog provides an easy way to use log messages in a fpc application
+    <Description Value="Multilog provides an easy way to use log messages in a fpc/Lazarus application
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="4"/>
-    <Files Count="7">
+    <Version Minor="5"/>
+    <Files Count="8">
       <Item1>
         <Filename Value="multilog.pas"/>
         <UnitName Value="multilog"/>
@@ -52,6 +52,10 @@
         <Filename Value="ipcchannel.pas"/>
         <UnitName Value="ipcchannel"/>
       </Item7>
+      <Item8>
+        <Filename Value="sharedloggerlcl.pas"/>
+        <UnitName Value="sharedloggerlcl"/>
+      </Item8>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">

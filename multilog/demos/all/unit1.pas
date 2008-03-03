@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls, sharedloggerlcl,
-  Buttons, logtreeview, ExtCtrls, StdCtrls, Spin, ipcchannel, multiloglcl, multilog;
+  Buttons, logtreeview, ExtCtrls, StdCtrls, Spin, ipcchannel, multilog;
 
 type
 
