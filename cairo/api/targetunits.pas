@@ -1,4 +1,4 @@
-unit targetunits;
+unit TargetUnits;
 
 {$mode objfpc}{$H+}
 
@@ -6,7 +6,7 @@ interface
 
 uses
 {$ifdef windows}
-  cairo_win32;
+  CairoWin32;
 {$endif}
 
 {$ifdef unix}

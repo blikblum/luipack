@@ -61,6 +61,7 @@ type
     FSize: Integer;
     FStyle: TFontStyles;
     FUpdateCount: Integer;
+    procedure CreateHandle;
     procedure Changed;
     procedure HandleNeeded;
     procedure SetCharSet(const AValue: TFontCharSet);
@@ -69,6 +70,8 @@ type
     procedure SetPitch(const AValue: TFontPitch);
     procedure SetSize(const AValue: Integer);
     procedure SetStyle(const AValue: TFontStyles);
+  protected
+    function GetHandle: Pcairo_font_face_t; override;
   public
     procedure BeginUpdate;
     procedure EndUpdate;
@@ -123,11 +126,13 @@ type
     property OnResize;
   end;
 
-function CreateFontFromLog(const LogFont: TLogFont): Pcairo_font_face_t;
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 function ColorToCairoColor(Color: TColor): TCairoColor; inline;
 
 implementation
+
+uses
+  Math;
 
 {$i cairolcl.inc}
 
@@ -249,6 +254,7 @@ begin
   Changed;
 end;
 
+
 procedure TCairoLCLFont.Changed;
 begin
   if FUpdateCount <= 0 then
@@ -262,58 +268,9 @@ begin
 end;
 
 procedure TCairoLCLFont.HandleNeeded;
-//code borrowed from LCL
-const
-  LF_BOOL: array[Boolean] of Byte = (0, 255);
-  LF_WEIGHT: array[Boolean] of Integer = (FW_NORMAL, FW_BOLD);
-var
-  ALogFont: TLogFont;
-
-  procedure SetLogFontName(const NewName: string);
-  var
-    l: integer;
-    aName: string;
-  begin
-    if IsFontNameXLogicalFontDesc(NewName) then
-      aName := ExtractFamilyFromXLFDName(NewName)
-    else
-      aName := NewName;
-    l := High(ALogFont.lfFaceName) - Low(ALogFont.lfFaceName);
-    if l > length(aName) then
-      l := length(aName);
-    if l > 0 then
-      Move(aName[1], ALogFont.lfFaceName[Low(ALogFont.lfFaceName)], l);
-    ALogFont.lfFaceName[Low(ALogFont.lfFaceName) + l] := #0;
-  end;
-
 begin
-  if FHandle <> nil then
-    Exit;
-  FillChar(ALogFont, SizeOf(ALogFont), 0);
-  with ALogFont do
-  begin
-    lfHeight := FHeight;
-    //lfWidth := 0;
-    //lfEscapement := 0;
-    //lfOrientation := 0;
-    lfWeight := LF_WEIGHT[fsBold in FStyle];
-    lfItalic := LF_BOOL[fsItalic in FStyle];
-    lfUnderline := LF_BOOL[fsUnderline in FStyle];
-    lfStrikeOut := LF_BOOL[fsStrikeOut in FStyle];
-    lfCharSet := Byte(FCharset);
-    SetLogFontName(Name);
-
-    lfQuality := DEFAULT_QUALITY;
-    lfOutPrecision := OUT_DEFAULT_PRECIS;
-    lfClipPrecision := CLIP_DEFAULT_PRECIS;
-    case Pitch of
-      fpVariable: lfPitchAndFamily := VARIABLE_PITCH;
-      fpFixed: lfPitchAndFamily := FIXED_PITCH;
-    else
-      lfPitchAndFamily := DEFAULT_PITCH;
-    end;
-  end;
-  FHandle := CreateFontFromLog(ALogFont);
+  if FHandle = nil then
+    CreateHandle;
 end;
 
 procedure TCairoLCLFont.SetCharSet(const AValue: TFontCharSet);
@@ -344,6 +301,12 @@ procedure TCairoLCLFont.SetStyle(const AValue: TFontStyles);
 begin
   FStyle := AValue;
   Changed;
+end;
+
+function TCairoLCLFont.GetHandle: Pcairo_font_face_t;
+begin
+  HandleNeeded;
+  Result := FHandle;
 end;
 
 procedure TCairoLCLFont.BeginUpdate;
