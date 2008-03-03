@@ -65,6 +65,7 @@ type
     constructor Create;
     destructor Destroy;
     procedure SaveToFile(const AFileName: String);
+    procedure SaveToStream(Stream: TStream);
     procedure Clear;
     function CreateText(const AText: String): TDomNode;
     procedure AddBookmark(ANode:TDomNode; const AText: String);
@@ -210,7 +211,12 @@ end;
 
 procedure THtmlTree.SaveToFile(const AFileName:String);
 begin
-  WriteXMLFile(FDocHandle,AFileName);
+  WriteXMLFile(FDocHandle, AFileName);
+end;
+
+procedure THtmlTree.SaveToStream(Stream: TStream);
+begin
+  WriteXMLFile(FDocHandle, Stream);
 end;
 
 procedure THtmlTree.Clear;
@@ -465,10 +471,13 @@ end;
 
 function THtmlSubTree.GetBaseElement: TDOMElement;
 begin
+  Result := nil;
+  if FNodeList.Count = 0 then
+    Exit;
   if FBaseIndex = -1 then
-    Result:=TDOMElement(FNodeList[0])
+    Result := TDOMElement(FNodeList[0])
   else
-    Result:=TDOMElement(FNodeList[FBaseIndex]);
+    Result := TDOMElement(FNodeList[FBaseIndex]);
 end;
 
 constructor THtmlSubTree.Create(AParent: THtmlTree);
@@ -487,18 +496,15 @@ end;
 
 function THtmlSubTree.AddTo(ANode: TDomNode; const ATag: String): TDomNode;
 begin
-  Result:=FParent.DocHandle.CreateElement(ATag);
+  Result := FParent.DocHandle.CreateElement(ATag);
   if ANode <> nil then
     ANode.AppendChild(Result);
   FNodeList.Add(Result);
 end;
 
-function THtmlSubTree.Add(const ATag: String):TDomNode;
+function THtmlSubTree.Add(const ATag: String): TDomNode;
 begin
-  Result:=FParent.DocHandle.CreateElement(ATag);
-  if FNodeList.Count > 0 then
-    Base.AppendChild(Result);
-  FNodeList.Add(Result);
+  Result := AddTo(Base, ATag);
 end;
 
 procedure THtmlSubTree.AddText(const AText: String);

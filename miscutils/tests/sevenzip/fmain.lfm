@@ -1,7 +1,7 @@
 object FormMain: TFormMain
-  Left = 389
+  Left = 260
   Height = 526
-  Top = 237
+  Top = 144
   Width = 606
   HorzScrollBar.Page = 605
   VertScrollBar.Page = 506
@@ -11,6 +11,7 @@ object FormMain: TFormMain
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  Position = poDesktopCenter
   object Label1: TLabel
     Left = 8
     Height = 14
@@ -38,6 +39,7 @@ object FormMain: TFormMain
       item
         Caption = 'CRC'
       end>
+    PopupMenu = PopupFiles
     TabOrder = 0
     ViewStyle = vsReport
   end
@@ -69,5 +71,18 @@ object FormMain: TFormMain
       Caption = 'Options'
       OnClick = MIOptionsClick
     end
+  end
+  object PopupFiles: TPopupMenu
+    OnPopup = PopupFilesPopup
+    left = 517
+    top = 147
+    object MIExtract: TMenuItem
+      Caption = 'Extract File...'
+      OnClick = MIExtractClick
+    end
+  end
+  object SelectDirectory: TSelectDirectoryDialog
+    left = 462
+    top = 153
   end
 end

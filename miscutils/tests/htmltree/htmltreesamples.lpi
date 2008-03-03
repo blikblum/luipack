@@ -27,19 +27,22 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
         <PackageName Value="miscutils_package"/>
       </Item1>
       <Item2>
         <PackageName Value="LCL"/>
       </Item2>
+      <Item3>
+        <PackageName Value="SynEdit"/>
+      </Item3>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
-        <Filename Value="SevenZipBasic.lpr"/>
+        <Filename Value="htmltreesamples.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SevenZipBasic"/>
+        <UnitName Value="HtmlTreeSamples"/>
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
@@ -49,12 +52,14 @@
         <UnitName Value="fMain"/>
       </Unit1>
       <Unit2>
-        <Filename Value="feditexecutable.pas"/>
-        <ComponentName Value="FormEditExecutable"/>
+        <Filename Value="samples.pas"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="feditexecutable.lrs"/>
-        <UnitName Value="fEditExecutable"/>
+        <UnitName Value="Samples"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="tablesample.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
