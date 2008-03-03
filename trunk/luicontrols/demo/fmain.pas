@@ -13,6 +13,8 @@ type
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    CheckUnderline: TCheckBox;
+    CheckBold: TCheckBox;
     CheckPopupOnMouseUp: TCheckBox;
     CheckExecuteEmpty: TCheckBox;
     CheckExecuteKillFocus: TCheckBox;
@@ -74,9 +76,11 @@ type
     procedure ButtonArrowColorColorChanged(Sender: TObject);
     procedure ButtonHighlightColorColorChanged(Sender: TObject);
     procedure ButtonLabelColorColorChanged(Sender: TObject);
+    procedure CheckBoldChange(Sender: TObject);
     procedure CheckExecuteEmptyClick(Sender: TObject);
     procedure CheckExecuteKillFocusClick(Sender: TObject);
     procedure CheckPopupOnMouseUpChange (Sender: TObject );
+    procedure CheckUnderlineChange(Sender: TObject);
     procedure MenuButton1Click(Sender: TObject);
     procedure MenuItem15Click(Sender: TObject);
     procedure SearchEdit1Execute(Sender: TObject);
@@ -119,6 +123,20 @@ begin
   ToggleLabel2.Color := ButtonLabelColor.ButtonColor;
 end;
 
+procedure TfrmMain.CheckBoldChange(Sender: TObject);
+begin
+  if CheckBold.Checked then
+  begin
+    ToggleLabel1.Options := ToggleLabel1.Options + [tloBoldOnHover];
+    ToggleLabel2.Options := ToggleLabel2.Options + [tloBoldOnHover];
+  end
+  else
+  begin
+    ToggleLabel1.Options := ToggleLabel1.Options - [tloBoldOnHover];
+    ToggleLabel2.Options := ToggleLabel2.Options - [tloBoldOnHover];
+  end;
+end;
+
 procedure TfrmMain.ButtonArrowColorColorChanged(Sender: TObject);
 begin
   ToggleLabel1.ArrowColor := ButtonArrowColor.ButtonColor;
@@ -154,6 +172,20 @@ begin
       else
         TMenuButton(AControl).Options := TMenuButton(AControl).Options - [mboPopupOnMouseUp];
     end;
+  end;
+end;
+
+procedure TfrmMain.CheckUnderlineChange(Sender: TObject);
+begin
+  if CheckUnderline.Checked then
+  begin
+    ToggleLabel1.Options := ToggleLabel1.Options + [tloUnderlineOnHover];
+    ToggleLabel2.Options := ToggleLabel2.Options + [tloUnderlineOnHover];
+  end
+  else
+  begin
+    ToggleLabel1.Options := ToggleLabel1.Options - [tloUnderlineOnHover];
+    ToggleLabel2.Options := ToggleLabel2.Options - [tloUnderlineOnHover];
   end;
 end;
 

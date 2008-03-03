@@ -43,6 +43,10 @@ type
 
   TChangingEvent = procedure(Sender: TObject; var Allow: Boolean) of object;
 
+  TToggleLabelOption = (tloUnderlineOnHover, tloBoldOnHover);
+  
+  TToggleLabelOptions = set of TToggleLabelOption;
+  
   { TToggleLabel }
 
   TToggleLabel = class (TCustomLabel)
@@ -54,18 +58,22 @@ type
     FMouseInControl: Boolean;
     FOnChange: TNotifyEvent;
     FOnChanging: TChangingEvent;
+    FOptions: TToggleLabelOptions;
     FTextOffset: Integer;
     FExpanded: Boolean;
     FPaintOnlyArrow: Boolean;
+    FFontChanged: Boolean;
     function ChangeAllowed: Boolean;
     procedure InvalidateArrow;
     procedure SetArrowColor(const AValue: TColor);
     procedure SetExpanded(const AValue: Boolean);
     procedure SetExpandedCaption(const AValue: String);
     procedure SetHighlightColor(const AValue: TColor);
+    procedure SetOptions(const AValue: TToggleLabelOptions);
   protected
     procedure DoMeasureTextPosition(var TextTop: integer;
       var TextLeft: integer); override;
+    procedure FontChanged(Sender: TObject); override;
     function GetLabelText: string; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
@@ -73,8 +81,8 @@ type
   public
     constructor Create(TheOwner: TComponent); override;
     procedure Paint; override;
-    procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer;
-                                Lock: boolean = true); override;
+    procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: Integer;
+                                Lock: Boolean = True); override;
   published
     property ArrowColor: TColor read FArrowColor write SetArrowColor default clBlack;
     property ExpandedCaption: String read FExpandedCaption write SetExpandedCaption;
@@ -82,6 +90,7 @@ type
     property HighlightColor: TColor read FHighlightColor write SetHighlightColor default clWhite;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnChanging: TChangingEvent read FOnChanging write FOnChanging;
+    property Options: TToggleLabelOptions read FOptions write SetOptions;
     property Align;
     property Alignment;
     property Anchors;
@@ -163,6 +172,13 @@ begin
   InvalidateArrow;
 end;
 
+procedure TToggleLabel.SetOptions(const AValue: TToggleLabelOptions);
+begin
+  if FOptions = AValue then
+    Exit;
+  FOptions := AValue;
+end;
+
 procedure TToggleLabel.DoMeasureTextPosition(var TextTop: Integer;
   var TextLeft: Integer);
 var
@@ -186,6 +202,12 @@ begin
   FArrowTopOffset := TextTop + ((lTextHeight - 1) div 2) - 2;
 end;
 
+procedure TToggleLabel.FontChanged(Sender: TObject);
+begin
+  inherited FontChanged(Sender);
+  FFontChanged := True;
+end;
+
 function TToggleLabel.GetLabelText: string;
 begin
   if FExpanded then
@@ -205,7 +227,21 @@ begin
   begin
     FMouseInControl := True;
     if ChangeAllowed then
-      InvalidateArrow;
+    begin
+      if [tloUnderlineOnHover, tloBoldOnHover] * FOptions <> [] then
+      begin
+        Font.BeginUpdate;
+        if tloUnderlineOnHover in FOptions then
+          Font.Style := Font.Style + [fsUnderline];
+        if tloBoldOnHover in FOptions then
+          Font.Style := Font.Style + [fsBold];
+        Font.EndUpdate;
+      end;
+      if not FFontChanged then
+        InvalidateArrow
+      else
+        FFontChanged := False;
+    end;
   end;
 end;
 
@@ -218,7 +254,21 @@ begin
   begin
     FMouseInControl := False;
     if Enabled then
-      InvalidateArrow;
+    begin
+      if [tloUnderlineOnHover, tloBoldOnHover] * FOptions <> [] then
+      begin
+        Font.BeginUpdate;
+        if tloUnderlineOnHover in FOptions then
+          Font.Style := Font.Style - [fsUnderline];
+        if tloBoldOnHover in FOptions then
+          Font.Style := Font.Style - [fsBold];
+        Font.EndUpdate;
+      end;
+      if not FFontChanged then
+        InvalidateArrow
+      else
+        FFontChanged := False;
+    end;
   end;
 end;
 
