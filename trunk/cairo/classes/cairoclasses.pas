@@ -238,11 +238,13 @@ type
   TCairoFontFace = class
   protected
     FHandle: Pcairo_font_face_t;
+    function GetHandle: Pcairo_font_face_t; virtual;
   public
-    function  Status: cairo_status_t;
-    function  GetType: cairo_font_type_t;
-    function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
-    function  SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+    function Status: cairo_status_t;
+    function GetType: cairo_font_type_t;
+    function GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+    function SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
+    property Handle: Pcairo_font_face_t read GetHandle;
   end;
 
   { TCairoScaledFont }
@@ -764,7 +766,7 @@ end;
 
 procedure TCairoContext.SetFontFace(FontFace: TCairoFontFace);
 begin
-  cairo_set_font_face(FHandle, FontFace.FHandle);
+  cairo_set_font_face(FHandle, FontFace.Handle);
 end;
 
 function TCairoContext.GetFontFace: TCairoFontFace;
@@ -1448,6 +1450,11 @@ end;
 
 { TCairoFontFace }
 
+function TCairoFontFace.GetHandle: Pcairo_font_face_t;
+begin
+  Result := FHandle;
+end;
+
 function TCairoFontFace.Status: cairo_status_t;
 begin
   Result := cairo_font_face_status(FHandle);
@@ -1474,7 +1481,7 @@ end;
 constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix;
   const Ctm: TCairoMatrix; Options: TCairoFontOptions);
 begin
-  FHandle := cairo_scaled_font_create(FontFace.FHandle, @FontMatrix.FData, @Ctm.FData, Options.FHandle)
+  FHandle := cairo_scaled_font_create(FontFace.Handle, @FontMatrix.FData, @Ctm.FData, Options.FHandle)
 end;
 
 constructor TCairoScaledFont.Create;

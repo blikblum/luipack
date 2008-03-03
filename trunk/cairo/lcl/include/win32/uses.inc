@@ -1,2 +1,2 @@
 
-  cairo_win32,
+  CairoWin32,
