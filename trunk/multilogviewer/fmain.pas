@@ -29,8 +29,8 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Grids, StdCtrls, multilog, VirtualTrees, ComCtrls, Buttons, simpleipc, watchlist,
-  Menus, ATBinHex, togglelabel, SearchEdit;
+  Grids, StdCtrls, MultiLog, VirtualTrees, ComCtrls, Buttons, simpleipc, WatchList,
+  Menus, ATBinHex, ToggleLabel, SearchEdit;
 
 type
   TMessageSet = 0..31;
@@ -63,6 +63,7 @@ type
     lbMemorySize: TLabel;
     MainMenu1: TMainMenu;
     memoViewer: TMemo;
+    MIAbout: TMenuItem;
     MISep1: TMenuItem;
     MIClearAll: TMenuItem;
     MIExit: TMenuItem;
@@ -110,6 +111,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ImgViewerDblClick(Sender: TObject);
+    procedure MIAboutClick(Sender: TObject);
     procedure MIExitClick(Sender: TObject);
     procedure nbWatchesPageChanged(Sender: TObject);
     procedure PanelImageViewerDblClick(Sender: TObject);
@@ -138,7 +140,6 @@ type
     {$endif}
     FTitleFilter: String;
     FActiveMessages: set of TMessageSet;
-    FExpandParent: Boolean;
     FMessageCount: LongWord;
     FActiveWatch: TStringGrid;
     FCurrentMsg: TLogMessage;
@@ -146,6 +147,7 @@ type
     FLastNode: PVirtualNode;
     FIPCServer: TSimpleIPCServer;
     FWatches: TWatchList;
+    FExpandParent: Boolean;
     procedure FilterCallback(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
     procedure SetupFilters;
     procedure ToggleFilterSelected(CheckState:Boolean);
@@ -169,7 +171,7 @@ var
 implementation
 
 uses
-   StrUtils, LCLIntf, LCLType;
+  StrUtils, LCLIntf, LCLType, fAbout;
 
 type
   TNodeData = record
@@ -293,6 +295,16 @@ procedure TfrmMain.ImgViewerDblClick(Sender: TObject);
 begin
   with ImgViewer.Picture.Bitmap do
     PanelImageViewer.Canvas.DrawFocusRect(Rect(0,0,Width + 1,Height + 1));
+end;
+
+procedure TfrmMain.MIAboutClick(Sender: TObject);
+begin
+  with TFormAbout.Create(Self) do
+  try
+    ShowModal;
+  finally
+    Destroy;
+  end;
 end;
 
 procedure TfrmMain.MIExitClick(Sender: TObject);
