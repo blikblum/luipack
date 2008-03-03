@@ -1,4 +1,4 @@
-unit multilog;
+unit MultiLog;
 
 {
   Main unit of the Multilog logging system
