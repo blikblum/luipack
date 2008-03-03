@@ -1,0 +1,39 @@
+object FormAbout: TFormAbout
+  Left = 330
+  Height = 181
+  Top = 181
+  Width = 332
+  HorzScrollBar.Page = 331
+  VertScrollBar.Page = 180
+  Caption = 'About'
+  ClientHeight = 181
+  ClientWidth = 332
+  Position = poOwnerFormCenter
+  object LabelTitle: TLabel
+    Left = 72
+    Height = 26
+    Top = 40
+    Width = 180
+    Caption = 'Multilog Viewer 0.3'
+    Font.Height = -21
+    ParentColor = False
+  end
+  object LabelCopyright: TLabel
+    Left = 32
+    Height = 14
+    Top = 96
+    Width = 257
+    Caption = 'Copyright 2006-2008 by Luiz Américo Pereira Câmara'
+    ParentColor = False
+  end
+  object ButtonClose: TBitBtn
+    Left = 244
+    Height = 30
+    Top = 136
+    Width = 75
+    Caption = '&Close'
+    Kind = bkClose
+    NumGlyphs = 0
+    TabOrder = 0
+  end
+end
