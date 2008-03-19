@@ -24,6 +24,8 @@ type
 
 implementation
 
+uses
+  IntfGraphics, GraphType, FPimage, FPWriteBMP;
 
 function ColorToStr(Color: TColor): String;
 begin
@@ -90,9 +92,39 @@ begin
     clBtnHiLight              : Result:='clBtnHiLight';
     }
   else
-    Result:= 'Unknow Color';
+    Result := 'Unknow Color';
   end;//case
-  Result:=Result+' ($'+IntToHex(Color,6)+')';
+  Result := Result + ' ($' + IntToHex(Color, 6) + ')';
+end;
+
+procedure SaveBitmapToStream(Bitmap: TBitmap; Stream: TStream);
+var
+  IntfImg: TLazIntfImage;
+  ImgWriter: TFPCustomImageWriter;
+  RawImage: TRawImage;
+begin
+  // adapted from LCL code
+  IntfImg := nil;
+  ImgWriter := nil;
+  try
+    IntfImg := TLazIntfImage.Create(0,0);
+    IntfImg.LoadFromBitmap(Bitmap.Handle, Bitmap.MaskHandle);
+
+    IntfImg.GetRawImage(RawImage);
+    if RawImage.IsMasked(True) then
+      ImgWriter := TLazWriterXPM.Create
+    else
+    begin
+      ImgWriter := TFPWriterBMP.Create;
+      TFPWriterBMP(ImgWriter).BitsPerPixel := IntfImg.DataDescription.Depth;
+    end;
+
+    IntfImg.SaveToStream(Stream, ImgWriter);
+    Stream.Position := 0;
+  finally
+    IntfImg.Free;
+    ImgWriter.Free;
+  end;
 end;
 
 { TLCLLogger }
@@ -107,28 +139,30 @@ procedure TLCLLogger.SendBitmap(Classes: TDebugClasses; const AText: String;
 var
   AStream: TStream;
 begin
-  if Classes * ActiveClasses = [] then Exit;
+  if Classes * ActiveClasses = [] then
+    Exit;
   if ABitmap <> nil then
   begin
-    AStream:=TMemoryStream.Create;
-    ABitmap.SaveToStream(AStream);
+    AStream := TMemoryStream.Create;
+    //use custom function to avoid bug in TBitmap.SaveToStream
+    SaveBitmapToStream(ABitmap, AStream);
   end
   else
-    AStream:=nil;
+    AStream := nil;
   //SendStream free AStream
-  SendStream(ltBitmap,AText,AStream);
+  SendStream(ltBitmap, AText, AStream);
 end;
 
 procedure TLCLLogger.SendColor(const AText: String; AColor: TColor);
 begin
-  SendColor(DefaultClasses,AText,AColor);
+  SendColor(DefaultClasses, AText, AColor);
 end;
 
 procedure TLCLLogger.SendColor(Classes: TDebugClasses; const AText: String;
   AColor: TColor);
 begin
   if Classes * ActiveClasses = [] then Exit;
-  SendStream(ltValue,AText+' = '+ColorToStr(AColor),nil);
+  SendStream(ltValue, AText + ' = ' + ColorToStr(AColor),nil);
 end;
 
 end.
