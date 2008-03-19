@@ -1,1 +1,1 @@
-  LCLIntf, Graphics, qt4, qtint, qtobjects, qtwidgets,
+  InterfaceBase, LCLIntf, Graphics, qt4, qtint, qtobjects, qtwidgets,
