@@ -2,14 +2,10 @@
 {
   Qt Interface
   
-  Implemented by Zeljan Rikalo
+  Initial implementation by Zeljan Rikalo
+
+  SetTimer/KillTimer implementation by Luiz Americo
 }
-
-type
-  TTimerList = TObject;
-
-var
-  FTimerList: TTimerList;
 
 function CF_UNICODETEXT: TClipboardFormat;
 begin
@@ -33,7 +29,6 @@ end;
 {$i ../generic/stubs.inc}
 {$i ../generic/independentfunctions.inc}
 {$i ../generic/unicodefunctions.inc}
-{$i ../generic/timerfunctions.inc}
 
 {
 function GetBkColor(DC:HDC):COLORREF;
@@ -318,3 +313,198 @@ begin
     QMatrix_destroy(MatrixNew);
   end;
 end;
+
+type
+
+  { TQtTimerEx }
+
+  TQtTimerEx = class(TQtObject)
+  private
+    FCallbackFunc: TTimerNotify;
+    FUserId: LongWord;
+    FControl: TControl;
+    FAppObject: QObjectH;
+  public
+    constructor Create(TimerFunc: TTimerNotify;
+      UserId: LongWord; Control: TControl); virtual;
+    destructor Destroy; override;
+  public
+    function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
+    procedure Reset(TimerFunc: TTimerNotify; UserId: LongWord; Control: TControl);
+    procedure Start(Interval: Integer);
+    procedure Stop;
+  end;
+
+
+  { TTimerList }
+
+  TTimerList = class
+  private
+    FMap: TMap;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify;
+      WinControl: TControl): TQtTimerEx;
+    function GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
+  end;
+
+  TQtWidgetSetHack = Class(TWidgetSet)
+  private
+    App: QApplicationH;
+  end;
+
+{ TQtTimerEx }
+
+constructor TQtTimerEx.Create(TimerFunc: TTimerNotify;
+  UserId: LongWord; Control: TControl);
+begin
+  inherited Create;
+
+  FCallbackFunc := TimerFunc;
+  FUserId := UserId;
+  FControl := Control;
+  
+  //very big ultra extreme hack to get the app from QtWidgetset
+  TheObject := QTimer_create(TQtWidgetSetHack(QtWidgetSet).App);
+
+  AttachEvents;
+end;
+
+destructor TQtTimerEx.Destroy;
+begin
+  FCallbackFunc := nil;
+  FControl := nil;
+  inherited Destroy;
+end;
+
+function TQtTimerEx.EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl;
+begin
+  BeginEventProcessing;
+  Result := False;
+
+  if QEvent_type(Event) = QEventTimer then
+  begin
+    Result := True;
+
+    QEvent_accept(Event);
+
+    if Assigned(FCallbackFunc) then
+      FCallbackFunc(FUserId)
+    else
+      if FControl <> nil then
+        LCLSendTimerMsg(FControl, FUserId, 0);
+  end;
+  EndEventProcessing;
+end;
+
+procedure TQtTimerEx.Reset(TimerFunc: TTimerNotify;
+  UserId: LongWord; Control: TControl);
+begin
+  FControl := Control;
+  FCallbackFunc := TimerFunc;
+  FUserId := UserId;
+end;
+
+procedure TQtTimerEx.Start(Interval: Integer);
+begin
+  //QTimer_setInterval(QTimerH(TheObject), Interval);
+  QTimer_start(QTimerH(TheObject), Interval);
+end;
+
+procedure TQtTimerEx.Stop;
+begin
+  //todo: destroy the timer here instead of just stopping
+  QTimer_stop(QTimerH(TheObject));
+end;
+
+var
+  FTimerList: TTimerList;
+
+function MakeQWord(d1, d2: dword): QWord; inline;
+begin
+  Result := (QWord(d2) shl 32) or d1;
+end;
+
+  
+function KillTimer(hWnd: THandle; nIDEvent: LongWord):Boolean;
+var
+  TimerObject: TQtTimerEx;
+begin
+  TimerObject := FTimerList.GetTimerObject(hWnd, nIDEvent);
+  //DebugLn('KillTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
+  if TimerObject <> nil then
+    TimerObject.Stop;
+end;
+
+function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
+var
+  Control: TControl;
+  TimerObject: TQtTimerEx;
+begin
+  if hWnd <> 0 then
+    Control := FindControl(hWnd)
+  else
+    Control := nil;
+  TimerObject := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
+  TimerObject.Start(uElapse);
+  //DebugLn('SetTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
+end;
+
+function TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl): TQtTimerEx;
+var
+  AID: QWord;
+begin
+  AID := MakeQWord(hWnd, ID);
+  with FMap do
+  begin
+    if HasId(AID) then
+    begin
+      //DebugLn('Reset timer for HWnd: %d ID: %d', [hWnd, ID]);
+      GetData(AID, Result);
+      Result.Reset(NotifyFunc, ID, WinControl);
+    end
+    else
+    begin
+      //DebugLn('Create timer for HWnd: %d ID: %d', [hWnd, ID]);
+      Result := TQtTimerEx.Create(NotifyFunc, ID, WinControl);
+      Add(AID, Result);
+    end;
+  end;
+end;
+
+constructor TTimerList.Create;
+begin
+  //todo: handle 64bit
+  FMap := TMap.Create(itu8, SizeOf(TQtTimerEx));
+end;
+
+destructor TTimerList.Destroy;
+var
+  Iterator: TMapIterator;
+  TimerObject: TQtTimerEx;
+begin
+  Iterator := TMapIterator.Create(FMap);
+  with Iterator do
+  begin
+    while not EOM do
+    begin
+      GetData(TimerObject);
+      TimerObject.Free;
+      Next;
+    end;
+    Destroy;
+  end;
+  FMap.Destroy;
+end;
+
+function TTimerList.GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
+var
+  DataPtr: ^TQtTimerEx;
+begin
+  Result := nil;
+  DataPtr := FMap.GetDataPtr(MakeQWord(hWnd, ID));
+  if DataPtr <> nil then
+    Result := DataPtr^;
+end;
+
