@@ -1,18 +1,18 @@
-unit fmain;
+unit fMain;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, sqlite3wrapper,
+  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Sqlite3Wrapper,
   StdCtrls, Grids, Buttons, EditBtn;
 
 type
 
-  { TForm1 }
+  { TFormMain }
 
-  TForm1 = class(TForm)
+  TFormMain = class(TForm)
     ButExecSql: TButton;
     EditSQL: TEdit;
     EditFileName: TFileNameEdit;
@@ -25,7 +25,7 @@ type
     procedure ListTablesSelectionChange(Sender: TObject; User: boolean);
   private
     { private declarations }
-    FConnection: TSqlite3Connection;
+    FDatabase: TSqlite3Database;
     procedure OpenDatabase(const AFileName: String);
     procedure ShowData(const Sql: String);
     procedure ExecuteSql(const Sql: String);
@@ -34,44 +34,46 @@ type
   end; 
 
 var
-  Form1: TForm1; 
+  FormMain: TFormMain;
 
 implementation
 
-{ TForm1 }
+{ TFormMain }
 
-procedure TForm1.ButExecSqlClick(Sender: TObject);
+procedure TFormMain.ButExecSqlClick(Sender: TObject);
 var
   ASql: String;
 begin
-  ASql := EditSQL.Text;
-  if Pos('SELECT ', UpperCase(ASql)) > 0 then
+  ASql := Trim(EditSQL.Text);
+  if Pos('SELECT ', UpperCase(ASql)) = 1 then
     ShowData(ASql)
   else
     ExecuteSql(ASql);
 end;
 
-procedure TForm1.EditFileNameAcceptFileName(Sender: TObject; var Value: String);
+procedure TFormMain.EditFileNameAcceptFileName(Sender: TObject; var Value: String);
 begin
   if FileExists(Value) then
     OpenDatabase(Value);
 end;
 
-procedure TForm1.ListTablesSelectionChange(Sender: TObject; User: boolean);
+procedure TFormMain.ListTablesSelectionChange(Sender: TObject; User: boolean);
 begin
   with ListTables do
     if ItemIndex <> -1 then
       ShowData('Select * from ' + Items[ItemIndex]);
 end;
 
-procedure TForm1.OpenDatabase(const AFileName: String);
+procedure TFormMain.OpenDatabase(const AFileName: String);
+{
 var
   TableListReader: TSqlite3DataReader;
+}
 begin
-  //Create the connection
-  if FConnection = nil then
-    FConnection := TSqlite3Connection.Create(Self);
-  with FConnection do
+  //Create the database
+  if FDatabase = nil then
+    FDatabase := TSqlite3Database.Create(Self);
+  with FDatabase do
   begin
     Close;
     FileName := AFileName;
@@ -86,12 +88,15 @@ begin
       end;
     end;
     ButExecSql.Enabled := True;
-    //Get all tables in database
+    //Get all tables in database using Query.GetList function
+    ListTables.Clear;
+    Query('Select Name from sqlite_master where type = "table"').GetList(ListTables.Items);
+    //below is the way of getting using a datareader
+    {
     TableListReader := TSqlite3DataReader.Create;
     try
-      FConnection.Prepare('Select Name from sqlite_master where type = "table"',
+      Prepare('Select Name from sqlite_master where type = "table"',
         TableListReader);
-      ListTables.Clear;
       with TableListReader do
       begin
         while Step do
@@ -102,10 +107,11 @@ begin
     finally
       TableListReader.Destroy;
     end;
+    }
   end;
 end;
 
-procedure TForm1.ShowData(const Sql: String);
+procedure TFormMain.ShowData(const Sql: String);
 var
   TableDataReader: TSqlite3DataReader;
   i, j: Integer;
@@ -114,15 +120,15 @@ begin
     TableDataReader := TSqlite3DataReader.Create;
     try
       //prepare the datareader
-      FConnection.Prepare(Sql, TableDataReader);
+      FDatabase.Prepare(Sql, TableDataReader);
       with GridTableData, TableDataReader do
       begin
         //reset the grid
         RowCount := 1;
         ColCount := FieldCount;
         //get the field names
-        for i:= 0 to FieldCount - 1 do
-          Cells[i,0] := FieldNames[i];
+        for i := 0 to FieldCount - 1 do
+          Cells[i, 0] := FieldNames[i];
         //browse the data
         while Step do
         begin
@@ -131,9 +137,9 @@ begin
           RowCount := Succ(j);
           //fill the row with the values
           for i:= 0 to FieldCount - 1 do
-            Cells[i,j] := GetString(i);
+            Cells[i, j] := GetString(i);
         end;
-        //finalize the reader - optional
+        //finalize the reader (optional)
         Finalize;
         //Set the record count
         LabelRecordCount.Caption := 'Record Count: ' + IntToStr(RowCount - 1);
@@ -147,10 +153,10 @@ begin
   end;
 end;
 
-procedure TForm1.ExecuteSql(const Sql: String);
+procedure TFormMain.ExecuteSql(const Sql: String);
 begin
   try
-    FConnection.ExecSql(Sql);
+    FDatabase.ExecSql(Sql);
   except
     on E: Exception do
       ShowMessage(E.Message);

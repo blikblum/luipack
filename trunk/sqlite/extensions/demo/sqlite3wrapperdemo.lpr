@@ -8,11 +8,12 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, fmain, sqliteextensions_package;
+  { add your units here }, fMain;
 
 begin
+  Application.Title := 'Sqlite3Wrapper Demo';
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormMain, FormMain);
   Application.Run;
 end.
 

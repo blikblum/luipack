@@ -1,4 +1,36 @@
-unit sqlite3wrapper;
+unit Sqlite3Wrapper;
+
+{
+  Sqlite3Wrapper is a thin wrapper around sqlite3 api
+
+  Copyright (C) 2008 Luiz Americo Pereira Camara
+  pascalive@bol.com.br
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the GNU Library General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version with the following modification:
+
+  As a special exception, the copyright holders of this library give you
+  permission to link this library with independent modules to produce an
+  executable, regardless of the license terms of these independent modules,and
+  to copy and distribute the resulting executable under terms of your choice,
+  provided that you also meet, for each linked independent module, the terms
+  and conditions of the license of that module. An independent module is a
+  module which is not derived from or based on this library. If you modify
+  this library, you may extend this exception to your version of the library,
+  but you are not obligated to do so. If you do not wish to do so, delete this
+  exception statement from your version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
+  for more details.
+
+  You should have received a copy of the GNU Library General Public License
+  along with this library; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+}
 
 {$mode objfpc}{$H+}
 
@@ -12,6 +44,7 @@ const
   SQLITE_ROW = sqlite3.SQLITE_ROW;
 
 type
+
   TSqlite3DataReader = class;
   
   { TSqlite3Query }
@@ -19,6 +52,7 @@ type
   TSqlite3Query = class
   private
     FStatement: Pointer;
+    FReturnCode: Integer;
     procedure Reset;
   public
     function GetInteger(Finalize: Boolean = True): Integer;
@@ -27,23 +61,23 @@ type
     function IsNull(Finalize: Boolean = False): Boolean;
   end;
 
-  { TSqlite3Connection }
+  { TSqlite3Database }
 
-  TSqlite3Connection = class (TComponent)
+  TSqlite3Database = class (TComponent)
   private
     FFileName: String;
     FHandle: Pointer;
     FReturnCode: Integer;
-    FSharedHandle: Boolean;
     FQuery: TSqlite3Query;
-    procedure SetFileName(const AValue: String);
-    procedure SetHandle(AValue: Pointer);
+    FSharedHandle: Boolean;
+    procedure SetFileName (const AValue: String);
+    procedure SetHandle (AValue: Pointer);
   protected
   public
-    constructor Create(AOwner: TComponent);
+    constructor Create (AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Close;
-    function Query(const SQL: String): TSqlite3Query;
+    function Query (const SQL: String): TSqlite3Query;
     procedure Open;
     procedure ExecSql (const SQL: String);
     procedure Prepare (const SQL: String; Reader: TSqlite3DataReader);
@@ -76,9 +110,9 @@ type
 
 implementation
 
-{ TSqlite3Connection }
+{ TSqlite3Database }
 
-procedure TSqlite3Connection.SetFileName(const AValue: String);
+procedure TSqlite3Database.SetFileName(const AValue: String);
 begin
   if FFileName <> AValue then
   begin
@@ -87,7 +121,7 @@ begin
   end;
 end;
 
-procedure TSqlite3Connection.SetHandle(AValue: Pointer);
+procedure TSqlite3Database.SetHandle(AValue: Pointer);
 begin
   if FHandle <> AValue then
   begin
@@ -97,22 +131,22 @@ begin
   end;
 end;
 
-constructor TSqlite3Connection.Create(AOwner: TComponent);
+constructor TSqlite3Database.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FQuery := TSqlite3Query.Create;
 end;
 
-destructor TSqlite3Connection.Destroy;
+destructor TSqlite3Database.Destroy;
 begin
   FQuery.Destroy;
   Close;
   inherited Destroy;
 end;
 
-procedure TSqlite3Connection.Close;
+procedure TSqlite3Database.Close;
 begin
-  if (FHandle <> nil) then
+  if FHandle <> nil then
   begin
     if not FSharedHandle then
       sqlite3_close(FHandle);
@@ -120,19 +154,19 @@ begin
   end;
 end;
 
-function TSqlite3Connection.Query(const SQL: String): TSqlite3Query;
+function TSqlite3Database.Query(const SQL: String): TSqlite3Query;
 begin
-  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@FQuery.FStatement,nil);
+  FReturnCode := sqlite3_prepare(FHandle, PChar(SQL), -1, @FQuery.FStatement, nil);
   if FReturnCode = SQLITE_OK then
   begin
     Result := FQuery;
     FQuery.Reset;
   end
   else
-    raise Exception.Create('Error in Query: '+ReturnString);
+    raise Exception.Create('Error in Query: ' + ReturnString);
 end;
 
-procedure TSqlite3Connection.Open;
+procedure TSqlite3Database.Open;
 var
   stm: Pointer;
   ErrorStr: String;
@@ -156,28 +190,28 @@ begin
   end;
 end;
 
-procedure TSqlite3Connection.ExecSql(const SQL: String);
+procedure TSqlite3Database.ExecSql(const SQL: String);
 var
   stm: Pointer;
 begin
-  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@stm,nil);
+  FReturnCode := sqlite3_prepare(FHandle, PChar(SQL), -1, @stm, nil);
   if FReturnCode = SQLITE_OK then
   begin
     FReturnCode := sqlite3_step(stm);
     sqlite3_finalize(stm);
   end
   else
-    raise Exception.Create('Error in ExecSql: '+ReturnString);
+    raise Exception.Create('Error in ExecSql: ' + ReturnString);
 end;
 
-procedure TSqlite3Connection.Prepare(const SQL: String; Reader: TSqlite3DataReader);
+procedure TSqlite3Database.Prepare(const SQL: String; Reader: TSqlite3DataReader);
 begin
-  FReturnCode := sqlite3_prepare(FHandle,PChar(SQL),-1,@Reader.FStatement,nil);
+  FReturnCode := sqlite3_prepare(FHandle, PChar(SQL), -1, @Reader.FStatement, nil);
   if FReturnCode <> SQLITE_OK then
-    raise Exception.Create('Error in Prepare: '+ReturnString);
+    raise Exception.Create('Error in Prepare: ' + ReturnString);
 end;
 
-function TSqlite3Connection.ReturnString: String;
+function TSqlite3Database.ReturnString: String;
 begin
   case FReturnCode of
     SQLITE_OK           : Result := 'SQLITE_OK';
@@ -210,9 +244,9 @@ begin
     SQLITE_NOTADB       : Result := 'SQLITE_NOTADB';
     SQLITE_DONE         : Result := 'SQLITE_DONE';
   else
-    Result:='Unknow Return Value';
+    Result := 'Unknow Return Value';
   end;
-  Result := Result+' - ' + sqlite3_errmsg(FHandle);
+  Result := Result + ' - ' + sqlite3_errmsg(FHandle);
 end;
 
 function TSqlite3DataReader.Step: Boolean;
@@ -225,9 +259,9 @@ var
   i: Integer;
 begin
   for i := 0 to FieldCount - 1 do
-    if stricomp(PChar(FieldName),sqlite3_column_name(FStatement,i)) = 0 then
+    if stricomp(PChar(FieldName), sqlite3_column_name(FStatement,i)) = 0 then
     begin
-      Result:=i;
+      Result := i;
       Exit;
     end;
   Result := -1;
@@ -236,7 +270,7 @@ end;
 function TSqlite3DataReader.GetFieldNames(Index: Integer): String;
 begin
   if (Index >= 0) and (Index < FieldCount) then
-    Result := sqlite3_column_name(FStatement,Index)
+    Result := sqlite3_column_name(FStatement, Index)
   else
     raise Exception.Create('GetFieldNames - Index out of bounds');
 end;
@@ -272,14 +306,14 @@ var
 begin
   i := GetFieldIndex(FieldName);
   if i <> -1 then
-    Result:= sqlite3_column_int(FStatement,i)
+    Result := sqlite3_column_int(FStatement,i)
   else
-    raise Exception.Create('TSqlite3Wrapper - Field "'+FieldName+'" not found');
+    raise Exception.Create('TSqlite3Wrapper - Field "' + FieldName + '" not found');
 end;
 
 function TSqlite3DataReader.GetString(AFieldIndex: Integer): String;
 begin
-  Result := StrPas(sqlite3_column_text(FStatement,AFieldIndex));
+  Result := String(sqlite3_column_text(FStatement, AFieldIndex));
 end;
 
 function TSqlite3DataReader.GetString(const FieldName: String): String;
@@ -288,7 +322,7 @@ var
 begin
   i := GetFieldIndex(FieldName);
   if i <> -1 then
-    Result := StrPas(sqlite3_column_text(FStatement,i))
+    Result := String(sqlite3_column_text(FStatement, i))
   else
     raise Exception.Create('TSqlite3Wrapper - Field "'+FieldName+'" not found');
 end;
@@ -297,33 +331,59 @@ end;
 
 procedure TSqlite3Query.Reset;
 begin
-  sqlite3_step(FStatement);
+  FReturnCode := sqlite3_step(FStatement);
 end;
 
 function TSqlite3Query.GetInteger(Finalize: Boolean = True): Integer;
 begin
-  Result := sqlite3_column_int(FStatement,0);
+  Result := sqlite3_column_int(FStatement, 0);
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
-procedure TSqlite3Query.GetList(List: TStrings; FillObjects: Boolean;Finalize: Boolean = True);
+procedure TSqlite3Query.GetList(List: TStrings; FillObjects: Boolean; Finalize: Boolean = True);
+
+  procedure FillStrings;
+  begin
+    while FReturnCode = SQLITE_ROW do
+    begin
+      List.Add(String(sqlite3_column_text(FStatement, 0)));
+      FReturnCode := sqlite3_step(FStatement);
+    end;
+  end;
+
+  procedure FillStringsAndObjects;
+  begin
+    while FReturnCode = SQLITE_ROW do
+    begin
+      List.AddObject(String(sqlite3_column_text(FStatement, 0)),
+        TObject(PtrInt(sqlite3_column_int(FStatement, 1))));
+      FReturnCode := sqlite3_step(FStatement);
+    end;
+  end;
+
 begin
-  //todo
+  if (List <> nil) and (sqlite3_column_count(FStatement) > 0) then
+  begin
+    if FillObjects and (sqlite3_column_count(FStatement) > 1) then
+      FillStringsAndObjects
+    else
+      FillStrings;
+  end;
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
 function TSqlite3Query.GetString(Finalize: Boolean = True): String;
 begin
-  Result := StrPas(sqlite3_column_text(FStatement,0));
+  Result := String(sqlite3_column_text(FStatement, 0));
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
 function TSqlite3Query.IsNull(Finalize: Boolean = False): Boolean;
 begin
-  Result := sqlite3_column_type(FStatement,0) = SQLITE_NULL;
+  Result := sqlite3_column_type(FStatement, 0) = SQLITE_NULL;
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
