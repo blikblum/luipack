@@ -1,13 +1,12 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="2">
-    <PathDelim Value="\"/>
+  <Package Version="3">
     <Name Value="sqliteextensions_package"/>
+    <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="5"/>
-      <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -16,6 +15,9 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
+    <Description Value="SqliteExtensions provides classes to manipulate sqlite databases"/>
+    <License Value="Modified LGPL"/>
+    <Version Minor="1"/>
     <Files Count="2">
       <Item1>
         <Filename Value="sqlitetrees.pas"/>
@@ -34,7 +36,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)/"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
