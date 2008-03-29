@@ -229,6 +229,11 @@ type
     CAIRO_SURFACE_TYPE_SVG,
     CAIRO_SURFACE_TYPE_OS2
   );
+  
+  cairo_svg_version_t = (
+    CAIRO_SVG_VERSION_1_1,
+    CAIRO_SVG_VERSION_1_2
+  );
 
   Pcairo_surface_t = ^cairo_surface_t;
   PPcairo_surface_t = ^Pcairo_surface_t;
@@ -590,6 +595,32 @@ function  cairo_matrix_invert(matrix: Pcairo_matrix_t): cairo_status_t; cdecl; e
 procedure cairo_matrix_multiply(result, a, b: Pcairo_matrix_t); cdecl; external LIB_CAIRO;
 procedure cairo_matrix_transform_distance(matrix: Pcairo_matrix_t; dx, dy: PDouble); cdecl; external LIB_CAIRO;
 procedure cairo_matrix_transform_point(matrix: Pcairo_matrix_t; x, y: PDouble); cdecl; external LIB_CAIRO;
+
+(* PDF functions *)
+
+function  cairo_pdf_surface_create(filename: PChar; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+function  cairo_pdf_surface_create_for_stream(write_func: cairo_write_func_t; closure: Pointer; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+procedure cairo_pdf_surface_set_size(surface: Pcairo_surface_t; width_in_points, height_in_points: Double); cdecl; external LIB_CAIRO;
+
+(* PS functions *)
+
+function  cairo_ps_surface_create(filename: PChar; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+function  cairo_ps_surface_create_for_stream(write_func: cairo_write_func_t; closure: Pointer; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+procedure cairo_ps_surface_set_size(surface: Pcairo_surface_t; width_in_points, height_in_points: Double); cdecl; external LIB_CAIRO;
+procedure cairo_ps_surface_dsc_comment(surface: Pcairo_surface_t; comment: PChar); cdecl; external LIB_CAIRO;
+procedure cairo_ps_surface_dsc_begin_setup(surface: Pcairo_surface_t); cdecl; external LIB_CAIRO;
+procedure cairo_ps_surface_dsc_begin_page_setup(surface: Pcairo_surface_t); cdecl; external LIB_CAIRO;
+
+(* SVG functions *)
+
+function  cairo_svg_surface_create(filename: PChar; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+function  cairo_svg_surface_create_for_stream(write_func: cairo_write_func_t; closure: Pointer; width_in_points, height_in_points: Double): Pcairo_surface_t; cdecl; external LIB_CAIRO;
+procedure cairo_svg_surface_restrict_to_version(surface: Pcairo_surface_t; version: cairo_svg_version_t); cdecl; external LIB_CAIRO;
+//todo: see how translate this
+//procedure cairo_svg_get_versions(cairo_svg_version_t const	**versions,
+//                        int                      	 *num_versions);
+function  cairo_svg_version_to_string(version: cairo_svg_version_t): PChar; cdecl; external LIB_CAIRO;
+
 
 (* Functions to be used while debugging (not intended for use in production code) *)
 

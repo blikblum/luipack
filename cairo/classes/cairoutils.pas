@@ -5,7 +5,7 @@ unit CairoUtils;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, math;
+  Classes, SysUtils, CairoClasses;
 
 type
 
@@ -55,7 +55,7 @@ begin
   with Bounds do
   begin
     Left := ALeft + Offset;
-    Top := ALeft + Offset;
+    Top := ATop + Offset;
     Right := ARight - Offset;
     Bottom := ABottom - Offset;
   end;

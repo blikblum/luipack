@@ -114,6 +114,36 @@ type
     function GetStride: LongInt;
   end;
   
+  { TCairoPdfSurface }
+
+  TCairoPDFSurface = class(TCairoSurface)
+  public
+    constructor Create(const Filename: String; WidthInPoints, HeightInPoints: Double);
+    constructor Create(WriteFunc: cairo_write_func_t; Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+    procedure SetSize(WidthInPoints, HeightInPoints: Double);
+  end;
+  
+  { TCairoPSSurface }
+
+  TCairoPSSurface = class(TCairoSurface)
+  public
+    constructor Create(const Filename: String; WidthInPoints, HeightInPoints: Double);
+    constructor Create(WriteFunc: cairo_write_func_t; Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+    procedure DscBeginPageSetup;
+    procedure DscBeginSetup;
+    procedure DscComment(const Comment: String);
+    procedure SetSize(WidthInPoints, HeightInPoints: Double);
+  end;
+
+  { TCairoSVGSurface }
+
+  TCairoSVGSurface = class(TCairoSurface)
+  public
+    constructor Create(const Filename: String; WidthInPoints, HeightInPoints: Double);
+    constructor Create(WriteFunc: cairo_write_func_t; Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+    procedure RestrictToVersion(Version: cairo_svg_version_t);
+  end;
+  
   { TCairoPattern }
 
   TCairoPattern = class
@@ -1670,6 +1700,78 @@ end;
 destructor TCairoPath.Destroy;
 begin
   cairo_path_destroy(FPath);
+end;
+
+{ TCairoPDFSurface }
+
+constructor TCairoPDFSurface.Create(const Filename: String; WidthInPoints,
+  HeightInPoints: Double);
+begin
+  FHandle := cairo_pdf_surface_create(PChar(Filename), WidthInPoints, HeightInPoints);
+end;
+
+constructor TCairoPDFSurface.Create(WriteFunc: cairo_write_func_t;
+  Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+begin
+  FHandle := cairo_pdf_surface_create_for_stream(WriteFunc, Closure, WidthInPoints, HeightInPoints);
+end;
+
+procedure TCairoPDFSurface.SetSize(WidthInPoints, HeightInPoints: Double);
+begin
+  cairo_pdf_surface_set_size(FHandle, WidthInPoints, HeightInPoints);
+end;
+
+{ TCairoPSSurface }
+
+constructor TCairoPSSurface.Create(const Filename: String; WidthInPoints,
+  HeightInPoints: Double);
+begin
+  FHandle := cairo_ps_surface_create(PChar(Filename), WidthInPoints, HeightInPoints);
+end;
+
+constructor TCairoPSSurface.Create(WriteFunc: cairo_write_func_t;
+  Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+begin
+  FHandle := cairo_ps_surface_create_for_stream(WriteFunc, Closure, WidthInPoints, HeightInPoints);
+end;
+
+procedure TCairoPSSurface.DscBeginPageSetup;
+begin
+  cairo_ps_surface_dsc_begin_page_setup(FHandle);
+end;
+
+procedure TCairoPSSurface.DscBeginSetup;
+begin
+  cairo_ps_surface_dsc_begin_setup(FHandle);
+end;
+
+procedure TCairoPSSurface.DscComment(const Comment: String);
+begin
+  cairo_ps_surface_dsc_comment(FHandle, PChar(Comment));
+end;
+
+procedure TCairoPSSurface.SetSize(WidthInPoints, HeightInPoints: Double);
+begin
+  cairo_ps_surface_set_size(FHandle, WidthInPoints, HeightInPoints);
+end;
+
+{ TCairoSVGSurface }
+
+constructor TCairoSVGSurface.Create(const Filename: String; WidthInPoints,
+  HeightInPoints: Double);
+begin
+  FHandle := cairo_svg_surface_create(PChar(Filename), WidthInPoints, HeightInPoints);
+end;
+
+constructor TCairoSVGSurface.Create(WriteFunc: cairo_write_func_t;
+  Closure: Pointer; WidthInPoints, HeightInPoints: Double);
+begin
+  FHandle := cairo_svg_surface_create_for_stream(WriteFunc, Closure, WidthInPoints, HeightInPoints);
+end;
+
+procedure TCairoSVGSurface.RestrictToVersion(Version: cairo_svg_version_t);
+begin
+  cairo_svg_surface_restrict_to_version(FHandle, Version);
 end;
 
 end.
