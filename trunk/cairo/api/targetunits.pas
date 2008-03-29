@@ -10,7 +10,7 @@ uses
 {$endif}
 
 {$ifdef unix}
-  cairo_xlib;
+  CairoXlib;
 {$endif}
 
 implementation
