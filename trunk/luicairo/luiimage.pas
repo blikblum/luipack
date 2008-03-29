@@ -169,6 +169,7 @@ type
   published
     property OnAfterPaint: TLuiImageEvent read FOnAfterPaint write FOnAfterPaint;
     property OnBeforePaint: TLuiImageEvent read FOnBeforePaint write FOnBeforePaint;
+    property OnCreateContext;
     property OnDrawBackground: TLuiImageEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawClipPath: TLuiImageEvent read FOnDrawClipPath write FOnDrawClipPath;
     property OnGetPattern: TLuiImageGetPattern read FOnGetPattern write FOnGetPattern;

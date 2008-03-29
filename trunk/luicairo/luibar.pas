@@ -228,6 +228,7 @@ type
   published
     property Align;
     property BorderSpacing;
+    property OnCreateContext;
   end;
 
 implementation

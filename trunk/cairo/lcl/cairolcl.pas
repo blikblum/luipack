@@ -89,6 +89,7 @@ type
   private
     FBitmap: TBitmap;
     FContext: TCairoContext;
+    FOnCreateContext: TNotifyEvent;
     procedure InitBitmap;
   protected
     procedure DoCreateContext; virtual;
@@ -99,6 +100,7 @@ type
     procedure WMPaint(var Msg: TLMPaint); message LM_PAINT;
     property Bitmap: TBitmap read FBitmap;
     property Context: TCairoContext read FContext;
+    property OnCreateContext: TNotifyEvent read FOnCreateContext write FOnCreateContext;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -107,7 +109,7 @@ type
   
   { TCairoPaintBox }
 
-  TCairoPaintBox = class (TCustomCairoControl)
+  TCairoPaintBox = class(TCustomCairoControl)
   private
     FOnDraw: TNotifyEvent;
   protected
@@ -121,6 +123,7 @@ type
     property Align;
     property BorderSpacing;
     property BorderStyle;
+    property OnCreateContext;
     property OnMouseEnter;
     property OnMouseLeave;
     property OnResize;
@@ -154,6 +157,8 @@ begin
   Surface := TCairoDCSurface.Create(FBitmap.Canvas.Handle);
   FContext := TCairoContext.Create(Surface);
   Surface.Destroy;
+  if Assigned(FOnCreateContext) then
+    FOnCreateContext(Self);
 end;
 
 procedure TCustomCairoControl.InitBitmap;
