@@ -203,22 +203,18 @@ end;
 
 function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:LongWord):BOOLEAN;
 var
-  QtWidget: TQtWidget;
-  Region: TQtRegion;
+  QtWidget: TQtWidget absolute hWnd;
+  Region: TQtRegion absolute hrgnUpdate;
 begin
   {TODO: Check msdn docs for flags ... this implementation could raise AV !}
-  QtWidget := TQtWidget(hWnd);
   if (lprcUpdate = nil) and (hrgnUpdate = 0) then
     QWidget_update(QtWidget.Widget)
   else
   begin
     if lprcUpdate <> nil then
-      QWidget_update(QtWidget.Widget, lprcUpdate)
+      InvalidateRect(hWnd, lprcUpdate, False)
     else
-    begin
-      Region := TQtRegion(hrgnUpdate);
       QWidget_update(QtWidget.Widget, Region.Widget);
-    end;
   end;
 end;
 
