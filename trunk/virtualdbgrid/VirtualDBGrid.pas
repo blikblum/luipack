@@ -1,3 +1,5 @@
+unit VirtualDBGrid;
+
 // TVirtualDBGrid
 // version: 1.03 beta
 //
@@ -31,7 +33,7 @@
 //----------------------------------------------------------------------------------------------------------------------
 // LCL port: Luiz Americo Pereira Camara
 
-unit VirtualDBGrid;
+
 
 {$mode delphi}
 
@@ -804,7 +806,9 @@ begin
     then Result:= 0
     else begin
       try
-        Result:= VarAsType(Value, varInteger);
+        //todo: reenable this code as soon the fpc bug is fixed
+        //Result:= VarAsType(Value, varInteger);
+        Result := Value;
       except
         Result:= 0;
       end;
@@ -859,7 +863,9 @@ begin
     then Result:= false
     else begin
       try
-        Result:= VarAsType(Value, varBoolean);
+        //todo: reenable this code when fpc bug is fixed
+        //Result:= VarAsType(Value, varBoolean);
+        Result := Value;
       except
         Result:= false;
       end;
@@ -2028,9 +2034,7 @@ begin
 
   Header.Options := [hoColumnResize,hoDrag,hoHotTrack,hoShowHint,hoShowSortGlyphs,hoVisible];
   Header.SortColumn := -1;
-  Header.Style := hsPlates;
-  Header.Font.Style := [fsBold];
-
+  
   with TreeOptions do
   begin
     //AnimationOptions:= [];
@@ -2055,12 +2059,9 @@ end;
 
 destructor TCustomVirtualDBGrid.Destroy;
 begin
-  if Assigned(fDBOptions) then
-     FreeAndNil(fDBOptions);
-
-
-  if Assigned(fIndicatorBMP) then
-     FreeAndNil(fIndicatorBMP);
+  fDBNavigatorList.Free;
+  fDBOptions.Free;
+  fIndicatorBMP.Free;
 
   inherited Destroy;
 end;
