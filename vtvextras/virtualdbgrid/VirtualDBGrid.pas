@@ -272,6 +272,8 @@ type
   TCustomVirtualDBGrid = class;
 
 
+  { TVirtualDBTreeDataLink }
+
   TVirtualDBTreeDataLink = class(TDataLink)
   private
     FVirtualDBTree: TCustomVirtualDBGrid;
@@ -281,6 +283,7 @@ type
     procedure ActiveChanged; override;
     procedure DataSetChanged; override;
     procedure RecordChanged(Field: TField); override;
+    procedure DataSetScrolled(Distance: Integer); override;
   end;
 
 
@@ -352,7 +355,6 @@ type
     procedure SetIndicatorVAlign(Value: TIndicatorVAlign);
     procedure SetOddRowColor(value: tcolor);
     procedure SetEvenRowColor(value: tcolor);
-    procedure SetSortingType(value: TSortingType);
     procedure SetAdvOptions(value: TVTDBAdvOptions);
     procedure SetSortColumnBgColor(Value: TColor);
   protected
@@ -371,7 +373,7 @@ type
     property IndicatorVAlign:     TIndicatorVAlign read fIndicatorVAlign   write SetIndicatorVAlign stored true default aiMiddle;
     property OddRowColor:         TColor           read fOddRowColor       write SetOddRowColor;
     property EvenRowColor:        TColor           read fEvenRowColor      write SetEvenRowColor;
-    property SortingType:         TSortingType     read fSortingType       write SetSortingType stored true default stBuildIn;
+    property SortingType:         TSortingType     read fSortingType       write fSortingType stored true default stBuildIn;
     property RecordCountType:     TRecordCountType read fRecordCountType   write fRecordCountType stored true default rcFromDataset;
     property SortColumnBgColor:   TColor           read fSortColumnBgColor write SetSortColumnBgColor;
     property AdvOptions:          TVTDBAdvOptions  read fAdvOptions        write SetAdvOptions default DefaultAdvOptions;
@@ -386,9 +388,6 @@ type
     fLoadingDataFlag:         integer;
     fLastRecordCount:         longint;
     fRecordCount:             longint;
-    fIsWinNT,
-    fIsWin2K,
-    fIsWinXP:                 boolean;
 
     fDBOptions:               TVTDBOptions;
     fOnGetRecordCount:        TOnGetRecordCountEvent;
@@ -498,9 +497,6 @@ type
     function GetDataLink: TDataLink;
 
     property InternalRecordCount: longint   read fRecordCount;
-    property IsWinNT:             boolean   read fIsWinNT;
-    property IsWin2K:             boolean   read fIsWin2K;
-    property IsWinXP:             boolean   read fIsWinXP;
 
     property DBOptions: TVTDBOptions read fDBOptions write SetDBOptions;
     property LinkedDataSet: TDataSet read GetDataSet;
@@ -782,7 +778,7 @@ type
 implementation
 
 uses
-  Math;
+  Math, dbconst;
 
 
 function VarToWideStr(Value: Variant): WideString;
@@ -1308,12 +1304,10 @@ end;
 
 procedure TVirtualDBTreeDataLink.ActiveChanged;
 begin
-{$IFDEF COMPILER_6_UP}
   if Active and Assigned(DataSource) then
     if Assigned(DataSource.DataSet) then
       if DataSource.DataSet.IsUnidirectional then
-        DatabaseError(SDataSetUnidirectional);
-{$ENDIF}        
+        DatabaseError(SUniDirectional);
 
   FVirtualDBTree.DataLinkActiveChanged;
 end;
@@ -1326,6 +1320,11 @@ end;
 procedure TVirtualDBTreeDataLink.RecordChanged(Field: TField);
 begin
   FVirtualDBTree.DataLinkRecordChanged(Field);
+end;
+
+procedure TVirtualDBTreeDataLink.DataSetScrolled(Distance: Integer);
+begin
+  FVirtualDBTree.SetFocusToActualRecNo;
 end;
 
 
@@ -1492,10 +1491,10 @@ end;
 
 constructor TVirtualDBTreeColumn.Create(Collection: TCollection);
 begin
-  FField:= nil;
-  FieldName:= '';
+  //FField:= nil;
+  //FieldName:= '';
   fColumnType:= ctDBField;
-  fSavedMainColumn:= 0;
+  //fSavedMainColumn:= 0;
 
   inherited Create(Collection);
 end;
@@ -1813,15 +1812,14 @@ end;
 procedure TVTDBOptions.SetDataSource(Value: TDataSource);
 begin
   FDataLink.DataSource := Value;
-  If Assigned(Value) Then Value.FreeNotification(TreeView);
-
-  if (Value <> nil) then
-    if (Treeview.Header.Columns.Count = 0)
-       then Treeview.AddDefaultsFieldsToColumns;
-
+  if Assigned(Value) then
+  begin
+    Value.FreeNotification(TreeView);
+    if (Treeview.Header.Columns.Count = 0) then
+      Treeview.AddDefaultsFieldsToColumns;
+  end;
   if (Treeview.HandleAllocated) then
      Treeview.Invalidate;
-
 end;
 
 procedure TVTDBOptions.SetIndicatorImIndex(Value: TImageIndex);
@@ -1874,15 +1872,6 @@ begin
        Treeview.Invalidate;
   end;
 end;
-
-procedure TVTDBOptions.SetSortingType(value: TSortingType);
-begin
-  if (fSortingType <> value) then
-  begin
-     fSortingType:= value;
-  end;
-end;
-
 
 procedure TVTDBOptions.SetAdvOptions(value: TVTDBAdvOptions);
 var
@@ -3426,13 +3415,13 @@ try
 
   // DeltaIndex - How many records we must move in database from
   // where we can start loading CountToLoad records
-  DeltaIndex:= 0;
+
   DeltaIndex:= (TopNode.Index + 1);
 
   // CountToLoad - How much records we want to load
   if (AControlHeight = 0) then
      AControlHeight:= ClientHeight;
-  CountToLoad:= 0;
+
   CountToLoad:= AdvGetFullyVisibleCount(AControlHeight);
 
 
@@ -3482,7 +3471,7 @@ try
 
   if (GetCurrentDBRecNo <> OldRecNo) then
   begin
-    LinkedDataSet.Prior;
+    GotoRecNo(OldRecNo);
   end;
 
 finally
@@ -3785,11 +3774,10 @@ end;
 
 function TCustomVirtualDBGrid.GetCurrentDBRecNo: longint;
 begin
-  result:= 0;
-  if (not assigned(LinkedDataSet)) then exit;
-  if (not LinkedDataSet.Active)
-     then exit
-     else result:= LinkedDataSet.RecNo;
+  if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+    Result := LinkedDataSet.RecNo
+  else
+    Result := 0;
 end;
 
 { --- TCustomVirtualDBGrid --------------------------------------------------- }
