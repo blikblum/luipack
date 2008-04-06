@@ -3193,11 +3193,13 @@ end;
 
 function TCustomVirtualDBGrid.InternalGetNodeData(ANode: PVirtualNode): PNodeData;
 begin
-  result:= nil;
-
-  if (csDesigning in ComponentState)
-     then result:= InternalData(ANode)
-     else result:= GetNodeData(ANode);
+  //todo: see if this check is neccessary.
+  //InternalData and GetNodeData are almost the same
+  //BTW: InternalData looks buggy
+  if not (csDesigning in ComponentState) then
+    Result := GetNodeData(ANode)
+  else
+    Result := InternalData(ANode);
 end;
 
 
@@ -3321,7 +3323,6 @@ begin
 
   if Assigned(NewFocusedNode) then
   begin
-    VisibledNodes:= 0;
     VisibledNodes:=AdvGetFullyVisibleCount(ClientHeight);
 
     CenterToNode:= true;
@@ -3359,15 +3360,16 @@ end;
 procedure TCustomVirtualDBGrid.UpdateCurrentRecord;
 var
   Node: PVirtualNode;
-  RecNo: longint;
 begin
-  if ((csLoading in ComponentState)) then exit;
+  if csLoading in ComponentState then
+    Exit;
 
-  RecNo:= GetCurrentDBRecNo;
-  Node:= FindNodeByRecNo(RecNo);
-  InternalLoadDBData(Node, true);
-  if Assigned(Node) then
+  Node := FindNodeByRecNo(GetCurrentDBRecNo);
+  if Node <> nil then
+  begin
+    InternalLoadDBData(Node, True);
     InvalidateNode(Node);
+  end;
 end;
 
 procedure TCustomVirtualDBGrid.UpdateAllRecords;
@@ -3512,11 +3514,10 @@ var
 
     CalculatedColumns: TStrings;
 begin
-  // If Node is nil then exit
-  if (ANode = nil) then exit;
-
+  //todo: see what checks are really necessary
+  
   // If there isnt any column defined then exit
-  if (self.Header.Columns.Count = 0) then exit;
+  if (Self.Header.Columns.Count = 0) then exit;
 
   // If there isnt any Dataset assigned then exit
   if (not assigned(LinkedDataSet)) then exit;
@@ -3530,9 +3531,13 @@ begin
      if (not AlwaysUpdate) then exit;
      // If RecordData is nil then create it, if AlwaysUpdate is true
      Data.RecordData:= GetRecordDataClass.Create;//TRecordData.Create;
+     //necessary to avoid memory leaks when scrolling to fast
+     if not (vsInitialized in ANode^.States) then
+       InitNode(ANode);
   end;
 
   // CalculatedColumns to archive calculated column indexes
+  //todo: move CalculatedColumns to a field or at least create here only on demand
   CalculatedColumns:= TStringList.Create;
   try
     RecordNo:= GetCurrentDBRecNo;
@@ -3633,18 +3638,15 @@ end;
 function TCustomVirtualDBGrid.AdvGetFullyVisibleCount(AControlHeight: Integer): Cardinal;
 var
    Node: PVirtualNode;
-   CHeight,
    AHeight: Integer;
 begin
   Result:= 0;
-
-  CHeight:= AControlHeight;
   AHeight:= 0;
   Node:= TopNode;
   while (Node <> nil) do
   begin
     AHeight:= AHeight + Node.NodeHeight;
-    if (AHeight < CHeight)
+    if (AHeight < AControlHeight)
        then inc(Result)
        else break;
     Node:= GetNextVisibleSibling(Node);
