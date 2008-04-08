@@ -415,7 +415,7 @@ type
     function IsDataCreated(ANode: PVirtualNode): boolean;
     // Return number of current record in database
     //   - if database is closed, returns 0
-    function GetCurrentDBRecNo: longint;
+    function GetCurrentDBRecNo: LongInt;
     procedure AddColumn(AColumnType: TColumnType; AFieldName, ACaption: string; AWidth: Integer=-1;
                         AUpdateDBTree: boolean= true);
     procedure IncLoadingDataFlag;
@@ -466,7 +466,7 @@ type
 
     function FindNodeByRecNo(ARecNo: longint): PVirtualNode;
     function SetFocusToNode(Node: PVirtualNode; Center: boolean=true): boolean;
-    procedure GotoRecNo(ARecNo: longint);
+    procedure GotoRecNo(NewRecNo: longint);
     function GetNodeByIndex(Index: Integer): PVirtualNode;
 
     function GetSelectedRecord(Index: Integer): TRecordData;
@@ -2934,10 +2934,7 @@ end;
 
 
 
-procedure TCustomVirtualDBGrid.GotoRecNo(ARecNo: longint);
-var
-   OldRecNo,
-   NewRecNo: longint;
+procedure TCustomVirtualDBGrid.GotoRecNo(NewRecNo: longint);
 begin
   //if (not Assigned(LinkedDataSet)) then exit;
   if (not Assigned(fDBOptions.DataLink)) then exit;
@@ -2945,9 +2942,8 @@ begin
 
   IncLoadingDataFlag;
   try
-    OldRecNo:= GetCurrentDBRecNo;
-    NewRecNo:= ARecNo;
-    LinkedDataSet.MoveBy(NewRecNo-OldRecNo);
+    //todo use LinkedDataset.RecNo directly
+    LinkedDataSet.MoveBy(NewRecNo - GetCurrentDBRecNo);
   finally
     DecLoadingDataFlag;
   end;
@@ -3386,100 +3382,92 @@ end;
 
 procedure TCustomVirtualDBGrid.UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0);
 var
-   DeltaIndex,
-   CountToLoad,
-   Count: Cardinal;
+  DeltaIndex,
+  CountToLoad,
+  Count: Cardinal;
 
-   OldRecNo,
-   NewRecNo,
-   NewMove: longint;
+  OldRecNo,
+  NewRecNo,
+  NewMove: LongInt;
 
-   Run: PVirtualNode;
+  Run: PVirtualNode;
 
-   WasNewMoved,
-   DoLoad : boolean;
+  WasNewMoved,
+  DoLoad : boolean;
 
-   CHeight,
-   AHeight: Integer;
+  CHeight,
+  AHeight: Integer;
 
 begin
-  if (not Assigned(LinkedDataSet)) then exit;
-  if (not LinkedDataSet.Active) then exit;
-  if (not Assigned(TopNode)) then exit;
-  if (IsDataLoading) then exit; 
+  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
+    Exit;
 
+  Run := TopNode;
+  if not Assigned(Run) then
+    Exit;
+    
+  IncLoadingDataFlag;
+  try
+    //todo: get recno directly from LinkedDataset since the check is alreay done above
+    OldRecNo := GetCurrentDBRecNo;
 
-IncLoadingDataFlag;
-try
+    // DeltaIndex - How many records we must move in database from
+    // where we can start loading CountToLoad records
 
-  OldRecNo:= GetCurrentDBRecNo;
+    //Run = TopNode
+    DeltaIndex := Run.Index + 1;
 
-  // DeltaIndex - How many records we must move in database from
-  // where we can start loading CountToLoad records
+    // CountToLoad - How much records we want to load
+    if AControlHeight = 0 then
+      AControlHeight := ClientHeight;
 
-  DeltaIndex:= (TopNode.Index + 1);
+    CountToLoad := AdvGetFullyVisibleCount(AControlHeight);
 
-  // CountToLoad - How much records we want to load
-  if (AControlHeight = 0) then
-     AControlHeight:= ClientHeight;
+    WasNewMoved := False;
+    NewMove := DeltaIndex - OldRecNo;
 
-  CountToLoad:= AdvGetFullyVisibleCount(AControlHeight);
+    LinkedDataSet.DisableControls;
 
-
-  WasNewMoved:= false;
-  NewMove:= DeltaIndex - OldRecNo;
-
-  LinkedDataSet.DisableControls;
-
-  DoLoad:= AlwaysUpdate;
-  Count:= 0;
-  Run:= TopNode;
-  while (Assigned(Run))
-        and
-        ((not LinkedDataSet.Eof) or (LinkedDataSet.Eof and (not WasNewMoved)))
-        and
-        (Count <= CountToLoad)
-  do begin
-
-    // If we dont want always update data, then we must test that
-    // if node has data created, and if not than we can load data from database
-    // to node's data
-    if (not AlwaysUpdate) then
-       DoLoad:= (not IsDataCreated(Run));
-
-    if (DoLoad) then
+    DoLoad := AlwaysUpdate;
+    Count := 0;
+    while Assigned(Run) and
+      (not LinkedDataSet.Eof or (not WasNewMoved)) and
+      (Count <= CountToLoad) do
     begin
-       // If there wasnt newmove on database then do newmove
-       if (not WasNewMoved) then
-       begin
-           NewMove:= (Run.Index - OldRecNo) + 1;
-           if (NewMove <> 0) then
-           begin
+      // If we dont want always update data, then we must test that
+      // if node has data created, and if not than we can load data from database
+      // to node's data
+      if not AlwaysUpdate then
+        DoLoad := not IsDataCreated(Run);
+
+      if DoLoad then
+      begin
+         // If there wasnt newmove on database then do newmove
+         if not WasNewMoved then
+         begin
+           NewMove := (Run.Index - OldRecNo) + 1;
+           if NewMove <> 0 then
              LinkedDataSet.MoveBy(NewMove);
-           end;
-           WasNewMoved:= true;
-       end;
+           WasNewMoved := True;
+         end;
 
-       InternalLoadDBData(Run, true); // load data from database
+         InternalLoadDBData(Run, True); // load data from database
 
-       LinkedDataSet.Next;
+         LinkedDataSet.Next;
+      end;
+
+
+      Inc(Count);
+      Run := GetNextSibling(Run);
     end;
+    //todo: get RecNo directly
+    if (GetCurrentDBRecNo <> OldRecNo) then
+      GotoRecNo(OldRecNo);
 
-
-    Inc(Count);
-    Run:= GetNextSibling(Run);
+  finally
+    LinkedDataSet.EnableControls;
+    DecLoadingDataFlag;
   end;
-
-  if (GetCurrentDBRecNo <> OldRecNo) then
-  begin
-    GotoRecNo(OldRecNo);
-  end;
-
-finally
-  LinkedDataSet.EnableControls;
-  DecLoadingDataFlag;
-end;
-
 end;
 
 
@@ -3641,6 +3629,7 @@ var
 begin
   //todo: see why this is called twice at startup
   Result := 0;
+  //TopNode
   Node := GetNodeAt(0, 0, True, AHeight);
   while Node <> nil do
   begin
@@ -3774,7 +3763,7 @@ begin
 end;
 
 
-function TCustomVirtualDBGrid.GetCurrentDBRecNo: longint;
+function TCustomVirtualDBGrid.GetCurrentDBRecNo: LongInt;
 begin
   if Assigned(LinkedDataSet) and LinkedDataSet.Active then
     Result := LinkedDataSet.RecNo
