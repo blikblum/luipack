@@ -427,12 +427,12 @@ type
   protected
     procedure ValidateNodeDataSize(var Size: Integer); override;
     procedure DoFocusChange(Node: PVirtualNode; Column: TColumnIndex); override;
-    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellRect: TRect); override;
-    procedure DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellRect: TRect); override;
+    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
+    procedure DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
     procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; override;
-    procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; ItemRect: TRect; var Color: TColor;
+    procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
            var EraseAction: TItemEraseAction); override;
     function DoCompare(Node1, Node2: PVirtualNode; Column: TColumnIndex): Integer; override;
     procedure DoUpdating(State: TVTUpdateState); override;
@@ -443,7 +443,7 @@ type
     procedure _OnGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
            TextType: TVSTTextType; var CellText: WideString); virtual;
     procedure _OnNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-           NewText: WideString); virtual;
+           const NewText: WideString); virtual;
 
     // new
     procedure DoGetRecordCount(Sender: TObject; var RecordCount: longint); virtual;
@@ -2352,7 +2352,7 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; ItemRect: TRect; var Color: TColor;
+procedure TCustomVirtualDBGrid.DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
            var EraseAction: TItemEraseAction);
 begin
   if (not (aoStrippedRows in DBOptions.AdvOptions)) then exit;
@@ -2389,7 +2389,7 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellRect: TRect);
+procedure TCustomVirtualDBGrid.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
 begin
 
   if (aoHighlightSortColumn in DBOptions.AdvOptions)and
@@ -2410,13 +2410,15 @@ end;
 
 
 procedure TCustomVirtualDBGrid.DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode;
-     Column: TColumnIndex; CellRect: TRect);
+     Column: TColumnIndex; const CellRect: TRect);
 var
    DoInh: boolean;
    X, Y: Integer;
    IconWidth, IconHeight: Integer;
+   R: TRect;
 begin
-  DoInh:= true;
+  DoInh := True;
+  R := CellRect;
   if (Column > NoColumn) then
     if (TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType = ctIndicator) then
     begin
@@ -2425,13 +2427,13 @@ begin
       with Canvas do
       begin
         if toShowVertGridLines in TreeOptions.PaintOptions then
-          Inc(CellRect.Right);
+          Inc(R.Right);
         if toShowHorzGridLines in TreeOptions.PaintOptions then
-          Inc(CellRect.Bottom);
+          Inc(R.Bottom);
 
         Brush.Color:= Header.Columns[Column].Color;
-        FillRect(CellRect);
-        DrawEdge(Handle, CellRect, BDR_RAISEDINNER, BF_RECT {or BF_MIDDLE});
+        FillRect(R);
+        DrawEdge(Handle, R, BDR_RAISEDINNER, BF_RECT {or BF_MIDDLE});
 
         if (Node = FocusedNode) then
         begin
@@ -2455,11 +2457,11 @@ begin
                    X:= 0;
 
                 aiCenter: begin
-                   X:= ((CellRect.Right - CellRect.Left) - IconWidth) div 2 + 1;
+                   X:= ((R.Right - R.Left) - IconWidth) div 2 + 1;
                 end;
 
                 aiRight: begin
-                   X:= (CellRect.Right - CellRect.Left) - IconWidth;
+                   X:= (R.Right - R.Left) - IconWidth;
                 end;
            end;
 
@@ -2469,11 +2471,11 @@ begin
                    Y:= 0;
 
                 aiMiddle: begin
-                   Y:= ((CellRect.Bottom - CellRect.Top) - IconHeight) div 2 + 1;
+                   Y:= ((R.Bottom - R.Top) - IconHeight) div 2 + 1;
                 end;
 
                 aiBottom: begin
-                   Y:= (CellRect.Bottom - CellRect.Top) - IconHeight;
+                   Y:= (R.Bottom - R.Top) - IconHeight;
                 end;
            end;
 
@@ -2489,7 +2491,7 @@ begin
       DoInh:= false;
     end;
 
-  if (DoInh) then inherited DoAfterCellPaint(Canvas, Node, Column, CellRect);
+  if (DoInh) then inherited DoAfterCellPaint(Canvas, Node, Column, R);
 end;
 
 
@@ -2729,7 +2731,7 @@ end;
 
 
 procedure TCustomVirtualDBGrid._OnNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-           NewText: WideString);
+           const NewText: WideString);
 var
     WField:     TField;
     IDText:     string;
@@ -2737,6 +2739,7 @@ var
     ColumnType: TColumnType;
     Data:       PNodeData;
     PostChanges:  boolean;
+    PostText: WideString;
 begin
   // if we dont want to post changes to database (toEditable is not set in the treeoptions->misc) then exit
   {if not (toEditable in TreeOptions.MiscOptions)
@@ -2751,23 +2754,25 @@ begin
   Data:= InternalGetNodeData(Node);
   if (not IsDataOk(Data)) then exit;
 
+  PostText := NewText;
+
   if (ColumnType = ctCalculated) then
   begin
     IDText:= TVirtualDBTreeColumn(Header.Columns[Column]).Text;
 
     PostChanges:= true;
-    DoPostChanges(self, IDText, Column, ColumnType, Data.RecordData, Node.Index,
-                  NewText, PostChanges);
+    DoPostChanges(Self, IDText, Column, ColumnType, Data.RecordData, Node.Index,
+                  PostText, PostChanges);
 
     if (PostChanges) then
-       Data.RecordData.CalculatedValue[IDText]:= NewText;
+       Data.RecordData.CalculatedValue[IDText]:= PostText;
   end
   else begin
 
      FieldName:= TVirtualDBTreeColumn(Header.Columns[Column]).FieldName;
      PostChanges:= false;
      DoPostChanges(self, FieldName, Column, ColumnType, Data.RecordData,
-                   Node.Index, NewText, PostChanges);
+                   Node.Index, PostText, PostChanges);
 
      if (PostChanges) then
      if Assigned(LinkedDataSet) then
@@ -2779,7 +2784,7 @@ begin
           if (WField <> nil) then
           begin
              LinkedDataSet.Edit;
-             WField.Value:= NewText;
+             WField.Value:= PostText;
              LinkedDataSet.Post;
           end;
         except
