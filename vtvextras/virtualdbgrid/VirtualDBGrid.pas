@@ -2208,12 +2208,6 @@ begin
   end;
 end;
 
-{
-procedure TCustomVirtualDBGrid.DataLinkScrolled;
-begin
-end;
-}
-
 procedure TCustomVirtualDBGrid.DataLinkChanged;
 begin
   // we can reflect changes in database(like insert or delete record(s))
@@ -3642,19 +3636,20 @@ end;
 
 function TCustomVirtualDBGrid.AdvGetFullyVisibleCount(AControlHeight: Integer): Cardinal;
 var
-   Node: PVirtualNode;
-   AHeight: Integer;
+  Node: PVirtualNode;
+  AHeight: Integer;
 begin
-  Result:= 0;
-  AHeight:= 0;
-  Node:= TopNode;
-  while (Node <> nil) do
+  //todo: see why this is called twice at startup
+  Result := 0;
+  Node := GetNodeAt(0, 0, True, AHeight);
+  while Node <> nil do
   begin
-    AHeight:= AHeight + Node.NodeHeight;
-    if (AHeight < AControlHeight)
-       then inc(Result)
-       else break;
-    Node:= GetNextVisibleSibling(Node);
+    Inc(AHeight, Node.NodeHeight);
+    if AHeight < AControlHeight then
+      Inc(Result)
+    else
+      Break;
+    Node := GetNextVisibleSibling(Node);
   end;
 end;
 
