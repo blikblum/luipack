@@ -1,2 +1,2 @@
 
-  qt4, qtint, qtobjects, cairo_xlib,
+  qt4, qtint, qtobjects, CairoXlib,
