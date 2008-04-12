@@ -229,6 +229,7 @@ function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): Bool
 function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
 function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord): LongInt;
 
+function UpdateWindow(Handle: HWND): Boolean;
 
 implementation
 

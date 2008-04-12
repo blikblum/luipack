@@ -251,6 +251,11 @@ begin
   Result := Windows.ToAscii(uVirtKey,uScanCode,lpKeyState,lpChar,uFlags);
 end;
 
+function UpdateWindow(Handle: HWND): Boolean;
+begin
+  Result := Windows.UpdateWindow(Handle);
+end;
+
 type
   TTimerRecord = record
     Control: TControl;
