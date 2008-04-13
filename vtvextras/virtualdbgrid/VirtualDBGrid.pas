@@ -44,13 +44,6 @@ uses
   Variants, contnrs, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons, LResources;
 
 const
-  {
-  // navigator buttons
-  ResBMP_ARROWFIRST   = 'ARROWFIRST';
-  ResBMP_ARROWPRIOR   = 'ARROWPRIOR';
-  ResBMP_ARROWNEXT    = 'ARROWNEXT';
-  ResBMP_ARROWLAST    = 'ARROWLAST';
-  }
   ResBMP_INDICATOR    = 'INDICATOR';
 
   clWhiteSmoke  : TColor = $00F5F5F5;
@@ -379,9 +372,6 @@ type
     property AdvOptions:          TVTDBAdvOptions  read fAdvOptions        write SetAdvOptions default DefaultAdvOptions;
   end;
 
-
-  TVirtualDBNavigatorLink = class;
-
   TCustomVirtualDBGrid = class(TCustomVirtualStringTree)
   private
     FInternalDataOffset:      longword;
@@ -398,7 +388,6 @@ type
     fOnPostChanges:           TOnPostChanges;
     fOnChangeSort:            TOnChangeSort;
     fIndicatorBMP:            TBitmap;
-    fDBNavigatorList:         TObjectList;
 
     function GetHeader: TVTDBHeader;
     procedure SetHeader(Value: TVTDBHeader);
@@ -421,7 +410,6 @@ type
     procedure IncLoadingDataFlag;
     procedure DecLoadingDataFlag;
     function IsDataLoading: boolean;
-    procedure UpdateDBNavigators;
     function GetIndicatorColumn: TVirtualDBTreeColumn;
     function GetSortingColumn: TVirtualDBTreeColumn;
   protected
@@ -435,7 +423,6 @@ type
     procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
            var EraseAction: TItemEraseAction); override;
     function DoCompare(Node1, Node2: PVirtualNode; Column: TColumnIndex): Integer; override;
-    procedure DoUpdating(State: TVTUpdateState); override;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
     procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
 
@@ -487,9 +474,6 @@ type
     procedure DataLinkActiveChanged; virtual;
     procedure DataLinkChanged; virtual;
     procedure DataLinkRecordChanged(Field: TField); virtual;
-
-    procedure AddDBNavigatorLink(ADBNavigatorLink: TVirtualDBNavigatorLink);
-    procedure RemoveDBNavigatorLink(ADBNavigatorLink: TVirtualDBNavigatorLink);
 
     function InternalData(Node: PVirtualNode): Pointer;
 
@@ -727,42 +711,6 @@ type
   TControlClick = class(TControl)
   published
     property OnClick;
-  end;
-
-  TVirtualDBNavigatorLink = class(TComponent)
-  private
-    fVirtualDBGrid: TCustomVirtualDBGrid;
-    fButtonFirst,
-    fButtonPrev,
-    fButtonNext,
-    fButtonLast  : TControl;
-    function GetButtonFirst: TControl;
-    function GetButtonPrev: TControl;
-    function GetButtonNext: TControl;
-    function GetButtonLast: TControl;
-    function GetVirtualDBGrid: TCustomVirtualDBGrid;
-    procedure SetButtonFirst(Value: TControl);
-    procedure SetButtonPrev(Value: TControl);
-    procedure SetButtonNext(Value: TControl);
-    procedure SetButtonLast(Value: TControl);
-    procedure SetVirtualDBGrid(Value: TCustomVirtualDBGrid);
-  protected
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-
-    procedure UpdateNavControls; virtual;
-    procedure DoClick(Button: Byte); virtual;
-    procedure ButtonFirstClick(Sender: TObject); virtual;
-    procedure ButtonPrevClick(Sender: TObject); virtual;
-    procedure ButtonNextClick(Sender: TObject); virtual;
-    procedure ButtonLastClick(Sender: TObject); virtual;
-  public
-    constructor Create; virtual;
-  published
-    property ButtonFirst:   TControl             read GetButtonFirst   write SetButtonFirst;
-    property ButtonPrev:    TControl             read GetButtonPrev    write SetButtonPrev;
-    property ButtonNext:    TControl             read GetButtonNext    write SetButtonNext;
-    property ButtonLast:    TControl             read GetButtonLast    write SetButtonLast;
-    property VirtualDBGrid: TCustomVirtualDBGrid read GetVirtualDBGrid write SetVirtualDBGrid;
   end;
 
   function VarToWideStr(Value: Variant): WideString;
@@ -1314,6 +1262,7 @@ end;
 
 procedure TVirtualDBTreeDataLink.DataSetChanged;
 begin
+  //WriteLn('DatasetChanged');
   FVirtualDBTree.DataLinkChanged;
 end;
 
@@ -1322,8 +1271,10 @@ begin
   FVirtualDBTree.DataLinkRecordChanged(Field);
 end;
 
+
 procedure TVirtualDBTreeDataLink.DataSetScrolled(Distance: Integer);
 begin
+  //WriteLn('DatasetScrolled');
   FVirtualDBTree.SetFocusToActualRecNo;
 end;
 
@@ -2006,8 +1957,6 @@ constructor TCustomVirtualDBGrid.Create(Owner: TComponent);
 begin
   inherited;
 
-  fDBNavigatorList := TObjectList.Create(false);
-
   fIndicatorBMP := TBitmap.Create;
   fIndicatorBMP.LoadFromLazarusResource(ResBMP_INDICATOR);
   fIndicatorBMP.TransparentMode := tmFixed;
@@ -2048,39 +1997,10 @@ end;
 
 destructor TCustomVirtualDBGrid.Destroy;
 begin
-  fDBNavigatorList.Free;
   fDBOptions.Free;
   fIndicatorBMP.Free;
 
   inherited Destroy;
-end;
-
-
-procedure TCustomVirtualDBGrid.AddDBNavigatorLink(ADBNavigatorLink: TVirtualDBNavigatorLink);
-begin
-  if not Assigned(fDBNavigatorList) then exit;
-
-  if (fDBNavigatorList.IndexOf(ADBNavigatorLink) = -1) then
-     fDBNavigatorList.Add(ADBNavigatorLink);
-end;
-
-procedure TCustomVirtualDBGrid.RemoveDBNavigatorLink(ADBNavigatorLink: TVirtualDBNavigatorLink);
-begin
-  if not Assigned(fDBNavigatorList) then exit;
-
-  if (fDBNavigatorList.IndexOf(ADBNavigatorLink) > -1) then
-     fDBNavigatorList.Remove(ADBNavigatorLink);
-end;
-
-procedure TCustomVirtualDBGrid.UpdateDBNavigators;
-var
-   loop: integer;
-begin
-  if not Assigned(fDBNavigatorList) then exit;
-
-  for loop:= fDBNavigatorList.Count-1 downto 0 do
-    if Assigned(fDBNavigatorList[loop]) then
-       TVirtualDBNavigatorLink(fDBNavigatorList[loop]).UpdateNavControls;
 end;
 
 function TCustomVirtualDBGrid.GetIndicatorColumn: TVirtualDBTreeColumn;
@@ -2211,7 +2131,7 @@ end;
 procedure TCustomVirtualDBGrid.DataLinkChanged;
 begin
   // we can reflect changes in database(like insert or delete record(s))
-  // inly if DBOptions.RecordCountType = rcFromDataset is set and we know
+  // only if DBOptions.RecordCountType = rcFromDataset is set and we know
   // how many records is in the dataset
 
   if (not (csLoading in ComponentState)) and
@@ -2236,6 +2156,8 @@ begin
           fLastRecordCount:= GetRecordCount;
        end;
 
+       //lcl
+       //SetFocusToActualRecNo;
     end;
   end;
 
@@ -2378,8 +2300,6 @@ begin
   finally
     DecLoadingDataFlag;
   end;
-
-  UpdateDBNavigators;
 end;
 
 
@@ -2672,15 +2592,6 @@ begin
   except
     Result:= 1;
   end;
-end;
-
-
-procedure TCustomVirtualDBGrid.DoUpdating(State: TVTUpdateState);
-begin
-  inherited;
-
-  if (State = usEnd) then
-     UpdateDBNavigators;
 end;
 
 
@@ -3750,6 +3661,10 @@ function TCustomVirtualDBGrid.DoSetOffsetXY(Value: TPoint; Options: TScrollUpdat
 var
    YChanged: boolean;
 begin
+  //todo: see if is better to override DoScroll since the calculation of "YChanged"
+  //is not so simple
+  //there's a chance that this could cause delay in tree update
+  //in last case copy the YChanged algo from VTV
   YChanged := (Value.Y - OffsetY) <> 0;
   inherited DoSetOffsetXY(Value, Options, ClipRect);
 
@@ -3772,179 +3687,6 @@ begin
 end;
 
 { --- TCustomVirtualDBGrid --------------------------------------------------- }
-{ ============================================================================ }
-
-
-
-{ ============================================================================ }
-{ --- TVirtualDBNavigatorLink --------------------------------------------------- }
-
-constructor TVirtualDBNavigatorLink.Create;
-begin
-  fVirtualDBGrid:= nil;
-  fButtonFirst:=   nil;
-  fButtonPrev:=    nil;
-  fButtonNext:=    nil;
-  fButtonLast:=    nil;
-end;
-
-procedure TVirtualDBNavigatorLink.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited;
-
-  if (Operation = opRemove) then
-    begin
-      if (AComponent = fButtonFirst) then
-         fButtonFirst:= nil;
-      if (AComponent = fButtonPrev) then
-         fButtonPrev:= nil;
-      if (AComponent = fButtonNext) then
-         fButtonNext:= nil;
-      if (AComponent = fButtonLast) then
-         fButtonLast:= nil;
-
-      if (AComponent = fVirtualDBGrid) then
-      begin
-        fVirtualDBGrid.RemoveDBNavigatorLink(self);
-        fVirtualDBGrid:= nil;
-      end;
-
-      if (AComponent = self) then
-      begin
-         if Assigned(fVirtualDBGrid) then
-            fVirtualDBGrid.RemoveDBNavigatorLink(self);
-      end
-    end;
-end;
-
-function TVirtualDBNavigatorLink.GetButtonFirst: TControl;
-begin
-  Result:= fButtonFirst;
-end;
-
-function TVirtualDBNavigatorLink.GetButtonPrev: TControl;
-begin
-  Result:= fButtonPrev;
-end;
-
-function TVirtualDBNavigatorLink.GetButtonNext: TControl;
-begin
-  Result:= fButtonNext;
-end;
-
-function TVirtualDBNavigatorLink.GetButtonLast: TControl;
-begin
-  Result:= fButtonLast;
-end;
-
-function TVirtualDBNavigatorLink.GetVirtualDBGrid: TCustomVirtualDBGrid;
-begin
-  Result:= fVirtualDBGrid;
-end;
-
-procedure TVirtualDBNavigatorLink.SetButtonFirst(Value: TControl);
-begin
-  fButtonFirst:= Value;
-  if Assigned(fButtonFirst) then
-     TControlClick(fButtonFirst).OnClick := ButtonFirstClick;
-end;
-
-procedure TVirtualDBNavigatorLink.SetButtonPrev(Value: TControl);
-begin
-  fButtonPrev:= Value;
-  if Assigned(fButtonPrev) then
-     TControlClick(fButtonPrev).OnClick:= ButtonPrevClick;
-end;
-
-procedure TVirtualDBNavigatorLink.SetButtonNext(Value: TControl);
-begin
-  fButtonNext:= Value;
-  if Assigned(fButtonNext) then
-     TControlClick(fButtonNext).OnClick:= ButtonNextClick;
-end;
-
-procedure TVirtualDBNavigatorLink.SetButtonLast(Value: TControl);
-begin
-  fButtonLast:= Value;
-  if Assigned(fButtonLast) then
-     TControlClick(fButtonLast).OnClick:= ButtonLastClick;
-end;
-
-procedure TVirtualDBNavigatorLink.SetVirtualDBGrid(Value: TCustomVirtualDBGrid);
-begin
-  fVirtualDBGrid:= Value;
-
-  if Assigned(fVirtualDBGrid) then
-  begin
-     fVirtualDBGrid.AddDBNavigatorLink(self);
-     fVirtualDBGrid.UpdateDBNavigators;
-  end;
-end;
-
-procedure TVirtualDBNavigatorLink.UpdateNavControls;
-var
-   FocusedNodeIndex: Integer;
-   WEnabled: Boolean;
-begin
-  if (not Assigned(fVirtualDBGrid)) then exit;
-
-  FocusedNodeIndex:= 0;
-  if Assigned(fVirtualDBGrid.FocusedNode) then
-     FocusedNodeIndex:= fVirtualDBGrid.FocusedNode.Index;
-
-  if Assigned(fButtonFirst) then
-     fButtonFirst.Enabled:= (FocusedNodeIndex > 0);
-
-  if Assigned(fButtonPrev) then
-     fButtonPrev.Enabled:= (FocusedNodeIndex > 0);
-
-  WEnabled:= (fVirtualDBGrid.RootNodeCount > 0);
-
-  if Assigned(fButtonNext) then
-     fButtonNext.Enabled:= WEnabled and (FocusedNodeIndex < (fVirtualDBGrid.RootNodeCount-1));
-
-  if Assigned(fButtonLast) then
-     fButtonLast.Enabled:= WEnabled and (FocusedNodeIndex < (fVirtualDBGrid.RootNodeCount-1));
-end;
-
-procedure TVirtualDBNavigatorLink.DoClick(Button: Byte);
-begin
-  if not Assigned(fVirtualDBGrid) then exit;
-
-  case Button of
-       0: fVirtualDBGrid.Navigate(nfpBegin, 0);    // first
-       1: fVirtualDBGrid.Navigate(nfpCurrent, -1); // prev
-       2: fVirtualDBGrid.Navigate(nfpCurrent, 1);  // next
-       3: fVirtualDBGrid.Navigate(nfpEnd, 0);      // end
-  end;
-
-  if Assigned(fVirtualDBGrid) then
-     fVirtualDBGrid.UpdateDBNavigators;
-
-  //UpdateNavControls;
-end;
-
-procedure TVirtualDBNavigatorLink.ButtonFirstClick(Sender: TObject);
-begin
-  DoClick(0);
-end;
-
-procedure TVirtualDBNavigatorLink.ButtonPrevClick(Sender: TObject);
-begin
-  DoClick(1);
-end;
-
-procedure TVirtualDBNavigatorLink.ButtonNextClick(Sender: TObject);
-begin
-  DoClick(2);
-end;
-
-procedure TVirtualDBNavigatorLink.ButtonLastClick(Sender: TObject);
-begin
-  DoClick(3);
-end;
-
-{ --- TVirtualDBNavigatorLink --------------------------------------------------- }
 { ============================================================================ }
 
 initialization
