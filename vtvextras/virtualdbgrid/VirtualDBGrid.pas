@@ -372,6 +372,8 @@ type
     property AdvOptions:          TVTDBAdvOptions  read fAdvOptions        write SetAdvOptions default DefaultAdvOptions;
   end;
 
+  { TCustomVirtualDBGrid }
+
   TCustomVirtualDBGrid = class(TCustomVirtualStringTree)
   private
     FInternalDataOffset:      longword;
@@ -467,7 +469,7 @@ type
     function GetHeaderClass: TVTHeaderClass; override;
     function GetColumnClass: TVirtualTreeColumnClass; override;
     function GetOptionsClass: TTreeOptionsClass; override;
-    function DoSetOffsetXY(Value: TPoint; Options: TScrollUpdateOptions; ClipRect: PRect = nil): Boolean; override;
+    procedure DoScroll(DeltaX, DeltaY: Integer); override;
     function GetRecordDataClass: TRecordDataClass; virtual;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -726,7 +728,7 @@ type
 implementation
 
 uses
-  Math, dbconst;
+  Math, dbconst, vtlogger;
 
 
 function VarToWideStr(Value: Variant): WideString;
@@ -1252,30 +1254,40 @@ end;
 
 procedure TVirtualDBTreeDataLink.ActiveChanged;
 begin
+  Logger.EnterMethod(lcAll, 'ActiveChanged');
+  //Logger.SendCallStack(lcAll, 'ActiveChanged');
   if Active and Assigned(DataSource) then
     if Assigned(DataSource.DataSet) then
       if DataSource.DataSet.IsUnidirectional then
         DatabaseError(SUniDirectional);
 
   FVirtualDBTree.DataLinkActiveChanged;
+  Logger.ExitMethod(lcAll, 'ActiveChanged');
 end;
 
 procedure TVirtualDBTreeDataLink.DataSetChanged;
 begin
-  //WriteLn('DatasetChanged');
+  Logger.EnterMethod(lcAll, 'DatasetChanged');
+  //Logger.SendCallStack(lcAll, 'DatasetChanged');
   FVirtualDBTree.DataLinkChanged;
+  Logger.ExitMethod(lcAll, 'DatasetChanged');
 end;
 
 procedure TVirtualDBTreeDataLink.RecordChanged(Field: TField);
 begin
+  Logger.EnterMethod(lcAll, 'RecordChanged');
+  //Logger.SendCallStack(lcAll, 'RecordChanged');
   FVirtualDBTree.DataLinkRecordChanged(Field);
+  Logger.ExitMethod(lcAll, 'RecordChanged');
 end;
 
 
 procedure TVirtualDBTreeDataLink.DataSetScrolled(Distance: Integer);
 begin
-  //WriteLn('DatasetScrolled');
+  Logger.EnterMethod(lcAll, 'DataSetScrolled');
+  //Logger.SendCallStack(lcAll, 'DatasetScrolled');
   FVirtualDBTree.SetFocusToActualRecNo;
+  Logger.ExitMethod(lcAll, 'DataSetScrolled');
 end;
 
 
@@ -2138,26 +2150,23 @@ begin
      (DBOptions.RecordCountType = rcFromDataset) and
      (not IsDataLoading) then
   begin
-    if (Assigned(LinkedDataSet)) and
-       (LinkedDataSet.Active) then
+    if Assigned(LinkedDataSet) and LinkedDataSet.Active then
     begin
-       IncLoadingDataFlag;
-       try
-         fRecordCount:= GetRecordCount;
-       finally
-         DecLoadingDataFlag;
-       end;
-
-       // If old record count(fLastRecordCount) <> to new record count(GetRecordCount)
+       Logger.EnterMethod(lcAll, 'DataLinkChanged');
+       //Skip GetRecordCount and retieve RecordCount directly from dataset
+       //since we already know that RecordCountType is rcFromDataset
+       fRecordCount := LinkedDataSet.RecordCount;
+       // If old record count(fLastRecordCount) <> to new record count
        // then, there was add or remove some record and we want to reflect this changes
        if (fRecordCount <> fLastRecordCount) then
        begin
           ReInitializeDBGrid;
-          fLastRecordCount:= GetRecordCount;
+          fLastRecordCount := fRecordCount;
        end;
 
        //lcl
        //SetFocusToActualRecNo;
+       Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
   end;
 
@@ -2208,6 +2217,7 @@ end;
 
 procedure TCustomVirtualDBGrid.WMVScroll(var Message: TWMVScroll);
 begin
+  //todo: see if is required this because DoScroll already updates the tree
   inherited;
 
   UpdateDBTree(false);
@@ -2772,6 +2782,14 @@ begin
      else PostChanges:= true;
 end;
 
+procedure TCustomVirtualDBGrid.DoScroll(DeltaX, DeltaY: Integer);
+begin
+  //todo: elaborate an algorithm to update only the scrolled nodes ??
+  if DeltaY <> 0 then
+     UpdateDBTree(False);
+  inherited DoScroll(DeltaX, DeltaY);
+end;
+
 
 procedure TCustomVirtualDBGrid.DoChangeSort(Sender: TObject; SortColumn: TColumnIndex;
         SortDirection: TSortDirection); 
@@ -2783,22 +2801,15 @@ end;
 
 function TCustomVirtualDBGrid.GetRecordCount: longint;
 begin
-  Result:= 0;
-
-  if (DBOptions.RecordCountType = rcFromDataset) then
+  Result := 0;
+  if DBOptions.RecordCountType = rcFromDataset then
   begin
-    if Assigned(LinkedDataSet) then
-    begin
-      if LinkedDataSet.Active
-         then Result:= LinkedDataSet.RecordCount
-         else Result:= 0;
-    end;
+    if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+      Result := LinkedDataSet.RecordCount;
   end
   else
-  DoGetRecordCount(self, Result);
+    DoGetRecordCount(Self, Result);
 end;
-
-
 
 function TCustomVirtualDBGrid.FindNodeByRecNo(ARecNo: longint): PVirtualNode;
 var
@@ -3118,36 +3129,31 @@ end;
 
 procedure TCustomVirtualDBGrid.InternalInitializeDBTree;
 var
-   DBRecordCount: longint;
-   ColumnIndex:    TColumnIndex;
-   IndCol:         TVirtualDBTreeColumn;
-   IndColIndex:    TColumnIndex;
+  ColumnIndex:    TColumnIndex;
+  IndCol:         TVirtualDBTreeColumn;
+  IndColIndex:    TColumnIndex;
 begin
-  DBRecordCount:= 0;
-  DBRecordCount:= fRecordCount;//GetRecordCount;
-
   BeginUpdate;
   Clear;
   // Set Nodes count equals to database records count
-  RootNodeCount:= DBRecordCount;
+  RootNodeCount := FRecordCount;
   EndUpdate;
 
-
   // Set focused column
-  ColumnIndex:= 0;
+  ColumnIndex := 0;
   // Find first column near indicator
-  IndColIndex:= -1;
-  IndCol:= IndicatorColumn;
+  IndColIndex := -1;
+  IndCol := IndicatorColumn;
   if (IndCol <> nil) then
   begin
-     ColumnIndex:= Header.Columns.ColumnFromPosition(1);
-     IndColIndex:= IndCol.Index;
+     ColumnIndex := Header.Columns.ColumnFromPosition(1);
+     IndColIndex := IndCol.Index;
   end;
 
   if (IndColIndex <> ColumnIndex) and
      (ColumnIndex > NoColumn) and
      (ColumnIndex < Header.Columns.Count)
-     then FocusedColumn:= ColumnIndex;
+     then FocusedColumn := ColumnIndex;
 end;
 
 procedure TCustomVirtualDBGrid.InitializeDBTree;
@@ -3158,89 +3164,74 @@ end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
 var
-   OldTopNode,
-   NewFocusedNode,
-   RunNode: PVirtualNode;
+  OldTopNode,
+  NewFocusedNode,
+  RunNode: PVirtualNode;
 
-   OldNodeIndex,
-   OldFocusedNodeIndex: Cardinal;
+  OldNodeIndex,
+  OldFocusedNodeIndex: Cardinal;
 
-   OldRecNo,
-   NewRecNo:       longint;
+  OldOffsetXY: TPoint;
 
-   Data:           PNodeData;
+  VisibledNodes: Cardinal;
 
-   OldOffsetY,
-   OldOffsetX : Integer;
-
-   VisibledNodes: Cardinal;
-
-   CenterToNode: boolean;
+  CenterToNode: Boolean;
 begin
+  Logger.EnterMethod(lcAll, 'ReInitializeDBGrid');
   // backup old values
-  OldTopNode:= TopNode;
-  OldNodeIndex:= 0;
+  OldTopNode := TopNode;
+  OldNodeIndex := 0;
   if Assigned(OldTopNode) then
-    OldNodeIndex:= OldTopNode.Index;
-  OldFocusedNodeIndex:= 0;
+    OldNodeIndex := OldTopNode.Index;
+  OldFocusedNodeIndex := 0;
   if Assigned(FocusedNode) then
-    OldFocusedNodeIndex:= FocusedNode.Index;
-  OldOffsetY:= OffsetY;
-  OldOffsetX:= OffsetX;
-  Data:= InternalGetNodeData(OldTopNode);
-  OldRecNo:= 0;
-  if IsDataOk(Data) then OldRecNo:= Data.RecordData.RecNo;
+    OldFocusedNodeIndex := FocusedNode.Index;
 
+  OldOffsetXY := OffsetXY;
 
   // Initialize database tree
   InternalInitializeDBTree;
 
-
   // Set back offset X & Y
-  OffsetY:= OldOffsetY;
-  OffsetX:= OldOffsetX;
-
-  // Set database cursor
-  GotoRecNo(OldRecNo);
+  OffsetXY := OldOffsetXY;
 
   // Update database tree
-  UpdateDBTree(true);
-
+  UpdateDBTree(True);
 
   // Set focus
   BeginUpdate;
 
-  OldTopNode:=     TopNode;
-  RunNode:=        OldTopNode;
-  NewFocusedNode:= RunNode;
+  OldTopNode := TopNode;
+  RunNode := OldTopNode;
+  NewFocusedNode := RunNode;
   while Assigned(RunNode) and
         (OldFocusedNodeIndex <> NewFocusedNode.Index) and
         (NewFocusedNode.Index < OldFocusedNodeIndex)
   do begin
-    RunNode:= GetNextSibling(NewFocusedNode);
+    RunNode := GetNextSibling(NewFocusedNode);
     if Assigned(RunNode) then
        NewFocusedNode:= RunNode;
   end;
 
-  if (not Assigned(NewFocusedNode)) then
-     NewFocusedNode:= OldTopNode;
-  if (not Assigned(NewFocusedNode)) then
-     NewFocusedNode:= GetFirst;
+  if not Assigned(NewFocusedNode) then
+     NewFocusedNode := OldTopNode;
+  if not Assigned(NewFocusedNode) then
+     NewFocusedNode := GetFirst;
 
   if Assigned(NewFocusedNode) then
   begin
-    VisibledNodes:=AdvGetFullyVisibleCount(ClientHeight);
+    VisibledNodes := AdvGetFullyVisibleCount(ClientHeight);
 
-    CenterToNode:= true;
+    CenterToNode := True;
     if Assigned(OldTopNode) then
-       CenterToNode:= (NewFocusedNode.Index < OldTopNode.Index) or
+       CenterToNode := (NewFocusedNode.Index < OldTopNode.Index) or
                       (NewFocusedNode.Index > (OldTopNode.Index + VisibledNodes));
-
 
     SetFocusToNode(NewFocusedNode, CenterToNode);
   end;
 
   EndUpdate;
+  Logger.ExitMethod(lcAll, 'ReInitializeDBGrid');
 end;
 
 
@@ -3298,7 +3289,6 @@ var
   Count: Cardinal;
 
   OldRecNo,
-  NewRecNo,
   NewMove: LongInt;
 
   Run: PVirtualNode;
@@ -3310,9 +3300,14 @@ var
   AHeight: Integer;
 
 begin
-  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
-    Exit;
 
+  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
+  begin
+    Exit;
+  end;
+  Logger.EnterMethod(lcAll, 'UpdateDBTree');
+  Logger.Send(lcAll, 'AControlHeight', AControlHeight);
+  //Logger.SendCallStack(lcAll, 'Stack');
   Run := TopNode;
   if not Assigned(Run) then
     Exit;
@@ -3361,7 +3356,7 @@ begin
              LinkedDataSet.MoveBy(NewMove);
            WasNewMoved := True;
          end;
-
+         Logger.Send(lcAll, 'LoadingData', Run.Index);
          InternalLoadDBData(Run, True); // load data from database
 
          LinkedDataSet.Next;
@@ -3379,6 +3374,7 @@ begin
     LinkedDataSet.EnableControls;
     DecLoadingDataFlag;
   end;
+  Logger.ExitMethod(lcAll, 'UpdateDBTree');
 end;
 
 
@@ -3657,26 +3653,10 @@ begin
   end;
 end;
 
-function TCustomVirtualDBGrid.DoSetOffsetXY(Value: TPoint; Options: TScrollUpdateOptions; ClipRect: PRect = nil): Boolean;
-var
-   YChanged: boolean;
-begin
-  //todo: see if is better to override DoScroll since the calculation of "YChanged"
-  //is not so simple
-  //there's a chance that this could cause delay in tree update
-  //in last case copy the YChanged algo from VTV
-  YChanged := (Value.Y - OffsetY) <> 0;
-  inherited DoSetOffsetXY(Value, Options, ClipRect);
-
-  if YChanged then
-     UpdateDBTree(false);
-end;
-
 function TCustomVirtualDBGrid.GetRecordDataClass: TRecordDataClass;
 begin
   Result:= TRecordData;
 end;
-
 
 function TCustomVirtualDBGrid.GetCurrentDBRecNo: LongInt;
 begin
