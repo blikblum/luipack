@@ -396,7 +396,6 @@ type
     procedure SetDBOptions(const Value: TVTDBOptions);
     function GetOptions: TStringTreeOptions;
     procedure SetOptions(const Value: TStringTreeOptions);
-    procedure WMVScroll(var Message: TWMVScroll); message WM_VSCROLL;
     procedure WMSize(var Message: TWMSize); message WM_SIZE;
 
     function InternalGetNodeData(ANode: PVirtualNode): PNodeData;
@@ -2011,24 +2010,21 @@ destructor TCustomVirtualDBGrid.Destroy;
 begin
   fDBOptions.Free;
   fIndicatorBMP.Free;
-
   inherited Destroy;
 end;
 
 function TCustomVirtualDBGrid.GetIndicatorColumn: TVirtualDBTreeColumn;
 var
-   IndColumn: TColumnIndex;
+  IndColumn: TColumnIndex;
 begin
-  Result:= nil;
+  Result := nil;
   // indicator column is always at position 0
-  IndColumn:= NoColumn;
-  IndColumn:= Header.Columns.ColumnFromPosition(0);
-  if (IndColumn > NoColumn) and
-     (IndColumn < Header.Columns.Count) then
+  IndColumn := Header.Columns.ColumnFromPosition(0);
+  if IndColumn <> NoColumn then
   begin
-    Result:= TVirtualDBTreeColumn(Header.Columns[IndColumn]);
-    if (Result.ColumnType <> ctIndicator) then
-       Result:= nil;
+    Result := TVirtualDBTreeColumn(Header.Columns[IndColumn]);
+    if Result.ColumnType <> ctIndicator then
+       Result := nil;
   end;
 end;
 
@@ -2088,7 +2084,6 @@ begin
          then fDBOptions.DataSource := nil;
     end;
 end;
-
 
 procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
 begin
@@ -2186,8 +2181,6 @@ begin
   end;
 end;
 
-
-
 function TCustomVirtualDBGrid.GetDataSet: TDataSet;
 var
     WDataLink: TDataLink;
@@ -2203,7 +2196,6 @@ begin
   end;
 end;
 
-
 function TCustomVirtualDBGrid.GetDataLink: TDataLink;
 begin
   Result:= nil;
@@ -2214,15 +2206,6 @@ begin
     Result:= nil;
   end;
 end;
-
-procedure TCustomVirtualDBGrid.WMVScroll(var Message: TWMVScroll);
-begin
-  //todo: see if is required this because DoScroll already updates the tree
-  inherited;
-
-  UpdateDBTree(false);
-end;
-
 
 procedure TCustomVirtualDBGrid.ValidateNodeDataSize(var Size: Integer);
 begin
@@ -2784,10 +2767,12 @@ end;
 
 procedure TCustomVirtualDBGrid.DoScroll(DeltaX, DeltaY: Integer);
 begin
+  Logger.EnterMethod(lcAll, 'DoScroll');
   //todo: elaborate an algorithm to update only the scrolled nodes ??
   if DeltaY <> 0 then
      UpdateDBTree(False);
   inherited DoScroll(DeltaX, DeltaY);
+  Logger.ExitMethod(lcAll, 'DoScroll');
 end;
 
 
