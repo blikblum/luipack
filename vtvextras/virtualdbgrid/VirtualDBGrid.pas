@@ -160,27 +160,27 @@ type
 
   TRecordData = class
   private
-    fList : TList;
+    fList : TFpList;
     fRecNo: Longint;
 
     function GetCalculatedByIdx(Index: Integer): boolean;
-    function GetCalculated(IDText: string): boolean;
+    function GetCalculated(const IDText: string): boolean;
     function GetCalculatedValueByIdx(Index: Integer): Variant;
     procedure PutCalculatedValueByIdx(Index: Integer; Value: Variant);
-    function GetCalculatedValue(IDText: string): Variant;
-    procedure PutCalculatedValue(IDText: string; Value: Variant);
+    function GetCalculatedValue(const IDText: string): Variant;
+    procedure PutCalculatedValue(const IDText: string; Value: Variant);
 
     function GetField(Index: Integer) : TDBFieldValueRec;
     procedure PutField(Index: Integer; Value: TDBFieldValueRec);
     function GetFieldName(Index: Integer) : string;
     procedure PutFieldName(Index: Integer; Value: string);
     function GetFieldValueByIdx(Index: Integer) : Variant;
-    function GetFieldValue(FieldName: String) : Variant;
+    function GetFieldValue(const FieldName: String) : Variant;
     procedure PutFieldValueByIdx(Index: Integer; Value: Variant);
     procedure PutFieldValue(FieldName: String; Value: Variant);
     function GetFieldTypeByIdx(Index: Integer) : TFieldType;
     function GetFieldType(FieldName: string) : TFieldType;
-    function GetFieldsCount: Integer;
+    function GetFieldsCount: Integer; inline;
     function GetIndidicatorByIdx(Index: Integer): boolean;
     function GetFielFlag(Index: Integer): byte;
   public
@@ -188,12 +188,12 @@ type
     destructor Destroy; override;
 
     procedure ClearItems;
-    procedure Add(AFieldName: string; AFieldValue: Variant; AFieldType: TFieldType;
+    procedure Add(const AFieldName: string; AFieldValue: Variant; AFieldType: TFieldType;
                   AFieldFlag: byte);
     procedure Edit(const AFieldName: string; const AFieldFlag: byte; NewFieldValue: Variant); overload;
     procedure Edit(const AFieldName: string; const AFieldFlag: byte; NewFieldValue: Variant;
                    NewFieldType: TFieldType); overload;
-    procedure Insert(Index: Integer; AFieldName: string; AFieldValue: Variant;
+    procedure Insert(Index: Integer; const AFieldName: string; AFieldValue: Variant;
                      AFieldType: TFieldType; AFieldFlag: byte);
 
     procedure Delete(Index: Integer);
@@ -287,8 +287,8 @@ type
     fColumnType: TColumnType;
 
     fSavedMainColumn: TColumnIndex;
-    procedure InternalSetFieldName(AFieldName: widestring);
-    procedure SetFieldName(AFieldName: widestring);
+    procedure InternalSetFieldName(const AFieldName: widestring);
+    procedure SetFieldName(const AFieldName: widestring);
     procedure SetColumnType(value: TColumnType);
     function GetOwnerTree: TCustomVirtualDBGrid;
   protected
@@ -478,8 +478,7 @@ type
 
     function InternalData(Node: PVirtualNode): Pointer;
 
-    function GetDataSet: TDataSet;
-    function GetDataLink: TDataLink;
+    function GetDataSet: TDataSet; inline;
 
     property InternalRecordCount: longint   read fRecordCount;
 
@@ -855,54 +854,46 @@ end;
 constructor TRecordData.Create;
 begin
   inherited Create;
-  fList := TList.Create;
-  fRecNo:= 0;
+  fList := TFpList.Create;
+  //fRecNo := 0;
 end;
 
 destructor TRecordData.Destroy;
 begin
   ClearItems;
-  if Assigned(fList) then
-    FreeAndNil(fList);
-
+  fList.Destroy;
   inherited Destroy;
 end;
 
 
 procedure TRecordData.ClearItems;
-var i   : integer;
-    rec : PDBFieldValueRec;
+var
+  i   : integer;
+  rec : PDBFieldValueRec;
 begin
-  if (fList = nil) then exit;
-
-  for i := 0 to fList.Count-1 do
+  for i := 0 to fList.Count - 1 do
   begin
-    rec:= nil;
-    rec:= PDBFieldValueRec(fList[I]);
-    if (rec <> nil) then
-    begin
-       dispose(rec);
-    end;
+    rec := PDBFieldValueRec(fList[i]);
+    if rec <> nil then
+      Dispose(rec);
   end;
   fList.Clear;
-
 end;
-
 
 procedure TRecordData.Edit(const AFieldName: string; const AFieldFlag: byte;
    NewFieldValue: Variant);
-
-var i : integer;
+var
+  i : integer;
 begin
-  if (AFieldName <> '')
-  then begin
-     for i := 0 to FieldsCount-1 do
+  if (AFieldName <> '') then
+  begin
+     for i := 0 to FieldsCount - 1 do
      begin
        if (UpperCase(Fields[i].FieldName) = UpperCase(AFieldName)) and
           (Fields[i].FieldFlag = AFieldFlag) then
           begin
             PDBFieldValueRec(fList[i])^.FieldValue:= NewFieldValue;
-            break;
+            Break;
           end;
      end;
   end;
@@ -911,106 +902,94 @@ end;
 
 procedure TRecordData.Edit(const AFieldName: string; const AFieldFlag: byte;
     NewFieldValue: Variant; NewFieldType: TFieldType);
-
-var i : integer;
+var
+  i : integer;
 begin
-  if (AFieldName <> '')
-  then begin
-     for i := 0 to FieldsCount-1 do
+  if (AFieldName <> '') then
+  begin
+     for i := 0 to FieldsCount - 1 do
      begin
        if (UpperCase(Fields[i].FieldName) = UpperCase(AFieldName)) and
           (Fields[i].FieldFlag = AFieldFlag) then
           begin
-            PDBFieldValueRec(fList[i])^.FieldValue:= NewFieldValue;
-            PDBFieldValueRec(fList[i])^.FieldType:=  NewFieldType;
-            break;
+            PDBFieldValueRec(fList[i])^.FieldValue := NewFieldValue;
+            PDBFieldValueRec(fList[i])^.FieldType := NewFieldType;
+            Break;
           end;
      end;
   end;
 end;
 
 
-procedure TRecordData.Add(AFieldName: string; AFieldValue: Variant; AFieldType: TFieldType;
+procedure TRecordData.Add(const AFieldName: string; AFieldValue: Variant; AFieldType: TFieldType;
                           AFieldFlag: byte);
 var
-    rec: PDBFieldValueRec;
+  rec: PDBFieldValueRec;
 begin
-  if (not assigned(fList)) then exit;
-
-  new(rec);
-  fillchar(rec^, sizeof(rec^), 0);
-  rec^.FieldName:=  AFieldName;
-  rec^.FieldValue:= AFieldValue;
-  rec^.FieldType:=  AFieldType;
-  rec^.FieldFlag:=  AFieldFlag;
-
+  New(rec);
+  rec^.FieldName := AFieldName;
+  rec^.FieldValue := AFieldValue;
+  rec^.FieldType := AFieldType;
+  rec^.FieldFlag := AFieldFlag;
   fList.Add(rec);
 end;
 
-procedure TRecordData.Insert(Index: Integer; AFieldName: string; AFieldValue: Variant;
+procedure TRecordData.Insert(Index: Integer; const AFieldName: string; AFieldValue: Variant;
                              AFieldType: TFieldType; AFieldFlag: byte);
 var
-    rec: PDBFieldValueRec;
+  rec: PDBFieldValueRec;
 begin
-  if (not assigned(fList)) then exit;
-
   new(rec);
-  fillchar(rec^, sizeof(rec^), 0);
-  rec^.FieldName:=  AFieldName;
-  rec^.FieldValue:= AFieldValue;
-  rec^.FieldType:=  AFieldType;
-  rec^.FieldFlag:=  AFieldFlag;
-
+  rec^.FieldName := AFieldName;
+  rec^.FieldValue := AFieldValue;
+  rec^.FieldType := AFieldType;
+  rec^.FieldFlag := AFieldFlag;
   fList.Insert(Index, rec);
 end;
 
 procedure TRecordData.Delete(Index: Integer);
 var
-    rec: PDBFieldValueRec;
+  rec: PDBFieldValueRec;
 begin
-  if (not assigned(fList)) then exit;
-
-  if (Index > -1)and(Index < FieldsCount)
-     then begin
-        rec:= nil;
-        rec:= PDBFieldValueRec(fList[Index]);
-        if (rec <> nil) then
-           dispose(rec);
-        fList.Delete(Index);
-     end;
+  if (Index > -1) and (Index < FieldsCount) then
+  begin
+    rec := PDBFieldValueRec(fList[Index]);
+    if (rec <> nil) then
+       dispose(rec);
+    fList.Delete(Index);
+  end;
 end;
 
 function TRecordData.IndexOf(const AFieldName: string) : Integer;
-var i : integer;
+var
+  i : integer;
 begin
-   Result:= -1;
-   for i := 0 to FieldsCount-1 do
+   Result := -1;
+   for i := 0 to FieldsCount - 1 do
    begin
      if (UpperCase(Fields[i].FieldName) = UpperCase(AFieldName)) then
      begin
-        if (AFieldName <> '') or
-           ((AFieldName = '') and (Fields[i].FieldFlag = ffIndicator))
-           then Result:= I;
-
-        break;
+        if (AFieldName <> '') or (Fields[i].FieldFlag = ffIndicator) then
+          Result := i;
+        Break;
      end;
    end;
 end;
 
 function TRecordData.IndexOf(const AFieldName: string; const AFieldFlag: byte) : Integer;
-var i : integer;
+var
+  i : integer;
 begin
-  Result:= -1;
-  if (AFieldName <> '') or
-     ((AFieldName = '') and (AFieldFlag = ffIndicator))
-  then begin
-     for i := 0 to FieldsCount-1 do
+  Result := -1;
+  if (AFieldName <> '') or (AFieldFlag = ffIndicator) then
+  begin
+     for i := 0 to FieldsCount - 1 do
      begin
        if (UpperCase(Fields[i].FieldName) = UpperCase(AFieldName)) and
           (Fields[i].FieldFlag = AFieldFlag) then
           begin
-            Result:= I;
-            break;
+            Result:= i;
+            Break;
           end;
      end;
   end;
@@ -1020,11 +999,9 @@ end;
 procedure TRecordData.Exchange(Index1, Index2: Integer);
 var
   Item1, Item2: PDBFieldValueRec;
-  FCount: Integer;
 begin
-  FCount:= FieldsCount;
-  if (Index1 < 0) or (Index1 >= FCount) then exit;
-  if (Index2 < 0) or (Index2 >= FCount) then exit;
+  if (Index1 < 0) or (Index1 >= FieldsCount) then exit;
+  if (Index2 < 0) or (Index2 >= FieldsCount) then exit;
 
   Item1 := PDBFieldValueRec(FList[Index1]);
   Item2 := PDBFieldValueRec(FList[Index2]);
@@ -1040,47 +1017,41 @@ begin
   PDBFieldValueRec(FList[Index2])^.FieldValue:= Item1^.FieldValue;
   PDBFieldValueRec(FList[Index2])^.FieldType:=  Item1^.FieldType;
   PDBFieldValueRec(FList[Index2])^.FieldFlag:=  Item1^.FieldFlag;
-
 end;
 
 
 function TRecordData.GetFieldsCount: Integer;
 begin
-  Result:= -1;
-  if (Assigned(fList)) then
-     Result:= fList.Count;
-
+  Result := fList.Count;
 end;
-
 
 function TRecordData.GetIndidicatorByIdx(Index: Integer): boolean;
 begin
-  result:= false;
+  result := false;
 
   if (Index > -1) and (Index < FieldsCount) then
-     result:= (Fields[Index].FieldFlag = ffIndicator);
+     result := (Fields[Index].FieldFlag = ffIndicator);
 end;
 
 function TRecordData.GetFielFlag(Index: Integer): byte;
 begin
-  result:= ffUndeclared;
+  result := ffUndeclared;
 
   if (Index > -1) and (Index < FieldsCount) then
-     result:= Fields[Index].FieldFlag;
+     result := Fields[Index].FieldFlag;
 end;
 
 function TRecordData.GetCalculatedByIdx(Index: Integer): boolean;
 begin
-  Result:= false;
-
+  Result := false;
   if (Index > -1) and (Index < FieldsCount) then
-     Result:= (Fields[Index].FieldFlag = ffCalculated);
+     Result := (Fields[Index].FieldFlag = ffCalculated);
 end;
 
-function TRecordData.GetCalculated(IDText: string): boolean;
+function TRecordData.GetCalculated(const IDText: string): boolean;
 var i : integer;
 begin
-  Result:= false;
+  Result := false;
 
   if (IDText <> '')
   then begin
@@ -1097,19 +1068,19 @@ end;
 
 function TRecordData.GetCalculatedValueByIdx(Index: Integer): Variant;
 begin
-  Result:= null;
+  Result := null;
 
   if IsCalculatedByIdx[Index] then
-     Result:= FieldValueByIdx[Index];
+     Result := FieldValueByIdx[Index];
 end;
 
 procedure TRecordData.PutCalculatedValueByIdx(Index: Integer; Value: Variant);
 begin
   if IsCalculatedByIdx[Index] then
-     FieldValueByIdx[Index]:= Value;
+     FieldValueByIdx[Index] := Value;
 end;
 
-function TRecordData.GetCalculatedValue(IDText: string): Variant;
+function TRecordData.GetCalculatedValue(const IDText: string): Variant;
 begin
   Result:= null;
 
@@ -1117,7 +1088,7 @@ begin
      Result:= FieldValue[IDText];
 end;
 
-procedure TRecordData.PutCalculatedValue(IDText: string; Value: Variant);
+procedure TRecordData.PutCalculatedValue(const IDText: string; Value: Variant);
 begin
   if IsCalculated[IDText] then
      FieldValue[IDText]:= Value;
@@ -1126,52 +1097,44 @@ end;
 
 function TRecordData.GetField(Index: Integer) : TDBFieldValueRec;
 begin
-  if (Index > -1)and(Index < fList.Count)
-     then begin
-        Result:= PDBFieldValueRec(fList[Index])^;
-     end;
+  if (Index > -1) and (Index < fList.Count) then
+    Result:= PDBFieldValueRec(fList[Index])^;
 end;
 
 procedure TRecordData.PutField(Index: Integer; Value: TDBFieldValueRec);
 begin
-  if (Index > -1)and(Index < fList.Count)
-     then begin
-       PDBFieldValueRec(fList[Index])^:= Value;
-     end;
-
+  if (Index > -1) and (Index < fList.Count) then
+    PDBFieldValueRec(fList[Index])^:= Value;
 end;
 
 function TRecordData.GetFieldName(Index: Integer) : string;
 begin
-  if (Index > -1)and(Index < fList.Count)
-     then Result:= PDBFieldValueRec(fList[Index])^.FieldName;
-
+  if (Index > -1) and (Index < fList.Count) then
+    Result := PDBFieldValueRec(fList[Index])^.FieldName;
 end;
 
 procedure TRecordData.PutFieldName(Index: Integer; Value: string);
 begin
-  if (Index > -1)and(Index < fList.Count)
-     then PDBFieldValueRec(fList[Index])^.FieldName:= Value;
-
+  if (Index > -1) and (Index < fList.Count) then
+    PDBFieldValueRec(fList[Index])^.FieldName := Value;
 end;
 
 function TRecordData.GetFieldValueByIdx(Index: Integer) : Variant;
 begin
-  Result:= null;
-
-  if (Index < 0) or (Index >= FieldsCount) then exit;
-
-  Result:= Fields[Index].FieldValue;
+  if (Index < 0) or (Index >= FieldsCount) then
+    Result := null
+  else
+    Result := Fields[Index].FieldValue;
 end;
 
-
-function TRecordData.GetFieldValue(FieldName: String) : Variant;
-var i : integer;
+function TRecordData.GetFieldValue(const FieldName: String) : Variant;
+var
+  i: integer;
 begin
-  Result:= null;
+  Result := null;
 
-  if (FieldName <> '')
-  then begin
+  if (FieldName <> '') then
+  begin
      for i := 0 to FieldsCount-1 do
      begin
        if UpperCase(Fields[i].FieldName) = UpperCase(FieldName)
@@ -1181,7 +1144,6 @@ begin
           end;
      end;
   end;
-
 end;
 
 
@@ -1194,10 +1156,11 @@ end;
 
 
 procedure TRecordData.PutFieldValue(FieldName: String; Value: Variant);
-var i : integer;
+var
+  i : integer;
 begin
-  if (FieldName <> '')
-  then begin
+  if (FieldName <> '') then
+  begin
      for i := 0 to FieldsCount-1 do
      begin
        if UpperCase(Fields[i].FieldName) = UpperCase(FieldName)
@@ -1212,29 +1175,29 @@ end;
 
 function TRecordData.GetFieldTypeByIdx(Index: Integer) : TFieldType;
 begin
-  Result:= ftUnknown;
-
-  if (Index < 0) or (Index >= FieldsCount) then exit;
-
-  Result:= Fields[Index].FieldType;
+  if (Index < 0) or (Index >= FieldsCount) then
+    Result:= ftUnknown
+  else
+    Result:= Fields[Index].FieldType;
 end;
 
 function TRecordData.GetFieldType(FieldName: string) : TFieldType;
-var i : integer;
+var
+  i : integer;
 begin
-  Result:= ftUnknown;
+  Result := ftUnknown;
 
-  if (FieldName <> '')
-     then begin
-       for i := 0 to FieldsCount-1 do
-       begin
-         if UpperCase(Fields[i].FieldName) = UpperCase(FieldName)
-            then begin
-              Result:= Fields[i].FieldType;
-              break;
-            end;
-       end;
-     end;
+  if (FieldName <> '') then
+  begin
+    for i := 0 to FieldsCount-1 do
+    begin
+     if UpperCase(Fields[i].FieldName) = UpperCase(FieldName)
+        then begin
+          Result:= Fields[i].FieldType;
+          break;
+        end;
+    end;
+  end;
 end;
 
 { --- TRecordData ---------------------------------------------------------------- }
@@ -1298,7 +1261,7 @@ end;
 { ============================================================================ }
 { --- TVirtualDBTreeColumn --------------------------------------------------- }
 
-procedure TVirtualDBTreeColumn.InternalSetFieldName(AFieldName: widestring);
+procedure TVirtualDBTreeColumn.InternalSetFieldName(const AFieldName: widestring);
 var Tree: TCustomVirtualDBGrid;
     empty: boolean;
     str:   string;
@@ -1314,10 +1277,11 @@ begin
   Tree:= GetOwnerTree;
   FField := Nil;
   FFieldName := AFieldName;
-  empty:= self.Text = '';
+  empty := self.Text = '';
   if (empty) then
-     self.Text:= FFieldName;
+    self.Text:= FFieldName;
   if (not Assigned(Tree.LinkedDataSet)) then exit;
+  //todo: see why this call here
   Tree.DataLinkActiveChanged;
 
   Ok:= true;
@@ -1326,7 +1290,6 @@ begin
 
   if (Ok) then
   begin
-     FField:= nil;
      FField:= Tree.LinkedDataSet.FindField(FFieldName);
      if (FField <> nil) then
      begin
@@ -1365,10 +1328,9 @@ begin
 
      end;
   end;
-
 end;
 
-procedure TVirtualDBTreeColumn.SetFieldName(AFieldName: widestring);
+procedure TVirtualDBTreeColumn.SetFieldName(const AFieldName: widestring);
 var Tree: TCustomVirtualDBGrid;
     empty: boolean;
     str:   string;
@@ -1434,7 +1396,7 @@ end;
 
 function TVirtualDBTreeColumn.GetOwnerTree: TCustomVirtualDBGrid;
 begin
-  Result:= TCustomVirtualDBGrid(Owner.Header.Treeview);
+  Result := TCustomVirtualDBGrid(Owner.Header.Treeview);
 end;
 
 
@@ -1630,7 +1592,6 @@ begin
       Data:= InternalGetNodeData(Run);
       if IsDataOk(Data) then
       begin
-         RecordData:= nil;
          RecordData:= Data.RecordData;
 
          if Assigned(RecordData) then
@@ -1766,9 +1727,7 @@ end;
 
 function TVTDBOptions.GetDataSource: TDataSource;
 begin
-  Result:= nil;
-  if (FDataLink <> nil) then
-     Result := FDataLink.DataSource;
+  Result := FDataLink.DataSource;
 end;
 
 procedure TVTDBOptions.SetDataSource(Value: TDataSource);
@@ -1921,9 +1880,7 @@ end;
 
 destructor TVTDBOptions.Destroy;
 begin
-  if Assigned(FDataLink) then
-     FreeAndNil(FDataLink);
-
+  fDataLink.Destroy;
   inherited Destroy;
 end;
 
@@ -2041,6 +1998,7 @@ end;
 
 function TCustomVirtualDBGrid.InternalData(Node: PVirtualNode): Pointer;
 begin
+  //todo: see is necessary this code
   if (Node = RootNode) or (Node = nil) then
     Result := nil
   else
@@ -2073,20 +2031,16 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.Notification(AComponent: TComponent; Operation: TOperation);
-var
-    WDataLink: TDataLink;
 begin
   inherited;
-  if (Operation = opRemove) then
-    begin
-      WDataLink:= GetDataLink;
-      if Assigned(WDataLink) and (AComponent = fDBOptions.DataSource)
-         then fDBOptions.DataSource := nil;
-    end;
+  if (Operation = opRemove) and Assigned(fDBOptions.DataLink) and
+    (AComponent = fDBOptions.DataSource) then
+      fDBOptions.DataSource := nil;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
 begin
+  //todo: refactor this method
   if (not (csLoading in ComponentState)) and
      (not IsDataLoading) then
   begin
@@ -2182,82 +2136,49 @@ begin
 end;
 
 function TCustomVirtualDBGrid.GetDataSet: TDataSet;
-var
-    WDataLink: TDataLink;
 begin
-  Result:= nil;
-  WDataLink:= nil;
-  try
-    WDataLink:= GetDataLink;
-    if (WDataLink <> nil) then
-       Result:= WDataLink.DataSet;
-  except
-    Result:= nil;
-  end;
-end;
-
-function TCustomVirtualDBGrid.GetDataLink: TDataLink;
-begin
-  Result:= nil;
-  try
-    if (fDBOptions <> nil) then
-       Result:= fDBOptions.DataLink;
-  except
-    Result:= nil;
-  end;
+  Result := fDBOptions.fDataLink.DataSet;
 end;
 
 procedure TCustomVirtualDBGrid.ValidateNodeDataSize(var Size: Integer);
 begin
-  Size:= sizeof(TNodeData);
+  Size := SizeOf(TNodeData);
   inherited;
 end;
 
 procedure TCustomVirtualDBGrid._OnFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
-   Data: PNodeData;
+  Data: PNodeData;
 begin
-  if (not Assigned(Node)) then exit;
-
-  Data:= InternalGetNodeData(Node);
-  if IsDataOk(Data) then FreeAndNil(Data.RecordData);
-
+  Data := InternalGetNodeData(Node);
+  if IsDataOk(Data) then
+    FreeAndNil(Data.RecordData);
 end;
 
 
 procedure TCustomVirtualDBGrid._OnGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
     TextType: TVSTTextType; var CellText: WideString);
 var
-    Data:       PNodeData;
-    ColumnType: TColumnType;
-    FieldName:  string;
-    FieldValue: variant;
-    DBRecNo:    longint;
+  Data:       PNodeData;
+  ColumnType: TColumnType;
+  FieldValue: variant;
 
 begin
-  if (Node = nil) or
-     (Column <= NoColumn) or
-     (Column >= Header.Columns.Count) or
-     (TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType = ctIndicator)
-     then exit;
+  if (Column <= NoColumn) or (TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType = ctIndicator) then
+    Exit;
 
-  Data:= InternalGetNodeData(Node);
-
-  ColumnType:= TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType;
-  FieldName:=  TVirtualDBTreeColumn(Header.Columns[Column]).FieldName;
-  FieldValue:= null;
-  DBRecNo:=    -1;
+  Data := InternalGetNodeData(Node);
 
   if IsDataOk(Data) then
   begin
-       DBRecNo:=    Data.RecordData.RecNo;
-
-       if (ColumnType = ctDBField)
-          then FieldValue:= Data.RecordData.FieldValue[TVirtualDBTreeColumn(Header.Columns[Column]).FieldName]
-          else FieldValue:= Data.RecordData.FieldValueByIdx[Header.Columns[Column].Index];
-       CellText:=   NullVar2Str(FieldValue);
+    ColumnType := TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType;
+    //todo: add a Column > FieldIndex map to avoid using fieldname for the data lookup
+    if ColumnType = ctDBField then
+      FieldValue := Data.RecordData.FieldValue[TVirtualDBTreeColumn(Header.Columns[Column]).FieldName]
+    else
+      FieldValue := Data.RecordData.FieldValueByIdx[Header.Columns[Column].Index];
+    CellText := NullVar2Str(FieldValue);
   end;
-
 end;
 
 
@@ -2285,21 +2206,16 @@ var
 begin
   inherited DoFocusChange(Node, Column);
 
-  IncLoadingDataFlag;
-  try
-    Data:= InternalGetNodeData(Node);
-    if IsDataOk(Data) then
-      GotoRecNo(Data.RecordData.RecNo);
-  finally
-    DecLoadingDataFlag;
-  end;
+  Data := InternalGetNodeData(Node);
+  if IsDataOk(Data) then
+    GotoRecNo(Data.RecordData.RecNo);
 end;
 
 
 procedure TCustomVirtualDBGrid.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
 begin
 
-  if (aoHighlightSortColumn in DBOptions.AdvOptions)and
+  if (aoHighlightSortColumn in DBOptions.AdvOptions) and
      (Column > NoColumn) then
   begin
     Canvas.Brush.Color := Header.Columns[Column].Color;
@@ -2448,15 +2364,10 @@ begin
     exit;
   end;
 
-  Result:= true;
+  Result := (TVirtualDBTreeColumn(Header.Columns[NewColumn]).ColumnType <> ctIndicator);
 
-  if (NewColumn > NoColumn) then
-     if (TVirtualDBTreeColumn(Header.Columns[NewColumn]).ColumnType = ctIndicator)
-        then Result:= false;
-
-  if (Result) then
-     Result:= inherited DoFocusChanging(OldNode, NewNode, OldColumn, NewColumn);
-
+  if Result then
+     Result := inherited DoFocusChanging(OldNode, NewNode, OldColumn, NewColumn);
 end;
 
 
@@ -2482,6 +2393,7 @@ var
 begin
   Result:= 0;
   try
+    //todo: override Sort method and move all these checks to there
     // If we dont want to auto sort then do nothing ...
     if (not (aoAllowSorting in DBOptions.AdvOptions)) then exit;
 
@@ -2662,7 +2574,7 @@ begin
     DoPostChanges(Self, IDText, Column, ColumnType, Data.RecordData, Node.Index,
                   PostText, PostChanges);
 
-    if (PostChanges) then
+    if PostChanges then
        Data.RecordData.CalculatedValue[IDText]:= PostText;
   end
   else begin
@@ -2676,9 +2588,8 @@ begin
      if Assigned(LinkedDataSet) then
      begin
         if (not LinkedDataSet.CanModify) then exit;
-        WField:= nil;
         try
-          WField:= LinkedDataSet.FindField(FieldName);
+          WField := LinkedDataSet.FindField(FieldName);
           if (WField <> nil) then
           begin
              LinkedDataSet.Edit;
@@ -2824,27 +2735,24 @@ end;
 
 function TCustomVirtualDBGrid.SetFocusToNode(Node: PVirtualNode; Center: boolean=true): boolean;
 begin
-  result:= false;
-  if (not Assigned(Node)) then exit;
-  result:= true;
+  Result := Assigned(Node);
+  if not Result then
+    Exit;
 
-  if Assigned(FocusedNode) then Selected[FocusedNode] := False;
+  if Assigned(FocusedNode) then
+    Selected[FocusedNode] := False;
+
   FocusedNode := Node;
-
-  if Assigned(Node) then
-  begin
-    Selected[Node] := True;
-    FullyVisible[Node] := True;
-    ScrollIntoView(Node, Center);
-  end;
+  Selected[Node] := True;
+  FullyVisible[Node] := True;
+  ScrollIntoView(Node, Center);
 end;
 
 
 
 procedure TCustomVirtualDBGrid.GotoRecNo(NewRecNo: longint);
 begin
-  //if (not Assigned(LinkedDataSet)) then exit;
-  if (not Assigned(fDBOptions.DataLink)) then exit;
+  if (not Assigned(LinkedDataSet)) then exit;
   if (not fDBOptions.DataLink.Active) then exit;
 
   IncLoadingDataFlag;
@@ -3004,7 +2912,6 @@ begin
 
    IncLoadingDataFlag;
    try
-     fromDefs:= false;
      fromDefs:= LinkedDataSet.FieldDefs.Count > 0;
      if (fromDefs) then
        begin
@@ -3243,9 +3150,6 @@ procedure TCustomVirtualDBGrid.UpdateCurrentRecord;
 var
   Node: PVirtualNode;
 begin
-  if csLoading in ComponentState then
-    Exit;
-
   Node := FindNodeByRecNo(GetCurrentDBRecNo);
   if Node <> nil then
   begin
@@ -3367,15 +3271,8 @@ function TCustomVirtualDBGrid.IsDataCreated(ANode: PVirtualNode): boolean;
 var
   Data: PNodeData;
 begin
-  Result:= false;
-  try
-    Data:= nil;
-
-    Data:= InternalGetNodeData(ANode);
-    Result:= IsDataOk(Data);
-  except
-    Result:= false;
-  end;
+  Data := InternalGetNodeData(ANode);
+  Result := IsDataOk(Data);
 end;
 
 procedure TCustomVirtualDBGrid.InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: boolean);
@@ -3533,7 +3430,6 @@ begin
     Node := GetNextVisibleSibling(Node);
   end;
 end;
-
 
 
 procedure TCustomVirtualDBGrid.DoSortColumn(AColumn: TColumnIndex; ASortDirection: Integer= -1);
