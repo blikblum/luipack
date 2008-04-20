@@ -164,6 +164,7 @@ type
     FSelectedIndex: Integer;
     FHoverIndex: Integer;
     FSpacing: Integer;
+    FTitlePadding: Integer;
     function CellInPoint(const P: TPoint): Integer;
 //    procedure FillCellClientGap(Cell: TLuiBarCell);
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
@@ -177,6 +178,7 @@ type
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
+    procedure SetTitlePadding(const AValue: Integer);
   protected
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
     procedure DoDraw; override;
@@ -217,6 +219,7 @@ type
     property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
+    property TitlePadding: Integer read FTitlePadding write SetTitlePadding;
     //events
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
@@ -236,9 +239,6 @@ implementation
 uses
   sharedlogger, CairoUtils;
 
-const
-  CellTitlePadding = 8;
-  
 { TLuiBarCellList }
 
 function TLuiBarCellList.GetItems(Index: Integer): TLuiBarCell;
@@ -285,7 +285,7 @@ end;
 
 procedure TLuiBarCellList.UpdateCellBounds;
 var
-  i, NextLeft, NextTop, NewWidth, AlignOffset: Integer;
+  i, NextLeft, NextTop, AlignOffset: Integer;
   Cell: TLuiBarCell;
 begin
   //todo: move to TLuiBar
@@ -776,15 +776,21 @@ begin
   Redraw;
 end;
 
+procedure TLuiBar.SetTitlePadding(const AValue: Integer);
+begin
+  if FTitlePadding=AValue then exit;
+  FTitlePadding:=AValue;
+end;
+
 function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
   if FPosition in [lbpTop, lbpBottom] then
   begin
     if lboVariableCellWidth in FOptions then
     begin
-      Result := Round(GetTextWidth(Cell.Title)) + CellTitlePadding * 2;
+      Result := Round(GetTextWidth(Cell.Title)) + FTitlePadding * 2;
       if (Cell.ImageIndex >=0) and (FImages <> nil) then
-        Inc(Result, FImages.Width + CellTitlePadding div 4);
+        Inc(Result, FImages.Width + FTitlePadding div 4);
     end
     else
     begin
@@ -905,6 +911,7 @@ begin
   FCellHeight := 20;
   FHoverIndex := -1;
   FSelectedIndex := -1;
+  FTitlePadding := 8;
   //todo: find more sensible colors
   with FColors do
   begin
@@ -1055,23 +1062,30 @@ const
   TextPatternMap: array[Boolean] of TLuiBarPatternType = (ptText, ptSelectedText);
 var
   Extents: cairo_text_extents_t;
+  ImageLeft: Integer;
 begin
   with Context do
   begin
-    Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index =
-      FSelectedIndex]);
+    Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index = FSelectedIndex]);
     TextExtents(Cell.Title, @Extents);
-    if (Cell.ImageIndex >=0) and (FImages <> nil) then
+    if (Cell.ImageIndex >= 0) and (FImages <> nil) then
     begin
-      Extents.width := Extents.width - (FImages.Width + CellTitlePadding div 4
-        );
-      FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + CellTitlePadding,
+      //todo: add option to image be positioned at TitlePadding
+      // or be centered together with the text
+      //todo: compute linewidth
+      //todo: rename FTitlePadding to CellPadding
+      
+      ImageLeft := Cell.Width - (FImages.Width + Trunc(Extents.Width) +
+        FTitlePadding);
+      //this will center the image
+      ImageLeft :=  ImageLeft div 2;
+      Extents.Width := Extents.Width - (FImages.Width + FTitlePadding div 4);
+      FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImageLeft,
         (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
-         Cell.ImageIndex, (Cell.Index = FSelectedIndex) or (Cell.Index =
-           FHoverIndex));
+         Cell.ImageIndex, (Cell.Index = FSelectedIndex) or (Cell.Index = FHoverIndex));
     end;
-    MoveTo((Cell.Width  - Extents.width) / 2 , (Cell.Height + Extents.height)
-      / 2);
+    MoveTo((Cell.Width - Extents.Width) / 2,
+      (Cell.Height + Extents.Height) / 2);
     ShowText(Cell.Title);
   end;
 end;
