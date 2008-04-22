@@ -1,5 +1,13 @@
 unit CairoXlib;
 
+{
+ Translation of cairo-xlib.h version 1.4
+ by Jeffrey Pohlmeyer 
+ updated to version 1.4 by Luiz Américo Pereira Câmara 2007
+}
+
+{$mode ObjFpc}
+
 interface
 
 uses

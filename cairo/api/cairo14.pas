@@ -1,3 +1,5 @@
+unit Cairo14;
+
 (* cairo - a vector graphics library with display and print output
  *
  * Copyright © 2002 University of Southern California
@@ -53,15 +55,12 @@
   October 2007
 *)
 
-{$Mode ObjFpc}
-
-unit Cairo14;
+{$mode ObjFpc}
 
 interface
 
 const
   LIB_CAIRO = 'cairo';
-
 
 {$IFDEF FPC}
   {$PACKRECORDS C}

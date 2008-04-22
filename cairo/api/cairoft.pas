@@ -1,15 +1,21 @@
-unit cairo_ft; 
+unit CairoFT; 
+
+{
+ Translation of cairo-ft.h 
+ by Jeffrey Pohlmeyer 
+ updated to version 1.4 by Luiz Américo Pereira Câmara 2007
+}
 
 {$mode objfpc}
 
 interface
 
 uses
-  cairo14, freetypeh;
+  Cairo14, freetypeh;
 
 type
   //todo: properly define FcPattern:
-  //see if ft requires X
+  //It will require translate FontConfig header
   (*
   typedef struct _XftPattern {
     int		    num;
@@ -20,8 +26,7 @@ type
   *)
   FcPattern = Pointer;
   PFcPattern = ^FcPattern;
-  
-  
+    
 function  cairo_ft_font_face_create_for_pattern(pattern:PFcPattern):Pcairo_font_face_t; cdecl; external LIB_CAIRO;
 procedure cairo_ft_font_options_substitute(options:Pcairo_font_options_t; pattern:PFcPattern); cdecl; external LIB_CAIRO;
 function  cairo_ft_font_face_create_for_ft_face(face:TFT_Face; load_flags:longint):Pcairo_font_face_t; cdecl; external LIB_CAIRO;
