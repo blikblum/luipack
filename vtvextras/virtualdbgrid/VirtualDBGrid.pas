@@ -177,9 +177,9 @@ type
     function GetFieldValueByIdx(Index: Integer) : Variant;
     function GetFieldValue(const FieldName: String) : Variant;
     procedure PutFieldValueByIdx(Index: Integer; Value: Variant);
-    procedure PutFieldValue(FieldName: String; Value: Variant);
+    procedure PutFieldValue(const FieldName: String; Value: Variant);
     function GetFieldTypeByIdx(Index: Integer) : TFieldType;
-    function GetFieldType(FieldName: string) : TFieldType;
+    function GetFieldType(const FieldName: String) : TFieldType;
     function GetFieldsCount: Integer; inline;
     function GetIndidicatorByIdx(Index: Integer): boolean;
     function GetFielFlag(Index: Integer): byte;
@@ -1068,10 +1068,10 @@ end;
 
 function TRecordData.GetCalculatedValueByIdx(Index: Integer): Variant;
 begin
-  Result := null;
-
   if IsCalculatedByIdx[Index] then
-     Result := FieldValueByIdx[Index];
+    Result := FieldValueByIdx[Index]
+  else
+    Result := Null;
 end;
 
 procedure TRecordData.PutCalculatedValueByIdx(Index: Integer; Value: Variant);
@@ -1082,16 +1082,16 @@ end;
 
 function TRecordData.GetCalculatedValue(const IDText: string): Variant;
 begin
-  Result:= null;
-
   if IsCalculated[IDText] then
-     Result:= FieldValue[IDText];
+    Result := FieldValue[IDText]
+  else
+    Result := Null;
 end;
 
 procedure TRecordData.PutCalculatedValue(const IDText: string; Value: Variant);
 begin
   if IsCalculated[IDText] then
-     FieldValue[IDText]:= Value;
+     FieldValue[IDText] := Value;
 end;
 
 
@@ -1155,7 +1155,7 @@ begin
 end;
 
 
-procedure TRecordData.PutFieldValue(FieldName: String; Value: Variant);
+procedure TRecordData.PutFieldValue(const FieldName: String; Value: Variant);
 var
   i : integer;
 begin
@@ -1176,12 +1176,12 @@ end;
 function TRecordData.GetFieldTypeByIdx(Index: Integer) : TFieldType;
 begin
   if (Index < 0) or (Index >= FieldsCount) then
-    Result:= ftUnknown
+    Result := ftUnknown
   else
-    Result:= Fields[Index].FieldType;
+    Result := Fields[Index].FieldType;
 end;
 
-function TRecordData.GetFieldType(FieldName: string) : TFieldType;
+function TRecordData.GetFieldType(const FieldName: string) : TFieldType;
 var
   i : integer;
 begin
@@ -2107,14 +2107,15 @@ begin
        fRecordCount := LinkedDataSet.RecordCount;
        // If old record count(fLastRecordCount) <> to new record count
        // then, there was add or remove some record and we want to reflect this changes
+       // Otherwise is necessary to sync to dataset RecNo to reflect a call to Last/First
        if (fRecordCount <> fLastRecordCount) then
        begin
           ReInitializeDBGrid;
           fLastRecordCount := fRecordCount;
-       end;
+       end
+       else
+         SetFocusToActualRecNo;
 
-       //lcl
-       //SetFocusToActualRecNo;
        Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
   end;
