@@ -285,6 +285,7 @@ end;
 
 constructor TToggleLabel.Create(TheOwner: TComponent);
 begin
+  FHighlightColor := clWhite;
   //todo: define Toggle button size dinamically instead of using a fixed value
   FTextOffset := 12;
   inherited Create(TheOwner);
