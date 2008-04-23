@@ -10,6 +10,7 @@ object frmMain: TfrmMain
   ClientHeight = 300
   ClientWidth = 400
   Position = poDesktopCenter
+  LCLVersion = '0.9.25'
   object NotebookMain: TNotebook
     Height = 300
     Width = 400
@@ -18,26 +19,24 @@ object frmMain: TfrmMain
     TabOrder = 0
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 396
+      ClientHeight = 266
       object ToggleLabel1: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 17
         Top = 10
-        Width = 102
+        Width = 149
         ExpandedCaption = 'State2 (Expanded)'
-        HighlightColor = clBlack
         Caption = 'State1 (Collapsed)'
         Layout = tlBottom
         ParentColor = False
       end
       object ToggleLabel2: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 17
         Top = 66
-        Width = 68
+        Width = 100
         ExpandedCaption = 'Hide Panel'
-        HighlightColor = clBlack
         OnChange = ToggleLabel2Change
         Caption = 'Show Panel'
         ParentColor = False
@@ -90,18 +89,18 @@ object frmMain: TfrmMain
       end
       object CheckUnderline: TCheckBox
         Left = 243
-        Height = 19
+        Height = 24
         Top = 95
-        Width = 120
+        Width = 167
         Caption = 'Underline On Hover'
         OnChange = CheckUnderlineChange
         TabOrder = 1
       end
       object CheckBold: TCheckBox
         Left = 244
-        Height = 19
+        Height = 24
         Top = 122
-        Width = 96
+        Width = 131
         Caption = 'Bold On Hover'
         OnChange = CheckBoldChange
         TabOrder = 2
@@ -109,8 +108,8 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 400
+      ClientHeight = 300
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
@@ -412,8 +411,8 @@ object frmMain: TfrmMain
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
-      ClientWidth = 392
-      ClientHeight = 274
+      ClientWidth = 400
+      ClientHeight = 300
       object SearchEdit1: TSearchEdit
         Left = 6
         Height = 23
@@ -421,7 +420,6 @@ object frmMain: TfrmMain
         Width = 168
         EmptyText = '<Search Here> '
         OnExecute = SearchEdit1Execute
-        Font.Color = clGray
         TabOrder = 0
       end
       object MemoSearchLog: TMemo
