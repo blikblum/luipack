@@ -2060,9 +2060,13 @@ begin
             end;
        end;
 
-       if Header.Columns.Count = 0
-          then AddDefaultsFieldsToColumns
-          else InitializeDBTree;
+       if Header.Columns.Count = 0 then
+       begin
+         AddDefaultsFieldsToColumns;
+         InternalInitializeDBTree;
+       end
+       else
+         InitializeDBTree;
 
 
        if Assigned(LinkedDataSet) then
@@ -2932,7 +2936,7 @@ begin
 
    EndUpdate;
 
-   ReInitializeDBGrid;
+   //ReInitializeDBGrid;
 end;
 
 procedure TCustomVirtualDBGrid.ClearAllColumns;
