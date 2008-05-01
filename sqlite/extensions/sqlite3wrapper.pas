@@ -55,10 +55,12 @@ type
     FReturnCode: Integer;
     procedure Reset;
   public
-    function GetInteger(Finalize: Boolean = True): Integer;
+    function GetInteger(Column: Integer = 0; Finalize: Boolean = True): Integer;
     procedure GetList(List: TStrings; FillObjects: Boolean = False; Finalize: Boolean = True);
-    function GetString(Finalize: Boolean = True): String;
-    function IsNull(Finalize: Boolean = False): Boolean;
+    function GetString(Column: Integer = 0; Finalize: Boolean = True): String;
+    function IsEmpty: Boolean;
+    function IsNull(Column: Integer = 0; Finalize: Boolean = False): Boolean;
+    
   end;
 
   { TSqlite3Database }
@@ -80,6 +82,7 @@ type
     function Query (const SQL: String): TSqlite3Query;
     procedure Open;
     procedure ExecSql (const SQL: String);
+    function LastInsertRowId: Integer;
     procedure Prepare (const SQL: String; Reader: TSqlite3DataReader);
     function ReturnString: String;
     property FileName: String read FFileName write SetFileName;
@@ -202,6 +205,11 @@ begin
   end
   else
     raise Exception.Create('Error in ExecSql: ' + ReturnString);
+end;
+
+function TSqlite3Database.LastInsertRowId: Integer;
+begin
+  Result := sqlite3_last_insert_rowid(FHandle);
 end;
 
 procedure TSqlite3Database.Prepare(const SQL: String; Reader: TSqlite3DataReader);
@@ -334,9 +342,9 @@ begin
   FReturnCode := sqlite3_step(FStatement);
 end;
 
-function TSqlite3Query.GetInteger(Finalize: Boolean = True): Integer;
+function TSqlite3Query.GetInteger(Column: Integer = 0; Finalize: Boolean = True): Integer;
 begin
-  Result := sqlite3_column_int(FStatement, 0);
+  Result := sqlite3_column_int(FStatement, Column);
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
@@ -374,16 +382,21 @@ begin
     sqlite3_finalize(FStatement);
 end;
 
-function TSqlite3Query.GetString(Finalize: Boolean = True): String;
+function TSqlite3Query.GetString(Column: Integer = 0; Finalize: Boolean = True): String;
 begin
-  Result := String(sqlite3_column_text(FStatement, 0));
+  Result := String(sqlite3_column_text(FStatement, Column));
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
 
-function TSqlite3Query.IsNull(Finalize: Boolean = False): Boolean;
+function TSqlite3Query.IsEmpty: Boolean;
 begin
-  Result := sqlite3_column_type(FStatement, 0) = SQLITE_NULL;
+  Result := FReturnCode <> SQLITE_ROW;
+end;
+
+function TSqlite3Query.IsNull(Column: Integer = 0; Finalize: Boolean = False): Boolean;
+begin
+  Result := sqlite3_column_type(FStatement, Column) = SQLITE_NULL;
   if Finalize then
     sqlite3_finalize(FStatement);
 end;
