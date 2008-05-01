@@ -101,8 +101,7 @@ type
   TOnFormatFieldValueEvent = procedure(Sender: TObject; Column: TColumnIndex;
                                        RecordData: TRecordData;
                                        RowIndex: Cardinal; Field: TField;
-                                       var FieldValue: WideString;
-                                       var DefaultFormat: boolean) of object;
+                                       var FieldValue: WideString) of object;
 
   { TOnLoadRecordEvent - Triggered when record from database was loaded into VirtualDBGrid }
   {                      Assigning this event can reduce speed of VirtualDBGrid            }
@@ -1262,70 +1261,79 @@ end;
 { --- TVirtualDBTreeColumn --------------------------------------------------- }
 
 procedure TVirtualDBTreeColumn.InternalSetFieldName(const AFieldName: widestring);
-var Tree: TCustomVirtualDBGrid;
-    empty: boolean;
-    str:   string;
-    Ok:    boolean;
-    size:  integer;
-    ColWidth,
-    ColWidth2: Integer;
+var
+  Tree: TCustomVirtualDBGrid;
+  Empty: boolean;
+  str:   string;
+  Ok:    boolean;
+  size:  integer;
+  CaptionWidth,
+  FieldWidth: Integer;
 
-    ColSpaceExpand: Integer;
-    TextSize: TSize;
-    CalcCanvas: TCanvas;
+  TextSize: TSize;
+  CalcCanvas: TCanvas;
 begin
-  Tree:= GetOwnerTree;
-  FField := Nil;
+  Tree := GetOwnerTree;
+  FField := nil;
   FFieldName := AFieldName;
-  empty := self.Text = '';
-  if (empty) then
-    self.Text:= FFieldName;
-  if (not Assigned(Tree.LinkedDataSet)) then exit;
+  Empty := Self.Text = '';
+  if Empty then
+    Self.Text := FFieldName;
+  if not Assigned(Tree.LinkedDataSet) then
+    Exit;
   //todo: see why this call here
   Tree.DataLinkActiveChanged;
 
-  Ok:= true;
-  if (Tree.LinkedDataSet.Active)
-     then Ok:= (FFieldName <> '');
+  Ok := not Tree.LinkedDataSet.Active or (FFieldName <> '');
 
-  if (Ok) then
+  if Ok then
   begin
-     FField:= Tree.LinkedDataSet.FindField(FFieldName);
-     if (FField <> nil) then
+     FField := Tree.LinkedDataSet.FindField(FFieldName);
+     if FField <> nil then
      begin
          // Assign Text
-         FFieldName:= FField.FieldName;
-         if (empty) then
-           if (FField.DisplayLabel <> '') then
-               self.Text:= FField.DisplayLabel;
-
+         FFieldName := FField.FieldName;
+         if Empty and (FField.DisplayLabel <> '') then
+           Self.Text := FField.DisplayLabel;
 
          // Calculate width
-         ColSpaceExpand:= 2 + Spacing + (Margin*2);
-         CalcCanvas:= TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
-         CalcCanvas.Font:= Owner.Header.Font;
+         CalcCanvas := TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
+         CalcCanvas.Font := Owner.Header.Font;
          // width of column caption
          GetTextExtentPoint32W(CalcCanvas.Handle, PWideChar(self.Text), Length(self.Text), TextSize);
-         ColWidth:= TextSize.cx + ColSpaceExpand;
+         CaptionWidth := TextSize.cx + Spacing + Margin * 2;
 
          // width of field caption
-         size:= FField.DisplayWidth;
-         if (size = 0) then size:= FField.Size;
-         str:= stringofchar('w', size);
-         GetTextExtentPoint32W(CalcCanvas.Handle, PWideChar(str), Length(str), TextSize);
-         ColWidth2:= TextSize.cx + ColSpaceExpand;
+         Size := FField.DisplayWidth;
+         if Size = 0 then
+           Size := FField.Size;
 
-         // which width size is greater then set it
-         if (ColWidth > ColWidth2) then
-         begin
-            if (ColWidth > -1) then
-               Width:= ColWidth;
-         end
-         else begin
-            if (ColWidth2 > -1) then
-               Width:= ColWidth2 + (2*GetOwnerTree.TextMargin);
+         case FField.DataType of
+           ftString:
+             Str := StringOfChar('w', Min(Size, 40));
+           ftInteger, ftWord:
+             Str := '999999';
+           ftBoolean:
+             Str := 'False';
+           else
+             Str := '99999999999999';
          end;
 
+         CalcCanvas := Tree.Canvas;
+         CalcCanvas.Font := Tree.Font;
+         GetTextExtentPoint32W(CalcCanvas.Handle, PWideChar(Str), Length(Str), TextSize);
+         FieldWidth := TextSize.cx + Tree.Margin * 2;
+
+         // which width size is greater then set it
+         if CaptionWidth > FieldWidth then
+         begin
+           if CaptionWidth > -1 then
+             Width := CaptionWidth;
+         end
+         else begin
+           if FieldWidth > -1 then
+             Width := FieldWidth + (2 * GetOwnerTree.TextMargin);
+         end;
      end;
   end;
 end;
@@ -2631,27 +2639,12 @@ end;
 procedure TCustomVirtualDBGrid.DoFormatFieldValue(Sender: TObject; Column: TColumnIndex;
              RecordData: TRecordData; RowIndex: Cardinal; Field: TField;
              var FieldValue: WideString);
-var
-   DefaultFormat: boolean;
 begin
-
-  DefaultFormat:= true;
-  FieldValue:= NullVar2Str(Field.Value);
-
+  FieldValue := NullVar2Str(Field.Value);
+  //todo: remove aoFormatFieldValue
   // If aoFormatFieldValue flag is set then trigger user event OnFormatFieldValue
-  if (aoFormatFieldValue in DBOptions.AdvOptions) then
-    if Assigned(fOnFormatFieldValue) then
-    begin
-       DefaultFormat:= false;
-       fOnFormatFieldValue(Sender, Column, RecordData, RowIndex, Field, FieldValue,
-                           DefaultFormat);
-    end;
-
-  // DefaultFormat means there are no changes made by user in event OnFormatFieldValue
-  // and than we will use value of the Field.Value
-  if (DefaultFormat) then
-     FieldValue:= NullVar2Str(Field.Value);
-
+  if (aoFormatFieldValue in DBOptions.AdvOptions) and Assigned(fOnFormatFieldValue) then
+    fOnFormatFieldValue(Sender, Column, RecordData, RowIndex, Field, FieldValue);
 end;
 
 
@@ -3348,7 +3341,8 @@ begin
                          then begin
                            //todo: see how to handle widestrings
                            //original: Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
-                           Data.RecordData.Add(WFieldName, WField.Value, WField.DataType, ffDBField);
+                           //Data.RecordData.Add(WFieldName, WField.Value, WField.DataType, ffDBField);
+                           Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
                          end
                          else begin
                            if (Idx <> I) then Data.RecordData.Exchange(Idx, I);
@@ -3559,4 +3553,3 @@ initialization
   {$i resources.lrs}
 
 end.
-
