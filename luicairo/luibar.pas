@@ -20,7 +20,8 @@ type
     lboVariableCellWidth,
     lboHotTrack,
     lboOutLineClientArea,
-    lboOmitBaseLine
+    lboOmitBaseLine,
+    lboCenterImage
     );
   
   TLuiBarOptions = set of TLuiBarOption;
@@ -155,6 +156,7 @@ type
     FCellWidth: Integer;
     FClientBounds: TRect;
     FColors: TLuiBarColors;
+    FImagePadding: Integer;
     FImages: TImageList;
     FInitialSpace: Integer;
     FOnDrawBackground: TLuiBarEvent;
@@ -174,7 +176,7 @@ type
     FSelectedIndex: Integer;
     FHoverIndex: Integer;
     FSpacing: Integer;
-    FTitlePadding: Integer;
+    FTextPadding: Integer;
     function CellInPoint(const P: TPoint): Integer;
 //    procedure FillCellClientGap(Cell: TLuiBarCell);
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
@@ -182,6 +184,7 @@ type
     function GetTextWidth(const AText: String): Double;
     function IndexToPatternType(Index: Integer): TLuiBarPatternType;
     procedure SetCellAlign(const AValue: TLuiBarCellAlign);
+    procedure SetImagePadding(const AValue: Integer);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
@@ -189,7 +192,6 @@ type
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
-    procedure SetTitlePadding(const AValue: Integer);
   protected
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
     procedure DoDraw; override;
@@ -200,7 +202,7 @@ type
     procedure DoDrawClientArea;
     function DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType
       ): TCairoPattern; virtual;
-    function DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo;
+    function DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo; virtual;
     procedure DoSelect; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
@@ -222,6 +224,7 @@ type
     property Colors: TLuiBarColors read FColors write FColors;
     property Context;
     property HoverIndex: Integer read FHoverIndex;
+    property ImagePadding: Integer read FImagePadding write SetImagePadding;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property Options: TLuiBarOptions read FOptions write FOptions;
@@ -231,7 +234,7 @@ type
     property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
-    property TitlePadding: Integer read FTitlePadding write SetTitlePadding;
+    property TextPadding: Integer read FTextPadding write FTextPadding;
     //events
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
@@ -485,6 +488,12 @@ procedure TLuiBar.SetCellAlign(const AValue: TLuiBarCellAlign);
 begin
   if FCellAlign = AValue then exit;
   FCellAlign := AValue;
+end;
+
+procedure TLuiBar.SetImagePadding(const AValue: Integer);
+begin
+  if FImagePadding=AValue then exit;
+  FImagePadding:=AValue;
 end;
 
 procedure TLuiBar.SetImages(const AValue: TImageList);
@@ -802,21 +811,22 @@ begin
   Redraw;
 end;
 
-procedure TLuiBar.SetTitlePadding(const AValue: Integer);
-begin
-  if FTitlePadding=AValue then exit;
-  FTitlePadding:=AValue;
-end;
-
 function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
   if FPosition in [lbpTop, lbpBottom] then
   begin
     if lboVariableCellWidth in FOptions then
     begin
-      Result := Round(GetTextWidth(Cell.Title)) + FTitlePadding * 2;
+      Result := Round(GetTextWidth(Cell.Title));
       if (FImages <> nil) and (DoGetImageInfo(Cell).Index >= 0) then
-        Inc(Result, FImages.Width + FTitlePadding div 4);
+      begin
+        //ignore FTextPadding if the Title is ''
+        if Result <> 0 then
+          Inc(Result, FTextPadding);
+        Inc(Result, FImages.Width + 2 * FImagePadding);
+      end
+      else
+        Inc(Result, 2 * FTextPadding)
     end
     else
     begin
@@ -937,7 +947,8 @@ begin
   FCellHeight := 20;
   FHoverIndex := -1;
   FSelectedIndex := -1;
-  FTitlePadding := 8;
+  FTextPadding := 8;
+  FImagePadding := 3;
   //todo: find more sensible colors
   with FColors do
   begin
@@ -1088,35 +1099,44 @@ const
   TextPatternMap: array[Boolean] of TLuiBarPatternType = (ptText, ptSelectedText);
 var
   Extents: cairo_text_extents_t;
-  ImageLeft: Integer;
+  TextWidth: Integer;
+  TextPos: TPoint;
+  ImagePos: TPoint;
   ImageInfo: TLuiBarImageInfo;
 begin
   with Context do
   begin
     Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index = FSelectedIndex]);
     TextExtents(Cell.Title, @Extents);
-
-    if FImages <> nil then
+    TextWidth := Round(Extents.Width);
+    ImageInfo := DoGetImageInfo(Cell);
+    if (FImages <> nil) and (ImageInfo.Index >= 0) then
     begin
-      //todo: add option to image be positioned at TitlePadding
-      // or be centered together with the text
       //todo: compute linewidth
-      //todo: rename FTitlePadding to CellPadding
-      ImageInfo := DoGetImageInfo(Cell);
-      if ImageInfo.Index >= 0 then
+      //todo: add text alignment options
+      if lboCenterImage in FOptions then
       begin
-        ImageLeft := Cell.Width - (FImages.Width + Trunc(Extents.Width) +
-          FTitlePadding);
-        //this will center the image
-        ImageLeft :=  ImageLeft div 2;
-        Extents.Width := Extents.Width - (FImages.Width + FTitlePadding div 4);
-        FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImageLeft,
-          (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
-           ImageInfo.Index, ImageInfo.Effect);
+        ImagePos.x := (Cell.Width - FImages.Width);
+        //ignore TextWidth if Title = ''
+        if TextWidth <> 0 then
+          Dec(ImagePos.x, TextWidth + FImagePadding);
+        ImagePos.x := ImagePos.x div 2;
+        TextPos.x := ImagePos.x + FImages.Width + FImagePadding;
+      end
+      else
+      begin
+        ImagePos.x := FImagePadding;
+        TextPos.x := (Cell.Width - TextWidth - FImagePadding - FImages.Width) div 2;
+        Inc(TextPos.x, FImages.Width + FImagePadding);
       end;
-    end;
-    MoveTo((Cell.Width - Extents.Width) / 2,
-      (Cell.Height + Extents.Height) / 2);
+      FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImagePos.x,
+        (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
+         ImageInfo.Index, ImageInfo.Effect);
+    end
+    else
+      TextPos.x := (Cell.Width - TextWidth) div 2;
+
+    MoveTo(TextPos.x, (Cell.Height + Extents.Height) / 2);
     ShowText(Cell.Title);
   end;
 end;
