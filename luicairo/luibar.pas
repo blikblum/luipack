@@ -771,10 +771,15 @@ begin
       end;
       ptHover:
       begin
-        if Cell.Patterns.Hover = nil then
-          Result := FPatterns.Hover
+        if lboHoverAsSelected in FOptions then
+          Result := DoGetCellPattern(Cell, ptSelected)
         else
-          Result := Cell.Patterns.Hover;
+        begin
+          if Cell.Patterns.Hover = nil then
+            Result := FPatterns.Hover
+          else
+            Result := Cell.Patterns.Hover;
+        end;
       end;
       ptSelected:
       begin
