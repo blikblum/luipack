@@ -21,7 +21,8 @@ type
     lboHotTrack,
     lboOutLineClientArea,
     lboOmitBaseLine,
-    lboCenterImage
+    lboCenterImage,
+    lboTransitorySelect
     );
   
   TLuiBarOptions = set of TLuiBarOption;
@@ -934,7 +935,10 @@ begin
     begin
       FSelectedIndex := ClickedCell;
       DoSelect;
-      Redraw;
+      if lboTransitorySelect in FOptions then
+        FSelectedIndex := -1
+      else
+        Redraw;
     end;
   end;
   inherited MouseDown(Button, Shift, X, Y);
