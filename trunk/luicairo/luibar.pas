@@ -5,7 +5,8 @@ unit LuiBar;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math, Graphics;
+  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math,
+  Graphics, GraphType;
 
 type
 
@@ -41,6 +42,14 @@ type
   TLuiBarGetCellPattern = procedure (Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern) of object;
   
+  TLuiBarImageInfo = record
+    Index: Integer;
+    Effect: TGraphicsDrawEffect;
+  end;
+
+  TLuiBarGetImageInfo = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
+    var ImageInfo: TLuiBarImageInfo) of object;
+  
   TLuiBarColors = record
     Normal: TColor;
     Selected: TColor;
@@ -51,6 +60,8 @@ type
     Background: TColor;
     ClientArea: TColor;
   end;
+  
+
   
   { TLuiBarPatterns }
 
@@ -98,7 +109,6 @@ type
   TLuiBarCell = class
   private
     FBounds: TRect;
-    FImageIndex: Integer;
     FIndex: Integer;
     FPatterns: TLuiBarPatterns;
     FTitle: String;
@@ -108,7 +118,6 @@ type
     constructor Create;
     destructor Destroy; override;
     property Height: Integer read GetHeight;
-    property ImageIndex: Integer read FImageIndex write FImageIndex;
     property Index: Integer read FIndex write FIndex;
     property Patterns: TLuiBarPatterns read FPatterns write FPatterns;
     property Title: String read FTitle write FTitle;
@@ -128,7 +137,7 @@ type
   public
     constructor Create(Owner: TLuiBar);
     destructor Destroy; override;
-    function Add(const Title: String; ImageIndex: Integer = -1): TLuiBarCell;
+    function Add(const Title: String): TLuiBarCell;
     procedure Clear;
     procedure UpdateCellBounds;
     property Count: Integer read GetCount;
@@ -153,6 +162,7 @@ type
     FOnDrawCellPath: TLuiBarDrawCellEvent;
     FOnDrawCellText: TLuiBarDrawCellEvent;
     FOnGetCellPattern: TLuiBarGetCellPattern;
+    FOnGetImageInfo: TLuiBarGetImageInfo;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
     FOnGetPattern: TLuiBarGetPattern;
@@ -174,6 +184,7 @@ type
     procedure SetCellAlign(const AValue: TLuiBarCellAlign);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
+    procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
     procedure SetOnGetPattern(const AValue: TLuiBarGetPattern);
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
@@ -189,6 +200,7 @@ type
     procedure DoDrawClientArea;
     function DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType
       ): TCairoPattern; virtual;
+    function DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo;
     procedure DoSelect; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
@@ -225,6 +237,7 @@ type
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property OnDrawCellPath: TLuiBarDrawCellEvent read FOnDrawCellPath write FOnDrawCellPath;
     property OnDrawCellText: TLuiBarDrawCellEvent read FOnDrawCellText write FOnDrawCellText;
+    property OnGetImageInfo: TLuiBarGetImageInfo read FOnGetImageInfo write SetOnGetImageInfo;
     property OnGetPattern: TLuiBarGetPattern read FOnGetPattern write SetOnGetPattern;
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
@@ -264,12 +277,11 @@ begin
   FList.Destroy;
 end;
 
-function TLuiBarCellList.Add(const Title: String; ImageIndex: Integer = -1): TLuiBarCell;
+function TLuiBarCellList.Add(const Title: String): TLuiBarCell;
 begin
   Result := TLuiBarCell.Create;
   Result.Title := Title;
   Result.Index := FList.Count;
-  Result.ImageIndex := ImageIndex;
   FList.Add(Result);
   FRequiresUpdate := True;
 end;
@@ -485,6 +497,12 @@ procedure TLuiBar.SetInitialSpace(const AValue: Integer);
 begin
   if FInitialSpace=AValue then exit;
   FInitialSpace:=AValue;
+end;
+
+procedure TLuiBar.SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
+begin
+  if FOnGetImageInfo=AValue then exit;
+  FOnGetImageInfo:=AValue;
 end;
 
 procedure TLuiBar.SetOnGetPattern(const AValue: TLuiBarGetPattern);
@@ -765,6 +783,14 @@ begin
   end;
 end;
 
+function TLuiBar.DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo;
+begin
+  Result.Index := -1;
+  Result.Effect := gdeNormal;
+  if Assigned(FOnGetImageInfo) then
+    FOnGetImageInfo(Self, Cell, Result);
+end;
+
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
   if AValue >= FCells.Count then
@@ -789,7 +815,7 @@ begin
     if lboVariableCellWidth in FOptions then
     begin
       Result := Round(GetTextWidth(Cell.Title)) + FTitlePadding * 2;
-      if (Cell.ImageIndex >=0) and (FImages <> nil) then
+      if (FImages <> nil) and (DoGetImageInfo(Cell).Index >= 0) then
         Inc(Result, FImages.Width + FTitlePadding div 4);
     end
     else
@@ -1063,26 +1089,31 @@ const
 var
   Extents: cairo_text_extents_t;
   ImageLeft: Integer;
+  ImageInfo: TLuiBarImageInfo;
 begin
   with Context do
   begin
     Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index = FSelectedIndex]);
     TextExtents(Cell.Title, @Extents);
-    if (Cell.ImageIndex >= 0) and (FImages <> nil) then
+
+    if FImages <> nil then
     begin
       //todo: add option to image be positioned at TitlePadding
       // or be centered together with the text
       //todo: compute linewidth
       //todo: rename FTitlePadding to CellPadding
-      
-      ImageLeft := Cell.Width - (FImages.Width + Trunc(Extents.Width) +
-        FTitlePadding);
-      //this will center the image
-      ImageLeft :=  ImageLeft div 2;
-      Extents.Width := Extents.Width - (FImages.Width + FTitlePadding div 4);
-      FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImageLeft,
-        (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
-         Cell.ImageIndex, (Cell.Index = FSelectedIndex) or (Cell.Index = FHoverIndex));
+      ImageInfo := DoGetImageInfo(Cell);
+      if ImageInfo.Index >= 0 then
+      begin
+        ImageLeft := Cell.Width - (FImages.Width + Trunc(Extents.Width) +
+          FTitlePadding);
+        //this will center the image
+        ImageLeft :=  ImageLeft div 2;
+        Extents.Width := Extents.Width - (FImages.Width + FTitlePadding div 4);
+        FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImageLeft,
+          (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
+           ImageInfo.Index, ImageInfo.Effect);
+      end;
     end;
     MoveTo((Cell.Width - Extents.Width) / 2,
       (Cell.Height + Extents.Height) / 2);
