@@ -28,7 +28,11 @@ type
   
   TLuiBarPosition = (lbpTop, lbpLeft, lbpBottom, lbpRight);
   
-  TLuiBarCellAlign = (lbaDefault, lbaInvert, lbaCenter);
+  TLuiBarImagePosition = (lbipTop, lbipLeft, lbipBottom, lbipRight);
+  
+  TLuiBarCellAlign = (lbcaDefault, lbcaInvert, lbcaCenter);
+  
+  TLuiBarTextAlign = (taCenter, taLeft, taRight);
   
   TLuiBarEvent = procedure (Sender: TLuiBar) of object;
   
@@ -157,6 +161,7 @@ type
     FClientBounds: TRect;
     FColors: TLuiBarColors;
     FImagePadding: Integer;
+    FImagePosition: TLuiBarImagePosition;
     FImages: TImageList;
     FInitialSpace: Integer;
     FOnDrawBackground: TLuiBarEvent;
@@ -176,6 +181,7 @@ type
     FSelectedIndex: Integer;
     FHoverIndex: Integer;
     FSpacing: Integer;
+    FTextAlign: TLuiBarTextAlign;
     FTextPadding: Integer;
     function CellInPoint(const P: TPoint): Integer;
 //    procedure FillCellClientGap(Cell: TLuiBarCell);
@@ -185,6 +191,7 @@ type
     function IndexToPatternType(Index: Integer): TLuiBarPatternType;
     procedure SetCellAlign(const AValue: TLuiBarCellAlign);
     procedure SetImagePadding(const AValue: Integer);
+    procedure SetImagePosition(const AValue: TLuiBarImagePosition);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
@@ -192,6 +199,7 @@ type
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
+    procedure SetTextAlign(const AValue: TLuiBarTextAlign);
   protected
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
     procedure DoDraw; override;
@@ -212,7 +220,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure DefaultDrawCell(Cell: TLuiBarCell);
-    procedure DefaultDrawCellPath(const Cell: TLuiBarCell);
+    procedure DefaultDrawCellPath(Cell: TLuiBarCell);
     procedure DefaultDrawCellText(Cell: TLuiBarCell);
     destructor Destroy; override;
     property Cells: TLuiBarCellList read FCells;
@@ -225,6 +233,7 @@ type
     property Context;
     property HoverIndex: Integer read FHoverIndex;
     property ImagePadding: Integer read FImagePadding write SetImagePadding;
+    property ImagePosition: TLuiBarImagePosition read FImagePosition write SetImagePosition;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property Options: TLuiBarOptions read FOptions write FOptions;
@@ -234,6 +243,7 @@ type
     property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
     property Spacing: Integer read FSpacing write FSpacing;
+    property TextAlign: TLuiBarTextAlign read FTextAlign write SetTextAlign;
     property TextPadding: Integer read FTextPadding write FTextPadding;
     //events
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
@@ -440,11 +450,11 @@ end;
 function TLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
 begin
   case FCellAlign of
-    lbaDefault:
+    lbcaDefault:
       Result := FInitialSpace;
-    lbaInvert:
+    lbcaInvert:
       Result := ControlSize - (CellSize + FInitialSpace);
-    lbaCenter:
+    lbcaCenter:
       Result := (ControlSize - CellSize) div 2;
   end;
 end;
@@ -494,6 +504,12 @@ procedure TLuiBar.SetImagePadding(const AValue: Integer);
 begin
   if FImagePadding=AValue then exit;
   FImagePadding:=AValue;
+end;
+
+procedure TLuiBar.SetImagePosition(const AValue: TLuiBarImagePosition);
+begin
+  if FImagePosition=AValue then exit;
+  FImagePosition:=AValue;
 end;
 
 procedure TLuiBar.SetImages(const AValue: TImageList);
@@ -811,6 +827,12 @@ begin
   Redraw;
 end;
 
+procedure TLuiBar.SetTextAlign(const AValue: TLuiBarTextAlign);
+begin
+  if FTextAlign=AValue then exit;
+  FTextAlign:=AValue;
+end;
+
 function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
   if FPosition in [lbpTop, lbpBottom] then
@@ -948,7 +970,9 @@ begin
   FHoverIndex := -1;
   FSelectedIndex := -1;
   FTextPadding := 8;
+  FTextAlign := taCenter;
   FImagePadding := 3;
+  FImagePosition := lbipLeft;
   //todo: find more sensible colors
   with FColors do
   begin
@@ -988,7 +1012,7 @@ begin
   end;
 end;
 
-procedure TLuiBar.DefaultDrawCellPath(const Cell: TLuiBarCell);
+procedure TLuiBar.DefaultDrawCellPath(Cell: TLuiBarCell);
 var
   InnerRadius: Integer;
   R: TDoubleRect;
@@ -1100,43 +1124,128 @@ const
 var
   Extents: cairo_text_extents_t;
   TextWidth: Integer;
-  TextPos: TPoint;
+  TextHeight: Integer;
+  TextBox: TRect;
+  EffectiveTextAlign: TLuiBarTextAlign;
   ImagePos: TPoint;
   ImageInfo: TLuiBarImageInfo;
 begin
   with Context do
   begin
     Source := DoGetCellPattern(Cell, TextPatternMap[Cell.Index = FSelectedIndex]);
+    EffectiveTextAlign := FTextAlign;
     TextExtents(Cell.Title, @Extents);
     TextWidth := Round(Extents.Width);
+    TextHeight := Round(Extents.Height);
     ImageInfo := DoGetImageInfo(Cell);
     if (FImages <> nil) and (ImageInfo.Index >= 0) then
     begin
       //todo: compute linewidth
-      //todo: add text alignment options
-      if lboCenterImage in FOptions then
-      begin
-        ImagePos.x := (Cell.Width - FImages.Width);
-        //ignore TextWidth if Title = ''
-        if TextWidth <> 0 then
-          Dec(ImagePos.x, TextWidth + FImagePadding);
-        ImagePos.x := ImagePos.x div 2;
-        TextPos.x := ImagePos.x + FImages.Width + FImagePadding;
-      end
-      else
-      begin
-        ImagePos.x := FImagePadding;
-        TextPos.x := (Cell.Width - TextWidth - FImagePadding - FImages.Width) div 2;
-        Inc(TextPos.x, FImages.Width + FImagePadding);
+      //todo: refactor into sub routines ?
+      case FImagePosition of
+      lbipLeft:
+        begin
+          ImagePos.y := (Cell.Height - FImages.Height) div 2;
+          if (lboCenterImage in FOptions) and (FTextAlign = taCenter) then
+          begin
+            ImagePos.x := Cell.Width - FImages.Width;
+            //ignore TextWidth if Title = ''
+            if TextWidth <> 0 then
+              Dec(ImagePos.x, TextWidth + FImagePadding);
+            ImagePos.x := ImagePos.x div 2;
+            EffectiveTextAlign := taLeft;
+          end
+          else
+          begin
+            ImagePos.x := FImagePadding;
+          end;
+          TextBox := Rect(ImagePos.x + FImages.Width + FImagePadding, 0,
+            Cell.Width - FTextPadding, Cell.Height);
+        end;
+      lbipTop:
+        begin
+          ImagePos.x := (Cell.Width - FImages.Width) div 2;
+          if lboCenterImage in FOptions then
+          begin
+            ImagePos.y := Cell.Height - FImages.Height;
+            //ignore TextHeight if Title = ''
+            if TextHeight <> 0 then
+              Dec(ImagePos.y, TextHeight + FImagePadding);
+            ImagePos.y := ImagePos.y div 2;
+          end
+          else
+          begin
+            ImagePos.y := FImagePadding;
+          end;
+          TextBox := Rect(FTextPadding, ImagePos.y + FImages.Height + FImagePadding,
+            Cell.Width - FTextPadding, Cell.Height - FTextPadding);
+        end;
+      lbipBottom:
+        begin
+          ImagePos.x := (Cell.Width - FImages.Width) div 2;
+          if lboCenterImage in FOptions then
+          begin
+            ImagePos.y := Cell.Height - FImages.Height;
+            if TextHeight <> 0 then
+              Dec(ImagePos.y, TextHeight + FImagePadding);
+            ImagePos.y := ImagePos.y div 2;
+            Inc(ImagePos.y, TextHeight + FImagePadding)
+          end
+          else
+          begin
+            ImagePos.y := Cell.Height - FImages.Height - FImagePadding;
+          end;
+          TextBox := Rect(FTextPadding, FTextPadding,
+            Cell.Width - FTextPadding, ImagePos.y - FImagePadding);
+        end;
+      lbipRight:
+        begin
+          ImagePos.y := (Cell.Height - FImages.Height) div 2;
+          if (lboCenterImage in FOptions) and (FTextAlign = taCenter) then
+          begin
+            ImagePos.x := Cell.Width - FImages.Width;
+            if TextWidth <> 0 then
+              Dec(ImagePos.x, TextWidth + FImagePadding);
+            ImagePos.x := ImagePos.x div 2;
+            Inc(ImagePos.x, TextWidth + FImagePadding);
+            EffectiveTextAlign := taRight;
+          end
+          else
+          begin
+            ImagePos.x := Cell.Width - FImages.Width - FImagePadding;
+          end;
+          TextBox := Rect(FTextPadding, 0,
+            ImagePos.x - FImagePadding, Cell.Height);
+        end;
       end;
+
       FImages.Draw(Bitmap.Canvas, Cell.Bounds.Left + ImagePos.x,
-        (Cell.Bounds.Top + ((Cell.Height - FImages.Height) div 2)),
-         ImageInfo.Index, ImageInfo.Effect);
+        Cell.Bounds.Top + ImagePos.y, ImageInfo.Index, ImageInfo.Effect);
     end
     else
-      TextPos.x := (Cell.Width - TextWidth) div 2;
+    begin
+      TextBox := Rect(FTextPadding, 0, Cell.Width - FTextPadding, Cell.Height);
+    end;
+    //Draw text in the given rectangle
+    case EffectiveTextAlign of
+      taCenter:
+      begin
+        with TextBox do
+          MoveTo((Right - Left - TextWidth) div 2 + Left,
+            (Bottom - Top + TextHeight) div 2 + Top);
+      end;
+      taLeft:
+      begin
+        with TextBox do
+          MoveTo(Left, (Bottom - Top + TextHeight) div 2 + Top);
+      end;
+      taRight:
+      begin
+        with TextBox do
+          MoveTo(Right - TextWidth, (Bottom - Top + TextHeight) div 2 + Top);
+      end;
+    end;
 
-    MoveTo(TextPos.x, (Cell.Height + Extents.Height) / 2);
     ShowText(Cell.Title);
   end;
 end;
