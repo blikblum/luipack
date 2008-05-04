@@ -21,6 +21,7 @@ type
     CairoPaintBox1: TCairoPaintBox;
     Timer1: TTimer;
     procedure CairoPaintBox1Draw(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
@@ -34,7 +35,7 @@ var
 implementation
 
 uses
-  cairo14;
+  cairo14, InterfaceBase;
 
 const
   m_radius = 0.42;
@@ -133,6 +134,11 @@ begin
     Arc(0, 0, m_lineWidth / 3.0, 0, 2 * PI);
     Fill;
   end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  Caption := Caption + ' [' + LCLPlatformDirNames[WidgetSet.LCLPlatform] + ']';
 end;
 
 initialization

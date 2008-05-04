@@ -57,8 +57,7 @@
   <CompilerOptions>
     <Version Value="5"/>
     <SearchPaths>
-      <OtherUnitFiles Value="../;D:/repositories/luipack/cairo/api/"/>
-      <LCLWidgetType Value="qt"/>
+      <OtherUnitFiles Value="../"/>
     </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
