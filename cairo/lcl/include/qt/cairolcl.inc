@@ -1,4 +1,8 @@
 
+procedure TCairoLCLFont.CreateHandle;
+begin
+end;
+
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 var
   DeviceContext: TQtDeviceContext absolute DC;
@@ -16,8 +20,4 @@ begin
       );
     QX11Info_destroy(X11Info);
   end;
-end;
-
-function CreateFontFromLog(const LogFont: TLogFont): Pcairo_font_face_t;
-begin
 end;

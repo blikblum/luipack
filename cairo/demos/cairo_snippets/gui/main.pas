@@ -63,7 +63,11 @@ var
   TempBitmap, OldBitmap: HBITMAP;
 begin
   TempDC := CreateCompatibleDC(PaintBoxMain.Canvas.Handle);
+  {$ifdef LCLQt}
+  TempBitmap := CreateBitmap(PaintBoxMain.Width, PaintBoxMain.Height, 1, 32, nil);
+  {$else}
   TempBitmap := CreateCompatibleBitmap(PaintBoxMain.Canvas.Handle, PaintBoxMain.Width, PaintBoxMain.Height);
+  {$endif}
   OldBitmap := SelectObject(TempDC, TempBitmap);
 
   surface := CreateSurfaceFromDC(TempDC);
