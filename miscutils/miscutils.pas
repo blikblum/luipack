@@ -132,6 +132,8 @@ type
 
 procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
 
+function ExtractFileTitle(const FileName: String): String;
+
 procedure GetFileList(const AFilter: String; AStrList: TStrings);
 
 procedure GetFileTree(const ARootDir:String; const AFilter: String; AStrList: TStrings);
@@ -143,8 +145,22 @@ function StringsToCSV(AStrList:TStrings; Delimiter: Char = ';'):String;
 function ValidMail(const AMail: String): Boolean;
 
 implementation
+
 uses
   StrUtils;
+
+function ExtractFileTitle(const FileName: String): String;
+var
+  I: LongInt;
+begin
+  Result := ExtractFileName(FileName);
+  I := Length(Result);
+  while (I > 0) and  (FileName[I] <> '.') do
+    Dec(I);
+  if (I > 0) and (FileName[I] = '.') then
+     Result := Copy(FileName, 1, I - 1);
+end;
+
 
 procedure GetDirectoryTree(const ARootDir:String; AList: TStrings);
   procedure RecurseDir(const ADir:String);
