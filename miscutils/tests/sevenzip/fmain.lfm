@@ -4,19 +4,20 @@ object FormMain: TFormMain
   Top = 144
   Width = 606
   HorzScrollBar.Page = 605
-  VertScrollBar.Page = 506
+  VertScrollBar.Page = 497
   Caption = 'SevenZip Reader Basic Demo'
-  ClientHeight = 507
+  ClientHeight = 498
   ClientWidth = 606
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDesktopCenter
+  LCLVersion = '0.9.25'
   object Label1: TLabel
     Left = 8
-    Height = 14
+    Height = 17
     Top = 8
-    Width = 42
+    Width = 65
     Caption = 'File Path'
     ParentColor = False
   end
@@ -57,9 +58,9 @@ object FormMain: TFormMain
   end
   object CheckGetDetails: TCheckBox
     Left = 456
-    Height = 19
+    Height = 24
     Top = 24
-    Width = 78
+    Width = 105
     Caption = 'Get Details'
     OnChange = CheckGetDetailsChange
     TabOrder = 2

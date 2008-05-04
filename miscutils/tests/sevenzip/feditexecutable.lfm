@@ -1,21 +1,21 @@
 object FormEditExecutable: TFormEditExecutable
   Left = 346
-  Height = 100
+  Height = 98
   Top = 205
   Width = 411
   HorzScrollBar.Page = 410
-  VertScrollBar.Page = 99
+  VertScrollBar.Page = 97
   Caption = 'Options'
-  ClientHeight = 100
+  ClientHeight = 98
   ClientWidth = 411
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   Position = poOwnerFormCenter
+  LCLVersion = '0.9.25'
   object Label1: TLabel
     Left = 16
-    Height = 14
+    Height = 17
     Top = 8
-    Width = 106
+    Width = 161
     Caption = '7-Zip Executable Path'
     ParentColor = False
   end
