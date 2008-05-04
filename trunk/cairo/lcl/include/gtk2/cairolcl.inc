@@ -1,4 +1,8 @@
 
+procedure TCairoLCLFont.CreateHandle;
+begin
+end;
+
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 var
   DeviceContext: TGtk2DeviceContext absolute DC;

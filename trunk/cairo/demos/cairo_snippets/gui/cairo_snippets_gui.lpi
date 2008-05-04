@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="\"/>
+    <PathDelim Value="/"/>
     <Version Value="6"/>
     <General>
+      <Flags>
+        <AlwaysBuild Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="8"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
-      <Language Value=""/>
-      <CharSet Value=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
@@ -38,16 +39,11 @@
         <PackageName Value="cairolcl_package"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="25">
+    <Units Count="2">
       <Unit0>
         <Filename Value="cairo_snippets_gui.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cairo_snippets_gui"/>
-        <CursorPos X="59" Y="11"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="6"/>
-        <UsageCount Value="32"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pas"/>
@@ -55,250 +51,14 @@
         <IsPartOfProject Value="True"/>
         <ResourceFilename Value="main.lrs"/>
         <UnitName Value="main"/>
-        <CursorPos X="8" Y="77"/>
-        <TopLine Value="50"/>
-        <EditorIndex Value="0"/>
-        <UsageCount Value="32"/>
-        <Bookmarks Count="1">
-          <Item0 X="3" Y="96" ID="1"/>
-        </Bookmarks>
-        <Loaded Value="True"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="..\snippets.pas"/>
-        <UnitName Value="snippets"/>
-        <CursorPos X="10" Y="6"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="8"/>
-        <UsageCount Value="17"/>
-        <Loaded Value="True"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="..\cairo.pp"/>
-        <UnitName Value="cairo"/>
-        <CursorPos X="68" Y="545"/>
-        <TopLine Value="501"/>
-        <UsageCount Value="17"/>
-        <Bookmarks Count="1">
-          <Item0 X="1" Y="510" ID="0"/>
-        </Bookmarks>
-      </Unit3>
-      <Unit4>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\extctrls.pp"/>
-        <UnitName Value="ExtCtrls"/>
-        <CursorPos X="25" Y="497"/>
-        <TopLine Value="480"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="17"/>
-        <Loaded Value="True"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\paintbox.inc"/>
-        <CursorPos X="3" Y="21"/>
-        <TopLine Value="10"/>
-        <UsageCount Value="16"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\controls.pp"/>
-        <UnitName Value="Controls"/>
-        <CursorPos X="15" Y="1814"/>
-        <TopLine Value="1792"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="17"/>
-        <Loaded Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\wincontrol.inc"/>
-        <CursorPos X="35" Y="4271"/>
-        <TopLine Value="4262"/>
-        <UsageCount Value="16"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\graphiccontrol.inc"/>
-        <CursorPos X="29" Y="60"/>
-        <TopLine Value="35"/>
-        <UsageCount Value="16"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\controlcanvas.inc"/>
-        <CursorPos X="23" Y="39"/>
-        <TopLine Value="37"/>
-        <UsageCount Value="14"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\graphics.pp"/>
-        <UnitName Value="Graphics"/>
-        <CursorPos X="15" Y="928"/>
-        <TopLine Value="906"/>
-        <UsageCount Value="16"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\canvas.inc"/>
-        <CursorPos X="3" Y="1506"/>
-        <TopLine Value="1497"/>
-        <UsageCount Value="16"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\control.inc"/>
-        <CursorPos X="3" Y="3743"/>
-        <TopLine Value="3734"/>
-        <UsageCount Value="16"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\winapih.inc"/>
-        <CursorPos X="10" Y="117"/>
-        <TopLine Value="95"/>
-        <UsageCount Value="16"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="..\..\..\..\..\lazarus\components\synedit\syneditkeycmds.pp"/>
-        <UnitName Value="SynEditKeyCmds"/>
-        <CursorPos X="13" Y="116"/>
-        <TopLine Value="107"/>
-        <EditorIndex Value="10"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\buttons.pp"/>
-        <UnitName Value="Buttons"/>
-        <CursorPos X="41" Y="198"/>
-        <TopLine Value="176"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\speedbutton.inc"/>
-        <CursorPos X="26" Y="824"/>
-        <TopLine Value="802"/>
-        <UsageCount Value="10"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\lclproc.pas"/>
-        <UnitName Value="LCLProc"/>
-        <CursorPos X="20" Y="591"/>
-        <TopLine Value="656"/>
-        <UsageCount Value="10"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\customcontrol.inc"/>
-        <CursorPos X="29" Y="78"/>
-        <TopLine Value="59"/>
-        <UsageCount Value="10"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\chart.pp"/>
-        <UnitName Value="Chart"/>
-        <CursorPos X="3" Y="264"/>
-        <TopLine Value="232"/>
-        <UsageCount Value="10"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\interfaces\win32\win32callback.inc"/>
-        <CursorPos X="66" Y="482"/>
-        <TopLine Value="455"/>
-        <UsageCount Value="11"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="..\..\..\..\..\lazarus\lcl\include\customlistbox.inc"/>
-        <CursorPos X="1" Y="514"/>
-        <TopLine Value="492"/>
-        <EditorIndex Value="1"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="C:\bin\code\fpc214\source\rtl\inc\mathh.inc"/>
-        <CursorPos X="14" Y="59"/>
-        <TopLine Value="50"/>
-        <EditorIndex Value="9"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="..\..\..\api\cairo_win32.pas"/>
-        <UnitName Value="cairo_win32"/>
-        <CursorPos X="34" Y="10"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="21"/>
-        <Loaded Value="True"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <UnitName Value="sqlite3"/>
-        <CursorPos X="76" Y="122"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="7"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
-      </Unit24>
     </Units>
-    <JumpHistory Count="14" HistoryIndex="13">
-      <Position1>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="25" Column="3" TopLine="9"/>
-      </Position1>
-      <Position2>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="110" Column="80" TopLine="88"/>
-      </Position2>
-      <Position3>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="111" Column="146" TopLine="89"/>
-      </Position3>
-      <Position4>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="112" Column="97" TopLine="90"/>
-      </Position4>
-      <Position5>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="113" Column="82" TopLine="91"/>
-      </Position5>
-      <Position6>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="114" Column="88" TopLine="92"/>
-      </Position6>
-      <Position7>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="115" Column="77" TopLine="93"/>
-      </Position7>
-      <Position8>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="116" Column="77" TopLine="94"/>
-      </Position8>
-      <Position9>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="117" Column="81" TopLine="95"/>
-      </Position9>
-      <Position10>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="118" Column="129" TopLine="96"/>
-      </Position10>
-      <Position11>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="119" Column="99" TopLine="97"/>
-      </Position11>
-      <Position12>
-        <Filename Value="C:\bin\code\fpc214\source\packages\base\sqlite\sqlite3.pp"/>
-        <Caret Line="121" Column="66" TopLine="99"/>
-      </Position12>
-      <Position13>
-        <Filename Value="main.pas"/>
-        <Caret Line="69" Column="33" TopLine="57"/>
-      </Position13>
-      <Position14>
-        <Filename Value="main.pas"/>
-        <Caret Line="77" Column="8" TopLine="50"/>
-      </Position14>
-    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="5"/>
-    <PathDelim Value="\"/>
     <SearchPaths>
-      <OtherUnitFiles Value="..\;D:\repositories\luipack\cairo\api\"/>
+      <OtherUnitFiles Value="../;D:/repositories/luipack/cairo/api/"/>
+      <LCLWidgetType Value="qt"/>
     </SearchPaths>
     <CodeGeneration>
       <Generate Value="Faster"/>
@@ -307,20 +67,4 @@
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Source Value="..\..\..\..\..\lazarus\lcl\include\wincontrol.inc"/>
-        <Line Value="5896"/>
-      </Item1>
-    </BreakPoints>
-    <Exceptions Count="2">
-      <Item1>
-        <Name Value="ECodetoolError"/>
-      </Item1>
-      <Item2>
-        <Name Value="EFOpenError"/>
-      </Item2>
-    </Exceptions>
-  </Debugging>
 </CONFIG>
