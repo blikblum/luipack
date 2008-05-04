@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  cairo14, CairoLCL;
+  cairo14, CairoLCL, InterfaceBase;
 
 { TForm1 }
 
@@ -42,10 +42,12 @@ var
   i, major, minor, micro: Integer;
 begin
   cairo_version(major, minor, micro);
-  Caption := Caption +  Format(' - Cairo Version %d.%d.%d',[major, minor, micro]);
+  Caption := Caption + Format(' - Cairo Version %d.%d.%d [%s]',
+    [major, minor, micro, LCLPlatformDirNames[WidgetSet.LCLPlatform]]);
   SetCurrentDir('..');
   for i := 0 to snippet_count - 1 do
     ListSnippets.Items.Add(snippet_name[i]);
+  ListSnippets.ItemIndex := 0;
 end;
 
 procedure TForm1.ListSnippetsSelectionChange (Sender: TObject; User: boolean );
@@ -73,7 +75,7 @@ begin
   surface := CreateSurfaceFromDC(TempDC);
   cr := cairo_create (surface);
 
-  cairo_save(cr);;
+  cairo_save(cr);
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_paint(cr);
   cairo_restore(cr);
