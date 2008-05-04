@@ -2,13 +2,16 @@ unit SevenZipWrapper;
 
 {$mode objfpc}{$H+}
 
+{$ifdef unix}
+{$define USE_P7ZIP}
+{$endif}
+
 interface
 
 uses
   Classes, SysUtils, ProcessLineTalk;
 
 type
-
 
   TSevenZipPackedFile = class
   private
@@ -17,19 +20,13 @@ type
     FPackedSize: Int64;
     FPath: String;
     FSize: Int64;
-    procedure SetCRC(const AValue: String);
-    procedure SetMofified(const AValue: TDateTime);
-    procedure SetPackedSize(const AValue: Int64);
-    procedure SetPath(const AValue: String);
-    procedure SetSize(const AValue: Int64);
   public
-    property CRC: String read FCRC write SetCRC;
-    property Mofified: TDateTime read FMofified write SetMofified;
-    property PackedSize: Int64 read FPackedSize write SetPackedSize;
-    property Path: String read FPath write SetPath;
-    property Size: Int64 read FSize write SetSize;
+    property CRC: String read FCRC write FCRC;
+    property Mofified: TDateTime read FMofified write FMofified;
+    property PackedSize: Int64 read FPackedSize write FPackedSize;
+    property Path: String read FPath write FPath;
+    property Size: Int64 read FSize write FSize;
   end;
-
 
   { TSevenZipPackedFileList }
 
@@ -74,10 +71,6 @@ type
     function HandleError(const ErrorStr: String): Boolean;
     procedure ParseDefaultOutput;
     procedure ParseDetailedOutput;
-    procedure SetExecutable(const AValue: String);
-    procedure SetFileName(const AValue: String);
-    procedure SetOnError(const AValue: TSevenZipErrorEvent);
-    procedure SetOptions(const AValue: TSevenZipReaderOptions);
     procedure UpdateFileTypeInfo;
   public
     constructor Create;
@@ -85,10 +78,10 @@ type
     procedure Extract(Index: Integer; const Directory: String = '');
     procedure Extract(const AFileName: String; const Directory: String = '');
     procedure Load;
-    property Executable: String read FExecutable write SetExecutable;
-    property FileName: String read FFileName write SetFileName;
-    property OnError: TSevenZipErrorEvent read FOnError write SetOnError;
-    property Options: TSevenZipReaderOptions read FOptions write SetOptions;
+    property Executable: String read FExecutable write FExecutable;
+    property FileName: String read FFileName write FFileName;
+    property OnError: TSevenZipErrorEvent read FOnError write FOnError;
+    property Options: TSevenZipReaderOptions read FOptions write FOptions;
     property PackedFiles: TSevenZipPackedFileList read FPackedFiles;
   end;
 
@@ -96,38 +89,6 @@ implementation
 
 uses
   process, strutils;
-
-{ TSevenZipPackedFile }
-
-procedure TSevenZipPackedFile.SetPath(const AValue: String);
-begin
-  if FPath=AValue then exit;
-  FPath:=AValue;
-end;
-
-procedure TSevenZipPackedFile.SetPackedSize(const AValue: Int64);
-begin
-  if FPackedSize=AValue then exit;
-  FPackedSize:=AValue;
-end;
-
-procedure TSevenZipPackedFile.SetMofified(const AValue: TDateTime);
-begin
-  if FMofified=AValue then exit;
-  FMofified:=AValue;
-end;
-
-procedure TSevenZipPackedFile.SetCRC(const AValue: String);
-begin
-  if FCRC=AValue then exit;
-  FCRC:=AValue;
-end;
-
-procedure TSevenZipPackedFile.SetSize(const AValue: Int64);
-begin
-  if FSize=AValue then exit;
-  FSize:=AValue;
-end;
 
 { TSevenZipPackedFileList }
 
@@ -168,31 +129,23 @@ end;
 
 { TSevenZipReader }
 
-procedure TSevenZipReader.SetFileName(const AValue: String);
-begin
-  if FFileName=AValue then exit;
-  FFileName:=AValue;
-end;
-
-procedure TSevenZipReader.SetOnError(const AValue: TSevenZipErrorEvent);
-begin
-  if FOnError=AValue then exit;
-  FOnError:=AValue;
-end;
-
-procedure TSevenZipReader.SetOptions(const AValue: TSevenZipReaderOptions);
-begin
-  if FOptions=AValue then exit;
-  FOptions:=AValue;
-end;
-
 const
+  //output of p7zip is different from 7zip
+  {$ifdef USE_P7ZIP}
   FileTypes: array [0..2] of TFileTypeInfo =
   (
-  (FileListOffset: 12; EntriesPerFile: 9; SizeOffset: 1; CRCOffset: 5),
-  (FileListOffset: 9; EntriesPerFile: 12; SizeOffset: 2; CRCOffset: 8),
-  (FileListOffset: 14; EntriesPerFile: 18; SizeOffset: 2; CRCOffset: 13)
+  (FileListOffset: 9; EntriesPerFile: 9; SizeOffset: 1; CRCOffset: 5), //7z
+  (FileListOffset: 9; EntriesPerFile: 12; SizeOffset: 2; CRCOffset: 8), //zip
+  (FileListOffset: 14; EntriesPerFile: 18; SizeOffset: 2; CRCOffset: 13) //rar
   );
+  {$else}
+  FileTypes: array [0..2] of TFileTypeInfo =
+  (
+  (FileListOffset: 12; EntriesPerFile: 9; SizeOffset: 1; CRCOffset: 5), //7z
+  (FileListOffset: 9; EntriesPerFile: 12; SizeOffset: 2; CRCOffset: 8), //zip
+  (FileListOffset: 14; EntriesPerFile: 18; SizeOffset: 2; CRCOffset: 13)  //rar
+  );
+  {$endif}
   
 procedure TSevenZipReader.UpdateFileTypeInfo;
 var
@@ -324,12 +277,6 @@ begin
   end;
 end;
 
-procedure TSevenZipReader.SetExecutable(const AValue: String);
-begin
-  if FExecutable=AValue then exit;
-  FExecutable:=AValue;
-end;
-
 constructor TSevenZipReader.Create;
 begin
   FPackedFiles := TSevenZipPackedFileList.Create;
@@ -381,6 +328,10 @@ begin
     CommandLine := FExecutable + ' l '+ IfThen(szoGetDetails in FOptions, '-slt ') +
       '"' + FFileName + '"';
     Execute;
+    //todo: see why is necessary to wait under linux/unix
+    {$ifdef unix}
+    Sleep(100);
+    {$endif}
     if szoGetDetails in FOptions then
       ParseDetailedOutput
     else

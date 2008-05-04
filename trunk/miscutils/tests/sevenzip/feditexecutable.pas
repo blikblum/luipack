@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, EditBtn,
-  StdCtrls, IniFiles, Buttons;
+  StdCtrls, Buttons;
 
 type
 
@@ -18,33 +18,28 @@ type
     Label1: TLabel;
     procedure ButtonSaveClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
   private
     { private declarations }
-    FIni: TIniFile;
   public
     { public declarations }
   end; 
 
 implementation
 
+uses
+  fMain;
+
 { TFormEditExecutable }
 
 procedure TFormEditExecutable.ButtonSaveClick(Sender: TObject);
 begin
   if EditExecutablePath.Text <> '' then
-    FIni.WriteString('options', 'exepath', EditExecutablePath.Text);
+    FormMain.Ini.WriteString('options', 'exepath', EditExecutablePath.Text);
 end;
 
 procedure TFormEditExecutable.FormCreate(Sender: TObject);
 begin
-  FIni := TIniFile.Create('sevenzip.ini');
-  EditExecutablePath.Text := FIni.ReadString('options', 'exepath', '');
-end;
-
-procedure TFormEditExecutable.FormDestroy(Sender: TObject);
-begin
-  FIni.Destroy;
+  EditExecutablePath.Text := FormMain.Ini.ReadString('options', 'exepath', '');
 end;
 
 initialization

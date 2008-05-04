@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  EditBtn, StdCtrls, Menus, SevenZipWrapper;
+  EditBtn, StdCtrls, Menus, SevenZipWrapper, IniFiles;
 
 type
 
@@ -35,6 +35,7 @@ type
   public
     { public declarations }
     Reader: TSevenZipReader;
+    Ini: TIniFile;
   end; 
 
 var
@@ -43,7 +44,7 @@ var
 implementation
 
 uses
-  fEditExecutable, IniFiles;
+  fEditExecutable;
   
 { TFormMain }
 
@@ -77,6 +78,8 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   Reader := TSevenZipReader.Create;
+  Ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'sevenzip.ini');
+  EditFileName.InitialDir := Ini.ReadString('options', 'lastfiledir', '');
   UpdateExecutable;
 end;
 
@@ -86,6 +89,7 @@ var
   i: Integer;
   ListItem: TListItem;
 begin
+  Ini.WriteString('options', 'lastfiledir', ExtractFileDir(Value));
   Reader.FileName := Value;
   Reader.Load;
   with ListViewFiles do
@@ -115,6 +119,7 @@ end;
 procedure TFormMain.FormDestroy(Sender: TObject);
 begin
   Reader.Destroy;
+  Ini.Destroy;
 end;
 
 procedure TFormMain.MIExtractClick(Sender: TObject);
