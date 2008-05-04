@@ -185,7 +185,6 @@ type
     FTextAlign: TLuiBarTextAlign;
     FTextPadding: Integer;
     function CellInPoint(const P: TPoint): Integer;
-//    procedure FillCellClientGap(Cell: TLuiBarCell);
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
     function GetRealCellWidth: Integer;
     function GetTextWidth(const AText: String): Double;
@@ -576,34 +575,6 @@ begin
   end;
 end;
 
-{
-procedure TLuiBar.FillCellClientGap(Cell: TLuiBarCell);
-begin
-  with Context do
-  begin
-    case FPosition of
-    lbpTop:
-      begin
-        Rectangle(0, Cell.Height - FOutLineWidth, Cell.Width, FOutLineWidth);
-      end;
-    lbpLeft:
-      begin
-        Rectangle(Cell.Width - FOutLineWidth, 0, FOutLineWidth, Cell.Height);
-      end;
-    lbpRight:
-      begin
-        Rectangle(0, 0, FOutLineWidth, Cell.Height);
-      end;
-    lbpBottom:
-      begin
-        Rectangle(0, 0, Cell.Width, FOutLineWidth);
-      end;
-    end;
-    Fill;
-  end;
-end;
-}
-
 procedure TLuiBar.DoDrawCellPath(Cell: TLuiBarCell);
 begin
   if Assigned(FOnDrawCellPath) then
@@ -645,13 +616,13 @@ var
           begin
             LineTo(FClientBounds.Right - LineOffset, Cell.Bounds.Top);
             Stroke;
-            LineTo(FClientBounds.Right - LineOffset, Cell.Bounds.Bottom);
+            MoveTo(FClientBounds.Right - LineOffset, Cell.Bounds.Bottom);
           end;
         lbpBottom:
           begin
             LineTo(Cell.Bounds.Left, FClientBounds.Bottom - LineOffset);
             Stroke;
-            LineTo(Cell.Bounds.Right, FClientBounds.Bottom - LineOffset);
+            MoveTo(Cell.Bounds.Right, FClientBounds.Bottom - LineOffset);
           end;
       end;
     end;
@@ -664,11 +635,25 @@ var
 begin
   with Context do
   begin
-    //fill the client area
+    //fill the client area avoiding to overlap the cells
+    //todo: do this before the cell draw ?
+    //      or draw the base line at cell area instead of client area as is today?
     Save;
     Translate(FClientBounds.Left, FClientBounds.Top);
-    Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left,
-      FClientBounds.Bottom - FClientBounds.Top);
+    case FPosition of
+      lbpTop:
+        Rectangle(0, FOutLineWidth, FClientBounds.Right - FClientBounds.Left,
+          FClientBounds.Bottom - FClientBounds.Top - FOutLineWidth);
+      lbpLeft:
+        Rectangle(FOutLineWidth, 0, FClientBounds.Right - FClientBounds.Left - FOutLineWidth,
+          FClientBounds.Bottom - FClientBounds.Top);
+      lbpRight:
+        Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left - FOutLineWidth,
+          FClientBounds.Bottom - FClientBounds.Top);
+      lbpBottom:
+        Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left,
+          FClientBounds.Bottom - FClientBounds.Top - FOutLineWidth);
+    end;
     Source := FPatterns.ClientArea;
     Fill;
     Restore;
@@ -704,51 +689,63 @@ begin
         SkipCells[0] := FSelectedIndex;
       if SkipCells[0] <> -1 then
         DrawBaseLineSkipCell(FCells[SkipCells[0]]);
+
       if SkipCells[1] <> -1 then
         DrawBaseLineSkipCell(FCells[SkipCells[1]]);
 
-      //todo remove all these case
-      case FPosition of
-        lbpTop:
-          LineTo(Width - LineOffset, FClientBounds.Top + LineOffset);
-        lbpLeft:
-          LineTo(FClientBounds.Left + LineOffset, Height - LineOffset);
-        lbpRight:
-          LineTo(FClientBounds.Right - LineOffset, Height - LineOffset);
-        lbpBottom:
-          LineTo(Width, FClientBounds.Bottom - LineOffset);
-      end;
     end;
     //todo: move this to DoDrawClientArea
-    if lboOutLineClientArea in FOptions then
-    begin
-      case FPosition of
-        lbpTop:
+    case FPosition of
+      lbpTop:
+        begin
+          if lboOutLineClientArea in FOptions then
           begin
+            LineTo(Width - LineOffset, FClientBounds.Top + LineOffset);
             LineTo(Width - LineOffset, Height - LineOffset);
             LineTo(LineOffset, Height - LineOffset);
             LineTo(LineOffset, FClientBounds.Top + LineOffset);
-          end;
-        lbpLeft:
+          end
+          else
+            LineTo(Width, FClientBounds.Top + LineOffset);
+        end;
+      lbpLeft:
+        begin
+          if lboOutLineClientArea in FOptions then
           begin
+            LineTo(FClientBounds.Left + LineOffset, Height - LineOffset);
             LineTo(Width - LineOffset, Height - LineOffset);
             LineTo(Width - LineOffset, LineOffset);
             LineTo(FClientBounds.Left + LineOffset, LineOffset);
-          end;
-        lbpRight:
+          end
+          else
+            LineTo(FClientBounds.Left + LineOffset, Height);
+        end;
+      lbpRight:
+        begin
+          if lboOutLineClientArea in FOptions then
           begin
+            LineTo(FClientBounds.Right - LineOffset, Height - LineOffset);
             LineTo(LineOffset, Height - LineOffset);
             LineTo(LineOffset, LineOffset);
             LineTo(FClientBounds.Right - LineOffset, LineOffset);
-          end;
-        lbpBottom:
+          end
+          else
+            LineTo(FClientBounds.Right - LineOffset, Height);
+        end;
+      lbpBottom:
+        begin
+          if lboOutLineClientArea in FOptions then
           begin
+            LineTo(Width - LineOffset, FClientBounds.Bottom - LineOffset);
             LineTo(Width - LineOffset, LineOffset);
             LineTo(LineOffset, LineOffset);
             LineTo(LineOffset, FClientBounds.Bottom - LineOffset);
-          end;
-      end;
+          end
+          else
+            LineTo(Width, FClientBounds.Bottom - LineOffset);
+        end;
     end;
+
     Stroke;
     Restore;
   end;
@@ -1025,12 +1022,14 @@ procedure TLuiBar.DefaultDrawCellPath(Cell: TLuiBarCell);
 var
   InnerRadius: Integer;
   R: TDoubleRect;
+  LineOffset: Double;
 begin
   if lboEmulateTab in FOptions then
     InnerRadius := 0
   else
     InnerRadius := FCellRoundRadius;
   CalculateSharpBounds(0, 0, Cell.Width, Cell.Height, FOutLineWidth, R);
+  LineOffset := GetSharpLineOffset(FOutLineWidth);
   //todo: use matrix manipulation to consolidate the procedures??
   case FPosition of
     lbpTop:
@@ -1038,19 +1037,19 @@ begin
       begin
         //this is necessary to avoid a gap between cell and client area
         if lboEmulateTab in FOptions then
-          R.Bottom := R.Bottom + FOutLineWidth;
-        MoveTo(InnerRadius, R.Bottom);
-        CurveTo(InnerRadius, R.Bottom,
+          R.Bottom := R.Bottom + LineOffset + FOutLineWidth;
+        MoveTo(R.Left + InnerRadius, R.Bottom);
+        CurveTo(R.Left + InnerRadius, R.Bottom,
           R.Left, R.Bottom,
           R.Left, R.Bottom - InnerRadius);
-        LineTo(R.Left, FCellRoundRadius);
-        CurveTo(R.Left, FCellRoundRadius,
+        LineTo(R.Left, R.Top + FCellRoundRadius);
+        CurveTo(R.Left, R.Top + FCellRoundRadius,
           R.Left, R.Top,
-          FCellRoundRadius, R.Top);
+          R.Left + FCellRoundRadius, R.Top);
         LineTo(R.Right - FCellRoundRadius, R.Top);
         CurveTo(R.Right - FCellRoundRadius, R.Top,
           R.Right, R.Top,
-          R.Right, FCellRoundRadius);
+          R.Right, R.Top + FCellRoundRadius);
         LineTo(R.Right, R.Bottom - InnerRadius);
         CurveTo(R.Right, R.Bottom - InnerRadius,
           R.Right, R.Bottom,
@@ -1060,21 +1059,21 @@ begin
       with Context do
       begin
         if lboEmulateTab in FOptions then
-          R.Top := R.Top - FOutLineWidth;
-        MoveTo(InnerRadius, R.Top);
-        CurveTo(InnerRadius, R.Top,
+          R.Top := R.Top - LineOffset - FOutLineWidth;
+        MoveTo(R.Left + InnerRadius, R.Top);
+        CurveTo(R.Left + InnerRadius, R.Top,
           R.Left, R.Top,
-          R.Left, InnerRadius);
+          R.Left, R.Top + InnerRadius);
         LineTo(R.Left, R.Bottom - FCellRoundRadius);
         CurveTo(R.Left, R.Bottom - FCellRoundRadius,
           R.Left, R.Bottom,
-          FCellRoundRadius, R.Bottom);
+          R.Left + FCellRoundRadius, R.Bottom);
         LineTo(R.Right - FCellRoundRadius, R.Bottom);
         CurveTo(R.Right - FCellRoundRadius, R.Bottom,
           R.Right, R.Bottom,
           R.Right, R.Bottom - FCellRoundRadius);
-        LineTo(R.Right, InnerRadius);
-        CurveTo(R.Right, InnerRadius,
+        LineTo(R.Right, R.Top + InnerRadius);
+        CurveTo(R.Right, R.Top + InnerRadius,
           R.Right, R.Top,
           R.Right - InnerRadius, R.Top);
       end;
@@ -1082,19 +1081,19 @@ begin
       with Context do
       begin
         if lboEmulateTab in FOptions then
-          R.Right := R.Right + FOutLineWidth;
-        MoveTo(R.Right, InnerRadius);
-        CurveTo(R.Right, InnerRadius,
+          R.Right := R.Right + FOutLineWidth + LineOffset;
+        MoveTo(R.Right, R.Top + InnerRadius);
+        CurveTo(R.Right, R.Top + InnerRadius,
           R.Right, R.Top,
           R.Right - InnerRadius, R.Top);
-        LineTo(FCellRoundRadius, R.Top);
-        CurveTo(FCellRoundRadius, R.Top,
+        LineTo(R.Left + FCellRoundRadius, R.Top);
+        CurveTo(R.Left + FCellRoundRadius, R.Top,
           R.Left, R.Top,
-          R.Left, FCellRoundRadius);
+          R.Left, R.Top + FCellRoundRadius);
         LineTo(R.Left, R.Bottom - FCellRoundRadius);
         CurveTo(R.Left, R.Bottom - FCellRoundRadius,
           R.Left, R.Bottom,
-          FCellRoundRadius, R.Bottom);
+          R.Left + FCellRoundRadius, R.Bottom);
         LineTo(R.Right - InnerRadius, R.Bottom);
         CurveTo(R.Right - InnerRadius, R.Bottom,
           R.Right, R.Bottom,
@@ -1104,21 +1103,21 @@ begin
       with Context do
       begin
         if lboEmulateTab in FOptions then
-          R.Left := R.Left - FOutLineWidth;
-        MoveTo(R.Left, InnerRadius);
-        CurveTo(R.Left, InnerRadius,
+          R.Left := R.Left - FOutLineWidth - LineOffset;
+        MoveTo(R.Left, R.Top + InnerRadius);
+        CurveTo(R.Left, R.Top + InnerRadius,
           R.Left, R.Top,
-          InnerRadius, R.Top);
+          R.Left + InnerRadius, R.Top);
         LineTo(R.Right - FCellRoundRadius, R.Top);
         CurveTo(R.Right - FCellRoundRadius, R.Top,
           R.Right, R.Top,
-          R.Right, FCellRoundRadius);
+          R.Right, R.Top + FCellRoundRadius);
         LineTo(R.Right, R.Bottom - FCellRoundRadius);
         CurveTo(R.Right, R.Bottom - FCellRoundRadius,
           R.Right, R.Bottom,
           R.Right - FCellRoundRadius, R.Bottom);
-        LineTo(InnerRadius, R.Bottom);
-        CurveTo(InnerRadius, R.Bottom,
+        LineTo(R.Left + InnerRadius, R.Bottom);
+        CurveTo(R.Left + InnerRadius, R.Bottom,
           R.Left, R.Bottom,
           R.Left, R.Bottom - InnerRadius);
       end;
