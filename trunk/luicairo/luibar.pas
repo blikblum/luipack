@@ -165,6 +165,7 @@ type
     FImagePosition: TLuiBarImagePosition;
     FImages: TImageList;
     FInitialSpace: Integer;
+    FOnAfterDraw: TLuiBarEvent;
     FOnDrawBackground: TLuiBarEvent;
     FOnDrawCell: TLuiBarDrawCellEvent;
     FOnDrawCellPath: TLuiBarDrawCellEvent;
@@ -194,6 +195,7 @@ type
     procedure SetImagePosition(const AValue: TLuiBarImagePosition);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
+    procedure SetOnAfterDraw(const AValue: TLuiBarEvent);
     procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
     procedure SetOnGetPattern(const AValue: TLuiBarGetPattern);
     procedure SetOuterOffset(const AValue: Integer);
@@ -201,6 +203,7 @@ type
     procedure SetSelectedIndex(const AValue: Integer);
     procedure SetTextAlign(const AValue: TLuiBarTextAlign);
   protected
+    procedure DoAfterDraw; virtual;
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
     procedure DoDraw; override;
     procedure DoDrawBackground; virtual;
@@ -246,6 +249,7 @@ type
     property TextAlign: TLuiBarTextAlign read FTextAlign write SetTextAlign;
     property TextPadding: Integer read FTextPadding write FTextPadding;
     //events
+    property OnAfterDraw: TLuiBarEvent read FOnAfterDraw write SetOnAfterDraw;
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property OnDrawCellPath: TLuiBarDrawCellEvent read FOnDrawCellPath write FOnDrawCellPath;
@@ -524,6 +528,12 @@ begin
   FInitialSpace:=AValue;
 end;
 
+procedure TLuiBar.SetOnAfterDraw(const AValue: TLuiBarEvent);
+begin
+  if FOnAfterDraw=AValue then exit;
+  FOnAfterDraw:=AValue;
+end;
+
 procedure TLuiBar.SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
 begin
   if FOnGetImageInfo=AValue then exit;
@@ -659,6 +669,7 @@ begin
     Restore;
 
     //Draw base outline
+    Save;
     if not (lboOmitBaseLine in FOptions) then
     begin
       //todo: handle when there's no client area
@@ -745,7 +756,6 @@ begin
             LineTo(Width, FClientBounds.Bottom - LineOffset);
         end;
     end;
-
     Stroke;
     Restore;
   end;
@@ -836,6 +846,12 @@ begin
   FTextAlign:=AValue;
 end;
 
+procedure TLuiBar.DoAfterDraw;
+begin
+  if Assigned(FOnAfterDraw) then
+    FOnAfterDraw(Self);
+end;
+
 function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
   if FPosition in [lbpTop, lbpBottom] then
@@ -889,6 +905,7 @@ begin
   end;
   if lboEmulateTab in FOptions then
     DoDrawClientArea;
+  DoAfterDraw;
 end;
 
 procedure TLuiBar.DoDrawCell(Cell: TLuiBarCell);
@@ -918,6 +935,7 @@ begin
       Rectangle(0, 0, Width, Height);
       Fill;
     end;
+    Restore;
   end;
 end;
 procedure TLuiBar.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
