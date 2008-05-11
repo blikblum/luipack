@@ -390,6 +390,7 @@ type
     fOnChangeSort:            TOnChangeSort;
     fIndicatorBMP:            TBitmap;
 
+    function GetFocusedRecord: TRecordData;
     function GetHeader: TVTDBHeader;
     procedure SetHeader(Value: TVTDBHeader);
     procedure SetDBOptions(const Value: TVTDBOptions);
@@ -530,6 +531,7 @@ type
 
     property SortingColumn:                  TVirtualDBTreeColumn read GetSortingColumn;
     property IndicatorColumn:                TVirtualDBTreeColumn read GetIndicatorColumn;
+    property FocusedRecord: TRecordData read GetFocusedRecord;
     property VisibleRecordsCount:            Cardinal             read GetFullyVisibleCount;
     property SelectedRecord[Index: Integer]: TRecordData          read GetSelectedRecord;
   published
@@ -1939,6 +1941,18 @@ end;
 function TCustomVirtualDBGrid.GetHeader: TVTDBHeader;
 begin
   Result := TVTDBHeader(inherited Header);
+end;
+
+function TCustomVirtualDBGrid.GetFocusedRecord: TRecordData;
+var
+  Data: PNodeData;
+begin
+  Result := nil;
+  if FocusedNode = nil then
+    Exit;
+  Data := InternalGetNodeData(FocusedNode);
+  if IsDataOk(Data) then
+    Result := Data.RecordData;
 end;
 
 procedure TCustomVirtualDBGrid.SetHeader(Value: TVTDBHeader);
