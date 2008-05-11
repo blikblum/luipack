@@ -1,0 +1,27 @@
+object Form1: TForm1
+  Left = 317
+  Height = 493
+  Top = 148
+  Width = 607
+  HorzScrollBar.Page = 606
+  VertScrollBar.Page = 492
+  Caption = 'Sprites example using Cairo '
+  ClientHeight = 493
+  ClientWidth = 607
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.25'
+  object CairoControl1: TCairoPaintBox
+    Height = 493
+    Width = 607
+    OnDraw = CairoControl1Draw
+    Align = alClient
+    OnResize = CairoControl1Resize
+  end
+  object Timer1: TTimer
+    Interval = 100
+    OnTimer = Timer1Timer
+    left = 49
+    top = 22
+  end
+end
