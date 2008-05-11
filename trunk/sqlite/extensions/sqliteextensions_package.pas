@@ -7,7 +7,7 @@ unit sqliteextensions_package;
 interface
 
 uses
-  SqliteTrees, Sqlite3Wrapper, LazarusPackageIntf; 
+  SqliteTrees, Sqlite3Wrapper, Sqlite3Ext, LazarusPackageIntf; 
 
 implementation
 
