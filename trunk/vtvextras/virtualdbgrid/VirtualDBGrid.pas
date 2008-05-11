@@ -1970,7 +1970,7 @@ begin
   begin
     //AnimationOptions:= [];
     AutoOptions:=      [toAutoDropExpand, toAutoScroll, toAutoTristateTracking,
-                       toAutoDeleteMovedNodes];
+                       toAutoDeleteMovedNodes, toDisableAutoscrollOnFocus];
     MiscOptions:=      [toAcceptOLEDrop, toGridExtensions, toInitOnSave,
                        toToggleOnDblClick, toWheelPanning];
     PaintOptions:=     [toHideFocusRect, toShowDropmark, toThemeAware, toUseBlendedImages];
