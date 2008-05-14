@@ -65,7 +65,7 @@ type
     procedure Scale(Sx, Sy: Double);
     procedure Rotate(Radians: Double);
     function  Invert: cairo_status_t;
-    procedure Multiply(A, B: TCairoMatrix);
+    procedure Multiply(const A, B: TCairoMatrix);
     procedure MatrixTransformDistance(Dx, Dy: PDouble);
     procedure TransformPoint(X, Y: PDouble);
   end;
@@ -75,8 +75,9 @@ type
   TCairoSurface = class
   protected
     FHandle: Pcairo_surface_t;
-    FHandleIsPrivate: Boolean;
     FOnReference: TReferenceNotify;
+    FHandleIsPrivate: Boolean;
+    function  GetContent: cairo_content_t;
   public
     constructor Create(AHandle: Pcairo_surface_t);
     constructor Create(Other: TCairoSurface; Content: cairo_content_t; Width, Height: LongInt);
@@ -85,7 +86,6 @@ type
     procedure Reference;
     function  Status: cairo_status_t;
     function  GetType: cairo_surface_type_t;
-    function  GetContent: cairo_content_t;
     function  WriteToPng(Filename: String): cairo_status_t;
     function  WriteToPngStream(WriteFunc: cairo_write_func_t; closure: Pointer): cairo_status_t;
     function  GetUserData(Key: Pcairo_user_data_key_t): Pointer;
@@ -97,21 +97,28 @@ type
     procedure SetDeviceOffset(XOffset, YOffset: Double);
     procedure GetDeviceOffset(XOffset, YOffset: PDouble);
     procedure SetFallbackResolution(XPixelsPerInch, YPixelsPerInch: Double);
+    property Content: cairo_content_t read GetContent;
   end;
   
   { TCairoImageSurface }
 
   TCairoImageSurface = class(TCairoSurface)
-  public
-    constructor Create(Format: cairo_format_t; width, height: LongInt);
-    constructor Create(Data: PByte; Format: cairo_format_t; Width, Height, Stride: LongInt);
-    constructor Create(const Filename: String);
-    constructor Create(ReadFunc: cairo_read_func_t; Closure: pointer);
+  private
     function GetData: PChar;
     function GetFormat: cairo_format_t;
     function GetWidth: LongInt;
     function GetHeight: LongInt;
     function GetStride: LongInt;
+  public
+    constructor Create(Format: cairo_format_t; width, height: LongInt);
+    constructor Create(Data: PByte; Format: cairo_format_t; Width, Height, Stride: LongInt);
+    constructor Create(const Filename: String);
+    constructor Create(ReadFunc: cairo_read_func_t; Closure: pointer);
+    property Data: PChar read GetData;
+    property Format: cairo_format_t read GetFormat;
+    property Height: LongInt read GetHeight;
+    property Stride: LongInt read GetStride;
+    property Width: LongInt read GetWidth;
   end;
   
   { TCairoPdfSurface }
@@ -149,8 +156,8 @@ type
   TCairoPattern = class
   private
     FHandle: Pcairo_pattern_t;
-    FHandleIsPrivate: Boolean;
     FOnReference: TReferenceNotify;
+    FHandleIsPrivate: Boolean;
     function  GetExtend: cairo_extend_t;
     function  GetFilter: cairo_filter_t;
     procedure SetExtend(Extend: cairo_extend_t);
@@ -210,10 +217,11 @@ type
   TCairoSurfacePattern = class (TCairoPattern)
   private
     FSurface: TCairoSurface;
+    function  GetSurface: TCairoSurface;
   public
     constructor Create(Surface: TCairoSurface);
     destructor Destroy; override;
-    function  GetSurface: TCairoSurface;
+    property Surface: TCairoSurface read GetSurface;
   end;
 
   { TCairoRectangleList }
@@ -245,6 +253,14 @@ type
   TCairoFontOptions = class
   private
     FHandle: Pcairo_font_options_t;
+    procedure SetAntialias(Antialias: cairo_antialias_t);
+    function  GetAntialias: cairo_antialias_t;
+    procedure SetHintMetrics(HintMetrics: cairo_hint_metrics_t);
+    function  GetHintMetrics: cairo_hint_metrics_t;
+    procedure SetHintStyle(HintStyle: cairo_hint_style_t);
+    function  GetHintStyle: cairo_hint_style_t;
+    procedure SetSubpixelOrder(SubpixelOrder: cairo_subpixel_order_t);
+    function  GetSubpixelOrder: cairo_subpixel_order_t;
   public
     constructor Create;
     destructor Destroy; override;
@@ -253,14 +269,10 @@ type
     procedure Merge(Other: TCairoFontOptions);
     function  Equal(Other: TCairoFontOptions): Boolean;
     function  Hash: LongWord;
-    procedure SetAntialias(Antialias: cairo_antialias_t);
-    function  GetAntialias: cairo_antialias_t;
-    procedure SetSubpixelOrder(SubpixelOrder: cairo_subpixel_order_t);
-    function  GetSubpixelOrder: cairo_subpixel_order_t;
-    procedure SetHintStyle(HintStyle: cairo_hint_style_t);
-    function  GetHintStyle: cairo_hint_style_t;
-    procedure SetHintMetrics(HintMetrics: cairo_hint_metrics_t);
-    function  GetHintMetrics: cairo_hint_metrics_t;
+    property Antialias: cairo_antialias_t read GetAntialias write SetAntialias;
+    property HintMetrics: cairo_hint_metrics_t read GetHintMetrics write SetHintMetrics;
+    property HintStyle: cairo_hint_style_t read GetHintStyle write SetHintStyle;
+    property SubpixelOrder: cairo_subpixel_order_t read GetSubpixelOrder write SetSubpixelOrder;
   end;
 
   { TCairoFontFace }
@@ -268,11 +280,15 @@ type
   TCairoFontFace = class
   protected
     FHandle: Pcairo_font_face_t;
+    FOnReference: TReferenceNotify;
+    FHandleIsPrivate: Boolean;
     function GetHandle: Pcairo_font_face_t; virtual;
   public
+    destructor Destroy; override;
     function Status: cairo_status_t;
     function GetType: cairo_font_type_t;
     function GetUserData(Key: Pcairo_user_data_key_t): Pointer;
+    procedure Reference;
     function SetUserData(Key: Pcairo_user_data_key_t; UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
     property Handle: Pcairo_font_face_t read GetHandle;
   end;
@@ -282,9 +298,14 @@ type
   TCairoScaledFont = class
   private
     FHandle: Pcairo_scaled_font_t;
-  public
-    constructor Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix; const Ctm: TCairoMatrix; Options: TCairoFontOptions);
+    FFontFace: TCairoFontFace;
+    FOnReference: TReferenceNotify;
+    FHandleIsPrivate: Boolean;
     constructor Create;
+    procedure PrivateObjectReferenced(Key: Pointer);
+    function  GetFontFace: TCairoFontFace;
+  public
+    constructor Create(FontFace: TCairoFontFace; const FontMatrix, Ctm: TCairoMatrix; Options: TCairoFontOptions);
     destructor Destroy; override;
     function  Status: cairo_status_t;
     function  GetType: cairo_font_type_t;
@@ -293,12 +314,12 @@ type
     procedure Extents(AExtents: Pcairo_font_extents_t);
     procedure TextExtents(Utf8: PChar; AExtents: Pcairo_text_extents_t);
     procedure GlyphExtents(Glyphs: Pcairo_glyph_t; NumGlyphs: LongInt; AExtents: Pcairo_text_extents_t);
-    function  GetFontFace: Pcairo_font_face_t;
     procedure GetFontMatrix(var FontMatrix: TCairoMatrix);
     procedure GetCtm(var Ctm: TCairoMatrix);
     procedure GetFontOptions (Options: Pcairo_font_options_t);
+    procedure Reference;
+    property FontFace: TCairoFontFace read GetFontFace;
   end;
-
 
   { TCairoContext }
 
@@ -429,7 +450,6 @@ type
     property Source: TCairoPattern read GetSource write SetSource;
     property Target: TCairoSurface read GetTarget;
     property Tolerance: Double read GetTolerance write SetTolerance;
-
     property Handle: Pcairo_t read FHandle;
   end;
   
@@ -484,7 +504,7 @@ end;
 
 function StatusToString(Status: cairo_status_t): String;
 begin
-  Result := StrPas(cairo_status_to_string(Status));
+  Result := cairo_status_to_string(Status);
 end;
 
 { TCairoContext }
@@ -810,6 +830,8 @@ begin
   begin
     Result := TCairoFontFace.Create;
     Result.FHandle := FontFaceHandle;
+    Result.FHandleIsPrivate := True;
+    Result.FOnReference := @PrivateObjectReferenced;
     FObjectTree[FontFaceHandle] := Result;
   end;
 end;
@@ -830,6 +852,8 @@ begin
   begin
     Result := TCairoScaledFont.Create;
     Result.FHandle := ScaledFontHandle;
+    Result.FHandleIsPrivate := True;
+    Result.FOnReference := @PrivateObjectReferenced;
     FObjectTree[ScaledFontHandle] := Result;
   end;
 end;
@@ -1480,6 +1504,12 @@ end;
 
 { TCairoFontFace }
 
+destructor TCairoFontFace.Destroy;
+begin
+  if not FHandleIsPrivate then
+    cairo_font_face_destroy(FHandle);
+end;
+
 function TCairoFontFace.GetHandle: Pcairo_font_face_t;
 begin
   Result := FHandle;
@@ -1500,6 +1530,16 @@ begin
   Result := cairo_font_face_get_user_data(FHandle, Key);
 end;
 
+procedure TCairoFontFace.Reference;
+begin
+  if FHandleIsPrivate then
+  begin
+    FHandleIsPrivate := False;
+    cairo_font_face_reference(FHandle);
+    FOnReference(FHandle);
+  end;
+end;
+
 function TCairoFontFace.SetUserData(Key: Pcairo_user_data_key_t;
   UserData: Pointer; destroy_func: cairo_destroy_func_t): cairo_status_t;
 begin
@@ -1508,20 +1548,21 @@ end;
 
 { TCairoScaledFont }
 
-constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; const FontMatrix: TCairoMatrix;
-  const Ctm: TCairoMatrix; Options: TCairoFontOptions);
+constructor TCairoScaledFont.Create(FontFace: TCairoFontFace; const FontMatrix, Ctm: TCairoMatrix; Options: TCairoFontOptions);
 begin
   FHandle := cairo_scaled_font_create(FontFace.Handle, @FontMatrix.FData, @Ctm.FData, Options.FHandle)
 end;
 
 constructor TCairoScaledFont.Create;
 begin
-
+  //necessary to create as private object in context
 end;
 
 destructor TCairoScaledFont.Destroy;
 begin
-  cairo_scaled_font_destroy(FHandle);
+  if not FHandleIsPrivate then
+    cairo_scaled_font_destroy(FHandle);
+  FFontFace.Free;
 end;
 
 function TCairoScaledFont.Status: cairo_status_t;
@@ -1562,9 +1603,31 @@ begin
   cairo_scaled_font_glyph_extents(FHandle, Glyphs, NumGlyphs, AExtents);
 end;
 
-function TCairoScaledFont.GetFontFace: Pcairo_font_face_t;
+procedure TCairoScaledFont.PrivateObjectReferenced(Key: Pointer);
 begin
-  Result := cairo_scaled_font_get_font_face(FHandle);
+  FFontFace := nil;
+end;
+
+procedure TCairoScaledFont.Reference;
+begin
+  if FHandleIsPrivate then
+  begin
+    FHandleIsPrivate := False;
+    cairo_scaled_font_reference(FHandle);
+    FOnReference(FHandle);
+  end;
+end;
+
+function TCairoScaledFont.GetFontFace: TCairoFontFace;
+begin
+  if FFontFace = nil then
+  begin
+    FFontFace := TCairoFontFace.Create;
+    FFontFace.FHandle := cairo_scaled_font_get_font_face(FHandle);
+    FFontFace.FHandleIsPrivate := True;
+    FFontFace.FOnReference := @PrivateObjectReferenced;
+  end;
+  Result := FFontFace;
 end;
 
 procedure TCairoScaledFont.GetFontMatrix(var FontMatrix: TCairoMatrix);
@@ -1679,7 +1742,7 @@ begin
   Result := cairo_matrix_invert(@FData);
 end;
 
-procedure TCairoMatrix.Multiply(A, B: TCairoMatrix);
+procedure TCairoMatrix.Multiply(const A, B: TCairoMatrix);
 begin
   cairo_matrix_multiply(@FData, @A.FData, @B.FData);
 end;
