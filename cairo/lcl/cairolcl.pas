@@ -134,9 +134,6 @@ function ColorToCairoColor(Color: TColor): TCairoColor; inline;
 
 implementation
 
-uses
-  Math;
-
 {$i cairolcl.inc}
 
 function ColorToCairoColor(Color: TColor): TCairoColor;
