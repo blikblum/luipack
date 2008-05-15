@@ -1,4 +1,6 @@
-
+uses
+  qt4, qtint, qtobjects, CairoXlib;
+  
 procedure TCairoLCLFont.CreateHandle;
 begin
 end;

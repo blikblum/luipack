@@ -1,4 +1,6 @@
-
+uses
+  gtkdef, gtkint, CairoXlib, gdk, GtkWSControls, WSLCLClasses;
+  
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 var
   DeviceContext: TGtkDeviceContext absolute DC;
@@ -17,10 +19,6 @@ begin
       Width, Height
       );
   end;
-end;
-
-function CreateFontFromLog(const LogFont: TLogFont): Pcairo_font_face_t;
-begin
 end;
 
 procedure TCairoLCLFont.CreateHandle;
