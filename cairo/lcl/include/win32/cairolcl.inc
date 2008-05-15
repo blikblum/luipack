@@ -1,5 +1,5 @@
 uses
-  CairoWin32;
+  Math, CairoWin32;
   
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 begin
