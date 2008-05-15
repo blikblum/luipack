@@ -32,14 +32,12 @@ unit CairoLCL;
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
-
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  {$i uses.inc} cairo14,
-  LCLIntf, Classes, SysUtils, LCLType, CairoClasses, Controls, Graphics, LMessages;
+  LCLIntf, Classes, SysUtils, LCLType, CairoClasses, Cairo14, Controls, Graphics, LMessages;
 
 type
 
@@ -90,11 +88,11 @@ type
     FBitmap: TBitmap;
     FContext: TCairoContext;
     FOnCreateContext: TNotifyEvent;
-    procedure InitBitmap;
   protected
     procedure DoCreateContext; virtual;
     procedure DoDraw; virtual; abstract;
     procedure DoOnResize; override;
+    procedure InitBitmap; virtual;
     procedure PaintWindow(DC: HDC); override;
     procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
     procedure WMPaint(var Msg: TLMPaint); message LM_PAINT;
@@ -141,19 +139,17 @@ begin
   Result := RGBToCairoColor(ColorToRGB(Color));
 end;
 
-
 { TCustomCairoControl }
 
 procedure TCustomCairoControl.DoCreateContext;
 var
-  Surface: TCairoDCSurface;
+  Surface: Pcairo_surface_t;
 begin
   FBitmap.Width := Width;
   FBitmap.Height := Height;
-  InitBitmap;
-  Surface := TCairoDCSurface.Create(FBitmap.Canvas.Handle);
+  Surface := CreateSurfaceFromDC(FBitmap.Canvas.Handle);
   FContext := TCairoContext.Create(Surface);
-  Surface.Destroy;
+  cairo_surface_destroy(Surface);
   if Assigned(FOnCreateContext) then
     FOnCreateContext(Self);
 end;
@@ -185,6 +181,7 @@ begin
   if not Assigned(FContext) then
   begin
     DoCreateContext;
+    InitBitmap;
     DoDraw;
   end;
   Include(FControlState, csCustomPaint);

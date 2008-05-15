@@ -358,6 +358,7 @@ type
     procedure SetTolerance(Tolerance: Double);
   public
     constructor Create(Target: TCairoSurface);
+    constructor Create(Target: Pcairo_surface_t);
     destructor Destroy; override;
     procedure AppendPath(Path: TCairoPath);
     procedure Arc(Xc, Yc, Radius, Angle1, Angle2: Double);
@@ -1019,6 +1020,11 @@ function TCairoContext.CopyPathFlat: TCairoPath;
 begin
   Result := TCairoPath.Create;
   Result.FPath := cairo_copy_path_flat(FHandle);
+end;
+
+constructor TCairoContext.Create(Target: Pcairo_surface_t);
+begin
+  FHandle := cairo_create(Target);
 end;
 
 procedure TCairoContext.AppendPath(Path: TCairoPath);
