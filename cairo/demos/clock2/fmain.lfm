@@ -1,17 +1,52 @@
 object Form1: TForm1
   Left = 452
-  Height = 335
+  Height = 337
   Top = 314
-  Width = 400
-  HorzScrollBar.Page = 399
-  VertScrollBar.Page = 334
+  Width = 452
+  HorzScrollBar.Page = 451
+  VertScrollBar.Page = 336
   Caption = 'Cairo Clock Demo 2'
-  ClientHeight = 335
-  ClientWidth = 400
-  object CairoPaintBox1: TCairoPaintBox
-    Height = 335
-    Width = 400
-    OnDraw = CairoPaintBox1Draw
-    Align = alClient
+  ClientHeight = 337
+  ClientWidth = 452
+  OnCreate = FormCreate
+  LCLVersion = '0.9.25'
+  object PanelOptions: TPanel
+    Height = 34
+    Width = 452
+    Align = alTop
+    ClientHeight = 34
+    ClientWidth = 452
+    TabOrder = 0
+    object CheckDigital: TCheckBox
+      Left = 8
+      Height = 19
+      Top = 8
+      Width = 55
+      Caption = 'Digital'
+      OnChange = CheckDigitalChange
+      TabOrder = 0
+    end
+    object CheckDrawShadow: TCheckBox
+      Left = 72
+      Height = 19
+      Top = 8
+      Width = 93
+      Caption = 'Draw Shadow'
+      OnChange = CheckDrawShadowChange
+      TabOrder = 1
+    end
+    object CheckShowSeconds: TCheckBox
+      Left = 176
+      Height = 19
+      Top = 8
+      Width = 98
+      Caption = 'Show Seconds'
+      OnChange = CheckShowSecondsChange
+      TabOrder = 2
+    end
+  end
+  object TimerClock: TTimer
+    OnTimer = TimerClockTimer
+    top = 40
   end
 end

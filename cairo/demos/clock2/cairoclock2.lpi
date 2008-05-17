@@ -38,7 +38,7 @@
         <PackageName Value="cairobase_package"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="cairoclock2.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -51,6 +51,11 @@
         <ResourceFilename Value="fmain.lrs"/>
         <UnitName Value="fmain"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="janaclock.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="JanaClock"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
