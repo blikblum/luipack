@@ -1,5 +1,29 @@
 unit JanaClock;
 
+{
+
+Port of http://svn.o-hand.com/repos/jana/trunk/libjana-gtk/jana-gtk-clock.c
+
+/*
+ *  Author: Chris Lord <chris@openedhand.com>
+ *
+ *  Copyright (c) 2007 OpenedHand Ltd - http://www.openedhand.com/
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ */
+ 
+  Adapted to LCL/fpGui by Luiz Américo
+}
+
 {$mode objfpc}{$H+}
 
 interface
@@ -30,7 +54,7 @@ type
     procedure SetDrawShadow(const AValue: Boolean);
     procedure SetShowSeconds(const AValue: Boolean);
     procedure SetTime(const AValue: TDateTime);
-    procedure CreateClockBuffer(NewWidth, NewHeight: Integer);
+    procedure CreateClockBuffer;
     procedure UpdateClockBuffer;
   protected
     {$ifdef FPGUI}
@@ -89,7 +113,7 @@ begin
   Redraw;
 end;
 
-procedure TJanaClock.CreateClockBuffer(NewWidth, NewHeight: Integer);
+procedure TJanaClock.CreateClockBuffer;
 begin
   FClockBuffer := TCairoSurface.Create(Context.Target,
     CAIRO_CONTENT_COLOR_ALPHA, Width, Height);
@@ -128,7 +152,7 @@ procedure TJanaClock.DoDraw;
 begin
   if FClockBuffer = nil then
   begin
-    CreateClockBuffer(Width, Height);
+    CreateClockBuffer;
     UpdateClockBuffer;
   end;
 
@@ -219,43 +243,33 @@ begin
       Restore;
     end;
 
-    //if (priv->dirty) return;
-
     (* Draw clock face *)
     thickness := size div 20;
     NewPath;
-    Arc (awidth/2, aheight/2,
-            size/2 - thickness/2, 0, 2 * PI);
+    Arc(awidth/2, aheight/2,
+      size/2 - thickness/2, 0, 2 * PI);
     ClosePath;
     pattern := TCairoRadialGradient.Create (awidth/2, aheight/3,
-            0, awidth/2, aheight/2,
-            size/2 - thickness/2);
-    Pattern.AddColorStopRgb (0, bg_color.Red*2,
-            bg_color.Green*2, bg_color.Blue*2);
+      0, awidth/2, aheight/2,
+      size/2 - thickness/2);
+    Pattern.AddColorStopRgb (0, bg_color.Red*2, bg_color.Green*2, bg_color.Blue*2);
     Pattern.AddColorStop(0.3, bg_color);
-    Pattern.AddColorStopRgb (1, bg_color.Red/1.15,
-            bg_color.Green/1.15, bg_color.Blue/1.15);
+    Pattern.AddColorStopRgb (1, bg_color.Red/1.15, bg_color.Green/1.15, bg_color.Blue/1.15);
     Source := Pattern;
     Fill;
     Pattern.Destroy;
-
-    //if (priv->dirty) return;
 
     (* Draw tick marks *)
     Color := fg_color;
     for i := 0 to 3 do
     begin
       NewPath;
-      Arc ((awidth/2) + ((size/2 - thickness/2 - size/6) *
-                      cos (i * PI/2)),
-              (aheight/2) + ((size/2 - thickness/2 - size/6) *
-                      sin (i * PI/2)),
-              size/40, 0, 2 * PI);
+      Arc ((awidth/2) + ((size/2 - thickness/2 - size/6) * cos (i * PI/2)),
+        (aheight/2) + ((size/2 - thickness/2 - size/6) * sin (i * PI/2)),
+         size/40, 0, 2 * PI);
       ClosePath;
       Fill;
     end;
-
-    //if (priv->dirty) return;
 
     (* Draw centre point *)
     NewPath;
@@ -264,18 +278,16 @@ begin
     LineWidth := size/60;
     Stroke;
 
-    //if (priv->dirty) return;
-
     (* Draw internal clock-frame shadow *)
     thickness := size div 20;
     NewPath;
     Arc(awidth/2, aheight/2,
-            size/2 - thickness, 0, 2 * PI);
+      size/2 - thickness, 0, 2 * PI);
     ClosePath;
-    pattern := TCairoRadialGradient.Create ((awidth/2) - (size/4),
-            (aheight/2) - (size/4),
-            0, awidth/2, aheight/2,
-            size/2 - thickness/2);
+    Pattern := TCairoRadialGradient.Create ((awidth/2) - (size/4),
+      (aheight/2) - (size/4),
+      0, awidth/2, aheight/2,
+      size/2 - thickness/2);
     Pattern.AddColorStopRgb (0, bg_color.Red/2,
             bg_color.Green/2, bg_color.Blue/2);
     Pattern.AddColorStopRgb (0.5, bg_color.Red/2,
@@ -287,48 +299,42 @@ begin
     Stroke;
     Pattern.Destroy;
 
-    //if (priv->dirty) return;
-
     (* Draw internal clock-frame *)
     NewPath;
-    Arc (awidth/2, aheight/2,
-            size/2 - thickness/2, 0, 2 * PI);
+    Arc(awidth/2, aheight/2,
+      size/2 - thickness/2, 0, 2 * PI);
     ClosePath;
     pattern := TCairoRadialGradient.Create ((awidth/2) - (size/3),
-            (aheight/2) - (size/3), 0, awidth/3, aheight/3, size/2);
+      (aheight/2) - (size/3), 0, awidth/3, aheight/3, size/2);
     Pattern.AddColorStopRgb ( 0, base_color.Red*1.2,
-            base_color.Green*1.2, base_color.Blue*1.2);
+      base_color.Green*1.2, base_color.Blue*1.2);
     Pattern.AddColorStop( 0.7, base_color);
     Pattern.AddColorStopRgb ( 1, base_color.Red/1.2,
-            base_color.Green/1.2, base_color.Blue/1.2);
+      base_color.Green/1.2, base_color.Blue/1.2);
     Source := pattern;
     Stroke;
     Pattern.Destroy;
-    
-    //if (priv->dirty) return;
 
     (* Dark outline frame *)
 
     thickness := size div 60;
     NewPath;
     Arc (awidth/2, aheight/2,
-            size/2 - thickness/2, 0, 2 * PI);
+      size/2 - thickness/2, 0, 2 * PI);
     ClosePath;
     SetSourceRGB (base_color.Red/2,
-            base_color.Green/2, base_color.Blue/2);
+      base_color.Green/2, base_color.Blue/2);
     LineWidth := thickness;
     Stroke ;
-
-    //if (priv->dirty) return;
-
+    
     (* Draw less dark inner outline frame *)
     thickness := size div 40;
     NewPath;
-    Arc ( awidth/2, aheight/2, size/2 -
-            (size/20)/2 - thickness, 0, 2 * PI);
+    Arc(awidth/2, aheight/2, size/2 -
+      (size/20)/2 - thickness, 0, 2 * PI);
     ClosePath ;
     SetSourceRgb(base_color.Red/1.5,
-            base_color.Green/1.5, base_color.Blue/1.5);
+      base_color.Green/1.5, base_color.Blue/1.5);
     LineWidth := thickness;
     Stroke;
   end;
@@ -340,7 +346,7 @@ var
   awidth, aheight, size, thickness: Integer;
   Hour, Second, Minute, MSecond: Word;
 begin
-  with Context do
+  with DrawContext do
   begin
     awidth := Width;
     aheight := Height;
@@ -364,36 +370,28 @@ begin
 
     (* Draw hour hand *)
     pi_ratio := (((Hour * 60) + Minute)/60.0)/6.0;
-    //pi_ratio = ((gdouble)((jana_time_get_hours (time)*60)+jana_time_get_minutes (time))/60.0)/6.0;
     NewPath;
     MoveTo ((awidth/2) + ((size/2 - thickness/2 - size/4) * cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) + ((size/2 - thickness/2 - size/4) *	sin ((pi_ratio * PI)-(PI/2))));
+      (aheight/2) + ((size/2 - thickness/2 - size/4) * sin ((pi_ratio * PI)-(PI/2))));
 
     LineTo((awidth/2) + ((size/35) * cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
+      (aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
     ClosePath;
     Stroke;
-
-    //if (priv->dirty) return;
 
     (* Draw minute hand *)
     pi_ratio := Minute/30.0;
     NewPath;
-    MoveTo ((awidth/2) + ((size/2 - thickness/2 - size/8) *
-  		cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) + ((size/2 - thickness/2 - size/8) *
-  			sin ((pi_ratio * PI)-(PI/2))));
+    MoveTo ((awidth/2) + ((size/2 - thickness/2 - size/8) * cos ((pi_ratio * PI)-(PI/2))),
+      (aheight/2) + ((size/2 - thickness/2 - size/8) * sin ((pi_ratio * PI)-(PI/2))));
     LineTo((awidth/2) + ((size/35) * cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
+      (aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
     ClosePath;
     Stroke;
-
-    //if ((!priv->show_seconds) || priv->dirty) return;
 
     if not FShowSeconds then
       Exit;
     (* Draw second hand *)
-    //gdk_cairo_set_source_color (cr, &style->bg[GTK_STATE_SELECTED]);
     {$ifdef FPGUI}
     //Color := fpgColorToCairoColor(clSelection);
     Color := CairoColor(0,0,1,1);
@@ -403,12 +401,10 @@ begin
     LineWidth := MAX (1, size / 120);
     pi_ratio := Second/30.0;
     NewPath;
-    MoveTo ((awidth/2) + ((size/2 - thickness/2 - size/8) *
-  		cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) + ((size/2 - thickness/2 - size/8) *
-  		sin ((pi_ratio * PI)-(PI/2))));
+    MoveTo ((awidth/2) + ((size/2 - thickness/2 - size/8) * cos ((pi_ratio * PI)-(PI/2))),
+      (aheight/2) + ((size/2 - thickness/2 - size/8) * sin ((pi_ratio * PI)-(PI/2))));
     LineTo((awidth/2) + ((size/35) * cos ((pi_ratio * PI)-(PI/2))),
-  	(aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
+      (aheight/2) +((size/35) * sin ((pi_ratio * PI)-(PI/2))));
     ClosePath;
     Stroke;
   end;
@@ -423,30 +419,30 @@ var
   Pattern: TCairoRadialGradient;
 begin
 
-	(* Draw a Tango-style analogue clock face *)
+  (* Draw a Tango-style analogue clock face *)
 
- {
-	base_color[0] = ((double)style->bg[GTK_STATE_SELECTED].red)/
-		(double)G_MAXUINT16;
-	base_color[1] = ((double)style->bg[GTK_STATE_SELECTED].green)/
-		(double)G_MAXUINT16;
-	base_color[2] = ((double)style->bg[GTK_STATE_SELECTED].blue)/
-		(double)G_MAXUINT16;
+  {
+  base_color[0] = ((double)style->bg[GTK_STATE_SELECTED].red)/
+  (double)G_MAXUINT16;
+  base_color[1] = ((double)style->bg[GTK_STATE_SELECTED].green)/
+  (double)G_MAXUINT16;
+  base_color[2] = ((double)style->bg[GTK_STATE_SELECTED].blue)/
+  (double)G_MAXUINT16;
 
-	bg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
-		(double)G_MAXUINT16;
-	bg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
-		(double)G_MAXUINT16;
-	bg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
-		(double)G_MAXUINT16;
+  bg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
+  (double)G_MAXUINT16;
+  bg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
+  (double)G_MAXUINT16;
+  bg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
+  (double)G_MAXUINT16;
 
-	fg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
-		(double)G_MAXUINT16;
-	fg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
-		(double)G_MAXUINT16;
-	fg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
-		(double)G_MAXUINT16;
-}
+  fg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
+  (double)G_MAXUINT16;
+  fg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
+  (double)G_MAXUINT16;
+  fg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
+  (double)G_MAXUINT16;
+  }
   {$ifdef FPGUI}
   {
   base_color := fpgColorToCairoColor(clSelection);
@@ -463,124 +459,112 @@ begin
   {$endif}
   with DrawContext do
   begin
-	aheight := Height;
-        awidth := Width;
-        if FDrawShadow then
-        begin
-          Dec(aheight, aheight div 10);
-          Dec(awidth, awidth div 10);
-        end;
-        awidth := MIN (awidth, aheight * 2);
-	aheight := awidth div 2;
-	x := (Width - awidth) div 2;
-	y := (Height - aheight) div 2;
+    aheight := Height;
+    awidth := Width;
+    if FDrawShadow then
+    begin
+      Dec(aheight, aheight div 10);
+      Dec(awidth, awidth div 10);
+    end;
+    awidth := MIN (awidth, aheight * 2);
+    aheight := awidth div 2;
+    x := (Width - awidth) div 2;
+    y := (Height - aheight) div 2;
 
-	SetOperator (CAIRO_OPERATOR_CLEAR);
-	Paint;
-	SetOperator (CAIRO_OPERATOR_SOURCE);
+    SetOperator (CAIRO_OPERATOR_CLEAR);
+    Paint;
+    SetOperator (CAIRO_OPERATOR_SOURCE);
 
-	//if (priv->dirty) return;
+    Translate (x, y);
 
-	Translate (x, y);
+    if FDrawShadow then
+    begin
+      (* Draw ground shadow *)
+      Save;
+      Translate (awidth/2, aheight);
+      Scale (1.0, (aheight/awidth)/10);
 
-	if FDrawShadow then
-        begin
-		(* Draw ground shadow *)
-		Save;
-		Translate (awidth/2, aheight);
-		Scale (1.0, (aheight/awidth)/10);
+      NewPath;
+      shadow_radius := ((10*awidth) div 9) div 2;
+      Arc (0, 0, shadow_radius, 0, 2 * PI);
+      ClosePath;
+      Pattern := TCairoRadialGradient.Create (0, 0, 0,
+        0, 0, shadow_radius);
+      Pattern.AddColorStopRgba (0, 0, 0, 0, 0.5);
+      Pattern.AddColorStopRgba (0.5, 0, 0, 0, 0.5);
+      Pattern.AddColorStopRgba (1, 0, 0, 0, 0);
+      Source := Pattern;
+      Fill;
+      Pattern.Destroy;
 
-		NewPath;
-		shadow_radius := ((10*awidth) div 9) div 2;
-		Arc (0, 0, shadow_radius, 0, 2 * PI);
-		ClosePath;
-		pattern := TCairoRadialGradient.Create (0, 0, 0,
-			0, 0, shadow_radius);
-		Pattern.AddColorStopRgba (0, 0, 0, 0, 0.5);
-		Pattern.AddColorStopRgba (0.5, 0, 0, 0, 0.5);
-		Pattern.AddColorStopRgba (1, 0, 0, 0, 0);
-		Source := Pattern;
-		Fill;
-		Pattern.Destroy;
+      Restore;
+    end;
 
-		Restore;
-        end;
+    (* Draw internal frame shadow *)
+    thickness := awidth div 28;
+    NewPath;
+    Rectangle (thickness*2, thickness*2,
+      awidth - thickness*4, aheight - thickness*4);
+    pattern := TCairoRadialGradient.Create (
+      awidth - thickness * 4, aheight - thickness * 4, 0,
+      awidth - thickness * 4, aheight - thickness * 4, aheight);
+    Pattern.AddColorStopRgb (0,
+      (2*fg_color.Red+bg_color.Red)/3,
+      (2*fg_color.Green+bg_color.Green)/3,
+      (2*fg_color.Blue+bg_color.Blue)/3);
+    Pattern.AddColorStop(0.5, fg_color);
+    Pattern.AddColorStop (1, fg_color);
+    Source := Pattern;
+    LineWidth := thickness;
+    Stroke;
+    Pattern.Destroy;
 
-	//if (priv->dirty) return;
+    (* Draw clock face *)
+    NewPath;
+    Rectangle (thickness*2.5, thickness*2.5,
+      awidth - thickness*5, aheight - thickness*5);
+    LineJoin := CAIRO_LINE_JOIN_ROUND;
+    LineCap := CAIRO_LINE_CAP_ROUND;
+    SetSourceRgb (
+      (15*fg_color.Red+bg_color.Red)/16,
+      (15*fg_color.Green+bg_color.Green)/16,
+      (15*fg_color.Blue+bg_color.Blue)/16);
+    LineWidth := thickness/2;
+    StrokePreserve;
+    Fill;
 
-	(* Draw internal frame shadow *)
-	thickness := awidth div 28;
-	NewPath;
-	Rectangle (thickness*2, thickness*2,
-		awidth - thickness*4, aheight - thickness*4);
-	pattern := TCairoRadialGradient.Create (
-		awidth - thickness * 4, aheight - thickness * 4, 0,
-		awidth - thickness * 4, aheight - thickness * 4, aheight);
-	Pattern.AddColorStopRgb (0,
-		(2*fg_color.Red+bg_color.Red)/3,
-		(2*fg_color.Green+bg_color.Green)/3,
-		(2*fg_color.Blue+bg_color.Blue)/3);
-	Pattern.AddColorStop(0.5, fg_color);
-	Pattern.AddColorStop (1, fg_color);
-	Source := Pattern;
-	LineWidth := thickness;
-	Stroke;
-	Pattern.Destroy;
+    (* Draw dark outline frame *)
+    NewPath;
+    Rectangle (thickness/2, thickness/2,
+      awidth - thickness, aheight - thickness);
+    LineWidth := thickness;
+    SetSourceRgb (base_color.Red/2,
+      base_color.Green/2, base_color.Blue/2);
+    Stroke;
 
-	//if (priv->dirty) return;
+    (* Draw main outline frame *)
+    NewPath;
+    Rectangle (thickness, thickness,
+      awidth - thickness*2, aheight - thickness*2);
+    Pattern := TCairoRadialGradient.Create (thickness/2,
+      thickness/2, 0, thickness/2, thickness/2, awidth);
+    Pattern.AddColorStopRgb (0, base_color.Red*1.2,
+      base_color.Green*1.2, base_color.Blue*1.2);
+    Pattern.AddColorStop (0.7, base_color);
+    Pattern.AddColorStopRgb (1, base_color.Red/1.2,
+      base_color.Green/1.2, base_color.Blue/1.2);
+    Source := Pattern;
+    Stroke;
+    Pattern.Destroy;
 
-	(* Draw clock face *)
-	NewPath;
-	Rectangle (thickness*2.5, thickness*2.5,
-		awidth - thickness*5, aheight - thickness*5);
-	LineJoin := CAIRO_LINE_JOIN_ROUND;
-	LineCap := CAIRO_LINE_CAP_ROUND;
-	SetSourceRgb (
-          (15*fg_color.Red+bg_color.Red)/16,
-	  (15*fg_color.Green+bg_color.Green)/16,
-	  (15*fg_color.Blue+bg_color.Blue)/16);
-	LineWidth := thickness/2;
-	StrokePreserve;
-	Fill;
-
-	//if (priv->dirty) return;
-
-	(* Draw dark outline frame *)
-	NewPath;
-	Rectangle (thickness/2, thickness/2,
-		awidth - thickness, aheight - thickness);
-	LineWidth := thickness;
-	SetSourceRgb (base_color.Red/2,
-		base_color.Green/2, base_color.Blue/2);
-	Stroke;
-
-	//if (priv->dirty) return;
-
-	(* Draw main outline frame *)
-	NewPath;
-	Rectangle (thickness, thickness,
-		awidth - thickness*2, aheight - thickness*2);
-	Pattern := TCairoRadialGradient.Create (thickness/2,
-		thickness/2, 0, thickness/2, thickness/2, awidth);
-	Pattern.AddColorStopRgb (0, base_color.Red*1.2,
-		base_color.Green*1.2, base_color.Blue*1.2);
-	Pattern.AddColorStop (0.7, base_color);
-	Pattern.AddColorStopRgb (1, base_color.Red/1.2,
-		base_color.Green/1.2, base_color.Blue/1.2);
-	Source := Pattern;
-	Stroke;
-	Pattern.Destroy;
-
-	//if (priv->dirty) return;
-
-	(* Draw less dark inner outline frame *)
-	NewPath;
-	Rectangle (thickness*1.5, thickness*1.5,
-		awidth - thickness*3, aheight - thickness*3);
-	SetSourceRgb (base_color.Red/1.5,
-		base_color.Green/1.5, base_color.Blue/1.5);
-	LineWidth := thickness/2;
-	Stroke;
+    (* Draw less dark inner outline frame *)
+    NewPath;
+    Rectangle (thickness*1.5, thickness*1.5,
+      awidth - thickness*3, aheight - thickness*3);
+    SetSourceRgb (base_color.Red/1.5,
+      base_color.Green/1.5, base_color.Blue/1.5);
+    LineWidth := thickness/2;
+    Stroke;
   end;
 end;
 
@@ -601,90 +585,62 @@ begin
   fg_color := ColorToCairoColor(clWindow);
   {$endif}
   {
-  	bg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
-		(double)G_MAXUINT16;
-	bg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
-		(double)G_MAXUINT16;
-	bg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
-		(double)G_MAXUINT16;
+   bg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
+  (double)G_MAXUINT16;
+  bg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
+  (double)G_MAXUINT16;
+  bg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
+  (double)G_MAXUINT16;
 
-	fg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
-		(double)G_MAXUINT16;
-	fg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
-		(double)G_MAXUINT16;
-	fg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
-		(double)G_MAXUINT16;
+  fg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
+  (double)G_MAXUINT16;
+  fg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
+  (double)G_MAXUINT16;
+  fg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
+  (double)G_MAXUINT16;
   }
   with DrawContext do
   begin
-        Save;
-	aheight := Height;
-        awidth := Width;
-        if FDrawShadow then
-        begin
-          Dec(aheight, aheight div 10);
-          Dec(awidth, awidth div 10);
-        end;
-	awidth := MIN (awidth, aheight * 2);
-	aheight := awidth div 2;
-	x := (Width - awidth) div 2;
-	y := (Height - aheight) div 2;
+    Save;
+    aheight := Height;
+    awidth := Width;
+    if FDrawShadow then
+    begin
+      Dec(aheight, aheight div 10);
+      Dec(awidth, awidth div 10);
+    end;
+    awidth := MIN (awidth, aheight * 2);
+    aheight := awidth div 2;
+    x := (Width - awidth) div 2;
+    y := (Height - aheight) div 2;
 
-	thickness := awidth div 28;
+    thickness := awidth div 28;
 
-	//if (priv->dirty) return;
+    Translate (x + thickness*3, y + thickness*3);
+    Scale ((awidth - thickness*6)/5.0,(aheight - thickness*6));
 
-	Translate (x + thickness*3, y + thickness*3);
-	Scale ((awidth - thickness*6)/5.0,(aheight - thickness*6));
+    DecodeTime(ATime, Hour, Minute, Second, MSecond);
 
-        DecodeTime(ATime, Hour, Minute, Second, MSecond);
-        
-        DrawDigitalNumber(DrawContext, Hour div 10, fg_color, bg_color);
-        //draw_digital_number (cr, time ?
-	//	jana_time_get_hours (time)/10 : -1, bg_color, fg_color);
-	Translate (1.1, 0);
+    DrawDigitalNumber(DrawContext, Hour div 10, fg_color, bg_color);
+    Translate (1.1, 0);
+    DrawDigitalNumber(DrawContext, Hour Mod 10, fg_color, bg_color);
+    Translate (1.1, 0);
 
-	//if (priv->dirty) return;
+    (* Draw separator *)
+    if FShowSeconds and ((Second mod 2) = 1) then
+      Color := bg_color
+    else
+      Color := fg_color;
+    NewPath;
+    Rectangle (0.15, 2.0/8.0, 0.3, 1.0/8.0);
+    Rectangle (0.15, 5.0/8.0, 0.3, 1.0/8.0);
+    Fill;
 
-        DrawDigitalNumber(DrawContext, Hour Mod 10, fg_color, bg_color);
-	//draw_digital_numberime ?
-	//	jana_time_get_hours (time)%10 : -1, bg_color, fg_color);
-	Translate (1.1, 0);
-
-	//if (priv->dirty) return;
-
-	(* Draw separator *)
- {
-	if (time && priv->show_seconds &&
-	    ((jana_time_get_seconds (time) % 2) == 1))
-		cairo_set_source_rgb (
-			cr, bg_color[0], bg_color[1], bg_color[2]);
-	else
-		cairo_set_source_rgb (
-			cr, fg_color[0], fg_color[1], fg_color[2]);
-}
-        if FShowSeconds and ((Second mod 2) = 1) then
-          Color := bg_color
-        else
-          Color := fg_color;
-	NewPath;
-	Rectangle (0.15, 2.0/8.0, 0.3, 1.0/8.0);
-	Rectangle (0.15, 5.0/8.0, 0.3, 1.0/8.0);
-	Fill;
-
-	//if (priv->dirty) return;
-	Translate (0.7, 0);
-        DrawDigitalNumber(DrawContext, Minute div 10, fg_color, bg_color);
-	//draw_digital_number (cr, time ?
-	//	jana_time_get_minutes (time)/10 : -1, bg_color, fg_color);
-	Translate (1.1, 0);
-
-	//if (priv->dirty) return;
-
-        DrawDigitalNumber(DrawContext, Minute mod 10, fg_color, bg_color);
-	//draw_digital_number (cr, time ?
-	//	jana_time_get_minutes (time)%10 : -1, bg_color, fg_color);
-        Restore;
+    Translate (0.7, 0);
+    DrawDigitalNumber(DrawContext, Minute div 10, fg_color, bg_color);
+    Translate (1.1, 0);
+    DrawDigitalNumber(DrawContext, Minute mod 10, fg_color, bg_color);
+    Restore;
   end;
 end;
 
@@ -696,10 +652,9 @@ begin
   padding := 0.01;
   with DrawContext do
   begin
+    (* Draw a segmented number, like on an old digital LCD display *)
 
-   (* Draw a segmented number, like on an old digital LCD display *)
-
-   (* Top *)
+    (* Top *)
     if number in  [0, 2, 3, 5, 6, 7, 8, 9] then
       Color := ForegroundColor
     else
@@ -717,89 +672,86 @@ begin
       Color := ForegroundColor
     else
       Color := BackColor;
-	NewPath;
-	MoveTo(0, 0);
-	LineTo (0, 4.0/8.0);
-	LineTo ( 1.0/5.0 - padding, 3.5/8.0 - padding);
-	LineTo ( 1.0/5.0 - padding, 1.0/8.0 + padding);
-        ClosePath;
-	Fill;
+    NewPath;
+    MoveTo(0, 0);
+    LineTo (0, 4.0/8.0);
+    LineTo ( 1.0/5.0 - padding, 3.5/8.0 - padding);
+    LineTo ( 1.0/5.0 - padding, 1.0/8.0 + padding);
+          ClosePath;
+    Fill;
 
-     (* Top-right *)
+    (* Top-right *)
     if number in  [0, 1, 2, 3, 4, 7, 8, 9] then
       Color := ForegroundColor
     else
       Color := BackColor;
 
-	NewPath;
-	MoveTo (5.0/5.0, 0);
-	LineTo (5.0/5.0, 4.0/8.0);
-	LineTo ( 4.0/5.0 + padding, 3.5/8.0 - padding);
-	LineTo (4.0/5.0 + padding, 1.0/8.0 + padding);
-	ClosePath;
-	Fill;
+    NewPath;
+    MoveTo (5.0/5.0, 0);
+    LineTo (5.0/5.0, 4.0/8.0);
+    LineTo ( 4.0/5.0 + padding, 3.5/8.0 - padding);
+    LineTo (4.0/5.0 + padding, 1.0/8.0 + padding);
+    ClosePath;
+    Fill;
 
-	(* Middle *)
+    (* Middle *)
     if number in  [2, 3, 4, 5, 6, 8, 9] then
       Color := ForegroundColor
     else
       Color := BackColor;
 
+    NewPath;
+    MoveTo (0, 4.0/8.0);
+    LineTo (1.0/5.0 + padding, 3.5/8.0 + padding);
+    LineTo (4.0/5.0 - padding, 3.5/8.0 + padding);
+    LineTo (5.0/5.0, 4.0/8.0);
+    LineTo (4.0/5.0 - padding, 4.5/8.0 - padding);
+    LineTo (1.0/5.0 + padding, 4.5/8.0 - padding);
+    ClosePath;
+    Fill;
 
-	NewPath;
-	MoveTo (0, 4.0/8.0);
-	LineTo (1.0/5.0 + padding, 3.5/8.0 + padding);
-	LineTo (4.0/5.0 - padding, 3.5/8.0 + padding);
-	LineTo (5.0/5.0, 4.0/8.0);
-	LineTo (4.0/5.0 - padding, 4.5/8.0 - padding);
-	LineTo (1.0/5.0 + padding, 4.5/8.0 - padding);
-	ClosePath;
-	Fill;
-
-	(* Bottom-left *)
+    (* Bottom-left *)
     if number in  [0, 2, 6, 8] then
       Color := ForegroundColor
     else
       Color := BackColor;
 
-	NewPath;
-	MoveTo (0, 4.0/8.0);
-	LineTo (0, 8.0/8.0);
-	LineTo (1.0/5.0 - padding, 7.0/8.0 - padding);
-	LineTo (1.0/5.0 - padding, 4.5/8.0 + padding);
-	ClosePath;
-	Fill;
+    NewPath;
+    MoveTo (0, 4.0/8.0);
+    LineTo (0, 8.0/8.0);
+    LineTo (1.0/5.0 - padding, 7.0/8.0 - padding);
+    LineTo (1.0/5.0 - padding, 4.5/8.0 + padding);
+    ClosePath;
+    Fill;
 
-	(* Bottom-right *)
+    (* Bottom-right *)
 
     if number in  [0, 1, 3, 4, 5, 6, 7, 8, 9] then
       Color := ForegroundColor
     else
       Color := BackColor;
 
+    NewPath;
+    MoveTo (5.0/5.0, 4.0/8.0);
+    LineTo (5.0/5.0, 8.0/8.0);
+    LineTo (4.0/5.0 + padding, 7.0/8.0 - padding);
+    LineTo (4.0/5.0 + padding, 4.5/8.0 + padding);
+    ClosePath;
+    Fill;
 
-	NewPath;
-	MoveTo (5.0/5.0, 4.0/8.0);
-	LineTo (5.0/5.0, 8.0/8.0);
-	LineTo (4.0/5.0 + padding, 7.0/8.0 - padding);
-	LineTo (4.0/5.0 + padding, 4.5/8.0 + padding);
-	ClosePath;
-	Fill;
-
-	(* Bottom *)
+    (* Bottom *)
     if number in  [0, 2, 3, 5, 6, 8, 9] then
       Color := ForegroundColor
     else
       Color := BackColor;
 
-
-	NewPath;
-	MoveTo (0, 8.0/8.0);
-	LineTo (5.0/5.0, 8.0/8.0);
-	LineTo ( 4.0/5.0 - padding, 7.0/8.0 + padding);
-	LineTo (1.0/5.0 + padding, 7.0/8.0 + padding);
-	ClosePath;
-	Fill;
+    NewPath;
+    MoveTo (0, 8.0/8.0);
+    LineTo (5.0/5.0, 8.0/8.0);
+    LineTo ( 4.0/5.0 - padding, 7.0/8.0 + padding);
+    LineTo (1.0/5.0 + padding, 7.0/8.0 + padding);
+    ClosePath;
+    Fill;
   end;
 end;
 
