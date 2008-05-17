@@ -8,7 +8,8 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { you can add units after this }, fmain, cairolcl_package, cairobase_package;
+  { you can add units after this }, fmain, cairolcl_package, cairobase_package,
+  JanaClock;
 
 begin
   Application.Initialize;
