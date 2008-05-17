@@ -97,13 +97,7 @@ implementation
 
 function fpgColorToCairoColor(const AColor: TfpgColor): TCairoColor;
 begin
-  with Result do
-  begin
-    Red   := fpgGetRed(AColor) / 255;
-    Green := fpgGetGreen(AColor) / 255;
-    Blue  := fpgGetBlue(AColor) / 255;
-    Alpha := 1;
-  end
+  Result := RGBToCairoColor(fpgColorToRGB(AColor));
 end;
 
 
