@@ -177,36 +177,11 @@ begin
   with DrawContext do
   begin
     (* Draw a Tango-style analogue clock face *)
-
-    {
-    base_color[0] = ((double)widget->style->bg[GTK_STATE_SELECTED].red)/
-            (double)G_MAXUINT16;
-    base_color[1] = ((double)widget->style->bg[GTK_STATE_SELECTED].green)/
-            (double)G_MAXUINT16;
-    base_color[2] = ((double)widget->style->bg[GTK_STATE_SELECTED].blue)/
-            (double)G_MAXUINT16;
-
-    bg_color[0] = ((double)widget->style->base[GTK_STATE_NORMAL].red)/
-            (double)G_MAXUINT16;
-    bg_color[1] = ((double)widget->style->base[GTK_STATE_NORMAL].green)/
-            (double)G_MAXUINT16;
-    bg_color[2] = ((double)widget->style->base[GTK_STATE_NORMAL].blue)/
-            (double)G_MAXUINT16;
-
-    fg_color[0] = ((double)widget->style->text[GTK_STATE_NORMAL].red)/
-            (double)G_MAXUINT16;
-    fg_color[1] = ((double)widget->style->text[GTK_STATE_NORMAL].green)/
-            (double)G_MAXUINT16;
-    fg_color[2] = ((double)widget->style->text[GTK_STATE_NORMAL].blue)/
-            (double)G_MAXUINT16;
-    }
+    
     {$ifdef FPGUI}
-    //base_color := fpgColorToCairoColor(clSelection);
-    //bg_color := fpgColorToCairoColor(clWindowBackground);
-    //fg_color := fpgColorToCairoColor(clText1);
-    base_color := CairoColor(0,0,1,1);
-    bg_color := CairoColor(1,1,1,1);
-    fg_color := CairoColor(0,0,0,1);
+    base_color := fpgColorToCairoColor(clSelection);
+    bg_color := fpgColorToCairoColor(clWindowBackground);
+    fg_color := fpgColorToCairoColor(clText1);
     {$else}
     base_color := ColorToCairoColor(clHighlight);
     bg_color := ColorToCairoColor(clWindow);
@@ -357,8 +332,7 @@ begin
     //gdk_cairo_set_source_color (cr, &style->fg[GTK_STATE_NORMAL]);
     //Color := ColorToCairoColor(clWindow);
     {$ifdef FPGUI}
-    //Color := fpgColorToCairoColor(clText1);
-    Color := CairoColor(0,0,0,1);
+    Color := fpgColorToCairoColor(clText1);
     {$else}
     Color := ColorToCairoColor(clWindowText);
     {$endif}
@@ -393,8 +367,7 @@ begin
       Exit;
     (* Draw second hand *)
     {$ifdef FPGUI}
-    //Color := fpgColorToCairoColor(clSelection);
-    Color := CairoColor(0,0,1,1);
+    Color := fpgColorToCairoColor(clSelection);
     {$else}
     Color := ColorToCairoColor(clHighlight);
     {$endif}
@@ -418,40 +391,11 @@ var
   fg_color: TCairoColor;
   Pattern: TCairoRadialGradient;
 begin
-
   (* Draw a Tango-style analogue clock face *)
-
-  {
-  base_color[0] = ((double)style->bg[GTK_STATE_SELECTED].red)/
-  (double)G_MAXUINT16;
-  base_color[1] = ((double)style->bg[GTK_STATE_SELECTED].green)/
-  (double)G_MAXUINT16;
-  base_color[2] = ((double)style->bg[GTK_STATE_SELECTED].blue)/
-  (double)G_MAXUINT16;
-
-  bg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
-  (double)G_MAXUINT16;
-  bg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
-  (double)G_MAXUINT16;
-  bg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
-  (double)G_MAXUINT16;
-
-  fg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
-  (double)G_MAXUINT16;
-  fg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
-  (double)G_MAXUINT16;
-  fg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
-  (double)G_MAXUINT16;
-  }
   {$ifdef FPGUI}
-  {
   base_color := fpgColorToCairoColor(clSelection);
   bg_color := fpgColorToCairoColor(clWindowBackground);
   fg_color := fpgColorToCairoColor(clText1);
-  }
-  base_color := CairoColor(0,0,1,1);
-  bg_color := CairoColor(1,1,1,1);
-  fg_color := CairoColor(0,0,0,1);
   {$else}
   base_color := ColorToCairoColor(clHighlight);
   bg_color := ColorToCairoColor(clWindow);
@@ -576,29 +520,12 @@ var
   Hour, Second, Minute, MSecond: Word;
 begin
   {$ifdef FPGUI}
-  //bg_color := fpgColorToCairoColor(clText1);
-  //fg_color := fpgColorToCairoColor(clWindowBackground);
-  bg_color := CairoColor(0,0,0,1);
-  fg_color := CairoColor(1,1,1,1);
+  bg_color := fpgColorToCairoColor(clText1);
+  fg_color := fpgColorToCairoColor(clWindowBackground);
   {$else}
   bg_color := ColorToCairoColor(clWindowText);
   fg_color := ColorToCairoColor(clWindow);
   {$endif}
-  {
-   bg_color[0] = ((double)style->text[GTK_STATE_NORMAL].red)/
-  (double)G_MAXUINT16;
-  bg_color[1] = ((double)style->text[GTK_STATE_NORMAL].green)/
-  (double)G_MAXUINT16;
-  bg_color[2] = ((double)style->text[GTK_STATE_NORMAL].blue)/
-  (double)G_MAXUINT16;
-
-  fg_color[0] = ((double)style->base[GTK_STATE_NORMAL].red)/
-  (double)G_MAXUINT16;
-  fg_color[1] = ((double)style->base[GTK_STATE_NORMAL].green)/
-  (double)G_MAXUINT16;
-  fg_color[2] = ((double)style->base[GTK_STATE_NORMAL].blue)/
-  (double)G_MAXUINT16;
-  }
   with DrawContext do
   begin
     Save;
