@@ -204,6 +204,9 @@ end;
 
 procedure TCustomCairoControl.Redraw;
 begin
+  //sometimes the control can have 0 size
+  if (Width <= 0) or (Height <= 0) then
+    Exit;
   if not Assigned(FContext) then
     DoCreateContext;
   InitBitmap;
