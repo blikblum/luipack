@@ -38,7 +38,7 @@ unit CairofpGui;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, Cairo14, fpgfx, gfx_widget;
+  Classes, SysUtils, CairoClasses, Cairo14, fpgfx, gfx_widget, gfxbase;
 
 type
 
@@ -64,6 +64,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure Redraw;
   end;
   
   { TfpgCairoPaintBox }
@@ -80,7 +81,7 @@ type
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
   end;
 
-
+  function fpgColorToCairoColor(const AColor: TfpgColor): TCairoColor;
   function CreateSurfaceFromCanvas(Canvas: TfpgCanvas): Pcairo_surface_t;
   
 implementation
@@ -93,6 +94,17 @@ implementation
 {$ifdef unix}
 {$i cairo_x11.inc}
 {$endif}
+
+function fpgColorToCairoColor(const AColor: TfpgColor): TCairoColor;
+begin
+  with Result do
+  begin
+    Red   := fpgGetRed(AColor) / 255;
+    Green := fpgGetGreen(AColor) / 255;
+    Blue  := fpgGetBlue(AColor) / 255;
+    Alpha := 1;
+  end
+end;
 
 
 { TfpgCairoSurface }
@@ -113,6 +125,12 @@ end;
 destructor TfpgCustomCairoControl.Destroy;
 begin
   inherited Destroy;
+end;
+
+procedure TfpgCustomCairoControl.Redraw;
+begin
+  //No special action necessary in fpGui
+  Invalidate;
 end;
 
 procedure TfpgCustomCairoControl.DoCreateContext;
