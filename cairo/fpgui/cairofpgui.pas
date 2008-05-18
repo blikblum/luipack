@@ -42,16 +42,18 @@ uses
 
 type
 
-  { TfpgCairoSurface }
 
-  TfpgCairoSurface = class(TCairoSurface)
+  { TCairoFpgCanvasSurface }
+
+  TCairoFpgCanvasSurface = class(TCairoSurface)
   public
     constructor Create(Canvas: TfpgCanvas);
   end;
   
-  { TfpgCustomCairoControl }
 
-  TfpgCustomCairoControl = class(TfpgWidget)
+  { TCustomCairoControl }
+
+  TCustomCairoControl = class(TfpgWidget)
   private
     FContext: TCairoContext;
     FOnCreateContext: TNotifyEvent;
@@ -67,9 +69,9 @@ type
     procedure Redraw;
   end;
   
-  { TfpgCairoPaintBox }
+  { TCairoPaintBox }
 
-  TfpgCairoPaintBox = class(TfpgCustomCairoControl)
+  TCairoPaintBox = class(TCustomCairoControl)
   private
     FOnDraw: TNotifyEvent;
   protected
@@ -81,7 +83,7 @@ type
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
   end;
 
-  function fpgColorToCairoColor(const AColor: TfpgColor): TCairoColor;
+  function ColorToCairoColor(const AColor: TfpgColor): TCairoColor;
   function CreateSurfaceFromCanvas(Canvas: TfpgCanvas): Pcairo_surface_t;
   
 implementation
@@ -95,45 +97,45 @@ implementation
 {$i cairo_x11.inc}
 {$endif}
 
-function fpgColorToCairoColor(const AColor: TfpgColor): TCairoColor;
+function ColorToCairoColor(const AColor: TfpgColor): TCairoColor;
 begin
   Result := RGBToCairoColor(fpgColorToRGB(AColor));
 end;
 
 
-{ TfpgCairoSurface }
+{ TCairoFpgCanvasSurface }
 
-constructor TfpgCairoSurface.Create(Canvas: TfpgCanvas);
+constructor TCairoFpgCanvasSurface.Create(Canvas: TfpgCanvas);
 begin
   FHandle := CreateSurfaceFromCanvas(Canvas);
 end;
 
 
-{ TfpgCustomCairoControl }
+{ TCustomCairoControl }
 
-constructor TfpgCustomCairoControl.Create(AOwner: TComponent);
+constructor TCustomCairoControl.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 end;
 
-destructor TfpgCustomCairoControl.Destroy;
+destructor TCustomCairoControl.Destroy;
 begin
   inherited Destroy;
 end;
 
-procedure TfpgCustomCairoControl.Redraw;
+procedure TCustomCairoControl.Redraw;
 begin
   //No special action necessary in fpGui
   Invalidate;
 end;
 
-procedure TfpgCustomCairoControl.DoCreateContext;
+procedure TCustomCairoControl.DoCreateContext;
 begin
   if Assigned(FOnCreateContext) then
     FOnCreateContext(Self);
 end;
 
-procedure TfpgCustomCairoControl.HandlePaint;
+procedure TCustomCairoControl.HandlePaint;
 var
   Surface: Pcairo_surface_t;
 begin
@@ -151,14 +153,14 @@ begin
 end;
 
 
-{ TfpgCairoPaintBox }
+{ TCairoPaintBox }
 
-constructor TfpgCairoPaintBox.Create(AOwner: TComponent);
+constructor TCairoPaintBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 end;
 
-procedure TfpgCairoPaintBox.DoDraw;
+procedure TCairoPaintBox.DoDraw;
 begin
   if Assigned(FOnDraw) then
   begin

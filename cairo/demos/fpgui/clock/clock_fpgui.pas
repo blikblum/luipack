@@ -22,19 +22,19 @@ type
   protected
   public
     Timer: TfpgTimer;
-    PaintBox: TfpgCairoPaintBox;
+    PaintBox: TCairoPaintBox;
     constructor Create(AOwner: TComponent); override;
-    procedure   TimerFired(Sender: TObject);
-    procedure   FormDestroy(Sender: TObject);
-    procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure   AfterCreate; override;
+    procedure TimerFired(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure AfterCreate; override;
     procedure PaintBoxDraw(Sender: TObject);
   end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  PaintBox := TfpgCairoPaintBox.Create(Self);
+  PaintBox := TCairoPaintBox.Create(Self);
   with PaintBox do
   begin
     Parent := Self;
