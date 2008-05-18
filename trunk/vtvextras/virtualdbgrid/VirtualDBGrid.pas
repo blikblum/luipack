@@ -89,7 +89,7 @@ type
 
   { TOnCalculateValueEvent - Triggered when at least one column has column type = ctCalculated and }
   {                          we want to fillup value for this calculated column                    }
-  TOnCalculateValueEvent   = procedure(Sender: TObject; IDText: string;
+  TOnCalculateValueEvent   = procedure(Sender: TObject; const IDText: string;
                                        Column: TColumnIndex; RecordData: TRecordData;
                                        RowIndex: Cardinal; var CalculatedValue: WideString;
                                        var CalculatedValueType: TFieldType) of object;
@@ -134,7 +134,7 @@ type
   {        :RecordData - data of current record (TRecordData object)                        }
   {          :NewValue - new posted value                                                   }
   {       :PostChanges - set to True if you want to post changed, or False to not post      }
-  TOnPostChanges             = procedure(Sender: TObject; FieldNameOrIDText: string;
+  TOnPostChanges             = procedure(Sender: TObject; const FieldNameOrIDText: string;
                                          Column: TcolumnIndex; ColumnType: TColumnType;
                                          RecordData: TRecordData; RowIndex: Cardinal;
                                          var NewValue: WideString; var PostChanges: boolean)
@@ -515,12 +515,12 @@ type
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
 
-    procedure AddDBColumn(AFieldName, ACaption: string; AWidth: Integer=-1);
-    procedure AddCalcColumn(IDText: string; AWidth: Integer);
+    procedure AddDBColumn(const AFieldName, ACaption: string; AWidth: Integer=-1);
+    procedure AddCalcColumn(const IDText: string; AWidth: Integer);
     procedure AddIndicatorColumn(AWidth: Integer);
     procedure AddDefaultsFieldsToColumns(ClearOldColumns: boolean= true);
     procedure ClearAllColumns;
-    procedure SetSortColumn(ColumnTitle: string; Direction: TSortDirection);
+    procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
     procedure SetFocusToActualRecNo;
     procedure UpdateCurrentRecord;
     procedure UpdateAllRecords;
@@ -2888,12 +2888,12 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.AddDBColumn(AFieldName, ACaption: string; AWidth: Integer=-1);
+procedure TCustomVirtualDBGrid.AddDBColumn(const AFieldName, ACaption: string; AWidth: Integer=-1);
 begin
   AddColumn(ctDBField, AFieldName, ACaption, AWidth);
 end;
 
-procedure TCustomVirtualDBGrid.AddCalcColumn(IDText: string; AWidth: Integer);
+procedure TCustomVirtualDBGrid.AddCalcColumn(const IDText: string; AWidth: Integer);
 begin
   AddColumn(ctCalculated, '', IDText, AWidth);
 end;
@@ -2961,7 +2961,7 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.SetSortColumn(ColumnTitle: string; Direction: TSortDirection);
+procedure TCustomVirtualDBGrid.SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
 
 var I  : integer;
 begin
