@@ -35,6 +35,9 @@ var
 
 implementation
 
+const
+  UseBuffer = False;
+
 { TForm1 }
 
 procedure TForm1.CairoControl1Draw(Sender: TObject);
@@ -44,23 +47,47 @@ var
   y: Integer;
   CenterX: Integer;
   CenterY: Integer;
+  Matrix: TCairoMatrix;
 begin
   with CairoControl1, Context do
   begin
-    // Create a stretched surface to be used as a buffer
-    if FStretchedSurface = nil then
-      CreateStretchedSurface(Target, Width, Height);
+    //Paint the background
+    if UseBuffer then
+    begin
+      //Create a stretched surface to be used as a buffer
+      if FStretchedSurface = nil then
+        CreateStretchedSurface(Target, Width, Height);
 
-    // Paint the background
-    SetSourceSurface(FStretchedSurface, 0, 0);
-    Paint;
+      //Set the buffer as the source
+      SetSourceSurface(FStretchedSurface, 0, 0);
+
+      Paint;
+    end
+    else
+    begin
+      Save;
+      //Init a matrix with the scale factors we need
+      Matrix.InitScale(Width / FBackgroundSurface.Width,
+        Height / FBackgroundSurface.Height);
+
+      //Is necessary to set the matrix to context before setting the source
+      SetMatrix(Matrix);
+
+      //Set the source surface from where get the data
+      SetSourceSurface(FBackgroundSurface, 0, 0);
+
+      Paint;
+      //This will undo the matrix transformation
+      Restore;
+    end;
+
     
     // Paint the sprite
     CenterX := Width div 2;
     CenterY := Height div 2;
     t := Now * 86400;
-    x := CenterX + round(cos(t)*CenterX*2/3) - (FSpriteSurface.GetWidth div 2);
-    y := CenterY + round(sin(t*0.7)*CenterY*2/3) - (FSpriteSurface.GetHeight div 2);
+    x := CenterX + round(cos(t)*CenterX*2/3) - (FSpriteSurface.Width div 2);
+    y := CenterY + round(sin(t*0.7)*CenterY*2/3) - (FSpriteSurface.Height div 2);
     
     SetSourceSurface(FSpriteSurface, x, y);
     Paint;
@@ -75,7 +102,7 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  FBackgroundSurface := TCairoImageSurface.Create('lazarus.png');
+  FBackgroundSurface := TCairoImageSurface.Create('splash_logo.png');
   FSpriteSurface := TCairoImageSurface.Create('ide_icon48x48.png');
 end;
 
@@ -103,8 +130,8 @@ begin
   Context := TCairoContext.Create(FStretchedSurface);
   
   //Init a matrix with the scale factors we need
-  Matrix.InitScale(AWidth / FBackgroundSurface.GetWidth,
-    AHeight / FBackgroundSurface.GetHeight);
+  Matrix.InitScale(AWidth / FBackgroundSurface.Width,
+    AHeight / FBackgroundSurface.Height);
 
   //Is necessary to set the matrix to context before setting the source
   Context.SetMatrix(Matrix);
