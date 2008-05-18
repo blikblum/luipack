@@ -17,16 +17,16 @@ type
   private
   protected
   public
-    PaintBox: TfpgCairoPaintBox;
+    PaintBox: TCairoPaintBox;
     constructor Create(AOwner: TComponent); override;
-    procedure   AfterCreate; override;
+    procedure AfterCreate; override;
     procedure PaintBoxDraw(Sender: TObject);
   end;
 
 constructor TMainForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  PaintBox := TfpgCairoPaintBox.Create(Self);
+  PaintBox := TCairoPaintBox.Create(Self);
   with PaintBox do
   begin
     Parent := Self;

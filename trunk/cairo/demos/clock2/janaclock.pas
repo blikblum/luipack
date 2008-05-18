@@ -35,23 +35,40 @@ uses
   {$else}
   Graphics, LCLType, CairoLCL
   {$endif};
-  
+
+
+{$ifdef FPGUI}
+const
+  clHighlight = clSelection;
+  clWindow = clWindowBackground;
+  clWindowText = clText1;
+{$endif}
+
 type
+  {$ifdef FPGUI}
+  TColor = TfpgColor;
+  {$endif}
 
   { TJanaClock }
-  {$ifdef FPGUI}
-  TJanaClock = class(TfpgCustomCairoControl)
-  {$else}
+
   TJanaClock = class(TCustomCairoControl)
-  {$endif}
   private
+    FBackColor: TColor;
+    FBaseColor: TColor;
     FClockBuffer: TCairoSurface;
+    FForeColor: TColor;
+    FTime: TDateTime;
+    base_color: TCairoColor;
+    bg_color: TCairoColor;
+    fg_color: TCairoColor;
     FDigital: Boolean;
     FDrawShadow: Boolean;
     FShowSeconds: Boolean;
-    FTime: TDateTime;
+    procedure SetBackColor(const AValue: TColor);
+    procedure SetBaseColor(const AValue: TColor);
     procedure SetDigital(const AValue: Boolean);
     procedure SetDrawShadow(const AValue: Boolean);
+    procedure SetForeColor(const AValue: TColor);
     procedure SetShowSeconds(const AValue: Boolean);
     procedure SetTime(const AValue: TDateTime);
     procedure CreateClockBuffer;
@@ -64,14 +81,18 @@ type
     {$endif}
     procedure DoDraw; override;
     procedure DrawAnalogueClock(DrawContext: TCairoContext);
-    procedure DrawAnalogueFace(DrawContext: TCairoContext; ATime: TDateTime);
+    procedure DrawAnalogueFace(DrawContext: TCairoContext);
     procedure DrawDigitalClock(DrawContext: TCairoContext);
-    procedure DrawDigitalFace(DrawContext: TCairoContext; ATime: TDateTime);
-    procedure DrawDigitalNumber(DrawContext: TCairoContext; Number: Integer; const ForegroundColor, BackColor: TCairoColor);
+    procedure DrawDigitalFace(DrawContext: TCairoContext);
+    procedure DrawDigitalNumber(DrawContext: TCairoContext; Number: Integer);
   public
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    property BackColor: TColor read FBackColor write SetBackColor;
+    property BaseColor: TColor read FBaseColor write SetBaseColor;
     property Digital: Boolean read FDigital write SetDigital;
     property DrawShadow: Boolean read FDrawShadow write SetDrawShadow;
+    property ForeColor: TColor read FForeColor write SetForeColor;
     property ShowSeconds: Boolean read FShowSeconds write SetShowSeconds;
     property Time: TDateTime read FTime write SetTime;
   end;
@@ -91,12 +112,33 @@ begin
   Redraw;
 end;
 
+procedure TJanaClock.SetForeColor(const AValue: TColor);
+begin
+  if FForeColor=AValue then exit;
+  FForeColor:=AValue;
+  fg_color := ColorToCairoColor(AValue);
+end;
+
 procedure TJanaClock.SetDigital(const AValue: Boolean);
 begin
   if FDigital=AValue then exit;
   FDigital:=AValue;
   UpdateClockBuffer;
   Redraw;
+end;
+
+procedure TJanaClock.SetBaseColor(const AValue: TColor);
+begin
+  if FBaseColor=AValue then exit;
+  FBaseColor:=AValue;
+  base_color := ColorToCairoColor(AValue);
+end;
+
+procedure TJanaClock.SetBackColor(const AValue: TColor);
+begin
+  if FBackColor=AValue then exit;
+  FBackColor:=AValue;
+  bg_color := ColorToCairoColor(AValue);
 end;
 
 procedure TJanaClock.SetShowSeconds(const AValue: Boolean);
@@ -132,15 +174,12 @@ begin
 end;
 
 {$ifdef FPGUI}
-
 procedure TJanaClock.HandleResize(awidth, aheight: TfpgCoord);
 begin
   inherited HandleResize(awidth, aheight);
   FreeAndNil(FClockBuffer);
 end;
-
 {$else}
-
 procedure TJanaClock.DoCreateContext;
 begin
   inherited DoCreateContext;
@@ -163,31 +202,19 @@ begin
   end;
 
   if FDigital then
-    DrawDigitalFace(Context, FTime)
+    DrawDigitalFace(Context)
   else
-    DrawAnalogueFace(Context, FTime);
+    DrawAnalogueFace(Context);
 end;
 
 procedure TJanaClock.DrawAnalogueClock(DrawContext: TCairoContext);
 var
   Pattern: TCairoRadialGradient;
   awidth, aheight, size, thickness, i, shadow_radius: Integer;
-  base_color, bg_color, fg_color: TCairoColor;
 begin
   with DrawContext do
   begin
     (* Draw a Tango-style analogue clock face *)
-    
-    {$ifdef FPGUI}
-    base_color := fpgColorToCairoColor(clSelection);
-    bg_color := fpgColorToCairoColor(clWindowBackground);
-    fg_color := fpgColorToCairoColor(clText1);
-    {$else}
-    base_color := ColorToCairoColor(clHighlight);
-    bg_color := ColorToCairoColor(clWindow);
-    fg_color := ColorToCairoColor(clWindowText);
-    {$endif}
-
     awidth := Width;
     aheight := Height;
     if FDrawShadow then
@@ -315,7 +342,7 @@ begin
   end;
 end;
 
-procedure TJanaClock.DrawAnalogueFace(DrawContext: TCairoContext; ATime: TDateTime);
+procedure TJanaClock.DrawAnalogueFace(DrawContext: TCairoContext);
 var
   pi_ratio: Double;
   awidth, aheight, size, thickness: Integer;
@@ -329,18 +356,12 @@ begin
       Dec(aheight, aheight div 20);
     size := MIN (awidth, aheight);
 
-    //gdk_cairo_set_source_color (cr, &style->fg[GTK_STATE_NORMAL]);
-    //Color := ColorToCairoColor(clWindow);
-    {$ifdef FPGUI}
-    Color := fpgColorToCairoColor(clText1);
-    {$else}
-    Color := ColorToCairoColor(clWindowText);
-    {$endif}
+    Color := fg_color;
     LineJoin := CAIRO_LINE_JOIN_ROUND;
     LineWidth := MAX (1.5, size / 60);
     thickness := size div 20;
 
-    DecodeTime(ATime, Hour,  Minute, Second, MSecond);
+    DecodeTime(FTime, Hour,  Minute, Second, MSecond);
 
     (* Draw hour hand *)
     pi_ratio := (((Hour * 60) + Minute)/60.0)/6.0;
@@ -365,12 +386,9 @@ begin
 
     if not FShowSeconds then
       Exit;
+
     (* Draw second hand *)
-    {$ifdef FPGUI}
-    Color := fpgColorToCairoColor(clSelection);
-    {$else}
-    Color := ColorToCairoColor(clHighlight);
-    {$endif}
+    Color := base_color;
     LineWidth := MAX (1, size / 120);
     pi_ratio := Second/30.0;
     NewPath;
@@ -386,21 +404,9 @@ end;
 procedure TJanaClock.DrawDigitalClock(DrawContext: TCairoContext);
 var
   x, y, awidth, aheight, thickness, shadow_radius: Integer;
-  base_color: TCairoColor;
-  bg_color: TCairoColor;
-  fg_color: TCairoColor;
   Pattern: TCairoRadialGradient;
 begin
   (* Draw a Tango-style analogue clock face *)
-  {$ifdef FPGUI}
-  base_color := fpgColorToCairoColor(clSelection);
-  bg_color := fpgColorToCairoColor(clWindowBackground);
-  fg_color := fpgColorToCairoColor(clText1);
-  {$else}
-  base_color := ColorToCairoColor(clHighlight);
-  bg_color := ColorToCairoColor(clWindow);
-  fg_color := ColorToCairoColor(clWindowText);
-  {$endif}
   with DrawContext do
   begin
     aheight := Height;
@@ -440,7 +446,6 @@ begin
       Source := Pattern;
       Fill;
       Pattern.Destroy;
-
       Restore;
     end;
 
@@ -512,20 +517,11 @@ begin
   end;
 end;
 
-procedure TJanaClock.DrawDigitalFace(DrawContext: TCairoContext; ATime: TDateTime);
+procedure TJanaClock.DrawDigitalFace(DrawContext: TCairoContext);
 var
   x, y, awidth, aheight, thickness: Integer;
-  bg_color: TCairoColor;
-  fg_color: TCairoColor;
   Hour, Second, Minute, MSecond: Word;
 begin
-  {$ifdef FPGUI}
-  bg_color := fpgColorToCairoColor(clText1);
-  fg_color := fpgColorToCairoColor(clWindowBackground);
-  {$else}
-  bg_color := ColorToCairoColor(clWindowText);
-  fg_color := ColorToCairoColor(clWindow);
-  {$endif}
   with DrawContext do
   begin
     Save;
@@ -546,11 +542,11 @@ begin
     Translate (x + thickness*3, y + thickness*3);
     Scale ((awidth - thickness*6)/5.0,(aheight - thickness*6));
 
-    DecodeTime(ATime, Hour, Minute, Second, MSecond);
+    DecodeTime(FTime, Hour, Minute, Second, MSecond);
 
-    DrawDigitalNumber(DrawContext, Hour div 10, fg_color, bg_color);
+    DrawDigitalNumber(DrawContext, Hour div 10);
     Translate (1.1, 0);
-    DrawDigitalNumber(DrawContext, Hour Mod 10, fg_color, bg_color);
+    DrawDigitalNumber(DrawContext, Hour Mod 10);
     Translate (1.1, 0);
 
     (* Draw separator *)
@@ -564,15 +560,14 @@ begin
     Fill;
 
     Translate (0.7, 0);
-    DrawDigitalNumber(DrawContext, Minute div 10, fg_color, bg_color);
+    DrawDigitalNumber(DrawContext, Minute div 10);
     Translate (1.1, 0);
-    DrawDigitalNumber(DrawContext, Minute mod 10, fg_color, bg_color);
+    DrawDigitalNumber(DrawContext, Minute mod 10);
     Restore;
   end;
 end;
 
-procedure TJanaClock.DrawDigitalNumber(DrawContext: TCairoContext; Number: Integer; const ForegroundColor,
-  BackColor: TCairoColor);
+procedure TJanaClock.DrawDigitalNumber(DrawContext: TCairoContext; Number: Integer);
 var
   Padding: Double;
 begin
@@ -583,9 +578,9 @@ begin
 
     (* Top *)
     if number in  [0, 2, 3, 5, 6, 7, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
     NewPath;
     MoveTo(0, 0);
     LineTo(8.0/8.0, 0);
@@ -596,22 +591,22 @@ begin
 
     (* Top-left *)
     if number in  [0, 4, 5, 6, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
     NewPath;
     MoveTo(0, 0);
     LineTo (0, 4.0/8.0);
     LineTo ( 1.0/5.0 - padding, 3.5/8.0 - padding);
     LineTo ( 1.0/5.0 - padding, 1.0/8.0 + padding);
-          ClosePath;
+    ClosePath;
     Fill;
 
     (* Top-right *)
     if number in  [0, 1, 2, 3, 4, 7, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
 
     NewPath;
     MoveTo (5.0/5.0, 0);
@@ -623,9 +618,9 @@ begin
 
     (* Middle *)
     if number in  [2, 3, 4, 5, 6, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
 
     NewPath;
     MoveTo (0, 4.0/8.0);
@@ -639,9 +634,9 @@ begin
 
     (* Bottom-left *)
     if number in  [0, 2, 6, 8] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
 
     NewPath;
     MoveTo (0, 4.0/8.0);
@@ -654,9 +649,9 @@ begin
     (* Bottom-right *)
 
     if number in  [0, 1, 3, 4, 5, 6, 7, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
 
     NewPath;
     MoveTo (5.0/5.0, 4.0/8.0);
@@ -668,9 +663,9 @@ begin
 
     (* Bottom *)
     if number in  [0, 2, 3, 5, 6, 8, 9] then
-      Color := ForegroundColor
+      Color := bg_color
     else
-      Color := BackColor;
+      Color := fg_color;
 
     NewPath;
     MoveTo (0, 8.0/8.0);
@@ -681,6 +676,15 @@ begin
     Fill;
   end;
 end;
+
+constructor TJanaClock.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  BaseColor := clHighlight;
+  ForeColor := clWindowText;
+  BackColor := clWindow;
+end;
+
 
 destructor TJanaClock.Destroy;
 begin
