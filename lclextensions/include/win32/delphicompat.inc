@@ -80,8 +80,8 @@ begin
   Result:=Windows.EndDeferWindowPos(hWinPosInfo);
 end;
 
-function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
-  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
+function ExtTextOutW(DC: LCLType.HDC; X, Y: Integer; Options: LongInt; Rect: Types.PRect;
+  Str: PWideChar; Count: LongInt; Dx: ObjPas.PInteger): Boolean;
 begin
   Result := Windows.ExtTextOutW(DC, X, Y, Options, Rect,Str, Count, Dx);
 end;
@@ -144,16 +144,16 @@ begin
   Result := Windows.GetTextAlign(hDC);
 end;
 
-function GetTextExtentExPoint(DC: HDC; Str: PChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+function GetTextExtentExPoint(DC: LCLType.HDC; Str: PChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: ObjPas.PInteger;
   var Size: TSize): BOOL;
 begin
   Result := Windows.GetTextExtentExPoint(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
 end;
 
-function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
+function GetTextExtentExPointW(DC: LCLType.HDC; Str: PWideChar;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: ObjPas.PInteger;
+  var Size: Types.TSize): BOOL;
 begin
   Result := Windows.GetTextExtentExPointW(DC, Str, Count, MaxWidth, MaxCount, PartialWidths,  Size);
 end;
@@ -175,7 +175,7 @@ end;
 
 function ImageList_DragShowNolock(fShow: Boolean): Boolean;
 begin
-  Result:=Windows.ImageList_DragShowNolock(fShow);
+  Result := CommCtrl.ImageList_DragShowNolock(fShow);
 end;
 
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
@@ -206,13 +206,13 @@ begin
   Result := Windows.OffsetRgn(hrgn,nxOffset,nYOffset);
 end;
 
-function RedrawWindow(hWnd: THandle; lprcUpdate: PRECT; hrgnUpdate: HRGN;
+function RedrawWindow(hWnd: THandle; lprcUpdate: Types.PRECT; hrgnUpdate: HRGN;
   flags: LongWord): BOOLEAN;
 begin
   Result := Windows.RedrawWindow(hWnd,lprcUpdate,hrgnUpdate,flags);
 end;
 
-function SetBrushOrgEx(DC: HDC; nXOrg, nYOrg: longint; lppt: PPOINT): Boolean;
+function SetBrushOrgEx(DC: LCLType.HDC; nXOrg, nYOrg: longint; lppt: Types.PPoint): Boolean;
 begin
   Result := Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
 end;
@@ -222,14 +222,14 @@ begin
   Result := Windows.SetMapMode(DC, fnMapMode);
 end;
 
-function ScrollDC(hDC: HDC; dx: longint; dy: longint; var lprcScroll: TRECT;
-  var lprcClip: TRECT; hrgnUpdate: HRGN; lprcUpdate: PRECT): Boolean;
+function ScrollDC(DC: LCLType.HDC; dx: longint; dy: longint; var lprcScroll: Types.TRect;
+  var lprcClip: Types.TRect; hrgnUpdate: LCLType.HRGN; lprcUpdate: Types.PRect): Boolean;
 begin
-  Result := Windows.ScrollDC(hDC,dx,dy,lprcScroll,lprcClip,hrgnUpdate,lprcUpdate);
+  Result := Windows.ScrollDC(DC, dx, dy, lprcScroll, lprcClip, hrgnUpdate, lprcUpdate);
 end;
 
-function ScrollWindow(hWnd: THandle; XAmount, YAmount: longint; lpRect: PRECT;
-  lpClipRect: PRECT): Boolean;
+function ScrollWindow(hWnd: THandle; XAmount, YAmount: longint; lpRect: Types.PRect;
+  lpClipRect: Types.PRect): Boolean;
 begin
   Result := Windows.ScrollWindow(hWnd,XAmount,YAmount,lpRect,lpClipRect);
 end;
