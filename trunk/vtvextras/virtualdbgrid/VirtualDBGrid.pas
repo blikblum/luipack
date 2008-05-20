@@ -717,12 +717,9 @@ type
   function VarToWideStr(Value: Variant): WideString;
   function NullVar2Str(Value: Variant): WideString;
   function NullVar2Int(Value: Variant): Integer;
-  function NullVar2Float(Value: Variant): Extended;
   function NullVar2Double(Value: Variant): Double;
   function NullVar2Guid(Value: Variant): WideString;
   function NullVar2Bool(Value: Variant): boolean;
-  function NullVar2Date(Value: Variant): tdate;
-  function NullVar2Time(Value: Variant): ttime;
 
 implementation
 
@@ -732,145 +729,77 @@ uses
 
 function VarToWideStr(Value: Variant): WideString;
 begin
-  if not VarIsNull(Value)
-     then Result := Value
-     else Result := '';
+  if not VarIsNull(Value) then
+    Result := Value
+  else
+    Result := '';
 end;
 
 function NullVar2Str(Value: Variant): WideString;
 begin
- if (VarIsNull(Value))
-    then Result:= ''
-    else Result:= VarToWideStr(Value);
+ if not VarIsNull(Value) then
+   Result := VarToWideStr(Value)
+ else
+   Result := '';
 end;
-
 
 function NullVar2Int(Value: Variant): Integer;
 begin
- if (VarIsNull(Value))
-    then Result:= 0
-    else begin
-      try
-        //todo: reenable this code as soon the fpc bug is fixed
-        //Result:= VarAsType(Value, varInteger);
-        Result := Value;
-      except
-        Result:= 0;
-      end;
+  if VarIsNull(Value) then
+    Result:= 0
+  else
+  begin
+    try
+      Result := VarAsType(Value, varInteger);
+    except
+      Result := 0;
     end;
-end;
-
-function NullVar2Float(Value: Variant): Extended;
-begin
- if (VarIsNull(Value))
-    then Result:= 0
-    else begin
-      try
-        Result:= Value;
-      except
-        Result:= 0;
-      end;
-    end;
+  end;
 end;
 
 function NullVar2Double(Value: Variant): Double;
 begin
- if (VarIsNull(Value))
-    then Result:= 0
-    else begin
-      try
-        Result:= VarAsType(Value, varDouble);
-      except
-        Result:= 0;
-      end;
+  if VarIsNull(Value) then
+    Result := 0
+  else
+  begin
+    try
+      Result := VarAsType(Value, varDouble);
+    except
+      Result := 0;
     end;
+  end;
 end;
 
 function NullVar2Guid(Value: Variant): WideString;
-var
-   NullGuid: WideString;
-begin
- NullGuid:= '{00000000-0000-0000-0000-000000000000}';
- if (VarIsNull(Value))
-    then Result:= NullGuid
-    else begin
-      try
-        Result:= NullVar2Str(Value);
-      except
-        Result:= NullGuid;
-      end;
-    end;
-end;
-
-function NullVar2Bool(Value: Variant): boolean;
-begin
- if (VarIsNull(Value))
-    then Result:= false
-    else begin
-      try
-        //todo: reenable this code when fpc bug is fixed
-        //Result:= VarAsType(Value, varBoolean);
-        Result := Value;
-      except
-        Result:= false;
-      end;
-    end;
-end;
-
-function NullVar2Date(Value: Variant): tdate;
+const
+  NullGuid: WideString = '{00000000-0000-0000-0000-000000000000}';
 begin
   if VarIsNull(Value) then
-    Result := 0
+    Result:= NullGuid
   else
   begin
     try
-      Double(Result) := VarAsType(Value, vardouble);
+      Result := NullVar2Str(Value);
     except
-      Result := 0;
+      Result := NullGuid;
     end;
   end;
-
-  //todo: conflict between Controls.TDate and other type?
-  {
- if (VarIsNull(Value))
-    then Result:= 0
-    else begin
-      try
-        Result:= VarAsType(Value, varDate);
-      except
-        Result:= 0;
-      end;
-    end;
-  }
 end;
 
-function NullVar2Time(Value: Variant): ttime;
+function NullVar2Bool(Value: Variant): Boolean;
 begin
   if VarIsNull(Value) then
-    Result := 0
+    Result := False
   else
   begin
     try
-      Double(Result) := Value;
+      Result := VarAsType(Value, varBoolean);
     except
-      Result := 0;
+      Result := False;
     end;
   end;
-  
- //todo: see why this code does not compiles
- {
- if (VarIsNull(Value))
-    then Result:= 0
-    else begin
-       try
-         Result:= Value;
-       except
-         Result:= 0;
-       end;
-    end;
-  }
 end;
-
 
 { ============================================================================ }
 { --- TRecordData ---------------------------------------------------------------- }
@@ -1462,7 +1391,6 @@ begin
   end
   else
     inherited Assign(Source);
-
 end;
 
 
@@ -2487,12 +2415,16 @@ begin
           end;
 
          // float types
-         ftFloat       : begin
-               Result:= CompareValue( NullVar2Float(Data1Value),
-                                      NullVar2Float(Data2Value) );
+         ftFloat,
+           ftDate,
+           ftDateTime,
+           ftTime: begin
+               Result:= CompareValue( NullVar2Double(Data1Value),
+                                      NullVar2Double(Data2Value) );
          end;
 
          // mena typy (SK, CZ, ...)
+         //todo see if using double here is ok
          ftCurrency    : begin
                Result:= CompareValue( NullVar2Double(Data1Value),
                                       NullVar2Double(Data2Value) );
@@ -2508,25 +2440,8 @@ begin
                                       Integer(NullVar2Bool(Data2Value)) );
          end;
 
-         ftDate : begin
-               Result:= CompareValue( NullVar2Date(Data1Value),
-                                      NullVar2Date(Data2Value) );
-         end;
-
-         ftTime : begin
-               Result:= CompareValue( NullVar2Time(Data1Value),
-                                      NullVar2Time(Data2Value) );
-         end;
-
-         ftDateTime : begin
-               // same as ftTime
-               Result:= CompareValue( NullVar2Time(Data1Value),
-                                      NullVar2Time(Data2Value) );
-         end;
-
          else
-         Result := 1;
-
+           Result := 1;
     end;
 
   except
