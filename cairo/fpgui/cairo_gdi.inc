@@ -8,5 +8,5 @@ type
   
 function CreateSurfaceFromCanvas(Canvas: TfpgCanvas): Pcairo_surface_t;
 begin
-  Result := cairo_win32_surface_create(TWin32CanvasAccess(Canvas).FGc);
+  Result := cairo_win32_surface_create(TWin32CanvasAccess(Canvas).DCHandle);
 end;

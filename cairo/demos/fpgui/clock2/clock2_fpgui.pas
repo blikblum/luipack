@@ -118,7 +118,7 @@ procedure TMainForm.AfterCreate;
 begin
   Name := 'MainForm';
   SetPosition(316, 186, 429, 341);
-  WindowTitle := 'Cairo Clock Demo 2';
+  WindowTitle := 'Cairo Clock Demo 2 Under fpGui';
   WindowPosition := wpScreenCenter;
 end;
 

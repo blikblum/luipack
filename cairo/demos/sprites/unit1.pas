@@ -36,7 +36,7 @@ var
 implementation
 
 const
-  UseBuffer = False;
+  UseBuffer = True;
 
 { TForm1 }
 

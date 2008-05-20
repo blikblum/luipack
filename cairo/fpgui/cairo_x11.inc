@@ -1,5 +1,5 @@
 uses
-  CairoXLib, gfx_x11, gfxbase;
+  CairoXLib, gfx_x11;
 
 type
 
@@ -11,16 +11,13 @@ type
   
 function CreateSurfaceFromCanvas(Canvas: TfpgCanvas): Pcairo_surface_t;
 var
-  Applicattion: TfpgApplication;
   R: TfpgRect;
-
 begin
-  Applicattion := TfpgApplication(GetApplicationAddress);
   Canvas.GetWinRect(R);
   Result := cairo_xlib_surface_create(
-    Applicattion.Display,
-    TX11CanvasAccess(Canvas).FDrawHandle,
-    TX11ApplicationAccess(Applicattion).DefaultVisual,
+    fpgApplication.Display,
+    TX11CanvasAccess(Canvas).DCHandle,
+    TX11ApplicationAccess(fpgApplication).DefaultVisual,
     R.Width, R.Height
     );
 end;
