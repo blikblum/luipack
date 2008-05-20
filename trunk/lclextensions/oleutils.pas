@@ -104,7 +104,7 @@ begin
   //soFrom* constants are equal to STREAM_SEEK_* constants. Assume it here
   liOffset.LowPart:=Offset;
   liOffset.HighPart:=0;
-  Res:=FSrcStream.Seek(liOffset, Origin, liResult);
+  Res:=FSrcStream.Seek(Int64(liOffset), Origin, Int64(liResult));
   Result:=liResult.LowPart;
   if Res <> S_OK then
     Raise Exception.Create('TOLEStream - Error while seeking: '+ErrorString(Res));
@@ -131,7 +131,7 @@ procedure TOLEStream.InternalSetSize(NewSize: LARGE_INTEGER);
 var
   Res:HRESULT;
 begin
-  Res:=FSrcStream.SetSize(NewSize);
+  Res:=FSrcStream.SetSize(Int64(NewSize));
   if Res <> S_OK then
     Raise Exception.Create('TOLEStream - Error while setting size: '+ErrorString(Res));
 end;
