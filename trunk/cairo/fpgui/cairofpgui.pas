@@ -32,7 +32,6 @@ unit CairofpGui;
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
-
 {$mode objfpc}{$H+}
 
 interface
@@ -42,14 +41,12 @@ uses
 
 type
 
-
   { TCairoFpgCanvasSurface }
 
   TCairoFpgCanvasSurface = class(TCairoSurface)
   public
     constructor Create(Canvas: TfpgCanvas);
   end;
-  
 
   { TCustomCairoControl }
 
@@ -64,8 +61,6 @@ type
     property Context: TCairoContext read FContext;
     property OnCreateContext: TNotifyEvent read FOnCreateContext write FOnCreateContext;
   public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
     procedure Redraw;
   end;
   
@@ -79,7 +74,6 @@ type
   public
     property Context;
   published
-    constructor Create(AOwner: TComponent); override;
     property OnDraw: TNotifyEvent read FOnDraw write FOnDraw;
   end;
 
@@ -87,7 +81,6 @@ type
   function CreateSurfaceFromCanvas(Canvas: TfpgCanvas): Pcairo_surface_t;
   
 implementation
-
 
 {$ifdef windows}
 {$i cairo_gdi.inc}
@@ -102,7 +95,6 @@ begin
   Result := RGBToCairoColor(fpgColorToRGB(AColor));
 end;
 
-
 { TCairoFpgCanvasSurface }
 
 constructor TCairoFpgCanvasSurface.Create(Canvas: TfpgCanvas);
@@ -110,18 +102,7 @@ begin
   FHandle := CreateSurfaceFromCanvas(Canvas);
 end;
 
-
 { TCustomCairoControl }
-
-constructor TCustomCairoControl.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-end;
-
-destructor TCustomCairoControl.Destroy;
-begin
-  inherited Destroy;
-end;
 
 procedure TCustomCairoControl.Redraw;
 begin
@@ -144,7 +125,7 @@ begin
   cairo_surface_destroy(Surface);
   try
     Canvas.Color := BackgroundColor;
-    Canvas.FillRectangle(0,0,Width,Height);
+    Canvas.FillRectangle(0, 0, Width, Height);
     DoCreateContext;
     DoDraw;
   finally
@@ -152,13 +133,7 @@ begin
   end;
 end;
 
-
 { TCairoPaintBox }
-
-constructor TCairoPaintBox.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-end;
 
 procedure TCairoPaintBox.DoDraw;
 begin
