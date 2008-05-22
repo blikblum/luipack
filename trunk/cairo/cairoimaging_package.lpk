@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="3">
-    <PathDelim Value="\"/>
     <Name Value="cairoimaging_package"/>
     <CompilerOptions>
       <Version Value="5"/>
-      <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="imaging\"/>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
+        <OtherUnitFiles Value="imaging/"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -19,17 +17,17 @@
     </CompilerOptions>
     <Files Count="1">
       <Item1>
-        <Filename Value="imaging\cairoimaging.pas"/>
+        <Filename Value="imaging/cairoimaging.pas"/>
         <UnitName Value="CairoImaging"/>
       </Item1>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="cairobase_package"/>
+        <PackageName Value="vampyreimaging_base"/>
       </Item1>
       <Item2>
-        <PackageName Value="VampyreImagingPackage"/>
+        <PackageName Value="cairobase_package"/>
       </Item2>
       <Item3>
         <PackageName Value="FCL"/>
