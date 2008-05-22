@@ -70,7 +70,6 @@ begin
   FPanelTop := TfpgPanel.Create(Self);
   with FPanelTop do
   begin
-    Parent := Self;
     Text := '';
     Align := alTop;
     Height := 40;
@@ -79,7 +78,6 @@ begin
 
   with FCheckDigital do
   begin
-    Parent := FPanelTop;
     Align := alLeft;
     Text := 'Digital';
     OnChange := @DigitalChanged;
@@ -88,7 +86,6 @@ begin
   FCheckDrawShadow := TfpgCheckBox.Create(FPanelTop);
   with FCheckDrawShadow do
   begin
-    Parent := FPanelTop;
     Align := alLeft;
     Text := 'Draw Shadow';
     OnChange := @DrawShadowChanged;
@@ -97,7 +94,6 @@ begin
   FCheckShowSeconds := TfpgCheckBox.Create(FPanelTop);
   with FCheckShowSeconds do
   begin
-    Parent := FPanelTop;
     Align := alLeft;
     Text := 'Show Seconds';
     OnChange := @ShowSecondsChanged;
@@ -106,7 +102,6 @@ begin
   FClock := TJanaClock.Create(Self);
   with FClock do
   begin
-    Parent := Self;
     Align := alClient;
   end;
   FTimer := TfpgTimer.Create(100);
