@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math,
-  Graphics, GraphType;
+  Graphics, GraphType, Maps;
 
 type
 
@@ -25,13 +25,15 @@ type
     lboTransitorySelect
     );
   
+  TLuiBarDrawType = (dtCell, dtCellPath, dtCellText, dtBackground);
+
   TLuiBarOptions = set of TLuiBarOption;
   
-  TLuiBarPosition = (lbpTop, lbpLeft, lbpBottom, lbpRight);
+  TLuiBarPosition = (poTop, poLeft, poBottom, poRight);
   
-  TLuiBarImagePosition = (lbipTop, lbipLeft, lbipBottom, lbipRight);
+  TLuiBarImagePosition = (ipTop, ipLeft, ipBottom, ipRight);
   
-  TLuiBarCellAlign = (lbcaDefault, lbcaInvert, lbcaCenter);
+  TLuiBarCellAlign = (caDefault, caInvert, caCenter);
   
   TLuiBarTextAlign = (taCenter, taLeft, taRight);
   
@@ -39,10 +41,13 @@ type
   
   TLuiBarDrawCellEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell) of object;
   
+  TLuiBarDrawingEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
+    DrawType: TLuiBarDrawType; var Allowed: Boolean) of object;
+  
   TLuiBarPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText,
     ptBackground, ptOutLine, ptClientArea);
   
-  TLuiBarGetPattern = procedure (Sender: TLuiBar; PatternType: TLuiBarPatternType;
+  TLuiBarCreatePattern = procedure (Sender: TLuiBar; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern) of object;
   
   TLuiBarGetCellPattern = procedure (Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
@@ -67,8 +72,6 @@ type
     ClientArea: TColor;
   end;
   
-
-  
   { TLuiBarPatterns }
 
   TLuiBarPatterns = class
@@ -81,12 +84,17 @@ type
     FSelected: TCairoPattern;
     FSelectedText: TCairoPattern;
     FText: TCairoPattern;
+    FPatternMap: TMap;
     FInvalid: Boolean;
     FFixedValues: Boolean;
+    procedure FreePatternMap;
+    function GetIndexed(Index: Integer): TCairoPattern;
     function GetRequiresUpdate: Boolean;
+    procedure PatternMapNeeded;
     procedure SetBackGround(const AValue: TCairoPattern);
     procedure SetClientArea(const AValue: TCairoPattern);
     procedure SetHover(const AValue: TCairoPattern);
+    procedure SetIndexed(Index: Integer; const AValue: TCairoPattern);
     procedure SetNormal(const AValue: TCairoPattern);
     procedure SetOutLine(const AValue: TCairoPattern);
     procedure SetSelected(const AValue: TCairoPattern);
@@ -108,6 +116,8 @@ type
     property Text: TCairoPattern read FText write SetText;
     property Selected: TCairoPattern read FSelected write SetSelected;
     property SelectedText: TCairoPattern read FSelectedText write SetSelectedText;
+    //User defined
+    property Indexed[Index: Integer]: TCairoPattern read GetIndexed write SetIndexed; default;
   end;
   
   { TLuiBarCell }
@@ -170,11 +180,12 @@ type
     FOnDrawCell: TLuiBarDrawCellEvent;
     FOnDrawCellPath: TLuiBarDrawCellEvent;
     FOnDrawCellText: TLuiBarDrawCellEvent;
+    FOnDrawing: TLuiBarDrawingEvent;
     FOnGetCellPattern: TLuiBarGetCellPattern;
     FOnGetImageInfo: TLuiBarGetImageInfo;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
-    FOnGetPattern: TLuiBarGetPattern;
+    FOnCreatePattern: TLuiBarCreatePattern;
     FOnSelect: TLuiBarEvent;
     FOptions: TLuiBarOptions;
     FCellRoundRadius: Integer;
@@ -196,16 +207,20 @@ type
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
     procedure SetOnAfterDraw(const AValue: TLuiBarEvent);
+    procedure SetOnDrawing(const AValue: TLuiBarDrawingEvent);
     procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
-    procedure SetOnGetPattern(const AValue: TLuiBarGetPattern);
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
     procedure SetTextAlign(const AValue: TLuiBarTextAlign);
   protected
+    procedure DefaultDrawCell(Cell: TLuiBarCell);
+    procedure DefaultDrawCellPath(Cell: TLuiBarCell);
+    procedure DefaultDrawCellText(Cell: TLuiBarCell);
     procedure DoAfterDraw; virtual;
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
     procedure DoDraw; override;
+    function DoDrawing(Cell: TLuiBarCell; DrawType: TLuiBarDrawType): Boolean; virtual;
     procedure DoDrawBackground; virtual;
     procedure DoDrawCell(Cell: TLuiBarCell); virtual;
     procedure DoDrawCellPath(Cell: TLuiBarCell); virtual;
@@ -222,9 +237,6 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure DefaultDrawCell(Cell: TLuiBarCell);
-    procedure DefaultDrawCellPath(Cell: TLuiBarCell);
-    procedure DefaultDrawCellText(Cell: TLuiBarCell);
     destructor Destroy; override;
     property Cells: TLuiBarCellList read FCells;
     property CellAlign: TLuiBarCellAlign read FCellAlign write SetCellAlign;
@@ -254,8 +266,9 @@ type
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property OnDrawCellPath: TLuiBarDrawCellEvent read FOnDrawCellPath write FOnDrawCellPath;
     property OnDrawCellText: TLuiBarDrawCellEvent read FOnDrawCellText write FOnDrawCellText;
+    property OnDrawing: TLuiBarDrawingEvent read FOnDrawing write SetOnDrawing;
     property OnGetImageInfo: TLuiBarGetImageInfo read FOnGetImageInfo write SetOnGetImageInfo;
-    property OnGetPattern: TLuiBarGetPattern read FOnGetPattern write SetOnGetPattern;
+    property OnCreatePattern: TLuiBarCreatePattern read FOnCreatePattern write FOnCreatePattern;
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
   published
@@ -275,7 +288,6 @@ function TLuiBarCellList.GetItems(Index: Integer): TLuiBarCell;
 begin
   Result := TLuiBarCell(FList[Index]);
 end;
-
 
 constructor TLuiBarCellList.Create(Owner: TLuiBar);
 begin
@@ -319,7 +331,7 @@ var
 begin
   //todo: move to TLuiBar
   case FOwner.Position of
-    lbpTop:
+    poTop:
       begin
         NextLeft := 0;
         for i := 0 to FList.Count - 1 do
@@ -342,7 +354,7 @@ begin
         FOwner.FClientBounds.Left := 0;
         FOwner.FClientBounds.Right := FOwner.Width;
       end;
-    lbpLeft:
+    poLeft:
       begin
         NextTop := 0;
         for i := 0 to FList.Count - 1 do
@@ -365,7 +377,7 @@ begin
         FOwner.FClientBounds.Left := Cell.Bounds.Right; //hack
         FOwner.FClientBounds.Right := FOwner.Width;
       end;
-    lbpRight:
+    poRight:
       begin
         NextTop := 0;
         for i := 0 to FList.Count - 1 do
@@ -389,7 +401,7 @@ begin
         FOwner.FClientBounds.Right := FOwner.Width - (FOwner.OuterOffset +
           FOwner.DoCalculateCellWidth(Cell));
       end;
-    lbpBottom:
+    poBottom:
       begin
         NextLeft := 0;
         for i := 0 to FList.Count - 1 do
@@ -454,13 +466,21 @@ end;
 function TLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
 begin
   case FCellAlign of
-    lbcaDefault:
+    caDefault:
       Result := FInitialSpace;
-    lbcaInvert:
+    caInvert:
       Result := ControlSize - (CellSize + FInitialSpace);
-    lbcaCenter:
+    caCenter:
       Result := (ControlSize - CellSize) div 2;
   end;
+end;
+
+function TLuiBar.DoDrawing(Cell: TLuiBarCell; DrawType: TLuiBarDrawType
+  ): Boolean;
+begin
+  Result := True;
+  if Assigned(FOnDrawing) then
+    FOnDrawing(Self, Cell, DrawType, Result);
 end;
 
 function TLuiBar.GetRealCellWidth: Integer;
@@ -469,7 +489,7 @@ begin
     Result := FCellWidth
   else
   begin
-    if FPosition in [lbpRight, lbpLeft] then
+    if FPosition in [poRight, poLeft] then
       Result := Width - FOuterOffset
     else
       Result := (Width - FInitialSpace - (FSpacing * (FCells.Count - 1) )) div FCells.Count;
@@ -534,16 +554,16 @@ begin
   FOnAfterDraw:=AValue;
 end;
 
+procedure TLuiBar.SetOnDrawing(const AValue: TLuiBarDrawingEvent);
+begin
+  if FOnDrawing=AValue then exit;
+  FOnDrawing:=AValue;
+end;
+
 procedure TLuiBar.SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
 begin
   if FOnGetImageInfo=AValue then exit;
   FOnGetImageInfo:=AValue;
-end;
-
-procedure TLuiBar.SetOnGetPattern(const AValue: TLuiBarGetPattern);
-begin
-  FOnGetPattern := AValue;
-  FPatterns.FixedValues := AValue = nil;
 end;
 
 procedure TLuiBar.SetOuterOffset(const AValue: Integer);
@@ -563,8 +583,8 @@ procedure TLuiBar.DoUpdatePatterns;
   function DoGetPattern(AType: TLuiBarPatternType; DefaultColor: TColor): TCairoPattern;
   begin
     Result := nil;
-    if Assigned(FOnGetPattern) then
-      FOnGetPattern(Self, AType, Result);
+    if Assigned(FOnCreatePattern) then
+      FOnCreatePattern(Self, AType, Result);
     if Result = nil then
       Result := TCairoSolidPattern.Create(ColorToCairoColor(DefaultColor));
   end;
@@ -587,18 +607,18 @@ end;
 
 procedure TLuiBar.DoDrawCellPath(Cell: TLuiBarCell);
 begin
-  if Assigned(FOnDrawCellPath) then
-    FOnDrawCellPath(Self, Cell)
-  else
+  if DoDrawing(Cell, dtCellPath) then
     DefaultDrawCellPath(Cell);
+  if Assigned(FOnDrawCellPath) then
+    FOnDrawCellPath(Self, Cell);
 end;
 
 procedure TLuiBar.DoDrawCellText(Cell: TLuiBarCell);
 begin
-  if Assigned(FOnDrawCellText) then
-    FOnDrawCellText(Self, Cell)
-  else
+  if DoDrawing(Cell, dtCellText) then
     DefaultDrawCellText(Cell);
+  if Assigned(FOnDrawCellText) then
+    FOnDrawCellText(Self, Cell);
 end;
 
 procedure TLuiBar.DoDrawClientArea;
@@ -610,25 +630,25 @@ var
     with Context do
     begin
       case FPosition of
-        lbpTop:
+        poTop:
           begin
             LineTo(Cell.Bounds.Left, FClientBounds.Top + LineOffset);
             Stroke;
             MoveTo(Cell.Bounds.Right, FClientBounds.Top + LineOffset);
           end;
-        lbpLeft:
+        poLeft:
           begin
             LineTo(FClientBounds.Left + LineOffset, Cell.Bounds.Top);
             Stroke;
             MoveTo(FClientBounds.Left + LineOffset, Cell.Bounds.Bottom);
           end;
-        lbpRight:
+        poRight:
           begin
             LineTo(FClientBounds.Right - LineOffset, Cell.Bounds.Top);
             Stroke;
             MoveTo(FClientBounds.Right - LineOffset, Cell.Bounds.Bottom);
           end;
-        lbpBottom:
+        poBottom:
           begin
             LineTo(Cell.Bounds.Left, FClientBounds.Bottom - LineOffset);
             Stroke;
@@ -651,16 +671,16 @@ begin
     Save;
     Translate(FClientBounds.Left, FClientBounds.Top);
     case FPosition of
-      lbpTop:
+      poTop:
         Rectangle(0, FOutLineWidth, FClientBounds.Right - FClientBounds.Left,
           FClientBounds.Bottom - FClientBounds.Top - FOutLineWidth);
-      lbpLeft:
+      poLeft:
         Rectangle(FOutLineWidth, 0, FClientBounds.Right - FClientBounds.Left - FOutLineWidth,
           FClientBounds.Bottom - FClientBounds.Top);
-      lbpRight:
+      poRight:
         Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left - FOutLineWidth,
           FClientBounds.Bottom - FClientBounds.Top);
-      lbpBottom:
+      poBottom:
         Rectangle(0, 0, FClientBounds.Right - FClientBounds.Left,
           FClientBounds.Bottom - FClientBounds.Top - FOutLineWidth);
     end;
@@ -680,13 +700,13 @@ begin
       Source := FPatterns.OutLine;
 
       case FPosition of
-        lbpTop:
+        poTop:
           MoveTo(0, FClientBounds.Top + LineOffset);
-        lbpLeft:
+        poLeft:
           MoveTo(FClientBounds.Left + LineOffset, 0);
-        lbpRight:
+        poRight:
           MoveTo(FClientBounds.Right - LineOffset, 0);
-        lbpBottom:
+        poBottom:
           MoveTo(0, FClientBounds.Bottom - LineOffset);
       end;
 
@@ -707,7 +727,7 @@ begin
     end;
     //todo: move this to DoDrawClientArea
     case FPosition of
-      lbpTop:
+      poTop:
         begin
           if lboOutLineClientArea in FOptions then
           begin
@@ -719,7 +739,7 @@ begin
           else
             LineTo(Width, FClientBounds.Top + LineOffset);
         end;
-      lbpLeft:
+      poLeft:
         begin
           if lboOutLineClientArea in FOptions then
           begin
@@ -731,7 +751,7 @@ begin
           else
             LineTo(FClientBounds.Left + LineOffset, Height);
         end;
-      lbpRight:
+      poRight:
         begin
           if lboOutLineClientArea in FOptions then
           begin
@@ -743,7 +763,7 @@ begin
           else
             LineTo(FClientBounds.Right - LineOffset, Height);
         end;
-      lbpBottom:
+      poBottom:
         begin
           if lboOutLineClientArea in FOptions then
           begin
@@ -854,7 +874,7 @@ end;
 
 function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
-  if FPosition in [lbpTop, lbpBottom] then
+  if FPosition in [poTop, poBottom] then
   begin
     if lboVariableCellWidth in FOptions then
     begin
@@ -910,10 +930,10 @@ end;
 
 procedure TLuiBar.DoDrawCell(Cell: TLuiBarCell);
 begin
-  if Assigned(FOnDrawCell) then
-    FOnDrawCell(Self, Cell)
-  else
+  if DoDrawing(Cell, dtCell) then
     DefaultDrawCell(Cell);
+  if Assigned(FOnDrawCell) then
+    FOnDrawCell(Self, Cell);
 end;
 
 procedure TLuiBar.DoSelect;
@@ -927,14 +947,14 @@ begin
   with Context do
   begin
     Save;
-    if Assigned(FOnDrawBackground) then
-      FOnDrawBackground(Self)
-    else
+    if DoDrawing(nil, dtBackground) then
     begin
       Source := FPatterns.Background;
       Rectangle(0, 0, Width, Height);
       Fill;
     end;
+    if Assigned(FOnDrawBackground) then
+      FOnDrawBackground(Self);
     Restore;
   end;
 end;
@@ -996,7 +1016,7 @@ begin
   FTextPadding := 8;
   FTextAlign := taCenter;
   FImagePadding := 3;
-  FImagePosition := lbipLeft;
+  FImagePosition := ipLeft;
   //todo: find more sensible colors
   with FColors do
   begin
@@ -1050,7 +1070,7 @@ begin
   LineOffset := GetSharpLineOffset(FOutLineWidth);
   //todo: use matrix manipulation to consolidate the procedures??
   case FPosition of
-    lbpTop:
+    poTop:
       with Context do
       begin
         //this is necessary to avoid a gap between cell and client area
@@ -1073,7 +1093,7 @@ begin
           R.Right, R.Bottom,
           R.Right - InnerRadius, R.Bottom);
       end;
-    lbpBottom:
+    poBottom:
       with Context do
       begin
         if lboEmulateTab in FOptions then
@@ -1095,7 +1115,7 @@ begin
           R.Right, R.Top,
           R.Right - InnerRadius, R.Top);
       end;
-    lbpLeft:
+    poLeft:
       with Context do
       begin
         if lboEmulateTab in FOptions then
@@ -1117,7 +1137,7 @@ begin
           R.Right, R.Bottom,
           R.Right, R.Bottom - InnerRadius);
       end;
-    lbpRight:
+    poRight:
       with Context do
       begin
         if lboEmulateTab in FOptions then
@@ -1169,7 +1189,7 @@ begin
       //todo: compute linewidth
       //todo: refactor into sub routines ?
       case FImagePosition of
-      lbipLeft:
+      ipLeft:
         begin
           ImagePos.y := (Cell.Height - FImages.Height) div 2;
           if (lboCenterImage in FOptions) and (FTextAlign = taCenter) then
@@ -1188,7 +1208,7 @@ begin
           TextBox := Rect(ImagePos.x + FImages.Width + FImagePadding, 0,
             Cell.Width - FTextPadding, Cell.Height);
         end;
-      lbipTop:
+      ipTop:
         begin
           ImagePos.x := (Cell.Width - FImages.Width) div 2;
           if lboCenterImage in FOptions then
@@ -1206,7 +1226,7 @@ begin
           TextBox := Rect(FTextPadding, ImagePos.y + FImages.Height + FImagePadding,
             Cell.Width - FTextPadding, Cell.Height - FTextPadding);
         end;
-      lbipBottom:
+      ipBottom:
         begin
           ImagePos.x := (Cell.Width - FImages.Width) div 2;
           if lboCenterImage in FOptions then
@@ -1224,7 +1244,7 @@ begin
           TextBox := Rect(FTextPadding, FTextPadding,
             Cell.Width - FTextPadding, ImagePos.y - FImagePadding);
         end;
-      lbipRight:
+      ipRight:
         begin
           ImagePos.y := (Cell.Height - FImages.Height) div 2;
           if (lboCenterImage in FOptions) and (FTextAlign = taCenter) then
@@ -1308,6 +1328,20 @@ begin
   FHover := AValue;
 end;
 
+procedure TLuiBarPatterns.SetIndexed(Index: Integer; const AValue: TCairoPattern);
+var
+  OldPattern: TCairoPattern;
+begin
+  PatternMapNeeded;
+  if FPatternMap.GetData(Index, OldPattern) then
+  begin
+    OldPattern.Free;
+    FPatternMap.SetData(Index, AValue);
+  end
+  else
+    FPatternMap.Add(Index, AValue);
+end;
+
 procedure TLuiBarPatterns.SetNormal(const AValue: TCairoPattern);
 begin
   FNormal.Free;
@@ -1354,12 +1388,48 @@ begin
   FSelectedText.Free;
   FOutLine.Free;
   FBackGround.Free;
+  
+  FreePatternMap;
+end;
+
+procedure TLuiBarPatterns.FreePatternMap;
+var
+  Iterator: TMapIterator;
+  Pattern: TCairoPattern;
+begin
+  if FPatternMap = nil then
+    Exit;
+  Iterator := TMapIterator.Create(FPatternMap);
+  with Iterator do
+  begin
+    while not EOM do
+    begin
+      GetData(Pattern);
+      Pattern.Free;
+      Next;
+    end;
+    Destroy;
+  end;
+  FPatternMap.Destroy;
+end;
+
+function TLuiBarPatterns.GetIndexed(Index: Integer): TCairoPattern;
+begin
+  PatternMapNeeded;
+  if not FPatternMap.GetData(Index, Result) then
+    raise Exception.Create('Pattern with index ' + IntToStr(Index) + ' not found');
 end;
 
 procedure TLuiBarPatterns.Invalidate;
 begin
   if not FFixedValues then
     FInvalid := True
+end;
+
+procedure TLuiBarPatterns.PatternMapNeeded;
+begin
+  if FPatternMap = nil then
+    FPatternMap := TMap.Create(its4, SizeOf(TCairoPattern));
 end;
 
 procedure TLuiBarPatterns.Updated;
