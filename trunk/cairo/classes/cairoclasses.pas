@@ -1041,7 +1041,7 @@ begin
   if FObjectTree.GetFirst(Key, AnObject) then
   begin
     TObject(AnObject).Free;
-    while FObjectTree.GetNext(Key, AnObject, NextKey) do
+    while FObjectTree.GetNext(Key, NextKey, AnObject) do
     begin
       TObject(AnObject).Free;
       Key := NextKey;
