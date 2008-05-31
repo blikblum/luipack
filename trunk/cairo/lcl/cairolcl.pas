@@ -122,6 +122,7 @@ type
     property BorderSpacing;
     property BorderStyle;
     property OnCreateContext;
+    property OnMouseDown;
     property OnMouseEnter;
     property OnMouseLeave;
     property OnResize;
