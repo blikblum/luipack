@@ -4,7 +4,12 @@ var
   radius: Double;
   angle1: Double;
   angle2: Double;
+  OldMask: TFPUExceptionMask;
 begin
+  //workaround to a cairo bug (fixed post 1.6.4)
+  OldMask := GetExceptionMask;
+  SetExceptionMask([exInvalidOp, exPrecision]);
+
   xc := 0.5;
   yc := 0.5;
   radius := 0.4;
@@ -26,4 +31,6 @@ begin
   cairo_arc (cr, xc, yc, radius, angle2, angle2);
   cairo_line_to (cr, xc, yc);
   cairo_stroke (cr);
+
+  SetExceptionMask(OldMask);
 end;

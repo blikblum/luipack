@@ -7,7 +7,7 @@ uses
 
 const
   SampleDir = 'snippets' + PathDelim;
-  ExcludeFilters: array [0..2] of String = ('libsvg*','operator_*', '*arc*');
+  ExcludeFilters: array [0..1] of String = ('libsvg*','operator_*');
   
 var
   UnitFile: Text;
@@ -59,7 +59,7 @@ begin
   //the header
   WriteLn(UnitFile, 'unit snippets;', LineEnding);
   WriteLn(UnitFile, 'interface', LineEnding);
-  WriteLn(UnitFile, 'uses', LineEnding,'  cairo14;',LineEnding);
+  WriteLn(UnitFile, 'uses', LineEnding,'  cairo14, math;',LineEnding);
   WriteLn(UnitFile, 'const');
   WriteLn(UnitFile, '  snippet_count = ',SnippetList.Count, ';');
   WriteLn(UnitFile, '  snippet_name: array [0..', SnippetList.Count - 1, '] of String = (');
