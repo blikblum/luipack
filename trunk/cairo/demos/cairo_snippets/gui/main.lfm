@@ -1,15 +1,16 @@
-object Form1: TForm1
+object FormMain: TFormMain
   Left = 343
-  Height = 690
+  Height = 730
   Top = 25
-  Width = 666
-  HorzScrollBar.Page = 665
-  VertScrollBar.Page = 689
+  Width = 649
   ActiveControl = ListSnippets
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
   Caption = 'Cairo Snippets Demo'
-  ClientHeight = 690
-  ClientWidth = 666
+  ClientHeight = 730
+  ClientWidth = 649
   OnCreate = FormCreate
+  Position = poScreenCenter
   LCLVersion = '0.9.25'
   object PaintBoxMain: TPaintBox
     Left = 240
@@ -25,7 +26,6 @@ object Form1: TForm1
     Width = 192
     OnSelectionChange = ListSnippetsSelectionChange
     TabOrder = 0
-    TopIndex = -1
   end
   object SynSnippetCode: TSynEdit
     Left = 8
@@ -37,10 +37,8 @@ object Form1: TForm1
     ParentColor = False
     TabOrder = 1
     BookMarkOptions.Xoffset = -18
-    BookMarkOptions.OnChange = nil
     Gutter.AutoSize = True
     Gutter.Visible = False
-    Gutter.OnChange = nil
     Gutter.CodeFoldingWidth = 14
     Highlighter = SynPasSyn1
     Keystrokes = <    
@@ -364,7 +362,6 @@ object Form1: TForm1
         Command = 250
         ShortCut = 24642
       end>
-    SelectedColor.OnChange = nil
   end
   object SynPasSyn1: TSynPasSyn
     Enabled = False

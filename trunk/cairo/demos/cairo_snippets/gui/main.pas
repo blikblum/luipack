@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TForm1 }
+  { TFormMain }
 
-  TForm1 = class(TForm)
+  TFormMain = class(TForm)
     ListSnippets: TListBox;
     PaintBoxMain: TPaintBox;
     SynPasSyn1: TSynPasSyn;
@@ -28,16 +28,16 @@ type
   end; 
 
 var
-  Form1: TForm1; 
+  FormMain: TFormMain;
 
 implementation
 
 uses
   cairo14, CairoLCL, InterfaceBase;
 
-{ TForm1 }
+{ TFormMain }
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TFormMain.FormCreate(Sender: TObject);
 var
   i, major, minor, micro: Integer;
 begin
@@ -50,14 +50,14 @@ begin
   ListSnippets.ItemIndex := 0;
 end;
 
-procedure TForm1.ListSnippetsSelectionChange (Sender: TObject; User: boolean );
+procedure TFormMain.ListSnippetsSelectionChange (Sender: TObject; User: boolean );
 begin
   PaintBoxMain.Invalidate;
   if FileExists('snippets' + PathDelim + ListSnippets.Items[ListSnippets.ItemIndex] + '.cairo') then
     SynSnippetCode.Lines.LoadFromFile('snippets' + PathDelim + ListSnippets.Items[ListSnippets.ItemIndex] + '.cairo');
 end;
 
-procedure TForm1.PaintBoxMainPaint(Sender: TObject);
+procedure TFormMain.PaintBoxMainPaint(Sender: TObject);
 var
   surface: Pcairo_surface_t;
   cr: Pcairo_t;
@@ -93,7 +93,7 @@ begin
   DeleteObject(TempBitmap);
 end;
 
-procedure TForm1.EraseBackground (DC: HDC );
+procedure TFormMain.EraseBackground (DC: HDC );
 var
   ARect: TRect;
 begin
