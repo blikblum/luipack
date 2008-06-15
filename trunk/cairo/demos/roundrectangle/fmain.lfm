@@ -1,0 +1,299 @@
+object FormMain: TFormMain
+  Left = 295
+  Height = 271
+  Top = 226
+  Width = 588
+  Caption = 'Cairo Rounded Rectangle'
+  ClientHeight = 271
+  ClientWidth = 588
+  LCLVersion = '0.9.25'
+  object Label1: TLabel
+    Left = 352
+    Height = 14
+    Top = 77
+    Width = 51
+    Caption = 'Line Width'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 280
+    Height = 14
+    Top = 13
+    Width = 7
+    Caption = 'X'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 368
+    Height = 14
+    Top = 13
+    Width = 29
+    Caption = 'Width'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 280
+    Height = 14
+    Top = 43
+    Width = 7
+    Caption = 'Y'
+    ParentColor = False
+  end
+  object Label5: TLabel
+    Left = 368
+    Height = 14
+    Top = 43
+    Width = 32
+    Caption = 'Height'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    Left = 256
+    Height = 14
+    Top = 80
+    Width = 33
+    Caption = 'Radius'
+    ParentColor = False
+  end
+  object Label15: TLabel
+    Left = 427
+    Height = 14
+    Top = 136
+    Width = 38
+    Caption = 'Label15'
+    ParentColor = False
+  end
+  object CairoPaintBox: TCairoPaintBox
+    Left = 8
+    Height = 258
+    Top = 6
+    Width = 238
+    OnDraw = CairoPaintBoxDraw
+  end
+  object EditLineWidth: TSpinEdit
+    Left = 408
+    Height = 23
+    Top = 72
+    Width = 42
+    MaxValue = 10
+    MinValue = 1
+    OnChange = ValueChanged
+    TabOrder = 1
+    Value = 1
+  end
+  object EditX: TSpinEdit
+    Left = 296
+    Height = 23
+    Top = 8
+    Width = 42
+    MinValue = 2
+    OnChange = ValueChanged
+    TabOrder = 2
+    Value = 10
+  end
+  object EditY: TSpinEdit
+    Left = 296
+    Height = 23
+    Top = 40
+    Width = 42
+    MinValue = 2
+    OnChange = ValueChanged
+    TabOrder = 3
+    Value = 10
+  end
+  object EditWidth: TSpinEdit
+    Left = 408
+    Height = 23
+    Top = 8
+    Width = 42
+    MinValue = 10
+    OnChange = ValueChanged
+    TabOrder = 4
+    Value = 40
+  end
+  object EditHeight: TSpinEdit
+    Left = 408
+    Height = 23
+    Top = 40
+    Width = 42
+    MinValue = 10
+    OnChange = ValueChanged
+    TabOrder = 5
+    Value = 40
+  end
+  object GroupBox1: TGroupBox
+    Left = 288
+    Height = 160
+    Top = 104
+    Width = 280
+    ClientHeight = 142
+    ClientWidth = 276
+    TabOrder = 6
+    object Label7: TLabel
+      Left = 6
+      Height = 14
+      Width = 38
+      Caption = 'TopLeft'
+      ParentColor = False
+    end
+    object Label8: TLabel
+      Left = 214
+      Height = 14
+      Width = 44
+      Caption = 'TopRight'
+      ParentColor = False
+    end
+    object Label9: TLabel
+      Left = 118
+      Height = 14
+      Width = 19
+      Caption = 'Top'
+      ParentColor = False
+    end
+    object Label10: TLabel
+      Left = 221
+      Height = 14
+      Top = 47
+      Width = 26
+      Caption = 'Right'
+      ParentColor = False
+    end
+    object Label11: TLabel
+      Left = 6
+      Height = 14
+      Top = 48
+      Width = 20
+      Caption = 'Left'
+      ParentColor = False
+    end
+    object Label12: TLabel
+      Left = 6
+      Height = 14
+      Top = 96
+      Width = 54
+      Caption = 'BottomLeft'
+      ParentColor = False
+    end
+    object Label13: TLabel
+      Left = 110
+      Height = 14
+      Top = 96
+      Width = 35
+      Caption = 'Bottom'
+      ParentColor = False
+    end
+    object Label14: TLabel
+      Left = 214
+      Height = 14
+      Top = 96
+      Width = 60
+      Caption = 'BottomRight'
+      ParentColor = False
+    end
+    object CheckIndividualRadius: TCheckBox
+      Left = 6
+      Height = 19
+      Top = -16
+      Width = 129
+      Caption = 'Use Individual Radius'
+      OnChange = ValueChanged
+      TabOrder = 0
+    end
+    object EditTopLeftRadius: TSpinEdit
+      Left = 6
+      Height = 23
+      Top = 16
+      Width = 50
+      OnChange = ValueChanged
+      TabOrder = 1
+    end
+    object EditTopRightRadius: TSpinEdit
+      Left = 214
+      Height = 23
+      Top = 16
+      Width = 50
+      OnChange = ValueChanged
+      TabOrder = 2
+    end
+    object EditBottomRightRadius: TSpinEdit
+      Left = 214
+      Height = 23
+      Top = 111
+      Width = 50
+      OnChange = ValueChanged
+      TabOrder = 3
+    end
+    object EditBottomLeftRadius: TSpinEdit
+      Left = 6
+      Height = 23
+      Top = 111
+      Width = 50
+      OnChange = ValueChanged
+      TabOrder = 4
+    end
+    object EditBottomRadius: TSpinEdit
+      Left = 110
+      Height = 23
+      Top = 111
+      Width = 49
+      MinValue = -100
+      OnChange = ValueChanged
+      TabOrder = 5
+    end
+    object EditTopRadius: TSpinEdit
+      Left = 110
+      Height = 23
+      Top = 16
+      Width = 50
+      MinValue = -100
+      OnChange = ValueChanged
+      TabOrder = 6
+    end
+    object EditLeftRadius: TSpinEdit
+      Left = 6
+      Height = 23
+      Top = 62
+      Width = 50
+      MinValue = -100
+      OnChange = ValueChanged
+      TabOrder = 7
+    end
+    object EditRightRadius: TSpinEdit
+      Left = 214
+      Height = 23
+      Top = 64
+      Width = 50
+      MinValue = -100
+      OnChange = ValueChanged
+      TabOrder = 8
+    end
+  end
+  object EditRadius: TSpinEdit
+    Left = 296
+    Height = 23
+    Top = 75
+    Width = 42
+    OnChange = ValueChanged
+    TabOrder = 7
+  end
+  object CheckDrawSharpLine: TCheckBox
+    Left = 464
+    Height = 19
+    Top = 72
+    Width = 105
+    Caption = 'Draw Sharp Line'
+    Checked = True
+    OnChange = ValueChanged
+    State = cbChecked
+    TabOrder = 8
+  end
+  object ButtonResetValues: TButton
+    Left = 472
+    Height = 33
+    Top = 6
+    Width = 83
+    Caption = 'Reset Values'
+    OnClick = ButtonResetValuesClick
+    TabOrder = 9
+  end
+end
