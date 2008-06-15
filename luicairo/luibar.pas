@@ -275,6 +275,9 @@ type
     property Align;
     property BorderSpacing;
     property OnCreateContext;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
   end;
 
 implementation
