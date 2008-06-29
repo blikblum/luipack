@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
-  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, CairofpGui, CairoClasses, CairoUtils, cairo14;
+  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, gui_dialogs,
+  CairofpGui, CairoClasses, CairoUtils, cairo14;
 
 const
   m_radius = 0.42;
@@ -19,16 +20,18 @@ type
 
   TMainForm = class(TfpgForm)
   private
+    procedure   TimerFired(Sender: TObject);
+    procedure   FormDestroy(Sender: TObject);
+    procedure   FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure   PaintBoxDraw(Sender: TObject);
   protected
+    procedure   HandleKeyPress(var keycode: word; var shiftstate: TShiftState;
+       var consumed: boolean); override;
   public
     Timer: TfpgTimer;
     PaintBox: TCairoPaintBox;
     constructor Create(AOwner: TComponent); override;
-    procedure TimerFired(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure AfterCreate; override;
-    procedure PaintBoxDraw(Sender: TObject);
+    procedure   AfterCreate; override;
   end;
 
 constructor TMainForm.Create(AOwner: TComponent);
@@ -37,14 +40,14 @@ begin
   PaintBox := TCairoPaintBox.Create(Self);
   with PaintBox do
   begin
-    Parent := Self;
-    Left := 0;
-    Top := 0;
-    Width := Self.Width;
-    Height := Self.Height;
-    Visible := True;
-    Align := alClient;
-    OnDraw := @PaintBoxDraw;
+    Parent    := Self;
+    Left      := 0;
+    Top       := 0;
+    Width     := Self.Width;
+    Height    := Self.Height;
+    Visible   := True;
+    Align     := alClient;
+    OnDraw    := @PaintBoxDraw;
   end;
   Timer := TfpgTimer.Create(1000);
   Timer.OnTimer := @TimerFired;
@@ -63,7 +66,7 @@ end;
 
 procedure TMainForm.PaintBoxDraw(Sender: TObject);
 var
-  i : Integer;
+  i: Integer;
   Hour, Second, Minute, MSecond: Word;
   inset, HourAngle, MinuteAngle, SecondAngle: Double;
 begin
@@ -97,7 +100,7 @@ begin
       Save;
       LineCap := CAIRO_LINE_CAP_ROUND;
 
-      if (i div 3 <> 0) then
+      if (i mod 3 <> 0) then
       begin
         inset := inset*0.8;
         LineWidth := 0.03;
@@ -153,6 +156,29 @@ begin
   end;
 end;
 
+procedure TMainForm.HandleKeyPress(var keycode: word;
+  var shiftstate: TShiftState; var consumed: boolean);
+begin
+  if keycode = keyEscape then
+  begin
+    consumed := True;
+    Close;
+  end
+  else if keycode = keyF1 then
+  begin
+    ShowMessage('F1 - Shows this help' + #13 +
+                'F11 - Toggles fullscreen mode (X11 only)' + #13 +
+                'Esc - Exits the application', 'Quick Help');
+  end
+  else if keycode = keyF11 then
+  begin
+    FullScreen := not FullScreen;
+    SetFullscreen(FullScreen);
+  end;
+  
+  inherited HandleKeyPress(keycode, shiftstate, consumed);
+end;
+
 procedure TMainForm.TimerFired(Sender: TObject);
 begin
   PaintBox.Invalidate;
@@ -162,7 +188,7 @@ procedure TMainForm.AfterCreate;
 begin
   Name := 'MainForm';
   SetPosition(316, 186, 400, 400);
-  WindowTitle := 'Cairo Clock Demo Running Under FpGui';
+  WindowTitle := 'Cairo Clock Demo Running Under fpGUI';
   WindowPosition := wpScreenCenter;
 end;
 
