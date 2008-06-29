@@ -80,7 +80,7 @@ begin
       Save;
       LineCap := CAIRO_LINE_CAP_ROUND;
 
-      if (i div 3 <> 0) then
+      if (i mod 3 <> 0) then
       begin
         inset := inset*0.8;
         LineWidth := 0.03;
