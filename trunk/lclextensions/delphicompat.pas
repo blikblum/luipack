@@ -196,9 +196,8 @@ function GetTextAlign(hDC:HDC): LongWord;
 function GetTextExtentExPoint(DC: HDC; Str: PChar;
   Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
   var Size: TSize): BOOL;
-function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
+function GetTextExtentExPointW(DC: HDC; Str: PWideChar; Count, MaxWidth: Integer;
+  MaxCount, PartialWidths: PInteger; var Size: TSize): BOOL;
 function GetTextExtentPoint32W(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; out Size: TSize): Boolean;
 function GetWindowDC(hWnd:THandle):HDC;
@@ -227,7 +226,7 @@ function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): Boolean;
 
 function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
-function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState:PBYTE; lpChar:PWORD; uFlags:LongWord): LongInt;
+function ToAscii(uVirtKey, uScanCode:LongWord; lpKeyState: PByte; lpChar: PWord; uFlags:LongWord): LongInt;
 
 function UpdateWindow(Handle: HWND): Boolean;
 

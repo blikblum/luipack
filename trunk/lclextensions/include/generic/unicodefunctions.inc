@@ -10,7 +10,7 @@ end;
 {$endif}
 
 function ExtTextOutW(DC: HDC; X, Y: Integer; Options: LongInt; Rect: PRect;
-  Str: PWideChar; Count: LongInt; Dx: PInteger): Boolean;
+  Str: PWideChar; Count: LongInt; Dx: ObjPas.PInteger): Boolean;
 var
   TempStr: UTF8String;
 begin
@@ -27,7 +27,7 @@ begin
 end;
 
 function GetTextExtentExPointW(DC: HDC; Str: PWideChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
+  Count, MaxWidth: Integer; MaxCount, PartialWidths: ObjPas.PInteger;
   var Size: TSize): BOOL;
 var
   TempStr: UTF8String;
