@@ -2174,13 +2174,12 @@ end;
 
 procedure TCustomVirtualDBGrid.DoFocusChange(Node: PVirtualNode; Column: TColumnIndex);
 var
-   Data: PNodeData;
+  Data: PNodeData;
 begin
-  inherited DoFocusChange(Node, Column);
-
   Data := InternalGetNodeData(Node);
   if IsDataOk(Data) then
     GotoRecNo(Data.RecordData.RecNo);
+  inherited DoFocusChange(Node, Column);
 end;
 
 
