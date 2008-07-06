@@ -455,10 +455,16 @@ type
   end;
   
   function CairoColor(Red, Green, Blue, Alpha: Double): TCairoColor;
+
   function RGBToCairoColor(R, G, B: Byte): TCairoColor;
-  function RGBToCairoColor(RGB: Cardinal): TCairoColor;
   function RGBAToCairoColor(R, G, B, A: Byte): TCairoColor;
-  function RGBAToCairoColor(RGBA: Cardinal): TCairoColor;
+  
+  function RGBToCairoColor(RGB: Cardinal): TCairoColor;
+  function BGRToCairoColor(BGR: Cardinal): TCairoColor;
+
+  function ARGBToCairoColor(ARGB: Cardinal): TCairoColor;
+  function ABGRToCairoColor(ABGR: Cardinal): TCairoColor;
+  
   function StatusToString(Status: cairo_status_t): String;
 
 implementation
@@ -473,34 +479,50 @@ end;
 
 function RGBToCairoColor(R, G, B: Byte): TCairoColor;
 begin
-  Result.Red := R/255;
-  Result.Green := G/255;
-  Result.Blue := B/255;
-  Result.Alpha := 1;
-end;
-
-function RGBToCairoColor(RGB: Cardinal): TCairoColor;
-begin
-  Result.Red := (RGB and $000000ff)/255;
-  Result.Green := ((RGB shr 8) and $000000ff)/255;
-  Result.Blue := ((RGB shr 16) and $000000ff)/255;
+  Result.Red := R / 255;
+  Result.Green := G / 255;
+  Result.Blue := B / 255;
   Result.Alpha := 1;
 end;
 
 function RGBAToCairoColor(R, G, B, A: Byte): TCairoColor;
 begin
-  Result.Red := R/255;
-  Result.Green := G/255;
-  Result.Blue := B/255;
-  Result.Alpha := A/255;
+  Result.Red := R / 255;
+  Result.Green := G / 255;
+  Result.Blue := B / 255;
+  Result.Alpha := A / 255;
 end;
 
-function RGBAToCairoColor(RGBA: Cardinal): TCairoColor;
+function RGBToCairoColor(RGB: Cardinal): TCairoColor;
 begin
-  Result.Red := (RGBA and $000000ff)/255;
-  Result.Green := ((RGBA shr 8) and $000000ff)/255;
-  Result.Blue := ((RGBA shr 16) and $000000ff)/255;
-  Result.Alpha := ((RGBA shr 32) and $000000ff)/255;//Correct??
+  Result.Red := ((RGB shr 16) and $000000FF) / 255;
+  Result.Green := ((RGB shr 8) and $000000FF) / 255;
+  Result.Blue := (RGB and $000000FF) / 255;
+  Result.Alpha := 1;
+end;
+
+function BGRToCairoColor(BGR: Cardinal): TCairoColor;
+begin
+  Result.Red := (BGR and $000000FF) / 255;
+  Result.Green := ((BGR shr 8) and $000000FF) / 255;
+  Result.Blue := ((BGR shr 16) and $000000FF) / 255;
+  Result.Alpha := 1;
+end;
+
+function ARGBToCairoColor(ARGB: Cardinal): TCairoColor;
+begin
+  Result.Red := ((ARGB shr 16) and $000000FF) / 255;
+  Result.Green := ((ARGB shr 8) and $000000FF) / 255;
+  Result.Blue := (ARGB and $000000FF) / 255;
+  Result.Alpha := ((ARGB shr 32) and $000000FF) / 255; //Correct??
+end;
+
+function ABGRToCairoColor(ABGR: Cardinal): TCairoColor;
+begin
+  Result.Red := (ABGR and $000000FF) / 255;
+  Result.Green := ((ABGR shr 8) and $000000FF) / 255;
+  Result.Blue := ((ABGR shr 16) and $000000FF) / 255;
+  Result.Alpha := ((ABGR shr 32) and $000000FF) / 255; //Correct??
 end;
 
 function StatusToString(Status: cairo_status_t): String;
@@ -509,7 +531,6 @@ begin
 end;
 
 { TCairoContext }
-
 
 procedure TCairoContext.SetOperator(Op: cairo_operator_t);
 begin
