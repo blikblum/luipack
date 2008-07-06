@@ -7,7 +7,7 @@ unit vtvutils_package;
 interface
 
 uses
-  VTComboEditLink; 
+  VTComboEditLink, VTController; 
 
 implementation
 
