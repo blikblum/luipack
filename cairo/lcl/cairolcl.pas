@@ -137,7 +137,8 @@ implementation
 
 function ColorToCairoColor(Color: TColor): TCairoColor;
 begin
-  Result := RGBToCairoColor(ColorToRGB(Color));
+  //LCL.ColorToRGB returns a BGR color
+  Result := BGRToCairoColor(ColorToRGB(Color));
 end;
 
 { TCustomCairoControl }
