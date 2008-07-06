@@ -94,9 +94,8 @@ begin
 end;
 
 {$ifndef GTK2}
-function GetTextExtentExPoint(DC: HDC; Str: PChar;
-  Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
-  var Size: TSize): BOOL;
+function GetTextExtentExPoint(DC: HDC; Str: PChar; Count, MaxWidth: Integer;
+  MaxCount, PartialWidths: ObjPas.PInteger; var Size: TSize): BOOL;
 var
   lbearing, rbearing, width, ascent,descent: LongInt;
   UseFont : PGDKFont;
