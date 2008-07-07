@@ -5,7 +5,7 @@ unit register_luicairo;
 interface
 
 uses
-  Classes, SysUtils, LResources, LazarusPackageIntf, LuiBar, LuiImage;
+  Classes, SysUtils, LResources, LazarusPackageIntf, LuiBar;
 
 procedure Register;
 
@@ -16,15 +16,9 @@ begin
   RegisterComponents('Cairo', [TLuiBar]);
 end;
 
-procedure RegisterUnitLuiImage;
-begin
-  RegisterComponents('Cairo', [TLuiImage]);
-end;
-
 procedure Register;
 begin
   RegisterUnit('LuiBar', @RegisterUnitLuiBar);
-  RegisterUnit('LuiImage', @RegisterUnitLuiImage);
 end;
 
 end.
