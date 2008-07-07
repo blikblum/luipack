@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { you can add units after this }, fmain, cairoimaging_package;
+  { you can add units after this }, fmain, luicairo_package;
 
 begin
   Application.Title:='LuiImage Demo';

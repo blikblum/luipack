@@ -5,9 +5,18 @@ unit LuiImage;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, Graphics, LCLProc, math, CairoImaging, LMessages;
+  Classes, SysUtils, CairoClasses,
+  {$ifdef FPGUI}
+  CairofpGui, gfxbase,
+  {$else}
+  CairoLCL, Graphics, LCLProc, LMessages,
+  {$endif}
+  math, CairoImaging;
 
 type
+  {$ifdef FPGUI}
+  TColor = TfpgColor;
+  {$endif}
 
   TLuiImage = class;
   
@@ -143,19 +152,18 @@ type
     procedure UpdatePatterns;
     procedure UpdateScrollBars;
   protected
-    procedure ChangeBounds(ALeft, ATop, AWidth, AHeight: Integer) override;
+    {$define READ_CLASS_INTERFACE}
+    {$i luiimage.inc}
+    {$undef READ_CLASS_INTERFACE}
     procedure DoAfterPaint; virtual;
     procedure DoBeforePaint; virtual;
     procedure DoDraw; override;
     procedure DoDrawBackground; virtual;
     procedure DoDrawClipPath; virtual;
-    procedure DoOnResize; override;
     procedure DoPaintImage; virtual;
     procedure DoPrepareMatrix(const Matrix: TCairoMatrix); virtual;
     procedure DoSetSource; virtual;
     procedure Loaded; override;
-    procedure WMHScroll(var Message: TLMHScroll); message LM_HSCROLL;
-    procedure WMVScroll(var Message: TLMVScroll); message LM_VSCROLL;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -190,15 +198,17 @@ type
 implementation
 
 uses
-  cairo14, CairoUtils, LCLIntf, LCLType;
+  cairo14, CairoUtils
+  {$ifdef FPGUI}
+  {$else}
+  , LCLIntf, LCLType
+  {$endif};
 
 { TLuiImage }
 
-procedure TLuiImage.ChangeBounds(ALeft, ATop, AWidth, AHeight: Integer);
-begin
-  if not (lioAutoSize in FOptions) then
-    inherited ChangeBounds(ALeft, ATop, AWidth, AHeight);
-end;
+{$define READ_CLASS_IMPLEMENTATION}
+{$i luiimage.inc}
+{$undef READ_CLASS_IMPLEMENTATION}
 
 procedure TLuiImage.Changed;
 begin
@@ -266,8 +276,17 @@ begin
   end;
   Inc(DesiredWidth, FEffectivePadding.Left + FEffectivePadding.Right + (FOutLineWidth * 2));
   Inc(DesiredHeight, FEffectivePadding.Top + FEffectivePadding.Bottom + (FOutLineWidth * 2));
+  {$ifdef FPGUI}
+  if (DesiredHeight <> Height) or (DesiredWidth <> Width) then
+  begin
+    inherited SetWidth(DesiredWidth);
+    inherited SetHeight(DesiredHeight);
+    UpdateWindowPosition;
+  end;
+  {$else}
   if (DesiredHeight <> Height) or (DesiredWidth <> Width) then
     inherited ChangeBounds(Left, Top, DesiredWidth, DesiredHeight);
+  {$endif}
   Exclude(FStates, lisAutoSizePending);
 end;
 
@@ -294,6 +313,7 @@ begin
     Exit;
   if lioAutoSize in (AValue - FOptions) then
   begin
+    Include(FStates, lisScrollBarsUpdatePending);
     Include(FStates, lisAutoSizePending);
     Include(FStates, lisPaddingCalcPending);
     Include(FStates, lisScaleCalcPending);
@@ -337,32 +357,6 @@ begin
     Include(FStates, lisScrollBarsUpdatePending);
   FViewStyle := AValue;
   Changed;
-end;
-
-procedure TLuiImage.UpdateHorizontalScrollBar;
-var
-  ScrollInfo: TScrollInfo;
-begin
-  FillChar(ScrollInfo, SizeOf(ScrollInfo), 0);
-  //ScrollInfo.nMin := 0;
-  ScrollInfo.nMax := FHScrollRange;
-  ScrollInfo.nPos := FHScrollOffset;
-  ScrollInfo.nPage := ClientWidth;
-  ScrollInfo.fMask := SIF_ALL;
-  SetScrollInfo(Handle, SB_Horz, ScrollInfo, True);
-end;
-
-procedure TLuiImage.UpdateVerticalScrollBar;
-var
-  ScrollInfo: TScrollInfo;
-begin
-  FillChar(ScrollInfo, SizeOf(ScrollInfo), 0);
-  //ScrollInfo.nMin := 0;
-  ScrollInfo.nMax := FVScrollRange;
-  ScrollInfo.nPos := FVScrollOffset;
-  ScrollInfo.nPage := ClientHeight;
-  ScrollInfo.fMask := SIF_ALL;
-  SetScrollInfo(Handle, SB_Vert, ScrollInfo, True);
 end;
 
 procedure TLuiImage.UpdateEffectivePadding;
@@ -454,52 +448,17 @@ procedure TLuiImage.UpdatePatterns;
 begin
   with FPatterns do
   begin
+    {$ifdef FPGUI}
+    if FColors.Background = clNone then
+      FColors.Background := Parent.BackgroundColor;
+    {$else}
     if FColors.Background = clNone then
       FColors.Background := Parent.Color;
+    {$endif}
     BackGround := DoGetPattern(ptBackground, FColors.Background);
     OutLine := DoGetPattern(ptOutLine, FColors.OutLine);
     Updated;
   end;
-end;
-
-procedure TLuiImage.UpdateScrollBars;
-var
-  VScrollVisible, HScrollVisible: Boolean;
-begin
-  FVScrollOffset := 0;
-  FVScrollRange := 0;
-  FHScrollOffset := 0;
-  FHScrollRange := 0;
-  //shortcut
-  if not (FViewStyle in [livNormal, livScale]) then
-  begin
-    ShowScrollBar(Handle, SB_BOTH, False);
-    Exit;
-  end;
-  //vertical scrollbar
-  FVScrollRange := FPadding.Top + FPadding.Bottom + GetImageHeight;
-  VScrollVisible := (FVScrollRange - Height) > 0;
-  DebugLn('VScrollVisible ', BoolToStr(VScrollVisible, True));
-  ShowScrollBar(Handle, SB_Vert, VScrollVisible);
-  //horizontal scrollbar (takes into account vertical scroll - if any)
-  FHScrollRange := FPadding.Left + FPadding.Right + GetImageWidth;
-  HScrollVisible := (FHScrollRange - ClientWidth) > 0;
-  DebugLn('HScrollVisible ', BoolToStr(HScrollVisible, True));
-  ShowScrollBar(Handle, SB_Horz, HScrollVisible);
-  //update vertical scrollbar to take the horizontal scrollbar size into account
-  if HScrollVisible and not VScrollVisible then
-  begin
-    VScrollVisible := (FVScrollRange - ClientHeight) > 0;
-    if VScrollVisible then
-      ShowScrollBar(Handle, SB_Vert, VScrollVisible);
-  end;
-
-  if VScrollVisible then
-    UpdateVerticalScrollBar;
-  if HScrollVisible then
-    UpdateHorizontalScrollBar;
-
-  Exclude(FStates, lisScrollBarsUpdatePending);
 end;
 
 procedure TLuiImage.DoAfterPaint;
@@ -578,21 +537,6 @@ begin
   end;
 end;
 
-procedure TLuiImage.DoOnResize;
-begin
-  inherited DoOnResize;
-  if not (lisAutoSizePending in FStates) and (FPicture.Data.Size <> 0) then
-  begin
-    if FViewStyle in [livNormal, livScale] then
-      Include(FStates, lisScrollBarsUpdatePending);
-    Include(FStates, lisPaddingCalcPending);
-    Include(FStates, lisScaleCalcPending);
-    if lioAutoSize in FOptions then
-      Include(FStates, lisAutoSizePending);
-    Changed;
-  end;
-end;
-
 procedure TLuiImage.DoPaintImage;
 begin
   if Assigned(FOnPaintImage) then
@@ -634,64 +578,6 @@ begin
   CheckStates;
 end;
 
-procedure TLuiImage.WMHScroll(var Message: TLMHScroll);
-begin
-  DebugLn('#WMHScroll#');
-  case Message.ScrollCode of
-    SB_BOTTOM:
-      FHScrollOffset := FHScrollRange - ClientWidth;
-    SB_ENDSCROLL:;
-      //??;
-    SB_LINEUP:
-      FHScrollOffset := Max(FHScrollOffset - 10, 0);
-    SB_LINEDOWN:
-      FHScrollOffset := Min(FHScrollOffset + 10, FHScrollRange - ClientWidth);
-    SB_PAGEUP:
-      FHScrollOffset := Max(FHScrollOffset - ClientWidth, 0);
-    SB_PAGEDOWN:
-      FHScrollOffset := Min(FHScrollOffset + ClientWidth, FHScrollRange - ClientWidth);
-    SB_THUMBPOSITION,
-    SB_THUMBTRACK:
-      begin
-        FHScrollOffset := Message.Pos;
-      end;
-    SB_TOP:
-      FHScrollOffset := 0;
-  end;
-  UpdateHorizontalScrollBar;
-  Message.Result := 0;
-  Redraw;
-end;
-
-procedure TLuiImage.WMVScroll(var Message: TLMVScroll);
-begin
-  DebugLn('#WMVScroll#');
-  case Message.ScrollCode of
-    SB_BOTTOM:
-      FVScrollOffset := FVScrollRange - ClientHeight;
-    SB_ENDSCROLL:;
-      //??;
-    SB_LINEUP:
-      FVScrollOffset := Max(FVScrollOffset - 10, 0);
-    SB_LINEDOWN:
-      FVScrollOffset := Min(FVScrollOffset + 10, FVScrollRange - ClientHeight);
-    SB_PAGEUP:
-      FVScrollOffset := Max(FVScrollOffset - ClientHeight, 0);
-    SB_PAGEDOWN:
-      FVScrollOffset := Min(FVScrollOffset + ClientHeight, FVScrollRange - ClientHeight);
-    SB_THUMBPOSITION,
-    SB_THUMBTRACK:
-      begin
-        FVScrollOffset := Message.Pos;
-      end;
-    SB_TOP:
-      FVScrollOffset := 0;
-  end;
-  UpdateVerticalScrollBar;
-  Message.Result := 0;
-  Redraw;
-end;
-
 constructor TLuiImage.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -707,7 +593,12 @@ begin
     OutLine := clBlack;
     Background := clNone;
   end;
+  {$ifdef FPGUI}
+  Width := 105;
+  Height := 105;
+  {$else}
   SetInitialBounds(0, 0, 105, 105);
+  {$endif}
 end;
 
 destructor TLuiImage.Destroy;

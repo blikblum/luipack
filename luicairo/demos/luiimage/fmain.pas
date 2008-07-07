@@ -14,6 +14,8 @@ type
 
   TMainForm = class(TForm)
     BorderOptionsPage: TPage;
+    Image: TLuiImage;
+    Label15: TLabel;
     RotateButton: TButton;
     ReflectionButton: TButton;
     KeepAspectCheckBox: TCheckBox;
@@ -47,14 +49,12 @@ type
     WidthSpinEdit: TSpinEdit;
     HeightSpinEdit: TSpinEdit;
     AutoSizeCheckBox: TCheckBox;
-    FileInfoPanel: TPanel;
     FileNameEdit: TFileNameEdit;
     ImagePanel: TPanel;
     ImageOptionsNotebook: TNotebook;
     SizeOptionsPage: TPage;
     Label1: TLabel;
     Label2: TLabel;
-    Image: TLuiImage;
     RoundEdgeRadiusSpinEdit: TSpinEdit;
     OutlineWidthSpinEdit: TSpinEdit;
     procedure AutoSizeCheckBoxChange(Sender: TObject);
@@ -103,7 +103,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  //workaround to LCL bug
+  //workaround to LCL bug that prevents set value 1 to an spinedit
   VerticalScaleSpinEdit.Value := 1;
   HorizontalScaleSpinEdit.Value := 1;
   Image.Picture.Options := [cioAllowChangesAfterLoad];
@@ -221,6 +221,7 @@ end;
 
 procedure TMainForm.RotateButtonClick(Sender: TObject);
 begin
+  //todo: reimplement since is buggy
   with Image do
   begin
     BeginUpdate;

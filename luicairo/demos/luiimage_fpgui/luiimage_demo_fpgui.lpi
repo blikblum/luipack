@@ -9,50 +9,38 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value=".\"/>
-      <TargetFileExt Value=""/>
-      <Title Value="LuiImage Demo"/>
+      <IconPath Value="./"/>
+      <TargetFileExt Value=".exe"/>
     </General>
     <VersionInfo>
       <ProjectVersion Value=""/>
     </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
       <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
       <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="luicairo_package"/>
-        <MinVersion Valid="True"/>
+        <PackageName Value="luiimage_package_fpgui"/>
       </Item1>
       <Item2>
-        <PackageName Value="luiimage_package"/>
+        <PackageName Value="fpgui_package"/>
       </Item2>
-      <Item3>
-        <PackageName Value="LCL"/>
-      </Item3>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="1">
       <Unit0>
-        <Filename Value="luiimagedemo.lpr"/>
+        <Filename Value="luiimage_demo_fpgui.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="luiimagedemo"/>
+        <UnitName Value="luiimage_demo_fpgui"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="fmain.pas"/>
-        <ComponentName Value="MainForm"/>
-        <IsPartOfProject Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <ResourceFilename Value="fmain.lrs"/>
-        <UnitName Value="fmain"/>
-      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -61,11 +49,6 @@
     <CodeGeneration>
       <Generate Value="Faster"/>
     </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <UseHeaptrc Value="True"/>
-      </Debugging>
-    </Linking>
     <Other>
       <CompilerPath Value="$(CompPath)"/>
     </Other>

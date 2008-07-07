@@ -1,57 +1,43 @@
 object MainForm: TMainForm
   Left = 303
-  Height = 540
+  Height = 471
   Top = 213
   Width = 828
-  HorzScrollBar.Page = 827
-  VertScrollBar.Page = 539
   ActiveControl = ImageOptionsNotebook
   Caption = 'LuiImage Demo'
-  ClientHeight = 540
+  ClientHeight = 471
   ClientWidth = 828
   OnCreate = FormCreate
+  LCLVersion = '0.9.25'
   object Label5: TLabel
-    Left = 8
+    Left = 11
     Height = 14
-    Top = 88
+    Top = 41
     Width = 50
     Caption = 'View Style'
     ParentColor = False
   end
-  object FileInfoPanel: TPanel
-    Left = 8
-    Height = 72
+  object Label15: TLabel
+    Left = 11
+    Height = 14
     Top = 8
-    Width = 494
-    ClientHeight = 72
-    ClientWidth = 494
-    TabOrder = 0
-    object FileNameEdit: TFileNameEdit
-      Left = 27
-      Height = 23
-      Top = 10
-      Width = 328
-      OnAcceptFileName = FileNameEditAcceptFileName
-      Filter = 'Image Files|*.png;*.xpm;*.bmp;*.jpeg;*.jpg|All Files|*.*'
-      ButtonWidth = 23
-      NumGlyphs = 1
-      ParentColor = False
-      TabOrder = 0
-    end
+    Width = 47
+    Caption = 'File Name'
+    ParentColor = False
   end
   object ImagePanel: TPanel
-    Left = 277
-    Height = 421
-    Top = 90
+    Left = 256
+    Height = 424
+    Top = 41
     Width = 547
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 421
+    ClientHeight = 424
     ClientWidth = 547
-    TabOrder = 1
+    TabOrder = 0
     object Image: TLuiImage
-      Left = 11
+      Left = 8
       Height = 250
-      Top = 14
+      Top = 7
       Width = 250
       Opacity = 1
     end
@@ -59,16 +45,16 @@ object MainForm: TMainForm
   object ImageOptionsNotebook: TNotebook
     Left = 8
     Height = 392
-    Top = 120
-    Width = 247
-    PageIndex = 3
-    TabOrder = 2
+    Top = 72
+    Width = 232
+    PageIndex = 0
+    TabOrder = 1
     object SizeOptionsPage: TPage
       Caption = 'Size'
-      ClientWidth = 239
+      ClientWidth = 224
       ClientHeight = 366
       object Label3: TLabel
-        Left = 38
+        Left = 44
         Height = 14
         Top = 22
         Width = 29
@@ -76,7 +62,7 @@ object MainForm: TMainForm
         ParentColor = False
       end
       object Label4: TLabel
-        Left = 30
+        Left = 41
         Height = 14
         Top = 51
         Width = 32
@@ -120,10 +106,10 @@ object MainForm: TMainForm
         Left = 6
         Height = 105
         Top = 138
-        Width = 224
+        Width = 203
         Caption = 'Scale Factor'
-        ClientHeight = 105
-        ClientWidth = 224
+        ClientHeight = 87
+        ClientWidth = 199
         TabOrder = 3
         object Label6: TLabel
           Left = 22
@@ -176,34 +162,34 @@ object MainForm: TMainForm
     end
     object BorderOptionsPage: TPage
       Caption = 'Border'
-      ClientWidth = 243
-      ClientHeight = 361
+      ClientWidth = 224
+      ClientHeight = 366
       object Label2: TLabel
-        Left = 6
-        Height = 20
-        Top = 68
-        Width = 89
+        Left = 28
+        Height = 14
+        Top = 50
+        Width = 69
         Caption = 'OutLine Width'
         ParentColor = False
       end
       object Label1: TLabel
         Left = 5
-        Height = 20
+        Height = 14
         Top = 18
-        Width = 122
+        Width = 94
         Caption = 'Round Edge Radius'
         ParentColor = False
       end
       object OutlineWidthSpinEdit: TSpinEdit
-        Left = 133
+        Left = 100
         Height = 23
-        Top = 65
+        Top = 50
         Width = 50
         OnChange = OutlineWidthSpinEditChange
         TabOrder = 0
       end
       object RoundEdgeRadiusSpinEdit: TSpinEdit
-        Left = 133
+        Left = 101
         Height = 23
         Top = 18
         Width = 49
@@ -212,47 +198,47 @@ object MainForm: TMainForm
       end
       object PaddingGroupBox: TGroupBox
         Left = 28
-        Height = 201
+        Height = 183
         Top = 115
-        Width = 185
+        Width = 145
         Caption = 'Padding'
-        ClientHeight = 201
-        ClientWidth = 185
+        ClientHeight = 165
+        ClientWidth = 141
         TabOrder = 2
         object Label10: TLabel
           Left = 24
-          Height = 20
+          Height = 14
           Top = 52
-          Width = 25
+          Width = 20
           Caption = 'Left'
           ParentColor = False
         end
         object Label9: TLabel
           Left = 22
-          Height = 20
+          Height = 14
           Top = 11
-          Width = 22
+          Width = 19
           Caption = 'Top'
           ParentColor = False
         end
         object Label8: TLabel
           Left = 21
-          Height = 20
+          Height = 14
           Top = 95
-          Width = 33
+          Width = 26
           Caption = 'Right'
           ParentColor = False
         end
         object Label11: TLabel
-          Left = 8
-          Height = 20
-          Top = 143
-          Width = 49
+          Left = 9
+          Height = 14
+          Top = 135
+          Width = 35
           Caption = 'Bottom'
           ParentColor = False
         end
         object PaddingTopSpinEdit: TSpinEdit
-          Left = 74
+          Left = 54
           Height = 23
           Top = 11
           Width = 50
@@ -260,15 +246,15 @@ object MainForm: TMainForm
           TabOrder = 0
         end
         object PaddingLeftSpinEdit: TSpinEdit
-          Left = 75
+          Left = 54
           Height = 23
-          Top = 49
+          Top = 47
           Width = 50
           OnChange = PaddingLeftSpinEditChange
           TabOrder = 1
         end
         object PaddingRightSpinEdit: TSpinEdit
-          Left = 77
+          Left = 54
           Height = 23
           Top = 89
           Width = 50
@@ -276,9 +262,9 @@ object MainForm: TMainForm
           TabOrder = 2
         end
         object PaddingBottomSpinEdit: TSpinEdit
-          Left = 78
+          Left = 54
           Height = 23
-          Top = 140
+          Top = 127
           Width = 50
           OnChange = PaddingBottomSpinEditChange
           TabOrder = 3
@@ -287,7 +273,7 @@ object MainForm: TMainForm
     end
     object EffectsPage: TPage
       Caption = 'Effects'
-      ClientWidth = 239
+      ClientWidth = 224
       ClientHeight = 366
       object Label12: TLabel
         Left = 29
@@ -356,7 +342,7 @@ object MainForm: TMainForm
     end
     object CustomPage: TPage
       Caption = 'Custom'
-      ClientWidth = 239
+      ClientWidth = 224
       ClientHeight = 366
       object ReflectionButton: TButton
         Left = 12
@@ -377,9 +363,9 @@ object MainForm: TMainForm
         TabOrder = 1
       end
       object RotateSpinEdit: TSpinEdit
-        Left = 132
+        Left = 124
         Height = 23
-        Top = 84
+        Top = 86
         Width = 50
         Increment = 5
         MaxValue = 360
@@ -389,9 +375,9 @@ object MainForm: TMainForm
     end
   end
   object ViewStyleComboBox: TComboBox
-    Left = 119
+    Left = 72
     Height = 21
-    Top = 88
+    Top = 41
     Width = 136
     AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
     ItemHeight = 13
@@ -406,7 +392,19 @@ object MainForm: TMainForm
     MaxLength = 0
     OnSelect = ViewStyleComboBoxSelect
     Style = csDropDownList
-    TabOrder = 3
+    TabOrder = 2
     Text = 'Normal'
+  end
+  object FileNameEdit: TFileNameEdit
+    Left = 64
+    Height = 23
+    Top = 8
+    Width = 328
+    OnAcceptFileName = FileNameEditAcceptFileName
+    Filter = 'Image Files|*.png;*.xpm;*.bmp;*.jpeg;*.jpg|All Files|*.*'
+    ButtonWidth = 23
+    NumGlyphs = 1
+    ParentColor = False
+    TabOrder = 3
   end
 end
