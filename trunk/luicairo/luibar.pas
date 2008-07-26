@@ -150,6 +150,8 @@ type
     FRequiresUpdate: Boolean;
     function GetCount: Integer;
     function GetItems(Index: Integer): TLuiBarCell; inline;
+  protected
+    property RequiresUpdate: Boolean read FRequiresUpdate write FRequiresUpdate;
   public
     constructor Create(Owner: TLuiBar);
     destructor Destroy; override;
@@ -158,7 +160,6 @@ type
     procedure UpdateCellBounds;
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TLuiBarCell read GetItems; default;
-    property RequiresUpdate: Boolean read FRequiresUpdate;
   end;
   
   { TLuiBar }
@@ -229,6 +230,7 @@ type
     function DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType
       ): TCairoPattern; virtual;
     function DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo; virtual;
+    procedure DoOnResize; override;
     procedure DoSelect; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
@@ -850,6 +852,13 @@ begin
   Result.Effect := gdeNormal;
   if Assigned(FOnGetImageInfo) then
     FOnGetImageInfo(Self, Cell, Result);
+end;
+
+procedure TLuiBar.DoOnResize;
+begin
+  inherited DoOnResize;
+  if FCellAlign in [caInvert, caCenter] then
+    FCells.RequiresUpdate := True;
 end;
 
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
