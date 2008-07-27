@@ -9,7 +9,7 @@ uses
 
 type
 
-  { TCustomLuiBarSample }
+  { TFolhaLuiBarSample }
 
   TFolhaLuiBarSample = class(TPage)
   private

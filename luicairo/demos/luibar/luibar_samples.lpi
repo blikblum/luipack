@@ -9,6 +9,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
     </General>
     <VersionInfo>
@@ -34,7 +35,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="18">
       <Unit0>
         <Filename Value="luibar_samples.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -96,7 +97,7 @@
       <Unit11>
         <Filename Value="samples\folhasample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="folhasample"/>
+        <UnitName Value="FolhaSample"/>
       </Unit11>
       <Unit12>
         <Filename Value="samples\globoluibarsample.pas"/>
@@ -123,6 +124,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="youtubesample"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="samples\widgetsample.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="WidgetSample"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
