@@ -21,7 +21,7 @@
     <Description Value="Miscellaneous functions and classes"/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="5">
+    <Files Count="6">
       <Item1>
         <Filename Value="domutils.pas"/>
         <UnitName Value="domutils"/>
@@ -42,6 +42,10 @@
         <Filename Value="sevenzipwrapper.pas"/>
         <UnitName Value="sevenzipwrapper"/>
       </Item5>
+      <Item6>
+        <Filename Value="virtualdataobjects.pas"/>
+        <UnitName Value="virtualdataobjects"/>
+      </Item6>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
