@@ -35,7 +35,7 @@ uses
   FolhaSample, YahooSample, UolSample, MSSDKSample, UbuntuSample,
   ConversaAfiadaSample, YouTubeSample, LgMobileLuiBarSample, xpStyleLuiBarSample,
   TerraEsportesLuiBarSample, SqliteLuiBarSample, UTorrentLuiBarSample,
-  GloboLuiBarSample, GnomeDoLuiBarSample, MediaControlLuiBarSample;
+  GloboLuiBarSample, GnomeDoLuiBarSample, MediaControlLuiBarSample, WidgetSample;
 
 { TFormMain }
 
@@ -63,6 +63,7 @@ begin
   RegisterSample('Globo', TGloboLuiBarSample.Create(Self));
   RegisterSample('GnomeDo', TGnomeDoLuiBarSample.Create(Self));
   RegisterSample('Media Control (aTunes)', TMediaControlLuiBarSample.Create(Self));
+  RegisterSample('Lui Widgets', TWidgetLuiBarSample.Create(Self));
 end;
 
 procedure TFormMain.RegisterSample(const AName: String; APage: TPage);

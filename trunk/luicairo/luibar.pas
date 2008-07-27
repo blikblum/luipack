@@ -5,8 +5,8 @@ unit LuiBar;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, CairoLCL, types, Controls, Cairo14, math,
-  Graphics, GraphType, Maps;
+  Classes, SysUtils, CairoClasses, LuiCairoControls, CairoLCL, Types, Controls, Cairo14,
+  Math, Graphics, GraphType, Maps;
 
 type
 
@@ -164,7 +164,7 @@ type
   
   { TLuiBar }
 
-  TLuiBar = class(TCustomCairoControl)
+  TLuiBar = class(TLuiContainer)
   private
     FCellAlign: TLuiBarCellAlign;
     FCellHeight: Integer;
@@ -197,7 +197,7 @@ type
     FSpacing: Integer;
     FTextAlign: TLuiBarTextAlign;
     FTextPadding: Integer;
-    function CellInPoint(const P: TPoint): Integer;
+    function CellInPos(X, Y: Integer): Integer;
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
     function GetRealCellWidth: Integer;
     function GetTextWidth(const AText: String): Double;
@@ -458,13 +458,13 @@ end;
 
 { TLuiBar }
 
-function TLuiBar.CellInPoint(const P: TPoint): Integer;
+function TLuiBar.CellInPos(X, Y: Integer): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to FCells.Count - 1 do
-    if PtInRect(FCells[i].Bounds, P) then
+    if PosInRect(FCells[i].Bounds, X, Y) then
       Exit(i);
 end;
 
@@ -937,6 +937,7 @@ begin
   end;
   if lboEmulateTab in FOptions then
     DoDrawClientArea;
+  inherited DoDraw;
   DoAfterDraw;
 end;
 
@@ -977,7 +978,7 @@ var
 begin
   if Button = mbLeft then
   begin
-    ClickedCell := CellInPoint(Point(X,Y));
+    ClickedCell := CellInPos(X,Y);
     if (ClickedCell <> -1) and (ClickedCell <> FSelectedIndex) then
     begin
       FSelectedIndex := ClickedCell;
@@ -1007,7 +1008,7 @@ var
 begin
   if lboHotTrack in FOptions then
   begin
-    NewHoverIndex := CellInPoint(Point(X, Y));
+    NewHoverIndex := CellInPos(X, Y);
     if NewHoverIndex <> FHoverIndex then
     begin
       FHoverIndex := NewHoverIndex;
@@ -1319,12 +1320,16 @@ end;
 
 procedure TLuiBarPatterns.SetBackGround(const AValue: TCairoPattern);
 begin
+  if FBackGround = AValue then
+    Exit;
   FBackGround.Free;
   FBackGround := AValue;
 end;
 
 procedure TLuiBarPatterns.SetClientArea(const AValue: TCairoPattern);
 begin
+  if FClientArea = AValue then
+    Exit;
   FClientArea.Free;
   FClientArea := AValue;
 end;
@@ -1336,6 +1341,8 @@ end;
 
 procedure TLuiBarPatterns.SetHover(const AValue: TCairoPattern);
 begin
+  if FHover = AValue then
+    Exit;
   FHover.Free;
   FHover := AValue;
 end;
@@ -1356,30 +1363,40 @@ end;
 
 procedure TLuiBarPatterns.SetNormal(const AValue: TCairoPattern);
 begin
+  if FNormal = AValue then
+    Exit;
   FNormal.Free;
   FNormal := AValue;
 end;
 
 procedure TLuiBarPatterns.SetOutLine(const AValue: TCairoPattern);
 begin
+  if FOutLine = AValue then
+    Exit;
   FOutLine.Free;
   FOutLine := AValue;
 end;
 
 procedure TLuiBarPatterns.SetSelected(const AValue: TCairoPattern);
 begin
+  if FSelected = AValue then
+    Exit;
   FSelected.Free;
   FSelected := AValue;
 end;
 
 procedure TLuiBarPatterns.SetSelectedText(const AValue: TCairoPattern);
 begin
+  if FSelectedText = AValue then
+    Exit;
   FSelectedText.Free;
   FSelectedText := AValue;
 end;
 
 procedure TLuiBarPatterns.SetText(const AValue: TCairoPattern);
 begin
+  if FText = AValue then
+    Exit;
   FText.Free;
   FText := AValue;
 end;
@@ -1427,7 +1444,8 @@ end;
 
 function TLuiBarPatterns.GetIndexed(Index: Integer): TCairoPattern;
 begin
-  PatternMapNeeded;
+  if FPatternMap = nil then
+    raise Exception.Create('Pattern Map Not Initialized');
   if not FPatternMap.GetData(Index, Result) then
     raise Exception.Create('Pattern with index ' + IntToStr(Index) + ' not found');
 end;
