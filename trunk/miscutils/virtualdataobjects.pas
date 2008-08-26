@@ -49,8 +49,10 @@ type
     procedure AttachTracker(Tracker: IObjectTracker);
     procedure BeginUpdate;
     procedure DataNeeded;
+    procedure Delete; virtual;
     procedure DetachTracker(Tracker: IObjectTracker);
     procedure EndUpdate(IgnoreUpdates: Boolean = False);
+    function IdAsString: String; inline;
     procedure NotifyTrackers(NotificationType: TNotificationType = ntUpdate;
       Data: PtrInt = 0);
     procedure Load; virtual;
@@ -68,6 +70,9 @@ type
     FObjectList: TFpList;
   protected
     function GetItems(Index: Integer): TVirtualDataObject;
+    procedure ChildNotification(Child: TVirtualDataObject;
+                     NotificationType: TNotificationType=ntUpdate; Data: PtrInt=
+                     0); override;
   public
     constructor Create(AState: TObjectState); override;
     destructor Destroy; override;
@@ -88,6 +93,12 @@ begin
   Result := TVirtualDataObject(FObjectList[Index]);
 end;
 
+procedure TVirtualDataObjectList.ChildNotification(Child: TVirtualDataObject;
+  NotificationType: TNotificationType; Data: PtrInt);
+begin
+  NotifyTrackers(ntChildUpdate, PtrInt(Child));
+end;
+
 constructor TVirtualDataObjectList.Create(AState: TObjectState);
 begin
   inherited Create(AState);
@@ -98,6 +109,7 @@ destructor TVirtualDataObjectList.Destroy;
 begin
   Clear;
   FObjectList.Destroy;
+  inherited Destroy;
 end;
 
 procedure TVirtualDataObjectList.Add(AnObject: TVirtualDataObject);
@@ -141,7 +153,6 @@ begin
   if FId = AValue then
     Exit;
   FId := AValue;
-  PropertyChanged;
 end;
 
 procedure TVirtualDataObject.SetOwner(const AValue: TVirtualDataObject);
@@ -181,7 +192,7 @@ end;
 
 procedure TVirtualDataObject.Save;
 begin
-
+  FState := osClean;
 end;
 
 procedure TVirtualDataObject.PropertyChanged;
@@ -229,6 +240,11 @@ begin
     LoadData;
 end;
 
+procedure TVirtualDataObject.Delete;
+begin
+
+end;
+
 procedure TVirtualDataObject.DetachTracker(Tracker: IObjectTracker);
 begin
   if FTrackerList = nil then
@@ -242,6 +258,11 @@ begin
     Dec(FUpdateCount);
   if (FUpdateCount = 0) and not IgnoreUpdates then
     DoUpdate;
+end;
+
+function TVirtualDataObject.IdAsString: String;
+begin
+  Result := IntToStr(FId);
 end;
 
 procedure TVirtualDataObject.NotifyTrackers(NotificationType: TNotificationType = ntUpdate;
