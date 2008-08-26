@@ -38,9 +38,12 @@ type
   TLuiBarTextAlign = (taCenter, taLeft, taRight);
   
   TLuiBarEvent = procedure (Sender: TLuiBar) of object;
+
+  TLuiBarSelectingEvent = procedure (Sender: TLuiBar; OldCell, NewCell: Integer;
+    var Allowed: Boolean) of object;
   
   TLuiBarDrawCellEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell) of object;
-  
+
   TLuiBarDrawingEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
     DrawType: TLuiBarDrawType; var Allowed: Boolean) of object;
   
@@ -133,6 +136,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    UserData: Pointer;
     property Height: Integer read GetHeight;
     property Index: Integer read FIndex write FIndex;
     property Patterns: TLuiBarPatterns read FPatterns write FPatterns;
@@ -184,6 +188,7 @@ type
     FOnDrawing: TLuiBarDrawingEvent;
     FOnGetCellPattern: TLuiBarGetCellPattern;
     FOnGetImageInfo: TLuiBarGetImageInfo;
+    FOnSelecting: TLuiBarSelectingEvent;
     FOuterOffset: Integer;
     FPatterns: TLuiBarPatterns;
     FOnCreatePattern: TLuiBarCreatePattern;
@@ -210,6 +215,7 @@ type
     procedure SetOnAfterDraw(const AValue: TLuiBarEvent);
     procedure SetOnDrawing(const AValue: TLuiBarDrawingEvent);
     procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
+    procedure SetOnSelecting(const AValue: TLuiBarSelectingEvent);
     procedure SetOuterOffset(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
@@ -232,6 +238,7 @@ type
     function DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo; virtual;
     procedure DoOnResize; override;
     procedure DoSelect; virtual;
+    function DoSelecting(OldCell, NewCell: Integer): Boolean; virtual;
     procedure DoUpdatePatterns; virtual;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
                        Y: Integer); override;
@@ -273,6 +280,7 @@ type
     property OnCreatePattern: TLuiBarCreatePattern read FOnCreatePattern write FOnCreatePattern;
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
+    property OnSelecting: TLuiBarSelectingEvent read FOnSelecting write SetOnSelecting;
   published
     property Align;
     property BorderSpacing;
@@ -335,6 +343,11 @@ var
   Cell: TLuiBarCell;
 begin
   //todo: move to TLuiBar
+  if FList.Count = 0 then
+  begin
+    FOwner.FClientBounds := FOwner.ClientRect;
+    Exit;
+  end;
   case FOwner.Position of
     poTop:
       begin
@@ -569,6 +582,12 @@ procedure TLuiBar.SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
 begin
   if FOnGetImageInfo=AValue then exit;
   FOnGetImageInfo:=AValue;
+end;
+
+procedure TLuiBar.SetOnSelecting(const AValue: TLuiBarSelectingEvent);
+begin
+  if FOnSelecting=AValue then exit;
+  FOnSelecting:=AValue;
 end;
 
 procedure TLuiBar.SetOuterOffset(const AValue: Integer);
@@ -955,6 +974,13 @@ begin
     FOnSelect(Self);
 end;
 
+function TLuiBar.DoSelecting(OldCell, NewCell: Integer): Boolean;
+begin
+  Result := True;
+  if Assigned(FOnSelecting) then
+    FOnSelecting(Self, OldCell, NewCell, Result);
+end;
+
 procedure TLuiBar.DoDrawBackground;
 begin
   with Context do
@@ -981,12 +1007,15 @@ begin
     ClickedCell := CellInPos(X,Y);
     if (ClickedCell <> -1) and (ClickedCell <> FSelectedIndex) then
     begin
-      FSelectedIndex := ClickedCell;
-      DoSelect;
-      if lboTransitorySelect in FOptions then
-        FSelectedIndex := -1
-      else
-        Redraw;
+      if DoSelecting(FSelectedIndex, ClickedCell) then
+      begin
+        FSelectedIndex := ClickedCell;
+        DoSelect;
+        if lboTransitorySelect in FOptions then
+          FSelectedIndex := -1
+        else
+          Redraw;
+      end;
     end;
   end;
   inherited MouseDown(Button, Shift, X, Y);
