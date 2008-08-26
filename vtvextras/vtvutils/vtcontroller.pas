@@ -9,7 +9,7 @@ uses
 
 type
 
-  TVTEvent = (evGetText, evFocusChanged);
+  TVTEvent = (evGetText, evFocusChanged, evInitNode);
   TVTEvents = set of TVTEvent;
   
   { TCustomVirtualTreeController }
@@ -20,14 +20,22 @@ type
     //for now connect to only one tree
     FTree: TVirtualStringTree;
     FEvents: TVTEvents;
+    //event bridges
     procedure FocusChangedEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure GetTextEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: WideString);
+    procedure InitNodeEvent(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode;
+      var InitialStates: TVirtualNodeInitStates);
+
     procedure SetNodeDataSize(const AValue: Integer);
   protected
+    //abstract event handlers
     procedure DoFocusChanged(Node: PVirtualNode; Column: TColumnIndex); virtual; abstract;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: WideString); virtual; abstract;
+    procedure DoInitNode(ParentNode, Node: PVirtualNode;
+      var InitialStates: TVirtualNodeInitStates); virtual; abstract;
+
     property Events: TVTEvents read FEvents write FEvents;
     property NodeDataSize: Integer read FNodeDataSize write SetNodeDataSize;
     property Tree: TVirtualStringTree read FTree write FTree;
@@ -54,6 +62,8 @@ begin
     FTree.OnGetText := @GetTextEvent;
   if evFocusChanged in FEvents then
     FTree.OnFocusChanged := @FocusChangedEvent;
+  if evInitNode in FEvents then
+    FTree.OnInitNode := @InitNodeEvent;
 end;
 
 procedure TCustomVirtualTreeController.Disconnect;
@@ -89,6 +99,12 @@ procedure TCustomVirtualTreeController.GetTextEvent(Sender: TBaseVirtualTree;
   var CellText: WideString);
 begin
   DoGetText(Node, Column, TextType, CellText);
+end;
+
+procedure TCustomVirtualTreeController.InitNodeEvent(Sender: TBaseVirtualTree;
+  ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+begin
+  DoInitNode(ParentNode, Node, InitialStates);
 end;
 
 procedure TCustomVirtualTreeController.SetNodeDataSize(const AValue: Integer);
