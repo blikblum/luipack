@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <CONFIG>
   <Package Version="3">
+    <PathDelim Value="\"/>
     <Name Value="vtvutils_package"/>
     <CompilerOptions>
       <Version Value="5"/>
+      <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
       <CodeGeneration>
         <Generate Value="Faster"/>
@@ -14,7 +16,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="2">
+    <Files Count="4">
       <Item1>
         <Filename Value="vtcomboeditlink.pas"/>
         <UnitName Value="vtcomboeditlink"/>
@@ -23,6 +25,14 @@
         <Filename Value="vtcontroller.pas"/>
         <UnitName Value="vtcontroller"/>
       </Item2>
+      <Item3>
+        <Filename Value="virtualnodeinterfaces.pas"/>
+        <UnitName Value="virtualnodeinterfaces"/>
+      </Item3>
+      <Item4>
+        <Filename Value="vtobjecttree.pas"/>
+        <UnitName Value="vtobjecttree"/>
+      </Item4>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
@@ -33,10 +43,11 @@
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)/"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
+      <DestinationDirectory Value="$(TestDir)\publishedpackage\"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
