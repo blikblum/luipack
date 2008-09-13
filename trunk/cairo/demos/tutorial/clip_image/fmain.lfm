@@ -1,0 +1,27 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 228
+  Top = 160
+  Width = 303
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Clip Image'
+  ClientHeight = 228
+  ClientWidth = 303
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 227
+    Width = 302
+    OnDraw = CairoPaintBoxDraw
+  end
+  object TimerClip: TTimer
+    Interval = 100
+    OnTimer = TimerClipTimer
+    left = 25
+    top = 8
+  end
+end

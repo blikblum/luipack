@@ -1,0 +1,24 @@
+object FormMain: TFormMain
+  Left = 396
+  Height = 252
+  Top = 121
+  Width = 321
+  Caption = 'Cairo Tutorial - Blind Down'
+  ClientHeight = 252
+  ClientWidth = 321
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  ParentFont = False
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 250
+    Width = 320
+    OnDraw = CairoPaintBoxDraw
+  end
+  object Timer: TTimer
+    Interval = 15
+    OnTimer = TimerTimer
+    left = 126
+    top = 27
+  end
+end

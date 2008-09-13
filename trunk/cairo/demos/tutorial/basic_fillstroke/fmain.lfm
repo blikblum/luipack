@@ -1,0 +1,19 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 306
+  Top = 160
+  Width = 341
+  BorderIcons = [biSystemMenu]
+  Caption = 'Cairo Tutorial - Basic Drawing / Fill and Stroke'
+  ClientHeight = 306
+  ClientWidth = 341
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 306
+    Width = 341
+    OnDraw = CairoPaintBoxDraw
+    Align = alClient
+  end
+end

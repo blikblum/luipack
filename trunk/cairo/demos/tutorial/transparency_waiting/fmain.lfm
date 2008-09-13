@@ -1,0 +1,26 @@
+object FormMain: TFormMain
+  Left = 610
+  Height = 132
+  Top = 405
+  Width = 208
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Waiting Demo'
+  ClientHeight = 132
+  ClientWidth = 208
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Left = 32
+    Height = 129
+    Width = 144
+    OnDraw = CairoPaintBoxDraw
+  end
+  object TimerWaiting: TTimer
+    Interval = 100
+    OnTimer = TimerWaitingTimer
+    left = 29
+    top = 52
+  end
+end

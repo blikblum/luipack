@@ -1,0 +1,28 @@
+object FormMain: TFormMain
+  Left = 413
+  Height = 303
+  Top = 310
+  Width = 402
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'Cairo Tutorial - Basic Drawing / Lines'
+  ClientHeight = 303
+  ClientWidth = 402
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object Label1: TLabel
+    Left = 33
+    Height = 14
+    Width = 337
+    Caption = 'Left mouse button mark the points. Right mouse button draw the lines'
+    ParentColor = False
+  end
+  object CairoPaintBox: TCairoPaintBox
+    Height = 284
+    Top = 16
+    Width = 400
+    OnDraw = CairoPaintBoxDraw
+    OnMouseDown = CairoPaintBoxMouseDown
+  end
+end

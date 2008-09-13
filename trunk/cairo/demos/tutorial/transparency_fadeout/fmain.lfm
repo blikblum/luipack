@@ -1,0 +1,27 @@
+object FormMain: TFormMain
+  Left = 480
+  Height = 249
+  Top = 234
+  Width = 323
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Fade Out'
+  ClientHeight = 249
+  ClientWidth = 323
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 245
+    Width = 320
+    OnDraw = CairoPaintBoxDraw
+  end
+  object TimerFadeOut: TTimer
+    Interval = 50
+    OnTimer = TimerFadeOutTimer
+    left = 23
+    top = 13
+  end
+end

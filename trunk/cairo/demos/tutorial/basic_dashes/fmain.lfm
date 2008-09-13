@@ -1,0 +1,21 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 112
+  Top = 160
+  Width = 258
+  HorzScrollBar.Page = 257
+  VertScrollBar.Page = 111
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Basic Drawing / Dashes'
+  ClientHeight = 112
+  ClientWidth = 258
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 112
+    Width = 258
+    OnDraw = CairoPaintBoxDraw
+    Align = alClient
+  end
+end

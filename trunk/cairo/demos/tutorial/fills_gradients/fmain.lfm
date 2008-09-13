@@ -1,0 +1,20 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 387
+  Top = 160
+  Width = 337
+  HorzScrollBar.Page = 336
+  VertScrollBar.Page = 386
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Fills / Gradients'
+  ClientHeight = 387
+  ClientWidth = 337
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 384
+    Width = 336
+    OnDraw = CairoPaintBoxDraw
+  end
+end

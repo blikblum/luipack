@@ -1,0 +1,19 @@
+object FormMain: TFormMain
+  Left = 437
+  Height = 255
+  Top = 290
+  Width = 422
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Soulmate'
+  ClientHeight = 255
+  ClientWidth = 422
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 250
+    Width = 420
+    OnDraw = CairoPaintBoxDraw
+  end
+end

@@ -1,0 +1,26 @@
+object FormMain: TFormMain
+  Left = 429
+  Height = 201
+  Top = 327
+  Width = 351
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Puff'
+  ClientHeight = 201
+  ClientWidth = 351
+  OnCreate = FormCreate
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 200
+    Width = 350
+    OnDraw = CairoPaintBoxDraw
+  end
+  object Timer: TTimer
+    Interval = 14
+    OnTimer = TimerTimer
+    left = 254
+    top = 60
+  end
+end

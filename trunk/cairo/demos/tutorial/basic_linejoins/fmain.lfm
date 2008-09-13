@@ -1,0 +1,21 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 274
+  Top = 160
+  Width = 295
+  HorzScrollBar.Page = 294
+  VertScrollBar.Page = 273
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Basic Drawing / Line Joins'
+  ClientHeight = 274
+  ClientWidth = 295
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 274
+    Width = 295
+    OnDraw = CairoPaintBoxDraw
+    Align = alClient
+  end
+end
