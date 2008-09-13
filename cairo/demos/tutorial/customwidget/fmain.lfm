@@ -1,0 +1,30 @@
+object FormMain: TFormMain
+  Left = 456
+  Height = 138
+  Top = 265
+  Width = 192
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Cpu Widget'
+  ClientHeight = 138
+  ClientWidth = 192
+  OnCreate = FormCreate
+  ParentFont = False
+  Position = poScreenCenter
+  ShowHint = True
+  LCLVersion = '0.9.25'
+  object TrackBar1: TTrackBar
+    Left = 120
+    Height = 112
+    Top = 8
+    Width = 41
+    Frequency = 2
+    Max = 20
+    OnChange = TrackBar1Change
+    Orientation = trVertical
+    Position = 20
+    ScalePos = trBottom
+    TickMarks = tmBoth
+    TabOrder = 0
+  end
+end

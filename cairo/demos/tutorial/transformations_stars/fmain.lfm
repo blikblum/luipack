@@ -1,0 +1,26 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 301
+  Top = 154
+  Width = 402
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Stars'
+  ClientHeight = 301
+  ClientWidth = 402
+  OnCreate = FormCreate
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 300
+    Width = 400
+    OnDraw = CairoPaintBoxDraw
+  end
+  object Timer: TTimer
+    Interval = 10
+    OnTimer = TimerTimer
+    left = 304
+    top = 16
+  end
+end

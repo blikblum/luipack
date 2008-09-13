@@ -1,0 +1,20 @@
+object FormMain: TFormMain
+  Left = 365
+  Height = 242
+  Top = 241
+  Width = 465
+  HorzScrollBar.Page = 464
+  VertScrollBar.Page = 241
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Shapes2'
+  ClientHeight = 242
+  ClientWidth = 465
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 240
+    Width = 464
+    OnDraw = CairoPaintBoxDraw
+  end
+end

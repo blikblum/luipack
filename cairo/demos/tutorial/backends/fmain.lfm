@@ -1,0 +1,52 @@
+object FormMain: TFormMain
+  Left = 397
+  Height = 163
+  Top = 354
+  Width = 408
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Backends'
+  ClientHeight = 163
+  ClientWidth = 408
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Left = 4
+    Height = 90
+    Top = 8
+    Width = 400
+    OnDraw = CairoPaintBoxDraw
+  end
+  object ButtonSaveTo: TButton
+    Left = 4
+    Height = 25
+    Top = 120
+    Width = 75
+    Caption = 'Save To'
+    OnClick = ButtonSaveToClick
+    TabOrder = 1
+  end
+  object ComboSelectBackend: TComboBox
+    AnchorSideLeft.Control = ButtonSaveTo
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ButtonSaveTo
+    AnchorSideTop.Side = asrCenter
+    Left = 82
+    Height = 21
+    Top = 122
+    Width = 167
+    BorderSpacing.Left = 3
+    ItemHeight = 13
+    ItemIndex = 0
+    Items.Strings = (
+      'PDF file'
+      'PNG image'
+      'SVG file'
+    )
+    MaxLength = -1
+    Style = csDropDownList
+    TabOrder = 2
+    Text = 'PDF file'
+  end
+end

@@ -1,0 +1,19 @@
+object FormMain: TFormMain
+  Left = 386
+  Height = 142
+  Top = 160
+  Width = 361
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Scale'
+  ClientHeight = 142
+  ClientWidth = 361
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 140
+    Width = 360
+    OnDraw = CairoPaintBoxDraw
+  end
+end

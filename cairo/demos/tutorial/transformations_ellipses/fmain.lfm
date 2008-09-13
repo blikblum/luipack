@@ -1,0 +1,20 @@
+object FormMain: TFormMain
+  Left = 404
+  Height = 303
+  Top = 207
+  Width = 335
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Cairo Tutorial - Ellipses'
+  ClientHeight = 303
+  ClientWidth = 335
+  ParentFont = False
+  Position = poScreenCenter
+  LCLVersion = '0.9.25'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 297
+    Top = 1
+    Width = 332
+    OnDraw = CairoPaintBoxDraw
+  end
+end
