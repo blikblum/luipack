@@ -35,7 +35,7 @@ var
 implementation
 
 uses
-  cairo14, InterfaceBase;
+  Cairo, InterfaceBase;
 
 const
   m_radius = 0.42;

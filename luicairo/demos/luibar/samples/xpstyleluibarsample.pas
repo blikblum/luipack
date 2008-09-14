@@ -5,7 +5,7 @@ unit xpStyleLuiBarSample;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, LuiBar, Graphics, Controls, LResources, ImgList;
+  Classes, SysUtils, ExtCtrls, LuiBar, Graphics, Controls, LResources;
 
 type
 

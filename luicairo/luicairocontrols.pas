@@ -5,7 +5,7 @@ unit LuiCairoControls;
 interface
 
 uses
-  Classes, SysUtils, CairoLCL, CairoClasses, Controls, Types, Menus, Maps, Cairo14,
+  Classes, SysUtils, CairoLCL, CairoClasses, Controls, Types, Menus, Maps, Cairo,
   LCLType, Graphics;
   
 type

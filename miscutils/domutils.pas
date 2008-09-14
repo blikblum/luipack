@@ -63,7 +63,7 @@ type
     procedure SetTitle(const AName: String);
   public
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override;
     procedure SaveToFile(const AFileName: String);
     procedure SaveToStream(Stream: TStream);
     procedure Clear;
@@ -95,7 +95,7 @@ type
     function GetBaseElement: TDOMElement;
   public
     constructor Create(AParent: THtmlTree);virtual;
-    destructor Destroy;virtual;
+    destructor Destroy; override;
     //todo: Add function Add([array of const]);
     function AddTo(ANode:TDomNode;const ATag: String): TDomNode;
     function Add(const ATag:String): TDomNode;
@@ -139,7 +139,7 @@ type
     procedure UpdateField(ADataSet:TDataSet);
   public
     constructor Create(ADataset:TDataset;AFieldName:String);
-    destructor Destroy;
+    destructor Destroy; override;
     function GetData:String;
     property FieldName: String read FFieldName write FFieldName;
     property Title: String read FTitle write FTitle;
@@ -154,7 +154,7 @@ type
     function GetCount:Integer;
   public
     constructor Create(AParent: TDBTree);
-    destructor Destroy;
+    destructor Destroy; override;
     procedure Add(AFieldName,ATitle:String;ACallback:TColumnCallback); overload;
     procedure Add(AFieldName,ATitle:String); overload;
     procedure Add(AFieldName:String;ACallback:TColumnCallback); overload;

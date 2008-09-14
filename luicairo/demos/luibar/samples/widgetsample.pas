@@ -28,7 +28,7 @@ type
 implementation
 
 uses
-  CairoUtils, CairoLCL, Cairo14;
+  CairoUtils, CairoLCL, Cairo;
   
 { TWidgetLuiBarSample }
 

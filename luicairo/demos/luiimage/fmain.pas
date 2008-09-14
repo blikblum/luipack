@@ -151,7 +151,6 @@ end;
 procedure TMainForm.DrawReflection(Sender: TLuiImage);
 var
   Gradient: TCairoLinearGradient;
-  Matrix: TCairoMatrix;
 begin
   with Image, Context do
   begin

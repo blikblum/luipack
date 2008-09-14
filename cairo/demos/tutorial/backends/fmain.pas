@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, CairoLCL,
-  CairoClasses, Cairo14, StdCtrls;
+  CairoClasses, Cairo, StdCtrls;
 
 type
 

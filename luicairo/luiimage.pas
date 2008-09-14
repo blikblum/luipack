@@ -198,7 +198,7 @@ type
 implementation
 
 uses
-  cairo14, CairoUtils
+  Cairo, CairoUtils
   {$ifdef FPGUI}
   {$else}
   , LCLIntf, LCLType
@@ -279,8 +279,7 @@ begin
   {$ifdef FPGUI}
   if (DesiredHeight <> Height) or (DesiredWidth <> Width) then
   begin
-    inherited SetWidth(DesiredWidth);
-    inherited SetHeight(DesiredHeight);
+    inherited HandleResize(DesiredWidth, DesiredHeight);
     UpdateWindowPosition;
   end;
   {$else}

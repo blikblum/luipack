@@ -27,7 +27,7 @@ var
 implementation
 
 uses
-  cairo14;
+  Cairo;
 
 { TFormMain }
 

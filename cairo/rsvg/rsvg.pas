@@ -5,7 +5,7 @@ unit rsvg;
 interface
 
 uses
-  glib2, gdk2pixbuf, Cairo14;
+  glib2, gdk2pixbuf, Cairo;
   
 const
   RSVG_LIBNAME = 'rsvg-2';

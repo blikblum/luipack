@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
-  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, CairofpGui, CairoClasses, CairoUtils, cairo14;
+  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, CairofpGui, CairoClasses, CairoUtils, Cairo;
 
 type
 

@@ -48,10 +48,6 @@ type
 
 implementation
 
-type
-  TCustomVirtualStringTreeAccess = class (TCustomVirtualStringTree)
-  end;
-
 
 { TCustomVirtualTreeController }
 

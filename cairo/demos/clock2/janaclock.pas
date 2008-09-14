@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  Math, cairo14;
+  Math, Cairo;
 
 { TJanaClock }
 

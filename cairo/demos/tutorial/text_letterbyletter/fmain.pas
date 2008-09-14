@@ -30,7 +30,7 @@ var
 implementation
 
 uses
-  cairo14;
+  Cairo;
 
 const
   TheText: array[0..6] of Char = ('Z', 'e', 't', 'C', 'o', 'd', 'e');

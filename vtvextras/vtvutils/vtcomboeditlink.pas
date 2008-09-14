@@ -63,11 +63,7 @@ begin
 end;
 
 constructor TVTComboEditLink.Create;
-var
-  AObject: TObject;
-
 begin
-  AObject := Self;
   FCombo := TComboBox.Create(nil);
   with FCombo do
   begin

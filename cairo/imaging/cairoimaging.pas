@@ -61,7 +61,7 @@ type
 implementation
 
 uses
-  cairo14;
+  Cairo;
 
 procedure MultiplyAlphaChannel(Pixel: PColor32Rec; ByteCount: PtrUInt);
 begin

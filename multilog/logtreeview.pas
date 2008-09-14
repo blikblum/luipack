@@ -5,7 +5,7 @@ unit logtreeview;
 interface
 
 uses
-  Classes, SysUtils, Comctrls, Controls,multilog, LResources;
+  Classes, SysUtils, Comctrls, Controls, MultiLog, LResources, Graphics;
 
 type
 
@@ -163,22 +163,22 @@ begin
   FImgList:=TImageList.Create(nil);
   with FImgList do
   begin
-    AddLazarusResource('info');
-    AddLazarusResource('error');
-    AddLazarusResource('warning');
-    AddLazarusResource('value');
-    AddLazarusResource('entermethod');
-    AddLazarusResource('exitmethod');
-    AddLazarusResource('whatisthis');  //conditional
-    AddLazarusResource('check');
-    AddLazarusResource('strings');
-    AddLazarusResource('callstack');
-    AddLazarusResource('object');
-    AddLazarusResource('error');
-    AddLazarusResource('image');
-    AddLazarusResource('whatisthis');   //heap
-    AddLazarusResource('whatisthis');   //memory
-    AddLazarusResource('whatisthis');   //custom data
+    AddLazarusResource('info', clDefault);
+    AddLazarusResource('error', clDefault);
+    AddLazarusResource('warning', clDefault);
+    AddLazarusResource('value', clDefault);
+    AddLazarusResource('entermethod', clDefault);
+    AddLazarusResource('exitmethod', clDefault);
+    AddLazarusResource('whatisthis', clDefault);  //conditional
+    AddLazarusResource('check', clDefault);
+    AddLazarusResource('strings', clDefault);
+    AddLazarusResource('callstack', clDefault);
+    AddLazarusResource('object', clDefault);
+    AddLazarusResource('error', clDefault);
+    AddLazarusResource('image', clDefault);
+    AddLazarusResource('whatisthis', clDefault);   //heap
+    AddLazarusResource('whatisthis', clDefault);   //memory
+    AddLazarusResource('whatisthis', clDefault);   //custom data
   end;
   Images:=FImgList;
 end;

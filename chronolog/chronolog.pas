@@ -65,7 +65,7 @@ type
     procedure SetCapacity(Value: Integer);
   public
     constructor Create;
-    destructor Destroy;
+    destructor Destroy; override;
     procedure Start;
     procedure Stop(AId:Integer);
     procedure Stop; inline;

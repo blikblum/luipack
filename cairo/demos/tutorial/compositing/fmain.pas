@@ -26,7 +26,7 @@ var
 implementation
 
 uses
-  cairo14, CairoClasses;
+  Cairo, CairoClasses;
 
 const
   oper: array[0..5] of cairo_operator_t = (

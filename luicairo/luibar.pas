@@ -5,7 +5,7 @@ unit LuiBar;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, LuiCairoControls, CairoLCL, Types, Controls, Cairo14,
+  Classes, SysUtils, CairoClasses, LuiCairoControls, CairoLCL, Types, Controls, Cairo,
   Math, Graphics, GraphType, Maps;
 
 type

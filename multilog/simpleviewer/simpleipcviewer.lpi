@@ -31,7 +31,7 @@
         <PackageName Value="multiloglaz"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="simpleipcviewer.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -41,26 +41,21 @@
         <Filename Value="fmain.pas"/>
         <ComponentName Value="frmMain"/>
         <IsPartOfProject Value="True"/>
+        <ResourceBaseClass Value="Form"/>
         <ResourceFilename Value="fmain.lrs"/>
         <UnitName Value="fmain"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="..\..\pascal\multilog\multilogproj.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="multilogproj"/>
-      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <PathDelim Value="\"/>
     <SearchPaths>
       <OtherUnitFiles Value="E:\work\pascal\sqliteds\;E:\work\packages\zarchive-0.2.1-work\zlibar\;E:\work\pascal\utils\"/>
       <SrcPath Value="$(LazarusDir)\lcl\;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)\"/>
     </SearchPaths>
     <CodeGeneration>
-      <Generate Value="Faster"/>
-      <TargetProcessor Value="3"/>
+      <TargetProcessor Value="PENTIUM3"/>
       <Optimizations>
         <VariablesInRegisters Value="True"/>
         <OptimizationLevel Value="2"/>

@@ -39,7 +39,6 @@ object FormMain: TFormMain
       ParentColor = False
       TabOrder = 0
       BookMarkOptions.OnChange = nil
-      Gutter.OnChange = nil
       Gutter.CodeFoldingWidth = 14
       Highlighter = SynPasSyn1
       Keystrokes = <      
@@ -378,7 +377,6 @@ object FormMain: TFormMain
       ParentColor = False
       TabOrder = 1
       BookMarkOptions.OnChange = nil
-      Gutter.OnChange = nil
       Gutter.CodeFoldingWidth = 14
       Highlighter = SynHTMLSyn1
       Keystrokes = <      
