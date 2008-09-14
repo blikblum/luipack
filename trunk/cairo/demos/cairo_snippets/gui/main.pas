@@ -6,7 +6,7 @@ interface
 
 uses
   LCLIntf, Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, snippets, LCLType, SynEdit, SynHighlighterPas, Buttons, LCLProc;
+  ExtCtrls, LCLType, SynEdit, SynHighlighterPas, Buttons, LCLProc;
 
 type
 
@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  cairo14, CairoLCL, InterfaceBase;
+  Cairo, CairoLCL, snippets, InterfaceBase;
 
 { TFormMain }
 
@@ -61,47 +61,44 @@ procedure TFormMain.PaintBoxMainPaint(Sender: TObject);
 var
   surface: Pcairo_surface_t;
   cr: Pcairo_t;
-  TempDC: HDC;
-  TempBitmap, OldBitmap: HBITMAP;
+  Buffer: TBitmap;
+  w, h: Integer;
 begin
-  TempDC := CreateCompatibleDC(PaintBoxMain.Canvas.Handle);
-  {$ifdef LCLQt}
-  TempBitmap := CreateBitmap(PaintBoxMain.Width, PaintBoxMain.Height, 1, 32, nil);
-  {$else}
-  TempBitmap := CreateCompatibleBitmap(PaintBoxMain.Canvas.Handle, PaintBoxMain.Width, PaintBoxMain.Height);
-  {$endif}
-  OldBitmap := SelectObject(TempDC, TempBitmap);
+  w := PaintBoxMain.Width;
+  h := PaintBoxMain.Height;
 
-  surface := CreateSurfaceFromDC(TempDC);
+  Buffer := TBitmap.Create;
+  Buffer.SetSize(w, h);
+
+  surface := CreateSurfaceFromDC(Buffer.Canvas.Handle);
   cr := cairo_create (surface);
 
   cairo_save(cr);
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_paint(cr);
   cairo_restore(cr);
-  
-  snippet_do (cr, ListSnippets.ItemIndex, PaintBoxMain.Width, PaintBoxMain.Height);
 
-  BitBlt(PaintBoxMain.Canvas.Handle, 0, 0, PaintBoxMain.Width, PaintBoxMain.Height,
-    TempDC, 0, 0, SRCCOPY);
+  snippet_do(cr, ListSnippets.ItemIndex, w, h);
 
-  cairo_destroy (cr);
-  cairo_surface_destroy (surface);
+  PaintBoxMain.Canvas.Draw(0, 0, Buffer);
 
-  SelectObject(TempDC, OldBitmap);
-  DeleteDC(TempDC);
-  DeleteObject(TempBitmap);
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+
+  Buffer.Destroy;
 end;
 
 procedure TFormMain.EraseBackground (DC: HDC );
 var
   ARect: TRect;
 begin
-  if DC=0 then exit;
+  //avoid flickering in PaintBox under win32
+  if DC = 0 then
+    Exit;
   with PaintBoxMain do
     ExcludeClipRect(Dc, Left, Top, Left + Width, Top + Height);
-  ARect:=Rect(0,0,Width,Height);
-  FillRect(DC,ARect,Brush.Handle);
+  ARect := Rect(0, 0, Width,Height);
+  FillRect(DC, ARect, Brush.Handle);
   SelectClipRGN(DC, 0);
 end;
 

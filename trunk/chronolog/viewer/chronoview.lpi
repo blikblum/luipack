@@ -65,13 +65,14 @@
         <Filename Value="dmodule.pas"/>
         <ComponentName Value="dmMain"/>
         <IsPartOfProject Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
         <ResourceFilename Value="dmodule.lrs"/>
         <UnitName Value="dmodule"/>
       </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="8"/>
     <PathDelim Value="\"/>
     <SearchPaths>
       <SrcPath Value="$(LazarusDir)\lcl\;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)\;$(ProjectDir)..\outros\cpu\lib\;E:\work\pascal\chronolog\"/>
@@ -81,7 +82,6 @@
         <IOChecks Value="True"/>
         <RangeChecks Value="True"/>
       </Checks>
-      <Generate Value="Faster"/>
     </CodeGeneration>
     <Linking>
       <Debugging>

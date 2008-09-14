@@ -37,7 +37,7 @@ unit CairoClasses;
 interface
 
 uses
-  Classes, Cairo14, ObjectAvlTree;
+  Classes, Cairo, ObjectAvlTree;
   
 type
 

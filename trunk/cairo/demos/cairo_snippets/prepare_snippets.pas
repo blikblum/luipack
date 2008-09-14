@@ -57,9 +57,9 @@ begin
   Assign(UnitFile, 'snippets.pas');
   Rewrite(UnitFile);
   //the header
-  WriteLn(UnitFile, 'unit snippets;', LineEnding);
+  WriteLn(UnitFile, 'unit Snippets;', LineEnding);
   WriteLn(UnitFile, 'interface', LineEnding);
-  WriteLn(UnitFile, 'uses', LineEnding,'  cairo14, math;',LineEnding);
+  WriteLn(UnitFile, 'uses', LineEnding,'  Cairo, Math;',LineEnding);
   WriteLn(UnitFile, 'const');
   WriteLn(UnitFile, '  snippet_count = ',SnippetList.Count, ';');
   WriteLn(UnitFile, '  snippet_name: array [0..', SnippetList.Count - 1, '] of String = (');

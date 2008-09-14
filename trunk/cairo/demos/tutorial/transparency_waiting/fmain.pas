@@ -30,7 +30,7 @@ var
 implementation
 
 uses
-  Cairo14;
+  Cairo;
 
 const
   trs: array [0..7, 0..7] of Double = (

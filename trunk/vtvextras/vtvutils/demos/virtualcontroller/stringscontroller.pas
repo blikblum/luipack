@@ -23,7 +23,7 @@ type
     FStrings: TStrings;
     procedure SetStrings(const AValue: TStrings);
   protected
-    procedure DoGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure DoGetText(Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: WideString); override;
   public
@@ -50,9 +50,8 @@ begin
   Events := [evGetText];
 end;
 
-procedure TStringsController.DoGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: WideString);
+procedure TStringsController.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: WideString);
 begin
   if not Assigned(FStrings) or (Node^.Index >= FStrings.Count) then
     Exit;

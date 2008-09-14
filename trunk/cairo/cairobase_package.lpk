@@ -5,15 +5,12 @@
     <Name Value="cairobase_package"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="api\;classes\"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -23,23 +20,19 @@
     <License Value="Modified LGPL
 "/>
     <Version Minor="1"/>
-    <Files Count="4">
+    <Files Count="3">
       <Item1>
         <Filename Value="classes\cairoclasses.pas"/>
         <UnitName Value="CairoClasses"/>
       </Item1>
       <Item2>
-        <Filename Value="api\targetunits.pas"/>
-        <UnitName Value="targetunits"/>
-      </Item2>
-      <Item3>
         <Filename Value="classes\objectavltree.pas"/>
         <UnitName Value="ObjectAvlTree"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="classes\cairoutils.pas"/>
         <UnitName Value="CairoUtils"/>
-      </Item4>
+      </Item3>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

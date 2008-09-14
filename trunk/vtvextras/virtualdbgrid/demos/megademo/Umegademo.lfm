@@ -1,0 +1,834 @@
+object MainForm: TMainForm
+  Left = 322
+  Height = 846
+  Top = 118
+  Width = 869
+  ActiveControl = NTB
+  Caption = 'VirtualDBGrid Demo (MegaDemo)'
+  ClientHeight = 846
+  ClientWidth = 869
+  Constraints.MinHeight = 540
+  Constraints.MinWidth = 680
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  OnCreate = FormCreate
+  ParentFont = False
+  LCLVersion = '0.9.25'
+  object Panel1: TPanel
+    Height = 38
+    Top = 808
+    Width = 869
+    Align = alBottom
+    BevelInner = bvRaised
+    BevelOuter = bvLowered
+    ClientHeight = 38
+    ClientWidth = 869
+    TabOrder = 0
+    object Label6: TLabel
+      Left = 8
+      Height = 14
+      Top = 12
+      Width = 96
+      Caption = 'Database navigator'
+      ParentColor = False
+    end
+    object chActiveDatabase: TCheckBox
+      Left = 371
+      Height = 19
+      Top = 8
+      Width = 103
+      Caption = 'Active database'
+      OnClick = chActiveDatabaseClick
+      TabOrder = 0
+    end
+    object DBNavigator2: TDBNavigator
+      Left = 112
+      Height = 25
+      Top = 5
+      Width = 241
+      BevelOuter = bvNone
+      ClientHeight = 25
+      ClientWidth = 241
+      DataSource = DataSource1
+      TabOrder = 1
+    end
+  end
+  object GroupBox1: TGroupBox
+    Height = 176
+    Width = 869
+    Align = alTop
+    Caption = ' VirtualDBGrid options '
+    ClientHeight = 158
+    ClientWidth = 865
+    TabOrder = 1
+    object GroupBox2: TGroupBox
+      Left = 2
+      Height = 152
+      Width = 149
+      Caption = ' Row options '
+      ClientHeight = 134
+      ClientWidth = 145
+      TabOrder = 0
+      object lbOddRowColor: TLabel
+        Cursor = crHandPoint
+        Left = 25
+        Height = 13
+        Top = 21
+        Width = 91
+        Alignment = taCenter
+        AutoSize = False
+        Caption = 'Odd row color'
+        Color = 16119285
+        ParentColor = False
+        Transparent = False
+        OnMouseDown = lbOddRowColorMouseDown
+      end
+      object lbEvenRowColor: TLabel
+        Tag = 1
+        Cursor = crHandPoint
+        Left = 25
+        Height = 13
+        Top = 37
+        Width = 91
+        Alignment = taCenter
+        AutoSize = False
+        Caption = 'Even row color'
+        Color = clBtnFace
+        ParentColor = False
+        Transparent = False
+        OnMouseDown = lbOddRowColorMouseDown
+      end
+      object chStrippedRows: TCheckBox
+        Tag = 10
+        Left = 7
+        Height = 19
+        Width = 118
+        Caption = 'Show stripped rows'
+        OnClick = SetSettings
+        TabOrder = 0
+      end
+      object chShowHorzLines: TCheckBox
+        Tag = 11
+        Left = 7
+        Height = 19
+        Top = 54
+        Width = 125
+        Caption = 'Show horizontal lines'
+        OnClick = SetSettings
+        TabOrder = 1
+      end
+      object chShowVertLines: TCheckBox
+        Tag = 12
+        Left = 7
+        Height = 19
+        Top = 73
+        Width = 114
+        Caption = 'Show vertical lines'
+        OnClick = SetSettings
+        TabOrder = 2
+      end
+      object chFullRowSelect: TCheckBox
+        Tag = 13
+        Left = 7
+        Height = 19
+        Top = 92
+        Width = 93
+        Caption = 'Full row select'
+        OnClick = SetSettings
+        TabOrder = 3
+      end
+      object chMultiSelect: TCheckBox
+        Tag = 14
+        Left = 7
+        Height = 19
+        Top = 112
+        Width = 79
+        Caption = 'Multi select'
+        OnClick = SetSettings
+        TabOrder = 4
+      end
+    end
+    object GroupBox3: TGroupBox
+      Left = 174
+      Height = 152
+      Width = 186
+      Caption = ' Row indicator '
+      ClientHeight = 134
+      ClientWidth = 182
+      TabOrder = 1
+      object Label2: TLabel
+        Left = 6
+        Height = 14
+        Top = 24
+        Width = 69
+        Caption = 'Indicator align'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 6
+        Height = 14
+        Top = 48
+        Width = 107
+        Caption = 'Indicator vertical align'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 6
+        Height = 14
+        Top = 76
+        Width = 75
+        Caption = 'Indicator image'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 6
+        Height = 13
+        Top = 98
+        Width = 97
+        AutoSize = False
+        Caption = 'Indicator bg color'
+        ParentColor = False
+      end
+      object clrIndicatorBgColor: TShape
+        Cursor = crHandPoint
+        Left = 132
+        Height = 20
+        Top = 96
+        Width = 20
+        Brush.Color = clBtnFace
+        OnMouseDown = clrIndicatorBgColorMouseDown
+      end
+      object chAutoInsertIndicator: TCheckBox
+        Tag = 20
+        Left = 11
+        Height = 19
+        Hint = 'Insert automatically indicator column, when opening dataset, if there are no columns defined'#13#10'Close & than open database (Active database) and see what happend with indicator.'
+        Width = 119
+        Caption = 'Auto insert indicator'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+      end
+      object cmbIndicatorAlign: TComboBox
+        Left = 116
+        Height = 20
+        Top = 21
+        Width = 57
+        Font.CharSet = EASTEUROPE_CHARSET
+        Font.Height = -9
+        Font.Name = 'Small Fonts'
+        ItemHeight = 12
+        Items.Strings = (
+          'left'
+          'center'
+          'right'
+        )
+        MaxLength = -1
+        OnChange = cmbIndicatorAlignChange
+        ParentFont = False
+        Style = csDropDownList
+        TabOrder = 1
+      end
+      object cmbIndicatorVAlign: TComboBox
+        Left = 116
+        Height = 20
+        Top = 48
+        Width = 57
+        Font.CharSet = EASTEUROPE_CHARSET
+        Font.Height = -9
+        Font.Name = 'Small Fonts'
+        ItemHeight = 12
+        Items.Strings = (
+          'top'
+          'middle'
+          'bottom'
+        )
+        MaxLength = -1
+        OnChange = cmbIndicatorVAlignChange
+        ParentFont = False
+        Style = csDropDownList
+        TabOrder = 2
+      end
+      object cmbIndicatorImage: TComboBox
+        Left = 116
+        Height = 20
+        Top = 73
+        Width = 63
+        Font.CharSet = EASTEUROPE_CHARSET
+        Font.Height = -9
+        Font.Name = 'Small Fonts'
+        ItemHeight = 12
+        Items.Strings = (
+          '[default]'
+          'image 1'
+          'image 2'
+          'image 3'
+        )
+        MaxLength = -1
+        OnChange = cmbIndicatorImageChange
+        ParentFont = False
+        Style = csDropDownList
+        TabOrder = 3
+      end
+    end
+    object GroupBox4: TGroupBox
+      Left = 382
+      Height = 152
+      Width = 312
+      Caption = ' Others '
+      ClientHeight = 134
+      ClientWidth = 308
+      TabOrder = 2
+      object chEditable: TCheckBox
+        Tag = 30
+        Left = 6
+        Height = 19
+        Hint = 'Allow editing values in cells and update changes to database.'#13#10'If Full row select is defined then no editing are allowed.'
+        Width = 270
+        Caption = 'Cell values editable (and post changes to database)'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+      end
+      object chAllowSorting: TCheckBox
+        Tag = 31
+        Left = 6
+        Height = 19
+        Hint = 'buildin - buildin sorting feature(slower on big database.'#13#10'custom - when there was a click on header then OnCustomSort event will be triggered to allow user sort database by their way(in some cases, this is much faster).'
+        Top = 17
+        Width = 85
+        Caption = 'Allow sorting'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+      end
+      object chSortDBFieldColumns: TCheckBox
+        Tag = 32
+        Left = 6
+        Height = 19
+        Top = 38
+        Width = 127
+        Caption = 'Sort DB field columns'
+        OnClick = SetSettings
+        TabOrder = 2
+      end
+      object chSortCalculatedColumns: TCheckBox
+        Tag = 33
+        Left = 6
+        Height = 19
+        Top = 57
+        Width = 139
+        Caption = 'Sort calculated columns'
+        OnClick = SetSettings
+        TabOrder = 3
+      end
+      object chFormatFieldValue: TCheckBox
+        Tag = 34
+        Left = 6
+        Height = 19
+        Hint = 'You can format field values(TField) when loading data from database.'#13#10'If you change this setting and VirtualDBGrid has already loaded data from databse, '#13#10'then you must reload data to accept new setting of Format field value.'#13#10'Set Active database to false & then to true.'
+        Top = 76
+        Width = 109
+        Caption = 'Format field value'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
+      end
+      object chScrollIntoView: TCheckBox
+        Tag = 35
+        Left = 6
+        Height = 19
+        Top = 95
+        Width = 129
+        Caption = 'Center scroll into view'
+        OnClick = SetSettings
+        TabOrder = 5
+      end
+      object chHourGlassCursor: TCheckBox
+        Tag = 36
+        Left = 6
+        Height = 19
+        Top = 114
+        Width = 204
+        Caption = 'Show HourGlass cursor on sort action'
+        OnClick = SetSettings
+        TabOrder = 6
+      end
+      object cmbSortingType: TComboBox
+        Left = 115
+        Height = 20
+        Top = 18
+        Width = 62
+        Font.CharSet = EASTEUROPE_CHARSET
+        Font.Height = -9
+        Font.Name = 'Small Fonts'
+        ItemHeight = 12
+        Items.Strings = (
+          'none'
+          'buildin'
+          'custom'
+        )
+        MaxLength = -1
+        OnChange = cmbSortingTypeChange
+        ParentFont = False
+        Style = csDropDownList
+        TabOrder = 7
+      end
+      object chEditDBFieldColumns: TCheckBox
+        Tag = 37
+        Left = 152
+        Height = 19
+        Top = 38
+        Width = 126
+        Caption = 'Edit DB field columns'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 8
+      end
+      object chEditCalculatedColumns: TCheckBox
+        Tag = 38
+        Left = 152
+        Height = 19
+        Top = 57
+        Width = 138
+        Caption = 'Edit calculated columns'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 9
+      end
+    end
+  end
+  object GroupBox5: TGroupBox
+    Height = 70
+    Top = 738
+    Width = 869
+    Align = alBottom
+    Caption = '  Detail of database record '
+    ClientHeight = 52
+    ClientWidth = 865
+    TabOrder = 2
+    object Label1: TLabel
+      Left = 6
+      Height = 14
+      Top = 7
+      Width = 40
+      Caption = 'Code ID'
+      ParentColor = False
+    end
+    object Label7: TLabel
+      Left = 110
+      Height = 14
+      Top = 7
+      Width = 26
+      Caption = 'Code'
+      ParentColor = False
+    end
+    object Label8: TLabel
+      Left = 369
+      Height = 14
+      Top = 7
+      Width = 12
+      Caption = 'Ts'
+      ParentColor = False
+    end
+    object Label9: TLabel
+      Left = 266
+      Height = 14
+      Top = 7
+      Width = 24
+      Caption = 'Desc'
+      ParentColor = False
+    end
+    object Label10: TLabel
+      Left = 449
+      Height = 14
+      Top = 7
+      Width = 43
+      Caption = 'XHost ID'
+      ParentColor = False
+    end
+    object Label11: TLabel
+      Left = 176
+      Height = 14
+      Top = 7
+      Width = 28
+      Caption = 'Name'
+      ParentColor = False
+    end
+    object Label12: TLabel
+      Left = 553
+      Height = 14
+      Top = 7
+      Width = 54
+      Caption = 'XHost date'
+      ParentColor = False
+    end
+    object DBEdit1: TDBEdit
+      Left = 6
+      Height = 19
+      Top = 23
+      Width = 100
+      DataField = 'CODE_ID'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 0
+    end
+    object DBEdit2: TDBEdit
+      Left = 110
+      Height = 19
+      Top = 23
+      Width = 62
+      DataField = 'CODE'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 1
+    end
+    object DBEdit3: TDBEdit
+      Left = 369
+      Height = 19
+      Top = 23
+      Width = 77
+      DataField = 'TS'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 2
+    end
+    object DBEdit4: TDBEdit
+      Left = 266
+      Height = 19
+      Top = 23
+      Width = 100
+      DataField = 'DESCRIP'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 3
+    end
+    object DBEdit5: TDBEdit
+      Left = 449
+      Height = 19
+      Top = 23
+      Width = 100
+      DataField = 'XHOST_ID'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 4
+    end
+    object DBNavigator1: TDBNavigator
+      Left = 670
+      Height = 19
+      Top = 23
+      Width = 60
+      BevelOuter = bvNone
+      ClientHeight = 19
+      ClientWidth = 60
+      DataSource = DataSource1
+      Flat = True
+      TabOrder = 5
+      VisibleButtons = [nbEdit, nbPost, nbCancel]
+    end
+    object DBEdit6: TDBEdit
+      Left = 176
+      Height = 19
+      Top = 23
+      Width = 86
+      DataField = 'NAME'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 6
+    end
+    object DBEdit7: TDBEdit
+      Left = 553
+      Height = 19
+      Top = 23
+      Width = 100
+      DataField = 'XHOST_DATE'
+      DataSource = DataSource1
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 7
+    end
+  end
+  object GroupBox6: TGroupBox
+    Height = 48
+    Top = 176
+    Width = 869
+    Align = alTop
+    ClientHeight = 30
+    ClientWidth = 865
+    TabOrder = 3
+    object Label13: TLabel
+      Left = 6
+      Height = 14
+      Top = 4
+      Width = 61
+      Caption = 'Sort column:'
+      ParentColor = False
+    end
+    object Label14: TLabel
+      Left = 176
+      Height = 14
+      Top = 3
+      Width = 69
+      Caption = 'Sort direction:'
+      ParentColor = False
+    end
+    object SetSortBtn: TSpeedButton
+      Left = 330
+      Height = 20
+      Hint = 'Apply new sort settings'
+      Top = 1
+      Width = 21
+      Color = clBtnFace
+      Flat = True
+      Glyph.Data = {
+        AE040000424DAE0400000000000036040000280000000A0000000A0000000100
+        08000000000078000000F00A0000F00A00000001000000010000000000003300
+        00006600000099000000CC000000FF0000000000330033003300660033009900
+        3300CC003300FF00330000006600330066006600660099006600CC006600FF00
+        660000009900330099006600990099009900CC009900FF0099000000CC003300
+        CC006600CC009900CC00CC00CC00FF00CC000000FF003300FF006600FF009900
+        FF00CC00FF00FF00FF0000330000333300006633000099330000CC330000FF33
+        000000333300333333006633330099333300CC333300FF333300003366003333
+        66006633660099336600CC336600FF3366000033990033339900663399009933
+        9900CC339900FF3399000033CC003333CC006633CC009933CC00CC33CC00FF33
+        CC000033FF003333FF006633FF009933FF00CC33FF00FF33FF00006600003366
+        00006666000099660000CC660000FF6600000066330033663300666633009966
+        3300CC663300FF66330000666600336666006666660099666600CC666600FF66
+        660000669900336699006666990099669900CC669900FF6699000066CC003366
+        CC006666CC009966CC00CC66CC00FF66CC000066FF003366FF006666FF009966
+        FF00CC66FF00FF66FF0000990000339900006699000099990000CC990000FF99
+        000000993300339933006699330099993300CC993300FF993300009966003399
+        66006699660099996600CC996600FF9966000099990033999900669999009999
+        9900CC999900FF9999000099CC003399CC006699CC009999CC00CC99CC00FF99
+        CC000099FF003399FF006699FF009999FF00CC99FF00FF99FF0000CC000033CC
+        000066CC000099CC0000CCCC0000FFCC000000CC330033CC330066CC330099CC
+        3300CCCC3300FFCC330000CC660033CC660066CC660099CC6600CCCC6600FFCC
+        660000CC990033CC990066CC990099CC9900CCCC9900FFCC990000CCCC0033CC
+        CC0066CCCC0099CCCC00CCCCCC00FFCCCC0000CCFF0033CCFF0066CCFF0099CC
+        FF00CCCCFF00FFCCFF0000FF000033FF000066FF000099FF0000CCFF0000FFFF
+        000000FF330033FF330066FF330099FF3300CCFF3300FFFF330000FF660033FF
+        660066FF660099FF6600CCFF6600FFFF660000FF990033FF990066FF990099FF
+        9900CCFF9900FFFF990000FFCC0033FFCC0066FFCC0099FFCC00CCFFCC00FFFF
+        CC0000FFFF0033FFFF0066FFFF0099FFFF00CCFFFF00FFFFFF00000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000D7D7D7D7D7D7
+        D7D7D7D70000D7D7D70000D7D7D7D7D70000D7D700000000D7D7D7D70000D700
+        0000000000D7D7D70000D700000000000000D7D70000D70000000000000000D7
+        0000D70000D7D700000000D70000D700D7D7D7D7000000D70000D7D7D7D7D7D7
+        D70000D70000D7D7D7D7D7D7D7D700D70000
+      }
+      NumGlyphs = 0
+      OnClick = SetSortBtnClick
+      ShowHint = True
+      ParentShowHint = False
+    end
+    object SelRecInfoBtn: TButton
+      Left = 692
+      Height = 21
+      Top = 1
+      Width = 165
+      Anchors = [akTop, akRight]
+      Caption = 'Selected records info page >>'
+      OnClick = SelRecInfoBtnClick
+      TabOrder = 0
+    end
+    object VDBGridBtn: TButton
+      Left = 548
+      Height = 21
+      Top = 1
+      Width = 137
+      Anchors = [akTop, akRight]
+      Caption = '<< VirtualDBGrid page'
+      OnClick = VDBGridBtnClick
+      TabOrder = 1
+    end
+    object cmbSortColumn: TComboBox
+      Left = 70
+      Height = 20
+      Top = 1
+      Width = 100
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ItemHeight = 12
+      MaxLength = -1
+      ParentFont = False
+      Style = csDropDownList
+      TabOrder = 2
+    end
+    object cmbSortDirection: TComboBox
+      Left = 246
+      Height = 20
+      Top = 1
+      Width = 83
+      Font.CharSet = EASTEUROPE_CHARSET
+      Font.Height = -9
+      Font.Name = 'Small Fonts'
+      ItemHeight = 12
+      Items.Strings = (
+        'Ascending'
+        'Descending'
+      )
+      MaxLength = -1
+      ParentFont = False
+      Style = csDropDownList
+      TabOrder = 3
+    end
+  end
+  object NTB: TNotebook
+    Height = 514
+    Top = 224
+    Width = 869
+    Align = alClient
+    PageIndex = 0
+    ShowTabs = False
+    TabOrder = 4
+    object Page1: TPage
+      Caption = 'DBGridPage'
+      ClientWidth = 861
+      ClientHeight = 488
+      object DBGrid: TVirtualDBGrid
+        Height = 488
+        Width = 861
+        Align = alClient
+        BorderStyle = bsSingle
+        Colors.FocusedSelectionColor = clTeal
+        Colors.FocusedSelectionBorderColor = clTeal
+        Header.AutoSizeIndex = -1
+        Header.Font.Height = -11
+        Header.Font.Name = 'MS Sans Serif'
+        Header.Font.Style = [fsBold]
+        Header.MainColumn = -1
+        Header.Options = [hoColumnResize, hoDrag, hoHotTrack, hoShowHint, hoShowSortGlyphs, hoVisible]
+        Header.Style = hsPlates
+        Images = IndicatorImages
+        TabOrder = 0
+        OnBeforeCellPaint = DBGridBeforeCellPaint
+        OnPaintText = DBGridPaintText
+        DBOptions.DataSource = DataSource1
+        DBOptions.OddRowColor = 16119285
+        DBOptions.EvenRowColor = clWindow
+        DBOptions.SortColumnBgColor = 14745599
+        OnCalculateValue = DBGridCalculateValue
+        OnFormatFieldValue = DBGridFormatFieldValue
+        OnCustomSort = DBGridCustomSort
+        OnPostChanges = DBGridPostChanges
+        OnChangeSort = DBGridChangeSort
+        Columns = <>
+        WideDefaultText = ''
+      end
+    end
+    object Page2: TPage
+      Caption = 'MemoPage'
+      ClientWidth = 861
+      ClientHeight = 483
+      object Memo1: TMemo
+        Height = 483
+        Width = 861
+        Align = alClient
+        ReadOnly = True
+        ScrollBars = ssBoth
+        TabOrder = 0
+        WordWrap = False
+      end
+    end
+  end
+  object DataSource1: TDatasource
+    DataSet = Dbf1
+    left = 272
+    top = 232
+  end
+  object IndicatorImages: TImageList
+    BkColor = clForeground
+    Height = 10
+    Width = 10
+    left = 192
+    top = 232
+    Bitmap = {
+      4C69030000000A0000000A000000000000000000000000000000000000000000
+      0000000000000000000000000000000000FF0000000000000000000000000000
+      000000000000000000000000000000000000000000FF000000FF000000000000
+      0000000000FF00000000000000000000000000000000000000FF000000FF0000
+      00FF0000000000000000000000FF000000FF0000000000000000000000FF0000
+      00FF000000FF000000FF0000000000000000000000FF000000FF000000FF0000
+      00FF000000FF000000FF000000FF000000FF0000000000000000000000FF0000
+      00FF000000FF000000FF000000FF000000FF000000FF00000000000000000000
+      0000000000FF000000FF000000FF000000FF000000FF000000FF000000000000
+      0000000000000000000000000000000000FF000000FF000000FF000000FF0000
+      0000000000000000000000000000000000000000000000000000000000FF0000
+      00FF000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000FF0000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000FF00000000000000000000000000000000000000000000
+      0000000000000000000000000000000000FF000000FF00000000000000000000
+      0000000000000000000000000000000000000000000000000000000000FF0000
+      00FF00000000000000FF000000FF000000FF000000FF000000FF000000FF0000
+      00FF000000FF000000FF000000FF000000000000000000000000000000000000
+      00000000000000000000000000FF000000FF0000000000000000000000000000
+      0000000000000000000000000000000000FF000000FF00000000000000000000
+      000000000000000000000000000000000000000000FF00000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000FF000000FF000000FF000000000000000000000000000000000000
+      000000000000000000FF000000FF000000FF000000FF000000FF000000000000
+      00000000000000000000000000FF000000FF000000FF000000FF000000FF0000
+      00FF000000FF000000000000000000000000000000FF000000FF000000FF0000
+      00FF000000FF000000FF000000FF000000000000000000000000000000FF0000
+      00FF000000FF000000FF000000FF000000FF000000FF00000000000000000000
+      000000000000000000FF000000FF000000FF000000FF000000FF000000000000
+      000000000000000000000000000000000000000000FF000000FF000000FF0000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000
+    }
+  end
+  object ColorD: TColorDialog
+    left = 232
+    top = 232
+  end
+  object Dbf1: TDbf
+    IndexDefs = <>
+    TableLevel = 4
+    left = 312
+    top = 234
+  end
+end

@@ -3,12 +3,11 @@ object Form1: TForm1
   Height = 400
   Top = 242
   Width = 400
-  HorzScrollBar.Page = 399
-  VertScrollBar.Page = 399
   Caption = 'LCL Cairo Clock Example'
   ClientHeight = 400
   ClientWidth = 400
   OnCreate = FormCreate
+  ParentFont = False
   LCLVersion = '0.9.25'
   object CairoPaintBox1: TCairoPaintBox
     Height = 400

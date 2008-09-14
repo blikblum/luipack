@@ -78,7 +78,7 @@ type
     destructor Destroy; override;
     procedure Add(AnObject: TVirtualDataObject); virtual;
     procedure Clear;
-    procedure Delete(AnObject: TVirtualDataObject); virtual;
+    procedure Delete(AnObject: TVirtualDataObject); overload; virtual;
     function Count: Integer;
     function IndexOf(AnObject: TVirtualDataObject): Integer;
     property Items[Index: Integer]: TVirtualDataObject read GetItems;

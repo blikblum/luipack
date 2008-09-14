@@ -44,7 +44,6 @@ object FormMain: TFormMain
       'PNG image'
       'SVG file'
     )
-    MaxLength = -1
     Style = csDropDownList
     TabOrder = 2
     Text = 'PDF file'

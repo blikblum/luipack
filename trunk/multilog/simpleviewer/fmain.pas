@@ -23,7 +23,7 @@ unit fmain;
 interface
 
 uses
-  Classes, multilog, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,simpleipc,
+  Classes, MultiLog, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,simpleipc,
   ComCtrls, Buttons,LCLIntf,LCLType,LCLProc, logtreeview;
 
 type

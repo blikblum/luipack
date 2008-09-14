@@ -1,5 +1,5 @@
-{ This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+{ This file was automatically created by Lazarus. do not edit!
+  This source is only used to compile and install the package.
  }
 
 unit cairobase_package; 
@@ -7,7 +7,7 @@ unit cairobase_package;
 interface
 
 uses
-  CairoClasses, TargetUnits, ObjectAvlTree, CairoUtils; 
+CairoClasses, ObjectAvlTree, CairoUtils;
 
 implementation
 

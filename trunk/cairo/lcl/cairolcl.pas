@@ -37,7 +37,7 @@ unit CairoLCL;
 interface
 
 uses
-  LCLIntf, Classes, SysUtils, LCLType, CairoClasses, Cairo14, Controls, Graphics, LMessages;
+  LCLIntf, Classes, SysUtils, LCLType, CairoClasses, Cairo, Controls, Graphics, LMessages;
 
 type
 

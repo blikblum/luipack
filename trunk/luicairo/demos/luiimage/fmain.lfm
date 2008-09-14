@@ -8,6 +8,7 @@ object MainForm: TMainForm
   ClientHeight = 471
   ClientWidth = 828
   OnCreate = FormCreate
+  ParentFont = False
   LCLVersion = '0.9.25'
   object Label5: TLabel
     Left = 11
@@ -202,8 +203,8 @@ object MainForm: TMainForm
         Top = 115
         Width = 145
         Caption = 'Padding'
-        ClientHeight = 165
-        ClientWidth = 141
+        ClientHeight = 183
+        ClientWidth = 145
         TabOrder = 2
         object Label10: TLabel
           Left = 24
@@ -325,7 +326,6 @@ object MainForm: TMainForm
         Height = 21
         Top = 93
         Width = 100
-        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
         ItemHeight = 13
         ItemIndex = 0
         Items.Strings = (
@@ -334,6 +334,7 @@ object MainForm: TMainForm
           'Force Mask Color'
           'None'
         )
+        MaxLength = -1
         OnSelect = TransparencyModeComboSelect
         Style = csDropDownList
         TabOrder = 1
@@ -379,7 +380,6 @@ object MainForm: TMainForm
     Height = 21
     Top = 41
     Width = 136
-    AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
     ItemHeight = 13
     ItemIndex = 0
     Items.Strings = (
@@ -389,7 +389,6 @@ object MainForm: TMainForm
       'Stretch'
       'Tile'
     )
-    MaxLength = 0
     OnSelect = ViewStyleComboBoxSelect
     Style = csDropDownList
     TabOrder = 2
