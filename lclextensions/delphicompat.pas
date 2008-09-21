@@ -167,6 +167,7 @@ type
   end;
 
 function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
+function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc, YSrc: Integer; Rop: DWORD): Boolean;
 
 function CF_UNICODETEXT: TClipboardFormat;
 procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
