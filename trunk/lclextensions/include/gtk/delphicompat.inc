@@ -42,6 +42,13 @@
 {$i ../generic/independentfunctions.inc}
 {$i ../generic/unicodefunctions.inc}
 
+function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc,
+  YSrc: Integer; Rop: DWORD): Boolean;
+begin
+  Result := GTKWidgetSet.StretchCopyArea(DestDC, X, Y, Width, Height, SrcDC, XSrc, YSrc, Width, Height,
+   0, XSrc, YSrc, Rop);
+end;
+
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
   //todo: There's a bug in gtk intf. Skip for now.

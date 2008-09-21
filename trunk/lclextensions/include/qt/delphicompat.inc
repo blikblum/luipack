@@ -41,6 +41,13 @@ begin
 end;
 }
 
+function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc,
+  YSrc: Integer; Rop: DWORD): Boolean;
+begin
+  Result := StretchBlt(DestDC, X, Y, Width, Height, SrcDC, XSrc, YSrc, Width,
+    Height, ROP);
+end;
+
 function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
 begin
   Result := 0;
