@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, CairoClasses,
   {$ifdef FPGUI}
-  CairofpGui, gfxbase,
+  CairofpGui, fpg_base,
   {$else}
   CairoLCL, Graphics, LCLProc, LMessages,
   {$endif}

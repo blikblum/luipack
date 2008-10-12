@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes, SysUtils,
-  gfxbase, fpgfx, gui_form, gfx_imgfmt_bmp, CairofpGui, CairoClasses, CairoUtils, Cairo;
+  fpg_base, fpg_main, fpg_form, fpg_imgfmt_bmp, CairofpGui, CairoClasses, CairoUtils, Cairo;
 
 type
 
@@ -45,6 +45,7 @@ var
   LinearGradient: TCairoLinearGradient;
   Extents: cairo_text_extents_t;
   AText: String;
+  RoundInfo: TRoundedRectInfo;
 begin
   with PaintBox, Context do
   begin
@@ -62,7 +63,10 @@ begin
     Stroke;
 
     //shine the upper
-    RoundedRectangle(Context, 2.5, 2.5, Width - 5, (Height - 4)/ 2, 10, 0);
+    FillChar(RoundInfo, SizeOf(RoundInfo), 0);
+    RoundInfo.TopLeftRadius := 10;
+    RoundInfo.TopRightRadius := 10;
+    RoundedRectangle(Context, 2.5, 2.5, Width - 5, (Height - 4)/ 2, RoundInfo);
     LinearGradient := TCairoLinearGradient.Create(0,0,0, Height /2);
     LinearGradient.AddColorStopRgba(0, 1, 1, 1, 153/255);
     LinearGradient.AddColorStopRgba(1, 1, 1, 1, (153/255)/3);

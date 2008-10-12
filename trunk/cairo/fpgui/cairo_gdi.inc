@@ -1,5 +1,5 @@
 uses
-  CairoWin32, gfx_gdi;
+  CairoWin32, fpg_gdi;
 
 type
 
