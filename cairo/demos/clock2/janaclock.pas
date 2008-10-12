@@ -31,7 +31,7 @@ interface
 uses
   Classes, SysUtils, CairoClasses,
   {$ifdef FPGUI}
-  CairofpGui, gfxbase
+  CairofpGui, fpg_base
   {$else}
   Graphics, LCLType, CairoLCL
   {$endif};

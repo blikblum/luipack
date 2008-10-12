@@ -37,7 +37,7 @@ unit CairofpGui;
 interface
 
 uses
-  Classes, SysUtils, CairoClasses, Cairo, fpgfx, gfx_widget, gfxbase;
+  Classes, SysUtils, CairoClasses, Cairo, fpg_main, fpg_widget, fpg_base;
 
 type
 

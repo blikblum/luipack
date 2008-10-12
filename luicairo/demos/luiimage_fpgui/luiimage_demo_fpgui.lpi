@@ -9,7 +9,6 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
     </General>
     <VersionInfo>
@@ -27,13 +26,10 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
         <PackageName Value="luiimage_package_fpgui"/>
       </Item1>
-      <Item2>
-        <PackageName Value="fpgui_package"/>
-      </Item2>
     </RequiredPackages>
     <Units Count="1">
       <Unit0>

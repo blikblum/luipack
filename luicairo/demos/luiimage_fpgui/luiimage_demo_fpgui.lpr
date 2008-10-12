@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, fpgfx, gui_form, gui_tab, gui_combobox, gui_label, gui_panel,
-  gui_edit, gui_button, gui_dialogs, LuiImage, gfxbase, gui_checkbox;
+  Classes, fpg_main, fpg_tab, fpg_combobox, fpg_label, fpg_panel, fpg_form,
+  fpg_edit, fpg_button, fpg_dialogs, LuiImage, fpg_base, fpg_checkbox;
 
 type
 
