@@ -82,7 +82,6 @@ begin
     clGradientActiveCaption   : Result:='clGradientActiveCaption';
     clGradientInactiveCaption : Result:='clGradientInactiveCaption';
     clForm                    : Result:='clForm';
-    clEndColors               : Result:='clEndColors';
     {
     //todo find the conflicts
     clColorDesktop            : Result:='clColorDesktop';
