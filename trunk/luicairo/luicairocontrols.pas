@@ -149,7 +149,7 @@ type
     function GetItems(Index: Integer): TLuiWidget; inline;
   public
     constructor Create(AOwner: TLuiContainer);
-    destructor Destroy;
+    destructor Destroy; override;
     procedure Add(Widget: TLuiWidget);
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TLuiWidget read GetItems; default;
