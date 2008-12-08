@@ -81,6 +81,9 @@ type
     Label14: TLabel;
     cmbSortDirection: TComboBox;
     SetSortBtn: TSpeedButton;
+    procedure DBGridBeforeCellPaint(Sender: TBaseVirtualTree;
+      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure FormCreate(Sender: TObject);
     procedure SetSettings(Sender: TObject);
     procedure chActiveDatabaseClick(Sender: TObject);
@@ -110,9 +113,6 @@ type
     procedure DBGridPaintText(Sender: TBaseVirtualTree;
       const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
-    procedure DBGridBeforeCellPaint(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      CellRect: TRect);
     procedure DBGridCalculateValue(Sender: TObject; IDText: String;
       Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal; 
       var CalculatedValue: WideString;
@@ -578,8 +578,8 @@ begin
 end;
 
 procedure TMainForm.DBGridBeforeCellPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  CellRect: TRect);
+      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
   if (Column <= NoColumn) then exit;
 
