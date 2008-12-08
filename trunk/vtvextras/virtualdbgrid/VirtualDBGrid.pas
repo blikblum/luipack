@@ -416,7 +416,8 @@ type
   protected
     procedure ValidateNodeDataSize(var Size: Integer); override;
     procedure DoFocusChange(Node: PVirtualNode; Column: TColumnIndex); override;
-    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
+    procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); override;
     procedure DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
     procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
@@ -2183,9 +2184,9 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
+procedure TCustomVirtualDBGrid.DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
-
   if (aoHighlightSortColumn in DBOptions.AdvOptions) and
      (Column > NoColumn) then
   begin
