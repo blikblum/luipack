@@ -73,7 +73,8 @@ begin
     TempRect.Top := (TempRect.Top + TempRect.Bottom - TextHeight) div 2;
   end;
   TempStr := UTF8Encode(WideString(lpString));
-  Result := DrawText(hDC,PChar(TempStr),Length(TempStr),TempRect,uFormat);
+  Result := DrawText(hDC, PChar(TempStr), GetUTF8ByteCount(TempStr, nCount),
+    TempRect, uFormat);
   //Logger.Send('Rect',TempRect);
 end;
 
