@@ -15,7 +15,7 @@ implementation
 
 procedure RegisterUnitVirtualDbGrid;
 begin
-  RegisterComponents('Virtual Treeview', [TVirtualDbGrid]);
+  RegisterComponents('Virtual Controls', [TVirtualDbGrid]);
 end;  
 
 procedure Register;
