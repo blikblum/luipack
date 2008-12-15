@@ -305,12 +305,12 @@ end;
 
 procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings);
 begin
-
+  FDataProvider.ReadSection(SectionTitle, Strings);
 end;
 
 procedure TLuiConfig.ReadSections(Strings: TStrings);
 begin
-
+  FDataProvider.ReadSections(Strings);
 end;
 
 procedure TLuiConfig.RemoveObserver(Observer: IConfigObserver);
