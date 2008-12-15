@@ -19,9 +19,11 @@ type
     FVisibleSections: TStrings;
     procedure ConfigNotification(NotificationType: TLuiConfigNotificationType;
       Data: PtrInt);
-    procedure InitColumns;
+    function GetOptions: TStringTreeOptions;
+    procedure InitHeader;
     procedure LoadTree;
     procedure SetConfig(const AValue: TLuiConfig);
+    procedure SetOptions(const AValue: TStringTreeOptions);
   protected
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
     procedure DoExpanded(Node: PVirtualNode); override;
@@ -31,12 +33,186 @@ type
       var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   published
     property Config: TLuiConfig read FConfig write SetConfig;
     property Sections: TStrings read FSections;
+    //inherited properties
+    property Action;
+    property Align;
+    property Alignment;
+    property Anchors;
+    property AnimationDuration;
+    property AutoExpandDelay;
+    property AutoScrollDelay;
+    property AutoScrollInterval;
+    property Background;
+    property BackgroundOffsetX;
+    property BackgroundOffsetY;
+    property BiDiMode;
+    property BorderSpacing;
+    property BorderStyle;
+    property BottomSpace;
+    property ButtonFillMode;
+    property ButtonStyle;
+    property BorderWidth;
+    property ChangeDelay;
+    property CheckImageKind;
+    property ClipboardFormats;
+    property Color;
+    property Colors;
+    property Constraints;
+    property DefaultNodeHeight;
+    property DefaultPasteMode;
+    property DefaultText;
+    property DragCursor;
+    property DragHeight;
+    property DragKind;
+    property DragImageKind;
+    property DragMode;
+    property DragOperations;
+    property DragType;
+    property DragWidth;
+    property DrawSelectionMode;
+    property EditDelay;
+    property Enabled;
+    property Font;
+    property Header;
+    property HintAnimation;
+    property HintMode;
+    property HotCursor;
+    property Images;
+    property IncrementalSearch;
+    property IncrementalSearchDirection;
+    property IncrementalSearchStart;
+    property IncrementalSearchTimeout;
+    property Indent;
+    property LineMode;
+    property LineStyle;
+    property Margin;
+    property NodeAlignment;
+    property NodeDataSize;
+    property ParentBiDiMode;
+    property ParentColor default False;
+    property ParentFont;
+    property ParentShowHint;
+    property PopupMenu;
+    property RootNodeCount;
+    property ScrollBarOptions;
+    property SelectionBlendFactor;
+    property SelectionCurveRadius;
+    property ShowHint;
+    property StateImages;
+    property TabOrder;
+    property TabStop default True;
+    property TextMargin;
+    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property Visible;
+    property WantTabs;
+
+    property OnAdvancedHeaderDraw;
+    property OnAfterAutoFitColumns;
+    property OnAfterCellPaint;
+    property OnAfterGetMaxColumnWidth;
+    property OnAfterItemErase;
+    property OnAfterItemPaint;
+    property OnAfterPaint;
+    property OnBeforeAutoFitColumns;
+    property OnBeforeCellPaint;
+    property OnBeforeGetMaxColumnWidth;
+    property OnBeforeItemErase;
+    property OnBeforeItemPaint;
+    property OnBeforePaint;
+    property OnCanSplitterResizeColumn;
+    property OnChange;
+    property OnChecked;
+    property OnChecking;
+    property OnClick;
+    property OnCollapsed;
+    property OnCollapsing;
+    property OnColumnClick;
+    property OnColumnDblClick;
+    property OnColumnResize;
+    property OnCompareNodes;
+    property OnContextPopup;
+    property OnCreateDataObject;
+    property OnCreateDragManager;
+    property OnCreateEditor;
+    property OnDblClick;
+    property OnDragAllowed;
+    property OnDragOver;
+    property OnDragDrop;
+    property OnEditCancelled;
+    property OnEdited;
+    property OnEditing;
+    property OnEndDock;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    property OnExpanded;
+    property OnExpanding;
+    property OnFocusChanged;
+    property OnFocusChanging;
+    property OnFreeNode;
+    property OnGetCellIsEmpty;
+    property OnGetCursor;
+    property OnGetHeaderCursor;
+    property OnGetText;
+    property OnPaintText;
+    property OnGetHelpContext;
+    property OnGetImageIndex;
+    property OnGetImageIndexEx;
+    property OnGetImageText;
+    property OnGetHint;
+    property OnGetLineStyle;
+    property OnGetNodeDataSize;
+    property OnGetPopupMenu;
+    property OnGetUserClipboardFormats;
+    property OnHeaderClick;
+    property OnHeaderDblClick;
+    property OnHeaderDragged;
+    property OnHeaderDraggedOut;
+    property OnHeaderDragging;
+    property OnHeaderDraw;
+    property OnHeaderDrawQueryElements;
+    property OnHeaderMouseDown;
+    property OnHeaderMouseMove;
+    property OnHeaderMouseUp;
+    property OnHotChange;
+    property OnIncrementalSearch;
+    //property OnInitChildren;
+    //property OnInitNode;
+    property OnKeyAction;
+    property OnKeyDown;
+    property OnKeyPress;
+    property OnKeyUp;
+    property OnLoadNode;
+    property OnMeasureItem;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnNewText;
+    property OnNodeCopied;
+    property OnNodeCopying;
+    property OnNodeMoved;
+    property OnNodeMoving;
+    property OnPaintBackground;
+    property OnRenderOLEData;
+    property OnResetNode;
+    property OnResize;
+    property OnSaveNode;
+    property OnScroll;
+    property OnShortenString;
+    property OnShowScrollbar;
+    property OnStartDock;
+    property OnStartDrag;
+    property OnStateChange;
+    property OnStructureChange;
+    property OnUpdating;
   end;
 
 implementation
@@ -60,15 +236,21 @@ begin
   end;
 end;
 
-procedure TLuiConfigTree.InitColumns;
+function TLuiConfigTree.GetOptions: TStringTreeOptions;
+begin
+  Result := TStringTreeOptions(inherited TreeOptions);
+end;
+
+procedure TLuiConfigTree.InitHeader;
 var
   Column: TVirtualTreeColumn;
 begin
-  //todo: is necessary to set the Column text?
   Column := Header.Columns.Add;
   Column.Text := 'Key';
   Column := Header.Columns.Add;
   Column.Text := 'Data';
+
+  Header.Options := Header.Options + [hoVisible, hoAutoResize, hoAutoSpring];
 end;
 
 procedure TLuiConfigTree.LoadTree;
@@ -92,6 +274,11 @@ begin
   FConfig := AValue;
   if FConfig <> nil then
     FConfig.AddObserver(Self);
+end;
+
+procedure TLuiConfigTree.SetOptions(const AValue: TStringTreeOptions);
+begin
+  TreeOptions.Assign(AValue);
 end;
 
 function TLuiConfigTree.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex
@@ -150,7 +337,6 @@ procedure TLuiConfigTree.DoInitNode(ParentNode, Node: PVirtualNode;
 var
   Data: PConfigData;
 begin
-  inherited DoInitNode(ParentNode, Node, InitStates);
   Data := GetNodeData(Node);
   if ParentNode = nil then
   begin
@@ -165,6 +351,11 @@ begin
   end;
 end;
 
+function TLuiConfigTree.GetOptionsClass: TTreeOptionsClass;
+begin
+  Result := TStringTreeOptions;
+end;
+
 constructor TLuiConfigTree.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -173,7 +364,14 @@ begin
   FItems := TStringList.Create;
   FSections := TStringList.Create;
   FVisibleSections := TStringList.Create;
-  InitColumns;
+  InitHeader;
+  with TreeOptions do
+  begin
+    AutoOptions := AutoOptions + [toAutoSpanColumns];
+    PaintOptions := PaintOptions - [toShowTreeLines];
+    SelectionOptions := SelectionOptions + [toExtendedFocus];
+    MiscOptions := MiscOptions + [toEditable];
+  end;
 end;
 
 destructor TLuiConfigTree.Destroy;
