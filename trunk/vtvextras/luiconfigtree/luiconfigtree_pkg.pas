@@ -7,12 +7,13 @@ unit luiconfigtree_pkg;
 interface
 
 uses
-LuiConfigTree, LazarusPackageIntf;
+LuiConfigTree, register_luiconfigtree, LazarusPackageIntf;
 
 implementation
 
 procedure Register; 
 begin
+  RegisterUnit('register_luiconfigtree', @register_luiconfigtree.Register); 
 end; 
 
 initialization

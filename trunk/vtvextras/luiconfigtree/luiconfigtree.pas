@@ -11,12 +11,14 @@ type
 
   { TLuiConfigTree }
 
-  TLuiConfigTree = class(TCustomVirtualStringTree)
+  TLuiConfigTree = class(TCustomVirtualStringTree, IConfigObserver)
   private
     FConfig: TLuiConfig;
     FItems: TStrings;
     FSections: TStrings;
     FVisibleSections: TStrings;
+    procedure ConfigNotification(NotificationType: TLuiConfigNotificationType;
+      Data: PtrInt);
     procedure InitColumns;
     procedure LoadTree;
     procedure SetConfig(const AValue: TLuiConfig);
@@ -47,6 +49,17 @@ type
 
 { TLuiConfigTree }
 
+procedure TLuiConfigTree.ConfigNotification(
+  NotificationType: TLuiConfigNotificationType; Data: PtrInt);
+begin
+  case NotificationType of
+    lcnOpen:
+      LoadTree;
+    lcnClose:
+      Clear;
+  end;
+end;
+
 procedure TLuiConfigTree.InitColumns;
 var
   Column: TVirtualTreeColumn;
@@ -55,7 +68,7 @@ begin
   Column := Header.Columns.Add;
   Column.Text := 'Key';
   Column := Header.Columns.Add;
-  Column.Text := 'Data'
+  Column.Text := 'Data';
 end;
 
 procedure TLuiConfigTree.LoadTree;
@@ -72,8 +85,13 @@ end;
 
 procedure TLuiConfigTree.SetConfig(const AValue: TLuiConfig);
 begin
-  if FConfig=AValue then exit;
-  FConfig:=AValue;
+  if FConfig = AValue then
+    Exit;
+  if FConfig <> nil then
+    FConfig.RemoveObserver(Self);
+  FConfig := AValue;
+  if FConfig <> nil then
+    FConfig.AddObserver(Self);
 end;
 
 function TLuiConfigTree.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex
@@ -160,6 +178,7 @@ end;
 
 destructor TLuiConfigTree.Destroy;
 begin
+  Config := nil; //necessary to remove from the config observer list
   FItems.Destroy;
   FSections.Destroy;
   FVisibleSections.Destroy;
