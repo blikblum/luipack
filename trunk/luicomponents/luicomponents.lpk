@@ -13,7 +13,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="2">
+    <Files Count="3">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -22,6 +22,11 @@
         <Filename Value="iniconfigprovider.pas"/>
         <UnitName Value="IniConfigProvider"/>
       </Item2>
+      <Item3>
+        <Filename Value="register_luicomponents.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_luicomponents"/>
+      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
@@ -31,7 +36,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)"/>
+      <UnitPath Value="$(PkgOutDir)\"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>

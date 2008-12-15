@@ -23,6 +23,8 @@ type
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); virtual; abstract;
     procedure WriteBoolean(const SectionTitle, ItemKey: String; AValue: Boolean); virtual;
     procedure WriteFloat(const SectionTitle, ItemKey: String; AValue: Double); virtual;
+    procedure Open; virtual; abstract;
+    procedure Close; virtual; abstract;
   end;
 
   TLuiConfigDataType = (ldtString, ldtInteger, ldtBoolean, ldtFloat);
@@ -91,6 +93,13 @@ type
     function Find(const Title: ShortString): TLuiConfigSection;
   end;
 
+  TLuiConfigNotificationType = (lcnOpen, lcnClose);
+
+  IConfigObserver = interface
+    procedure ConfigNotification(NotificationType: TLuiConfigNotificationType;
+      Data: PtrInt);
+  end;
+
   { TLuiConfig }
 
   TLuiConfig = class(TComponent)
@@ -98,11 +107,21 @@ type
     FActive: Boolean;
     FDataProvider: TLuiConfigProvider;
     FItemDefs: TLuiConfigItems;
+    FObserverList: TFpList;
     FSectionDefs: TLuiConfigSections;
+    procedure CheckObserverList;
+    function HasObserver: Boolean;
+    procedure InternalOpen;
+    procedure InternalClose;
+    procedure Notify(NotificationType: TLuiConfigNotificationType; Data: PtrInt);
     procedure SetActive(const AValue: Boolean);
     procedure SetDataProvider(const AValue: TLuiConfigProvider);
+  protected
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure AddObserver(Observer: IConfigObserver);
     function GetItemText(const ItemKey: String): String;
     function GetSectionText(const SectionTitle: String): String;
     function ReadInteger(const SectionTitle, ItemKey: String): Integer;
@@ -111,6 +130,7 @@ type
     function ReadFloat(const SectionTitle, ItemKey: String): Double;
     procedure ReadSection(const SectionTitle: String; Strings: TStrings);
     procedure ReadSections(Strings: TStrings);
+    procedure RemoveObserver(Observer: IConfigObserver);
     procedure WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer);
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String);
     procedure WriteBoolean(const SectionTitle, ItemKey: String; AValue: Boolean);
@@ -122,10 +142,19 @@ type
     property SectionDefs: TLuiConfigSections read FSectionDefs;
   end;
 
+//todo: use miscutils instead
+function ReplacePathMacros(const Path: String): String;
+
 implementation
 
 uses
   StrUtils;
+
+function ReplacePathMacros(const Path: String): String;
+begin
+  Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', GetAppConfigDir(False));
+  Result := AnsiReplaceText(Result, '$(EXE_PATH)', ExtractFileDir(ParamStr(0)));
+end;
 
 { TLuiConfig }
 
@@ -136,11 +165,65 @@ begin
   FDataProvider := AValue;
 end;
 
+procedure TLuiConfig.CheckObserverList;
+begin
+  if FObserverList = nil then
+    FObserverList := TFPList.Create;
+end;
+
+function TLuiConfig.HasObserver: Boolean;
+begin
+  Result := (FObserverList <> nil) and (FObserverList.Count > 0);
+end;
+
+procedure TLuiConfig.InternalOpen;
+begin
+  if FDataProvider = nil then
+    raise Exception.Create('DataProvider not set');
+  FDataProvider.Open;
+  Notify(lcnOpen, 0);
+end;
+
+procedure TLuiConfig.InternalClose;
+begin
+  if FDataProvider <> nil then
+    FDataProvider.Close;
+  Notify(lcnClose, 0);
+end;
+
+procedure TLuiConfig.Loaded;
+begin
+  inherited Loaded;
+  if FActive then
+    InternalOpen
+  else
+    InternalClose;
+end;
+
+procedure TLuiConfig.Notify(NotificationType: TLuiConfigNotificationType;
+  Data: PtrInt);
+var
+  i: Integer;
+begin
+  if not HasObserver then
+    Exit;
+  for i := 0 to FObserverList.Count - 1 do
+    IConfigObserver(FObserverList[i]).ConfigNotification(NotificationType, Data);
+end;
+
 procedure TLuiConfig.SetActive(const AValue: Boolean);
+const
+  NotifyMap: array [Boolean] of TLuiConfigNotificationType = (lcnClose, lcnOpen);
 begin
   if FActive = AValue then
     Exit;
   FActive := AValue;
+  if csLoading in ComponentState then
+    Exit;
+  if FActive then
+    InternalOpen
+  else
+    InternalClose;
 end;
 
 constructor TLuiConfig.Create(AOwner: TComponent);
@@ -148,6 +231,18 @@ begin
   inherited Create(AOwner);
   FSectionDefs := TLuiConfigSections.Create(TLuiConfigSection);
   FItemDefs := TLuiConfigItems.Create(TLuiConfigItem);
+end;
+
+destructor TLuiConfig.Destroy;
+begin
+  FObserverList.Free;
+  inherited Destroy;
+end;
+
+procedure TLuiConfig.AddObserver(Observer: IConfigObserver);
+begin
+  CheckObserverList;
+  FObserverList.Add(Observer);
 end;
 
 function TLuiConfig.GetItemText(const ItemKey: String): String;
@@ -216,6 +311,13 @@ end;
 procedure TLuiConfig.ReadSections(Strings: TStrings);
 begin
 
+end;
+
+procedure TLuiConfig.RemoveObserver(Observer: IConfigObserver);
+begin
+  if not HasObserver then
+    Exit;
+  FObserverList.Remove(Observer);
 end;
 
 procedure TLuiConfig.WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer);

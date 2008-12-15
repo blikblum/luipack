@@ -17,12 +17,12 @@ type
     FIniFile: TMemIniFile;
     procedure SetFileName(const AValue: String);
   protected
-  public
-    destructor Destroy; override;
-    procedure Close;
-    procedure Open;
+    procedure Close; override;
+    procedure Open; override;
     function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; override;
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); override;
+  public
+    destructor Destroy; override;
   published
     property FileName: string read FFileName write SetFileName;
   end;
@@ -49,11 +49,15 @@ begin
 end;
 
 procedure TIniFileProvider.Open;
+var
+  ParsedFileName: String;
 begin
+  ParsedFileName := ReplacePathMacros(FFileName);
+  DoDirSeparators(ParsedFileName);
   if FIniFile = nil then
-    FIniFile := TMemIniFile.Create(FFileName)
+    FIniFile := TMemIniFile.Create(ParsedFileName)
   else
-    FIniFile.Rename(FFileName, True);
+    FIniFile.Rename(ParsedFileName, True);
 end;
 
 function TIniFileProvider.ReadString(const SectionTitle, ItemKey: String;
