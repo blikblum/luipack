@@ -144,6 +144,8 @@ function StringsToCSV(AStrList:TStrings; Delimiter: Char = ';'):String;
 
 function ValidMail(const AMail: String): Boolean;
 
+function ReplacePathMacros(const Path: String): String;
+
 implementation
 
 uses
@@ -266,6 +268,12 @@ begin
     if PosArroba <> 0 then
       Result := posex('.', Trimmed, PosArroba) <> 0;
   end;
+end;
+
+function ReplacePathMacros(const Path: String): String;
+begin
+  Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', GetAppConfigDir(False));
+  Result := AnsiReplaceText(Result, '$(EXE_PATH)', ExtractFileDir(ParamStr(0)));
 end;
 
 {TIndexedList}
