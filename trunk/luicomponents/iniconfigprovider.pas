@@ -15,13 +15,14 @@ type
   private
     FFileName: String;
     FIniFile: TMemIniFile;
-    procedure SetFileName(const AValue: string);
+    procedure SetFileName(const AValue: String);
   protected
   public
     destructor Destroy; override;
     procedure Close;
     procedure Open;
-    function ReadString(const Section, Key, Default: String): String; override;
+    function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; override;
+    procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); override;
   published
     property FileName: string read FFileName write SetFileName;
   end;
@@ -55,10 +56,23 @@ begin
     FIniFile.Rename(FFileName, True);
 end;
 
-function TIniFileProvider.ReadString(const Section, Key, Default: String
-  ): String;
+function TIniFileProvider.ReadString(const SectionTitle, ItemKey: String;
+  out ValueExists: Boolean): String;
 begin
-  Result := FIniFile.ReadString(Section, Key, Default);
+  //the natural way of retrieving ValueExists is to call FIniFile.ValueExists,
+  //but this would have a performance impact since the section/key would be
+  //searched twice. Here we compare the Result with the passed default value.
+  //Is necessary to use a space to guarantees that the value does not exists since
+  //the item value is trimmed when read from file or when write. See WriteString.
+  Result := FIniFile.ReadString(SectionTitle, ItemKey, ' ');
+  ValueExists := Result <> ' ';
+end;
+
+procedure TIniFileProvider.WriteString(const SectionTitle, ItemKey: String;
+  AValue: String);
+begin
+  //It's necessary to trim the value to avoid storing an empty space
+  FIniFile.WriteString(SectionTitle, ItemKey, TrimRight(AValue));
 end;
 
 
