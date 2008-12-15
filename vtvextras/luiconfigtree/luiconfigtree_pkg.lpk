@@ -13,11 +13,16 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="1">
+    <Files Count="2">
       <Item1>
         <Filename Value="luiconfigtree.pas"/>
         <UnitName Value="luiconfigtree"/>
       </Item1>
+      <Item2>
+        <Filename Value="register_luiconfigtree.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_luiconfigtree"/>
+      </Item2>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
