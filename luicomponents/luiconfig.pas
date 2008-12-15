@@ -13,16 +13,16 @@ type
 
   TLuiConfigProvider = class(TComponent)
   protected
-    function ReadInteger(const Section, Key: String; Default: Integer): Integer; virtual;
-    function ReadString(const Section, Key, Default: String): String; virtual; abstract;
-    function ReadBoolean(const Section, Key: String; Default: Boolean): Boolean; virtual;
-    function ReadFloat(const Section, Key: String; Default: Double): Double; virtual;
-    procedure ReadSection(const Section: String; Strings: TStrings); virtual; abstract;
+    function ReadInteger(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Integer; virtual;
+    function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; virtual; abstract;
+    function ReadBoolean(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Boolean; virtual;
+    function ReadFloat(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Double; virtual;
+    procedure ReadSection(const SectionTitle: String; Strings: TStrings); virtual; abstract;
     procedure ReadSections(Strings: TStrings); virtual; abstract;
-    procedure WriteInteger(const Section, Key: String; AValue: Integer); virtual;
-    procedure WriteString(const Section, Key: String; AValue: String); virtual; abstract;
-    procedure WriteBoolean(const Section, Key: String; AValue: Boolean); virtual;
-    procedure WriteFloat(const Section, Key: String; AValue: Double); virtual;
+    procedure WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer); virtual;
+    procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); virtual; abstract;
+    procedure WriteBoolean(const SectionTitle, ItemKey: String; AValue: Boolean); virtual;
+    procedure WriteFloat(const SectionTitle, ItemKey: String; AValue: Double); virtual;
   end;
 
   TLuiConfigDataType = (ldtString, ldtInteger, ldtBoolean, ldtFloat);
@@ -173,27 +173,39 @@ begin
 end;
 
 function TLuiConfig.ReadInteger(const SectionTitle, ItemKey: String): Integer;
+var
+  ValueExists: Boolean;
 begin
-  Result := FDataProvider.ReadInteger(SectionTitle, ItemKey,
-    FItemDefs.GetDefaultInteger(ItemKey));
+  Result := FDataProvider.ReadInteger(SectionTitle, ItemKey, ValueExists);
+  if not ValueExists then
+    Result := FItemDefs.GetDefaultInteger(ItemKey);
 end;
 
 function TLuiConfig.ReadString(const SectionTitle, ItemKey: String): String;
+var
+  ValueExists: Boolean;
 begin
-  Result := FDataProvider.ReadString(SectionTitle, ItemKey,
-    FItemDefs.GetDefaultString(ItemKey));
+  Result := FDataProvider.ReadString(SectionTitle, ItemKey, ValueExists);
+  if not ValueExists then
+    Result := FItemDefs.GetDefaultString(ItemKey);
 end;
 
 function TLuiConfig.ReadBoolean(const SectionTitle, ItemKey: String): Boolean;
+var
+  ValueExists: Boolean;
 begin
-  Result := FDataProvider.ReadBoolean(SectionTitle, ItemKey,
-    FItemDefs.GetDefaultBoolean(ItemKey));
+  Result := FDataProvider.ReadBoolean(SectionTitle, ItemKey, ValueExists);
+  if not ValueExists then
+    Result := FItemDefs.GetDefaultBoolean(ItemKey);
 end;
 
 function TLuiConfig.ReadFloat(const SectionTitle, ItemKey: String): Double;
+var
+  ValueExists: Boolean;
 begin
-  Result := FDataProvider.ReadFloat(SectionTitle, ItemKey,
-    FItemDefs.GetDefaultFloat(ItemKey));
+  Result := FDataProvider.ReadFloat(SectionTitle, ItemKey, ValueExists);
+  if not ValueExists then
+    Result := FItemDefs.GetDefaultFloat(ItemKey);
 end;
 
 procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings);
@@ -354,37 +366,37 @@ end;
 
 { TLuiConfigProvider }
 
-function TLuiConfigProvider.ReadInteger(const Section, Key: String; Default: Integer): Integer;
+function TLuiConfigProvider.ReadInteger(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Integer;
 begin
-  Result := StrToIntDef(ReadString(Section, Key, ''), Default);
+  Result := StrToIntDef(ReadString(SectionTitle, ItemKey, ValueExists), 0);
 end;
 
-function TLuiConfigProvider.ReadBoolean(const Section, Key: String; Default: Boolean): Boolean;
+function TLuiConfigProvider.ReadBoolean(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Boolean;
 begin
-  Result := StrToBoolDef(ReadString(Section, Key, ''), Default);
+  Result := StrToBoolDef(ReadString(SectionTitle, ItemKey, ValueExists), False);
 end;
 
-function TLuiConfigProvider.ReadFloat(const Section, Key: String; Default: Double): Double;
+function TLuiConfigProvider.ReadFloat(const SectionTitle, ItemKey: String; out ValueExists: Boolean): Double;
 begin
-  Result := StrToFloatDef(ReadString(Section, Key, ''), Default);
+  Result := StrToFloatDef(ReadString(SectionTitle, ItemKey, ValueExists), 0);
 end;
 
-procedure TLuiConfigProvider.WriteInteger(const Section, Key: String;
+procedure TLuiConfigProvider.WriteInteger(const SectionTitle, ItemKey: String;
   AValue: Integer);
 begin
-  WriteString(Section, Key, IntToStr(AValue));
+  WriteString(SectionTitle, ItemKey, IntToStr(AValue));
 end;
 
-procedure TLuiConfigProvider.WriteBoolean(const Section, Key: String;
+procedure TLuiConfigProvider.WriteBoolean(const SectionTitle, ItemKey: String;
   AValue: Boolean);
 begin
-  WriteString(Section, Key, IfThen(AValue, '1', '0'));
+  WriteString(SectionTitle, ItemKey, IfThen(AValue, '1', '0'));
 end;
 
-procedure TLuiConfigProvider.WriteFloat(const Section, Key: String;
+procedure TLuiConfigProvider.WriteFloat(const SectionTitle, ItemKey: String;
   AValue: Double);
 begin
-  WriteString(Section, Key, FloatToStr(AValue));
+  WriteString(SectionTitle, ItemKey, FloatToStr(AValue));
 end;
 
 end.
