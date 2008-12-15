@@ -212,8 +212,6 @@ begin
 end;
 
 procedure TLuiConfig.SetActive(const AValue: Boolean);
-const
-  NotifyMap: array [Boolean] of TLuiConfigNotificationType = (lcnClose, lcnOpen);
 begin
   if FActive = AValue then
     Exit;
@@ -251,7 +249,7 @@ var
 begin
   Item := FItemDefs.Find(ItemKey);
   if Item <> nil then
-    Result := Item.DisplayName
+    Result := Item.DisplayText
   else
     Result := ItemKey;
 end;
