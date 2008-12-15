@@ -19,6 +19,8 @@ type
   protected
     procedure Close; override;
     procedure Open; override;
+    procedure ReadSection(const SectionTitle: String; Strings: TStrings); override;
+    procedure ReadSections(Strings: TStrings); override;
     function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; override;
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); override;
   public
@@ -58,6 +60,17 @@ begin
     FIniFile := TMemIniFile.Create(ParsedFileName)
   else
     FIniFile.Rename(ParsedFileName, True);
+end;
+
+procedure TIniFileProvider.ReadSection(const SectionTitle: String;
+  Strings: TStrings);
+begin
+  FIniFile.ReadSection(SectionTitle, Strings);
+end;
+
+procedure TIniFileProvider.ReadSections(Strings: TStrings);
+begin
+  FIniFile.ReadSections(Strings);
 end;
 
 function TIniFileProvider.ReadString(const SectionTitle, ItemKey: String;
