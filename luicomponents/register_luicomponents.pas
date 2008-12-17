@@ -13,7 +13,7 @@ implementation
 
 procedure RegisterUnitLuiConfig;
 begin
-  RegisterComponents('Misc', [TLuiConfig, TIniFileProvider]);
+  RegisterComponents('Misc', [TLuiConfig, TIniConfigProvider]);
 end;
 
 procedure Register;

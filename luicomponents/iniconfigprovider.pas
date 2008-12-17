@@ -9,12 +9,14 @@ uses
 
 type
 
-  { TIniFileProvider }
+  { TIniConfigProvider }
 
-  TIniFileProvider = class(TLuiConfigProvider)
+  TIniConfigProvider = class(TLuiConfigProvider)
   private
+    FCacheUpdates: Boolean;
     FFileName: String;
     FIniFile: TMemIniFile;
+    procedure SetCacheUpdates(const AValue: Boolean);
     procedure SetFileName(const AValue: String);
   protected
     procedure Close; override;
@@ -24,56 +26,71 @@ type
     function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; override;
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); override;
   public
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   published
-    property FileName: string read FFileName write SetFileName;
+    property CacheUpdates: Boolean read FCacheUpdates write SetCacheUpdates default True;
+    property FileName: String read FFileName write SetFileName;
   end;
 
 implementation
 
-{ TIniFileProvider }
+{ TIniConfigProvider }
 
-procedure TIniFileProvider.SetFileName(const AValue: string);
+procedure TIniConfigProvider.SetFileName(const AValue: string);
 begin
   if FFileName = AValue then exit;
   FFileName := AValue;
 end;
 
-destructor TIniFileProvider.Destroy;
+procedure TIniConfigProvider.SetCacheUpdates(const AValue: Boolean);
+begin
+  if FCacheUpdates=AValue then exit;
+  FCacheUpdates:=AValue;
+  if FIniFile <> nil then
+    FIniFile.CacheUpdates := FCacheUpdates;
+end;
+
+destructor TIniConfigProvider.Destroy;
 begin
   FIniFile.Free;
   inherited Destroy;
 end;
 
-procedure TIniFileProvider.Close;
+procedure TIniConfigProvider.Close;
 begin
+  if FCacheUpdates then
+    FIniFile.UpdateFile;
   FIniFile.Clear;
 end;
 
-procedure TIniFileProvider.Open;
+procedure TIniConfigProvider.Open;
 var
   ParsedFileName: String;
 begin
   ParsedFileName := ReplacePathMacros(FFileName);
   DoDirSeparators(ParsedFileName);
   if FIniFile = nil then
-    FIniFile := TMemIniFile.Create(ParsedFileName)
+  begin
+    FIniFile := TMemIniFile.Create(ParsedFileName);
+    FIniFile.CacheUpdates := FCacheUpdates;
+  end
   else
     FIniFile.Rename(ParsedFileName, True);
 end;
 
-procedure TIniFileProvider.ReadSection(const SectionTitle: String;
+procedure TIniConfigProvider.ReadSection(const SectionTitle: String;
   Strings: TStrings);
 begin
   FIniFile.ReadSection(SectionTitle, Strings);
 end;
 
-procedure TIniFileProvider.ReadSections(Strings: TStrings);
+procedure TIniConfigProvider.ReadSections(Strings: TStrings);
 begin
   FIniFile.ReadSections(Strings);
 end;
 
-function TIniFileProvider.ReadString(const SectionTitle, ItemKey: String;
+function TIniConfigProvider.ReadString(const SectionTitle, ItemKey: String;
   out ValueExists: Boolean): String;
 begin
   //the natural way of retrieving ValueExists is to call FIniFile.ValueExists,
@@ -85,11 +102,17 @@ begin
   ValueExists := Result <> ' ';
 end;
 
-procedure TIniFileProvider.WriteString(const SectionTitle, ItemKey: String;
+procedure TIniConfigProvider.WriteString(const SectionTitle, ItemKey: String;
   AValue: String);
 begin
   //It's necessary to trim the value to avoid storing an empty space
   FIniFile.WriteString(SectionTitle, ItemKey, TrimRight(AValue));
+end;
+
+constructor TIniConfigProvider.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FCacheUpdates := True;
 end;
 
 

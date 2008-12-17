@@ -29,46 +29,52 @@ type
 
   TLuiConfigDataType = (ldtString, ldtInteger, ldtBoolean, ldtFloat);
 
-  { TLuiConfigItem }
+  { TLuiConfigItemDef }
 
-  TLuiConfigItem = class(TCollectionItem)
+  TLuiConfigItemDef = class(TCollectionItem)
   private
     FDataType: TLuiConfigDataType;
     FDefaultValue: String;
     FDisplayText: String;
     FKey: String;
+    FSection: String;
     procedure SetDataType(const AValue: TLuiConfigDataType);
     procedure SetDefaultValue(const AValue: String);
     procedure SetDisplayText(const AValue: String);
     procedure SetKey(const AValue: String);
+    procedure SetSection(const AValue: String);
   protected
     function GetDisplayName: String; override;
+  public
+    procedure Assign(Source: TPersistent); override;
   published
     property DataType: TLuiConfigDataType read FDataType write SetDataType;
     property DefaultValue: String read FDefaultValue write SetDefaultValue;
     property DisplayText: String read FDisplayText write SetDisplayText;
     property Key: String read FKey write SetKey;
+    property Section: String read FSection write SetSection;
   end;
 
-  { TLuiConfigItems }
+  { TLuiConfigItemDefs }
 
-  TLuiConfigItems = class(TCollection)
+  TLuiConfigItemDefs = class(TCollection)
   private
-    FList: TFPHashList;
+    FHashList: TFPHashList;
+    FValidHashList: Boolean;
+    procedure BuildHashList;
   public
-    constructor Create(AItemClass: TCollectionItemClass);
     destructor Destroy; override;
-    function Add: TLuiConfigItem;
-    function Find(const Key: String): TLuiConfigItem;
+    function Add: TLuiConfigItemDef;
+    function Find(const Key: String): TLuiConfigItemDef;
     function GetDefaultString(const Key: String): String;
     function GetDefaultInteger(const Key: String): Integer;
     function GetDefaultBoolean(const Key: String): Boolean;
     function GetDefaultFloat(const Key: String): Double;
   end;
 
-  { TLuiConfigSection }
+  { TLuiConfigSectionDef }
 
-  TLuiConfigSection = class(TCollectionItem)
+  TLuiConfigSectionDef = class(TCollectionItem)
   private
     FDisplayText: String;
     FTitle: String;
@@ -76,14 +82,16 @@ type
     procedure SetTitle(const AValue: String);
   protected
     function GetDisplayName: String; override;
+  public
+    procedure Assign(Source: TPersistent); override;
   published
     property DisplayText: String read FDisplayText write SetDisplayTitle;
     property Title: String read FTitle write SetTitle;
   end;
 
-  { TLuiConfigSections }
+  { TLuiConfigSectionDefs }
 
-  TLuiConfigSections = class(TCollection)
+  TLuiConfigSectionDefs = class(TCollection)
   private
     FHashList: TFPHashList;
     FValidHashList: Boolean;
@@ -93,13 +101,13 @@ type
       Action: TCollectionNotification); override;
   public
     destructor Destroy; override;
-    function Add: TLuiConfigSection;
-    function Find(const Title: String): TLuiConfigSection;
+    function Add: TLuiConfigSectionDef;
+    function Find(const Title: String): TLuiConfigSectionDef;
   end;
 
   TLuiConfigNotificationType = (lcnOpen, lcnClose);
 
-  IConfigObserver = interface
+  ILuiConfigObserver = interface
     procedure ConfigNotification(NotificationType: TLuiConfigNotificationType;
       Data: PtrInt);
   end;
@@ -110,9 +118,9 @@ type
   private
     FActive: Boolean;
     FDataProvider: TLuiConfigProvider;
-    FItemDefs: TLuiConfigItems;
+    FItemDefs: TLuiConfigItemDefs;
     FObserverList: TFpList;
-    FSectionDefs: TLuiConfigSections;
+    FSectionDefs: TLuiConfigSectionDefs;
     procedure CheckObserverList;
     function HasObserver: Boolean;
     procedure InternalOpen;
@@ -120,12 +128,15 @@ type
     procedure Notify(NotificationType: TLuiConfigNotificationType; Data: PtrInt);
     procedure SetActive(const AValue: Boolean);
     procedure SetDataProvider(const AValue: TLuiConfigProvider);
+    procedure SetItemDefs(const AValue: TLuiConfigItemDefs);
+    procedure SetSectionDefs(const AValue: TLuiConfigSectionDefs);
   protected
     procedure Loaded; override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AddObserver(Observer: IConfigObserver);
+    procedure AddObserver(Observer: ILuiConfigObserver);
     function GetItemText(const ItemKey: String): String;
     function GetSectionText(const SectionTitle: String): String;
     function ReadInteger(const SectionTitle, ItemKey: String): Integer;
@@ -134,7 +145,7 @@ type
     function ReadFloat(const SectionTitle, ItemKey: String): Double;
     procedure ReadSection(const SectionTitle: String; Strings: TStrings);
     procedure ReadSections(Strings: TStrings);
-    procedure RemoveObserver(Observer: IConfigObserver);
+    procedure RemoveObserver(Observer: ILuiConfigObserver);
     procedure WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer);
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String);
     procedure WriteBoolean(const SectionTitle, ItemKey: String; AValue: Boolean);
@@ -142,8 +153,8 @@ type
   published
     property Active: Boolean read FActive write SetActive;
     property DataProvider: TLuiConfigProvider read FDataProvider write SetDataProvider;
-    property ItemDefs: TLuiConfigItems read FItemDefs;
-    property SectionDefs: TLuiConfigSections read FSectionDefs;
+    property ItemDefs: TLuiConfigItemDefs read FItemDefs write SetItemDefs;
+    property SectionDefs: TLuiConfigSectionDefs read FSectionDefs write SetSectionDefs;
   end;
 
 //todo: use miscutils instead
@@ -167,6 +178,18 @@ begin
   if FDataProvider = AValue then
     Exit;
   FDataProvider := AValue;
+  if FDataProvider <> nil then
+    FDataProvider.FreeNotification(Self);
+end;
+
+procedure TLuiConfig.SetItemDefs(const AValue: TLuiConfigItemDefs);
+begin
+  FItemDefs.Assign(AValue);
+end;
+
+procedure TLuiConfig.SetSectionDefs(const AValue: TLuiConfigSectionDefs);
+begin
+  FSectionDefs.Assign(AValue);
 end;
 
 procedure TLuiConfig.CheckObserverList;
@@ -199,9 +222,17 @@ procedure TLuiConfig.Loaded;
 begin
   inherited Loaded;
   if FActive then
-    InternalOpen
-  else
-    InternalClose;
+    InternalOpen;
+end;
+
+procedure TLuiConfig.Notification(AComponent: TComponent; Operation: TOperation
+  );
+begin
+  if (AComponent = FDataProvider) and (Operation = opRemove) then
+  begin
+    FDataProvider.RemoveFreeNotification(Self);
+    FDataProvider := nil;
+  end;
 end;
 
 procedure TLuiConfig.Notify(NotificationType: TLuiConfigNotificationType;
@@ -212,7 +243,7 @@ begin
   if not HasObserver then
     Exit;
   for i := 0 to FObserverList.Count - 1 do
-    IConfigObserver(FObserverList[i]).ConfigNotification(NotificationType, Data);
+    ILuiConfigObserver(FObserverList[i]).ConfigNotification(NotificationType, Data);
 end;
 
 procedure TLuiConfig.SetActive(const AValue: Boolean);
@@ -231,17 +262,18 @@ end;
 constructor TLuiConfig.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FSectionDefs := TLuiConfigSections.Create(TLuiConfigSection);
-  FItemDefs := TLuiConfigItems.Create(TLuiConfigItem);
+  FSectionDefs := TLuiConfigSectionDefs.Create(TLuiConfigSectionDef);
+  FItemDefs := TLuiConfigItemDefs.Create(TLuiConfigItemDef);
 end;
 
 destructor TLuiConfig.Destroy;
 begin
+  InternalClose;
   FObserverList.Free;
   inherited Destroy;
 end;
 
-procedure TLuiConfig.AddObserver(Observer: IConfigObserver);
+procedure TLuiConfig.AddObserver(Observer: ILuiConfigObserver);
 begin
   CheckObserverList;
   FObserverList.Add(Observer);
@@ -249,7 +281,7 @@ end;
 
 function TLuiConfig.GetItemText(const ItemKey: String): String;
 var
-  Item: TLuiConfigItem;
+  Item: TLuiConfigItemDef;
 begin
   Item := FItemDefs.Find(ItemKey);
   if Item <> nil then
@@ -260,7 +292,7 @@ end;
 
 function TLuiConfig.GetSectionText(const SectionTitle: String): String;
 var
-  Section: TLuiConfigSection;
+  Section: TLuiConfigSectionDef;
 begin
   Section := FSectionDefs.Find(SectionTitle);
   if Section <> nil then
@@ -306,8 +338,20 @@ begin
 end;
 
 procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings);
+var
+  i: Integer;
+  Item: TLuiConfigItemDef;
 begin
   FDataProvider.ReadSection(SectionTitle, Strings);
+  //todo: make this behavior optional
+  //Add the items that exists in ItemDefs but not in the provider
+  for i := 0 to FItemDefs.Count - 1 do
+  begin
+    Item := TLuiConfigItemDef(FItemDefs.Items[i]);
+    if ((Item.Section = '') or (Item.Section = SectionTitle)) and
+      (Strings.IndexOf(Item.Key) = -1) then
+      Strings.Add(Item.Key);
+  end;
 end;
 
 procedure TLuiConfig.ReadSections(Strings: TStrings);
@@ -315,7 +359,7 @@ begin
   FDataProvider.ReadSections(Strings);
 end;
 
-procedure TLuiConfig.RemoveObserver(Observer: IConfigObserver);
+procedure TLuiConfig.RemoveObserver(Observer: ILuiConfigObserver);
 begin
   if not HasObserver then
     Exit;
@@ -342,119 +386,171 @@ begin
   FDataProvider.WriteFloat(SectionTitle, ItemKey, AValue);
 end;
 
-{ TLuiConfigItem }
+{ TLuiConfigItemDef }
 
-procedure TLuiConfigItem.SetKey(const AValue: String);
+procedure TLuiConfigItemDef.SetKey(const AValue: String);
 begin
   if FKey=AValue then exit;
   FKey:=AValue;
 end;
 
-function TLuiConfigItem.GetDisplayName: String;
+procedure TLuiConfigItemDef.SetSection(const AValue: String);
+begin
+  if FSection=AValue then exit;
+  FSection:=AValue;
+end;
+
+function TLuiConfigItemDef.GetDisplayName: String;
 begin
   Result := FDisplayText;
 end;
 
-procedure TLuiConfigItem.SetDataType(const AValue: TLuiConfigDataType);
+procedure TLuiConfigItemDef.Assign(Source: TPersistent);
+begin
+  if Source is TLuiConfigItemDef then
+  begin
+    Key := TLuiConfigItemDef(Source).Key;
+    DisplayText := TLuiConfigItemDef(Source).DisplayText;
+    DefaultValue := TLuiConfigItemDef(Source).DefaultValue;
+    DataType := TLuiConfigItemDef(Source).DataType;
+    Section := TLuiConfigItemDef(Source).Section;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+procedure TLuiConfigItemDef.SetDataType(const AValue: TLuiConfigDataType);
 begin
   if FDataType=AValue then exit;
   FDataType:=AValue;
 end;
 
-procedure TLuiConfigItem.SetDefaultValue(const AValue: String);
+procedure TLuiConfigItemDef.SetDefaultValue(const AValue: String);
 begin
   if FDefaultValue=AValue then exit;
   FDefaultValue:=AValue;
 end;
 
-procedure TLuiConfigItem.SetDisplayText(const AValue: String);
+procedure TLuiConfigItemDef.SetDisplayText(const AValue: String);
 begin
   if FDisplayText=AValue then exit;
   FDisplayText:=AValue;
 end;
 
-{ TLuiConfigSections }
+{ TLuiConfigSectionDefs }
 
-procedure TLuiConfigSections.BuildHashList;
+procedure TLuiConfigSectionDefs.BuildHashList;
+var
+  i: Integer;
+  Section: TLuiConfigSectionDef;
 begin
   if FHashList = nil then
     FHashList := TFPHashList.Create
   else
     FHashList.Clear;
-  //todo:
+  for i := 0 to Count - 1 do
+  begin
+    Section := TLuiConfigSectionDef(Items[i]);
+    FHashList.Add(Section.Title, Section);
+  end;
+  FValidHashList := True;
 end;
 
-procedure TLuiConfigSections.Notify(Item: TCollectionItem;
+procedure TLuiConfigSectionDefs.Notify(Item: TCollectionItem;
   Action: TCollectionNotification);
 begin
   FValidHashList := False;
 end;
 
-destructor TLuiConfigSections.Destroy;
+destructor TLuiConfigSectionDefs.Destroy;
 begin
   FHashList.Free;
   inherited Destroy;
 end;
 
-function TLuiConfigSections.Add: TLuiConfigSection;
+function TLuiConfigSectionDefs.Add: TLuiConfigSectionDef;
 begin
-  Result := TLuiConfigSection(inherited Add);
+  Result := TLuiConfigSectionDef(inherited Add);
 end;
 
-function TLuiConfigSections.Find(const Title: String): TLuiConfigSection;
+function TLuiConfigSectionDefs.Find(const Title: String): TLuiConfigSectionDef;
 begin
   if not FValidHashList then
     BuildHashList;
-  Result := TLuiConfigSection(FHashList.Find(Title));
+  Result := TLuiConfigSectionDef(FHashList.Find(Title));
 end;
 
-{ TLuiConfigSection }
+{ TLuiConfigSectionDef }
 
-procedure TLuiConfigSection.SetDisplayTitle(const AValue: String);
+procedure TLuiConfigSectionDef.SetDisplayTitle(const AValue: String);
 begin
   if FDisplayText=AValue then exit;
   FDisplayText:=AValue;
 end;
 
-procedure TLuiConfigSection.SetTitle(const AValue: String);
+procedure TLuiConfigSectionDef.SetTitle(const AValue: String);
 begin
   if FTitle=AValue then exit;
   FTitle:=AValue;
 end;
 
-function TLuiConfigSection.GetDisplayName: String;
+function TLuiConfigSectionDef.GetDisplayName: String;
 begin
   Result := FDisplayText;
 end;
 
-{ TLuiConfigItems }
-
-constructor TLuiConfigItems.Create(AItemClass: TCollectionItemClass);
+procedure TLuiConfigSectionDef.Assign(Source: TPersistent);
 begin
-  inherited Create(AItemClass);
-  FList := TFPHashList.Create;
+  if Source is TLuiConfigSectionDef then
+  begin
+    DisplayText := TLuiConfigSectionDef(Source).DisplayText;
+    Title := TLuiConfigSectionDef(Source).Title;
+  end
+  else
+    inherited Assign(Source);
 end;
 
-destructor TLuiConfigItems.Destroy;
+{ TLuiConfigItemDefs }
+
+procedure TLuiConfigItemDefs.BuildHashList;
+var
+  i: Integer;
+  Item: TLuiConfigItemDef;
 begin
-  FList.Destroy;
+  if FHashList = nil then
+    FHashList := TFPHashList.Create
+  else
+    FHashList.Clear;
+  for i := 0 to Count - 1 do
+  begin
+    Item := TLuiConfigItemDef(Items[i]);
+    FHashList.Add(Item.Key, Item);
+  end;
+  FValidHashList := True;
+end;
+
+destructor TLuiConfigItemDefs.Destroy;
+begin
+  FHashList.Free;
   inherited Destroy;
 end;
 
-function TLuiConfigItems.Add: TLuiConfigItem;
+function TLuiConfigItemDefs.Add: TLuiConfigItemDef;
 begin
   //protect the case the user try to create a item twice
-  Result := TLuiConfigItem(inherited Add);
+  Result := TLuiConfigItemDef(inherited Add);
 end;
 
-function TLuiConfigItems.Find(const Key: String): TLuiConfigItem;
+function TLuiConfigItemDefs.Find(const Key: String): TLuiConfigItemDef;
 begin
-  Result := TLuiConfigItem(FList.Find(Key));
+  if not FValidHashList then
+    BuildHashList;
+  Result := TLuiConfigItemDef(FHashList.Find(Key));
 end;
 
-function TLuiConfigItems.GetDefaultString(const Key: String): String;
+function TLuiConfigItemDefs.GetDefaultString(const Key: String): String;
 var
-  Item: TLuiConfigItem;
+  Item: TLuiConfigItemDef;
 begin
   Item := Find(Key);
   if Item <> nil then
@@ -463,17 +559,17 @@ begin
     Result := '';
 end;
 
-function TLuiConfigItems.GetDefaultInteger(const Key: String): Integer;
+function TLuiConfigItemDefs.GetDefaultInteger(const Key: String): Integer;
 begin
   Result := StrToIntDef(GetDefaultString(Key), 0);
 end;
 
-function TLuiConfigItems.GetDefaultBoolean(const Key: String): Boolean;
+function TLuiConfigItemDefs.GetDefaultBoolean(const Key: String): Boolean;
 begin
   Result := StrToBoolDef(GetDefaultString(Key), False);
 end;
 
-function TLuiConfigItems.GetDefaultFloat(const Key: String): Double;
+function TLuiConfigItemDefs.GetDefaultFloat(const Key: String): Double;
 begin
   Result := StrToFloatDef(GetDefaultString(Key), 0);
 end;
