@@ -5,7 +5,12 @@ unit LuiConfigTree;
 interface
 
 uses
-  Classes, SysUtils, LuiConfig, VirtualTrees;
+  Classes, SysUtils, LMessages, LuiConfig, VirtualTrees, Graphics;
+
+const
+  // Idea borrowed from the advanced demo
+  // Helper message to decouple node change handling from edit handling.
+  WM_STARTEDITING = LM_USER + 778;
 
 type
 
@@ -24,15 +29,23 @@ type
     procedure LoadTree;
     procedure SetConfig(const AValue: TLuiConfig);
     procedure SetOptions(const AValue: TStringTreeOptions);
+    procedure WMStartEditing(var Message: TLMessage); message WM_STARTEDITING;
   protected
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
+    procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex;
+                      var Allowed: Boolean); override;
+    procedure DoChange(Node: PVirtualNode); override;
     procedure DoExpanded(Node: PVirtualNode); override;
+    function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn,
+                      NewColumn: TColumnIndex): Boolean; override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: WideString); override;
     procedure DoInitChildren(Node: PVirtualNode;
       var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    procedure DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
+                     Column: TColumnIndex; TextType: TVSTTextType); override;
     function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -147,7 +160,7 @@ type
     property OnDragDrop;
     property OnEditCancelled;
     property OnEdited;
-    property OnEditing;
+    //property OnEditing;
     property OnEndDock;
     property OnEndDrag;
     property OnEnter;
@@ -217,9 +230,12 @@ type
 
 implementation
 
+uses
+  LCLIntf;
+
 type
   TConfigData = record
-    Key: ShortString;
+    Key: String;
   end;
   PConfigData = ^TConfigData;
 
@@ -247,9 +263,10 @@ var
 begin
   Column := Header.Columns.Add;
   Column.Text := 'Key';
+  Column.Width := 150;
   Column := Header.Columns.Add;
   Column.Text := 'Data';
-
+  Header.AutoSizeIndex := 1;
   Header.Options := Header.Options + [hoVisible, hoAutoResize, hoAutoSpring];
 end;
 
@@ -262,6 +279,8 @@ begin
   else
     FConfig.ReadSections(FVisibleSections);
   RootNodeCount := FVisibleSections.Count;
+  //todo: make full expand optional
+  FullExpand(nil);
   EndUpdate;
 end;
 
@@ -281,16 +300,46 @@ begin
   TreeOptions.Assign(AValue);
 end;
 
+procedure TLuiConfigTree.WMStartEditing(var Message: TLMessage);
+var
+  Node: PVirtualNode;
+begin
+  Node := Pointer(Message.WParam);
+  EditNode(Node, 1);
+end;
+
 function TLuiConfigTree.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex
   ): Boolean;
 begin
   Result := (Node^.Parent = RootNode) and (Column = 1);
 end;
 
+procedure TLuiConfigTree.DoCanEdit(Node: PVirtualNode; Column: TColumnIndex;
+  var Allowed: Boolean);
+begin
+  Allowed := Column = 1;
+end;
+
+procedure TLuiConfigTree.DoChange(Node: PVirtualNode);
+begin
+  inherited DoChange(Node);
+  if Assigned(Node) and (Node^.Parent <> RootNode) and
+    not (tsIncrementalSearching in TreeStates) then
+      PostMessage(Self.Handle, WM_STARTEDITING, Integer(Node), 0);
+end;
+
 procedure TLuiConfigTree.DoExpanded(Node: PVirtualNode);
 begin
   ValidateChildren(Node, True);
   inherited DoExpanded(Node);
+end;
+
+function TLuiConfigTree.DoFocusChanging(OldNode, NewNode: PVirtualNode;
+  OldColumn, NewColumn: TColumnIndex): Boolean;
+begin
+  //todo: make this behavior optional
+  Result := (NewNode <> nil) and (NewNode^.Parent <> RootNode);
+  ClearSelection;
 end;
 
 procedure TLuiConfigTree.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
@@ -351,6 +400,14 @@ begin
   end;
 end;
 
+procedure TLuiConfigTree.DoPaintText(Node: PVirtualNode;
+  const ACanvas: TCanvas; Column: TColumnIndex; TextType: TVSTTextType);
+begin
+  if Node^.Parent = RootNode then
+    ACanvas.Font.Style := [fsBold];
+  inherited DoPaintText(Node, ACanvas, Column, TextType);
+end;
+
 function TLuiConfigTree.GetOptionsClass: TTreeOptionsClass;
 begin
   Result := TStringTreeOptions;
@@ -364,13 +421,16 @@ begin
   FItems := TStringList.Create;
   FSections := TStringList.Create;
   FVisibleSections := TStringList.Create;
+  Indent := 13;
+  Margin := 0;
   InitHeader;
   with TreeOptions do
   begin
     AutoOptions := AutoOptions + [toAutoSpanColumns];
-    PaintOptions := PaintOptions - [toShowTreeLines];
+    PaintOptions := PaintOptions - [toShowTreeLines] +
+      [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
     SelectionOptions := SelectionOptions + [toExtendedFocus];
-    MiscOptions := MiscOptions + [toEditable];
+    MiscOptions := MiscOptions + [toEditable, toGridExtensions];
   end;
 end;
 
