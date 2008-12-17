@@ -36,16 +36,16 @@ type
     FDataType: TLuiConfigDataType;
     FDefaultValue: String;
     FDisplayText: String;
-    FKey: ShortString;
+    FKey: String;
     procedure SetDataType(const AValue: TLuiConfigDataType);
     procedure SetDefaultValue(const AValue: String);
     procedure SetDisplayText(const AValue: String);
-    procedure SetKey(const AValue: ShortString);
+    procedure SetKey(const AValue: String);
   published
     property DataType: TLuiConfigDataType read FDataType write SetDataType;
     property DefaultValue: String read FDefaultValue write SetDefaultValue;
     property DisplayText: String read FDisplayText write SetDisplayText;
-    property Key: ShortString read FKey write SetKey;
+    property Key: String read FKey write SetKey;
   end;
 
   { TLuiConfigItems }
@@ -57,11 +57,11 @@ type
     constructor Create(AItemClass: TCollectionItemClass);
     destructor Destroy; override;
     function Add: TLuiConfigItem;
-    function Find(const Key: ShortString): TLuiConfigItem;
-    function GetDefaultString(const Key: ShortString): String;
-    function GetDefaultInteger(const Key: ShortString): Integer;
-    function GetDefaultBoolean(const Key: ShortString): Boolean;
-    function GetDefaultFloat(const Key: ShortString): Double;
+    function Find(const Key: String): TLuiConfigItem;
+    function GetDefaultString(const Key: String): String;
+    function GetDefaultInteger(const Key: String): Integer;
+    function GetDefaultBoolean(const Key: String): Boolean;
+    function GetDefaultFloat(const Key: String): Double;
   end;
 
   { TLuiConfigSection }
@@ -69,12 +69,12 @@ type
   TLuiConfigSection = class(TCollectionItem)
   private
     FDisplayText: String;
-    FTitle: ShortString;
+    FTitle: String;
     procedure SetDisplayTitle(const AValue: String);
-    procedure SetTitle(const AValue: ShortString);
+    procedure SetTitle(const AValue: String);
   public
     property DisplayText: String read FDisplayText write SetDisplayTitle;
-    property Title: ShortString read FTitle write SetTitle;
+    property Title: String read FTitle write SetTitle;
   end;
 
   { TLuiConfigSections }
@@ -90,7 +90,7 @@ type
   public
     destructor Destroy; override;
     function Add: TLuiConfigSection;
-    function Find(const Title: ShortString): TLuiConfigSection;
+    function Find(const Title: String): TLuiConfigSection;
   end;
 
   TLuiConfigNotificationType = (lcnOpen, lcnClose);
@@ -340,7 +340,7 @@ end;
 
 { TLuiConfigItem }
 
-procedure TLuiConfigItem.SetKey(const AValue: ShortString);
+procedure TLuiConfigItem.SetKey(const AValue: String);
 begin
   if FKey=AValue then exit;
   FKey:=AValue;
@@ -392,7 +392,7 @@ begin
   Result := TLuiConfigSection(inherited Add);
 end;
 
-function TLuiConfigSections.Find(const Title: ShortString): TLuiConfigSection;
+function TLuiConfigSections.Find(const Title: String): TLuiConfigSection;
 begin
   if not FValidHashList then
     BuildHashList;
@@ -407,7 +407,7 @@ begin
   FDisplayText:=AValue;
 end;
 
-procedure TLuiConfigSection.SetTitle(const AValue: ShortString);
+procedure TLuiConfigSection.SetTitle(const AValue: String);
 begin
   if FTitle=AValue then exit;
   FTitle:=AValue;
@@ -433,12 +433,12 @@ begin
   Result := TLuiConfigItem(inherited Add);
 end;
 
-function TLuiConfigItems.Find(const Key: ShortString): TLuiConfigItem;
+function TLuiConfigItems.Find(const Key: String): TLuiConfigItem;
 begin
   Result := TLuiConfigItem(FList.Find(Key));
 end;
 
-function TLuiConfigItems.GetDefaultString(const Key: ShortString): String;
+function TLuiConfigItems.GetDefaultString(const Key: String): String;
 var
   Item: TLuiConfigItem;
 begin
@@ -449,17 +449,17 @@ begin
     Result := '';
 end;
 
-function TLuiConfigItems.GetDefaultInteger(const Key: ShortString): Integer;
+function TLuiConfigItems.GetDefaultInteger(const Key: String): Integer;
 begin
   Result := StrToIntDef(GetDefaultString(Key), 0);
 end;
 
-function TLuiConfigItems.GetDefaultBoolean(const Key: ShortString): Boolean;
+function TLuiConfigItems.GetDefaultBoolean(const Key: String): Boolean;
 begin
   Result := StrToBoolDef(GetDefaultString(Key), False);
 end;
 
-function TLuiConfigItems.GetDefaultFloat(const Key: ShortString): Double;
+function TLuiConfigItems.GetDefaultFloat(const Key: String): Double;
 begin
   Result := StrToFloatDef(GetDefaultString(Key), 0);
 end;
