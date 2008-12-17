@@ -41,6 +41,8 @@ type
     procedure SetDefaultValue(const AValue: String);
     procedure SetDisplayText(const AValue: String);
     procedure SetKey(const AValue: String);
+  protected
+    function GetDisplayName: String; override;
   published
     property DataType: TLuiConfigDataType read FDataType write SetDataType;
     property DefaultValue: String read FDefaultValue write SetDefaultValue;
@@ -72,7 +74,9 @@ type
     FTitle: String;
     procedure SetDisplayTitle(const AValue: String);
     procedure SetTitle(const AValue: String);
-  public
+  protected
+    function GetDisplayName: String; override;
+  published
     property DisplayText: String read FDisplayText write SetDisplayTitle;
     property Title: String read FTitle write SetTitle;
   end;
@@ -346,6 +350,11 @@ begin
   FKey:=AValue;
 end;
 
+function TLuiConfigItem.GetDisplayName: String;
+begin
+  Result := FDisplayText;
+end;
+
 procedure TLuiConfigItem.SetDataType(const AValue: TLuiConfigDataType);
 begin
   if FDataType=AValue then exit;
@@ -411,6 +420,11 @@ procedure TLuiConfigSection.SetTitle(const AValue: String);
 begin
   if FTitle=AValue then exit;
   FTitle:=AValue;
+end;
+
+function TLuiConfigSection.GetDisplayName: String;
+begin
+  Result := FDisplayText;
 end;
 
 { TLuiConfigItems }
