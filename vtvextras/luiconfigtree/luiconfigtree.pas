@@ -16,7 +16,7 @@ type
 
   { TLuiConfigTree }
 
-  TLuiConfigTree = class(TCustomVirtualStringTree, IConfigObserver)
+  TLuiConfigTree = class(TCustomVirtualStringTree, ILuiConfigObserver)
   private
     FConfig: TLuiConfig;
     FItems: TStrings;
@@ -33,19 +33,21 @@ type
   protected
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex;
-                      var Allowed: Boolean); override;
+      var Allowed: Boolean); override;
     procedure DoChange(Node: PVirtualNode); override;
     procedure DoExpanded(Node: PVirtualNode); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn,
-                      NewColumn: TColumnIndex): Boolean; override;
+      NewColumn: TColumnIndex): Boolean; override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: WideString); override;
     procedure DoInitChildren(Node: PVirtualNode;
       var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex;
+      const AText: UnicodeString); override;
     procedure DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
-                     Column: TColumnIndex; TextType: TVSTTextType); override;
+       Column: TColumnIndex; TextType: TVSTTextType); override;
     function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -398,6 +400,19 @@ begin
     //Item
     Data^.Key := FItems[Node^.Index];
   end;
+end;
+
+procedure TLuiConfigTree.DoNewText(Node: PVirtualNode; Column: TColumnIndex;
+  const AText: UnicodeString);
+var
+  Data, ParentData: PConfigData;
+begin
+  if (Node^.Parent = RootNode) or (Column <> 1) then
+    Exit;
+  Data := GetNodeData(Node);
+  ParentData := GetNodeData(Node^.Parent);
+  FConfig.WriteString(ParentData^.Key, Data^.Key, AText);
+  inherited DoNewText(Node, Column, AText);
 end;
 
 procedure TLuiConfigTree.DoPaintText(Node: PVirtualNode;
