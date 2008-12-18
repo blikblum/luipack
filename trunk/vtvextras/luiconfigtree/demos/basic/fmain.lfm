@@ -1,0 +1,99 @@
+object MainForm: TMainForm
+  Left = 334
+  Height = 228
+  Top = 252
+  Width = 486
+  Caption = 'LuiConfigTree Basic Demo'
+  ClientHeight = 228
+  ClientWidth = 486
+  OnCreate = FormCreate
+  LCLVersion = '0.9.27'
+  object ConfigTree: TLuiConfigTree
+    Left = 8
+    Height = 210
+    Top = 8
+    Width = 232
+    Config = Config
+    BorderStyle = bsSingle
+    Colors.FocusedSelectionColor = clSilver
+    Colors.FocusedSelectionBorderColor = clSilver
+    Colors.GridLineColor = clSilver
+    Header.AutoSizeIndex = 1
+    Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoVisible, hoAutoSpring]
+    Indent = 12
+    LineStyle = lsSolid
+    Margin = 0
+    NodeDataSize = 256
+    TabOrder = 0
+    TreeOptions.AutoOptions = [toAutoDropExpand, toAutoScrollOnExpand, toAutoSpanColumns, toAutoTristateTracking, toAutoDeleteMovedNodes]
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus]
+    OnBeforeCellPaint = ConfigTreeBeforeCellPaint
+    OnBeforeItemErase = ConfigTreeBeforeItemErase
+    OnNewText = ConfigTreeNewText
+    Columns = <    
+      item
+        Width = 100
+        WideText = 'Key'
+      end    
+      item
+        Position = 1
+        Width = 132
+        WideText = 'Data'
+      end>
+    WideDefaultText = ''
+  end
+  object IniFileMemo: TMemo
+    Left = 264
+    Height = 208
+    Top = 8
+    Width = 212
+    TabOrder = 1
+  end
+  object Config: TLuiConfig
+    Active = True
+    DataProvider = IniProvider
+    ItemDefs = <    
+      item
+        DefaultValue = 'Blargh!'
+        DisplayText = 'My Str Option'
+        Key = 'itemstr'
+      end    
+      item
+        DataType = ldtInteger
+        DefaultValue = '2'
+        DisplayText = 'An Int Option'
+        Key = 'itemint'
+      end    
+      item
+        DefaultValue = '1'
+        DisplayText = 'Should I Go?'
+        Key = 'itembool'
+        Section = 'Section2'
+      end    
+      item
+        DefaultValue = 'BlikBlum'
+        DisplayText = 'Got Default'
+        Key = 'itemx'
+        Section = 'Section2'
+      end>
+    SectionDefs = <    
+      item
+        DisplayText = 'My First Section'
+        Title = 'Section1'
+      end    
+      item
+        DisplayText = 'Another Section'
+        Title = 'Section2'
+      end>
+    left = 176
+    top = 40
+  end
+  object IniProvider: TIniConfigProvider
+    CacheUpdates = False
+    FileName = '$(EXE_PATH)/test.ini'
+    left = 208
+    top = 40
+  end
+end
