@@ -19,6 +19,7 @@ type
   TLuiConfigTree = class(TCustomVirtualStringTree, ILuiConfigObserver)
   private
     FConfig: TLuiConfig;
+    FConfigDataOffset: Cardinal;
     FItems: TStrings;
     FSections: TStrings;
     FVisibleSections: TStrings;
@@ -38,6 +39,7 @@ type
     procedure DoExpanded(Node: PVirtualNode); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn,
       NewColumn: TColumnIndex): Boolean; override;
+    procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: WideString); override;
     procedure DoInitChildren(Node: PVirtualNode;
@@ -48,6 +50,7 @@ type
       const AText: UnicodeString); override;
     procedure DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
        Column: TColumnIndex; TextType: TVSTTextType); override;
+    function GetConfigData(Node: PVirtualNode): Pointer;
     function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -344,6 +347,15 @@ begin
   ClearSelection;
 end;
 
+procedure TLuiConfigTree.DoFreeNode(Node: PVirtualNode);
+var
+  Data: PConfigData;
+begin
+  inherited DoFreeNode(Node);
+  Data := GetConfigData(Node);
+  Data^.Key := '';
+end;
+
 procedure TLuiConfigTree.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType; var CellText: WideString);
 var
@@ -353,7 +365,7 @@ begin
   //the user changed the text through OnGetText
   if CellText <> '' then
     Exit;
-  Data := GetNodeData(Node);
+  Data := GetConfigData(Node);
   if Node^.Parent = RootNode then
   begin
     //Section
@@ -366,7 +378,7 @@ begin
       CellText := FConfig.GetItemText(Data^.Key)
     else
     begin
-      ParentData := GetNodeData(Node^.Parent);
+      ParentData := GetConfigData(Node^.Parent);
       //handle item data differently according to data type
       CellText := FConfig.ReadString(ParentData^.Key, Data^.Key);
     end;
@@ -378,7 +390,7 @@ procedure TLuiConfigTree.DoInitChildren(Node: PVirtualNode;
 var
   Data: PConfigData;
 begin
-  Data := GetNodeData(Node);
+  Data := GetConfigData(Node);
   FConfig.ReadSection(Data^.Key, FItems);
   NodeChildCount := FItems.Count;
 end;
@@ -388,7 +400,7 @@ procedure TLuiConfigTree.DoInitNode(ParentNode, Node: PVirtualNode;
 var
   Data: PConfigData;
 begin
-  Data := GetNodeData(Node);
+  Data := GetConfigData(Node);
   if ParentNode = nil then
   begin
     //Section
@@ -409,8 +421,8 @@ var
 begin
   if (Node^.Parent = RootNode) or (Column <> 1) then
     Exit;
-  Data := GetNodeData(Node);
-  ParentData := GetNodeData(Node^.Parent);
+  Data := GetConfigData(Node);
+  ParentData := GetConfigData(Node^.Parent);
   FConfig.WriteString(ParentData^.Key, Data^.Key, AText);
   inherited DoNewText(Node, Column, AText);
 end;
@@ -423,6 +435,14 @@ begin
   inherited DoPaintText(Node, ACanvas, Column, TextType);
 end;
 
+function TLuiConfigTree.GetConfigData(Node: PVirtualNode): Pointer;
+begin
+  if (Node = RootNode) or (Node = nil) then
+    Result := nil
+  else
+    Result := PByte(Node) + FConfigDataOffset;
+end;
+
 function TLuiConfigTree.GetOptionsClass: TTreeOptionsClass;
 begin
   Result := TStringTreeOptions;
@@ -431,6 +451,7 @@ end;
 constructor TLuiConfigTree.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FConfigDataOffset := AllocateInternalDataArea(SizeOf(TConfigData));
   DefaultText := '';
   NodeDataSize := SizeOf(TConfigData);
   FItems := TStringList.Create;
