@@ -62,6 +62,8 @@ begin
   if FCacheUpdates then
     FIniFile.UpdateFile;
   FIniFile.Clear;
+  //Reset the Ini FileName to avoid clearing the file when CacheUpdates is True
+  FIniFile.Rename('', False);
 end;
 
 procedure TIniConfigProvider.Open;
