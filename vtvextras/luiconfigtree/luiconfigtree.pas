@@ -14,6 +14,33 @@ const
 
 type
 
+  TVTLuiConfigOption = (ltoAutoLoad);
+
+  TVTLuiConfigOptions = set of TVTLuiConfigOption;
+
+const
+  DefaultConfigOptions = [ltoAutoLoad];
+
+type
+
+  { TLuiConfigTreeOptions }
+
+  TLuiConfigTreeOptions = class(TCustomStringTreeOptions)
+  private
+    FConfigOptions: TVTLuiConfigOptions;
+    procedure SetConfigOptions(const AValue: TVTLuiConfigOptions);
+  public
+    constructor Create(AOwner: TBaseVirtualTree); override;
+  published
+    property ConfigOptions: TVTLuiConfigOptions read FConfigOptions write SetConfigOptions default DefaultConfigOptions;
+    property AnimationOptions;
+    property AutoOptions;
+    property MiscOptions;
+    property PaintOptions;
+    property SelectionOptions;
+    property StringOptions;
+  end;
+
   { TLuiConfigTree }
 
   TLuiConfigTree = class(TCustomVirtualStringTree, ILuiConfigObserver)
@@ -25,11 +52,10 @@ type
     FVisibleSections: TStrings;
     procedure ConfigNotification(NotificationType: TLuiConfigNotificationType;
       Data: PtrInt);
-    function GetOptions: TStringTreeOptions;
+    function GetOptions: TLuiConfigTreeOptions;
     procedure InitHeader;
-    procedure LoadTree;
     procedure SetConfig(const AValue: TLuiConfig);
-    procedure SetOptions(const AValue: TStringTreeOptions);
+    procedure SetOptions(const AValue: TLuiConfigTreeOptions);
     procedure WMStartEditing(var Message: TLMessage); message WM_STARTEDITING;
   protected
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
@@ -55,6 +81,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure LoadTree;
   published
     property Config: TLuiConfig read FConfig write SetConfig;
     property Sections: TStrings read FSections;
@@ -127,7 +154,7 @@ type
     property TabOrder;
     property TabStop default True;
     property TextMargin;
-    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property TreeOptions: TLuiConfigTreeOptions read GetOptions write SetOptions;
     property Visible;
     property WantTabs;
 
@@ -251,15 +278,16 @@ procedure TLuiConfigTree.ConfigNotification(
 begin
   case NotificationType of
     lcnOpen:
-      LoadTree;
+      if ltoAutoLoad in TreeOptions.ConfigOptions then
+        LoadTree;
     lcnClose:
       Clear;
   end;
 end;
 
-function TLuiConfigTree.GetOptions: TStringTreeOptions;
+function TLuiConfigTree.GetOptions: TLuiConfigTreeOptions;
 begin
-  Result := TStringTreeOptions(inherited TreeOptions);
+  Result := TLuiConfigTreeOptions(inherited TreeOptions);
 end;
 
 procedure TLuiConfigTree.InitHeader;
@@ -300,7 +328,7 @@ begin
     FConfig.AddObserver(Self);
 end;
 
-procedure TLuiConfigTree.SetOptions(const AValue: TStringTreeOptions);
+procedure TLuiConfigTree.SetOptions(const AValue: TLuiConfigTreeOptions);
 begin
   TreeOptions.Assign(AValue);
 end;
@@ -445,7 +473,7 @@ end;
 
 function TLuiConfigTree.GetOptionsClass: TTreeOptionsClass;
 begin
-  Result := TStringTreeOptions;
+  Result := TLuiConfigTreeOptions;
 end;
 
 constructor TLuiConfigTree.Create(AOwner: TComponent);
@@ -477,6 +505,21 @@ begin
   FSections.Destroy;
   FVisibleSections.Destroy;
   inherited Destroy;
+end;
+
+{ TLuiConfigTreeOptions }
+
+procedure TLuiConfigTreeOptions.SetConfigOptions(
+  const AValue: TVTLuiConfigOptions);
+begin
+  if FConfigOptions=AValue then exit;
+  FConfigOptions:=AValue;
+end;
+
+constructor TLuiConfigTreeOptions.Create(AOwner: TBaseVirtualTree);
+begin
+  inherited Create(AOwner);
+  FConfigOptions := DefaultConfigOptions;
 end;
 
 end.
