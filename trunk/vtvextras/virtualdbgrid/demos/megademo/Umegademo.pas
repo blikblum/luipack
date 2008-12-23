@@ -5,9 +5,9 @@ unit Umegademo;
 interface
 
 uses
-  LCLIntf, Messages, SysUtils, Classes, Graphics, Controls, Forms,
+  LCLIntf, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, DB, VirtualDBGrid, ExtCtrls, VirtualTrees, Buttons,
-  StdCtrls, ImgList, DBCtrls, LResources, dbf, ipcchannel;
+  StdCtrls, DBCtrls, LResources, dbf;
 
 type
 
@@ -100,12 +100,12 @@ type
       SortDirection: TSortDirection; var RefreshGrid: Boolean);
     procedure DBGridFormatFieldValue(Sender: TObject; Column: TColumnIndex;
       RecordData: TRecordData; RowIndex: Cardinal; Field: TField;
-      var FieldValue: WideString; var DefaultFormat: Boolean);
+      var FieldValue: UTF8String; var DefaultFormat: Boolean);
     procedure SelRecInfoBtnClick(Sender: TObject);
     procedure VDBGridBtnClick(Sender: TObject);
     procedure DBGridPostChanges(Sender: TObject; FieldNameOrIDText: String;
       Column: TColumnIndex; ColumnType: TColumnType;
-      RecordData: TRecordData; RowIndex: Cardinal; var NewValue: WideString;
+      RecordData: TRecordData; RowIndex: Cardinal; var NewValue: UTF8String;
       var DoDefault: Boolean);
     procedure DBGridChangeSort(Sender: TObject; SortColumn: TColumnIndex;
       SortDirection: TSortDirection);
@@ -115,7 +115,7 @@ type
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure DBGridCalculateValue(Sender: TObject; IDText: String;
       Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal; 
-      var CalculatedValue: WideString;
+      var CalculatedValue: UTF8String;
       var CalculatedValueType: TFieldType);
   private
     function GetIndicatorColor: TColor;
@@ -444,7 +444,7 @@ end;
 
 procedure TMainForm.DBGridFormatFieldValue(Sender: TObject;
   Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal;
-  Field: TField; var FieldValue: WideString; var DefaultFormat: Boolean);
+  Field: TField; var FieldValue: UTF8String; var DefaultFormat: Boolean);
 begin
    if (Field.FieldName = 'XHOST_DATE') then
    begin
@@ -464,8 +464,6 @@ procedure TMainForm.SelRecInfoBtnClick(Sender: TObject);
 var
   i, j: integer;
   rec: TRecordData;
-  calc,
-  indic: Boolean;
   Str: String;
 const
   calcstr: array[boolean] of string = ('', ' (calculated)');
@@ -505,7 +503,7 @@ end;
 
 procedure TMainForm.DBGridPostChanges(Sender: TObject;
   FieldNameOrIDText: String; Column: TColumnIndex; ColumnType: TColumnType;
-  RecordData: TRecordData; RowIndex: Cardinal; var NewValue: WideString;
+  RecordData: TRecordData; RowIndex: Cardinal; var NewValue: UTF8String;
   var DoDefault: Boolean);
 begin
   if (ColumnType = ctCalculated) then
@@ -607,7 +605,7 @@ end;
 
 procedure TMainForm.DBGridCalculateValue(Sender: TObject; IDText: String;
   Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal; 
-  var CalculatedValue: WideString; var CalculatedValueType: TFieldType);
+  var CalculatedValue: UTF8String; var CalculatedValueType: TFieldType);
 
 var
    numb1s,

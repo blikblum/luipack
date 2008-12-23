@@ -716,15 +716,16 @@ object MainForm: TMainForm
     object Page1: TPage
       Caption = 'DBGridPage'
       ClientWidth = 861
-      ClientHeight = 506
+      ClientHeight = 488
       object DBGrid: TVirtualDBGrid
-        Height = 506
+        Height = 488
         Width = 861
         Align = alClient
         BorderStyle = bsSingle
         Colors.FocusedSelectionColor = clTeal
         Colors.FocusedSelectionBorderColor = clTeal
         Header.AutoSizeIndex = -1
+        Header.Columns = <>
         Header.Font.Height = -11
         Header.Font.Name = 'MS Sans Serif'
         Header.Font.Style = [fsBold]
@@ -744,8 +745,6 @@ object MainForm: TMainForm
         OnCustomSort = DBGridCustomSort
         OnPostChanges = DBGridPostChanges
         OnChangeSort = DBGridChangeSort
-        Columns = <>
-        WideDefaultText = ''
       end
     end
     object Page2: TPage
