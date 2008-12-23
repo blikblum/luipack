@@ -19,7 +19,7 @@ object MainForm: TMainForm
     Header.MainColumn = -1
     Header.Options = [hoColumnResize, hoDrag]
     TabOrder = 0
-    Columns = <>
+    Header.Columns = <>
   end
   object EditStringsMemo: TMemo
     Left = 248

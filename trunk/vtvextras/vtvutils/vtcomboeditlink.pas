@@ -129,7 +129,7 @@ function TVTComboEditLink.PrepareEdit(Tree: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
 
 var
-  Text: WideString;
+  Text: UTF8String;
 begin
   Result := Tree is TCustomVirtualStringTree;
   if Result then

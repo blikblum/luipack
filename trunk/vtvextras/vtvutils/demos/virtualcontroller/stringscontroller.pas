@@ -25,7 +25,7 @@ type
   protected
     procedure DoGetText(Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString); override;
+      var CellText: UTF8String); override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Connect(ATree: TVirtualStringTree); override;
@@ -51,7 +51,7 @@ begin
 end;
 
 procedure TStringsController.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: UTF8String);
 begin
   if not Assigned(FStrings) or (Node^.Index >= FStrings.Count) then
     Exit;

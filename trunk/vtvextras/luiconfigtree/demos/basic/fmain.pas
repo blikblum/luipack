@@ -24,7 +24,7 @@ type
       TargetCanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
       var ItemColor: TColor; var EraseAction: TItemEraseAction);
     procedure ConfigTreeNewText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; const NewText: UnicodeString);
+      Column: TColumnIndex; const NewText: UTF8String);
     procedure FormCreate(Sender: TObject);
   private
     procedure UpdateMemo;
@@ -63,7 +63,7 @@ begin
 end;
 
 procedure TMainForm.ConfigTreeNewText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; const NewText: UnicodeString);
+  Node: PVirtualNode; Column: TColumnIndex; const NewText: UTF8String);
 begin
   UpdateMemo;
 end;

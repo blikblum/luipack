@@ -23,7 +23,7 @@ type
     //event bridges
     procedure FocusChangedEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure GetTextEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType; var CellText: WideString);
+      TextType: TVSTTextType; var CellText: UTF8String);
     procedure InitNodeEvent(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode;
       var InitialStates: TVirtualNodeInitStates);
 
@@ -32,7 +32,7 @@ type
     //abstract event handlers
     procedure DoFocusChanged(Node: PVirtualNode; Column: TColumnIndex); virtual; abstract;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType; var CellText: WideString); virtual; abstract;
+      TextType: TVSTTextType; var CellText: UTF8String); virtual; abstract;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitialStates: TVirtualNodeInitStates); virtual; abstract;
 
@@ -92,7 +92,7 @@ end;
 
 procedure TCustomVirtualTreeController.GetTextEvent(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: WideString);
+  var CellText: UTF8String);
 begin
   DoGetText(Node, Column, TextType, CellText);
 end;

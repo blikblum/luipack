@@ -67,13 +67,13 @@ type
       NewColumn: TColumnIndex): Boolean; override;
     procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType; var CellText: WideString); override;
+      TextType: TVSTTextType; var CellText: UTF8String); override;
     procedure DoInitChildren(Node: PVirtualNode;
       var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex;
-      const AText: UnicodeString); override;
+      const AText: UTF8String); override;
     procedure DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
        Column: TColumnIndex; TextType: TVSTTextType); override;
     function GetConfigData(Node: PVirtualNode): Pointer;
@@ -385,7 +385,7 @@ begin
 end;
 
 procedure TLuiConfigTree.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: UTF8String);
 var
   Data, ParentData: PConfigData;
 begin
@@ -443,7 +443,7 @@ begin
 end;
 
 procedure TLuiConfigTree.DoNewText(Node: PVirtualNode; Column: TColumnIndex;
-  const AText: UnicodeString);
+  const AText: UTF8String);
 var
   Data, ParentData: PConfigData;
 begin
