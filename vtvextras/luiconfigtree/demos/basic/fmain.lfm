@@ -19,6 +19,16 @@ object MainForm: TMainForm
     Colors.FocusedSelectionBorderColor = clSilver
     Colors.GridLineColor = clSilver
     Header.AutoSizeIndex = 1
+    Header.Columns = <    
+      item
+        Text = 'Key'
+        Width = 150
+      end    
+      item
+        Position = 1
+        Text = 'Data'
+        Width = 82
+      end>
     Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoVisible, hoAutoSpring]
     Indent = 12
     LineStyle = lsSolid
@@ -32,17 +42,6 @@ object MainForm: TMainForm
     OnBeforeCellPaint = ConfigTreeBeforeCellPaint
     OnBeforeItemErase = ConfigTreeBeforeItemErase
     OnNewText = ConfigTreeNewText
-    Columns = <    
-      item
-        Width = 100
-        WideText = 'Key'
-      end    
-      item
-        Position = 1
-        Width = 132
-        WideText = 'Data'
-      end>
-    WideDefaultText = ''
   end
   object IniFileMemo: TMemo
     Left = 264
