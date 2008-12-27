@@ -398,7 +398,8 @@ type
     function InternalGetNodeData(ANode: PVirtualNode): PNodeData;
     procedure InternalInitializeDBTree;
     procedure InitializeDBTree;
-    procedure UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0);
+    procedure UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0;
+      UpdateLoadedData: Boolean = False);
     function IsDataCreated(ANode: PVirtualNode): boolean;
     // Return number of current record in database
     //   - if database is closed, returns 0
@@ -2044,7 +2045,12 @@ begin
           fLastRecordCount := fRecordCount;
        end
        else
+       begin
+         //todo track the dataset state to avoid unnecessary calls to UpdateAllRecords
+         if LinkedDataset.State <> dsInsert then
+           UpdateAllRecords;
          SetFocusToActualRecNo;
+       end;
 
        Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
@@ -3047,18 +3053,36 @@ end;
 
 procedure TCustomVirtualDBGrid.UpdateAllRecords;
 var
-   TreeRect: TRect;
+  TreeRect: TRect;
+  OldRecNo: Integer;
+  OldFocusNode: PVirtualNode;
 begin
   if (not Assigned(LinkedDataSet)) then exit;
   if (not LinkedDataSet.Active) then exit;
-  LinkedDataSet.First;
-  SetFocusToNode(GetFirst);
+  OldFocusNode := FocusedNode;
+  OldRecNo := LinkedDataSet.RecNo;
+  BeginUpdate;
+  LinkedDataSet.DisableControls;
+  try
+    LinkedDataSet.First;
+    SetFocusToNode(GetFirst);
 
-  TreeRect:= GetTreeRect;
-  UpdateDBTree(false, TreeRect.Bottom - TreeRect.Top);
+    TreeRect:= GetTreeRect;
+    UpdateDBTree(false, TreeRect.Bottom - TreeRect.Top, True);
+  finally
+    SetFocusToNode(OldFocusNode);
+    //OldRecNo is invalid while appending
+    if OldRecNo > -1 then
+      LinkedDataset.RecNo := OldRecNo;
+    IncLoadingDataFlag;
+    LinkedDataset.EnableControls;
+    DecLoadingDataFlag;
+    EndUpdate;
+  end;
 end;
 
-procedure TCustomVirtualDBGrid.UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0);
+procedure TCustomVirtualDBGrid.UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0;
+  UpdateLoadedData: Boolean = False);
 var
   DeltaIndex,
   CountToLoad,
@@ -3070,10 +3094,10 @@ var
   Run: PVirtualNode;
 
   WasNewMoved,
-  DoLoad : boolean;
+  DoLoad, DoCreateData : boolean;
 
 begin
-
+  //todo: refactor this proc
   if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
   begin
     Exit;
@@ -3108,6 +3132,7 @@ begin
     LinkedDataSet.DisableControls;
 
     DoLoad := AlwaysUpdate;
+    DoCreateData := AlwaysUpdate;
     Count := 0;
     while Assigned(Run) and
       (not LinkedDataSet.Eof or (not WasNewMoved)) and
@@ -3117,7 +3142,10 @@ begin
       // if node has data created, and if not than we can load data from database
       // to node's data
       if not AlwaysUpdate then
-        DoLoad := not IsDataCreated(Run);
+      begin
+        DoCreateData := not IsDataCreated(Run);
+        DoLoad := DoCreateData or UpdateLoadedData;
+      end;
 
       if DoLoad then
       begin
@@ -3130,7 +3158,7 @@ begin
            WasNewMoved := True;
          end;
          Logger.Send(lcAll, 'LoadingData', Run.Index);
-         InternalLoadDBData(Run, True); // load data from database
+         InternalLoadDBData(Run, DoCreateData); // load data from database
 
          LinkedDataSet.Next;
       end;
