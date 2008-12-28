@@ -884,11 +884,9 @@ procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
   if AValue >= FCells.Count then
     raise Exception.Create('Cell index out of bounds');
-  if AValue >= 0 then
-    FSelectedIndex := AValue
-  else
-    FSelectedIndex := -1;
-  Redraw;
+  FSelectedIndex := Max(-1, AValue);
+  if not (csLoading in ComponentState) then
+    Redraw;
 end;
 
 procedure TLuiBar.SetTextAlign(const AValue: TLuiBarTextAlign);
