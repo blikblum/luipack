@@ -249,15 +249,15 @@ type
     destructor Destroy; override;
     property Cells: TLuiBarCellList read FCells;
     property CellAlign: TLuiBarCellAlign read FCellAlign write SetCellAlign;
-    property CellHeight: Integer read FCellHeight write FCellHeight;
+    property CellHeight: Integer read FCellHeight write FCellHeight default 20;
     property CellRoundRadius: Integer read FCellRoundRadius write FCellRoundRadius;
     property CellWidth: Integer read FCellWidth write FCellWidth;
     property ClientBounds: TRect read FClientBounds;
     property Colors: TLuiBarColors read FColors write FColors;
     property Context;
     property HoverIndex: Integer read FHoverIndex;
-    property ImagePadding: Integer read FImagePadding write SetImagePadding;
-    property ImagePosition: TLuiBarImagePosition read FImagePosition write SetImagePosition;
+    property ImagePadding: Integer read FImagePadding write SetImagePadding default 3;
+    property ImagePosition: TLuiBarImagePosition read FImagePosition write SetImagePosition default ipLeft;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
     property Options: TLuiBarOptions read FOptions write FOptions;
@@ -265,10 +265,10 @@ type
     property OutLineWidth: Integer read FOutLineWidth write FOutLineWidth;
     property Patterns: TLuiBarPatterns read FPatterns;
     property Position: TLuiBarPosition read FPosition write SetPosition;
-    property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
+    property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex default -1;
     property Spacing: Integer read FSpacing write FSpacing;
-    property TextAlign: TLuiBarTextAlign read FTextAlign write SetTextAlign;
-    property TextPadding: Integer read FTextPadding write FTextPadding;
+    property TextAlign: TLuiBarTextAlign read FTextAlign write SetTextAlign default taCenter;
+    property TextPadding: Integer read FTextPadding write FTextPadding default 8;
     //events
     property OnAfterDraw: TLuiBarEvent read FOnAfterDraw write SetOnAfterDraw;
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
@@ -882,7 +882,7 @@ end;
 
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
-  if AValue >= FCells.Count then
+  if (AValue >= FCells.Count) and not (csLoading in ComponentState) then
     raise Exception.Create('Cell index out of bounds');
   FSelectedIndex := Max(-1, AValue);
   if not (csLoading in ComponentState) then
