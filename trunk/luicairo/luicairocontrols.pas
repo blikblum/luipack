@@ -157,21 +157,26 @@ type
 
   { TLuiContainer }
 
-  TLuiContainer = class (TCustomCairoControl)
+  TLuiContainer = class(TCustomCairoControl)
   private
     FWidgets: TLuiWidgetList;
     FHoverWidget: TLuiWidget;
+    FUpdateCount: Integer;
     function WidgetInPos(X, Y: Integer): TLuiWidget;
   protected
+    procedure Changed;
+    procedure DoChange; virtual;
     procedure DoDraw; override;
     procedure DrawWidgets;
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X,
-                       Y: Integer); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X, Y: Integer); override;
     procedure MouseLeave; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure BeginUpdate;
+    procedure EndUpdate;
     property Widgets: TLuiWidgetList read FWidgets;
   end;
 
@@ -297,6 +302,20 @@ begin
   Result := nil;
 end;
 
+procedure TLuiContainer.Changed;
+begin
+  if (FUpdateCount = 0) and not (csLoading in ComponentState) then
+  begin
+    DoChange;
+    Redraw;
+  end;
+end;
+
+procedure TLuiContainer.DoChange;
+begin
+
+end;
+
 procedure TLuiContainer.DoDraw;
 begin
   DrawWidgets;
@@ -363,6 +382,18 @@ destructor TLuiContainer.Destroy;
 begin
   FWidgets.Destroy;
   inherited Destroy;
+end;
+
+procedure TLuiContainer.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TLuiContainer.EndUpdate;
+begin
+  if FUpdateCount > 0 then
+    Dec(FUpdateCount);
+  Changed;
 end;
 
 { TLuiWidgetList }
