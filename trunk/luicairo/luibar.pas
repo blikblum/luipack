@@ -208,18 +208,21 @@ type
     function GetTextWidth(const AText: String): Double;
     function IndexToPatternType(Index: Integer): TLuiBarPatternType;
     procedure SetCellAlign(const AValue: TLuiBarCellAlign);
+    procedure SetCellHeight(const AValue: Integer);
+    procedure SetCellRoundRadius(const AValue: Integer);
+    procedure SetCellWidth(const AValue: Integer);
     procedure SetImagePadding(const AValue: Integer);
     procedure SetImagePosition(const AValue: TLuiBarImagePosition);
     procedure SetImages(const AValue: TImageList);
     procedure SetInitialSpace(const AValue: Integer);
-    procedure SetOnAfterDraw(const AValue: TLuiBarEvent);
-    procedure SetOnDrawing(const AValue: TLuiBarDrawingEvent);
-    procedure SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
-    procedure SetOnSelecting(const AValue: TLuiBarSelectingEvent);
+    procedure SetOptions(const AValue: TLuiBarOptions);
     procedure SetOuterOffset(const AValue: Integer);
+    procedure SetOutLineWidth(const AValue: Integer);
     procedure SetPosition(const AValue: TLuiBarPosition);
     procedure SetSelectedIndex(const AValue: Integer);
+    procedure SetSpacing(const AValue: Integer);
     procedure SetTextAlign(const AValue: TLuiBarTextAlign);
+    procedure SetTextPadding(const AValue: Integer);
   protected
     procedure DefaultDrawCell(Cell: TLuiBarCell);
     procedure DefaultDrawCellPath(Cell: TLuiBarCell);
@@ -249,9 +252,9 @@ type
     destructor Destroy; override;
     property Cells: TLuiBarCellList read FCells;
     property CellAlign: TLuiBarCellAlign read FCellAlign write SetCellAlign;
-    property CellHeight: Integer read FCellHeight write FCellHeight default 20;
-    property CellRoundRadius: Integer read FCellRoundRadius write FCellRoundRadius;
-    property CellWidth: Integer read FCellWidth write FCellWidth;
+    property CellHeight: Integer read FCellHeight write SetCellHeight default 20;
+    property CellRoundRadius: Integer read FCellRoundRadius write SetCellRoundRadius;
+    property CellWidth: Integer read FCellWidth write SetCellWidth;
     property ClientBounds: TRect read FClientBounds;
     property Colors: TLuiBarColors read FColors write FColors;
     property Context;
@@ -260,27 +263,27 @@ type
     property ImagePosition: TLuiBarImagePosition read FImagePosition write SetImagePosition default ipLeft;
     property Images: TImageList read FImages write SetImages;
     property InitialSpace: Integer read FInitialSpace write SetInitialSpace;
-    property Options: TLuiBarOptions read FOptions write FOptions;
+    property Options: TLuiBarOptions read FOptions write SetOptions;
     property OuterOffset: Integer read FOuterOffset write SetOuterOffset;
-    property OutLineWidth: Integer read FOutLineWidth write FOutLineWidth;
+    property OutLineWidth: Integer read FOutLineWidth write SetOutLineWidth;
     property Patterns: TLuiBarPatterns read FPatterns;
     property Position: TLuiBarPosition read FPosition write SetPosition;
     property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex default -1;
-    property Spacing: Integer read FSpacing write FSpacing;
+    property Spacing: Integer read FSpacing write SetSpacing;
     property TextAlign: TLuiBarTextAlign read FTextAlign write SetTextAlign default taCenter;
-    property TextPadding: Integer read FTextPadding write FTextPadding default 8;
+    property TextPadding: Integer read FTextPadding write SetTextPadding default 8;
     //events
-    property OnAfterDraw: TLuiBarEvent read FOnAfterDraw write SetOnAfterDraw;
+    property OnAfterDraw: TLuiBarEvent read FOnAfterDraw write FOnAfterDraw;
     property OnDrawBackground: TLuiBarEvent read FOnDrawBackground write FOnDrawBackground;
     property OnDrawCell: TLuiBarDrawCellEvent read FOnDrawCell write FOnDrawCell;
     property OnDrawCellPath: TLuiBarDrawCellEvent read FOnDrawCellPath write FOnDrawCellPath;
     property OnDrawCellText: TLuiBarDrawCellEvent read FOnDrawCellText write FOnDrawCellText;
-    property OnDrawing: TLuiBarDrawingEvent read FOnDrawing write SetOnDrawing;
-    property OnGetImageInfo: TLuiBarGetImageInfo read FOnGetImageInfo write SetOnGetImageInfo;
+    property OnDrawing: TLuiBarDrawingEvent read FOnDrawing write FOnDrawing;
+    property OnGetImageInfo: TLuiBarGetImageInfo read FOnGetImageInfo write FOnGetImageInfo;
     property OnCreatePattern: TLuiBarCreatePattern read FOnCreatePattern write FOnCreatePattern;
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
-    property OnSelecting: TLuiBarSelectingEvent read FOnSelecting write SetOnSelecting;
+    property OnSelecting: TLuiBarSelectingEvent read FOnSelecting write FOnSelecting;
   published
     property Align;
     property BorderSpacing;
@@ -538,20 +541,50 @@ end;
 
 procedure TLuiBar.SetCellAlign(const AValue: TLuiBarCellAlign);
 begin
-  if FCellAlign = AValue then exit;
+  if FCellAlign = AValue then
+    Exit;
   FCellAlign := AValue;
+  Changed;
+end;
+
+procedure TLuiBar.SetCellHeight(const AValue: Integer);
+begin
+  if FCellHeight = AValue then
+    Exit;
+  FCellHeight := AValue;
+  Changed;
+end;
+
+procedure TLuiBar.SetCellRoundRadius(const AValue: Integer);
+begin
+  if FCellRoundRadius = AValue then
+    Exit;
+  FCellRoundRadius := AValue;
+  Changed;
+end;
+
+procedure TLuiBar.SetCellWidth(const AValue: Integer);
+begin
+  if FCellWidth = AValue then
+    Exit;
+  FCellWidth := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetImagePadding(const AValue: Integer);
 begin
-  if FImagePadding=AValue then exit;
-  FImagePadding:=AValue;
+  if FImagePadding = AValue then
+    Exit;
+  FImagePadding := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetImagePosition(const AValue: TLuiBarImagePosition);
 begin
-  if FImagePosition=AValue then exit;
-  FImagePosition:=AValue;
+  if FImagePosition = AValue then
+    Exit;
+  FImagePosition := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetImages(const AValue: TImageList);
@@ -562,44 +595,42 @@ end;
 
 procedure TLuiBar.SetInitialSpace(const AValue: Integer);
 begin
-  if FInitialSpace=AValue then exit;
-  FInitialSpace:=AValue;
+  if FInitialSpace = AValue then
+    Exit;
+  FInitialSpace := AValue;
+  Changed;
 end;
 
-procedure TLuiBar.SetOnAfterDraw(const AValue: TLuiBarEvent);
+procedure TLuiBar.SetOptions(const AValue: TLuiBarOptions);
 begin
-  if FOnAfterDraw=AValue then exit;
-  FOnAfterDraw:=AValue;
-end;
-
-procedure TLuiBar.SetOnDrawing(const AValue: TLuiBarDrawingEvent);
-begin
-  if FOnDrawing=AValue then exit;
-  FOnDrawing:=AValue;
-end;
-
-procedure TLuiBar.SetOnGetImageInfo(const AValue: TLuiBarGetImageInfo);
-begin
-  if FOnGetImageInfo=AValue then exit;
-  FOnGetImageInfo:=AValue;
-end;
-
-procedure TLuiBar.SetOnSelecting(const AValue: TLuiBarSelectingEvent);
-begin
-  if FOnSelecting=AValue then exit;
-  FOnSelecting:=AValue;
+  if FOptions = AValue then
+    Exit;
+  FOptions := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetOuterOffset(const AValue: Integer);
 begin
-  if FOuterOffset = AValue then exit;
+  if FOuterOffset = AValue then
+    Exit;
   FOuterOffset := AValue;
+  Changed;
+end;
+
+procedure TLuiBar.SetOutLineWidth(const AValue: Integer);
+begin
+  if FOutLineWidth = AValue then
+    Exit;
+  FOutLineWidth := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetPosition(const AValue: TLuiBarPosition);
 begin
-  if FPosition = AValue then exit;
+  if FPosition = AValue then
+    Exit;
   FPosition := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.DoUpdatePatterns;
@@ -885,14 +916,31 @@ begin
   if (AValue >= FCells.Count) and not (csLoading in ComponentState) then
     raise Exception.Create('Cell index out of bounds');
   FSelectedIndex := Max(-1, AValue);
-  if not (csLoading in ComponentState) then
-    Redraw;
+  Changed;
+end;
+
+procedure TLuiBar.SetSpacing(const AValue: Integer);
+begin
+  if FSpacing = AValue then
+    Exit;
+  FSpacing := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.SetTextAlign(const AValue: TLuiBarTextAlign);
 begin
-  if FTextAlign=AValue then exit;
-  FTextAlign:=AValue;
+  if FTextAlign = AValue then
+    Exit;
+  FTextAlign := AValue;
+  Changed;
+end;
+
+procedure TLuiBar.SetTextPadding(const AValue: Integer);
+begin
+  if FTextPadding = AValue then
+    Exit;
+  FTextPadding := AValue;
+  Changed;
 end;
 
 procedure TLuiBar.DoAfterDraw;
