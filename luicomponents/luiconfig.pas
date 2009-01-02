@@ -62,6 +62,9 @@ type
     FHashList: TFPHashList;
     FValidHashList: Boolean;
     procedure BuildHashList;
+  protected
+    procedure Notify(Item: TCollectionItem;
+      Action: TCollectionNotification); override;
   public
     destructor Destroy; override;
     function Add: TLuiConfigItemDef;
@@ -527,6 +530,12 @@ begin
     FHashList.Add(Item.Key, Item);
   end;
   FValidHashList := True;
+end;
+
+procedure TLuiConfigItemDefs.Notify(Item: TCollectionItem;
+  Action: TCollectionNotification);
+begin
+  FValidHashList := False;
 end;
 
 destructor TLuiConfigItemDefs.Destroy;
