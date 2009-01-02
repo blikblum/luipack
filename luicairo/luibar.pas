@@ -63,16 +63,27 @@ type
 
   TLuiBarGetImageInfo = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
     var ImageInfo: TLuiBarImageInfo) of object;
-  
-  TLuiBarColors = record
-    Normal: TColor;
-    Selected: TColor;
-    Hover: TColor;
-    Text: TColor;
-    SelectedText: TColor;
-    OutLine: TColor;
-    Background: TColor;
-    ClientArea: TColor;
+
+  { TLuiBarColors }
+
+  TLuiBarColors = class(TPersistent)
+  private
+    FOwner: TLuiBar;
+    FColors: array[0..7] of TColor;
+    function GetColor(const Index: Integer): TColor; inline;
+    procedure SetColor(const Index: Integer; const Value: TColor);
+  public
+    constructor Create(AOwner: TLuiBar);
+    procedure Assign(Source: TPersistent); override;
+  published
+    property Normal: TColor index 0 read GetColor write SetColor default clSkyBlue;
+    property Selected: TColor index 1 read GetColor write SetColor default clBlue;
+    property Hover: TColor index 2 read GetColor write SetColor default clBlue;
+    property Text: TColor index 3 read GetColor write SetColor default clBlack;
+    property SelectedText: TColor index 4 read GetColor write SetColor default clWhite;
+    property OutLine: TColor index 5 read GetColor write SetColor default clWhite;
+    property Background: TColor index 6 read GetColor write SetColor default clWhite;
+    property ClientArea: TColor index 7 read GetColor write SetColor default clBlue;
   end;
   
   { TLuiBarPatterns }
@@ -211,6 +222,7 @@ type
     procedure SetCellHeight(const AValue: Integer);
     procedure SetCellRoundRadius(const AValue: Integer);
     procedure SetCellWidth(const AValue: Integer);
+    procedure SetColors(const AValue: TLuiBarColors);
     procedure SetImagePadding(const AValue: Integer);
     procedure SetImagePosition(const AValue: TLuiBarImagePosition);
     procedure SetImages(const AValue: TImageList);
@@ -256,7 +268,7 @@ type
     property CellRoundRadius: Integer read FCellRoundRadius write SetCellRoundRadius;
     property CellWidth: Integer read FCellWidth write SetCellWidth;
     property ClientBounds: TRect read FClientBounds;
-    property Colors: TLuiBarColors read FColors write FColors;
+    property Colors: TLuiBarColors read FColors write SetColors;
     property Context;
     property HoverIndex: Integer read FHoverIndex;
     property ImagePadding: Integer read FImagePadding write SetImagePadding default 3;
@@ -569,6 +581,11 @@ begin
     Exit;
   FCellWidth := AValue;
   Changed;
+end;
+
+procedure TLuiBar.SetColors(const AValue: TLuiBarColors);
+begin
+  FColors.Assign(AValue);
 end;
 
 procedure TLuiBar.SetImagePadding(const AValue: Integer);
@@ -913,6 +930,8 @@ end;
 
 procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
+  if FSelectedIndex = AValue then
+    Exit;
   if (AValue >= FCells.Count) and not (csLoading in ComponentState) then
     raise Exception.Create('Cell index out of bounds');
   FSelectedIndex := Max(-1, AValue);
@@ -1105,18 +1124,7 @@ begin
   FTextAlign := taCenter;
   FImagePadding := 3;
   FImagePosition := ipLeft;
-  //todo: find more sensible colors
-  with FColors do
-  begin
-    Normal := clSkyBlue;
-    Selected := clBlue;
-    Hover := clBlue;
-    Text := clBlack;
-    SelectedText := clWhite;
-    ClientArea := Selected;
-    Background := clWhite;
-    OutLine := clWhite;
-  end;
+  FColors := TLuiBarColors.Create(Self);
   SetInitialBounds(0, 0, 100, 30);
 end;
 
@@ -1387,6 +1395,7 @@ end;
 destructor TLuiBar.Destroy;
 begin
   FCells.Destroy;
+  FColors.Destroy;
   FPatterns.Destroy;
   inherited Destroy;
 end;
@@ -1540,6 +1549,46 @@ end;
 procedure TLuiBarPatterns.Updated;
 begin
   FInvalid := False;
+end;
+
+{ TLuiBarColors }
+
+function TLuiBarColors.GetColor(const Index: Integer): TColor;
+begin
+  Result := FColors[Index];
+end;
+
+procedure TLuiBarColors.SetColor(const Index: Integer; const Value: TColor);
+begin
+  if FColors[Index] = Value then
+    Exit;
+  FColors[Index] := Value;
+  FOwner.Changed;
+end;
+
+constructor TLuiBarColors.Create(AOwner: TLuiBar);
+begin
+  FOwner := AOwner;
+  //todo: find better initial collors
+  FColors[0] := clSkyBlue; //Normal
+  FColors[1] := clBlue; //Selected
+  FColors[2] := clBlue; //Hover
+  FColors[3] := clBlack; //Text
+  FColors[4] := clWhite; //SelectedText
+  FColors[5] := clWhite; //OutLine
+  FColors[6] := clWhite;  //Background
+  FColors[7] := clBlue; //ClientArea
+end;
+
+procedure TLuiBarColors.Assign(Source: TPersistent);
+begin
+  if Source is TLuiBarColors then
+  begin
+    FColors := TLuiBarColors(Source).FColors;
+    FOwner.Changed;
+  end
+  else
+    inherited Assign(Source);
 end;
 
 end.
