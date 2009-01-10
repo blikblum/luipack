@@ -2015,7 +2015,12 @@ begin
 
      if Assigned(LinkedDataSet) then
        if (LinkedDataSet.Active) then
+       begin
           UpdateDBTree(true);
+          //todo: ensure the tree is not sorted twice
+          if DBOptions.SortingType <> stNone then
+            DoSortColumn(Header.SortColumn);
+       end;
 
   end;
 end;
@@ -2051,7 +2056,9 @@ begin
            UpdateAllRecords;
          SetFocusToActualRecNo;
        end;
-
+       //todo: ensure the tree is not sorted twice
+       if DBOptions.SortingType <> stNone then
+         DoSortColumn(Header.SortColumn);
        Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
   end;
@@ -3353,7 +3360,7 @@ var
    RefreshGrid:      boolean;
    ColumnType:       TColumnType;
 begin
-  if AColumn > NoColumn then
+  if (AColumn > NoColumn) and (AColumn < Header.Columns.Count) then
   begin
     ColumnType:= TVirtualDBTreeColumn(Header.Columns[AColumn]).ColumnType;
 
