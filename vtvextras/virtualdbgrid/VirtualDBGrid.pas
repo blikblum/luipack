@@ -2257,7 +2257,7 @@ end;
 procedure TCustomVirtualDBGrid.DoHeaderClick(Column: TColumnIndex; Button: TMouseButton;
     Shift: TShiftState; X, Y: Integer);
 begin
-  if (DBOptions.SortingType <> stNone) then
+  if (DBOptions.SortingType <> stNone) and (aoAllowSorting in DBOptions.AdvOptions) then
   begin
     DoSortColumn(Column);
     DoChangeSort(self, Header.SortColumn, Header.SortDirection);
@@ -2321,8 +2321,6 @@ begin
   Result := 0;
   try
     //todo: override Sort method and move all these checks to there
-    // If we dont want to auto sort then do nothing ...
-    if (not (aoAllowSorting in DBOptions.AdvOptions)) then exit;
 
     // If Column is out of bounds then do nothing ...
     if (Column < 0) or (Column >= Header.Columns.Count) then exit;
@@ -3355,9 +3353,8 @@ var
    RefreshGrid:      boolean;
    ColumnType:       TColumnType;
 begin
-  if (AColumn > NoColumn) and
-     (aoAllowSorting in DBOptions.AdvOptions)
-  then begin
+  if AColumn > NoColumn then
+  begin
     ColumnType:= TVirtualDBTreeColumn(Header.Columns[AColumn]).ColumnType;
 
     if (ColumnType <> ctIndicator) and
