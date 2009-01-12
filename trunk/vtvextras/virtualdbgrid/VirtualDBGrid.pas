@@ -2018,7 +2018,7 @@ begin
        begin
           UpdateDBTree(true);
           //todo: ensure the tree is not sorted twice
-          if DBOptions.SortingType <> stNone then
+          if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
             DoSortColumn(Header.SortColumn);
        end;
 
@@ -2053,11 +2053,13 @@ begin
        begin
          //todo track the dataset state to avoid unnecessary calls to UpdateAllRecords
          if LinkedDataset.State <> dsInsert then
+         begin
            UpdateAllRecords;
-         SetFocusToActualRecNo;
+           SetFocusToActualRecNo;
+         end;
        end;
        //todo: ensure the tree is not sorted twice
-       if DBOptions.SortingType <> stNone then
+       if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
          DoSortColumn(Header.SortColumn);
        Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
