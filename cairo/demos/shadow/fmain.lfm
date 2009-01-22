@@ -1,0 +1,17 @@
+object MainForm: TMainForm
+  Left = 394
+  Height = 387
+  Top = 166
+  Width = 466
+  Caption = 'Cairo Shadow'
+  ClientHeight = 387
+  ClientWidth = 466
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.27'
+  object CairoPaintBox: TCairoPaintBox
+    Height = 385
+    Width = 464
+    OnDraw = CairoPaintBoxDraw
+  end
+end
