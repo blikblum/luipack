@@ -13,7 +13,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -27,6 +27,10 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_luicomponents"/>
       </Item3>
+      <Item4>
+        <Filename Value="luiordereddataset.pas"/>
+        <UnitName Value="luiordereddataset"/>
+      </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
