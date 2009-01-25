@@ -166,6 +166,8 @@ procedure TLuiOrderedDataset.InternalOpen;
 var
   OrderField: TField;
 begin
+  if (FSql = '') and (FOrderFieldName <> '') and (FTableName <> '') then
+    FSql := 'Select * From ' + FTableName + ' Order By ' + FOrderFieldName;
   inherited InternalOpen;
   FOrderFieldIndex := -1;
   OrderField := FindField(FOrderFieldName);
