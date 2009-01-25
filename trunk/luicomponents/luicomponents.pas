@@ -7,7 +7,8 @@ unit luicomponents;
 interface
 
 uses
-LuiConfig, IniConfigProvider, register_luicomponents, LazarusPackageIntf;
+  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
+  LazarusPackageIntf;
 
 implementation
 

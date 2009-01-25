@@ -1,0 +1,86 @@
+object MainForm: TMainForm
+  Left = 290
+  Height = 393
+  Top = 175
+  Width = 595
+  Caption = 'MainForm'
+  ClientHeight = 393
+  ClientWidth = 595
+  OnCreate = FormCreate
+  LCLVersion = '0.9.27'
+  object Grid: TDBGrid
+    Left = 8
+    Height = 372
+    Top = 8
+    Width = 432
+    DataSource = OrderedDatasource
+    TabOrder = 0
+  end
+  object AppendButton: TButton
+    Left = 464
+    Height = 25
+    Top = 8
+    Width = 104
+    Caption = 'Append'
+    OnClick = AppendButtonClick
+    TabOrder = 1
+  end
+  object InsertButton: TButton
+    Left = 464
+    Height = 25
+    Top = 48
+    Width = 104
+    Caption = 'Insert'
+    OnClick = InsertButtonClick
+    TabOrder = 2
+  end
+  object PostButton: TButton
+    Left = 464
+    Height = 25
+    Top = 88
+    Width = 104
+    Caption = 'Post'
+    OnClick = PostButtonClick
+    TabOrder = 3
+  end
+  object DeleteButton: TButton
+    Left = 464
+    Height = 25
+    Top = 139
+    Width = 102
+    Caption = 'Delete'
+    OnClick = DeleteButtonClick
+    TabOrder = 4
+  end
+  object OrderOffsetEdit: TSpinEdit
+    Left = 544
+    Height = 23
+    Top = 191
+    Width = 46
+    MaxValue = 10
+    MinValue = -10
+    TabOrder = 5
+  end
+  object ChangeOrderButton: TButton
+    Left = 464
+    Height = 25
+    Top = 189
+    Width = 75
+    Caption = 'Change Order'
+    OnClick = ChangeOrderButtonClick
+    TabOrder = 6
+  end
+  object OrderedDataset: TLuiOrderedDataset
+    SaveOnClose = True
+    SQL = 'Select * from OrderedTable Order By OrderNo'
+    TableName = 'OrderedTable'
+    OrderFieldName = 'OrderNo'
+    left = 312
+    top = 24
+  end
+  object OrderedDatasource: TDatasource
+    DataSet = OrderedDataset
+    left = 312
+    top = 58
+  end
+end

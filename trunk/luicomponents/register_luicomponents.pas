@@ -5,7 +5,8 @@ unit register_luicomponents;
 interface
 
 uses
-  Classes, SysUtils, LazarusPackageIntf, LuiConfig, IniConfigProvider;
+  Classes, SysUtils, LazarusPackageIntf, LuiConfig, IniConfigProvider,
+  LuiOrderedDataset;
 
 procedure Register;
 
@@ -16,9 +17,15 @@ begin
   RegisterComponents('Misc', [TLuiConfig, TIniConfigProvider]);
 end;
 
+procedure RegisterUnitLuiOrderedDataset;
+begin
+  RegisterComponents('Data Access', [TLuiOrderedDataset]);
+end;
+
 procedure Register;
 begin
   RegisterUnit('LuiConfig', @RegisterUnitLuiConfig);
+  RegisterUnit('LuiOrderedDataset', @RegisterUnitLuiOrderedDataset);
 end;
 
 end.
