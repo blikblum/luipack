@@ -72,7 +72,6 @@ object MainForm: TMainForm
   end
   object OrderedDataset: TLuiOrderedDataset
     SaveOnClose = True
-    SQL = 'Select * from OrderedTable Order By OrderNo'
     TableName = 'OrderedTable'
     OrderFieldName = 'OrderNo'
     left = 312
