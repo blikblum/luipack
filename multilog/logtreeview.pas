@@ -34,7 +34,6 @@ type
     property BorderStyle;
     property BorderWidth;
     property Color;
-    property Ctl3D;
     property Constraints;
     property DefaultItemHeight;
     property DragKind;
@@ -49,7 +48,6 @@ type
     property Indent;
     //property ParentBiDiMode;
     property ParentColor default False;
-    property ParentCtl3D;
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
@@ -254,6 +252,24 @@ begin
   //todo: hook TCustomTreeView to auto expand
   if FLastNode.Parent <> nil then
     FLastNode.Parent.Expanded:=True;
+  FLastNode.GetFirstChild;
+  //todo: optimize painting
+  FLastNode.ImageIndex:=AMsg.MsgType;
+  FLastNode.SelectedIndex:=AMsg.MsgType;
+end;
+
+procedure TLogTreeView.Clear;
+begin
+  Items.Clear;
+  FLastNode:=nil;
+  FParentNode:=nil;
+end;
+
+initialization
+  {$i logimages.lrs}
+end.
+
+.Parent.Expanded:=True;
   FLastNode.GetFirstChild;
   //todo: optimize painting
   FLastNode.ImageIndex:=AMsg.MsgType;
