@@ -563,7 +563,6 @@ type
     property Color;
     property Colors;
     property Constraints;
-    property Ctl3D;
     property CustomCheckImages;
     property DefaultPasteMode;
     property DragCursor;
@@ -597,7 +596,6 @@ type
     {$endif COMPILER_7_UP}
     property ParentBiDiMode;
     property ParentColor default False;
-    property ParentCtl3D;
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
