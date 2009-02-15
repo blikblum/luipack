@@ -3,12 +3,11 @@ object FormAbout: TFormAbout
   Height = 181
   Top = 181
   Width = 332
-  HorzScrollBar.Page = 331
-  VertScrollBar.Page = 180
   Caption = 'About'
   ClientHeight = 181
   ClientWidth = 332
   Position = poOwnerFormCenter
+  LCLVersion = '0.9.27'
   object LabelTitle: TLabel
     Left = 72
     Height = 26
@@ -17,6 +16,7 @@ object FormAbout: TFormAbout
     Caption = 'Multilog Viewer 0.3'
     Font.Height = -21
     ParentColor = False
+    ParentFont = False
   end
   object LabelCopyright: TLabel
     Left = 32

@@ -2,14 +2,14 @@
 <CONFIG>
   <ProjectOptions>
     <PathDelim Value="\"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
       <Flags>
         <AlwaysBuild Value="False"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value=".\"/>
       <TargetFileExt Value=".exe"/>
     </General>
     <PublishOptions>
@@ -56,7 +56,7 @@
         <Filename Value="fmain.pas"/>
         <ComponentName Value="frmMain"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="fmain.lrs"/>
+        <ResourceBaseClass Value="Form"/>
         <UnitName Value="fMain"/>
       </Unit1>
       <Unit2>
@@ -69,7 +69,6 @@
         <ComponentName Value="FormAbout"/>
         <IsPartOfProject Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <ResourceFilename Value="fabout.lrs"/>
         <UnitName Value="fAbout"/>
       </Unit3>
     </Units>
