@@ -1,23 +1,21 @@
 object frmMain: TfrmMain
-  Left = 40
+  Left = 218
   Height = 604
-  Top = 76
+  Top = 224
   Width = 890
-  HorzScrollBar.Page = 889
-  VertScrollBar.Page = 584
   Caption = 'Multilog Viewer 0.3'
   ClientHeight = 585
   ClientWidth = 890
-  FormStyle = fsStayOnTop
   Menu = MainMenu1
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDesktopCenter
-  LCLVersion = '0.9.25'
+  LCLVersion = '0.9.27'
   object toolbarMain: TToolBar
     Left = 4
     Height = 38
+    Top = 0
     Width = 886
     BorderSpacing.Left = 4
     ButtonHeight = 36
@@ -25,7 +23,6 @@ object frmMain: TfrmMain
     Caption = 'toolbarMain'
     Color = clBtnFace
     EdgeBorders = []
-    Flat = True
     Images = imgToolbar
     ParentColor = False
     ParentShowHint = False
@@ -35,6 +32,7 @@ object frmMain: TfrmMain
     object ButClear: TToolButton
       Left = 1
       Hint = 'Clear Messages'
+      Top = 0
       Caption = 'Clear'
       ImageIndex = 0
       OnClick = ClearMessages
@@ -42,6 +40,7 @@ object frmMain: TfrmMain
     object ButStop: TToolButton
       Left = 37
       Hint = 'Stop Message Capture'
+      Top = 0
       Caption = 'ButStop'
       ImageIndex = 1
       Style = tbsCheck
@@ -50,6 +49,7 @@ object frmMain: TfrmMain
     object ButAlwaysOnTop: TToolButton
       Left = 73
       Hint = 'Always On Top'
+      Top = 0
       Caption = 'ButAlwaysOnTop'
       ImageIndex = 2
       Style = tbsCheck
@@ -67,6 +67,7 @@ object frmMain: TfrmMain
     ClientWidth = 599
     TabOrder = 0
     object panelViewer: TPanel
+      Left = 0
       Height = 175
       Top = 372
       Width = 599
@@ -80,6 +81,7 @@ object frmMain: TfrmMain
         AnchorSideBottom.Control = nbViewer
         Left = 4
         Height = 18
+        Top = 0
         Width = 595
         Align = alTop
         Anchors = [akLeft, akBottom]
@@ -88,6 +90,7 @@ object frmMain: TfrmMain
         ParentColor = False
       end
       object nbViewer: TNotebook
+        Left = 0
         Height = 157
         Top = 18
         Width = 599
@@ -100,11 +103,13 @@ object frmMain: TfrmMain
         end
         object pageText: TPage
           Caption = 'pageText'
-          ClientWidth = 599
-          ClientHeight = 157
+          ClientWidth = 591
+          ClientHeight = 149
           object memoViewer: TMemo
-            Height = 157
-            Width = 599
+            Left = 0
+            Height = 149
+            Top = 0
+            Width = 591
             Align = alClient
             Lines.Strings = (
               ''
@@ -116,20 +121,17 @@ object frmMain: TfrmMain
         end
         object PageBitmap: TPage
           Caption = 'PageBitmap'
-          ClientWidth = 595
-          ClientHeight = 153
+          ClientWidth = 591
+          ClientHeight = 149
           object StringGridBitmap: TStringGrid
-            Left = 429
-            Height = 153
+            Left = 425
+            Height = 149
+            Top = 0
             Width = 166
             Align = alRight
             ColCount = 2
-            FixedColor = clBtnFace
             FixedCols = 0
             FixedRows = 0
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
-            RowCount = 5
-            ScrollBars = ssAutoBoth
             TabOrder = 0
             ColWidths = (
               90
@@ -155,12 +157,14 @@ object frmMain: TfrmMain
             )
           end
           object PanelImageViewer: TPanel
-            Height = 153
-            Width = 429
+            Left = 0
+            Height = 149
+            Top = 0
+            Width = 425
             Align = alClient
             BevelOuter = bvNone
-            ClientHeight = 153
-            ClientWidth = 429
+            ClientHeight = 149
+            ClientWidth = 425
             ParentColor = False
             TabOrder = 1
             OnDblClick = PanelImageViewerDblClick
@@ -171,26 +175,28 @@ object frmMain: TfrmMain
               Width = 100
               AutoSize = True
               OnDblClick = ImgViewerDblClick
-              Transparent = False
             end
           end
         end
         object PageHexViewer: TPage
           Caption = 'PageHexViewer'
-          ClientWidth = 599
-          ClientHeight = 157
+          ClientWidth = 591
+          ClientHeight = 149
           object lbMemorySize: TLabel
+            Left = 0
             Height = 14
-            Width = 599
+            Top = 0
+            Width = 591
             Align = alTop
             Caption = 'Size:'
             ParentColor = False
           end
           object BinHexViewer: TATBinHex
             Cursor = crIBeam
-            Height = 143
+            Left = 0
+            Height = 135
             Top = 14
-            Width = 599
+            Width = 591
             Align = alClient
             BorderStyle = bsSingle
             Font.Height = -13
@@ -207,6 +213,7 @@ object frmMain: TfrmMain
     end
     object Splitter2: TSplitter
       Cursor = crVSplit
+      Left = 0
       Height = 5
       Top = 367
       Width = 599
@@ -215,7 +222,9 @@ object frmMain: TfrmMain
       ResizeAnchor = akBottom
     end
     object panelMessages: TPanel
+      Left = 0
       Height = 367
+      Top = 0
       Width = 599
       Align = alClient
       BevelOuter = bvNone
@@ -226,11 +235,15 @@ object frmMain: TfrmMain
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
         AnchorSideTop.Side = asrBottom
+        Left = 0
         Height = 245
         Top = 122
         Width = 599
         Align = alClient
         BorderStyle = bsSingle
+        DefaultText = 'Node'
+        Header.AutoSizeIndex = 0
+        Header.DefaultHeight = 17
         Header.MainColumn = -1
         Header.Options = [hoColumnResize, hoDrag]
         Images = imgMessages
@@ -241,10 +254,11 @@ object frmMain: TfrmMain
         OnGetText = vtreeMessagesGetText
         OnGetImageIndex = vtreeMessagesGetImageIndex
         OnInitNode = vtreeMessagesInitNode
-        Columns = <>
       end
       object panelFilter: TPanel
+        Left = 0
         Height = 122
+        Top = 0
         Width = 599
         Align = alTop
         BevelOuter = bvNone
@@ -260,8 +274,8 @@ object frmMain: TfrmMain
           Width = 74
           ExpandedCaption = 'Less Options'
           Expanded = True
-          HighlightColor = clBlack
           OnChange = ToggleOptionsChange
+          Options = []
           Caption = 'More Options'
           ParentColor = False
         end
@@ -289,9 +303,9 @@ object frmMain: TfrmMain
         object checkValue: TCheckBox
           Tag = 3
           Left = 2
-          Height = 19
+          Height = 17
           Top = 100
-          Width = 53
+          Width = 47
           Caption = 'Value'
           Checked = True
           State = cbChecked
@@ -322,9 +336,9 @@ object frmMain: TfrmMain
         object checkStrings: TCheckBox
           Tag = 8
           Left = 101
-          Height = 19
+          Height = 17
           Top = 76
-          Width = 58
+          Width = 52
           Caption = 'Strings'
           Checked = True
           State = cbChecked
@@ -344,9 +358,9 @@ object frmMain: TfrmMain
         object checkException: TCheckBox
           Tag = 11
           Left = 213
-          Height = 19
+          Height = 17
           Top = 52
-          Width = 73
+          Width = 67
           Caption = 'Exception'
           Checked = True
           State = cbChecked
@@ -366,9 +380,9 @@ object frmMain: TfrmMain
         object checkMemory: TCheckBox
           Tag = 14
           Left = 306
-          Height = 19
+          Height = 17
           Top = 28
-          Width = 63
+          Width = 57
           Caption = 'Memory'
           Checked = True
           State = cbChecked
@@ -377,9 +391,9 @@ object frmMain: TfrmMain
         object checkCustomData: TCheckBox
           Tag = 15
           Left = 306
-          Height = 19
+          Height = 17
           Top = 52
-          Width = 87
+          Width = 81
           Caption = 'Custom Data'
           Checked = True
           State = cbChecked
@@ -447,12 +461,14 @@ object frmMain: TfrmMain
           OnExecute = EditFilterMessagesExecute
           Options = [seoExecuteEmpty, seoExecuteOnKillFocus]
           Font.Color = clGray
+          ParentFont = False
           TabOrder = 16
         end
       end
     end
   end
   object panelRight: TPanel
+    Left = 0
     Height = 547
     Top = 38
     Width = 286
@@ -462,6 +478,7 @@ object frmMain: TfrmMain
     ClientWidth = 286
     TabOrder = 1
     object nbWatches: TNotebook
+      Left = 0
       Height = 175
       Top = 372
       Width = 286
@@ -474,7 +491,9 @@ object frmMain: TfrmMain
         ClientWidth = 278
         ClientHeight = 149
         object gridLastestWatch: TStringGrid
+          Left = 0
           Height = 149
+          Top = 0
           Width = 278
           Align = alClient
           AutoFillColumns = True
@@ -488,67 +507,63 @@ object frmMain: TfrmMain
               Title.Caption = 'Value'
               Width = 137
             end>
-          FixedColor = clBtnFace
           FixedCols = 0
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
           RowCount = 1
-          ScrollBars = ssAutoBoth
           TabOrder = 0
         end
       end
       object pageSelected: TPage
         Caption = 'Selected'
-        ClientWidth = 282
-        ClientHeight = 141
+        ClientWidth = 278
+        ClientHeight = 149
         object gridSelectedWatch: TStringGrid
-          Height = 141
-          Width = 282
+          Left = 0
+          Height = 149
+          Top = 0
+          Width = 278
           Align = alClient
           AutoFillColumns = True
           ColCount = 2
           Columns = <          
             item
               Title.Caption = 'Variable'
-              Width = 139
+              Width = 137
             end          
             item
               Title.Caption = 'Value'
-              Width = 139
+              Width = 137
             end>
-          FixedColor = clBtnFace
           FixedCols = 0
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
           RowCount = 1
-          ScrollBars = ssAutoBoth
           TabOrder = 0
         end
       end
       object PageHistory: TPage
         Caption = 'History'
-        ClientWidth = 282
-        ClientHeight = 141
+        ClientWidth = 278
+        ClientHeight = 149
         object ComboWatchHistory: TComboBox
+          Left = 0
           Height = 21
-          Width = 282
+          Top = 0
+          Width = 278
           Align = alTop
-          AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
+          AutoComplete = False
           ItemHeight = 13
-          MaxLength = 0
+          ItemWidth = 0
           OnSelect = ComboWatchHistorySelect
           Style = csDropDownList
           TabOrder = 0
         end
         object GridWatchHistory: TStringGrid
-          Height = 120
+          Left = 0
+          Height = 128
           Top = 21
-          Width = 282
+          Width = 278
           Align = alClient
           ColCount = 1
-          FixedColor = clBtnFace
           FixedCols = 0
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
           RowCount = 1
-          ScrollBars = ssAutoBoth
           TabOrder = 1
           ColWidths = (
             233
@@ -564,6 +579,7 @@ object frmMain: TfrmMain
     end
     object Splitter1: TSplitter
       Cursor = crVSplit
+      Left = 0
       Height = 5
       Top = 367
       Width = 286
@@ -574,6 +590,7 @@ object frmMain: TfrmMain
     object gridCallStack: TStringGrid
       Left = 5
       Height = 367
+      Top = 0
       Width = 281
       Align = alClient
       AutoFillColumns = True
@@ -583,15 +600,14 @@ object frmMain: TfrmMain
           Title.Caption = 'CallStack'
           Width = 277
         end>
-      FixedColor = clBtnFace
       FixedCols = 0
-      Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goSmoothScroll]
       RowCount = 1
-      ScrollBars = ssAutoBoth
       TabOrder = 1
     end
     object Splitter4: TSplitter
+      Left = 0
       Height = 367
+      Top = 0
       Width = 5
     end
   end
@@ -603,6 +619,7 @@ object frmMain: TfrmMain
     Beveled = True
   end
   object imgMessages: TImageList
+    Masked = False
     left = 176
     top = 416
     Bitmap = {
@@ -1123,6 +1140,7 @@ object frmMain: TfrmMain
   end
   object imgToolbar: TImageList
     Height = 32
+    Masked = False
     Width = 32
     left = 72
     top = 440

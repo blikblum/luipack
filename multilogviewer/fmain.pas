@@ -122,14 +122,13 @@ type
     procedure vtreeMessagesFocusChanging(Sender: TBaseVirtualTree;
       OldNode: PVirtualNode; NewNode: PVirtualNode; OldColumn: TColumnIndex;
       NewColumn: TColumnIndex; var Allowed: Boolean);
-    procedure vtreeMessagesFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode
-      );
+    procedure vtreeMessagesFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure vtreeMessagesGetImageIndex(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: LongInt);
     procedure vtreeMessagesGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: UTF8String);
     procedure vtreeMessagesInitNode(Sender: TBaseVirtualTree;
       ParentNode: PVirtualNode; Node: PVirtualNode;
       var InitialStates: TVirtualNodeInitStates);
@@ -414,7 +413,7 @@ end;
 
 procedure TfrmMain.vtreeMessagesGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: WideString);
+  var CellText: UTF8String);
 begin
   CellText:=PNodeData(Sender.GetNodeData(Node))^.Title;
 end;
