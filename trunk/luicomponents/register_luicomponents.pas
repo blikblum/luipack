@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LazarusPackageIntf, LuiConfig, IniConfigProvider,
-  LuiOrderedDataset;
+  LuiOrderedDataset, LuiRecordBuffer;
 
 procedure Register;
 
@@ -22,10 +22,16 @@ begin
   RegisterComponents('Data Access', [TLuiOrderedDataset]);
 end;
 
+procedure RegisterUnitLuiRecordBuffer;
+begin
+  RegisterComponents('Data Access', [TLuiRecordBuffer]);
+end;
+
 procedure Register;
 begin
   RegisterUnit('LuiConfig', @RegisterUnitLuiConfig);
   RegisterUnit('LuiOrderedDataset', @RegisterUnitLuiOrderedDataset);
+  RegisterUnit('LuiRecordBuffer', @RegisterUnitLuiRecordBuffer);
 end;
 
 end.
