@@ -296,7 +296,7 @@ type
     constructor Create(Collection: TCollection); override;
 
     procedure Assign(Source: TPersistent); override;
-    function Equals(OtherColumn: TVirtualTreeColumn): Boolean; override;
+    function Equals(OtherColumn: TObject): Boolean; override;
     procedure LoadFromStream(const Stream: TStream; Version: Integer);
     procedure SaveToStream(const Stream: TStream);
   published
@@ -1369,7 +1369,7 @@ end;
 
 
 
-function TVirtualDBTreeColumn.Equals(OtherColumn: TVirtualTreeColumn): Boolean;
+function TVirtualDBTreeColumn.Equals(OtherColumn: TObject): Boolean;
 begin
   Result := (FieldName =  TVirtualDBTreeColumn(OtherColumn).FieldName) and
             (ColumnType = TVirtualDBTreeColumn(OtherColumn).ColumnType);
