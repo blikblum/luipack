@@ -58,6 +58,35 @@ const
   ffIndicator  =  2;
 
 type
+  TVTDBAdvOption = (
+  aoEditable,               // allows edit nodes and update changes to database
+                            // If aoFullRowSelect is true then this flag(aoEditable)
+                            // is ignored (none of changes where updated to database)
+  aoStrippedRows,           // grid lines will be stripped
+  aoShowHorzLines,          // show horizontal grid lines
+  aoShowVertLines,          // show vertical grid lines
+  aoCenterScrollIntoView,   // enables toCenterScrollIntoView
+  aoAutoInsertIndicator,    // If AddDefaultsFieldsToColumns is called and aoAutoInsertIndicator
+                            // is set then will be insert indicator column automatically
+  aoAllowSorting,           // if is set then click on header will begin sorting procedure
+                            // depending of SortType in DBOptions
+  aoHighlightSortColumn,    // highlight sort column with custom color
+  aoHourGlassCursor,        // show hourglass cursor on sort action
+                            // (usefull if there is too much records to sort)
+  aoSortDBFieldColumns,     // sort columns with column type = ctDBField
+                            // {only if aoAllowSorting is set}
+  aoEditDBFieldColumns,     // if set, then editing colum with type ctDBField is allowed
+  aoSortCalculatedColumns,  // sort columns with column type = ctCalculated
+                            // {only if aoAllowSorting is set}
+  aoEditCalculatedColumns,  // if set, then editing colum with type ctCalculated is allowed
+  aoFullRowSelect,          // enable full row select, see aoEditable for details
+  aoMultiSelect,            // enable multi select
+  aoFormatFieldValue        // trigger event OnFormatFieldValue, where we can format value of
+                            // database TFIELD
+  );
+
+  TVTDBAdvOptions = set of TVTDBAdvOption;
+
   { --- Types --- }
   TColumnType =           (ctDBField, ctCalculated, ctIndicator);
   TIndicatorAlign =       (aiLeft, aiCenter, aiRight);
@@ -79,17 +108,23 @@ type
   //               to RecordCount in OnGetRecordCount event
   TRecordCountType =      (rcFromDataset, rcCustom);
 
+const
+  DefaultAdvOptions = [aoEditable, aoStrippedRows, aoShowHorzLines, aoShowVertLines,
+                       aoAllowSorting, aoHighlightSortColumn, aoCenterScrollIntoView,
+                       aoAutoInsertIndicator, aoHourGlassCursor, aoSortDBFieldColumns,
+                       aoEditDBFieldColumns, aoSortCalculatedColumns];
 
+type
   TRecordData = class;
-
+  TCustomVirtualDBGrid = class;
   { --- Events --- }
   { TOnGetRecordCountEvent - Triggered when we need to know how much records is in the database.            }
   {                          If isn't assigned this event, than standard 'dataset.recordcount' will be used }
-  TOnGetRecordCountEvent   = procedure(Sender: TObject; var RecordCount: longint) of object;
+  TOnGetRecordCountEvent   = procedure(Sender: TCustomVirtualDBGrid; var RecordCount: longint) of object;
 
   { TOnCalculateValueEvent - Triggered when at least one column has column type = ctCalculated and }
   {                          we want to fillup value for this calculated column                    }
-  TOnCalculateValueEvent   = procedure(Sender: TObject; const IDText: string;
+  TOnCalculateValueEvent   = procedure(Sender: TCustomVirtualDBGrid; const IDText: string;
                                        Column: TColumnIndex; RecordData: TRecordData;
                                        RowIndex: Cardinal; var CalculatedValue: UTF8String;
                                        var CalculatedValueType: TFieldType) of object;
@@ -98,14 +133,14 @@ type
   {                            database TField.Value. If isn't assigned this event          }
   {                            or aoFormatFieldValue is not in AdvOptions, then standard    }
   {                            TField.Value will be used                                    }
-  TOnFormatFieldValueEvent = procedure(Sender: TObject; Column: TColumnIndex;
+  TOnFormatFieldValueEvent = procedure(Sender: TCustomVirtualDBGrid; Column: TColumnIndex;
                                        RecordData: TRecordData;
                                        RowIndex: Cardinal; Field: TField;
                                        var FieldValue: UTF8String) of object;
 
   { TOnLoadRecordEvent - Triggered when record from database was loaded into VirtualDBGrid }
   {                      Assigning this event can reduce speed of VirtualDBGrid            }
-  TOnLoadRecordEvent       = procedure(Sender: TObject; RecordData: TRecordData;
+  TOnLoadRecordEvent       = procedure(Sender: TCustomVirtualDBGrid; RecordData: TRecordData;
                                        RowIndex: Cardinal) of object;
 
   { TOnCustomSortEvent - Triggered when SortType in DBOptions is stCustom to sort database }
@@ -118,7 +153,7 @@ type
   {   :SortDirection - Sorting direction, can be sdAscending or sdDescending               }
   {     :RefreshGrid - If True then after this event the grid will be refreshed            }
   {                    Default is TRUE.                                                    }
-  TOnCustomSortEvent         = procedure(Sender: TObject; Column: TColumnIndex;
+  TOnCustomSortEvent         = procedure(Sender: TCustomVirtualDBGrid; Column: TColumnIndex;
                                          ColumnType: TColumnType; const SortBy: string;
                                          SortDirection: TSortDirection;
                                          var RefreshGrid: boolean) of object;
@@ -134,7 +169,7 @@ type
   {        :RecordData - data of current record (TRecordData object)                        }
   {          :NewValue - new posted value                                                   }
   {       :PostChanges - set to True if you want to post changed, or False to not post      }
-  TOnPostChanges             = procedure(Sender: TObject; const FieldNameOrIDText: string;
+  TOnPostChanges             = procedure(Sender: TCustomVirtualDBGrid; const FieldNameOrIDText: string;
                                          Column: TcolumnIndex; ColumnType: TColumnType;
                                          RecordData: TRecordData; RowIndex: Cardinal;
                                          var NewValue: UTF8String; var PostChanges: boolean)
@@ -143,8 +178,11 @@ type
   { TOnChangeSort  - Triggered when sorting in the grid was changed                          }
   {    :SortColumn - column index of sorted column                                           }
   { :SortDirection - sort direction                                                          }
-  TOnChangeSort              = procedure(Sender: TObject; SortColumn: TColumnIndex;
+  TOnChangeSort              = procedure(Sender: TCustomVirtualDBGrid; SortColumn: TColumnIndex;
                                          SortDirection: TSortDirection) of object;
+
+  TOnCompareRecord = procedure(Sender: TCustomVirtualDBGrid; Record1, Record2: TRecordData; Column: TColumnIndex;
+    var Result: Integer) of object;
 
 
 
@@ -224,45 +262,6 @@ type
   end;
 
   TRecordDataClass = class of TRecordData;
-
-  TVTDBAdvOption = ( aoEditable,               // allows edit nodes and update changes to database
-                                               // If aoFullRowSelect is true then this flag(aoEditable)
-                                               // is ignored (none of changes where updated to database)
-                     aoStrippedRows,           // grid lines will be stripped
-                     aoShowHorzLines,          // show horizontal grid lines
-                     aoShowVertLines,          // show vertical grid lines
-                     aoCenterScrollIntoView,   // enables toCenterScrollIntoView
-                     aoAutoInsertIndicator,    // If AddDefaultsFieldsToColumns is called and aoAutoInsertIndicator
-                                               // is set then will be insert indicator column automatically
-                     aoAllowSorting,           // if is set then click on header will begin sorting procedure
-                                               // depending of SortType in DBOptions
-                     aoHighlightSortColumn,    // highlight sort column with custom color
-                     aoHourGlassCursor,        // show hourglass cursor on sort action
-                                               // (usefull if there is too much records to sort)
-                     aoSortDBFieldColumns,     // sort columns with column type = ctDBField
-                                               // {only if aoAllowSorting is set}
-                     aoEditDBFieldColumns,     // if set, then editing colum with type ctDBField is allowed
-                     aoSortCalculatedColumns,  // sort columns with column type = ctCalculated
-                                               // {only if aoAllowSorting is set}
-                     aoEditCalculatedColumns,  // if set, then editing colum with type ctCalculated is allowed
-                     aoFullRowSelect,          // enable full row select, see aoEditable for details
-                     aoMultiSelect,            // enable multi select
-                     aoFormatFieldValue        // trigger event OnFormatFieldValue, where we can format value of
-                                               // database TFIELD
-                    );
-
-  TVTDBAdvOptions = set of TVTDBAdvOption;
-
-const
-  DefaultAdvOptions = [aoEditable, aoStrippedRows, aoShowHorzLines, aoShowVertLines,
-                       aoAllowSorting, aoHighlightSortColumn, aoCenterScrollIntoView,
-                       aoAutoInsertIndicator, aoHourGlassCursor, aoSortDBFieldColumns,
-                       aoEditDBFieldColumns, aoSortCalculatedColumns];
-
-type
-
-  TCustomVirtualDBGrid = class;
-
 
   { TVirtualDBTreeDataLink }
 
@@ -385,6 +384,7 @@ type
     fOnCustomSort:            TOnCustomSortEvent;
     fOnPostChanges:           TOnPostChanges;
     fOnChangeSort:            TOnChangeSort;
+    FOnCompareRecord: TOnCompareRecord;
     fIndicatorBMP:            TBitmap;
 
     function GetFocusedRecord: TRecordData;
@@ -433,19 +433,19 @@ type
            const NewText: UTF8String); virtual;
 
     // new
-    procedure DoGetRecordCount(Sender: TObject; var RecordCount: longint); virtual;
-    procedure DoCalculateValue(Sender: TObject; const IDText: string; Column: TColumnIndex;
+    procedure DoGetRecordCount(var RecordCount: LongInt); virtual;
+    procedure DoCalculateValue(const IDText: string; Column: TColumnIndex;
         RecordData: TRecordData; RowIndex: Cardinal; var CalculatedValue: UTF8String;
         var CalculatedValueType: TFieldType);
-    procedure DoFormatFieldValue(Sender: TObject; Column: TColumnIndex; RecordData: TRecordData;
+    procedure DoFormatFieldValue(Column: TColumnIndex; RecordData: TRecordData;
         RowIndex: Cardinal; Field: TField; out FieldValue: UTF8String); virtual;
-    procedure DoLoadRecord(Sender: TObject; RecordData: TRecordData; RowIndex: Cardinal); virtual;
-    procedure DoCustomSort(Sender: TObject; Column: TColumnIndex; ColumnType: TColumnType;
+    procedure DoLoadRecord(RecordData: TRecordData; RowIndex: Cardinal); virtual;
+    procedure DoCustomSort(Column: TColumnIndex; ColumnType: TColumnType;
         const SortBy: string; SortDirection: TSortDirection; var RefreshGrid: boolean); virtual;
-    procedure DoPostChanges(Sender: TObject; const FieldNameOrIDText: string;
+    procedure DoPostChanges(const FieldNameOrIDText: string;
         Column: TcolumnIndex; ColumnType: TColumnType; RecordData: TRecordData;
         RowIndex: Cardinal; var NewValue: UTF8String; var PostChanges: boolean); virtual;
-    procedure DoChangeSort(Sender: TObject; SortColumn: TColumnIndex;
+    procedure DoChangeSort(SortColumn: TColumnIndex;
         SortDirection: TSortDirection); virtual;
 
     function GetRecordCount: longint;
@@ -491,6 +491,7 @@ type
     property OnCustomSort:            TOnCustomSortEvent       read fOnCustomSort            write fOnCustomSort;
     property OnPostChanges:           TOnPostChanges           read fOnPostChanges           write fOnPostChanges;
     property OnChangeSort:            TOnChangeSort            read fOnChangeSort            write fOnChangeSort;
+    property OnCompareRecord: TOnCompareRecord read FOnCompareRecord write FOnCompareRecord;
 
     // discarded VirtualTreeView properties that we doesn't allow to change by user
     property TreeOptions: TStringTreeOptions       read GetOptions          write SetOptions;
@@ -704,6 +705,7 @@ type
     property OnCustomSort;
     property OnPostChanges;
     property OnChangeSort;
+    property OnCompareRecord;
   end;
 
   TControlClick = class(TControl)
@@ -714,8 +716,11 @@ type
   function NullVar2Str(Value: Variant): UTF8String;
   function NullVar2Int(Value: Variant): Integer;
   function NullVar2Double(Value: Variant): Double;
+  function NullVar2DateTime(Value: Variant): TDateTime;
   function NullVar2Guid(Value: Variant): UTF8String;
   function NullVar2Bool(Value: Variant): boolean;
+
+  function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex): Integer;
 
 implementation
 
@@ -758,6 +763,20 @@ begin
   end;
 end;
 
+function NullVar2DateTime(Value: Variant): TDateTime;
+begin
+  if VarIsNull(Value) then
+    Result := 0
+  else
+  begin
+    try
+      Result := VarAsType(Value, varDate);
+    except
+      Result := 0;
+    end;
+  end;
+end;
+
 function NullVar2Guid(Value: Variant): UTF8String;
 const
   NullGuid: UTF8String = '{00000000-0000-0000-0000-000000000000}';
@@ -785,6 +804,70 @@ begin
     except
       Result := False;
     end;
+  end;
+end;
+
+function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex): Integer;
+var
+  Data1Value,
+  Data2Value : Variant;
+begin
+  // Get Data values of Data1 & Data2
+  Data1Value:= Record1.FieldValueByIdx[Column];
+  Data2Value:= Record2.FieldValueByIdx[Column];
+
+  case Record1.FieldTypeByIdx[Column] of
+    // string types
+    ftString,
+    ftMemo,
+    ftFixedChar: begin
+         Result := AnsiCompareText( NullVar2Str(Data1Value),
+                                    NullVar2Str(Data2Value));
+    end;
+
+    // integer types
+    ftSmallint,
+    ftInteger,
+    ftLargeint,
+    ftAutoInc,
+    ftWord: begin
+         Result:= CompareValue( NullVar2Int(Data1Value),
+                                NullVar2Int(Data2Value));
+    end;
+
+    // float types
+    ftFloat: begin
+     Result:= CompareValue( NullVar2Double(Data1Value),
+                            NullVar2Double(Data2Value));
+    end;
+
+    // date types
+     ftDate,
+     ftDateTime,
+     ftTime: begin
+         Result:= CompareValue( NullVar2DateTime(Data1Value),
+                                NullVar2DateTime(Data2Value) );
+    end;
+
+    // mena typy (SK, CZ, ...)
+    //todo see if using double here is ok
+    ftCurrency    : begin
+         Result:= CompareValue( NullVar2Double(Data1Value),
+                                NullVar2Double(Data2Value));
+    end;
+
+    ftGuid:         begin
+         Result:= CompareText( NullVar2Guid(Data1Value),
+                               NullVar2Guid(Data2Value));
+    end;
+
+    ftBoolean : begin
+         Result:= CompareValue( Integer(NullVar2Bool(Data1Value)),
+                                Integer(NullVar2Bool(Data2Value)));
+    end;
+
+    else
+      Result := 1;
   end;
 end;
 
@@ -2267,7 +2350,7 @@ begin
   if (DBOptions.SortingType <> stNone) and (aoAllowSorting in DBOptions.AdvOptions) then
   begin
     DoSortColumn(Column);
-    DoChangeSort(self, Header.SortColumn, Header.SortDirection);
+    DoChangeSort(Header.SortColumn, Header.SortDirection);
   end;
   inherited DoHeaderClick(Column, Button, Shift, X, Y);
 end;
@@ -2318,10 +2401,6 @@ function TCustomVirtualDBGrid.DoCompare(Node1, Node2: PVirtualNode; Column: TCol
 var
   Data1,
   Data2: PNodeData;
-
-  Data1Value,
-  Data2Value : Variant;
-
   ColType: TColumnType;
 
 begin
@@ -2357,60 +2436,10 @@ begin
     if (Data1^.RecordData.FieldTypeByIdx[Column] <> Data2^.RecordData.FieldTypeByIdx[Column])
        then exit;
 
-
-    // Get Data values of Data1 & Data2
-    Data1Value:= Data1^.RecordData.FieldValueByIdx[Column];
-    Data2Value:= Data2^.RecordData.FieldValueByIdx[Column];
-
-
-    case Data1^.RecordData.FieldTypeByIdx[Column] of
-         // string types
-         ftString,
-          ftMemo,
-          ftFixedChar: begin
-               Result := AnsiCompareText( NullVar2Str(Data1Value),
-                                          NullVar2Str(Data2Value) );
-          end;
-
-         // integer types
-         ftSmallint,
-          ftInteger,
-          ftLargeint,
-          ftAutoInc,
-          ftWord: begin
-               Result:= CompareValue( NullVar2Int(Data1Value),
-                                      NullVar2Int(Data2Value) );
-          end;
-
-         // float types
-         ftFloat,
-           ftDate,
-           ftDateTime,
-           ftTime: begin
-               Result:= CompareValue( NullVar2Double(Data1Value),
-                                      NullVar2Double(Data2Value) );
-         end;
-
-         // mena typy (SK, CZ, ...)
-         //todo see if using double here is ok
-         ftCurrency    : begin
-               Result:= CompareValue( NullVar2Double(Data1Value),
-                                      NullVar2Double(Data2Value) );
-         end;
-
-         ftGuid:         begin
-               Result:= CompareText( NullVar2Guid(Data1Value),
-                                     NullVar2Guid(Data2Value) );
-         end;
-
-         ftBoolean : begin
-               Result:= CompareValue( Integer(NullVar2Bool(Data1Value)),
-                                      Integer(NullVar2Bool(Data2Value)) );
-         end;
-
-         else
-           Result := 1;
-    end;
+    if Assigned(FOnCompareRecord) then
+      FOnCompareRecord(Self, Data1.RecordData, Data2.RecordData, Column, Result)
+    else
+      Result := CompareRecordData(Data1.RecordData, Data2.RecordData, Column);
 
   except
     Result:= 1;
@@ -2489,7 +2518,7 @@ begin
     IDText:= TVirtualDBTreeColumn(Header.Columns[Column]).Text;
 
     PostChanges:= true;
-    DoPostChanges(Self, IDText, Column, ColumnType, Data.RecordData, Node.Index,
+    DoPostChanges(IDText, Column, ColumnType, Data.RecordData, Node.Index,
                   PostText, PostChanges);
 
     if PostChanges then
@@ -2499,7 +2528,7 @@ begin
 
      FieldName:= TVirtualDBTreeColumn(Header.Columns[Column]).FieldName;
      PostChanges:= false;
-     DoPostChanges(self, FieldName, Column, ColumnType, Data.RecordData,
+     DoPostChanges(FieldName, Column, ColumnType, Data.RecordData,
                    Node.Index, PostText, PostChanges);
 
      if (PostChanges) then
@@ -2517,31 +2546,30 @@ begin
         except
         end;
      end;
-
   end;
 end;
 
 
 
-procedure TCustomVirtualDBGrid.DoGetRecordCount(Sender: TObject; var RecordCount: longint);
+procedure TCustomVirtualDBGrid.DoGetRecordCount(var RecordCount: LongInt);
 begin
   if Assigned(fOnGetRecordCount) then
-    fOnGetRecordCount(Sender, RecordCount);
+    fOnGetRecordCount(Self, RecordCount);
 end;
 
 
-procedure TCustomVirtualDBGrid.DoCalculateValue(Sender: TObject; const IDText: string;
+procedure TCustomVirtualDBGrid.DoCalculateValue(const IDText: string;
             Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal;
             var CalculatedValue: UTF8String; var CalculatedValueType: TFieldType);
 begin
   if Assigned(fOnCalculateValue) then
-     fOnCalculateValue(Sender, IDText, Column, RecordData, RowIndex,
+     fOnCalculateValue(Self, IDText, Column, RecordData, RowIndex,
                        CalculatedValue, CalculatedValueType);
 end;
 
 
 
-procedure TCustomVirtualDBGrid.DoFormatFieldValue(Sender: TObject; Column: TColumnIndex;
+procedure TCustomVirtualDBGrid.DoFormatFieldValue(Column: TColumnIndex;
              RecordData: TRecordData; RowIndex: Cardinal; Field: TField;
              out FieldValue: UTF8String);
 begin
@@ -2549,32 +2577,32 @@ begin
   //todo: remove aoFormatFieldValue
   // If aoFormatFieldValue flag is set then trigger user event OnFormatFieldValue
   if (aoFormatFieldValue in DBOptions.AdvOptions) and Assigned(fOnFormatFieldValue) then
-    fOnFormatFieldValue(Sender, Column, RecordData, RowIndex, Field, FieldValue);
+    fOnFormatFieldValue(Self, Column, RecordData, RowIndex, Field, FieldValue);
 end;
 
 
-procedure TCustomVirtualDBGrid.DoLoadRecord(Sender: TObject; RecordData: TRecordData;
+procedure TCustomVirtualDBGrid.DoLoadRecord(RecordData: TRecordData;
      RowIndex: Cardinal);
 begin
   if Assigned(fOnLoadRecord) then
-     fOnLoadRecord(Sender, RecordData, RowIndex);
+     fOnLoadRecord(Self, RecordData, RowIndex);
 end;
 
 
-procedure TCustomVirtualDBGrid.DoCustomSort(Sender: TObject; Column: TColumnIndex;
+procedure TCustomVirtualDBGrid.DoCustomSort(Column: TColumnIndex;
          ColumnType: TColumnType; const SortBy: string; SortDirection: TSortDirection;
          var RefreshGrid: boolean);
 begin
   if Assigned(fOnCustomSort) then
-     fOnCustomSort(Sender, Column, ColumnType, SortBy, SortDirection, RefreshGrid);
+     fOnCustomSort(Self, Column, ColumnType, SortBy, SortDirection, RefreshGrid);
 end;
 
-procedure TCustomVirtualDBGrid.DoPostChanges(Sender: TObject; const FieldNameOrIDText: string;
+procedure TCustomVirtualDBGrid.DoPostChanges(const FieldNameOrIDText: string;
      Column: TcolumnIndex; ColumnType: TColumnType; RecordData: TRecordData;
      RowIndex: Cardinal; var NewValue: UTF8String; var PostChanges: boolean);
 begin
   if Assigned(fOnPostChanges)
-     then fOnPostChanges(Sender, FieldNameOrIDText, Column, ColumnType, RecordData,
+     then fOnPostChanges(Self, FieldNameOrIDText, Column, ColumnType, RecordData,
                          RowIndex, NewValue, PostChanges)
      else PostChanges:= true;
 end;
@@ -2590,11 +2618,11 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.DoChangeSort(Sender: TObject; SortColumn: TColumnIndex;
+procedure TCustomVirtualDBGrid.DoChangeSort(SortColumn: TColumnIndex;
         SortDirection: TSortDirection); 
 begin
   if Assigned(fOnChangeSort) then
-     fOnChangeSort(Sender, SortColumn, SortDirection);
+     fOnChangeSort(Self, SortColumn, SortDirection);
 end;
 
 
@@ -2607,7 +2635,7 @@ begin
       Result := LinkedDataSet.RecordCount;
   end
   else
-    DoGetRecordCount(Self, Result);
+    DoGetRecordCount(Result);
 end;
 
 function TCustomVirtualDBGrid.FindNodeByRecNo(ARecNo: longint): PVirtualNode;
@@ -3253,7 +3281,7 @@ begin
 
                 if (WField <> nil)
                    then begin
-                      DoFormatFieldValue(self, Header.Columns[i].Index, Data.RecordData,
+                      DoFormatFieldValue(Header.Columns[i].Index, Data.RecordData,
                                          ANode.Index, WField, WFieldValue);
 
                       if (Idx = -1)
@@ -3300,7 +3328,7 @@ begin
         Idx:= Data.RecordData.IndexOf(WIDText, ffCalculated);
 
         WCalcValue:= '';
-        DoCalculateValue(self, Header.Columns[ColIdx].Text, Header.Columns[ColIdx].Index,
+        DoCalculateValue(Header.Columns[ColIdx].Text, Header.Columns[ColIdx].Index,
                          Data.RecordData, ANode.Index, WCalcValue, WCalcType);
 
         if (Idx = -1)
@@ -3313,7 +3341,7 @@ begin
     end;
 
     // Fireup OnLoadRecord event
-    DoLoadRecord(self, Data.RecordData, ANode.Index);
+    DoLoadRecord(Data.RecordData, ANode.Index);
 
   finally
     CalculatedColumns.Free;
@@ -3436,7 +3464,7 @@ begin
                   SortBy:= TVirtualDBTreeColumn(Header.Columns[AColumn]).Text;}
            end;
 
-           DoCustomSort(self, AColumn, ColumnType, SortBy, sDirection, RefreshGrid);
+           DoCustomSort(AColumn, ColumnType, SortBy, sDirection, RefreshGrid);
 
            if (RefreshGrid) then ReInitializeDBGrid;
          end;
