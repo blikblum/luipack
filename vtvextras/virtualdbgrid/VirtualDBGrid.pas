@@ -671,6 +671,7 @@ type
     property OnHeaderMouseUp;
     property OnHotChange;
     property OnIncrementalSearch;
+    property OnInitNode;
     property OnKeyAction;
     property OnKeyDown;
     property OnKeyPress;
