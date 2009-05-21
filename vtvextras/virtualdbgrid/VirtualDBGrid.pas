@@ -498,7 +498,6 @@ type
     property RootNodeCount stored false;
     property NodeDataSize stored false;
     property DefaultText stored false;
-    property OnEditing;
     property OnFreeNode;
     property OnGetText;
     property OnNewText;
@@ -640,6 +639,7 @@ type
     property OnDragDrop;
     property OnEditCancelled;
     property OnEdited;
+    property OnEditing;
     property OnEndDock;
     property OnEndDrag;
     property OnEnter;
