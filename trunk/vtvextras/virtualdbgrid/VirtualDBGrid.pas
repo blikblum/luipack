@@ -2453,6 +2453,9 @@ var
    ColumnType: TColumnType;
    Col: TVirtualDBTreeColumn;
 begin
+  inherited DoCanEdit(Node, Column, Allowed);
+  if not Allowed then
+    Exit;
   if (Column > NoColumn) then
   begin
     Col:= TVirtualDBTreeColumn(Header.Columns[Column]);
