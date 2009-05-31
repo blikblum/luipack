@@ -709,7 +709,6 @@ type
     property OnClick;
   end;
 
-  function NullVar2Str(Value: Variant): UTF8String;
   function NullVar2Int(Value: Variant): Integer;
   function NullVar2Double(Value: Variant): Double;
   function NullVar2DateTime(Value: Variant): TDateTime;
@@ -722,14 +721,6 @@ implementation
 
 uses
   Math, dbconst, vtlogger;
-
-function NullVar2Str(Value: Variant): UTF8String;
-begin
- if not VarIsNull(Value) then
-   Result := VarToStr(Value)
- else
-   Result := '';
-end;
 
 function NullVar2Int(Value: Variant): Integer;
 begin
@@ -777,16 +768,7 @@ function NullVar2Guid(Value: Variant): UTF8String;
 const
   NullGuid: UTF8String = '{00000000-0000-0000-0000-000000000000}';
 begin
-  if VarIsNull(Value) then
-    Result:= NullGuid
-  else
-  begin
-    try
-      Result := NullVar2Str(Value);
-    except
-      Result := NullGuid;
-    end;
-  end;
+  Result := VarToStrDef(Value, NullGuid);
 end;
 
 function NullVar2Bool(Value: Variant): Boolean;
@@ -817,8 +799,8 @@ begin
     ftString,
     ftMemo,
     ftFixedChar: begin
-         Result := AnsiCompareText( NullVar2Str(Data1Value),
-                                    NullVar2Str(Data2Value));
+         Result := AnsiCompareText( VarToStr(Data1Value),
+                                    VarToStr(Data2Value));
     end;
 
     // integer types
@@ -2200,7 +2182,7 @@ begin
       FieldValue := Data.RecordData.FieldValue[TVirtualDBTreeColumn(Header.Columns[Column]).FieldName]
     else
       FieldValue := Data.RecordData.FieldValueByIdx[Header.Columns[Column].Index];
-    CellText := NullVar2Str(FieldValue);
+    CellText := VarToStr(FieldValue);
   end;
 end;
 

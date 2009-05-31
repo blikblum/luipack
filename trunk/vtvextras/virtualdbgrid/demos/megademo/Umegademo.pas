@@ -7,7 +7,7 @@ interface
 uses
   LCLIntf, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, DB, VirtualDBGrid, ExtCtrls, VirtualTrees, Buttons,
-  StdCtrls, DBCtrls, LResources, dbf;
+  StdCtrls, DBCtrls, LResources, dbf, Variants;
 
 type
 
@@ -477,7 +477,7 @@ begin
           str := calcstr[rec.IsCalculatedByIdx[j]];
           if str = '' then
             str := indicstr[rec.IsIndicatorByIdx[j]];
-          Memo1.Lines.Add(Format('[%s%s]: %s', [rec.FieldName[j], Str, NullVar2Str(rec.FieldValueByIdx[j])]));
+          Memo1.Lines.Add(Format('[%s%s]: %s', [rec.FieldName[j], Str, VarToStr(rec.FieldValueByIdx[j])]));
         end;
         Memo1.Lines.Add('-----------------------------------');
      end;
@@ -618,8 +618,8 @@ begin
   begin
      numb1:= 0;
      numb2:= 0;
-     numb1s:= NullVar2Str(RecordData.FieldValue['Number1']);
-     numb2s:= NullVar2Str(RecordData.FieldValue['Number2']);
+     numb1s:= VarToStr(RecordData.FieldValue['Number1']);
+     numb2s:= VarToStr(RecordData.FieldValue['Number2']);
      if (numb1s <> '') then
         numb1:= strtoint(numb1s);
      if (numb2s <> '') then
