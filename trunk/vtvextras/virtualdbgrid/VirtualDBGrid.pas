@@ -41,7 +41,7 @@ interface
 
 uses
   LCLType, types, delphicompat, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
-  Variants, ImgList, Forms, Graphics, ExtCtrls, StdCtrls, Buttons, LResources;
+  Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LResources;
 
 const
   ResBMP_INDICATOR    = 'INDICATOR';
