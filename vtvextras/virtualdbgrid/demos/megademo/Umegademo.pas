@@ -47,7 +47,6 @@ type
     chAllowSorting: TCheckBox;
     chSortDBFieldColumns: TCheckBox;
     chSortCalculatedColumns: TCheckBox;
-    chFormatFieldValue: TCheckBox;
     chActiveDatabase: TCheckBox;
     chScrollIntoView: TCheckBox;
     chHourGlassCursor: TCheckBox;
@@ -100,7 +99,7 @@ type
       SortDirection: TSortDirection; var RefreshGrid: Boolean);
     procedure DBGridFormatFieldValue(Sender: TObject; Column: TColumnIndex;
       RecordData: TRecordData; RowIndex: Cardinal; Field: TField;
-      var FieldValue: UTF8String; var DefaultFormat: Boolean);
+      var FieldValue: Variant);
     procedure SelRecInfoBtnClick(Sender: TObject);
     procedure VDBGridBtnClick(Sender: TObject);
     procedure DBGridPostChanges(Sender: TObject; FieldNameOrIDText: String;
@@ -196,11 +195,6 @@ begin
   chSortDBFieldColumns.Checked:= (aoSortDBFieldColumns in DBGrid.DBOptions.AdvOptions);
   { Sort calculated columns }
   chSortCalculatedColumns.Checked:= (aoSortCalculatedColumns in DBGrid.DBOptions.AdvOptions);
-  { Format field value }
-    { You can format field values(TField) when loading data from database.             }
-    { If you reset this setting and VirtualDBGrid has already loaded data from databse }
-    { then you must reload data to accept new setting of Format field value.           }
-  chFormatFieldValue.Checked:= (aoFormatFieldValue in DBGrid.DBOptions.AdvOptions);
   { Center scroll into view }
   chScrollIntoView.Checked:= (aoCenterScrollIntoView in DBGrid.DBOptions.AdvOptions);
   { Show HourGlass cursor on sort action }
@@ -329,11 +323,6 @@ begin
             else AdvOptions:= AdvOptions - [aoSortCalculatedColumns];
        end;
 
-       34: begin { Format field value }
-         if (Checked)
-            then AdvOptions:= AdvOptions + [aoFormatFieldValue]
-            else AdvOptions:= AdvOptions - [aoFormatFieldValue];
-       end;
 
        35: begin { Center scroll into view }
          if (Checked)
@@ -444,7 +433,7 @@ end;
 
 procedure TMainForm.DBGridFormatFieldValue(Sender: TObject;
   Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal;
-  Field: TField; var FieldValue: UTF8String; var DefaultFormat: Boolean);
+  Field: TField; var FieldValue: Variant);
 begin
    if (Field.FieldName = 'XHOST_DATE') then
    begin

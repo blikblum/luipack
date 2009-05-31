@@ -80,9 +80,7 @@ type
                             // {only if aoAllowSorting is set}
   aoEditCalculatedColumns,  // if set, then editing colum with type ctCalculated is allowed
   aoFullRowSelect,          // enable full row select, see aoEditable for details
-  aoMultiSelect,            // enable multi select
-  aoFormatFieldValue        // trigger event OnFormatFieldValue, where we can format value of
-                            // database TFIELD
+  aoMultiSelect             // enable multi select
   );
 
   TVTDBAdvOptions = set of TVTDBAdvOption;
@@ -129,14 +127,11 @@ type
                                        RowIndex: Cardinal; var CalculatedValue: UTF8String;
                                        var CalculatedValueType: TFieldType) of object;
 
-  { TOnFormatFieldValueEvent - Triggered when aoFormatFieldValue is in AdvOptions to format }
-  {                            database TField.Value. If isn't assigned this event          }
-  {                            or aoFormatFieldValue is not in AdvOptions, then standard    }
-  {                            TField.Value will be used                                    }
+  { TOnFormatFieldValueEvent - Triggered when loading data from dataset}
   TOnFormatFieldValueEvent = procedure(Sender: TCustomVirtualDBGrid; Column: TColumnIndex;
                                        RecordData: TRecordData;
                                        RowIndex: Cardinal; Field: TField;
-                                       var FieldValue: UTF8String) of object;
+                                       var FieldValue: Variant) of object;
 
   { TOnLoadRecordEvent - Triggered when record from database was loaded into VirtualDBGrid }
   {                      Assigning this event can reduce speed of VirtualDBGrid            }
@@ -438,7 +433,7 @@ type
         RecordData: TRecordData; RowIndex: Cardinal; var CalculatedValue: UTF8String;
         var CalculatedValueType: TFieldType);
     procedure DoFormatFieldValue(Column: TColumnIndex; RecordData: TRecordData;
-        RowIndex: Cardinal; Field: TField; out FieldValue: UTF8String); virtual;
+        RowIndex: Cardinal; Field: TField; var FieldValue: Variant); virtual;
     procedure DoLoadRecord(RecordData: TRecordData; RowIndex: Cardinal); virtual;
     procedure DoCustomSort(Column: TColumnIndex; ColumnType: TColumnType;
         const SortBy: string; SortDirection: TSortDirection; var RefreshGrid: boolean); virtual;
@@ -2575,12 +2570,9 @@ end;
 
 procedure TCustomVirtualDBGrid.DoFormatFieldValue(Column: TColumnIndex;
              RecordData: TRecordData; RowIndex: Cardinal; Field: TField;
-             out FieldValue: UTF8String);
+             var FieldValue: Variant);
 begin
-  FieldValue := NullVar2Str(Field.Value);
-  //todo: remove aoFormatFieldValue
-  // If aoFormatFieldValue flag is set then trigger user event OnFormatFieldValue
-  if (aoFormatFieldValue in DBOptions.AdvOptions) and Assigned(fOnFormatFieldValue) then
+  if Assigned(fOnFormatFieldValue) then
     fOnFormatFieldValue(Self, Column, RecordData, RowIndex, Field, FieldValue);
 end;
 
@@ -3230,7 +3222,7 @@ var
     WFieldName:     UTF8String;
     WIDText:        string;
     WField:         TField;
-    WFieldValue:    UTF8String;
+    WFieldValue:    Variant;
     WCalcValue:     UTF8String;
     WCalcType:      TFieldType;
     ColType:        TColumnType;
@@ -3252,13 +3244,13 @@ begin
 
   If (Data.RecordData = nil) then
   begin
-     // If AlwaysUpdate is false then we dont want to reload existing values from database
-     if (not AlwaysUpdate) then exit;
-     // If RecordData is nil then create it, if AlwaysUpdate is true
-     Data.RecordData:= GetRecordDataClass.Create;//TRecordData.Create;
-     //necessary to avoid memory leaks when scrolling to fast
-     if not (vsInitialized in ANode^.States) then
-       InitNode(ANode);
+    // If AlwaysUpdate is false then we dont want to reload existing values from database
+    if (not AlwaysUpdate) then exit;
+    // If RecordData is nil then create it, if AlwaysUpdate is true
+    Data.RecordData:= GetRecordDataClass.Create;//TRecordData.Create;
+    //necessary to avoid memory leaks when scrolling to fast
+    if not (vsInitialized in ANode^.States) then
+      InitNode(ANode);
   end;
 
   // CalculatedColumns to archive calculated column indexes
@@ -3268,55 +3260,61 @@ begin
     RecordNo:= GetCurrentDBRecNo;
     // If current record number is other than -1 then setup RecordData.RecNo
     if (RecordNo <> -1) then
-      Data.RecordData.RecNo:= RecordNo;
+      Data.RecordData.RecNo := RecordNo;
 
     // Cycle for columns and load data from database and store to Node data
-    for I:= 0 to Header.Columns.Count-1 do
+    for I := 0 to Header.Columns.Count - 1 do
     begin
-      ColType:= TVirtualDBTreeColumn(Header.Columns[I]).ColumnType;
+      ColType := TVirtualDBTreeColumn(Header.Columns[I]).ColumnType;
 
       case ColType of
-           ctDBField: begin
-                WField:= nil;
-                WFieldName:= TVirtualDBTreeColumn(Header.Columns[I]).FieldName;
-                if (RecordNo <> -1) then
-                   WField:= LinkedDataSet.FindField(WFieldName);
-                Idx:= Data.RecordData.IndexOf(WFieldName, ffDBField);
+        ctDBField:
+        begin
+          WFieldName := TVirtualDBTreeColumn(Header.Columns[I]).FieldName;
+          if RecordNo <> -1 then
+            WField := LinkedDataSet.FindField(WFieldName)
+          else
+            WField := nil;
 
-                if (WField <> nil)
-                   then begin
-                      DoFormatFieldValue(Header.Columns[i].Index, Data.RecordData,
-                                         ANode.Index, WField, WFieldValue);
+          Idx := Data.RecordData.IndexOf(WFieldName, ffDBField);
 
-                      if (Idx = -1)
-                         then begin
-                           //todo: see what to do here after UTF8 conversion
-                           //original: Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
-                           //Data.RecordData.Add(WFieldName, WField.Value, WField.DataType, ffDBField);
-                           Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField);
-                         end
-                         else begin
-                           if (Idx <> I) then Data.RecordData.Exchange(Idx, I);
-                           Data.RecordData.Edit(WFieldName, ffDBField, WFieldValue, WField.DataType);
-                         end;
-                   end
-                   else begin // if field doesnt exists than add empty values
-                      if (Idx = -1)
-                         then Data.RecordData.Add(WFieldName, WFieldValue, ftUnknown, ffDBField)
-                         else begin
-                           if (Idx <> I) then Data.RecordData.Exchange(Idx, I);
-                           Data.RecordData.Edit(WFieldName, ffDBField, WFieldValue);
-                         end;
-                   end;
-           end;
+          if WField <> nil then
+          begin
+            WFieldValue := WField.Value;
+            DoFormatFieldValue(Header.Columns[i].Index, Data.RecordData,
+              ANode.Index, WField, WFieldValue);
 
-           ctCalculated: begin
-                CalculatedColumns.Add(Inttostr(I));
-           end;
+            if Idx = -1 then
+              Data.RecordData.Add(WFieldName, WFieldValue, WField.DataType, ffDBField)
+            else
+            begin
+               if Idx <> I then
+                 Data.RecordData.Exchange(Idx, I);
+               Data.RecordData.Edit(WFieldName, ffDBField, WFieldValue, WField.DataType);
+            end;
+          end
+          else
+          begin // if field doesnt exists than add empty values
+            if Idx = -1 then
+              Data.RecordData.Add(WFieldName, Null, ftUnknown, ffDBField)
+            else
+            begin
+              if Idx <> I then
+                Data.RecordData.Exchange(Idx, I);
+              Data.RecordData.Edit(WFieldName, ffDBField, Null);
+            end;
+          end;
+        end;
 
-           ctIndicator: begin
-               Data.RecordData.Add('', '', ftUnknown, ffIndicator);
-           end;
+        ctCalculated:
+        begin
+          CalculatedColumns.Add(Inttostr(I));
+        end;
+
+        ctIndicator:
+        begin
+          Data.RecordData.Add('', '', ftUnknown, ffIndicator);
+        end;
       end;
     end;
 
