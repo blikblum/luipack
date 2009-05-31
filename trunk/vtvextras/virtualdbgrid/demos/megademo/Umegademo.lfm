@@ -14,6 +14,7 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   LCLVersion = '0.9.27'
   object Panel1: TPanel
+    Left = 0
     Height = 38
     Top = 808
     Width = 869
@@ -27,15 +28,15 @@ object MainForm: TMainForm
       Left = 8
       Height = 14
       Top = 12
-      Width = 96
+      Width = 94
       Caption = 'Database navigator'
       ParentColor = False
     end
     object chActiveDatabase: TCheckBox
       Left = 371
-      Height = 19
+      Height = 17
       Top = 8
-      Width = 103
+      Width = 97
       Caption = 'Active database'
       OnClick = chActiveDatabaseClick
       TabOrder = 0
@@ -53,7 +54,9 @@ object MainForm: TMainForm
     end
   end
   object GroupBox1: TGroupBox
+    Left = 0
     Height = 176
+    Top = 0
     Width = 869
     Align = alTop
     Caption = ' VirtualDBGrid options '
@@ -63,6 +66,7 @@ object MainForm: TMainForm
     object GroupBox2: TGroupBox
       Left = 2
       Height = 152
+      Top = 0
       Width = 149
       Caption = ' Row options '
       ClientHeight = 134
@@ -100,8 +104,9 @@ object MainForm: TMainForm
       object chStrippedRows: TCheckBox
         Tag = 10
         Left = 7
-        Height = 19
-        Width = 118
+        Height = 17
+        Top = 0
+        Width = 112
         Caption = 'Show stripped rows'
         OnClick = SetSettings
         TabOrder = 0
@@ -109,9 +114,9 @@ object MainForm: TMainForm
       object chShowHorzLines: TCheckBox
         Tag = 11
         Left = 7
-        Height = 19
+        Height = 17
         Top = 54
-        Width = 125
+        Width = 119
         Caption = 'Show horizontal lines'
         OnClick = SetSettings
         TabOrder = 1
@@ -119,9 +124,9 @@ object MainForm: TMainForm
       object chShowVertLines: TCheckBox
         Tag = 12
         Left = 7
-        Height = 19
+        Height = 17
         Top = 73
-        Width = 114
+        Width = 108
         Caption = 'Show vertical lines'
         OnClick = SetSettings
         TabOrder = 2
@@ -129,9 +134,9 @@ object MainForm: TMainForm
       object chFullRowSelect: TCheckBox
         Tag = 13
         Left = 7
-        Height = 19
+        Height = 17
         Top = 92
-        Width = 93
+        Width = 87
         Caption = 'Full row select'
         OnClick = SetSettings
         TabOrder = 3
@@ -139,9 +144,9 @@ object MainForm: TMainForm
       object chMultiSelect: TCheckBox
         Tag = 14
         Left = 7
-        Height = 19
+        Height = 17
         Top = 112
-        Width = 79
+        Width = 73
         Caption = 'Multi select'
         OnClick = SetSettings
         TabOrder = 4
@@ -150,6 +155,7 @@ object MainForm: TMainForm
     object GroupBox3: TGroupBox
       Left = 174
       Height = 152
+      Top = 0
       Width = 186
       Caption = ' Row indicator '
       ClientHeight = 134
@@ -159,30 +165,30 @@ object MainForm: TMainForm
         Left = 6
         Height = 14
         Top = 24
-        Width = 69
+        Width = 67
         Caption = 'Indicator align'
         ParentColor = False
       end
       object Label3: TLabel
         Left = 6
         Height = 14
-        Top = 48
-        Width = 107
+        Top = 49
+        Width = 104
         Caption = 'Indicator vertical align'
         ParentColor = False
       end
       object Label4: TLabel
         Left = 6
         Height = 14
-        Top = 76
-        Width = 75
+        Top = 74
+        Width = 73
         Caption = 'Indicator image'
         ParentColor = False
       end
       object Label5: TLabel
         Left = 6
         Height = 13
-        Top = 98
+        Top = 100
         Width = 97
         AutoSize = False
         Caption = 'Indicator bg color'
@@ -190,20 +196,20 @@ object MainForm: TMainForm
       end
       object clrIndicatorBgColor: TShape
         Cursor = crHandPoint
-        Left = 132
+        Left = 116
         Height = 20
         Top = 96
         Width = 20
         Brush.Color = clBtnFace
-        Pen.Cosmetic = True
         OnMouseDown = clrIndicatorBgColorMouseDown
       end
       object chAutoInsertIndicator: TCheckBox
         Tag = 20
-        Left = 11
-        Height = 19
+        Left = 6
+        Height = 17
         Hint = 'Insert automatically indicator column, when opening dataset, if there are no columns defined'#13#10'Close & than open database (Active database) and see what happend with indicator.'
-        Width = 119
+        Top = 0
+        Width = 113
         Caption = 'Auto insert indicator'
         OnClick = SetSettings
         ParentShowHint = False
@@ -214,7 +220,7 @@ object MainForm: TMainForm
         Left = 116
         Height = 20
         Top = 21
-        Width = 57
+        Width = 63
         Font.CharSet = EASTEUROPE_CHARSET
         Font.Height = -9
         Font.Name = 'Small Fonts'
@@ -232,8 +238,8 @@ object MainForm: TMainForm
       object cmbIndicatorVAlign: TComboBox
         Left = 116
         Height = 20
-        Top = 48
-        Width = 57
+        Top = 46
+        Width = 63
         Font.CharSet = EASTEUROPE_CHARSET
         Font.Height = -9
         Font.Name = 'Small Fonts'
@@ -251,7 +257,7 @@ object MainForm: TMainForm
       object cmbIndicatorImage: TComboBox
         Left = 116
         Height = 20
-        Top = 73
+        Top = 71
         Width = 63
         Font.CharSet = EASTEUROPE_CHARSET
         Font.Height = -9
@@ -272,6 +278,7 @@ object MainForm: TMainForm
     object GroupBox4: TGroupBox
       Left = 382
       Height = 152
+      Top = 0
       Width = 312
       Caption = ' Others '
       ClientHeight = 134
@@ -280,9 +287,10 @@ object MainForm: TMainForm
       object chEditable: TCheckBox
         Tag = 30
         Left = 6
-        Height = 19
+        Height = 17
         Hint = 'Allow editing values in cells and update changes to database.'#13#10'If Full row select is defined then no editing are allowed.'
-        Width = 270
+        Top = 0
+        Width = 264
         Caption = 'Cell values editable (and post changes to database)'
         OnClick = SetSettings
         ParentShowHint = False
@@ -292,10 +300,10 @@ object MainForm: TMainForm
       object chAllowSorting: TCheckBox
         Tag = 31
         Left = 6
-        Height = 19
+        Height = 17
         Hint = 'buildin - buildin sorting feature(slower on big database.'#13#10'custom - when there was a click on header then OnCustomSort event will be triggered to allow user sort database by their way(in some cases, this is much faster).'
-        Top = 17
-        Width = 85
+        Top = 20
+        Width = 79
         Caption = 'Allow sorting'
         OnClick = SetSettings
         ParentShowHint = False
@@ -305,9 +313,9 @@ object MainForm: TMainForm
       object chSortDBFieldColumns: TCheckBox
         Tag = 32
         Left = 6
-        Height = 19
+        Height = 17
         Top = 38
-        Width = 127
+        Width = 121
         Caption = 'Sort DB field columns'
         OnClick = SetSettings
         TabOrder = 2
@@ -315,48 +323,35 @@ object MainForm: TMainForm
       object chSortCalculatedColumns: TCheckBox
         Tag = 33
         Left = 6
-        Height = 19
+        Height = 17
         Top = 57
-        Width = 139
+        Width = 133
         Caption = 'Sort calculated columns'
         OnClick = SetSettings
         TabOrder = 3
       end
-      object chFormatFieldValue: TCheckBox
-        Tag = 34
-        Left = 6
-        Height = 19
-        Hint = 'You can format field values(TField) when loading data from database.'#13#10'If you change this setting and VirtualDBGrid has already loaded data from databse, '#13#10'then you must reload data to accept new setting of Format field value.'#13#10'Set Active database to false & then to true.'
-        Top = 76
-        Width = 109
-        Caption = 'Format field value'
-        OnClick = SetSettings
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 4
-      end
       object chScrollIntoView: TCheckBox
         Tag = 35
         Left = 6
-        Height = 19
-        Top = 95
-        Width = 129
+        Height = 17
+        Top = 76
+        Width = 123
         Caption = 'Center scroll into view'
         OnClick = SetSettings
-        TabOrder = 5
+        TabOrder = 4
       end
       object chHourGlassCursor: TCheckBox
         Tag = 36
         Left = 6
-        Height = 19
-        Top = 114
-        Width = 204
+        Height = 17
+        Top = 95
+        Width = 198
         Caption = 'Show HourGlass cursor on sort action'
         OnClick = SetSettings
-        TabOrder = 6
+        TabOrder = 5
       end
       object cmbSortingType: TComboBox
-        Left = 115
+        Left = 94
         Height = 20
         Top = 18
         Width = 62
@@ -372,35 +367,36 @@ object MainForm: TMainForm
         OnChange = cmbSortingTypeChange
         ParentFont = False
         Style = csDropDownList
-        TabOrder = 7
+        TabOrder = 6
       end
       object chEditDBFieldColumns: TCheckBox
         Tag = 37
         Left = 152
-        Height = 19
+        Height = 17
         Top = 38
-        Width = 126
+        Width = 120
         Caption = 'Edit DB field columns'
+        OnClick = SetSettings
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 7
+      end
+      object chEditCalculatedColumns: TCheckBox
+        Tag = 38
+        Left = 152
+        Height = 17
+        Top = 57
+        Width = 132
+        Caption = 'Edit calculated columns'
         OnClick = SetSettings
         ParentShowHint = False
         ShowHint = True
         TabOrder = 8
       end
-      object chEditCalculatedColumns: TCheckBox
-        Tag = 38
-        Left = 152
-        Height = 19
-        Top = 57
-        Width = 138
-        Caption = 'Edit calculated columns'
-        OnClick = SetSettings
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 9
-      end
     end
   end
   object GroupBox5: TGroupBox
+    Left = 0
     Height = 70
     Top = 738
     Width = 869
@@ -429,7 +425,7 @@ object MainForm: TMainForm
       Left = 369
       Height = 14
       Top = 7
-      Width = 12
+      Width = 13
       Caption = 'Ts'
       ParentColor = False
     end
@@ -437,7 +433,7 @@ object MainForm: TMainForm
       Left = 266
       Height = 14
       Top = 7
-      Width = 24
+      Width = 26
       Caption = 'Desc'
       ParentColor = False
     end
@@ -445,7 +441,7 @@ object MainForm: TMainForm
       Left = 449
       Height = 14
       Top = 7
-      Width = 43
+      Width = 44
       Caption = 'XHost ID'
       ParentColor = False
     end
@@ -453,7 +449,7 @@ object MainForm: TMainForm
       Left = 176
       Height = 14
       Top = 7
-      Width = 28
+      Width = 29
       Caption = 'Name'
       ParentColor = False
     end
@@ -467,7 +463,7 @@ object MainForm: TMainForm
     end
     object DBEdit1: TDBEdit
       Left = 6
-      Height = 19
+      Height = 22
       Top = 23
       Width = 100
       DataField = 'CODE_ID'
@@ -475,13 +471,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 0
     end
     object DBEdit2: TDBEdit
       Left = 110
-      Height = 19
+      Height = 22
       Top = 23
       Width = 62
       DataField = 'CODE'
@@ -489,13 +484,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 1
     end
     object DBEdit3: TDBEdit
       Left = 369
-      Height = 19
+      Height = 22
       Top = 23
       Width = 77
       DataField = 'TS'
@@ -503,13 +497,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 2
     end
     object DBEdit4: TDBEdit
       Left = 266
-      Height = 19
+      Height = 22
       Top = 23
       Width = 100
       DataField = 'DESCRIP'
@@ -517,13 +510,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 3
     end
     object DBEdit5: TDBEdit
       Left = 449
-      Height = 19
+      Height = 22
       Top = 23
       Width = 100
       DataField = 'XHOST_ID'
@@ -531,7 +523,6 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 4
     end
@@ -550,7 +541,7 @@ object MainForm: TMainForm
     end
     object DBEdit6: TDBEdit
       Left = 176
-      Height = 19
+      Height = 22
       Top = 23
       Width = 86
       DataField = 'NAME'
@@ -558,13 +549,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 6
     end
     object DBEdit7: TDBEdit
       Left = 553
-      Height = 19
+      Height = 22
       Top = 23
       Width = 100
       DataField = 'XHOST_DATE'
@@ -572,12 +562,12 @@ object MainForm: TMainForm
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
-      ParentColor = False
       ParentFont = False
       TabOrder = 7
     end
   end
   object GroupBox6: TGroupBox
+    Left = 0
     Height = 48
     Top = 176
     Width = 869
@@ -706,6 +696,7 @@ object MainForm: TMainForm
     end
   end
   object NTB: TNotebook
+    Left = 0
     Height = 514
     Top = 224
     Width = 869
@@ -716,9 +707,11 @@ object MainForm: TMainForm
     object Page1: TPage
       Caption = 'DBGridPage'
       ClientWidth = 861
-      ClientHeight = 488
+      ClientHeight = 506
       object DBGrid: TVirtualDBGrid
-        Height = 488
+        Left = 0
+        Height = 506
+        Top = 0
         Width = 861
         Align = alClient
         BorderStyle = bsSingle
@@ -726,6 +719,7 @@ object MainForm: TMainForm
         Colors.FocusedSelectionBorderColor = clTeal
         Header.AutoSizeIndex = -1
         Header.Columns = <>
+        Header.DefaultHeight = 17
         Header.Font.Height = -11
         Header.Font.Name = 'MS Sans Serif'
         Header.Font.Style = [fsBold]
@@ -750,9 +744,11 @@ object MainForm: TMainForm
     object Page2: TPage
       Caption = 'MemoPage'
       ClientWidth = 861
-      ClientHeight = 483
+      ClientHeight = 506
       object Memo1: TMemo
-        Height = 483
+        Left = 0
+        Height = 506
+        Top = 0
         Width = 861
         Align = alClient
         ReadOnly = True
@@ -815,6 +811,7 @@ object MainForm: TMainForm
     }
   end
   object ColorD: TColorDialog
+    Color = clBlack
     CustomColors.Strings = (
       'ColorA=000000'
       'ColorB=000080'
@@ -843,6 +840,7 @@ object MainForm: TMainForm
   object Dbf1: TDbf
     IndexDefs = <>
     TableLevel = 4
+    FilterOptions = []
     left = 312
     top = 234
   end
