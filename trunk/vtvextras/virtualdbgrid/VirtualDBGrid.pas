@@ -521,7 +521,7 @@ type
     // navigate trought the treeview
     function Navigate(FromPosition: TNavigateFromPosition; Delta: Longint): boolean;
     procedure ReInitializeDBGrid;
-    function IsDataOk(AData: PNodeData): boolean;
+    function IsDataOk(AData: PNodeData): Boolean;
 
     property SortingColumn:                  TVirtualDBTreeColumn read GetSortingColumn;
     property IndicatorColumn:                TVirtualDBTreeColumn read GetIndicatorColumn;
@@ -2919,10 +2919,9 @@ begin
 end;
 
 
-function TCustomVirtualDBGrid.IsDataOk(AData: PNodeData): boolean;
+function TCustomVirtualDBGrid.IsDataOk(AData: PNodeData): Boolean;
 begin
-  result:= Assigned(AData);
-  if (result) then result:= Assigned(AData.RecordData);
+  Result := Assigned(AData) and Assigned(AData.RecordData);
 end;
 
 
