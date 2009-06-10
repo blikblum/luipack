@@ -48,7 +48,7 @@ implementation
 
 function IsFieldReadOnly(Field: TField): Boolean;
 begin
-  //todo: see if fpc224 already fixed autoinc.readonly
+  //todo: remove as soon autoinc.readonly is fixed. fpc224 is not fixed yet
   Result := Field.ReadOnly or (Field.DataType = ftAutoInc);
 end;
 
@@ -56,15 +56,7 @@ procedure AssignFieldValue(DestField, SrcField: TField);
 begin
   if IsFieldReadOnly(DestField) then
     Exit;
-  //todo: see if double fields bug is fixed in fpc 224
-  case DestField.DataType of
-    ftDate, ftDateTime, ftTime, ftFloat:
-      DestField.AsFloat := SrcField.AsFloat;
-    ftInteger:
-      DestField.AsInteger := SrcField.AsInteger;
-  else
-    DestField.AsString := SrcField.AsString;
-  end;
+  DestField.Value := SrcField.Value;
 end;
 
 { TLuiRecordBuffer }
@@ -125,6 +117,7 @@ end;
 procedure TLuiRecordBuffer.Save;
 var
   i: Integer;
+  FieldName: String;
 begin
   if State in dsEditModes then
     Post;
@@ -134,7 +127,10 @@ begin
   else
     SourceDataset.Edit;
   for i := 0 to SourceDataset.FieldDefs.Count - 1 do
-    AssignFieldValue(SourceDataset.Fields[i], Fields[i]);
+  begin
+    FieldName := SourceDataset.FieldDefs[i].Name;
+    AssignFieldValue(SourceDataSet.FieldByName(FieldName), FieldByName(FieldName));
+  end;
   SourceDataset.Post;
   DoAfterSave;
 end;
@@ -142,12 +138,16 @@ end;
 procedure TLuiRecordBuffer.AddRecord;
 var
   i: Integer;
+  FieldName: String;
 begin
   Append;
   if not FAppendMode then
   begin
     for i := 0 to SourceDataset.FieldDefs.Count - 1 do
-      AssignFieldValue(Fields[i], SourceDataset.Fields[i]);
+    begin
+      FieldName := SourceDataset.FieldDefs[i].Name;
+      AssignFieldValue(FieldByName(FieldName), SourceDataset.FieldByName(FieldName));
+    end;
   end;
   Post;
 end;
@@ -190,7 +190,6 @@ var
   i: Integer;
 begin
   FPrimaryKeyField := PrimaryKey;
-  //todo: see what happens when SrcDataset has CalcFields
   Close;
   FieldDefs.Clear;
   for i := 0 to FSourceDataset.FieldDefs.Count - 1 do
