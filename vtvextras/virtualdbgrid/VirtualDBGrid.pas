@@ -685,6 +685,7 @@ type
     property OnStateChange;
     property OnStructureChange;
     property OnUpdating;
+    property OnUTF8KeyPress;
   end;
 
 
