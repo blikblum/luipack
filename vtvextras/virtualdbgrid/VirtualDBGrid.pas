@@ -306,7 +306,7 @@ type
     //procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
     {.$ENDIF}
     procedure Update(Item: TCollectionItem); override;
-    function IndexOf(FieldNameOrIDText: string; ColumnType: TColumnType): Integer;
+    function IndexOf(const FieldNameOrIDText: string; ColumnType: TColumnType): Integer;
   public
     property HeaderBitmap;
   end;
@@ -1640,7 +1640,7 @@ begin
   end;
 end;
 
-function TVirtualDBTreeColumns.IndexOf(FieldNameOrIDText: string; ColumnType: TColumnType): Integer;
+function TVirtualDBTreeColumns.IndexOf(const FieldNameOrIDText: string; ColumnType: TColumnType): Integer;
 var
    loop: integer;
    column: TVirtualDBTreeColumn;
