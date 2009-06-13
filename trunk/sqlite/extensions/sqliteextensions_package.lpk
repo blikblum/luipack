@@ -5,14 +5,11 @@
     <Name Value="sqliteextensions_package"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -20,19 +17,28 @@
     <Description Value="SqliteExtensions provides classes to manipulate sqlite databases"/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="3">
+    <Files Count="5">
       <Item1>
         <Filename Value="sqlitetrees.pas"/>
-        <UnitName Value="sqlitetrees"/>
+        <UnitName Value="SqliteTrees"/>
       </Item1>
       <Item2>
         <Filename Value="sqlite3wrapper.pas"/>
-        <UnitName Value="sqlite3wrapper"/>
+        <UnitName Value="Sqlite3Wrapper"/>
       </Item2>
       <Item3>
         <Filename Value="sqlite3ext.pas"/>
-        <UnitName Value="sqlite3ext"/>
+        <UnitName Value="Sqlite3Ext"/>
       </Item3>
+      <Item4>
+        <Filename Value="sqliteutils.pas"/>
+        <UnitName Value="SqliteUtils"/>
+      </Item4>
+      <Item5>
+        <Filename Value="register_sqliteextensions.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_sqliteextensions"/>
+      </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
