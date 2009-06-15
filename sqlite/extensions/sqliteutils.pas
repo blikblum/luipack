@@ -208,6 +208,7 @@ begin
   FPrimaryKey.Delimiter := ',';
   FPrimaryKey.StrictDelimiter := True;
   FRecordStates := [rsAdded, rsUpdated, rsDeleted];
+  FOptions := [sqoSaveToSqlList];
 end;
 
 destructor TSqliteQueryBuilder.Destroy;
