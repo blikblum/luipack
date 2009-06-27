@@ -41,7 +41,7 @@ interface
 
 uses
   LCLType, types, delphicompat, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
-  Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LResources;
+  Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LResources, LMessages;
 
 const
   ResBMP_INDICATOR    = 'INDICATOR';
@@ -80,7 +80,8 @@ type
                             // {only if aoAllowSorting is set}
   aoEditCalculatedColumns,  // if set, then editing colum with type ctCalculated is allowed
   aoFullRowSelect,          // enable full row select, see aoEditable for details
-  aoMultiSelect             // enable multi select
+  aoMultiSelect,            // enable multi select
+  aoAutoToggleBoolean       // toggle boolean fields when the cell is double clicked
   );
 
   TVTDBAdvOptions = set of TVTDBAdvOption;
@@ -419,6 +420,7 @@ type
            var EraseAction: TItemEraseAction); override;
     function DoCompare(Node1, Node2: PVirtualNode; Column: TColumnIndex): Integer; override;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
+    procedure HandleMouseDblClick(var Message: TLMMouse; const HitInfo: THitInfo); override;
     procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
 
     procedure _OnFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode); virtual;
@@ -2451,6 +2453,31 @@ begin
   end
   else
   Allowed:= False;
+end;
+
+procedure TCustomVirtualDBGrid.HandleMouseDblClick(var Message: TLMMouse;
+  const HitInfo: THitInfo);
+var
+  Column: TVirtualDBTreeColumn;
+  Field: TField;
+begin
+  inherited HandleMouseDblClick(Message, HitInfo);
+  if (aoAutoToggleBoolean in fDBOptions.AdvOptions) and
+    (HitInfo.HitNode <> nil) and (HitInfo.HitNode = FocusedNode) and
+    (HitInfo.HitColumn > NoColumn) then
+  begin
+    Column := TVirtualDBTreeColumn(Header.Columns[HitInfo.HitColumn]);
+    if (Column.ColumnType = ctDBField) and Assigned(LinkedDataset) then
+    begin
+      Field := LinkedDataSet.FindField(Column.FieldName);
+      if (Field <> nil) and (Field.DataType = ftBoolean) then
+      begin
+        LinkedDataSet.Edit;
+        Field.AsBoolean := not Field.AsBoolean;
+        LinkedDataSet.Post;
+      end;
+    end;
+  end;
 end;
 
 procedure TCustomVirtualDBGrid.AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex);
