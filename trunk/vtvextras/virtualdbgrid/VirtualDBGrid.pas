@@ -413,6 +413,10 @@ type
     procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); override;
     procedure DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
+    procedure DoFreeNode(Node: PVirtualNode); override;
+    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var Text: UTF8String); override;
+    procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: UTF8String); override;
     procedure DoHeaderClick(HitInfo: TVTHeaderHitInfo); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; override;
@@ -422,13 +426,6 @@ type
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
     procedure HandleMouseDblClick(var Message: TLMMouse; const HitInfo: THitInfo); override;
     procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
-
-    procedure _OnFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode); virtual;
-    procedure _OnGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-           TextType: TVSTTextType; var CellText: UTF8String); virtual;
-    procedure _OnNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-           const NewText: UTF8String); virtual;
-
     // new
     procedure DoGetRecordCount(var RecordCount: LongInt); virtual;
     procedure DoCalculateValue(const IDText: string; Column: TColumnIndex;
@@ -1942,13 +1939,6 @@ begin
                        toRightClickSelect];
     StringOptions:=    [toSaveCaptions,toAutoAcceptEditChange];
   end;
-
-  //todo: replace this by Do* methods
-  OnFreeNode:=        _OnFreeNode;
-  OnGetText:=         _OnGetText;
-  OnNewText:=         _OnNewText;
-
-
   fDBOptions := TVTDBOptions.Create(self);
 end;
 
@@ -2154,42 +2144,6 @@ begin
   inherited;
 end;
 
-procedure TCustomVirtualDBGrid._OnFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
-var
-  Data: PNodeData;
-begin
-  Data := InternalGetNodeData(Node);
-  if IsDataOk(Data) then
-    FreeAndNil(Data.RecordData);
-end;
-
-
-procedure TCustomVirtualDBGrid._OnGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-    TextType: TVSTTextType; var CellText: UTF8String);
-var
-  Data:       PNodeData;
-  ColumnType: TColumnType;
-  FieldValue: variant;
-
-begin
-  if (Column <= NoColumn) or (TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType = ctIndicator) then
-    Exit;
-
-  Data := InternalGetNodeData(Node);
-
-  if IsDataOk(Data) then
-  begin
-    ColumnType := TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType;
-    //todo: add a Column > FieldIndex map to avoid using fieldname for the data lookup
-    if ColumnType = ctDBField then
-      FieldValue := Data.RecordData.FieldValue[TVirtualDBTreeColumn(Header.Columns[Column]).FieldName]
-    else
-      FieldValue := Data.RecordData.FieldValueByIdx[Header.Columns[Column].Index];
-    CellText := VarToStr(FieldValue);
-  end;
-end;
-
-
 procedure TCustomVirtualDBGrid.DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
            var EraseAction: TItemEraseAction);
 begin
@@ -2322,6 +2276,94 @@ begin
     end;
 
   if (DoInh) then inherited DoAfterCellPaint(Canvas, Node, Column, R);
+end;
+
+procedure TCustomVirtualDBGrid.DoFreeNode(Node: PVirtualNode);
+var
+  Data: PNodeData;
+begin
+  Data := InternalGetNodeData(Node);
+  if IsDataOk(Data) then
+    FreeAndNil(Data.RecordData);
+  inherited DoFreeNode(Node);
+end;
+
+procedure TCustomVirtualDBGrid.DoGetText(Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType; var Text: UTF8String);
+var
+  Data: PNodeData;
+  DBColumn: TVirtualDBTreeColumn;
+  FieldValue: variant;
+begin
+  if Column <= NoColumn  then
+    Exit;
+  DBColumn := TVirtualDBTreeColumn(Header.Columns[Column]);
+  if DBColumn.ColumnType = ctIndicator then
+    Exit;
+  Data := InternalGetNodeData(Node);
+  if IsDataOk(Data) then
+  begin
+    //todo: add a Column > FieldIndex map to avoid using fieldname for the data lookup
+    if DBColumn.ColumnType = ctDBField then
+      FieldValue := Data.RecordData.FieldValue[DBColumn.FieldName]
+    else
+      FieldValue := Data.RecordData.FieldValueByIdx[DBColumn.Index];
+    Text := VarToStr(FieldValue);
+  end;
+end;
+
+procedure TCustomVirtualDBGrid.DoNewText(Node: PVirtualNode;
+  Column: TColumnIndex; const Text: UTF8String);
+var
+  WField:  TField;
+  DBColumn: TVirtualDBTreeColumn;
+  Data: PNodeData;
+  PostChanges: Boolean;
+  PostText: UTF8String;
+begin
+  // if we dont want to post changes to database (toEditable is not set in the treeoptions->misc) then exit
+  {if not (toEditable in TreeOptions.MiscOptions)
+     then exit;}
+
+  //todo: see if these Column checks are really necessary
+  if Column <= NoColumn then
+    Exit;
+
+  // if column is ctIndicator then exit
+  DBColumn := TVirtualDBTreeColumn(Header.Columns[Column]);
+  if DBColumn.ColumnType = ctIndicator then
+    Exit;
+
+  Data := InternalGetNodeData(Node);
+  if not IsDataOk(Data) then
+    Exit;
+
+  PostText := Text;
+
+  if DBColumn.ColumnType = ctCalculated then
+  begin
+    PostChanges := True;
+    DoPostChanges(DBColumn.Text, Column, DBColumn.ColumnType, Data.RecordData, Node.Index,
+      PostText, PostChanges);
+    if PostChanges then
+      Data.RecordData.CalculatedValue[DBColumn.Text] := PostText;
+  end
+  else begin
+    PostChanges := False;
+    DoPostChanges(DBColumn.FieldName, Column, DBColumn.ColumnType, Data.RecordData,
+      Node.Index, PostText, PostChanges);
+    if PostChanges and Assigned(LinkedDataSet) and LinkedDataSet.CanModify then
+    begin
+      WField := LinkedDataSet.FindField(DBColumn.FieldName);
+      if WField <> nil then
+      begin
+        LinkedDataSet.Edit;
+        WField.Value := PostText;
+        LinkedDataSet.Post;
+      end;
+    end;
+  end;
+  inherited DoNewText(Node, Column, Text);
 end;
 
 
@@ -2493,71 +2535,6 @@ begin
      end;
   end;
 end;
-
-
-procedure TCustomVirtualDBGrid._OnNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-           const NewText: UTF8String);
-var
-    WField:     TField;
-    IDText:     string;
-    FieldName:  string;
-    ColumnType: TColumnType;
-    Data:       PNodeData;
-    PostChanges:  boolean;
-    PostText: UTF8String;
-begin
-  // if we dont want to post changes to database (toEditable is not set in the treeoptions->misc) then exit
-  {if not (toEditable in TreeOptions.MiscOptions)
-     then exit;}
-
-  if (Column <= NoColumn) then exit;
-
-  // if column is ctIndicator then exit
-  ColumnType:= TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType;
-  if (ColumnType = ctIndicator) then exit;
-
-  Data:= InternalGetNodeData(Node);
-  if (not IsDataOk(Data)) then exit;
-
-  PostText := NewText;
-
-  if (ColumnType = ctCalculated) then
-  begin
-    IDText:= TVirtualDBTreeColumn(Header.Columns[Column]).Text;
-
-    PostChanges:= true;
-    DoPostChanges(IDText, Column, ColumnType, Data.RecordData, Node.Index,
-                  PostText, PostChanges);
-
-    if PostChanges then
-       Data.RecordData.CalculatedValue[IDText]:= PostText;
-  end
-  else begin
-
-     FieldName:= TVirtualDBTreeColumn(Header.Columns[Column]).FieldName;
-     PostChanges:= false;
-     DoPostChanges(FieldName, Column, ColumnType, Data.RecordData,
-                   Node.Index, PostText, PostChanges);
-
-     if (PostChanges) then
-     if Assigned(LinkedDataSet) then
-     begin
-        if (not LinkedDataSet.CanModify) then exit;
-        try
-          WField := LinkedDataSet.FindField(FieldName);
-          if (WField <> nil) then
-          begin
-             LinkedDataSet.Edit;
-             WField.Value:= PostText;
-             LinkedDataSet.Post;
-          end;
-        except
-        end;
-     end;
-  end;
-end;
-
-
 
 procedure TCustomVirtualDBGrid.DoGetRecordCount(var RecordCount: LongInt);
 begin
