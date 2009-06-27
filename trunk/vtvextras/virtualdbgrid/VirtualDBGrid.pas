@@ -2357,9 +2357,13 @@ begin
       WField := LinkedDataSet.FindField(DBColumn.FieldName);
       if WField <> nil then
       begin
-        LinkedDataSet.Edit;
-        WField.Value := PostText;
-        LinkedDataSet.Post;
+        //todo: see if is necessary some kind of error handling here
+        try
+          LinkedDataSet.Edit;
+          WField.Value := PostText;
+          LinkedDataSet.Post;
+        except
+        end;
       end;
     end;
   end;
