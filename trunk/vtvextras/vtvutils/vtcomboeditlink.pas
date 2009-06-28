@@ -9,17 +9,22 @@ uses
 
 type
 
-  TVTComboEditLink = class;
+  TVTCustomComboEditLink = class;
 
-  TVTComboEditLinkEvent = procedure(Link: TVTComboEditLink) of object;
+  TVTComboEditLinkEvent = procedure(Link: TVTCustomComboEditLink) of object;
 
-  { TVTComboEditLink }
+  TVTPrepareComboEvent = procedure(Link: TVTCustomComboEditLink; Node: PVirtualNode;
+    Column: TColumnIndex; const NodeText: UTF8String) of object;
 
-  TVTComboEditLink = class(TInterfacedObject, IVTEditLink)
+  TCustomComboBoxClass = class of TCustomComboBox;
+
+  { TVTCustomComboEditLink }
+
+  TVTCustomComboEditLink = class(TInterfacedObject, IVTEditLink)
   private
-    FCombo: TComboBox;                  // A normal custom edit control.
-    FOnPrepare: TVTComboEditLinkEvent;
-    FOnSelect: TVTComboEditLinkEvent;
+    FCombo: TCustomComboBox;                  // A custom combo box control.
+    FOnPrepareCombo: TVTPrepareComboEvent;
+    FOnComboSelect: TVTComboEditLinkEvent;
     FTree: TCustomVirtualStringTree;        // A back reference to the tree calling.
     FNode: PVirtualNode;             // The node to be edited.
     FColumn: TColumnIndex;           // The column of the node.
@@ -28,44 +33,75 @@ type
     FAlignment: TAlignment;
     FStopping: Boolean;
     procedure ComboSelect(Sender: TObject);
+  protected
+    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+      const NodeText: UTF8String); virtual;
+    procedure DoSelect; virtual;
+    class function GetComboClass: TCustomComboBoxClass; virtual; abstract;
+    property Tree: TCustomVirtualStringTree read FTree;
   public
     constructor Create;
     destructor Destroy; override;
+    //IVTEditLink methods
     function BeginEdit: Boolean; virtual; stdcall;
     function CancelEdit: Boolean; virtual; stdcall;
     function EndEdit: Boolean; virtual; stdcall;
     function GetBounds: TRect; virtual; stdcall;
-    function PrepareEdit(Tree: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex): Boolean; virtual; stdcall;
+    function PrepareEdit(ATree: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex): Boolean; virtual; stdcall;
     procedure ProcessMessage(var Message: TLMessage); virtual; stdcall;
     procedure SetBounds(R: TRect); virtual; stdcall;
 
-    property Combo: TComboBox read FCombo;
-    property OnPrepare: TVTComboEditLinkEvent read FOnPrepare write FOnPrepare;
-    property OnSelect: TVTComboEditLinkEvent read FOnSelect write FOnSelect;
+    property Combo: TCustomComboBox read FCombo;
+    property OnPrepareCombo: TVTPrepareComboEvent read FOnPrepareCombo write FOnPrepareCombo;
+    property OnComboSelect: TVTComboEditLinkEvent read FOnComboSelect write FOnComboSelect;
   end;
 
+  { TVTComboEditLink }
 
+  TVTComboEditLink = class (TVTCustomComboEditLink)
+  protected
+    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+      const NodeText: UTF8String); override;
+    procedure DoSelect; override;
+    class function GetComboClass: TCustomComboBoxClass; override;
+  end;
 implementation
 
 type
   TBaseVirtualTreeAccess = class(TBaseVirtualTree)
   end;
 
-{ TVTComboEditLink }
+  TCustomComboBoxAccess = class(TCustomComboBox)
+  end;
 
-procedure TVTComboEditLink.ComboSelect(Sender: TObject);
+{ TVTCustomComboEditLink }
+
+procedure TVTCustomComboEditLink.ComboSelect(Sender: TObject);
 var
-  Tree: TCustomVirtualStringTree;
+  ATree: TCustomVirtualStringTree;
 begin
-  Tree := FTree;
+  ATree := FTree;
   TBaseVirtualTreeAccess(FTree).DoEndEdit;
-  Tree.SetFocus;
+  ATree.SetFocus;
 end;
 
-constructor TVTComboEditLink.Create;
+procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+  Column: TColumnIndex; const NodeText: UTF8String);
 begin
-  FCombo := TComboBox.Create(nil);
-  with FCombo do
+  if Assigned(FOnPrepareCombo) then
+    FOnPrepareCombo(Self, Node, Column, NodeText);
+end;
+
+procedure TVTCustomComboEditLink.DoSelect;
+begin
+  if Assigned(FOnComboSelect) then
+    FOnComboSelect(Self);
+end;
+
+constructor TVTCustomComboEditLink.Create;
+begin
+  FCombo := GetComboClass.Create(nil);
+  with TCustomComboBoxAccess(FCombo) do
   begin
     //Style := csDropDownList;
     Visible := False;
@@ -74,13 +110,13 @@ begin
   end;
 end;
 
-destructor TVTComboEditLink.Destroy;
+destructor TVTCustomComboEditLink.Destroy;
 begin
   Application.ReleaseComponent(FCombo);
   inherited Destroy;
 end;
 
-function TVTComboEditLink.BeginEdit: Boolean; stdcall;
+function TVTCustomComboEditLink.BeginEdit: Boolean; stdcall;
 begin
   Result := not FStopping;
   if Result then
@@ -90,7 +126,7 @@ begin
   end;
 end;
 
-function TVTComboEditLink.CancelEdit: Boolean; stdcall;
+function TVTCustomComboEditLink.CancelEdit: Boolean; stdcall;
 begin
   Result := not FStopping;
   if Result then
@@ -101,18 +137,14 @@ begin
   end;
 end;
 
-function TVTComboEditLink.EndEdit: Boolean; stdcall;
+function TVTCustomComboEditLink.EndEdit: Boolean; stdcall;
 begin
   Result := not FStopping;
   if Result then
   try
     FStopping := True;
     if FCombo.ItemIndex <> FOriginalIndex then
-    begin
-      FTree.Text[FNode, FColumn] := FCombo.Text;
-      if Assigned(FOnSelect) then
-        FOnSelect(Self);
-    end;
+      DoSelect;
     FCombo.Hide;
   except
     FStopping := False;
@@ -120,33 +152,29 @@ begin
   end;
 end;
 
-function TVTComboEditLink.GetBounds: TRect; stdcall;
+function TVTCustomComboEditLink.GetBounds: TRect; stdcall;
 begin
   Result := FCombo.BoundsRect;
 end;
 
-function TVTComboEditLink.PrepareEdit(Tree: TBaseVirtualTree;
+function TVTCustomComboEditLink.PrepareEdit(ATree: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
-
 var
-  Text: UTF8String;
+  NodeText: UTF8String;
 begin
-  Result := Tree is TCustomVirtualStringTree;
+  Result := ATree is TCustomVirtualStringTree;
   if Result then
   begin
-    FTree := Tree as TCustomVirtualStringTree;
+    FTree := TCustomVirtualStringTree(ATree);
     FNode := Node;
     FColumn := Column;
-    // Initial size, font and text of the node.
-    FTree.GetTextInfo(Node, Column, FCombo.Font, FTextBounds, Text);
+
     FCombo.Font.Color := clWindowText;
-    FCombo.Parent := Tree;
+    FCombo.Parent := ATree;
     FCombo.HandleNeeded;
-
-    if Assigned(FOnPrepare) then
-      FOnPrepare(Self);
-
-    FCombo.Text := Text;
+    // Initial size, font and text of the node.
+    FTree.GetTextInfo(Node, Column, FCombo.Font, FTextBounds, NodeText);
+    DoPrepareCombo(Node, Column, NodeText);
     FOriginalIndex := FCombo.ItemIndex;
 
     if Column <= NoColumn then
@@ -165,12 +193,12 @@ begin
 
 end;
 
-procedure TVTComboEditLink.ProcessMessage(var Message: TLMessage); stdcall;
+procedure TVTCustomComboEditLink.ProcessMessage(var Message: TLMessage); stdcall;
 begin
   FCombo.WindowProc(Message);
 end;
 
-procedure TVTComboEditLink.SetBounds(R: TRect); stdcall;
+procedure TVTCustomComboEditLink.SetBounds(R: TRect); stdcall;
 var
   Offset: Integer;
 begin
@@ -207,12 +235,32 @@ begin
       if not (vsMultiline in FNode^.States) then
         OffsetRect(R, 0, FTextBounds.Top - FCombo.Top);
 
-      SendMessage(FCombo.Handle, EM_SETRECTNP, 0, Integer(@R));
+      SendMessage(FCombo.Handle, EM_SETRECTNP, 0, PtrInt(@R));
 
     end;
   end;
 end;
 
+
+{ TVTComboEditLink }
+
+procedure TVTComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+  Column: TColumnIndex; const NodeText: UTF8String);
+begin
+  Combo.Text := NodeText;
+  inherited DoPrepareCombo(Node, Column, NodeText);
+end;
+
+procedure TVTComboEditLink.DoSelect;
+begin
+  FTree.Text[FNode, FColumn] := FCombo.Text;
+  inherited DoSelect;
+end;
+
+class function TVTComboEditLink.GetComboClass: TCustomComboBoxClass;
+begin
+  Result := TComboBox;
+end;
 
 end.
 
