@@ -5,7 +5,8 @@ unit VTComboEditLink;
 interface
 
 uses
-  Forms, LCLIntf, Classes, SysUtils, VirtualTrees, LMessages, StdCtrls, Graphics;
+  Forms, LCLIntf, Classes, SysUtils, VirtualTrees, LMessages, StdCtrls, Graphics,
+  DbCtrls, db;
 
 type
 
@@ -65,6 +66,32 @@ type
     procedure DoSelect; override;
     class function GetComboClass: TCustomComboBoxClass; override;
   end;
+
+  { TVTDBLookupComboEditLink }
+
+  TVTDBLookupComboEditLink = class (TVTCustomComboEditLink)
+  private
+    FDataSource: TDataSource;
+    function GetDataField: String;
+    function GetKeyField: String;
+    function GetListField: String;
+    function GetListSource: TDataSource;
+    procedure SetDataField(const AValue: String);
+    procedure SetKeyField(const AValue: String);
+    procedure SetListField(const AValue: String);
+    procedure SetListSource(const AValue: TDataSource);
+  protected
+    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+      const NodeText: UTF8String); override;
+    class function GetComboClass: TCustomComboBoxClass; override;
+  public
+    property DataField: String read GetDataField write SetDataField;
+    property DataSource: TDataSource read FDataSource write FDataSource;
+    property KeyField: String read GetKeyField write SetKeyField;
+    property ListField: String read GetListField write SetListField;
+    property ListSource: TDataSource read GetListSource write SetListSource;
+  end;
+
 implementation
 
 type
@@ -241,7 +268,6 @@ begin
   end;
 end;
 
-
 { TVTComboEditLink }
 
 procedure TVTComboEditLink.DoPrepareCombo(Node: PVirtualNode;
@@ -260,6 +286,60 @@ end;
 class function TVTComboEditLink.GetComboClass: TCustomComboBoxClass;
 begin
   Result := TComboBox;
+end;
+
+{ TVTDBLookupComboEditLink }
+
+procedure TVTDBLookupComboEditLink.SetDataField(const AValue: String);
+begin
+  (Combo as TDBLookupComboBox).DataField := AValue;
+end;
+
+function TVTDBLookupComboEditLink.GetDataField: String;
+begin
+  Result := (Combo as TDBLookupComboBox).DataField;
+end;
+
+function TVTDBLookupComboEditLink.GetKeyField: String;
+begin
+  Result := (Combo as TDBLookupComboBox).KeyField;
+end;
+
+function TVTDBLookupComboEditLink.GetListField: String;
+begin
+  Result := (Combo as TDBLookupComboBox).ListField;
+end;
+
+function TVTDBLookupComboEditLink.GetListSource: TDataSource;
+begin
+  Result := (Combo as TDBLookupComboBox).ListSource;
+end;
+
+procedure TVTDBLookupComboEditLink.SetKeyField(const AValue: String);
+begin
+  (Combo as TDBLookupComboBox).KeyField := AValue;
+end;
+
+procedure TVTDBLookupComboEditLink.SetListField(const AValue: String);
+begin
+  (Combo as TDBLookupComboBox).ListField := AValue;
+end;
+
+procedure TVTDBLookupComboEditLink.SetListSource(const AValue: TDataSource);
+begin
+  (Combo as TDBLookupComboBox).ListSource := AValue;
+end;
+
+procedure TVTDBLookupComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+  Column: TColumnIndex; const NodeText: UTF8String);
+begin
+  inherited DoPrepareCombo(Node, Column, NodeText);
+  (Combo as TDBLookupComboBox).DataSource := FDataSource;
+end;
+
+class function TVTDBLookupComboEditLink.GetComboClass: TCustomComboBoxClass;
+begin
+  Result := TDBLookupComboBox;
 end;
 
 end.
