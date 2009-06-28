@@ -81,7 +81,9 @@ type
   aoEditCalculatedColumns,  // if set, then editing colum with type ctCalculated is allowed
   aoFullRowSelect,          // enable full row select, see aoEditable for details
   aoMultiSelect,            // enable multi select
-  aoAutoToggleBoolean       // toggle boolean fields when the cell is double clicked
+  aoAutoToggleBoolean,      // toggle boolean fields when the cell is double clicked
+  aoEditOnClick,            // Editing mode can be entered with a single click
+  aoEditOnDblClick         // Editing mode can be entered with a double click
   );
 
   TVTDBAdvOptions = set of TVTDBAdvOption;
@@ -1786,6 +1788,21 @@ begin
      then Include(WMiscOptions, toEditable)
      else Exclude(WMiscOptions, toEditable);
 
+  if (aoEditOnClick in fAdvOptions)
+     then Include(WMiscOptions, toEditOnClick)
+     else Exclude(WMiscOptions, toEditOnClick);
+
+  if (aoEditOnDblClick in fAdvOptions) then
+     begin
+       Include(WMiscOptions, toEditOnDblClick);
+       Exclude(WMiscOptions, toToggleOnDblClick);
+     end
+     else
+     begin
+       Exclude(WMiscOptions, toEditOnDblClick);
+       Include(WMiscOptions, toToggleOnDblClick);
+     end;
+
   if (aoShowHorzLines in fAdvOptions)
      then Include(WPaintOptions, toShowHorzGridLines)
      else Exclude(WPaintOptions, toShowHorzGridLines);
@@ -2518,6 +2535,10 @@ begin
       Field := LinkedDataSet.FindField(Column.FieldName);
       if (Field <> nil) and (Field.DataType = ftBoolean) then
       begin
+        //todo: implement toggling through single click
+        //todo: is necessary also to block edit through another ways (F2)
+        if aoEditOnDblClick in fDBOptions.AdvOptions then
+          DoCancelEdit;
         LinkedDataSet.Edit;
         Field.AsBoolean := not Field.AsBoolean;
         LinkedDataSet.Post;
