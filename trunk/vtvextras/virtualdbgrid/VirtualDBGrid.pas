@@ -182,7 +182,7 @@ type
   TOnCompareRecord = procedure(Sender: TCustomVirtualDBGrid; Record1, Record2: TRecordData; Column: TColumnIndex;
     var Result: Integer) of object;
 
-
+  TOnRecordDblClick = procedure(Sender: TCustomVirtualDBGrid; Column: TColumnIndex; RecordData: TRecordData) of object;
 
   PDBFieldValueRec = ^TDBFieldValueRec;
   TDBFieldValueRec = record
@@ -383,6 +383,7 @@ type
     fOnPostChanges:           TOnPostChanges;
     fOnChangeSort:            TOnChangeSort;
     FOnCompareRecord: TOnCompareRecord;
+    FOnRecordDblClick: TOnRecordDblClick;
     fIndicatorBMP:            TBitmap;
 
     function GetFocusedRecord: TRecordData;
@@ -443,6 +444,7 @@ type
         RowIndex: Cardinal; var NewValue: UTF8String; var PostChanges: boolean); virtual;
     procedure DoChangeSort(SortColumn: TColumnIndex;
         SortDirection: TSortDirection); virtual;
+    procedure DoRecordDblClick(Column: TColumnIndex; RecordData: TRecordData);
 
     function GetRecordCount: longint;
     procedure InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: boolean);
@@ -488,6 +490,7 @@ type
     property OnPostChanges:           TOnPostChanges           read fOnPostChanges           write fOnPostChanges;
     property OnChangeSort:            TOnChangeSort            read fOnChangeSort            write fOnChangeSort;
     property OnCompareRecord: TOnCompareRecord read FOnCompareRecord write FOnCompareRecord;
+    property OnRecordDblClick: TOnRecordDblClick read FOnRecordDblClick write FOnRecordDblClick;
 
     // discarded VirtualTreeView properties that we doesn't allow to change by user
     property TreeOptions: TStringTreeOptions       read GetOptions          write SetOptions;
@@ -704,6 +707,7 @@ type
     property OnPostChanges;
     property OnChangeSort;
     property OnCompareRecord;
+    property OnRecordDblClick;
   end;
 
   TControlClick = class(TControl)
@@ -2523,27 +2527,36 @@ procedure TCustomVirtualDBGrid.HandleMouseDblClick(var Message: TLMMouse;
 var
   Column: TVirtualDBTreeColumn;
   Field: TField;
+  Data: PNodeData;
 begin
   inherited HandleMouseDblClick(Message, HitInfo);
-  if (aoAutoToggleBoolean in fDBOptions.AdvOptions) and
-    (HitInfo.HitNode <> nil) and (HitInfo.HitNode = FocusedNode) and
-    (HitInfo.HitColumn > NoColumn) then
+  if HitInfo.HitNode <> nil then
   begin
-    Column := TVirtualDBTreeColumn(Header.Columns[HitInfo.HitColumn]);
-    if (Column.ColumnType = ctDBField) and Assigned(LinkedDataset) then
+    //toggle boolean fields
+    if (aoAutoToggleBoolean in fDBOptions.AdvOptions) and
+      (HitInfo.HitNode = FocusedNode) and
+      (HitInfo.HitColumn > NoColumn) then
     begin
-      Field := LinkedDataSet.FindField(Column.FieldName);
-      if (Field <> nil) and (Field.DataType = ftBoolean) then
+      Column := TVirtualDBTreeColumn(Header.Columns[HitInfo.HitColumn]);
+      if (Column.ColumnType = ctDBField) and Assigned(LinkedDataset) then
       begin
-        //todo: implement toggling through single click
-        //todo: is necessary also to block edit through another ways (F2)
-        if aoEditOnDblClick in fDBOptions.AdvOptions then
-          DoCancelEdit;
-        LinkedDataSet.Edit;
-        Field.AsBoolean := not Field.AsBoolean;
-        LinkedDataSet.Post;
+        Field := LinkedDataSet.FindField(Column.FieldName);
+        if (Field <> nil) and (Field.DataType = ftBoolean) then
+        begin
+          //todo: implement toggling through single click
+          //todo: is necessary also to block edit through another ways (F2)
+          if aoEditOnDblClick in fDBOptions.AdvOptions then
+            DoCancelEdit;
+          LinkedDataSet.Edit;
+          Field.AsBoolean := not Field.AsBoolean;
+          LinkedDataSet.Post;
+        end;
       end;
     end;
+    //fire extended dblclick event
+    Data := InternalGetNodeData(HitInfo.HitNode);
+    if IsDataOk(Data) then
+      DoRecordDblClick(HitInfo.HitColumn, Data^.RecordData);
   end;
 end;
 
@@ -2630,6 +2643,13 @@ procedure TCustomVirtualDBGrid.DoChangeSort(SortColumn: TColumnIndex;
 begin
   if Assigned(fOnChangeSort) then
      fOnChangeSort(Self, SortColumn, SortDirection);
+end;
+
+procedure TCustomVirtualDBGrid.DoRecordDblClick(Column: TColumnIndex;
+  RecordData: TRecordData);
+begin
+  if Assigned(FOnRecordDblClick) then
+    FOnRecordDblClick(Self, Column, RecordData);
 end;
 
 
