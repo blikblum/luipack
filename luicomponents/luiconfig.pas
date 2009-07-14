@@ -272,6 +272,8 @@ end;
 destructor TLuiConfig.Destroy;
 begin
   InternalClose;
+  FSectionDefs.Destroy;
+  FItemDefs.Destroy;
   FObserverList.Free;
   inherited Destroy;
 end;
