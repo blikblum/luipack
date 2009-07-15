@@ -357,9 +357,9 @@ end;
 
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify):LongWord;
 var
-  WinInfo: PWindowInfo;
+  WinInfo: PWin32WindowInfo;
 begin
-  WinInfo := GetWindowInfo(hWnd);
+  WinInfo := GetWin32WindowInfo(hWnd);
   FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
   //todo: see the best way to set result when handle is 0
   Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
