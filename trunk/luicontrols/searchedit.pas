@@ -133,14 +133,6 @@ implementation
 
 uses
   LCLType;
-  
-const
-  //work around to LCL bugs 9945, 9946
-  {$if defined(LCLGtk) or defined(LCLGtk2)}
-  EmptyTextColor = clWindowText;
-  {$else}
-  EmptyTextColor = clGray;
-  {$endif}
 
 { TSearchEdit }
 
@@ -159,7 +151,7 @@ end;
 
 procedure TSearchEdit.DisplayEmptyText;
 begin
-  Font.Color := EmptyTextColor;
+  Font.Color := clGray;
   inherited RealSetText(FEmptyText);
 end;
 
