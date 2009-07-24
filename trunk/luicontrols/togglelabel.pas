@@ -82,7 +82,7 @@ type
     constructor Create(TheOwner: TComponent); override;
     procedure Paint; override;
     procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: Integer;
-                                Lock: Boolean = True); override;
+      Lock: Boolean = True); override;
   published
     property ArrowColor: TColor read FArrowColor write SetArrowColor default clBlack;
     property ExpandedCaption: String read FExpandedCaption write SetExpandedCaption;
@@ -90,7 +90,7 @@ type
     property HighlightColor: TColor read FHighlightColor write SetHighlightColor default clWhite;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnChanging: TChangingEvent read FOnChanging write FOnChanging;
-    property Options: TToggleLabelOptions read FOptions write SetOptions;
+    property Options: TToggleLabelOptions read FOptions write SetOptions default [];
     property Align;
     property Alignment;
     property Anchors;
