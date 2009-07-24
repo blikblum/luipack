@@ -36,15 +36,6 @@ unit MenuButton;
 {$mode objfpc}{$H+}
 {.define DEBUG_MENUBUTTON}
 
-//due to LCL bug gtk works only with popupmenu fire at mouseup
-{$ifdef LCLGtk}
-{$define FORCE_MOUSEUP}
-{$endif}
-{$ifdef LCLGtk2}
-{$define FORCE_MOUSEUP}
-{$endif}
-
-
 interface
 
 
@@ -299,9 +290,6 @@ end;
 
 procedure TMenuButton.Loaded;
 begin
-  {$ifdef FORCE_MOUSEUP}
-  include(FOptions, mboPopupOnMouseUp);
-  {$endif}
   inherited Loaded;
   UpdateStyle;
 end;
@@ -399,9 +387,6 @@ begin
   if FOptions = AValue then
     Exit;
   FOptions := AValue;
-  {$ifdef FORCE_MOUSEUP}
-  Include(FOptions, mboPopupOnMouseUp);
-  {$endif}
   UpdateStyle;
 end;
 
