@@ -3,16 +3,16 @@ object frmMain: TfrmMain
   Height = 300
   Top = 233
   Width = 400
-  HorzScrollBar.Page = 399
-  VertScrollBar.Page = 299
   ActiveControl = NotebookMain
   Caption = 'Lui Controls 0.3 Demo'
   ClientHeight = 300
   ClientWidth = 400
   Position = poDesktopCenter
-  LCLVersion = '0.9.25'
+  LCLVersion = '0.9.27'
   object NotebookMain: TNotebook
+    Left = 0
     Height = 300
+    Top = 0
     Width = 400
     Align = alClient
     PageIndex = 0
@@ -20,23 +20,25 @@ object frmMain: TfrmMain
     object PageToggleLabel: TPage
       Caption = 'TToggleLabel'
       ClientWidth = 396
-      ClientHeight = 266
+      ClientHeight = 269
       object ToggleLabel1: TToggleLabel
         Left = 12
-        Height = 17
+        Height = 18
         Top = 10
-        Width = 149
+        Width = 133
         ExpandedCaption = 'State2 (Expanded)'
+        Expanded = False
         Caption = 'State1 (Collapsed)'
         Layout = tlBottom
         ParentColor = False
       end
       object ToggleLabel2: TToggleLabel
         Left = 12
-        Height = 17
+        Height = 18
         Top = 66
-        Width = 100
+        Width = 87
         ExpandedCaption = 'Hide Panel'
+        Expanded = False
         OnChange = ToggleLabel2Change
         Caption = 'Show Panel'
         ParentColor = False
@@ -48,6 +50,7 @@ object frmMain: TfrmMain
         Width = 139
         BorderWidth = 2
         ButtonColorSize = 16
+        ButtonColor = clBlack
         Caption = 'Label Color     '
         Color = clBtnFace
         Layout = blGlyphRight
@@ -60,6 +63,7 @@ object frmMain: TfrmMain
         Width = 139
         BorderWidth = 2
         ButtonColorSize = 16
+        ButtonColor = clBlack
         Caption = 'Arrow Color    '
         Color = clBtnFace
         Layout = blGlyphRight
@@ -89,18 +93,18 @@ object frmMain: TfrmMain
       end
       object CheckUnderline: TCheckBox
         Left = 243
-        Height = 24
+        Height = 22
         Top = 95
-        Width = 167
+        Width = 152
         Caption = 'Underline On Hover'
         OnChange = CheckUnderlineChange
         TabOrder = 1
       end
       object CheckBold: TCheckBox
         Left = 244
-        Height = 24
+        Height = 22
         Top = 122
-        Width = 131
+        Width = 118
         Caption = 'Bold On Hover'
         OnChange = CheckBoldChange
         TabOrder = 2
@@ -108,15 +112,14 @@ object frmMain: TfrmMain
     end
     object PageMenuButton: TPage
       Caption = 'TMenuButton'
-      ClientWidth = 400
-      ClientHeight = 300
+      ClientWidth = 396
+      ClientHeight = 269
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
         Top = 34
         Width = 23
         Menu = PopupMenu1
-        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Glyph.Data = {
@@ -156,7 +159,7 @@ object frmMain: TfrmMain
         Top = 34
         Width = 23
         Menu = PopupMenu2
-        Options = [mboPopupOnMouseUp]
+        Style = mbsSingle
         Color = clBtnFace
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
@@ -211,7 +214,6 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu3
-        Options = [mboPopupOnMouseUp]
         Style = mbsCombo
         Color = clBtnFace
         Flat = True
@@ -252,7 +254,7 @@ object frmMain: TfrmMain
         Top = 111
         Width = 23
         Menu = PopupMenu4
-        Options = [mboPopupOnMouseUp]
+        Style = mbsSingle
         Color = clBtnFace
         Flat = True
         Glyph.Data = {
@@ -288,17 +290,17 @@ object frmMain: TfrmMain
       end
       object Label1: TLabel
         Left = 27
-        Height = 14
+        Height = 18
         Top = 82
-        Width = 63
+        Width = 84
         Caption = 'Flat Buttons:'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 26
-        Height = 14
+        Height = 18
         Top = 10
-        Width = 74
+        Width = 103
         Caption = 'Normal Buttons'
         ParentColor = False
       end
@@ -308,7 +310,8 @@ object frmMain: TfrmMain
         Top = 193
         Width = 133
         Menu = PopupMenu5
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
+        Style = mbsSingle
         Caption = 'Only Text'
         Color = clBtnFace
         Flat = True
@@ -316,9 +319,9 @@ object frmMain: TfrmMain
       end
       object Label3: TLabel
         Left = 26
-        Height = 14
+        Height = 18
         Top = 162
-        Width = 129
+        Width = 175
         Caption = 'Buttons with inlined arrow:'
         ParentColor = False
       end
@@ -328,7 +331,8 @@ object frmMain: TfrmMain
         Top = 191
         Width = 160
         Menu = PopupMenu6
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
+        Style = mbsSingle
         Caption = 'Text and Glyph'
         Color = clBtnFace
         Glyph.Data = {
@@ -367,7 +371,8 @@ object frmMain: TfrmMain
         Top = 191
         Width = 48
         Menu = PopupMenu7
-        Options = [mboPopupOnMouseUp, mboShowIndicator]
+        Options = [mboShowIndicator]
+        Style = mbsSingle
         Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -401,9 +406,9 @@ object frmMain: TfrmMain
       end
       object CheckPopupOnMouseUp: TCheckBox
         Left = 166
-        Height = 19
+        Height = 22
         Top = 34
-        Width = 123
+        Width = 151
         Caption = 'Popup On MouseUp'
         OnChange = CheckPopupOnMouseUpChange
         TabOrder = 0
@@ -411,15 +416,17 @@ object frmMain: TfrmMain
     end
     object PageSearchEdit: TPage
       Caption = 'TSearchEdit'
-      ClientWidth = 400
-      ClientHeight = 300
+      ClientWidth = 396
+      ClientHeight = 269
       object SearchEdit1: TSearchEdit
         Left = 6
-        Height = 23
+        Height = 27
         Top = 8
         Width = 168
         EmptyText = '<Search Here> '
         OnExecute = SearchEdit1Execute
+        Font.Color = clGray
+        ParentFont = False
         TabOrder = 0
       end
       object MemoSearchLog: TMemo
@@ -431,18 +438,18 @@ object frmMain: TfrmMain
       end
       object CheckExecuteEmpty: TCheckBox
         Left = 190
-        Height = 19
+        Height = 22
         Top = 8
-        Width = 141
+        Width = 181
         Caption = 'Execute If Text Is Empty'
         OnClick = CheckExecuteEmptyClick
         TabOrder = 2
       end
       object CheckExecuteKillFocus: TCheckBox
         Left = 190
-        Height = 19
+        Height = 22
         Top = 40
-        Width = 127
+        Width = 161
         Caption = 'Execute On KillFocus'
         OnClick = CheckExecuteKillFocusClick
         TabOrder = 3
@@ -450,7 +457,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu1: TPopupMenu
-    OnClose = nil
     left = 58
     top = 136
     object MenuItem1: TMenuItem
@@ -467,7 +473,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu2: TPopupMenu
-    OnClose = nil
     left = 58
     top = 176
     object MenuItem5: TMenuItem
@@ -481,7 +486,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu3: TPopupMenu
-    OnClose = nil
     left = 113
     top = 136
     object MenuItem8: TMenuItem
@@ -492,7 +496,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu4: TPopupMenu
-    OnClose = nil
     left = 113
     top = 176
     object MenuItem10: TMenuItem
@@ -551,7 +554,6 @@ object frmMain: TfrmMain
     }
   end
   object PopupMenu5: TPopupMenu
-    OnClose = nil
     left = 57
     top = 216
     object MenuItem15: TMenuItem
@@ -572,7 +574,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu6: TPopupMenu
-    OnClose = nil
     left = 113
     top = 216
     object MenuItem19: TMenuItem
@@ -589,7 +590,6 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu7: TPopupMenu
-    OnClose = nil
     left = 113
     top = 256
     object MenuItem23: TMenuItem

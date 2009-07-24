@@ -136,7 +136,7 @@ type
     procedure Click; override;
   published
     property Menu: TPopupMenu read FMenu write SetMenu;
-    property Options: TMenuButtonOptions read FOptions write SetOptions;
+    property Options: TMenuButtonOptions read FOptions write SetOptions default [];
     property Style: TMenuButtonStyle read FStyle write SetStyle;
     //TSpeedButton properties
     property Action;

@@ -81,7 +81,7 @@ type
   published
     property EmptyText: String read FEmptyText write SetEmptyText;
     property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
-    property Options: TSearchEditOptions read FOptions write FOptions;
+    property Options: TSearchEditOptions read FOptions write FOptions default [];
     //TEdit properties
     property Action;
     property Align;
