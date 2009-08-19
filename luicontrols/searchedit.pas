@@ -39,7 +39,7 @@ unit SearchEdit;
 interface
 
 uses
-  Forms, Classes, SysUtils, Controls, StdCtrls, LMessages, LCLProc, Graphics
+  Forms, Classes, SysUtils, Controls, StdCtrls, LMessages, LCLProc, Graphics, ExtCtrls
   {$ifdef DEBUG_SEARCHEDIT}, sharedlogger {$endif};
 
 type
@@ -59,13 +59,17 @@ type
     FEmptyText: String;
     FOnExecute: TNotifyEvent;
     FOptions: TSearchEditOptions;
+    FTimer: TTimer;
     procedure ClearEmptyText;
     {$ifdef Windows}
     //windows select all text when clearing the text inside LM_SETFOCUS
     procedure DelayedClear(Data: PtrInt);
     {$endif}
     procedure DisplayEmptyText;
+    function GetExecuteDelay: Integer;
+    procedure OnTimer(Sender: TObject);
     procedure SetEmptyText(const AValue: String);
+    procedure SetExecuteDelay(const AValue: Integer);
   protected
     procedure KeyUp(var Key: Word; Shift: TShiftState); override;
     procedure Loaded; override;
@@ -80,6 +84,7 @@ type
     property IsEmpty: Boolean read FIsEmpty;
   published
     property EmptyText: String read FEmptyText write SetEmptyText;
+    property ExecuteDelay: Integer read GetExecuteDelay write SetExecuteDelay default 0;
     property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
     property Options: TSearchEditOptions read FOptions write FOptions default [];
     //TEdit properties
@@ -155,6 +160,19 @@ begin
   inherited RealSetText(FEmptyText);
 end;
 
+function TSearchEdit.GetExecuteDelay: Integer;
+begin
+  if FTimer = nil then
+    Result := 0
+  else
+    Result := FTimer.Interval;
+end;
+
+procedure TSearchEdit.OnTimer(Sender: TObject);
+begin
+  Execute;
+end;
+
 procedure TSearchEdit.SetEmptyText(const AValue: String);
 begin
   if FEmptyText = AValue then
@@ -162,6 +180,16 @@ begin
   FEmptyText := AValue;
   if FIsEmpty then
     inherited RealSetText(FEmptyText);
+end;
+
+procedure TSearchEdit.SetExecuteDelay(const AValue: Integer);
+begin
+  if FTimer = nil then
+  begin
+    FTimer := TTimer.Create(Self);
+    FTimer.OnTimer := @OnTimer;
+  end;
+  FTimer.Interval := AValue;
 end;
 
 procedure TSearchEdit.KeyUp(var Key: Word; Shift: TShiftState);
@@ -206,6 +234,11 @@ begin
   Logger.Send('IsEmpty', FIsEmpty);
   {$endif}
   FIsEmpty := Trim(RealGetText) = '';
+  if FTimer <> nil then
+  begin
+    FTimer.Enabled := False;
+    FTimer.Enabled := True;
+  end;
   inherited TextChanged;
 end;
 
@@ -246,6 +279,8 @@ end;
 
 procedure TSearchEdit.Execute;
 begin
+  if FTimer <> nil then
+    FTimer.Enabled := False;
   if (FOnExecute <> nil) and (not FIsEmpty or (seoExecuteEmpty in FOptions)) then
     FOnExecute(Self);
 end;
