@@ -937,20 +937,22 @@ begin
   EnterMethod(DefaultClasses,Sender,AMethodName);
 end;
 
+function GetObjectDescription(Sender: TObject): String;
+begin
+  Result := Sender.ClassName;
+  if (Sender is TComponent) and (TComponent(Sender).Name <> '') then
+    Result := Result + '(' + TComponent(Sender).Name + ')';
+end;
+
 procedure TLogger.EnterMethod(Classes: TDebugClasses; Sender: TObject;
   const AMethodName: String);
 begin
   if Classes * ActiveClasses = [] then Exit;
-  FLogStack.Insert(0,UpperCase(AMethodName));
+  FLogStack.Insert(0, UpperCase(AMethodName));
   if Sender <> nil then
-  begin
-    if Sender is TComponent then
-      SendStream(ltEnterMethod,TComponent(Sender).Name+'.'+AMethodName,nil)
-    else
-      SendStream(ltEnterMethod,Sender.ClassName+'.'+AMethodName,nil);
-  end
+    SendStream(ltEnterMethod, GetObjectDescription(Sender) + '.' + AMethodName, nil)
   else
-    SendStream(ltEnterMethod,AMethodName,nil);
+    SendStream(ltEnterMethod, AMethodName, nil);
 end;
 
 procedure TLogger.ExitMethod(const AMethodName: String);
@@ -971,26 +973,21 @@ end;
 procedure TLogger.ExitMethod(Classes: TDebugClasses; Sender: TObject;
   const AMethodName: String);
 var
-  i:Integer;
+  i: Integer;
 begin
-  //ensure that ExitMethod will be called allways if there's a unpaired Entermethod
-  //even if Classes is not Active
+  //ensure that ExitMethod will be called always even if there's an unpaired Entermethod
+  //and Classes is not in ActiveClasses
   if FLogStack.Count = 0 then Exit;
   //todo: see if is necessary to do Uppercase (set case sensitive to false?)
-  i:=FLogStack.IndexOf(UpperCase(AMethodName));
+  i := FLogStack.IndexOf(UpperCase(AMethodName));
   if i <> -1 then
     FLogStack.Delete(i)
   else
     Exit;
   if Sender <> nil then
-  begin
-    if Sender is TComponent then
-      SendStream(ltExitMethod,TComponent(Sender).Name+'.'+AMethodName,nil)
-    else
-      SendStream(ltExitMethod,Sender.ClassName+'.'+AMethodName,nil);
-  end
+    SendStream(ltExitMethod, GetObjectDescription(Sender) + '.' + AMethodName, nil)
   else
-    SendStream(ltExitMethod,AMethodName,nil);
+    SendStream(ltExitMethod, AMethodName,nil);
 end;
 
 procedure TLogger.Watch(const AText, AValue: String);
