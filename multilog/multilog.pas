@@ -599,7 +599,6 @@ end;
 procedure TLogger.SendPointer(Classes: TDebugClasses; const AText: String;
   APointer: Pointer);
 begin
-  //todo: add pointerToStr
   if Classes * ActiveClasses = [] then Exit;
   SendStream(ltValue, AText + ' = $' + HexStr(APointer), nil);
 end;
