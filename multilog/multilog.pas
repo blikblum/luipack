@@ -586,7 +586,7 @@ begin
     end;
     TempStr := TempStr+(AObject.ClassName+'/');
   end;
-  TempStr := TempStr+('$'+IntToHex(PtrInt(AObject),SizeOf(PtrInt)*2)+')');
+  TempStr := TempStr+('$' + HexStr(AObject) + ')');
   //SendStream free AStream
   SendStream(ltObject,TempStr,AStream);
 end;
@@ -597,11 +597,11 @@ begin
 end;
 
 procedure TLogger.SendPointer(Classes: TDebugClasses; const AText: String;
-   APointer: Pointer);
+  APointer: Pointer);
 begin
   //todo: add pointerToStr
   if Classes * ActiveClasses = [] then Exit;
-  SendStream(ltValue,AText+' = '+IntToHex(Integer(APointer),8),nil);
+  SendStream(ltValue, AText + ' = $' + HexStr(APointer), nil);
 end;
 
 procedure TLogger.SendCallStack(const AText: String);
