@@ -567,6 +567,13 @@ begin
   Send(DefaultClasses,AText,AObject);
 end;
 
+function GetObjectDescription(Sender: TObject): String;
+begin
+  Result := Sender.ClassName;
+  if (Sender is TComponent) and (TComponent(Sender).Name <> '') then
+    Result := Result + '(' + TComponent(Sender).Name + ')';
+end;
+
 procedure TLogger.Send(Classes: TDebugClasses; const AText: String;
   AObject: TObject);
 var
@@ -575,20 +582,20 @@ var
 begin
   if Classes * ActiveClasses = [] then Exit;
   AStream := nil;
-  TempStr := AText+' (';
+  TempStr := AText + ' [';
   if AObject <> nil then
   begin
     if AObject is TComponent then
     begin
-      TempStr := TempStr+ ('"'+TComponent(AObject).Name+'"/');
       AStream := TMemoryStream.Create;
       AStream.WriteComponent(TComponent(AObject));
-    end;
-    TempStr := TempStr+(AObject.ClassName+'/');
+    end
+    else
+      TempStr := TempStr + GetObjectDescription(AObject) + ' / ';
   end;
-  TempStr := TempStr+('$' + HexStr(AObject) + ')');
+  TempStr := TempStr + ('$' + HexStr(AObject) + ']');
   //SendStream free AStream
-  SendStream(ltObject,TempStr,AStream);
+  SendStream(ltObject, TempStr, AStream);
 end;
 
 procedure TLogger.SendPointer(const AText: String; APointer: Pointer);
@@ -936,13 +943,6 @@ begin
   EnterMethod(DefaultClasses,Sender,AMethodName);
 end;
 
-function GetObjectDescription(Sender: TObject): String;
-begin
-  Result := Sender.ClassName;
-  if (Sender is TComponent) and (TComponent(Sender).Name <> '') then
-    Result := Result + '(' + TComponent(Sender).Name + ')';
-end;
-
 procedure TLogger.EnterMethod(Classes: TDebugClasses; Sender: TObject;
   const AMethodName: String);
 begin
@@ -986,7 +986,7 @@ begin
   if Sender <> nil then
     SendStream(ltExitMethod, GetObjectDescription(Sender) + '.' + AMethodName, nil)
   else
-    SendStream(ltExitMethod, AMethodName,nil);
+    SendStream(ltExitMethod, AMethodName, nil);
 end;
 
 procedure TLogger.Watch(const AText, AValue: String);
