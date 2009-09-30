@@ -13,13 +13,14 @@ begin
   Result := TClipboardFormat(0);
 end;
 
+{$define HAS_GETBKCOLOR}
 {$define HAS_GETCURRENTOBJECT}
+{$define HAS_INVERTRECT}
 {$define HAS_MAPMODEFUNCTIONS}
 {$define HAS_GETTEXTEXTENTEXPOINT}
 {$define HAS_GETDOUBLECLICKTIME}
 {$define HAS_GETTEXTALIGN}
 {$define HAS_GETWINDOWDC}
-{$define HAS_INVERTRECT}
 {$define HAS_OFFSETRGN}
 {$define HAS_REDRAWWINDOW}
 {$define HAS_SCROLLWINDOW}
@@ -30,16 +31,17 @@ end;
 {$i ../generic/independentfunctions.inc}
 {$i ../generic/unicodefunctions.inc}
 
-{
 function GetBkColor(DC:HDC):COLORREF;
+var
+  Color: PQColor;
 begin
-  //TODO: FIXME
   if QtWidgetSet.IsValidDC(DC) then
-    Result := TQtDeviceContext(DC).CurrentBackColor.ColorRef
-  else
+  begin
+    Color := TQtDeviceContext(DC).BackgroundBrush.getColor;
+    TQColorToColorRef(Color^, Result);
+  end else
     Result := CLR_INVALID;
 end;
-}
 
 function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc,
   YSrc: Integer; Rop: DWORD): Boolean;
@@ -72,68 +74,28 @@ function GetTextExtentExPoint(DC: HDC; Str: PChar;
   Count, MaxWidth: Integer; MaxCount, PartialWidths: PInteger;
   var Size: TSize): BOOL;
 var
-  lbearing, rbearing, width, ascent, descent: LongInt;
-  UseFont : TQtFont;
+  lbearing, rbearing, ascent, descent: LongInt;
   IsDBCSFont: Boolean;
   NewCount, Accumulator, i: Integer;
-  QtFontMetrics: QFontMetricsH;
+  AStr: WideString;
 begin
   //based in lcl code
   Result := QtWidgetSet.IsValidDC(DC);
   if Result then
   with TQtDeviceContext(DC) do
   begin
-    if (vFont = nil) or (vFont.Widget = nil)
-    then begin
-      UseFont := TQtFont.Create(True); //QtWidgetSet.GetDefaultGtkFont(false);
-    end
-    else begin
-      UseFont := vFont;
-    end;
-    if UseFont = nil then
-      DebugLn('WARNING: [TQtWidgetSet.GetTextExtentPoint] Missing font')
-    else begin
-      QtFontMetrics := QFontMetrics_create(UseFont.Widget);
-      try
-      descent:=0;
-      {
-      UpdateDCTextMetric(TDeviceContext(DC));
-      IsDBCSFont:=TDeviceContext(DC).DCTextMetric.IsDoubleByteChar;
-
-      if IsDBCSFont then begin
-        NewCount:=Count*2;
-        if FExtUTF8OutCacheSize<NewCount then begin
-          ReAllocMem(FExtUTF8OutCache,NewCount);
-          FExtUTF8OutCacheSize:=NewCount;
-        end;
-        NewCount:=UTF8ToDoubleByte(Str,Count,FExtUTF8OutCache)*2;
-        gdk_text_extents(UseFont, FExtUTF8OutCache, NewCount,
-                         @lbearing, @rBearing, @width, @ascent, @descent);
-      end else begin
-        gdk_text_extents(UseFont, Str, Count,
-                         @lbearing, @rBearing, @width, @ascent, @descent);
-      end;
-      }
-      {TODO: FIXME !}
-      // gdk_text_extents(UseFont, Str, Count,@lbearing, @rBearing, @width, @ascent, @descent);
-      ascent := QFontMetrics_ascent(QtFontMetrics);
-      descent := QFontMetrics_descent(QtFontMetrics);
-      Size.cX := Width;
-      Size.cY := ascent+descent;
-      if PartialWidths <> nil then
+    AStr := WideString(Str);
+    Ascent := Font.Metrics.ascent;
+    Descent := Font.Metrics.descent;
+    Size.cX := Font.Metrics.width(@AStr, Count);
+    Size.cY := Ascent + Descent;
+    if PartialWidths <> nil then
+    begin
+      Accumulator := 0;
+      for i:= 0 to Count - 1 do
       begin
-        Accumulator:=0;
-        for i:= 0 to Count - 1 do
-        begin
-          {TODO: FIXME !}
-          Inc(Accumulator,QFontMetrics_width(QtFontMetrics,PWideChar((Str+i))));
-          // gdk_char_width(UseFont,(Str+i)^));
-          PartialWidths[i] := Accumulator;
-        end;
-      end;
-
-      finally
-        QFontMetrics_destroy(QtFontMetrics);
+        Inc(Accumulator, QFontMetrics_width(Font.Metrics.Widget, PWideChar((Str+i))));
+        PartialWidths[i] := Accumulator;
       end;
     end;
   end;
@@ -141,7 +103,6 @@ end;
 
 function GetMapMode(DC: HDC): LongInt;
 begin
-  {TODO: FIXME}
   Result := MM_TEXT;
 end;
 
@@ -167,10 +128,7 @@ end;
 
 function GetWindowDC(hWnd:THandle): HDC;
 begin
-  if hWnd = 0 then
-    Exit;
-  //todo: see if is necessary to check the handle validity
-  Result := TQtWidget(hWnd).Context;
+  Result := LCLIntf.GetDC(hWnd);
 end;
 
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
@@ -323,6 +281,7 @@ type
 
   TQtTimerEx = class(TQtObject)
   private
+    FTimerHook: QTimer_hookH;
     FCallbackFunc: TTimerNotify;
     FUserId: LongWord;
     FControl: TControl;
@@ -331,6 +290,9 @@ type
     constructor Create(TimerFunc: TTimerNotify;
       UserId: LongWord; Control: TControl); virtual;
     destructor Destroy; override;
+    procedure AttachEvents; override;
+    procedure DetachEvents; override;
+    procedure signalTimeout; cdecl;
   public
     function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
     procedure Reset(TimerFunc: TTimerNotify; UserId: LongWord; Control: TControl);
@@ -361,15 +323,20 @@ type
 
 constructor TQtTimerEx.Create(TimerFunc: TTimerNotify;
   UserId: LongWord; Control: TControl);
+var
+  AName: WideString;
 begin
   inherited Create;
-
+  FDeleteLater := True;
+  FAppObject := TQtWidgetSetHack(QtWidgetSet).App;
   FCallbackFunc := TimerFunc;
   FUserId := UserId;
   FControl := Control;
   
   //very big ultra extreme hack to get the app from QtWidgetset
-  TheObject := QTimer_create(TQtWidgetSetHack(QtWidgetSet).App);
+  TheObject := QTimer_create(FAppObject);
+  AName := 'tqttimerex';
+  QObject_setObjectName(TheObject, @AName);
 
   AttachEvents;
 end;
@@ -381,24 +348,44 @@ begin
   inherited Destroy;
 end;
 
+procedure TQtTimerEx.AttachEvents;
+begin
+  FTimerHook := QTimer_hook_create(QTimerH(TheObject));
+  QTimer_hook_hook_timeout(FTimerHook, @signalTimeout);
+  inherited AttachEvents;
+end;
+
+procedure TQtTimerEx.DetachEvents;
+begin
+  QTimer_stop(QTimerH(TheObject));
+  if FTimerHook <> nil then
+    QTimer_hook_destroy(FTimerHook);
+  inherited DetachEvents;
+end;
+
+procedure TQtTimerEx.signalTimeout; cdecl;
+var
+  FCheckHandle: Boolean;
+begin
+  if Assigned(FCallbackFunc) then
+    FCallbackFunc(FUserID)
+  else
+  if Assigned(FControl) then
+  begin
+    if not (csLoading in FControl.ComponentState) then
+    if not (csDestroying in FControl.ComponentState) or not
+    (csDestroyingHandle in FControl.ControlState) then
+    begin
+      FCheckHandle := True;
+      LCLSendTimerMsg(FControl, FUserId, 0);
+    end;
+  end;
+end;
+
 function TQtTimerEx.EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl;
 begin
-  BeginEventProcessing;
   Result := False;
-
-  if QEvent_type(Event) = QEventTimer then
-  begin
-    Result := True;
-
-    QEvent_accept(Event);
-
-    if Assigned(FCallbackFunc) then
-      FCallbackFunc(FUserId)
-    else
-      if FControl <> nil then
-        LCLSendTimerMsg(FControl, FUserId, 0);
-  end;
-  EndEventProcessing;
+  QEvent_accept(Event);
 end;
 
 procedure TQtTimerEx.Reset(TimerFunc: TTimerNotify;
@@ -411,13 +398,11 @@ end;
 
 procedure TQtTimerEx.Start(Interval: Integer);
 begin
-  //QTimer_setInterval(QTimerH(TheObject), Interval);
   QTimer_start(QTimerH(TheObject), Interval);
 end;
 
 procedure TQtTimerEx.Stop;
 begin
-  //todo: destroy the timer here instead of just stopping
   QTimer_stop(QTimerH(TheObject));
 end;
 
@@ -435,9 +420,11 @@ var
   TimerObject: TQtTimerEx;
 begin
   TimerObject := FTimerList.GetTimerObject(hWnd, nIDEvent);
-  //DebugLn('KillTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
   if TimerObject <> nil then
+  begin
+    // DebugLn('KillTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
     TimerObject.Stop;
+  end;
 end;
 
 function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
@@ -450,7 +437,15 @@ begin
   else
     Control := nil;
   TimerObject := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
-  TimerObject.Start(uElapse);
+  try
+    TimerObject.Start(uElapse);
+    if hWnd = 0 then
+      Result := PtrInt(TimerObject)
+    else
+      Result := nIdEvent;
+  except
+    Result := 0;
+  end;
   //DebugLn('SetTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
 end;
 
@@ -463,13 +458,13 @@ begin
   begin
     if HasId(AID) then
     begin
-      //DebugLn('Reset timer for HWnd: %d ID: %d', [hWnd, ID]);
+      // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       GetData(AID, Result);
       Result.Reset(NotifyFunc, ID, WinControl);
     end
     else
     begin
-      //DebugLn('Create timer for HWnd: %d ID: %d', [hWnd, ID]);
+      // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       Result := TQtTimerEx.Create(NotifyFunc, ID, WinControl);
       Add(AID, Result);
     end;
@@ -504,9 +499,12 @@ end;
 function TTimerList.GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
 var
   DataPtr: ^TQtTimerEx;
+  AID: QWord;
 begin
   Result := nil;
-  DataPtr := FMap.GetDataPtr(MakeQWord(hWnd, ID));
+  AID := MakeQWord(hWnd, ID);
+  // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
+  DataPtr := FMap.GetDataPtr(AID);
   if DataPtr <> nil then
     Result := DataPtr^;
 end;
