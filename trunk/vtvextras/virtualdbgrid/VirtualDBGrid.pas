@@ -577,7 +577,6 @@ type
     property Enabled;
     property Font;
     property Header: TVTDBHeader read GetHeader write SetHeader;
-    property HintAnimation;
     property HintMode;
     property HotCursor;
     property Images;
