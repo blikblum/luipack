@@ -214,8 +214,7 @@ procedure TMainForm.OpenDataset;
 var
    I: Integer;
 begin
-  DBGrid.ClearAllColumns;
-  Dbf1.Active:= false;
+  Dbf1.Active := false;
 
   DBGrid.AddCalcColumn('RowNumber', 80);
   DBGrid.AddCalcColumn('Time', 50);
@@ -229,7 +228,7 @@ begin
   // open query, this automatically load up data to virtualdbgrid
   Dbf1.Active:= true;
 
-  DBGrid.AddDefaultsFieldsToColumns(false);
+  DBGrid.AddDefaultFieldsToColumns(false);
   //DBGrid.ReInitializeDBTree;
 
   cmbSortColumn.Items.Clear;
@@ -361,7 +360,6 @@ end;
 procedure TMainForm.CloseDataset;
 begin
   Dbf1.Active:= false;
-  DBGrid.ClearAllColumns;
   cmbSortColumn.Items.Clear;
   cmbSortDirection.ItemIndex:= -1; 
 end;
@@ -497,7 +495,7 @@ procedure TMainForm.DBGridPostChanges(Sender: TObject;
 begin
   if (ColumnType = ctCalculated) then
     DoDefault:= MessageDlg('Do you really want to save changes of calculated value?',
-                   mtConfirmation, [mbYes, mbNo], 0) = mrYes;
+      mtConfirmation, [mbYes, mbNo], 0) = mrYes;
 end;
 
 procedure TMainForm.DBGridChangeSort(Sender: TObject;
