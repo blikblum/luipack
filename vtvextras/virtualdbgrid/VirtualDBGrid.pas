@@ -396,7 +396,6 @@ type
 
     function InternalGetNodeData(ANode: PVirtualNode): PNodeData;
     procedure InternalInitializeDBTree;
-    procedure InitializeDBTree;
     procedure UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0;
       UpdateLoadedData: Boolean = False);
     function IsDataCreated(ANode: PVirtualNode): boolean;
@@ -411,6 +410,7 @@ type
     function GetIndicatorColumn: TVirtualDBTreeColumn;
     function GetSortingColumn: TVirtualDBTreeColumn;
   protected
+    procedure CreateWnd; override;
     procedure ValidateNodeDataSize(var Size: Integer); override;
     procedure DoFocusChange(Node: PVirtualNode; Column: TColumnIndex); override;
     procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -516,8 +516,7 @@ type
     procedure AddDBColumn(const AFieldName, ACaption: string; AWidth: Integer=-1);
     procedure AddCalcColumn(const IDText: string; AWidth: Integer);
     procedure AddIndicatorColumn(AWidth: Integer);
-    procedure AddDefaultsFieldsToColumns(ClearOldColumns: boolean= true);
-    procedure ClearAllColumns;
+    procedure AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
     procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
     procedure SetFocusToActualRecNo;
     procedure UpdateCurrentRecord;
@@ -1716,7 +1715,7 @@ begin
   begin
     Value.FreeNotification(TreeView);
     if (Treeview.Header.Columns.Count = 0) then
-      Treeview.AddDefaultsFieldsToColumns;
+      Treeview.AddDefaultFieldsToColumns;
   end;
   if (Treeview.HandleAllocated) then
      Treeview.Invalidate;
@@ -1995,6 +1994,14 @@ begin
       Result:= TVirtualDBTreeColumn(Header.Columns[Index]);
 end;
 
+procedure TCustomVirtualDBGrid.CreateWnd;
+begin
+  inherited CreateWnd;
+  //Set the selected node after the handle is created
+  if FocusedNode <> nil then
+    Selected[FocusedNode] := True;
+end;
+
 function TCustomVirtualDBGrid.InternalData(Node: PVirtualNode): Pointer;
 begin
   //todo: see is necessary this code
@@ -2039,56 +2046,38 @@ end;
 
 procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
 begin
-  //todo: refactor this method
   if (not (csLoading in ComponentState)) and
      (not IsDataLoading) then
   begin
      IncLoadingDataFlag;
+     BeginUpdate;
      try
-
-       if Assigned(LinkedDataSet) then
+       if Assigned(LinkedDataSet) and LinkedDataSet.Active then
        begin
-         if (LinkedDataSet.Active)
-            then begin
-               fRecordCount:= GetRecordCount;
-               fLastRecordCount:= fRecordCount;
-            end
-            else begin
-              fRecordCount:= 0;
-              fLastRecordCount:= 0;
-            end;
-       end;
-
-       if Header.Columns.Count = 0 then
-       begin
-         AddDefaultsFieldsToColumns;
+         fRecordCount := GetRecordCount;
+         fLastRecordCount := fRecordCount;
+         if Header.Columns.Count = 0 then
+           AddDefaultFieldsToColumns;
          InternalInitializeDBTree;
+         if fRecordCount > 0 then
+           SetFocusToNode(GetFirst);
        end
        else
-         InitializeDBTree;
-
-
-       if Assigned(LinkedDataSet) then
        begin
-         if (not LinkedDataSet.Active)
-            then begin
-              //fRecordCount:= 0;
-              fLastRecordCount:= 0;
-            end;
-       end
-       else begin
-         //fRecordCount:= 0;
-         fLastRecordCount:= 0;
+         fRecordCount := 0;
+         fLastRecordCount := 0;
+         Header.Columns.Clear;
+         Clear;
        end;
-
      finally
+       EndUpdate;
        DecLoadingDataFlag;
      end;
 
-     if Assigned(LinkedDataSet) then
-       if (LinkedDataSet.Active) then
+     if Assigned(LinkedDataSet) and LinkedDataSet.Active then
        begin
-          UpdateDBTree(true);
+          //todo: refactor to call UpdateDBTree earlier
+          UpdateDBTree(True);
           //todo: see if is doable implementing auto sort after dataset changes
           //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
           //  DoSortColumn(Header.SortColumn);
@@ -2688,7 +2677,6 @@ begin
   end;
 end;
 
-
 function TCustomVirtualDBGrid.SetFocusToNode(Node: PVirtualNode; Center: boolean=true): boolean;
 begin
   Result := Assigned(Node);
@@ -2699,12 +2687,13 @@ begin
     Selected[FocusedNode] := False;
 
   FocusedNode := Node;
-  Selected[Node] := True;
+  //don't set Selected if Handle is not allocated to avoid premature handle creation
+  if HandleAllocated then
+    Selected[Node] := True;
   FullyVisible[Node] := True;
+  //todo: change ScrollIntoView behavior?
   ScrollIntoView(Node, Center);
 end;
-
-
 
 procedure TCustomVirtualDBGrid.GotoRecNo(NewRecNo: longint);
 begin
@@ -2840,7 +2829,7 @@ begin
   AddColumn(ctIndicator, '', '', AWidth);
 end;
 
-procedure TCustomVirtualDBGrid.AddDefaultsFieldsToColumns(ClearOldColumns: boolean= true);
+procedure TCustomVirtualDBGrid.AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
 var
   I: Integer;
   fromDefs: Boolean;
@@ -2889,14 +2878,6 @@ begin
 
    //ReInitializeDBGrid;
 end;
-
-procedure TCustomVirtualDBGrid.ClearAllColumns;
-begin
-   BeginUpdate;
-   Header.Columns.Clear;
-   EndUpdate;
-end;
-
 
 procedure TCustomVirtualDBGrid.SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
 
@@ -3001,12 +2982,6 @@ begin
      (ColumnIndex > NoColumn) and
      (ColumnIndex < Header.Columns.Count)
      then FocusedColumn := ColumnIndex;
-end;
-
-procedure TCustomVirtualDBGrid.InitializeDBTree;
-begin
-  InternalInitializeDBTree;
-  SetFocusToNode(GetFirst);
 end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
