@@ -2089,9 +2089,9 @@ begin
        if (LinkedDataSet.Active) then
        begin
           UpdateDBTree(true);
-          //todo: ensure the tree is not sorted twice
-          if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
-            DoSortColumn(Header.SortColumn);
+          //todo: see if is doable implementing auto sort after dataset changes
+          //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
+          //  DoSortColumn(Header.SortColumn);
        end;
 
   end;
@@ -2130,9 +2130,9 @@ begin
            SetFocusToActualRecNo;
          end;
        end;
-       //todo: ensure the tree is not sorted twice
-       if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
-         DoSortColumn(Header.SortColumn);
+       //todo: see if is doable implementing auto sort after dataset changes
+       //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
+       //  DoSortColumn(Header.SortColumn);
        Logger.ExitMethod(lcAll, 'DataLinkChanged');
     end;
   end;
