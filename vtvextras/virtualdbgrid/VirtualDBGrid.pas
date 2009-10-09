@@ -2045,6 +2045,8 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
+var
+  ColumnPosition: Integer;
 begin
   if (not (csLoading in ComponentState)) and
      (not IsDataLoading) then
@@ -2059,6 +2061,11 @@ begin
          if Header.Columns.Count = 0 then
            AddDefaultFieldsToColumns;
          InternalInitializeDBTree;
+         if Header.Columns.Count > 0 then
+         begin
+           ColumnPosition := IfThen(IndicatorColumn <> nil, 1, 0);
+           FocusedColumn := Header.Columns.ColumnFromPosition(ColumnPosition);
+         end;
          if fRecordCount > 0 then
            SetFocusToNode(GetFirst);
        end
@@ -2948,40 +2955,16 @@ begin
     Result := InternalData(ANode);
 end;
 
-
 function TCustomVirtualDBGrid.IsDataOk(AData: PNodeData): Boolean;
 begin
   Result := Assigned(AData) and Assigned(AData.RecordData);
 end;
 
-
 procedure TCustomVirtualDBGrid.InternalInitializeDBTree;
-var
-  ColumnIndex:    TColumnIndex;
-  IndCol:         TVirtualDBTreeColumn;
-  IndColIndex:    TColumnIndex;
 begin
-  BeginUpdate;
   Clear;
   // Set Nodes count equals to database records count
   RootNodeCount := FRecordCount;
-  EndUpdate;
-
-  // Set focused column
-  ColumnIndex := 0;
-  // Find first column near indicator
-  IndColIndex := -1;
-  IndCol := IndicatorColumn;
-  if (IndCol <> nil) then
-  begin
-     ColumnIndex := Header.Columns.ColumnFromPosition(1);
-     IndColIndex := IndCol.Index;
-  end;
-
-  if (IndColIndex <> ColumnIndex) and
-     (ColumnIndex > NoColumn) and
-     (ColumnIndex < Header.Columns.Count)
-     then FocusedColumn := ColumnIndex;
 end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
@@ -3007,6 +2990,8 @@ begin
 
   OldOffsetXY := OffsetXY;
 
+  BeginUpdate;
+
   // Initialize database tree
   InternalInitializeDBTree;
 
@@ -3017,8 +3002,6 @@ begin
   UpdateDBTree(True);
 
   // Set focus
-  BeginUpdate;
-
   OldTopNode := TopNode;
   RunNode := OldTopNode;
   NewFocusedNode := RunNode;
