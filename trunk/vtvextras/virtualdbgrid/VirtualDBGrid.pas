@@ -468,7 +468,6 @@ type
     procedure DoScroll(DeltaX, DeltaY: Integer); override;
     function GetRecordDataClass: TRecordDataClass; virtual;
 
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure DataLinkActiveChanged; virtual;
     procedure DataLinkChanged; virtual;
     procedure DataLinkRecordChanged(Field: TField); virtual;
@@ -1711,14 +1710,6 @@ end;
 procedure TVTDBOptions.SetDataSource(Value: TDataSource);
 begin
   FDataLink.DataSource := Value;
-  if Assigned(Value) then
-  begin
-    Value.FreeNotification(TreeView);
-    if (Treeview.Header.Columns.Count = 0) then
-      Treeview.AddDefaultFieldsToColumns;
-  end;
-  if (Treeview.HandleAllocated) then
-     Treeview.Invalidate;
 end;
 
 procedure TVTDBOptions.SetIndicatorImIndex(Value: TImageIndex);
@@ -2034,14 +2025,6 @@ end;
 procedure TCustomVirtualDBGrid.SetOptions(const Value: TStringTreeOptions);
 begin
   inherited TreeOptions := Value;
-end;
-
-procedure TCustomVirtualDBGrid.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited;
-  if (Operation = opRemove) and Assigned(fDBOptions.DataLink) and
-    (AComponent = fDBOptions.DataSource) then
-      fDBOptions.DataSource := nil;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
