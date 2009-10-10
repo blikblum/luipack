@@ -111,8 +111,8 @@ type
 
 const
   DefaultAdvOptions = [aoEditable, aoStrippedRows, aoShowHorzLines, aoShowVertLines,
-                       aoAllowSorting, aoHighlightSortColumn, aoCenterScrollIntoView,
-                       aoAutoInsertIndicator, aoHourGlassCursor, aoSortDBFieldColumns,
+                       aoAllowSorting, aoHighlightSortColumn, aoAutoInsertIndicator,
+                       aoHourGlassCursor, aoSortDBFieldColumns,
                        aoEditDBFieldColumns, aoSortCalculatedColumns];
 
 type
