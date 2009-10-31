@@ -158,7 +158,10 @@ end;
 
 procedure TCustomCairoControl.InitBitmap;
 begin
-  FBitmap.Canvas.Brush.Color := Parent.Color;
+  if Parent <> nil then
+    FBitmap.Canvas.Brush.Color := Parent.Color
+  else
+    FBitmap.Canvas.Brush.Color := clBtnFace;
   FBitmap.Canvas.FillRect(0, 0, Width, Height);
 end;
 
