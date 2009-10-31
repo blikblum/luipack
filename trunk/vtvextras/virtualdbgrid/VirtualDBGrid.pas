@@ -2056,7 +2056,6 @@ begin
        begin
          fRecordCount := 0;
          fLastRecordCount := 0;
-         Header.Columns.Clear;
          Clear;
        end;
      finally
