@@ -1,5 +1,5 @@
-{ This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+{ This file was automatically created by Lazarus. do not edit ! 
+  This source is only used to compile and install the package.
  }
 
 unit luicontrols; 
@@ -7,8 +7,8 @@ unit luicontrols;
 interface
 
 uses
-  ToggleLabel, MenuButton, registermisccontrols, SearchEdit, 
-    LazarusPackageIntf; 
+    ToggleLabel, MenuButton, registermisccontrols, SearchEdit, DateEdit, 
+  LazarusPackageIntf;
 
 implementation
 

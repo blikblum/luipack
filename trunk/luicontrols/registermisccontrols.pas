@@ -7,7 +7,7 @@ interface
 
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
-  ToggleLabel, MenuButton, SearchEdit;
+  ToggleLabel, MenuButton, SearchEdit, DateEdit;
   
 procedure Register;
 
@@ -31,6 +31,12 @@ begin
   RegisterComponents(ComponentPage, [TSearchEdit]);
 end;
 
+procedure RegisterUnitDateEdit;
+begin
+  RegisterComponents(ComponentPage, [TDBDateMaskEdit]);
+end;
+
+
 
 procedure Register;
 
@@ -38,6 +44,7 @@ begin
   RegisterUnit('ToggleLabel',@RegisterUnitToggleLabel);
   RegisterUnit('MenuButton',@RegisterUnitMenuButton);
   RegisterUnit('SearchEdit',@RegisterUnitSearchEdit);
+  RegisterUnit('DateEdit',@RegisterUnitDateEdit);
 end; 
 
 initialization
