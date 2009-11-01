@@ -121,18 +121,19 @@ var
 begin
   if State in dsEditModes then
     Post;
-  DoBeforeSave;
+
   if FAppendMode then
     SourceDataset.Append
   else
     SourceDataset.Edit;
+  DoBeforeSave;
   for i := 0 to SourceDataset.FieldDefs.Count - 1 do
   begin
     FieldName := SourceDataset.FieldDefs[i].Name;
     AssignFieldValue(SourceDataSet.FieldByName(FieldName), FieldByName(FieldName));
   end;
-  SourceDataset.Post;
   DoAfterSave;
+  SourceDataset.Post;
 end;
 
 procedure TLuiRecordBuffer.AddRecord;
