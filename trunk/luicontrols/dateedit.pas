@@ -31,7 +31,7 @@ type
     FValidDate: Boolean;
     procedure BuildEditMask;
     procedure DataChange(Sender: TObject);
-    procedure HandleNullDate;
+    procedure UpdateControlState(DateIsValid: Boolean);
     procedure UpdateData(Sender: TObject);
     procedure UpdateText(const NewText: String);
   protected
@@ -88,14 +88,14 @@ end;
 
 procedure TDBDateMaskEdit.DataChange(Sender: TObject);
 begin
-  if (FDataLink.Field <> nil) and (FDataLink.Field.Value = Null) then
-    HandleNullDate;
+  UpdateControlState((FDataLink.Field = nil) or (FDataLink.Field.Value <> Null) or
+    not (deoNullDateAsError in FOptions));
   FOldDataChange(Sender);
 end;
 
-procedure TDBDateMaskEdit.HandleNullDate;
+procedure TDBDateMaskEdit.UpdateControlState(DateIsValid: Boolean);
 begin
-  if (deoNullDateAsError in FOptions) then
+  if not DateIsValid then
   begin
     FValidDate := False;
     Color := FErrorColor;
@@ -130,7 +130,7 @@ begin
       rmClear:
         begin
           UpdateText('');
-          HandleNullDate;
+          UpdateControlState(not (deoNullDateAsError in FOptions));
         end;
       rmRestore: FDataLink.Reset;
     end;
