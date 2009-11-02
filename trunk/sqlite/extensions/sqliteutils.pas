@@ -15,6 +15,8 @@ type
 
   TIntegerList = specialize TFPGList <Integer>;
 
+  //todo: add ability to create query for more than one Table
+
   { TSqliteQueryBuilder }
 
   TSqliteQueryBuilder = class(TComponent)
@@ -44,6 +46,7 @@ type
     procedure ParseUpdate(UserData: Pointer; Values: PPChar; ABookmark: TBookmark; State: TRecordState);
     procedure SetExcludeFields(const AValue: TStrings);
     procedure SetIncludeFields(const AValue: TStrings);
+    procedure SetPrimaryKey(const AValue: TStrings);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -54,7 +57,7 @@ type
     property ExcludeFields: TStrings read FExcludeFields write SetExcludeFields;
     property IncludeFields: TStrings read FIncludeFields write SetIncludeFields;
     property Options: TSqliteQueryBuilderOptions read FOptions write FOptions default [sqoSaveToSqlList];
-    property PrimaryKey: TStrings read FPrimaryKey;
+    property PrimaryKey: TStrings read FPrimaryKey write SetPrimaryKey;
     property RecordStates: TRecordStateSet read FRecordStates write FRecordStates default [rsAdded, rsUpdated, rsDeleted];
     property TableName: String read FTableName write FTableName;
   end;
@@ -194,6 +197,11 @@ end;
 procedure TSqliteQueryBuilder.SetIncludeFields(const AValue: TStrings);
 begin
   FIncludeFields.Assign(AValue);
+end;
+
+procedure TSqliteQueryBuilder.SetPrimaryKey(const AValue: TStrings);
+begin
+  FPrimaryKey.Assign(AValue);
 end;
 
 constructor TSqliteQueryBuilder.Create(AOwner: TComponent);
