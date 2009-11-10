@@ -120,7 +120,7 @@ type
 implementation
 
 uses
-  process, math;
+  process, math, strutils;
 
 { TDataSerieList }
 
