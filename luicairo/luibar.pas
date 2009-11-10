@@ -145,9 +145,9 @@ type
     function GetHeight: Integer;
     function GetWidth: Integer;
   public
+    UserData: Pointer;
     constructor Create;
     destructor Destroy; override;
-    UserData: Pointer;
     property Height: Integer read GetHeight;
     property Index: Integer read FIndex write FIndex;
     property Patterns: TLuiBarPatterns read FPatterns write FPatterns;
@@ -370,17 +370,17 @@ begin
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
-          Cell.Bounds.Left := NextLeft;
-          Cell.Bounds.Top := FOwner.OuterOffset;
-          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
-          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          Cell.FBounds.Left := NextLeft;
+          Cell.FBounds.Top := FOwner.OuterOffset;
+          Cell.FBounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          Cell.FBounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextLeft := Cell.Bounds.Right + FOwner.Spacing;
         end;
         AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Right, FOwner.Width);
         if AlignOffset > 0 then
         begin
           for i := 0 to FList.Count - 1 do
-            OffsetRect(Items[i].Bounds, AlignOffset, 0);
+            OffsetRect(Items[i].FBounds, AlignOffset, 0);
         end;
         FOwner.FClientBounds.Top := FOwner.OuterOffset + FOwner.CellHeight;
         FOwner.FClientBounds.Bottom := FOwner.Height;
@@ -393,17 +393,17 @@ begin
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
-          Cell.Bounds.Top := NextTop;
-          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
-          Cell.Bounds.Left := FOwner.OuterOffset;
-          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          Cell.FBounds.Top := NextTop;
+          Cell.FBounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          Cell.FBounds.Left := FOwner.OuterOffset;
+          Cell.FBounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
         end;
         AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Bottom, FOwner.Height);
         if AlignOffset > 0 then
         begin
           for i := 0 to FList.Count - 1 do
-            OffsetRect(Items[i].Bounds, 0, AlignOffset);
+            OffsetRect(Items[i].FBounds, 0, AlignOffset);
         end;
         FOwner.FClientBounds.Top := 0;
         FOwner.FClientBounds.Bottom := FOwner.Height;
@@ -416,17 +416,17 @@ begin
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
-          Cell.Bounds.Top := NextTop;
-          Cell.Bounds.Right := FOwner.Width - FOwner.OuterOffset;
-          Cell.Bounds.Left := Cell.Bounds.Right - FOwner.DoCalculateCellWidth(Cell);
-          Cell.Bounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
+          Cell.FBounds.Top := NextTop;
+          Cell.FBounds.Right := FOwner.Width - FOwner.OuterOffset;
+          Cell.FBounds.Left := Cell.Bounds.Right - FOwner.DoCalculateCellWidth(Cell);
+          Cell.FBounds.Bottom := Cell.Bounds.Top + FOwner.CellHeight;
           NextTop := Cell.Bounds.Bottom + FOwner.Spacing;
         end;
         AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Bottom, FOwner.Height);
         if AlignOffset > 0 then
         begin
           for i := 0 to FList.Count - 1 do
-            OffsetRect(Items[i].Bounds, 0, AlignOffset);
+            OffsetRect(Items[i].FBounds, 0, AlignOffset);
         end;
         FOwner.FClientBounds.Top := 0;
         FOwner.FClientBounds.Bottom := FOwner.Height;
@@ -440,17 +440,17 @@ begin
         for i := 0 to FList.Count - 1 do
         begin
           Cell := Items[i];
-          Cell.Bounds.Left := NextLeft;
-          Cell.Bounds.Bottom := FOwner.Height - FOwner.OuterOffset;
-          Cell.Bounds.Top := Cell.Bounds.Bottom - FOwner.CellHeight;
-          Cell.Bounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
+          Cell.FBounds.Left := NextLeft;
+          Cell.FBounds.Bottom := FOwner.Height - FOwner.OuterOffset;
+          Cell.FBounds.Top := Cell.Bounds.Bottom - FOwner.CellHeight;
+          Cell.FBounds.Right := Cell.Bounds.Left + FOwner.DoCalculateCellWidth(Cell);
           NextLeft := Cell.Bounds.Right + FOwner.Spacing;
         end;
         AlignOffset := FOwner.GetAlignOffset(Items[FList.Count - 1].Bounds.Right, FOwner.Width);
         if AlignOffset > 0 then
         begin
           for i := 0 to FList.Count - 1 do
-            OffsetRect(Items[i].Bounds, AlignOffset, 0);
+            OffsetRect(Items[i].FBounds, AlignOffset, 0);
         end;
         FOwner.FClientBounds.Top := 0;
         FOwner.FClientBounds.Bottom := FOwner.Height - (FOwner.CellHeight + FOwner.OuterOffset);
