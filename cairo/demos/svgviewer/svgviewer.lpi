@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
-    <PathDelim Value="/"/>
-    <Version Value="6"/>
+    <Version Value="7"/>
     <General>
       <Flags>
         <AlwaysBuild Value="False"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value="./"/>
       <TargetFileExt Value=".exe"/>
     </General>
     <VersionInfo>
@@ -46,18 +45,15 @@
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
-        <ComponentName Value="Form1"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="fmain.lrs"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
         <UnitName Value="fmain"/>
       </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Version Value="8"/>
     <Linking>
       <Options>
         <Win32>

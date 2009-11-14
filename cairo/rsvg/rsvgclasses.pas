@@ -5,7 +5,7 @@ unit RsvgClasses;
 interface
 
 uses
-  CairoClasses, rsvg;
+  CairoClasses, {$ifdef ver_2_4_0}rsvg{$else}rsvg_api{$endif};
 
 type
 
