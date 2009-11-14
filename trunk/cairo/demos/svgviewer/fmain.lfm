@@ -10,7 +10,9 @@ object Form1: TForm1
   ClientWidth = 410
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  object CairoControl1: TCairoControl
+  LCLVersion = '0.9.29'
+  object CairoControl1: TCairoPaintBox
+    Left = 0
     Height = 359
     Top = 26
     Width = 410
@@ -18,7 +20,9 @@ object Form1: TForm1
     Align = alClient
   end
   object TopPanel: TPanel
+    Left = 0
     Height = 26
+    Top = 0
     Width = 410
     Align = alTop
     BevelOuter = bvNone
@@ -27,13 +31,17 @@ object Form1: TForm1
     TabOrder = 0
     object SvgFileEdit: TFileNameEdit
       Left = 2
-      Height = 23
+      Height = 21
+      Top = 0
       Width = 376
       OnAcceptFileName = SvgFileEditAcceptFileName
+      DialogOptions = []
       Filter = 'Svg Files|*.svg|All Files|*.*'
+      FilterIndex = 0
+      HideDirectories = False
       ButtonWidth = 23
       NumGlyphs = 1
-      ParentColor = False
+      MaxLength = 0
       TabOrder = 0
     end
   end

@@ -1,5 +1,5 @@
-{ This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+{ This file was automatically created by Lazarus. do not edit ! 
+  This source is only used to compile and install the package.
  }
 
 unit rsvg_package; 
@@ -7,7 +7,7 @@ unit rsvg_package;
 interface
 
 uses
-  rsvg, RsvgClasses; 
+  RsvgClasses, rsvg_api;
 
 implementation
 

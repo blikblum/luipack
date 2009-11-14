@@ -3,14 +3,11 @@
   <Package Version="3">
     <Name Value="rsvg_package"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="8"/>
       <SearchPaths>
         <OtherUnitFiles Value="rsvg/"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -22,12 +19,12 @@
     <Version Minor="1"/>
     <Files Count="2">
       <Item1>
-        <Filename Value="rsvg/rsvg.pas"/>
-        <UnitName Value="rsvg"/>
-      </Item1>
-      <Item2>
         <Filename Value="rsvg/rsvgclasses.pas"/>
         <UnitName Value="rsvgclasses"/>
+      </Item1>
+      <Item2>
+        <Filename Value="rsvg/rsvg_api.pas"/>
+        <UnitName Value="rsvg_api"/>
       </Item2>
     </Files>
     <RequiredPkgs Count="2">

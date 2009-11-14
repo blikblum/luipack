@@ -5,15 +5,15 @@ unit fmain;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, CairoLCL, RsvgClasses, CairoClasses, rsvg,
-  EditBtn, ExtCtrls;
+  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, CairoLCL, RsvgClasses,
+  {$ifdef ver_2_4_0}rsvg{$else}rsvg_api{$endif},  EditBtn, ExtCtrls;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    CairoControl1: TCairoControl;
+    CairoControl1: TCairoPaintBox;
     TopPanel: TPanel;
     SvgFileEdit: TFileNameEdit;
     procedure CairoControl1Draw(Sender: TObject);
@@ -45,7 +45,8 @@ begin
       Rectangle(0, 0 , Width, Height);
       Stroke;
       FSvgFile.GetDimensions(Dimensions);
-      Scale(Width / Dimensions.width, Height / Dimensions.Height);
+      if (Dimensions.width > 0) and (Dimensions.height > 0) then
+        Scale(Width / Dimensions.width, Height / Dimensions.Height);
       FSvgFile.RenderToCairo(Context);
     end;
   end;
