@@ -67,6 +67,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 200);
     Options := [lboHotTrack, lboVariableCellWidth, lboEmulateTab];
@@ -92,7 +93,7 @@ begin
     Cells.Add('Download');
     Cells.Add('Skins');
     Cells.Add('FAQ');
-
+    EndUpdate;
     Visible := True;
   end;
 end;

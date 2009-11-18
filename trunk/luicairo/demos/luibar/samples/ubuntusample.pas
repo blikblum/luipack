@@ -65,6 +65,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 80);
     Options := [lboEmulateTab, lboVariableCellWidth, lboHotTrack];
@@ -87,6 +88,7 @@ begin
     Cells.Add('LongLongLongLong');
     Cells.Add('x');
     InitialSpace := 10;
+    EndUpdate;
     Visible := True;
   end;
 end;

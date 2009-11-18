@@ -56,6 +56,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 400);
     Options := [lboEmulateTab, lboOutLineClientArea, lboCenterImage];
@@ -83,6 +84,7 @@ begin
     Cells.Add('Features');
     Cells.Add('Events');
     Cells.Add('Description');
+    EndUpdate;
     Visible := True;
   end;
 end;

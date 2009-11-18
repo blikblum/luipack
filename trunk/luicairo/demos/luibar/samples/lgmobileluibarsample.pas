@@ -86,6 +86,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 120, 500);
     Patterns[HoverOutlinePattern] := TCairoSolidPattern.Create(RGBToCairoColor(215, 208, 135));
@@ -113,6 +114,7 @@ begin
     Cells.Add('');
     Cells.Add('');
     Cells.Add('');
+    EndUpdate;
     Visible := True;
   end;
 end;

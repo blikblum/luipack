@@ -102,6 +102,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 500, 120);
     //Selected outline pattern
@@ -128,6 +129,7 @@ begin
     Cells.Add('Test2');
     Cells.Add('Test3');
     Cells.Add('Test4');
+    EndUpdate;
     Visible := True;
   end;
 end;

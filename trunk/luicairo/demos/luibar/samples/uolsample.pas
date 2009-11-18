@@ -44,6 +44,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 60);
     Options := [lboEmulateTab, lboHoverAsSelected, lboOutLineClientArea,
@@ -68,12 +69,14 @@ begin
     Cells.Add('Imagens');
     OnGetImageInfo := @GetImageInfo;
     Images := ImgList;
+    EndUpdate;
     Visible := True;
   end;
 
   FBar2 := TLuiBar.Create(Self);
   with FBar2 do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 100, 180, 200);
     Options := [lboEmulateTab, lboHoverAsSelected, lboOutLineClientArea, lboHotTrack, lboCenterImage];
@@ -99,12 +102,14 @@ begin
     Cells.Add('Web');
     Cells.Add(UTF8Encode('Notícias'));
     Cells.Add('Imagens');
+    EndUpdate;
     Visible := True;
   end;
   
   FBar3 := TLuiBar.Create(Self);
   with FBar3 do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(220, 100, 200, 200);
     Options := [lboEmulateTab, lboHoverAsSelected, lboOutLineClientArea, lboHotTrack, lboCenterImage];
@@ -132,12 +137,14 @@ begin
     Cells.Add('Web');
     Cells.Add(UTF8Encode('Notícias'));
     Cells.Add('Imagens');
+    EndUpdate;
     Visible := True;
   end;
   
   FBar4 := TLuiBar.Create(Self);
   with FBar4 do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 320, 400, 60);
     Options := [lboEmulateTab, lboHoverAsSelected, lboOutLineClientArea, lboHotTrack];
@@ -159,6 +166,7 @@ begin
     Cells.Add('Web');
     Cells.Add(UTF8Encode('Notícias'));
     Cells.Add('Imagens');
+    EndUpdate;
     Visible := True;
   end;
 end;

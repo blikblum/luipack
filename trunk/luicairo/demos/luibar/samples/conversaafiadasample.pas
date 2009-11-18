@@ -67,6 +67,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 80);
     Options := [lboVariableCellWidth];
@@ -89,6 +90,7 @@ begin
     Cells.Add('RSS');
     InitialSpace := 10;
     Visible := True;
+    EndUpdate;
   end;
 end;
 
