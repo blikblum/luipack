@@ -86,6 +86,7 @@ begin
   Color := clWhite;
   with TLuiBar.Create(Self) do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 600, 100);
     Options := [lboEmulateTab, lboOmitBaseLine];
@@ -111,6 +112,7 @@ begin
     Cells.Add('Channels');
     Cells.Add('Community');
     InitialSpace := 10;
+    EndUpdate;
     Visible := True;
   end;
 end;

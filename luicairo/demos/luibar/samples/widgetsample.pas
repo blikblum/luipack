@@ -105,6 +105,7 @@ begin
   //Color := clWhite;
   with TLuiBar.Create(Self) do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 500, 80);
     Options := [lboOutLineClientArea];
@@ -131,7 +132,7 @@ begin
     Widgets.Add(FSimpleWidget);
     Widgets.Add(FLabelWidget);
     Widgets.Add(FMenuButtonWidget);
-
+    EndUpdate;
     Visible := True;
   end;
 end;

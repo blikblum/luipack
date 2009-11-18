@@ -27,6 +27,7 @@ begin
   Color := clWhite;
   with TLuiBar.Create(Self) do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 40);
     Options := [lboEmulateTab];
@@ -43,6 +44,7 @@ begin
     Cells.Add('Item1');
     Cells.Add('Item2');
     Cells.Add('Item3');
+    EndUpdate;
     Visible := True;
   end;
 end;

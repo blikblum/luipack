@@ -65,6 +65,7 @@ begin
   Color := clWhite;
   with TLuiBar.Create(Self) do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 100);
     Options := [lboEmulateTab, lboOutLineClientArea];
@@ -81,11 +82,13 @@ begin
     Cells.Add('Small');
     Cells.Add('LongLongLongLong');
     Cells.Add('x');
+    EndUpdate;
     Visible := True;
   end;
   
   with TLuiBar.Create(Self) do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 200, 400, 30);
     Options := [lboEmulateTab, lboOmitBaseLine, lboVariableCellWidth, lboHotTrack];
@@ -108,6 +111,7 @@ begin
     Cells.Add('Small');
     Cells.Add('LongLongLongLong');
     Cells.Add('x');
+    EndUpdate;
     Visible := True;
   end;
 end;

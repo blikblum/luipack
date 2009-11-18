@@ -66,6 +66,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 28);
     Options := [lboHotTrack, lboVariableCellWidth, lboTransitorySelect];
@@ -85,6 +86,7 @@ begin
     Cells.Add('Sitemap');
     Cells.Add('Documentation');
     Cells.Add('Download');
+    EndUpdate;
     Visible := True;
   end;
 end;

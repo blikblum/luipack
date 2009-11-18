@@ -206,6 +206,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 500, 120);
     Patterns[ButtonPressedPatternId] := TCairoSolidPattern.Create(RGBToCairoColor(147, 163, 107));
@@ -231,6 +232,7 @@ begin
     Cells.Add('');
     Cells.Add('');
     Cells.Add('');
+    EndUpdate;
     Visible := True;
   end;
 end;

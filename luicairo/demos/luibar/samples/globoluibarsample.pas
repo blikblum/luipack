@@ -55,6 +55,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 600, 45);
     Options := [lboHotTrack];
@@ -75,6 +76,7 @@ begin
     Cells.Add('esportes');
     Cells.Add('entretenimento');
     Cells.Add(UTF8Encode('vídeos'));
+    EndUpdate;
     Visible := True;
   end;
 end;

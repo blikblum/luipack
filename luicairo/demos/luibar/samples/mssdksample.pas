@@ -63,6 +63,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 28);
     Options := [lboEmulateTab, lboVariableCellWidth];
@@ -86,6 +87,7 @@ begin
     Cells.Add('Web');
     Cells.Add(UTF8Encode('Notícias'));
     Cells.Add('Imagens');
+    EndUpdate;
     Visible := True;
   end;
 end;

@@ -41,6 +41,7 @@ begin
   FBar := TLuiBar.Create(Self);
   with FBar do
   begin
+    BeginUpdate;
     Parent := Self;
     SetBounds(10, 10, 400, 100);
     Options := [lboEmulateTab, lboHoverAsSelected, lboHotTrack];
@@ -67,6 +68,7 @@ begin
     Cells.Add(UTF8Encode('2ª Fase'));
     Cells.Add(UTF8Encode('3ª Fase'));
     Cells.Add('Fase Final');
+    EndUpdate;
     Visible := True;
   end;
 end;

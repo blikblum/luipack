@@ -43,8 +43,8 @@
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
-        <ComponentName Value="FormMain"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormMain"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fMain"/>
       </Unit1>
@@ -91,7 +91,7 @@
       <Unit10>
         <Filename Value="samples\conversaafiadasample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="conversaafiadasample"/>
+        <UnitName Value="ConversaAfiadaSample"/>
       </Unit10>
       <Unit11>
         <Filename Value="samples\folhasample.pas"/>
@@ -101,27 +101,27 @@
       <Unit12>
         <Filename Value="samples\globoluibarsample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="globoluibarsample"/>
+        <UnitName Value="GloboLuiBarSample"/>
       </Unit12>
       <Unit13>
         <Filename Value="samples\mssdksample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="mssdksample"/>
+        <UnitName Value="MSSDKSample"/>
       </Unit13>
       <Unit14>
         <Filename Value="samples\ubuntusample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ubuntusample"/>
+        <UnitName Value="UbuntuSample"/>
       </Unit14>
       <Unit15>
         <Filename Value="samples\yahoosample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="yahoosample"/>
+        <UnitName Value="YahooSample"/>
       </Unit15>
       <Unit16>
         <Filename Value="samples\youtubesample.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="youtubesample"/>
+        <UnitName Value="YouTubeSample"/>
       </Unit16>
       <Unit17>
         <Filename Value="samples\widgetsample.pas"/>
