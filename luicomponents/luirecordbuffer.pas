@@ -9,6 +9,8 @@ uses
 
 type
 
+  TGetPrimaryKeyEvent = procedure(Sender: TObject; out NewKey: Integer) of object;
+
   { TLuiRecordBuffer }
 
   TLuiRecordBuffer = class(TSqlite3Dataset)
@@ -19,9 +21,11 @@ type
     FAfterLoad: TNotifyEvent;
     FBeforeSave: TNotifyEvent;
     FOnClear: TNotifyEvent;
+    FOnGetPrimaryKey: TGetPrimaryKeyEvent;
     FPrimaryKeyField: String;
     FSourceDataSet: TDataSet;
     procedure AddRecord;
+    function GetPrimaryKeyFromSource: Integer;
     procedure InitPrimaryKey;
     procedure InitTable;
   protected
@@ -30,6 +34,7 @@ type
     procedure DoAfterSave; virtual;
     procedure DoBeforeSave; virtual;
     procedure DoClear; virtual;
+    function DoGetPrimaryKey: Integer; virtual;
   public
     procedure Clear;
     procedure Load;
@@ -42,6 +47,7 @@ type
     property AfterSave: TNotifyEvent read FAfterSave write FAfterSave;
     property BeforeSave: TNotifyEvent read FBeforeSave write FBeforeSave;
     property OnClear: TNotifyEvent read FOnClear write FOnClear;
+    property OnGetPrimaryKey: TGetPrimaryKeyEvent read FOnGetPrimaryKey write FOnGetPrimaryKey;
   end;
 
 implementation
@@ -89,6 +95,19 @@ procedure TLuiRecordBuffer.DoClear;
 begin
   if Assigned(FOnClear) then
     FOnClear(Self);
+end;
+
+function TLuiRecordBuffer.DoGetPrimaryKey: Integer;
+begin
+  if FAppendMode then
+  begin
+    if Assigned(FOnGetPrimaryKey) then
+      FOnGetPrimaryKey(Self, Result)
+    else
+      Result := GetPrimaryKeyFromSource;
+  end
+  else
+    Result := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
 end;
 
 procedure TLuiRecordBuffer.Clear;
@@ -153,37 +172,35 @@ begin
   Post;
 end;
 
-procedure TLuiRecordBuffer.InitPrimaryKey;
+function TLuiRecordBuffer.GetPrimaryKeyFromSource: Integer;
 var
   OldRecNo: Integer;
 begin
+  OldRecNo := SourceDataset.RecNo;
+  SourceDataset.DisableControls;
+  try
+    SourceDataset.Append;
+    try
+      Edit;
+      Result := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
+      Post;
+    finally
+      SourceDataset.Cancel;
+    end;
+  finally
+    if OldRecNo > 0 then
+      SourceDataset.RecNo := OldRecNo;
+    SourceDataset.EnableControls;
+  end;
+end;
+
+procedure TLuiRecordBuffer.InitPrimaryKey;
+begin
   if FPrimaryKeyField = '' then
     Exit;
-  if FAppendMode then
-  begin
-    OldRecNo := SourceDataset.RecNo;
-    SourceDataset.DisableControls;
-    try
-      SourceDataset.Append;
-      try
-        Edit;
-        FieldByName(FPrimaryKeyField).AsInteger := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
-        Post;
-      finally
-        SourceDataset.Cancel;
-      end;
-    finally
-      if OldRecNo > 0 then
-        SourceDataset.RecNo := OldRecNo;
-      SourceDataset.EnableControls;
-    end;
-  end
-  else
-  begin
-    Edit;
-    FieldByName(FPrimaryKeyField).AsInteger := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
-    Post;
-  end;
+  Edit;
+  FieldByName(FPrimaryKeyField).AsInteger := DoGetPrimaryKey;
+  Post;
 end;
 
 procedure TLuiRecordBuffer.InitTable;
