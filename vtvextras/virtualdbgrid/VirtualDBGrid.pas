@@ -127,7 +127,7 @@ type
   {                          we want to fillup value for this calculated column                    }
   TOnCalculateValueEvent   = procedure(Sender: TCustomVirtualDBGrid; const IDText: string;
                                        Column: TColumnIndex; RecordData: TRecordData;
-                                       RowIndex: Cardinal; var CalculatedValue: UTF8String;
+                                       RowIndex: Cardinal; var CalculatedValue: String;
                                        var CalculatedValueType: TFieldType) of object;
 
   { TOnFormatFieldValueEvent - Triggered when loading data from dataset}
@@ -170,7 +170,7 @@ type
   TOnPostChanges             = procedure(Sender: TCustomVirtualDBGrid; const FieldNameOrIDText: string;
                                          Column: TcolumnIndex; ColumnType: TColumnType;
                                          RecordData: TRecordData; RowIndex: Cardinal;
-                                         var NewValue: UTF8String; var PostChanges: boolean)
+                                         var NewValue: String; var PostChanges: boolean)
                                          of object;
 
   { TOnChangeSort  - Triggered when sorting in the grid was changed                          }
@@ -278,13 +278,13 @@ type
 
   TVirtualDBTreeColumn = class(TVirtualTreeColumn)
   private
-    fFieldName:  UTF8String;
+    fFieldName:  String;
     fField:      TField;
     fColumnType: TColumnType;
 
     fSavedMainColumn: TColumnIndex;
-    procedure InternalSetFieldName(const AFieldName: UTF8String);
-    procedure SetFieldName(const AFieldName: UTF8String);
+    procedure InternalSetFieldName(const AFieldName: String);
+    procedure SetFieldName(const AFieldName: String);
     procedure SetColumnType(value: TColumnType);
     function GetOwnerTree: TCustomVirtualDBGrid;
   protected
@@ -297,7 +297,7 @@ type
     procedure LoadFromStream(const Stream: TStream; Version: Integer);
     procedure SaveToStream(const Stream: TStream);
   published
-    property FieldName: UTF8String read FFieldName write SetFieldName;
+    property FieldName: String read FFieldName write SetFieldName;
     property ColumnType: TColumnType read fColumnType write SetColumnType;
   end;
 
@@ -418,8 +418,8 @@ type
     procedure DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect); override;
     procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var Text: UTF8String); override;
-    procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: UTF8String); override;
+      var Text: String); override;
+    procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: String); override;
     procedure DoHeaderClick(HitInfo: TVTHeaderHitInfo); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; override;
@@ -432,7 +432,7 @@ type
     // new
     procedure DoGetRecordCount(var RecordCount: LongInt); virtual;
     procedure DoCalculateValue(const IDText: string; Column: TColumnIndex;
-        RecordData: TRecordData; RowIndex: Cardinal; var CalculatedValue: UTF8String;
+        RecordData: TRecordData; RowIndex: Cardinal; var CalculatedValue: String;
         var CalculatedValueType: TFieldType);
     procedure DoFormatFieldValue(Column: TColumnIndex; RecordData: TRecordData;
         RowIndex: Cardinal; Field: TField; var FieldValue: Variant); virtual;
@@ -441,7 +441,7 @@ type
         const SortBy: string; SortDirection: TSortDirection; var RefreshGrid: boolean); virtual;
     procedure DoPostChanges(const FieldNameOrIDText: string;
         Column: TcolumnIndex; ColumnType: TColumnType; RecordData: TRecordData;
-        RowIndex: Cardinal; var NewValue: UTF8String; var PostChanges: boolean); virtual;
+        RowIndex: Cardinal; var NewValue: String; var PostChanges: boolean); virtual;
     procedure DoChangeSort(SortColumn: TColumnIndex;
         SortDirection: TSortDirection); virtual;
     procedure DoRecordDblClick(Column: TColumnIndex; RecordData: TRecordData);
@@ -715,7 +715,7 @@ type
   function NullVar2Int(Value: Variant): Integer;
   function NullVar2Double(Value: Variant): Double;
   function NullVar2DateTime(Value: Variant): TDateTime;
-  function NullVar2Guid(Value: Variant): UTF8String;
+  function NullVar2Guid(Value: Variant): String;
   function NullVar2Bool(Value: Variant): boolean;
 
   function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex): Integer;
@@ -767,9 +767,9 @@ begin
   end;
 end;
 
-function NullVar2Guid(Value: Variant): UTF8String;
+function NullVar2Guid(Value: Variant): String;
 const
-  NullGuid: UTF8String = '{00000000-0000-0000-0000-000000000000}';
+  NullGuid: String = '{00000000-0000-0000-0000-000000000000}';
 begin
   Result := VarToStrDef(Value, NullGuid);
 end;
@@ -1264,7 +1264,7 @@ end;
 { ============================================================================ }
 { --- TVirtualDBTreeColumn --------------------------------------------------- }
 
-procedure TVirtualDBTreeColumn.InternalSetFieldName(const AFieldName: UTF8String);
+procedure TVirtualDBTreeColumn.InternalSetFieldName(const AFieldName: String);
 var
   Tree: TCustomVirtualDBGrid;
   Empty: boolean;
@@ -1342,7 +1342,7 @@ begin
   end;
 end;
 
-procedure TVirtualDBTreeColumn.SetFieldName(const AFieldName: UTF8String);
+procedure TVirtualDBTreeColumn.SetFieldName(const AFieldName: String);
 begin
   if ColumnType = ctDBField then
   begin
@@ -1443,7 +1443,7 @@ end;
 procedure TVirtualDBTreeColumn.LoadFromStream(const Stream: TStream; Version: Integer);
 var
   Dummy: Integer;
-  S: UTF8String;
+  S: String;
 
 begin
   with Stream do
@@ -2287,7 +2287,7 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.DoGetText(Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var Text: UTF8String);
+  Column: TColumnIndex; TextType: TVSTTextType; var Text: String);
 var
   Data: PNodeData;
   DBColumn: TVirtualDBTreeColumn;
@@ -2311,13 +2311,13 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.DoNewText(Node: PVirtualNode;
-  Column: TColumnIndex; const Text: UTF8String);
+  Column: TColumnIndex; const Text: String);
 var
   WField:  TField;
   DBColumn: TVirtualDBTreeColumn;
   Data: PNodeData;
   PostChanges: Boolean;
-  PostText: UTF8String;
+  PostText: String;
 begin
   // if we dont want to post changes to database (toEditable is not set in the treeoptions->misc) then exit
   {if not (toEditable in TreeOptions.MiscOptions)
@@ -2560,7 +2560,7 @@ end;
 
 procedure TCustomVirtualDBGrid.DoCalculateValue(const IDText: string;
             Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal;
-            var CalculatedValue: UTF8String; var CalculatedValueType: TFieldType);
+            var CalculatedValue: String; var CalculatedValueType: TFieldType);
 begin
   if Assigned(fOnCalculateValue) then
      fOnCalculateValue(Self, IDText, Column, RecordData, RowIndex,
@@ -2596,7 +2596,7 @@ end;
 
 procedure TCustomVirtualDBGrid.DoPostChanges(const FieldNameOrIDText: string;
      Column: TcolumnIndex; ColumnType: TColumnType; RecordData: TRecordData;
-     RowIndex: Cardinal; var NewValue: UTF8String; var PostChanges: boolean);
+     RowIndex: Cardinal; var NewValue: String; var PostChanges: boolean);
 begin
   if Assigned(fOnPostChanges)
      then fOnPostChanges(Self, FieldNameOrIDText, Column, ColumnType, RecordData,
@@ -3188,11 +3188,11 @@ end;
 procedure TCustomVirtualDBGrid.InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: boolean);
 var
     I, Idx, ColIdx: Integer;
-    WFieldName:     UTF8String;
+    WFieldName:     String;
     WIDText:        string;
     WField:         TField;
     WFieldValue:    Variant;
-    WCalcValue:     UTF8String;
+    WCalcValue:     String;
     WCalcType:      TFieldType;
     ColType:        TColumnType;
     Data:           PNodeData;
