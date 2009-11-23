@@ -22,7 +22,7 @@ type
     procedure SetNodeList(const AValue: IVirtualNodeList);
   protected
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType; var AText: UTF8String); override;
+      TextType: TVSTTextType; var AText: String); override;
     procedure DoInitChildren(Node: PVirtualNode; var AChildCount: Cardinal
                       ); override;
     procedure DoInitNode(AParent, Node: PVirtualNode;
@@ -48,7 +48,7 @@ begin
 end;
 
 procedure TVirtualObjectTree.DoGetText(Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var AText: UTF8String);
+  Column: TColumnIndex; TextType: TVSTTextType; var AText: String);
 var
   Data: PObjectData;
 begin
