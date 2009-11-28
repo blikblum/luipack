@@ -396,8 +396,9 @@ type
 
     function InternalGetNodeData(ANode: PVirtualNode): PNodeData;
     procedure InternalInitializeDBTree;
-    procedure UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0;
-      UpdateLoadedData: Boolean = False);
+    procedure UpdateVisibleDBTree(AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
+    procedure UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
+      AlwaysUpdate: Boolean; UpdateLoadedData: Boolean);
     function IsDataCreated(ANode: PVirtualNode): boolean;
     // Return number of current record in database
     //   - if database is closed, returns 0
@@ -456,7 +457,6 @@ type
 
     function GetSelectedRecord(Index: Integer): TRecordData;
     function GetFullyVisibleCount: Cardinal;
-    function AdvGetFullyVisibleCount(AControlHeight: Integer): Cardinal;
     // Value -1 in SortDirection mean that to autodetect sortdirection of column to sort by
     procedure DoSortColumn(AColumn: TColumnIndex; ASortDirection: Integer= -1);
     //procedure RemoveColumnFromRecordData(ColumnItem: TVirtualDBTreeColumn);
@@ -2066,7 +2066,7 @@ begin
      if Assigned(LinkedDataSet) and LinkedDataSet.Active then
        begin
           //todo: refactor to call UpdateDBTree earlier
-          UpdateDBTree(True);
+          UpdateVisibleDBTree(True);
           //todo: see if is doable implementing auto sort after dataset changes
           //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
           //  DoSortColumn(Header.SortColumn);
@@ -2609,7 +2609,7 @@ begin
   Logger.EnterMethod(lcAll, 'DoScroll');
   //todo: elaborate an algorithm to update only the scrolled nodes ??
   if DeltaY <> 0 then
-     UpdateDBTree(False);
+     UpdateVisibleDBTree(False);
   inherited DoScroll(DeltaX, DeltaY);
   Logger.ExitMethod(lcAll, 'DoScroll');
 end;
@@ -2741,14 +2741,6 @@ begin
         end;
      end;
 end;
-
-
-function TCustomVirtualDBGrid.GetFullyVisibleCount: Cardinal;
-begin
-  result:= AdvGetFullyVisibleCount(ClientHeight);
-end;
-
-
 
 procedure TCustomVirtualDBGrid.AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string;
                                   AWidth: Integer=-1; AUpdateDBTree: boolean= true);
@@ -2949,6 +2941,14 @@ begin
   RootNodeCount := FRecordCount;
 end;
 
+procedure TCustomVirtualDBGrid.UpdateVisibleDBTree(AlwaysUpdate: Boolean;
+  UpdateLoadedData: Boolean);
+begin
+  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
+    Exit;
+  UpdateDBTree(TopNode, GetFullyVisibleCount, AlwaysUpdate, UpdateLoadedData);
+end;
+
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
 var
   OldTopNode,
@@ -2981,7 +2981,7 @@ begin
   OffsetXY := OldOffsetXY;
 
   // Update database tree
-  UpdateDBTree(True);
+  UpdateVisibleDBTree(True);
 
   // Set focus
   OldTopNode := TopNode;
@@ -3003,7 +3003,7 @@ begin
 
   if Assigned(NewFocusedNode) then
   begin
-    VisibledNodes := AdvGetFullyVisibleCount(ClientHeight);
+    VisibledNodes := GetFullyVisibleCount;
 
     CenterToNode := True;
     if Assigned(OldTopNode) then
@@ -3051,39 +3051,31 @@ end;
 
 procedure TCustomVirtualDBGrid.UpdateAllRecords;
 var
-  TreeRect: TRect;
   OldRecNo: Integer;
-  OldFocusNode: PVirtualNode;
 begin
-  if (not Assigned(LinkedDataSet)) then exit;
-  if (not LinkedDataSet.Active) then exit;
-  OldFocusNode := FocusedNode;
+  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
+    Exit;
   OldRecNo := LinkedDataSet.RecNo;
   BeginUpdate;
+  IncLoadingDataFlag;
   LinkedDataSet.DisableControls;
   try
     LinkedDataSet.First;
-    SetFocusToNode(GetFirst);
-
-    TreeRect:= GetTreeRect;
-    UpdateDBTree(false, TreeRect.Bottom - TreeRect.Top, True);
+    UpdateDBTree(GetFirst, VisibleCount, False, True);
   finally
-    SetFocusToNode(OldFocusNode);
     //OldRecNo is invalid while appending
     if OldRecNo > -1 then
       LinkedDataset.RecNo := OldRecNo;
-    IncLoadingDataFlag;
     LinkedDataset.EnableControls;
     DecLoadingDataFlag;
     EndUpdate;
   end;
 end;
 
-procedure TCustomVirtualDBGrid.UpdateDBTree(AlwaysUpdate: boolean; AControlHeight: Integer=0;
-  UpdateLoadedData: Boolean = False);
+procedure TCustomVirtualDBGrid.UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
+  AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
 var
   DeltaIndex,
-  CountToLoad,
   Count: Cardinal;
 
   OldRecNo,
@@ -3092,37 +3084,25 @@ var
   Run: PVirtualNode;
 
   WasNewMoved,
-  DoLoad, DoCreateData : boolean;
-
+  DoLoad, DoCreateData : Boolean;
 begin
-  //todo: refactor this proc
-  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
-  begin
-    Exit;
-  end;
+  //it's up to the caller check for LinkedDataset and IsDataLoading
   Logger.EnterMethod(lcAll, 'UpdateDBTree');
-  Logger.Send(lcAll, 'AControlHeight', AControlHeight);
   //Logger.SendCallStack(lcAll, 'Stack');
-  Run := TopNode;
+  Run := StartNode;
   if not Assigned(Run) then
     Exit;
     
   IncLoadingDataFlag;
   try
     //todo: get recno directly from LinkedDataset since the check is alreay done above
-    OldRecNo := GetCurrentDBRecNo;
+    OldRecNo := LinkedDataSet.RecNo;
 
     // DeltaIndex - How many records we must move in database from
     // where we can start loading CountToLoad records
 
     //Run = TopNode
     DeltaIndex := Run.Index + 1;
-
-    // CountToLoad - How much records we want to load
-    if AControlHeight = 0 then
-      AControlHeight := ClientHeight;
-
-    CountToLoad := AdvGetFullyVisibleCount(AControlHeight);
 
     WasNewMoved := False;
     NewMove := DeltaIndex - OldRecNo;
@@ -3134,7 +3114,7 @@ begin
     Count := 0;
     while Assigned(Run) and
       (not LinkedDataSet.Eof or (not WasNewMoved)) and
-      (Count <= CountToLoad) do
+      (Count <= NodeCount) do
     begin
       // If we dont want always update data, then we must test that
       // if node has data created, and if not than we can load data from database
@@ -3319,22 +3299,20 @@ begin
   end;
 end;
 
-
 procedure TCustomVirtualDBGrid.WMSize(var Message: TWMSize);
 begin
   inherited;
-
-  UpdateDBTree(false, Message.Height);
+  UpdateVisibleDBTree(False);
 end;
 
-
-function TCustomVirtualDBGrid.AdvGetFullyVisibleCount(AControlHeight: Integer): Cardinal;
+function TCustomVirtualDBGrid.GetFullyVisibleCount: Cardinal;
 var
   Node: PVirtualNode;
-  AHeight: Integer;
+  AHeight, AControlHeight: Integer;
 begin
   //todo: see why this is called twice at startup
   Result := 0;
+  AControlHeight := ClientHeight;
   //TopNode
   Node := GetNodeAt(0, 0, True, AHeight);
   while Node <> nil do
@@ -3347,7 +3325,6 @@ begin
     Node := GetNextVisibleSibling(Node);
   end;
 end;
-
 
 procedure TCustomVirtualDBGrid.DoSortColumn(AColumn: TColumnIndex; ASortDirection: Integer= -1);
 var
@@ -3452,7 +3429,7 @@ end;
 
 function TCustomVirtualDBGrid.GetRecordDataClass: TRecordDataClass;
 begin
-  Result:= TRecordData;
+  Result := TRecordData;
 end;
 
 function TCustomVirtualDBGrid.GetCurrentDBRecNo: LongInt;
