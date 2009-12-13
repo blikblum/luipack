@@ -550,7 +550,7 @@ type
     property BevelKind;
     property BevelWidth;
     }
-    property BorderStyle;
+    property BorderStyle default bsSingle;
     property ButtonFillMode;
     property ButtonStyle;
     property BorderWidth;
