@@ -14,12 +14,6 @@ begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
-function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
-begin
-  //todo
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-
 function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
 begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
@@ -69,7 +63,7 @@ begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
-{$ifndef HAS_MAPMODEFUNCTIONS}
+{$if lcl_release < 29}
 function GetMapMode(DC: HDC): LongInt;
 begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
@@ -157,7 +151,7 @@ begin
 end;
 {$endif}
 
-{$ifndef HAS_MAPMODEFUNCTIONS}
+{$if lcl_release < 29}
 function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
 begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}

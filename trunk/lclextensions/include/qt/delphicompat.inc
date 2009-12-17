@@ -101,10 +101,12 @@ begin
   end;
 end;
 
+{$if lcl_release < 29}
 function GetMapMode(DC: HDC): LongInt;
 begin
   Result := MM_TEXT;
 end;
+{$endif}
 
 function GetTextAlign(hDC:HDC): LongWord;
 var
@@ -204,6 +206,7 @@ begin
   Result := True;
 end;
 
+{$if lcl_release < 29}
 function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
 var
   Matrix: QMatrixH;
@@ -274,6 +277,8 @@ begin
     QMatrix_destroy(MatrixNew);
   end;
 end;
+{$endif}
+
 
 type
 

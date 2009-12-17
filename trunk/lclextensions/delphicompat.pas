@@ -38,7 +38,7 @@ unit DelphiCompat;
 interface
 
 uses
-  LMessages, Types, LCLType, Classes;
+  LMessages, Types, LCLType, Classes, LCLVersion;
 
 const
   //Messages
@@ -66,13 +66,6 @@ const
   LR_MONOCHROME = 1;
   LR_CREATEDIBSECTION = 8192;
   LR_DEFAULTSIZE = 64;
-  
-  //drawedge constants
-  EDGE_SUNKEN = 10;
-  //BF_RECT = 15;
-  BF_ADJUST = 8192;
-  //BDR_RAISEDINNER =
-  //BF_MIDDLE =
   
   //systemparametersinfo
   SPI_GETWORKAREA = 48;
@@ -174,7 +167,6 @@ procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
-function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 
@@ -191,7 +183,9 @@ function GetDoubleClickTime: UINT;
 function GetKeyboardLayout(dwLayout:DWORD):THandle;
 function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
 function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
+{$if lcl_release < 29}
 function GetMapMode(DC: HDC): LongInt;
+{$endif}
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 function GetTextAlign(hDC:HDC): LongWord;
 function GetTextExtentExPoint(DC: HDC; Str: PChar;
@@ -222,7 +216,9 @@ function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:Lon
 function ScrollDC(DC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
+{$if lcl_release < 29}
 function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
+{$endif}
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify): LongWord;
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): Boolean;
 
