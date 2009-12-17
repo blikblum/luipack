@@ -52,7 +52,7 @@ end;
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
   //todo: There's a bug in gtk intf. Skip for now.
-  //Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
+  Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
 end;
 
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;

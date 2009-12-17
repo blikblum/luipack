@@ -58,19 +58,13 @@ begin
   Result := Windows.CreatePatternBrush(hbmp);
 end;
 
-function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter: THandle; x, y, cx,
-  cy: longint; uFlags: LongWord): THandle;
+function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter: THandle;
+  x, y, cx, cy: longint; uFlags: LongWord): THandle;
 begin
-  Result:=Windows.DeferWindowPos(hWinPosInfo,hWnd,hWndInsertAfter,x,y,cx,cy,uFlags);
+  Result := Windows.DeferWindowPos(hWinPosInfo,hWnd,hWndInsertAfter,x,y,cx,cy,uFlags);
 end;
 
-function DrawEdge(DC: hdc; var qrc: TRect; edge, grfFlags: LongWord): Boolean;
-begin
-  Result := Windows.DrawEdge(DC, qrc, edge, grfFlags);
-end;
-
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord
-  ): BOOLEAN;
+function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
   Result := Windows.DrawFrameControl(DC,Rect,uType,uState);
 end;
@@ -99,7 +93,7 @@ end;
 
 function GetACP: LongWord;
 begin
-  Result:=Windows.GetACP;
+  Result := Windows.GetACP;
 end;
 
 function GetBkColor(DC: HDC): LCLType.COLORREF;
@@ -138,10 +132,12 @@ begin
   Result := Windows.GetLocaleInfo(Locale,LCType,lpLCData,cchData);
 end;
 
+{$if lcl_release < 29}
 function GetMapMode(DC: HDC): LongInt;
 begin
   Result := Windows.GetMapMode(DC);
 end;
+{$endif}
 
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall; external 'GDI32.DLL';
 
@@ -223,10 +219,12 @@ begin
   Result := Windows.SetBrushOrgEx(DC,nXOrg,nYOrg,lppt);
 end;
 
+{$if lcl_release < 29}
 function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
 begin
   Result := Windows.SetMapMode(DC, fnMapMode);
 end;
+{$endif}
 
 function ScrollDC(DC: LCLType.HDC; dx: longint; dy: longint; var lprcScroll: Types.TRect;
   var lprcClip: Types.TRect; hrgnUpdate: LCLType.HRGN; lprcUpdate: Types.PRect): Boolean;
