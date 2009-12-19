@@ -6,7 +6,7 @@ interface
 
 uses
   Forms, LCLIntf, Classes, SysUtils, VirtualTrees, LMessages, StdCtrls, Graphics,
-  DbCtrls, db;
+  DbCtrls, db, Controls;
 
 type
 
@@ -33,10 +33,12 @@ type
     FOriginalIndex: Integer;
     FAlignment: TAlignment;
     FStopping: Boolean;
-    procedure ComboSelect(Sender: TObject);
+    procedure ComboEditingDone(Sender: TObject);
+    procedure ComboKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
       const NodeText: UTF8String); virtual;
+    procedure DoEditingDone; virtual;
     procedure DoSelect; virtual;
     class function GetComboClass: TCustomComboBoxClass; virtual; abstract;
     property Tree: TCustomVirtualStringTree read FTree;
@@ -59,12 +61,29 @@ type
 
   { TVTComboEditLink }
 
+  //todo: add OnKeyPress based on column field type
   TVTComboEditLink = class (TVTCustomComboEditLink)
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
       const NodeText: UTF8String); override;
-    procedure DoSelect; override;
+    procedure DoEditingDone; override;
     class function GetComboClass: TCustomComboBoxClass; override;
+  public
+  end;
+
+  { TVTDBComboEditLink }
+
+  TVTDBComboEditLink = class (TVTCustomComboEditLink)
+  private
+    function GetDataSource: TDataSource;
+    procedure SetDataSource(Value: TDataSource);
+    function GetDataField: String;
+    procedure SetDataField(const AValue: String);
+  protected
+    class function GetComboClass: TCustomComboBoxClass; override;
+  public
+    property DataField: String read GetDataField write SetDataField;
+    property DataSource: TDataSource read GetDataSource write SetDataSource;
   end;
 
   { TVTDBLookupComboEditLink }
@@ -94,6 +113,9 @@ type
 
 implementation
 
+uses
+  LCLType;
+
 type
   TBaseVirtualTreeAccess = class(TBaseVirtualTree)
   end;
@@ -101,15 +123,30 @@ type
   TCustomComboBoxAccess = class(TCustomComboBox)
   end;
 
+  TControlAccess = class(TControl)
+  end;
+
 { TVTCustomComboEditLink }
 
-procedure TVTCustomComboEditLink.ComboSelect(Sender: TObject);
+procedure TVTCustomComboEditLink.ComboEditingDone(Sender: TObject);
 var
   ATree: TCustomVirtualStringTree;
 begin
-  ATree := FTree;
-  TBaseVirtualTreeAccess(FTree).DoEndEdit;
-  ATree.SetFocus;
+  if not FStopping then
+  begin
+    ATree := FTree;
+    TBaseVirtualTreeAccess(FTree).DoEndEdit;
+    ATree.SetFocus;
+  end;
+end;
+
+procedure TVTCustomComboEditLink.ComboKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  //Tab key completes the text and finish
+  //todo: better handling of VK_SCAPE
+  if (Key = VK_RETURN) or (Key = VK_ESCAPE) then
+    Key := VK_TAB;
 end;
 
 procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
@@ -117,6 +154,11 @@ procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
 begin
   if Assigned(FOnPrepareCombo) then
     FOnPrepareCombo(Self, Node, Column, NodeText);
+end;
+
+procedure TVTCustomComboEditLink.DoEditingDone;
+begin
+  //todo
 end;
 
 procedure TVTCustomComboEditLink.DoSelect;
@@ -133,8 +175,9 @@ begin
     //Style := csDropDownList;
     Visible := False;
     AutoSize := False;
-    OnSelect := @ComboSelect;
   end;
+  TControlAccess(FCombo).OnEditingDone := @ComboEditingDone;
+  FCombo.OnKeyDown := @ComboKeyDown;
 end;
 
 destructor TVTCustomComboEditLink.Destroy;
@@ -170,8 +213,10 @@ begin
   if Result then
   try
     FStopping := True;
+    //todo: remove onselect keep only editing done
     if FCombo.ItemIndex <> FOriginalIndex then
       DoSelect;
+    DoEditingDone;
     FCombo.Hide;
   except
     FStopping := False;
@@ -192,6 +237,7 @@ begin
   Result := ATree is TCustomVirtualStringTree;
   if Result then
   begin
+    FStopping := False;
     FTree := TCustomVirtualStringTree(ATree);
     FNode := Node;
     FColumn := Column;
@@ -263,7 +309,6 @@ begin
         OffsetRect(R, 0, FTextBounds.Top - FCombo.Top);
 
       SendMessage(FCombo.Handle, EM_SETRECTNP, 0, PtrInt(@R));
-
     end;
   end;
 end;
@@ -277,10 +322,10 @@ begin
   inherited DoPrepareCombo(Node, Column, NodeText);
 end;
 
-procedure TVTComboEditLink.DoSelect;
+procedure TVTComboEditLink.DoEditingDone;
 begin
+  inherited;
   FTree.Text[FNode, FColumn] := FCombo.Text;
-  inherited DoSelect;
 end;
 
 class function TVTComboEditLink.GetComboClass: TCustomComboBoxClass;
@@ -340,6 +385,33 @@ end;
 class function TVTDBLookupComboEditLink.GetComboClass: TCustomComboBoxClass;
 begin
   Result := TDBLookupComboBox;
+end;
+
+{ TVTDBComboEditLink }
+
+function TVTDBComboEditLink.GetDataSource: TDataSource;
+begin
+  Result := (Combo as TDBComboBox).DataSource;
+end;
+
+procedure TVTDBComboEditLink.SetDataSource(Value: TDataSource);
+begin
+  (Combo as TDBComboBox).DataSource := Value;
+end;
+
+function TVTDBComboEditLink.GetDataField: String;
+begin
+  Result := (Combo as TDBComboBox).DataField;
+end;
+
+procedure TVTDBComboEditLink.SetDataField(const AValue: String);
+begin
+  (Combo as TDBComboBox).DataField := AValue;
+end;
+
+class function TVTDBComboEditLink.GetComboClass: TCustomComboBoxClass;
+begin
+  Result := TDBComboBox;
 end;
 
 end.
