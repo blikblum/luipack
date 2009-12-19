@@ -40,7 +40,7 @@ unit VirtualDBGrid;
 interface
 
 uses
-  LCLType, types, delphicompat, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
+  LCLType, types, delphicompat, LCLIntf, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
   Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LResources, LMessages;
 
 const
@@ -429,7 +429,7 @@ type
     function DoCompare(Node1, Node2: PVirtualNode; Column: TColumnIndex): Integer; override;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
     procedure HandleMouseDblClick(var Message: TLMMouse; const HitInfo: THitInfo); override;
-    procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
+    procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; out NextNonEmpty: TColumnIndex); override;
     // new
     procedure DoGetRecordCount(var RecordCount: LongInt); virtual;
     procedure DoCalculateValue(const IDText: string; Column: TColumnIndex;
@@ -2537,7 +2537,7 @@ begin
   end;
 end;
 
-procedure TCustomVirtualDBGrid.AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex);
+procedure TCustomVirtualDBGrid.AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; out NextNonEmpty: TColumnIndex);
 begin
   inherited;
   if (PaintInfo.Column <= NoColumn) then exit;
