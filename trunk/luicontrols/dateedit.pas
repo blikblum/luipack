@@ -108,16 +108,11 @@ end;
 
 procedure TDBDateMaskEdit.UpdateControlState(DateIsValid: Boolean);
 begin
-  if not DateIsValid then
-  begin
-    FValidDate := False;
-    Color := FErrorColor;
-  end
+  FValidDate := DateIsValid;
+  if FValidDate then
+    Color := clWindow
   else
-  begin
-    FValidDate := True;
-    Color := clWindow;
-  end;
+    Color := FErrorColor;
 end;
 
 procedure TDBDateMaskEdit.UpdateData(Sender: TObject);
