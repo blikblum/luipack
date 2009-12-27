@@ -31,9 +31,12 @@ type
     FValidDate: Boolean;
     procedure BuildEditMask;
     procedure DataChange(Sender: TObject);
+    procedure ResetDataLink;
     procedure UpdateControlState(DateIsValid: Boolean);
     procedure UpdateData(Sender: TObject);
     procedure UpdateText(const NewText: String);
+    procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
+    procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
   protected
     procedure CreateWnd; override;
   public
@@ -93,6 +96,16 @@ begin
   FOldDataChange(Sender);
 end;
 
+procedure TDBDateMaskEdit.ResetDataLink;
+begin
+  FDataLink.OnDataChange := nil;
+  try
+    FDataLink.Reset;
+  finally
+    FDataLink.OnDataChange := @DataChange;
+  end;
+end;
+
 procedure TDBDateMaskEdit.UpdateControlState(DateIsValid: Boolean);
 begin
   if not DateIsValid then
@@ -139,13 +152,27 @@ end;
 
 procedure TDBDateMaskEdit.UpdateText(const NewText: String);
 begin
-  //avoid setting calling the UpdateData event
+  //avoid calling the UpdateData event
   FDataLink.OnUpdateData := nil;
   try
     Text := NewText;
   finally
     FDataLink.OnUpdateData := @UpdateData;
   end;
+end;
+
+procedure TDBDateMaskEdit.WMKillFocus(var Message: TLMKillFocus);
+begin
+  PushMask(True);
+  if not FValidDate then
+    ResetDataLink;
+  inherited;
+end;
+
+procedure TDBDateMaskEdit.WMSetFocus(var Message: TLMSetFocus);
+begin
+  PopMask(True);
+  inherited;
 end;
 
 procedure TDBDateMaskEdit.CreateWnd;
@@ -155,6 +182,7 @@ begin
   OldText := Text;
   //post pone mask build the maximum
   BuildEditMask;
+  PushMask(True);
   //Setting EditMask clears the text. Update again here
   Text := OldText;
   inherited CreateWnd;
