@@ -29,6 +29,8 @@ type
     FOptions: TDBDateMaskEditOptions;
     FRecoverMode: TRecoverMode;
     FValidDate: Boolean;
+    FErrorHandled: Boolean;
+    FHandlingError: Boolean;
     procedure BuildEditMask;
     procedure DataChange(Sender: TObject);
     procedure ResetDataLink;
@@ -131,6 +133,8 @@ begin
   end
   else
   begin
+    FHandlingError := True;
+    FErrorHandled := True;
     if FErrorMessage <> '' then
       ShowMessage(AnsiReplaceText(FErrorMessage, '$(NewValue)', S));
     case FRecoverMode of
@@ -142,6 +146,7 @@ begin
         end;
       rmRestore: FDataLink.Reset;
     end;
+    FHandlingError := False;
   end;
 end;
 
@@ -159,13 +164,17 @@ end;
 procedure TDBDateMaskEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
   PushMask(True);
-  if not FValidDate then
+  //reset FDatalink to allow the user exit the control after the first message
+  //maybe this can be removed when Pop/PushMask is incorporated in TDBEdit
+  if not FValidDate and FErrorHandled then
     ResetDataLink;
   inherited;
 end;
 
 procedure TDBDateMaskEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
+  if not FValidDate and not FHandlingError then
+    FErrorHandled := False;
   PopMask(True);
   inherited;
 end;
