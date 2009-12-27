@@ -41,6 +41,7 @@ type
     procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
   protected
     procedure CreateWnd; override;
+    procedure KeyPress(var Key: char); override;
   public
     constructor Create(AOwner: TComponent); override;
     property ValidDate: Boolean read FValidDate;
@@ -190,6 +191,16 @@ begin
   //Setting EditMask clears the text. Update again here
   Text := OldText;
   inherited CreateWnd;
+end;
+
+procedure TDBDateMaskEdit.KeyPress(var Key: char);
+var
+  OldText: String;
+begin
+  OldText := RealGetText;
+  inherited KeyPress(Key);
+  if OldText <> RealGetText then
+    FErrorHandled := False;
 end;
 
 constructor TDBDateMaskEdit.Create(AOwner: TComponent);
