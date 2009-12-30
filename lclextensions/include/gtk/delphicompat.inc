@@ -37,6 +37,7 @@
 {$define HAS_GETBKCOLOR}
 {$define HAS_GETTEXTEXTENTEXPOINT}
 {$define HAS_DRAWFRAMECONTROL}
+{$define HAS_SCROLLWINDOW}
 
 {$i ../generic/stubs.inc}
 {$i ../generic/independentfunctions.inc}
@@ -187,6 +188,12 @@ begin
       {$endif}
     end;
   end;
+end;
+
+function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
+begin
+  //gtk implementation does nothing if lpRect and lpClipRect are not nil
+  Result := LCLIntf.ScrollWindowEx(hWnd, XAmount, YAmount, nil, nil, 0, nil, SW_INVALIDATE);
 end;
 
 var
