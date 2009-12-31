@@ -1928,7 +1928,7 @@ begin
   fIndicatorBMP.Transparent := True;
 
   NodeDataSize := SizeOf(TNodeData);
-  //DefaultText := '';
+  DefaultText := '';
   FInternalDataOffset := AllocateInternalDataArea( SizeOf(TNodeData));
   //fLoadingDataFlag := 0;
   //fLastRecordCount := 0;
@@ -2296,7 +2296,7 @@ begin
   if Column <= NoColumn  then
     Exit;
   DBColumn := TVirtualDBTreeColumn(Header.Columns[Column]);
-  if DBColumn.ColumnType = ctIndicator then
+  if (DBColumn.ColumnType = ctIndicator) or (DBColumn.Style = vsOwnerDraw) then
     Exit;
   Data := InternalGetNodeData(Node);
   if IsDataOk(Data) then
