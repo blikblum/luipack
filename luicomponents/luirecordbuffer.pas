@@ -195,11 +195,16 @@ begin
 end;
 
 procedure TLuiRecordBuffer.InitPrimaryKey;
+var
+  Key: Integer;
 begin
+  //todo: change key to a string type
   if FPrimaryKeyField = '' then
     Exit;
+  //It's necessary to get the key before calling Edit because DoGetPrimaryKey call Cancel
+  Key := DoGetPrimaryKey;
   Edit;
-  FieldByName(FPrimaryKeyField).AsInteger := DoGetPrimaryKey;
+  FieldByName(FPrimaryKeyField).AsInteger := Key;
   Post;
 end;
 
