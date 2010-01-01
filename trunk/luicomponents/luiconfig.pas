@@ -115,6 +115,10 @@ type
       Data: PtrInt);
   end;
 
+  TLuiConfigOption = (lcoParseMacros);
+
+  TLuiConfigOptions = set of TLuiConfigOption;
+
   { TLuiConfig }
 
   TLuiConfig = class(TComponent)
@@ -123,6 +127,7 @@ type
     FDataProvider: TLuiConfigProvider;
     FItemDefs: TLuiConfigItemDefs;
     FObserverList: TFpList;
+    FOptions: TLuiConfigOptions;
     FSectionDefs: TLuiConfigSectionDefs;
     procedure CheckObserverList;
     function HasObserver: Boolean;
@@ -157,22 +162,34 @@ type
     property Active: Boolean read FActive write SetActive;
     property DataProvider: TLuiConfigProvider read FDataProvider write SetDataProvider;
     property ItemDefs: TLuiConfigItemDefs read FItemDefs write SetItemDefs;
+    property Options: TLuiConfigOptions read FOptions write FOptions default [];
     property SectionDefs: TLuiConfigSectionDefs read FSectionDefs write SetSectionDefs;
   end;
 
 //todo: use miscutils instead
 function ReplacePathMacros(const Path: String): String;
+function ReplacePathMacrosUTF8(const Path: String): String;
 
 implementation
 
 uses
-  StrUtils;
+  StrUtils, FileUtil;
 
 function ReplacePathMacros(const Path: String): String;
 begin
   Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', GetAppConfigDir(False));
-  Result := AnsiReplaceText(Result, '$(EXE_PATH)', ExtractFileDir(ParamStr(0)));
+  Result := AnsiReplaceText(Result, '$(EXE_DIR)', ExtractFileDir(ParamStr(0)));
+  Result := AnsiReplaceText(Result, '$(PATH_DELIM)', PathDelim);
 end;
+
+function ReplacePathMacrosUTF8(const Path: String): String;
+begin
+  //todo: remove FileUtil/LCL dependency when fpc provides a unicode RTL
+  Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', GetAppConfigDirUTF8(False));
+  Result := AnsiReplaceText(Result, '$(EXE_DIR)', ExtractFileDir(ParamStrUTF8(0)));
+  Result := AnsiReplaceText(Result, '$(PATH_DELIM)', PathDelim);
+end;
+
 
 { TLuiConfig }
 
@@ -321,7 +338,11 @@ var
 begin
   Result := FDataProvider.ReadString(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
+  begin
     Result := FItemDefs.GetDefaultString(ItemKey);
+    if lcoParseMacros in FOptions then
+      Result := ReplacePathMacrosUTF8(Result);
+  end;
 end;
 
 function TLuiConfig.ReadBoolean(const SectionTitle, ItemKey: String): Boolean;
