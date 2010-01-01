@@ -307,7 +307,7 @@ var
 begin
   Item := FItemDefs.Find(ItemKey);
   if Item <> nil then
-    Result := Item.DisplayText
+    Result := Item.DisplayName
   else
     Result := ItemKey;
 end;
@@ -318,7 +318,7 @@ var
 begin
   Section := FSectionDefs.Find(SectionTitle);
   if Section <> nil then
-    Result := Section.DisplayText
+    Result := Section.DisplayName
   else
     Result := SectionTitle;
 end;
@@ -428,7 +428,10 @@ end;
 
 function TLuiConfigItemDef.GetDisplayName: String;
 begin
-  Result := FDisplayText;
+  if FDisplayText <> '' then
+    Result := FDisplayText
+  else
+    Result := FKey;
 end;
 
 procedure TLuiConfigItemDef.Assign(Source: TPersistent);
@@ -522,7 +525,10 @@ end;
 
 function TLuiConfigSectionDef.GetDisplayName: String;
 begin
-  Result := FDisplayText;
+  if FDisplayText <> '' then
+    Result := FDisplayText
+  else
+    Result := FTitle;
 end;
 
 procedure TLuiConfigSectionDef.Assign(Source: TPersistent);
