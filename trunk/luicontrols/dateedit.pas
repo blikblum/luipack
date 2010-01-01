@@ -164,7 +164,7 @@ end;
 
 procedure TDBDateMaskEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
-  PushMask(True);
+  PushMask(Text);
   //reset FDatalink to allow the user exit the control after the first message
   //maybe this can be removed when Pop/PushMask is incorporated in TDBEdit
   if not FValidDate and FErrorHandled then
@@ -176,7 +176,7 @@ procedure TDBDateMaskEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
   if not FValidDate and not FHandlingError then
     FErrorHandled := False;
-  PopMask(True);
+  PopMask(Text);
   inherited;
 end;
 
@@ -187,9 +187,8 @@ begin
   OldText := Text;
   //post pone mask build the maximum
   BuildEditMask;
-  PushMask(True);
-  //Setting EditMask clears the text. Update again here
-  Text := OldText;
+  //Setting EditMask clears the text. Update again here and reset the mask
+  PushMask(OldText);
   inherited CreateWnd;
 end;
 
