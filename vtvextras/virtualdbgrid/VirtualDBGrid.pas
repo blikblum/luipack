@@ -388,6 +388,7 @@ type
 
     function GetFocusedRecord: TRecordData;
     function GetHeader: TVTDBHeader;
+    function GetVisibleRecordsCount: Cardinal;
     procedure SetHeader(Value: TVTDBHeader);
     procedure SetDBOptions(const Value: TVTDBOptions);
     function GetOptions: TStringTreeOptions;
@@ -528,7 +529,7 @@ type
     property SortingColumn:                  TVirtualDBTreeColumn read GetSortingColumn;
     property IndicatorColumn:                TVirtualDBTreeColumn read GetIndicatorColumn;
     property FocusedRecord: TRecordData read GetFocusedRecord;
-    property VisibleRecordsCount:            Cardinal             read GetFullyVisibleCount;
+    property VisibleRecordsCount:            Cardinal             read GetVisibleRecordsCount;
     property SelectedRecord[Index: Integer]: TRecordData          read GetSelectedRecord;
   published
     property Action;
@@ -1898,6 +1899,11 @@ end;
 function TCustomVirtualDBGrid.GetHeader: TVTDBHeader;
 begin
   Result := TVTDBHeader(inherited Header);
+end;
+
+function TCustomVirtualDBGrid.GetVisibleRecordsCount: Cardinal;
+begin
+  Result := RootNodeCount;
 end;
 
 function TCustomVirtualDBGrid.GetFocusedRecord: TRecordData;
