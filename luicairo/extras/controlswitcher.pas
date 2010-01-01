@@ -8,7 +8,10 @@ uses
   Classes, SysUtils, LuiBar, Controls;
 
 type
+
   TControlSwitcher = class;
+
+  TControlCreateEvent = procedure(Sender: TControlSwitcher; NewControl: TControl) of object;
 
   { TControlInfo }
 
@@ -16,12 +19,14 @@ type
   private
     FCaption: String;
     FControl: TControl;
-    procedure SetCaption(const AValue: String);
-    procedure SetControl(const AValue: TControl);
+    FControlClass: TControlClass;
+    procedure SetControl(Value: TControl);
   protected
     function GetDisplayName: String; override;
+  public
+    property ControlClass: TControlClass read FControlClass write FControlClass;
   published
-    property Caption: String read FCaption write SetCaption;
+    property Caption: String read FCaption write FCaption;
     property Control: TControl read FControl write SetControl;
   end;
 
@@ -45,24 +50,29 @@ type
   TControlSwitcher = class(TLuiBar)
   private
     FControlList: TControlList;
+    FOnControlCreate: TControlCreateEvent;
     procedure SetControlList(const AValue: TControlList);
     procedure UpdateCells;
   protected
+    procedure CreateWnd; override;
     procedure DoChange; override;
+    procedure DoControlCreate(NewControl: TControl); virtual;
     function DoSelecting(OldCell, NewCell: Integer): Boolean; override;
-    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure AttachControl(const Title: String; Control: TControl);
+    procedure AttachControlClass(const Title: String; ControlClass: TControlClass);
   published
     property ControlList: TControlList read FControlList write SetControlList;
+    property OnControlCreate: TControlCreateEvent read FOnControlCreate write FOnControlCreate;
 
     property CellAlign;
     property CellHeight;
     property CellRoundRadius;
     property CellWidth;
     property Colors;
+    property Constraints;
     property ImagePadding;
     property ImagePosition;
     property Images;
@@ -102,11 +112,21 @@ procedure TControlSwitcher.UpdateCells;
 var
   i: Integer;
 begin
-  //todo: constrain SelectedIndex range
+  BeginUpdate;
+  if SelectedIndex >= FControlList.Count then
+    SelectedIndex := -1;
   Cells.Clear;
   for i := 0 to FControlList.Count - 1 do
     Cells.Add(FControlList[i].Caption);
   FControlList.FValidList := True;
+  EndUpdate;
+end;
+
+procedure TControlSwitcher.CreateWnd;
+begin
+  inherited CreateWnd;
+  UpdateCells;
+  DoSelecting(-1, SelectedIndex);
 end;
 
 procedure TControlSwitcher.DoChange;
@@ -115,9 +135,16 @@ begin
     UpdateCells;
 end;
 
+procedure TControlSwitcher.DoControlCreate(NewControl: TControl);
+begin
+  if Assigned(FOnControlCreate) then
+    FOnControlCreate(Self, NewControl);
+end;
+
 function TControlSwitcher.DoSelecting(OldCell, NewCell: Integer): Boolean;
 var
   Control: TControl;
+  ControlClass: TControlClass;
 begin
   Result := inherited DoSelecting(OldCell, NewCell);
   if Result then
@@ -125,6 +152,20 @@ begin
    if (NewCell <> -1) then
    begin
      Control := FControlList[NewCell].Control;
+     if (Control = nil) then
+     begin
+       ControlClass := FControlList[NewCell].ControlClass;
+       if (ControlClass <> nil) and (Parent <> nil) then
+       begin
+          Control := ControlClass.Create(Parent);
+          Control.Visible := False;
+          //todo customize the size/location (maybe use the dock sites?)
+          Control.Align := alClient;
+          Control.Parent := Parent;
+          FControlList[NewCell].FControl := Control;
+          DoControlCreate(Control);
+       end;
+     end;
      if Control <> nil then
        Control.Visible := True;
    end;
@@ -135,14 +176,6 @@ begin
        Control.Visible := False;
    end;
   end;
-end;
-
-procedure TControlSwitcher.Loaded;
-begin
-  inherited Loaded;
-  if SelectedIndex >= FControlList.Count then
-    SelectedIndex := -1;
-  UpdateCells;
 end;
 
 constructor TControlSwitcher.Create(AOwner: TComponent);
@@ -167,23 +200,29 @@ begin
   Cells.Add(Title);
 end;
 
+procedure TControlSwitcher.AttachControlClass(const Title: String;
+  ControlClass: TControlClass);
+var
+  NewControlInfo: TControlInfo;
+begin
+  NewControlInfo := TControlInfo(FControlList.Add);
+  NewControlInfo.ControlClass := ControlClass;
+  NewControlInfo.Caption := Title;
+  Cells.Add(Title);
+end;
+
 { TControlInfo }
 
-procedure TControlInfo.SetControl(const AValue: TControl);
+procedure TControlInfo.SetControl(Value: TControl);
 begin
-  if FControl=AValue then exit;
-  FControl:=AValue;
+  if Value <> nil then
+    Value.Visible := False;
+  FControl := Value;
 end;
 
 function TControlInfo.GetDisplayName: String;
 begin
   Result := FCaption;
-end;
-
-procedure TControlInfo.SetCaption(const AValue: String);
-begin
-  if FCaption=AValue then exit;
-  FCaption:=AValue;
 end;
 
 { TControlList }
