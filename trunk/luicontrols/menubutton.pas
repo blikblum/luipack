@@ -89,9 +89,9 @@ type
   TArrowButton = class (TToggleSpeedButton)
   private
     FMainButton: TMenuButton;
-    procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   protected
     procedure DoButtonDown; override;
+    procedure DoSetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure Paint; override;
