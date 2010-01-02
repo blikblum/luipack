@@ -65,6 +65,7 @@ type
     FHashList: TFPHashList;
     FValidHashList: Boolean;
     procedure BuildHashList;
+    function GetItem(Index: Integer): TLuiConfigItemDef;
   protected
     function GetOwner: TPersistent; override;
     procedure Notify(Item: TCollectionItem;
@@ -78,6 +79,7 @@ type
     function GetDefaultInteger(const Key: String): Integer;
     function GetDefaultBoolean(const Key: String): Boolean;
     function GetDefaultFloat(const Key: String): Double;
+    property Items[Index: Integer]: TLuiConfigItemDef read GetItem; default;
   end;
 
   { TLuiConfigSectionDef }
@@ -105,6 +107,7 @@ type
     FHashList: TFPHashList;
     FValidHashList: Boolean;
     procedure BuildHashList;
+    function GetItem(Index: Integer): TLuiConfigSectionDef;
   protected
     function GetOwner: TPersistent; override;
     procedure Notify(Item: TCollectionItem;
@@ -114,6 +117,7 @@ type
     destructor Destroy; override;
     function Add: TLuiConfigSectionDef;
     function Find(const Title: String): TLuiConfigSectionDef;
+    property Items[Index: Integer]: TLuiConfigSectionDef read GetItem; default;
   end;
 
   TLuiConfigNotificationType = (lcnOpen, lcnClose);
@@ -160,7 +164,7 @@ type
     function ReadBoolean(const SectionTitle, ItemKey: String): Boolean;
     function ReadFloat(const SectionTitle, ItemKey: String): Double;
     procedure ReadSection(const SectionTitle: String; Strings: TStrings);
-    procedure ReadSections(Strings: TStrings);
+    procedure ReadSections(Strings: TStrings; RetrieveEmpty: Boolean = False);
     procedure RemoveObserver(Observer: ILuiConfigObserver);
     procedure WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer);
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String);
@@ -388,9 +392,24 @@ begin
   end;
 end;
 
-procedure TLuiConfig.ReadSections(Strings: TStrings);
+procedure TLuiConfig.ReadSections(Strings: TStrings; RetrieveEmpty: Boolean);
+var
+  i, j, Last: Integer;
 begin
   FDataProvider.ReadSections(Strings);
+  if RetrieveEmpty then
+  begin
+    Last := 0;
+    for i := 0 to FSectionDefs.Count - 1 do
+    begin
+      j := Strings.IndexOf(FSectionDefs[i].Title);
+      if j = -1 then
+      begin
+        Strings.Insert(Last, FSectionDefs[i].Title);
+        Inc(Last);
+      end;
+    end;
+  end;
 end;
 
 procedure TLuiConfig.RemoveObserver(Observer: ILuiConfigObserver);
@@ -493,6 +512,11 @@ begin
   FValidHashList := True;
 end;
 
+function TLuiConfigSectionDefs.GetItem(Index: Integer): TLuiConfigSectionDef;
+begin
+  Result := TLuiConfigSectionDef(inherited GetItem(Index));
+end;
+
 function TLuiConfigSectionDefs.GetOwner: TPersistent;
 begin
   Result := FOwner;
@@ -578,6 +602,11 @@ begin
     FHashList.Add(Item.Key, Item);
   end;
   FValidHashList := True;
+end;
+
+function TLuiConfigItemDefs.GetItem(Index: Integer): TLuiConfigItemDef;
+begin
+  Result := TLuiConfigItemDef(inherited GetItem(Index));
 end;
 
 function TLuiConfigItemDefs.GetOwner: TPersistent;
