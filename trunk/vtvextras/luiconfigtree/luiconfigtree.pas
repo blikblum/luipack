@@ -56,6 +56,7 @@ type
     procedure InitHeader;
     procedure SetConfig(const AValue: TLuiConfig);
     procedure SetOptions(const AValue: TLuiConfigTreeOptions);
+    procedure SetSections(const AValue: TStrings);
     procedure WMStartEditing(var Message: TLMessage); message WM_STARTEDITING;
   protected
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
@@ -84,7 +85,7 @@ type
     procedure LoadTree;
   published
     property Config: TLuiConfig read FConfig write SetConfig;
-    property Sections: TStrings read FSections;
+    property Sections: TStrings read FSections write SetSections;
     //inherited properties
     property Action;
     property Align;
@@ -330,6 +331,11 @@ end;
 procedure TLuiConfigTree.SetOptions(const AValue: TLuiConfigTreeOptions);
 begin
   TreeOptions.Assign(AValue);
+end;
+
+procedure TLuiConfigTree.SetSections(const AValue: TStrings);
+begin
+  FSections.Assign(AValue);
 end;
 
 procedure TLuiConfigTree.WMStartEditing(var Message: TLMessage);
