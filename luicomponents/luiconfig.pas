@@ -9,6 +9,8 @@ uses
 
 type
 
+  TLuiConfig = class;
+
   { TLuiConfigProvider }
 
   TLuiConfigProvider = class(TComponent)
@@ -59,13 +61,16 @@ type
 
   TLuiConfigItemDefs = class(TCollection)
   private
+    FOwner: TLuiConfig;
     FHashList: TFPHashList;
     FValidHashList: Boolean;
     procedure BuildHashList;
   protected
+    function GetOwner: TPersistent; override;
     procedure Notify(Item: TCollectionItem;
       Action: TCollectionNotification); override;
   public
+    constructor Create(AOwner: TLuiConfig);
     destructor Destroy; override;
     function Add: TLuiConfigItemDef;
     function Find(const Key: String): TLuiConfigItemDef;
@@ -96,13 +101,16 @@ type
 
   TLuiConfigSectionDefs = class(TCollection)
   private
+    FOwner: TLuiConfig;
     FHashList: TFPHashList;
     FValidHashList: Boolean;
     procedure BuildHashList;
   protected
+    function GetOwner: TPersistent; override;
     procedure Notify(Item: TCollectionItem;
       Action: TCollectionNotification); override;
   public
+    constructor Create(AOwner: TLuiConfig);
     destructor Destroy; override;
     function Add: TLuiConfigSectionDef;
     function Find(const Title: String): TLuiConfigSectionDef;
@@ -282,8 +290,8 @@ end;
 constructor TLuiConfig.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FSectionDefs := TLuiConfigSectionDefs.Create(TLuiConfigSectionDef);
-  FItemDefs := TLuiConfigItemDefs.Create(TLuiConfigItemDef);
+  FSectionDefs := TLuiConfigSectionDefs.Create(Self);
+  FItemDefs := TLuiConfigItemDefs.Create(Self);
 end;
 
 destructor TLuiConfig.Destroy;
@@ -485,10 +493,21 @@ begin
   FValidHashList := True;
 end;
 
+function TLuiConfigSectionDefs.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
 procedure TLuiConfigSectionDefs.Notify(Item: TCollectionItem;
   Action: TCollectionNotification);
 begin
   FValidHashList := False;
+end;
+
+constructor TLuiConfigSectionDefs.Create(AOwner: TLuiConfig);
+begin
+  inherited Create(TLuiConfigSectionDef);
+  FOwner := AOwner;
 end;
 
 destructor TLuiConfigSectionDefs.Destroy;
@@ -561,10 +580,21 @@ begin
   FValidHashList := True;
 end;
 
+function TLuiConfigItemDefs.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
 procedure TLuiConfigItemDefs.Notify(Item: TCollectionItem;
   Action: TCollectionNotification);
 begin
   FValidHashList := False;
+end;
+
+constructor TLuiConfigItemDefs.Create(AOwner: TLuiConfig);
+begin
+  inherited Create(TLuiConfigItemDef);
+  FOwner := AOwner;
 end;
 
 destructor TLuiConfigItemDefs.Destroy;
