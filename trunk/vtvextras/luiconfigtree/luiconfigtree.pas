@@ -310,7 +310,7 @@ begin
   if FSections.Count > 0 then
     FVisibleSections.Assign(FSections)
   else
-    FConfig.ReadSections(FVisibleSections);
+    FConfig.ReadSections(FVisibleSections, True);
   RootNodeCount := FVisibleSections.Count;
   //todo: make full expand optional
   FullExpand(nil);
