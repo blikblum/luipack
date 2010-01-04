@@ -9,6 +9,10 @@ uses
 
 type
 
+  TLuiRecordBufferOption = (lboInitPrimaryKey);
+
+  TLuiRecordBufferOptions = set of TLuiRecordBufferOption;
+
   TGetPrimaryKeyEvent = procedure(Sender: TObject; out NewKey: Integer) of object;
 
   { TLuiRecordBuffer }
@@ -20,6 +24,7 @@ type
     FBeforeLoad: TNotifyEvent;
     FAfterLoad: TNotifyEvent;
     FBeforeSave: TNotifyEvent;
+    FBufferOptions: TLuiRecordBufferOptions;
     FOnClear: TNotifyEvent;
     FOnGetPrimaryKey: TGetPrimaryKeyEvent;
     FPrimaryKeyField: String;
@@ -36,11 +41,13 @@ type
     procedure DoClear; virtual;
     function DoGetPrimaryKey: Integer; virtual;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure Clear;
     procedure Load;
     procedure Save;
   published
     property AppendMode: Boolean read FAppendMode write FAppendMode;
+    property BufferOptions: TLuiRecordBufferOptions read FBufferOptions write FBufferOptions default [lboInitPrimaryKey];
     property SourceDataSet: TDataSet read FSourceDataSet write FSourceDataSet;
     property AfterLoad: TNotifyEvent read FAfterLoad write FAfterLoad;
     property BeforeLoad: TNotifyEvent read FBeforeLoad write FBeforeLoad;
@@ -110,6 +117,12 @@ begin
     Result := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
 end;
 
+constructor TLuiRecordBuffer.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FBufferOptions := [lboInitPrimaryKey];
+end;
+
 procedure TLuiRecordBuffer.Clear;
 var
   i: Integer;
@@ -129,7 +142,8 @@ begin
   DoBeforeLoad;
   InitTable;
   AddRecord;
-  InitPrimaryKey;
+  if FAppendMode and (lboInitPrimaryKey in FBufferOptions) then
+    InitPrimaryKey;
   DoAfterLoad;
 end;
 
