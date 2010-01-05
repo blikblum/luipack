@@ -406,12 +406,12 @@ begin
   end
   else
   begin
+    ParentData := GetConfigData(Node^.Parent);
     //Item
     if Column = 0 then
-      CellText := FConfig.GetItemText(Data^.Key)
+      CellText := FConfig.GetItemText(Data^.Key, ParentData^.Key)
     else
     begin
-      ParentData := GetConfigData(Node^.Parent);
       //handle item data differently according to data type
       CellText := FConfig.ReadString(ParentData^.Key, Data^.Key);
     end;
