@@ -171,6 +171,7 @@ type
     procedure WriteString(const SectionTitle, ItemKey: String; AValue: String);
     procedure WriteBoolean(const SectionTitle, ItemKey: String; AValue: Boolean);
     procedure WriteFloat(const SectionTitle, ItemKey: String; AValue: Double);
+    procedure WriteValue(const SectionTitle, ItemKey: String; AValue: Variant);
   published
     property Active: Boolean read FActive write SetActive;
     property DataProvider: TLuiConfigProvider read FDataProvider write SetDataProvider;
@@ -186,7 +187,7 @@ function ReplacePathMacrosUTF8(const Path: String): String;
 implementation
 
 uses
-  StrUtils, FileUtil;
+  StrUtils, FileUtil, Variants;
 
 function ReplacePathMacros(const Path: String): String;
 begin
@@ -491,6 +492,32 @@ end;
 procedure TLuiConfig.WriteFloat(const SectionTitle, ItemKey: String; AValue: Double);
 begin
   FDataProvider.WriteFloat(SectionTitle, ItemKey, AValue);
+end;
+
+procedure TLuiConfig.WriteValue(const SectionTitle, ItemKey: String;
+  AValue: Variant);
+var
+  Item: TLuiConfigItemDef;
+begin
+  if VarIsNull(AValue) then
+    FDataProvider.WriteString(SectionTitle, ItemKey, '')
+  else
+  begin
+    Item := FItemDefs.Find(ItemKey);
+    if (Item <> nil) and (Item.DataType in [ldtInteger, ldtBoolean, ldtFloat]) then
+    begin
+      case Item.DataType of
+        ldtBoolean:
+          FDataProvider.WriteBoolean(SectionTitle, ItemKey, AValue);
+        ldtInteger:
+          FDataProvider.WriteInteger(SectionTitle, ItemKey, AValue);
+        ldtFloat:
+          FDataProvider.WriteFloat(SectionTitle, ItemKey, AValue);
+      end;
+    end
+    else
+      FDataProvider.WriteString(SectionTitle, ItemKey, AValue);
+  end;
 end;
 
 { TLuiConfigItemDef }
