@@ -424,7 +424,7 @@ var
   Data: PConfigData;
 begin
   Data := GetConfigData(Node);
-  FConfig.ReadSection(Data^.Key, FItems);
+  FConfig.ReadSection(Data^.Key, FItems, True);
   NodeChildCount := FItems.Count;
 end;
 
