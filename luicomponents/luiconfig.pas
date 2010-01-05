@@ -163,7 +163,7 @@ type
     function ReadString(const SectionTitle, ItemKey: String): String;
     function ReadBoolean(const SectionTitle, ItemKey: String): Boolean;
     function ReadFloat(const SectionTitle, ItemKey: String): Double;
-    procedure ReadSection(const SectionTitle: String; Strings: TStrings);
+    procedure ReadSection(const SectionTitle: String; Strings: TStrings; RetrieveEmpty: Boolean = False);
     procedure ReadSections(Strings: TStrings; RetrieveEmpty: Boolean = False);
     procedure RemoveObserver(Observer: ILuiConfigObserver);
     procedure WriteInteger(const SectionTitle, ItemKey: String; AValue: Integer);
@@ -375,20 +375,28 @@ begin
     Result := FItemDefs.GetDefaultFloat(ItemKey);
 end;
 
-procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings);
+procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings;
+  RetrieveEmpty: Boolean);
 var
-  i: Integer;
+  i, Last: Integer;
   Item: TLuiConfigItemDef;
 begin
   FDataProvider.ReadSection(SectionTitle, Strings);
-  //todo: make this behavior optional
+
   //Add the items that exists in ItemDefs but not in the provider
-  for i := 0 to FItemDefs.Count - 1 do
+  if RetrieveEmpty then
   begin
-    Item := TLuiConfigItemDef(FItemDefs.Items[i]);
-    if ((Item.Section = '') or (Item.Section = SectionTitle)) and
-      (Strings.IndexOf(Item.Key) = -1) then
-      Strings.Add(Item.Key);
+    Last := 0;
+    for i := 0 to FItemDefs.Count - 1 do
+    begin
+      Item := TLuiConfigItemDef(FItemDefs.Items[i]);
+      if ((Item.Section = '') or (Item.Section = SectionTitle)) and
+        (Strings.IndexOf(Item.Key) = -1) then
+      begin
+        Strings.Insert(Last, Item.Key);
+        Inc(Last);
+      end;
+    end;
   end;
 end;
 
