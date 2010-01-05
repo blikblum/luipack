@@ -157,7 +157,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure AddObserver(Observer: ILuiConfigObserver);
-    function GetItemText(const ItemKey: String): String;
+    function GetItemText(const ItemKey: String; const SectionTitle: String = ''): String;
     function GetSectionText(const SectionTitle: String): String;
     function ReadInteger(const SectionTitle, ItemKey: String): Integer;
     function ReadString(const SectionTitle, ItemKey: String): String;
@@ -313,12 +313,12 @@ begin
   FObserverList.Add(Observer);
 end;
 
-function TLuiConfig.GetItemText(const ItemKey: String): String;
+function TLuiConfig.GetItemText(const ItemKey: String; const SectionTitle: String): String;
 var
   Item: TLuiConfigItemDef;
 begin
   Item := FItemDefs.Find(ItemKey);
-  if Item <> nil then
+  if (Item <> nil) and (Item.Section = SectionTitle) then
     Result := Item.DisplayName
   else
     Result := ItemKey;
