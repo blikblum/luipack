@@ -163,6 +163,7 @@ type
     function ReadString(const SectionTitle, ItemKey: String): String;
     function ReadBoolean(const SectionTitle, ItemKey: String): Boolean;
     function ReadFloat(const SectionTitle, ItemKey: String): Double;
+    function ReadValue(const SectionTitle, ItemKey: String): Variant;
     procedure ReadSection(const SectionTitle: String; Strings: TStrings; RetrieveEmpty: Boolean = False);
     procedure ReadSections(Strings: TStrings; RetrieveEmpty: Boolean = False);
     procedure RemoveObserver(Observer: ILuiConfigObserver);
@@ -352,7 +353,7 @@ begin
   if not ValueExists then
   begin
     Result := FItemDefs.GetDefaultString(ItemKey);
-    if lcoParseMacros in FOptions then
+    if (Result <> '') and (lcoParseMacros in FOptions) then
       Result := ReplacePathMacrosUTF8(Result);
   end;
 end;
@@ -373,6 +374,51 @@ begin
   Result := FDataProvider.ReadFloat(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
     Result := FItemDefs.GetDefaultFloat(ItemKey);
+end;
+
+function TLuiConfig.ReadValue(const SectionTitle, ItemKey: String): Variant;
+var
+  ValueExists: Boolean;
+  Item: TLuiConfigItemDef;
+  S: String;
+begin
+  Item := FItemDefs.Find(ItemKey);
+  if (Item <> nil) and (Item.DataType in [ldtBoolean, ldtFloat, ldtInteger]) then
+  begin
+    case Item.DataType of
+     ldtBoolean:
+       Result := DataProvider.ReadBoolean(SectionTitle, ItemKey, ValueExists);
+     ldtInteger:
+       Result := DataProvider.ReadInteger(SectionTitle, ItemKey, ValueExists);
+     ldtFloat:
+       Result := DataProvider.ReadFloat(SectionTitle, ItemKey, ValueExists);
+    end;
+    if not ValueExists then
+      Result := Null;
+  end
+  else
+  begin
+    //fallback for string or special types that can be added in the future
+    S := FDataProvider.ReadString(SectionTitle, ItemKey, ValueExists);
+    if not ValueExists then
+    begin
+      if Item <> nil then
+        S := Item.DefaultValue
+      else
+        S := FItemDefs.GetDefaultString(ItemKey);
+
+      if S = '' then
+        Result := Null
+      else
+      begin
+        if lcoParseMacros in FOptions then
+          S := ReplacePathMacrosUTF8(S);
+        Result := S;
+      end;
+    end
+    else
+      Result := S;
+  end;
 end;
 
 procedure TLuiConfig.ReadSection(const SectionTitle: String; Strings: TStrings;
