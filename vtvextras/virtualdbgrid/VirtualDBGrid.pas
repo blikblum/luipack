@@ -722,7 +722,7 @@ type
 implementation
 
 uses
-  Math, dbconst, vtlogger;
+  Math, dbconst {$ifdef DEBUG_VDBGRID}, vtlogger{$endif};
 
 function NullVar2Int(Value: Variant): Integer;
 begin
@@ -1218,7 +1218,7 @@ end;
 
 procedure TVirtualDBTreeDataLink.ActiveChanged;
 begin
-  Logger.EnterMethod(lcAll, 'ActiveChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'ActiveChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'ActiveChanged');
   if Active and Assigned(DataSource) then
     if Assigned(DataSource.DataSet) then
@@ -1226,32 +1226,32 @@ begin
         DatabaseError(SUniDirectional);
 
   FVirtualDBTree.DataLinkActiveChanged;
-  Logger.ExitMethod(lcAll, 'ActiveChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ActiveChanged');{$endif}
 end;
 
 procedure TVirtualDBTreeDataLink.DataSetChanged;
 begin
-  Logger.EnterMethod(lcAll, 'DatasetChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DatasetChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetChanged');
   FVirtualDBTree.DataLinkChanged;
-  Logger.ExitMethod(lcAll, 'DatasetChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DatasetChanged');{$endif}
 end;
 
 procedure TVirtualDBTreeDataLink.RecordChanged(Field: TField);
 begin
-  Logger.EnterMethod(lcAll, 'RecordChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'RecordChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'RecordChanged');
   FVirtualDBTree.DataLinkRecordChanged(Field);
-  Logger.ExitMethod(lcAll, 'RecordChanged');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'RecordChanged');{$endif}
 end;
 
 
 procedure TVirtualDBTreeDataLink.DataSetScrolled(Distance: Integer);
 begin
-  Logger.EnterMethod(lcAll, 'DataSetScrolled');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataSetScrolled');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetScrolled');
   FVirtualDBTree.SetFocusToActualRecNo;
-  Logger.ExitMethod(lcAll, 'DataSetScrolled');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DataSetScrolled');{$endif}
 end;
 
 
@@ -2086,7 +2086,7 @@ begin
   begin
     if Assigned(LinkedDataSet) and LinkedDataSet.Active then
     begin
-       Logger.EnterMethod(lcAll, 'DataLinkChanged');
+       {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataLinkChanged');{$endif}
        //Skip GetRecordCount and retieve RecordCount directly from dataset
        //since we already know that RecordCountType is rcFromDataset
        fRecordCount := LinkedDataSet.RecordCount;
@@ -2110,7 +2110,7 @@ begin
        //todo: see if is doable implementing auto sort after dataset changes
        //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
        //  DoSortColumn(Header.SortColumn);
-       Logger.ExitMethod(lcAll, 'DataLinkChanged');
+       {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DataLinkChanged');{$endif}
     end;
   end;
 
@@ -2605,12 +2605,12 @@ end;
 
 procedure TCustomVirtualDBGrid.DoScroll(DeltaX, DeltaY: Integer);
 begin
-  Logger.EnterMethod(lcAll, 'DoScroll');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DoScroll');{$endif}
   //todo: elaborate an algorithm to update only the scrolled nodes ??
   if DeltaY <> 0 then
      UpdateVisibleDBTree(False);
   inherited DoScroll(DeltaX, DeltaY);
-  Logger.ExitMethod(lcAll, 'DoScroll');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DoScroll');{$endif}
 end;
 
 
@@ -2962,7 +2962,7 @@ var
 
   CenterToNode: Boolean;
 begin
-  Logger.EnterMethod(lcAll, 'ReInitializeDBGrid');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'ReInitializeDBGrid');{$endif}
   // backup old values
   OldTopNode := TopNode;
   OldFocusedNodeIndex := 0;
@@ -3013,7 +3013,7 @@ begin
   end;
 
   EndUpdate;
-  Logger.ExitMethod(lcAll, 'ReInitializeDBGrid');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ReInitializeDBGrid');{$endif}
 end;
 
 
@@ -3086,7 +3086,7 @@ var
   DoLoad, DoCreateData : Boolean;
 begin
   //it's up to the caller check for LinkedDataset and IsDataLoading
-  Logger.EnterMethod(lcAll, 'UpdateDBTree');
+  {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'UpdateDBTree');{$endif}
   //Logger.SendCallStack(lcAll, 'Stack');
   Run := StartNode;
   if not Assigned(Run) then
@@ -3134,7 +3134,7 @@ begin
              LinkedDataSet.MoveBy(NewMove);
            WasNewMoved := True;
          end;
-         Logger.Send(lcAll, 'LoadingData', Run.Index);
+         {$ifdef DEBUG_VDBGRID}Logger.Send(lcAll, 'LoadingData', Run.Index);{$endif}
          InternalLoadDBData(Run, DoCreateData); // load data from database
 
          LinkedDataSet.Next;
@@ -3152,7 +3152,7 @@ begin
     LinkedDataSet.EnableControls;
     DecLoadingDataFlag;
   end;
-  Logger.ExitMethod(lcAll, 'UpdateDBTree');
+  {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'UpdateDBTree');{$endif}
 end;
 
 
@@ -3445,4 +3445,4 @@ end;
 initialization
   {$i resources.lrs}
 
-end.
+end.
