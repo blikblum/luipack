@@ -386,7 +386,6 @@ type
     FOnRecordDblClick: TOnRecordDblClick;
     fIndicatorBMP:            TBitmap;
 
-    function GetFocusedRecord: TRecordData;
     function GetHeader: TVTDBHeader;
     procedure SetHeader(Value: TVTDBHeader);
     procedure SetDBOptions(const Value: TVTDBOptions);
@@ -394,7 +393,7 @@ type
     procedure SetOptions(const Value: TStringTreeOptions);
     procedure WMSize(var Message: TWMSize); message WM_SIZE;
 
-    function InternalGetNodeData(ANode: PVirtualNode): PNodeData;
+    function InternalGetNodeData(Node: PVirtualNode): Pointer;
     procedure InternalInitializeDBTree;
     procedure UpdateVisibleDBTree(AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
     procedure UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
@@ -414,7 +413,6 @@ type
     procedure UpdateCurrentRecord;
   protected
     procedure CreateWnd; override;
-    procedure ValidateNodeDataSize(var Size: Integer); override;
     procedure DoFocusChange(Node: PVirtualNode; Column: TColumnIndex); override;
     procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); override;
@@ -474,8 +472,6 @@ type
     procedure DataLinkChanged; virtual;
     procedure DataLinkRecordChanged(Field: TField); virtual;
 
-    function InternalData(Node: PVirtualNode): Pointer;
-
     function GetDataSet: TDataSet; inline;
 
     property InternalRecordCount: longint   read fRecordCount;
@@ -496,7 +492,6 @@ type
     // discarded VirtualTreeView properties that we doesn't allow to change by user
     property TreeOptions: TStringTreeOptions       read GetOptions          write SetOptions;
     property RootNodeCount stored false;
-    property NodeDataSize stored false;
     property DefaultText stored false;
     property OnFreeNode;
     property OnGetText;
@@ -518,6 +513,7 @@ type
     procedure AddCalcColumn(const IDText: string; AWidth: Integer);
     procedure AddIndicatorColumn(AWidth: Integer);
     procedure AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
+    function GetNodeRecordData(Node: PVirtualNode): TRecordData;
     procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
     procedure UpdateAllRecords;
     // navigate trought the treeview
@@ -527,7 +523,6 @@ type
 
     property SortingColumn:                  TVirtualDBTreeColumn read GetSortingColumn;
     property IndicatorColumn:                TVirtualDBTreeColumn read GetIndicatorColumn;
-    property FocusedRecord: TRecordData read GetFocusedRecord;
     property SelectedRecord[Index: Integer]: TRecordData          read GetSelectedRecord;
   published
     property Action;
@@ -586,6 +581,7 @@ type
     property LineStyle;
     property Margin;
     property NodeAlignment;
+    property NodeDataSize;
     {$ifdef COMPILER_7_UP}
       property ParentBackground;
     {$endif COMPILER_7_UP}
@@ -1899,18 +1895,6 @@ begin
   Result := TVTDBHeader(inherited Header);
 end;
 
-function TCustomVirtualDBGrid.GetFocusedRecord: TRecordData;
-var
-  Data: PNodeData;
-begin
-  Result := nil;
-  if FocusedNode = nil then
-    Exit;
-  Data := InternalGetNodeData(FocusedNode);
-  if IsDataOk(Data) then
-    Result := Data.RecordData;
-end;
-
 procedure TCustomVirtualDBGrid.SetHeader(Value: TVTDBHeader);
 begin
   inherited Header := Value;
@@ -1926,9 +1910,8 @@ begin
   fIndicatorBMP.TransparentColor := clFuchsia;
   fIndicatorBMP.Transparent := True;
 
-  NodeDataSize := SizeOf(TNodeData);
   DefaultText := '';
-  FInternalDataOffset := AllocateInternalDataArea( SizeOf(TNodeData));
+  FInternalDataOffset := AllocateInternalDataArea(SizeOf(TNodeData));
   //fLoadingDataFlag := 0;
   //fLastRecordCount := 0;
 
@@ -1990,15 +1973,6 @@ begin
   //Set the selected node after the handle is created
   if FocusedNode <> nil then
     Selected[FocusedNode] := True;
-end;
-
-function TCustomVirtualDBGrid.InternalData(Node: PVirtualNode): Pointer;
-begin
-  //todo: see is necessary this code
-  if (Node = RootNode) or (Node = nil) then
-    Result := nil
-  else
-    Result := PChar(Node) + FInternalDataOffset;
 end;
 
 function TCustomVirtualDBGrid.GetHeaderClass: TVTHeaderClass;
@@ -2132,12 +2106,6 @@ end;
 function TCustomVirtualDBGrid.GetDataSet: TDataSet;
 begin
   Result := fDBOptions.fDataLink.DataSet;
-end;
-
-procedure TCustomVirtualDBGrid.ValidateNodeDataSize(var Size: Integer);
-begin
-  Size := SizeOf(TNodeData);
-  inherited;
 end;
 
 procedure TCustomVirtualDBGrid.DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
@@ -2739,9 +2707,9 @@ begin
 
         if Assigned(Node) then
         begin
-           Data:= InternalGetNodeData(Node);
-           if IsDataOk(Data) then
-              Result:= Data.RecordData;
+           Data := InternalGetNodeData(Node);
+           if Data <> nil then
+             Result := Data.RecordData;
         end;
      end;
 end;
@@ -2864,6 +2832,17 @@ begin
    //ReInitializeDBGrid;
 end;
 
+function TCustomVirtualDBGrid.GetNodeRecordData(Node: PVirtualNode): TRecordData;
+var
+  Data: PNodeData;
+begin
+  Data := InternalGetNodeData(Node);
+  if Data <> nil then
+    Result := Data^.RecordData
+  else
+    Result := nil;
+end;
+
 procedure TCustomVirtualDBGrid.SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
 
 var I  : integer;
@@ -2918,19 +2897,16 @@ begin
     end;
   end;
 
-  result:= SetFocusToNode(Node, false);
+  Result := SetFocusToNode(Node, false);
 end;
 
 
-function TCustomVirtualDBGrid.InternalGetNodeData(ANode: PVirtualNode): PNodeData;
+function TCustomVirtualDBGrid.InternalGetNodeData(Node: PVirtualNode): Pointer;
 begin
-  //todo: see if this check is neccessary.
-  //InternalData and GetNodeData are almost the same
-  //BTW: InternalData looks buggy
-  if not (csDesigning in ComponentState) then
-    Result := GetNodeData(ANode)
+  if (Node <> nil) and (Node <> RootNode) then
+    Result := PByte(Node) + FInternalDataOffset
   else
-    Result := InternalData(ANode);
+    Result := nil;
 end;
 
 function TCustomVirtualDBGrid.IsDataOk(AData: PNodeData): Boolean;
