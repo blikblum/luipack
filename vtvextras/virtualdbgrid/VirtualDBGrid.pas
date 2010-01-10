@@ -2955,23 +2955,16 @@ end;
 
 
 procedure TCustomVirtualDBGrid.SetFocusToActualRecNo;
-Var
-  WRecNo: longint;
-Begin
-  if (not (csLoading in ComponentState)) and
-     (not IsDataLoading) then
-    begin
-
-      WRecNo:= GetCurrentDBRecNo;
-      if (WRecNo <> 0) then
-      begin
-        SetFocusToNode(FindNodeByRecNo(WRecNo), False);
-        if (not Assigned(FocusedNode))
-           then SetFocusToNode(GetFirst);
-      end;
-    end;
+var
+  WRecNo: LongInt;
+begin
+  if not (csLoading in ComponentState) and not IsDataLoading then
+  begin
+    WRecNo := GetCurrentDBRecNo;
+    if WRecNo <> 0 then
+      SetFocusToNode(FindNodeByRecNo(WRecNo), False);
+  end;
 end;
-
 
 procedure TCustomVirtualDBGrid.UpdateCurrentRecord;
 var
