@@ -448,10 +448,10 @@ type
     procedure DoRecordDblClick(Column: TColumnIndex; RecordData: TRecordData);
 
     function GetRecordCount: longint;
-    procedure InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: boolean);
+    procedure InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: Boolean);
 
-    function FindNodeByRecNo(ARecNo: longint): PVirtualNode;
-    function SetFocusToNode(Node: PVirtualNode; Center: boolean=true): boolean;
+    function FindNodeByRecNo(ARecNo: LongInt): PVirtualNode;
+    function SetFocusToNode(Node: PVirtualNode; Center: Boolean = True): Boolean;
     procedure GotoRecNo(NewRecNo: longint);
     function GetNodeByIndex(Index: Cardinal): PVirtualNode;
 
@@ -2644,31 +2644,33 @@ begin
     DoGetRecordCount(Result);
 end;
 
-function TCustomVirtualDBGrid.FindNodeByRecNo(ARecNo: longint): PVirtualNode;
+function TCustomVirtualDBGrid.FindNodeByRecNo(ARecNo: LongInt): PVirtualNode;
 var
   Node: PVirtualNode;
   Data: PNodeData;
 begin
+  Result := nil;
 
-  Result:= nil;
-
-  Node:= GetFirst;
-  while (Node <> nil) do
+  Node := GetFirst;
+  while Node <> nil do
   begin
-    Data:= InternalGetNodeData(Node);
+    Data := InternalGetNodeData(Node);
 
-    if IsDataOk(Data) then
-       if (Data.RecordData.RecNo = ARecNo) then
-       begin
-         Result:= Node;
-         break;
-       end;
-
-    Node:= GetNext(Node);
+    if Data <> nil then
+    begin
+      if Data^.RecordData = nil then
+        InternalLoadDBData(Node, True);
+      if (Data^.RecordData <> nil) and (Data.RecordData.RecNo = ARecNo) then
+      begin
+        Result := Node;
+        Break;
+      end;
+    end;
+    Node := GetNext(Node);
   end;
 end;
 
-function TCustomVirtualDBGrid.SetFocusToNode(Node: PVirtualNode; Center: boolean=true): boolean;
+function TCustomVirtualDBGrid.SetFocusToNode(Node: PVirtualNode; Center: Boolean): Boolean;
 begin
   Result := Assigned(Node);
   if not Result then
@@ -2988,7 +2990,7 @@ Begin
       WRecNo:= GetCurrentDBRecNo;
       if (WRecNo <> 0) then
       begin
-        SetFocusToNode(FindNodeByRecNo(WRecNo), false);
+        SetFocusToNode(FindNodeByRecNo(WRecNo), False);
         if (not Assigned(FocusedNode))
            then SetFocusToNode(GetFirst);
       end;
