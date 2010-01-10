@@ -2626,7 +2626,11 @@ begin
     if Data <> nil then
     begin
       if Data^.RecordData = nil then
-        LoadRecordData(Node, True);
+      begin
+        //found the first record with data not loaded. Load the remaining
+        //todo: this will not work if the grid is sorted by the builtin feature (that is broken anyway)
+        UpdateDBTree(Node, RootNodeCount - Node^.Index, True, False);
+      end;
       if (Data^.RecordData <> nil) and (Data.RecordData.RecNo = ARecNo) then
       begin
         Result := Node;
@@ -2651,7 +2655,8 @@ begin
   //don't set Selected if Handle is not allocated to avoid premature handle creation
   if HandleAllocated then
     Selected[Node] := True;
-  FullyVisible[Node] := True;
+  //currently calling fully visible is not necessary since there's no parent node
+  //FullyVisible[Node] := True;
   //todo: change ScrollIntoView behavior?
   ScrollIntoView(Node, Center);
 end;
