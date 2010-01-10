@@ -410,6 +410,8 @@ type
     function IsDataLoading: boolean;
     function GetIndicatorColumn: TVirtualDBTreeColumn;
     function GetSortingColumn: TVirtualDBTreeColumn;
+    procedure SetFocusToActualRecNo;
+    procedure UpdateCurrentRecord;
   protected
     procedure CreateWnd; override;
     procedure ValidateNodeDataSize(var Size: Integer); override;
@@ -448,7 +450,7 @@ type
     procedure DoRecordDblClick(Column: TColumnIndex; RecordData: TRecordData);
 
     function GetRecordCount: longint;
-    procedure InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: Boolean);
+    procedure LoadRecordData(ANode: PVirtualNode; CreateData: Boolean);
 
     function FindNodeByRecNo(ARecNo: LongInt): PVirtualNode;
     function SetFocusToNode(Node: PVirtualNode; Center: Boolean = True): Boolean;
@@ -517,8 +519,6 @@ type
     procedure AddIndicatorColumn(AWidth: Integer);
     procedure AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
     procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
-    procedure SetFocusToActualRecNo;
-    procedure UpdateCurrentRecord;
     procedure UpdateAllRecords;
     // navigate trought the treeview
     function Navigate(FromPosition: TNavigateFromPosition; Delta: Longint): boolean;
@@ -2118,8 +2118,7 @@ end;
 
 procedure TCustomVirtualDBGrid.DataLinkRecordChanged(Field: TField);
 begin
-  if (not (csLoading in ComponentState)) and
-     (not IsDataLoading) then
+  if not (csLoading in ComponentState) and not IsDataLoading and Assigned(LinkedDataSet) then
   begin
      IncLoadingDataFlag;
      try
@@ -2659,7 +2658,7 @@ begin
     if Data <> nil then
     begin
       if Data^.RecordData = nil then
-        InternalLoadDBData(Node, True);
+        LoadRecordData(Node, True);
       if (Data^.RecordData <> nil) and (Data.RecordData.RecNo = ARecNo) then
       begin
         Result := Node;
@@ -3005,7 +3004,7 @@ begin
   Node := FindNodeByRecNo(GetCurrentDBRecNo);
   if Node <> nil then
   begin
-    InternalLoadDBData(Node, True);
+    LoadRecordData(Node, True);
     InvalidateNode(Node);
   end;
 end;
@@ -3097,7 +3096,7 @@ begin
            WasNewMoved := True;
          end;
          {$ifdef DEBUG_VDBGRID}Logger.Send(lcAll, 'LoadingData', Run.Index);{$endif}
-         InternalLoadDBData(Run, DoCreateData); // load data from database
+         LoadRecordData(Run, DoCreateData); // load data from database
 
          LinkedDataSet.Next;
       end;
@@ -3126,7 +3125,7 @@ begin
   Result := IsDataOk(Data);
 end;
 
-procedure TCustomVirtualDBGrid.InternalLoadDBData(ANode: PVirtualNode; AlwaysUpdate: boolean);
+procedure TCustomVirtualDBGrid.LoadRecordData(ANode: PVirtualNode; CreateData: Boolean);
 var
     I, Idx, ColIdx: Integer;
     WFieldName:     String;
@@ -3141,24 +3140,17 @@ var
 
     CalculatedColumns: TStrings;
 begin
-  //todo: see what checks are really necessary
-  
-  // If there isnt any column defined then exit
-  if (Self.Header.Columns.Count = 0) then exit;
-
-  // If there isnt any Dataset assigned then exit
-  if (not assigned(LinkedDataSet)) then exit;
-
-  Data:= InternalGetNodeData(ANode);
-  if (Data = nil) then exit;
-
-  If (Data.RecordData = nil) then
+  Data := InternalGetNodeData(ANode);
+  if Data = nil then
+    Exit;
+  if Data^.RecordData = nil then
   begin
     // If AlwaysUpdate is false then we dont want to reload existing values from database
-    if (not AlwaysUpdate) then exit;
-    // If RecordData is nil then create it, if AlwaysUpdate is true
-    Data.RecordData:= GetRecordDataClass.Create;//TRecordData.Create;
-    //necessary to avoid memory leaks when scrolling to fast
+    if not CreateData then
+      Exit;
+    // If RecordData is nil then create it
+    Data.RecordData := GetRecordDataClass.Create;
+    // necessary to avoid memory leaks when scrolling to fast
     if not (vsInitialized in ANode^.States) then
       InitNode(ANode);
   end;
