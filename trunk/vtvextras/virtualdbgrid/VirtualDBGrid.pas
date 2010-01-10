@@ -2954,25 +2954,9 @@ end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
 var
-  OldTopNode,
-  NewFocusedNode,
-  RunNode: PVirtualNode;
-
-  OldFocusedNodeIndex: Cardinal;
-
   OldOffsetXY: TPoint;
-
-  VisibledNodes: Cardinal;
-
-  CenterToNode: Boolean;
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'ReInitializeDBGrid');{$endif}
-  // backup old values
-  OldTopNode := TopNode;
-  OldFocusedNodeIndex := 0;
-  if Assigned(FocusedNode) then
-    OldFocusedNodeIndex := FocusedNode.Index;
-
   OldOffsetXY := OffsetXY;
 
   BeginUpdate;
@@ -2987,35 +2971,7 @@ begin
   UpdateVisibleDBTree(True);
 
   // Set focus
-  OldTopNode := TopNode;
-  RunNode := OldTopNode;
-  NewFocusedNode := RunNode;
-  while Assigned(RunNode) and
-        (OldFocusedNodeIndex <> NewFocusedNode.Index) and
-        (NewFocusedNode.Index < OldFocusedNodeIndex)
-  do begin
-    RunNode := GetNextSibling(NewFocusedNode);
-    if Assigned(RunNode) then
-       NewFocusedNode:= RunNode;
-  end;
-
-  if not Assigned(NewFocusedNode) then
-     NewFocusedNode := OldTopNode;
-  if not Assigned(NewFocusedNode) then
-     NewFocusedNode := GetFirst;
-
-  if Assigned(NewFocusedNode) then
-  begin
-    VisibledNodes := GetFullyVisibleCount;
-
-    CenterToNode := True;
-    if Assigned(OldTopNode) then
-       CenterToNode := (NewFocusedNode.Index < OldTopNode.Index) or
-                      (NewFocusedNode.Index > (OldTopNode.Index + VisibledNodes));
-
-    SetFocusToNode(NewFocusedNode, CenterToNode);
-  end;
-
+  SetFocusToActualRecNo;
   EndUpdate;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ReInitializeDBGrid');{$endif}
 end;
