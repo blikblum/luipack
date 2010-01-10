@@ -2163,9 +2163,12 @@ procedure TCustomVirtualDBGrid.DoFocusChange(Node: PVirtualNode; Column: TColumn
 var
   Data: PNodeData;
 begin
-  Data := InternalGetNodeData(Node);
-  if IsDataOk(Data) then
-    GotoRecNo(Data.RecordData.RecNo);
+  if not IsDataLoading then
+  begin
+    Data := InternalGetNodeData(Node);
+    if IsDataOk(Data) then
+      GotoRecNo(Data.RecordData.RecNo);
+  end;
   inherited DoFocusChange(Node, Column);
 end;
 
@@ -2674,7 +2677,8 @@ begin
   if Assigned(FocusedNode) then
     Selected[FocusedNode] := False;
 
-  FocusedNode := Node;
+  //call DoFocusNode instead of FocusedNode to avoid calling DoFocusChange
+  DoFocusNode(Node, False);
   //don't set Selected if Handle is not allocated to avoid premature handle creation
   if HandleAllocated then
     Selected[Node] := True;
@@ -3445,4 +3449,4 @@ end;
 initialization
   {$i resources.lrs}
 
-end.
+end.
