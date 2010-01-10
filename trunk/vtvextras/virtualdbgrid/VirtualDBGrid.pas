@@ -2952,9 +2952,10 @@ begin
   // Update database tree
   UpdateVisibleDBTree(True);
 
-  // Set focus
-  SetFocusToActualRecNo;
   EndUpdate;
+  // Set focus
+  //Focus must be set outside Begin/EndUpdate calls as a workaround to a VTV bug
+  SetFocusToActualRecNo;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ReInitializeDBGrid');{$endif}
 end;
 
