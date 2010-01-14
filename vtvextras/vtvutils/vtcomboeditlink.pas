@@ -35,6 +35,7 @@ type
     FStopping: Boolean;
     procedure ComboEditingDone(Sender: TObject);
     procedure ComboKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure NotifyEndEdit;
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
       const NodeText: UTF8String); virtual;
@@ -129,15 +130,8 @@ type
 { TVTCustomComboEditLink }
 
 procedure TVTCustomComboEditLink.ComboEditingDone(Sender: TObject);
-var
-  ATree: TCustomVirtualStringTree;
 begin
-  if not FStopping then
-  begin
-    ATree := FTree;
-    TBaseVirtualTreeAccess(FTree).DoEndEdit;
-    ATree.SetFocus;
-  end;
+  NotifyEndEdit;
 end;
 
 procedure TVTCustomComboEditLink.ComboKeyDown(Sender: TObject; var Key: Word;
@@ -147,6 +141,18 @@ begin
   //todo: better handling of VK_SCAPE
   if (Key = VK_RETURN) or (Key = VK_ESCAPE) then
     Key := VK_TAB;
+end;
+
+procedure TVTCustomComboEditLink.NotifyEndEdit;
+var
+  ATree: TCustomVirtualStringTree;
+begin
+  if not FStopping then
+  begin
+    ATree := FTree;
+    TBaseVirtualTreeAccess(FTree).DoEndEdit;
+    ATree.SetFocus;
+  end;
 end;
 
 procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
@@ -177,6 +183,7 @@ begin
     AutoSize := False;
   end;
   TControlAccess(FCombo).OnEditingDone := @ComboEditingDone;
+  TCustomComboBoxAccess(FCombo).OnCloseUp := @ComboEditingDone;
   FCombo.OnKeyDown := @ComboKeyDown;
 end;
 
