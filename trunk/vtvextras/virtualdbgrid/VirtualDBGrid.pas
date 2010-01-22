@@ -713,7 +713,8 @@ type
   function NullVar2Guid(Value: Variant): String;
   function NullVar2Bool(Value: Variant): boolean;
 
-  function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex): Integer;
+  function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex;
+    Reverse: Boolean = False): Integer;
 
 implementation
 
@@ -783,7 +784,8 @@ begin
   end;
 end;
 
-function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex): Integer;
+function CompareRecordData(Record1, Record2: TRecordData; Column: TColumnIndex;
+  Reverse: Boolean): Integer;
 var
   Data1Value,
   Data2Value : Variant;
@@ -845,6 +847,8 @@ begin
     else
       Result := 1;
   end;
+  if Reverse then
+    Result := -Result;
 end;
 
 { ============================================================================ }
