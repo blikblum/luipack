@@ -39,6 +39,15 @@ var
 
 implementation
 
+uses
+  sqlite3, LCLProc;
+
+
+procedure TraceSqlite(user: pointer; s: pchar); cdecl;
+begin
+  DebugLn(S);
+end;
+
 { TMainForm }
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -55,6 +64,7 @@ begin
       CreateTable;
     end;
     Open;
+    sqlite3_trace(SqliteHandle, @TraceSqlite, nil);
   end;
 end;
 

@@ -8,10 +8,11 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { you can add units after this }, fMain, LResources;
+  { you can add units after this }, fMain;
+
+{$R ordereddatasetdemo.res}
 
 begin
-  {$I ordereddatasetdemo.lrs}
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
