@@ -421,7 +421,7 @@ type
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var Text: String); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: String); override;
-    procedure DoHeaderClick(HitInfo: TVTHeaderHitInfo); override;
+    procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; override;
     procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
@@ -2342,14 +2342,15 @@ begin
 end;
 
 
-procedure TCustomVirtualDBGrid.DoHeaderClick(HitInfo: TVTHeaderHitInfo);
+procedure TCustomVirtualDBGrid.DoHeaderClick(Column: TColumnIndex;
+    Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (DBOptions.SortingType <> stNone) and (aoAllowSorting in DBOptions.AdvOptions) then
   begin
-    DoSortColumn(HitInfo.Column);
+    DoSortColumn(Column);
     DoChangeSort(Header.SortColumn, Header.SortDirection);
   end;
-  inherited DoHeaderClick(HitInfo);
+  inherited DoHeaderClick(Column, Button, Shift, X, Y);
 end;
 
 
