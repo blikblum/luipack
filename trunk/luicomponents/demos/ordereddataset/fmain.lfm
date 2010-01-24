@@ -1,23 +1,36 @@
 object MainForm: TMainForm
   Left = 290
-  Height = 393
+  Height = 387
   Top = 175
-  Width = 595
-  Caption = 'MainForm'
-  ClientHeight = 393
-  ClientWidth = 595
+  Width = 517
+  Caption = 'LuiOrderedDataset Demo'
+  ClientHeight = 387
+  ClientWidth = 517
   OnCreate = FormCreate
-  LCLVersion = '0.9.27'
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
   object Grid: TDBGrid
     Left = 8
     Height = 372
     Top = 8
-    Width = 432
+    Width = 376
+    Columns = <    
+      item
+        FieldName = 'Id'
+      end    
+      item
+        FieldName = 'OrderNo'
+      end    
+      item
+        Width = 200
+        FieldName = 'Str'
+      end>
     DataSource = OrderedDatasource
+    Scrollbars = ssAutoBoth
     TabOrder = 0
   end
   object AppendButton: TButton
-    Left = 464
+    Left = 392
     Height = 25
     Top = 8
     Width = 104
@@ -26,43 +39,43 @@ object MainForm: TMainForm
     TabOrder = 1
   end
   object InsertButton: TButton
-    Left = 464
+    Left = 392
     Height = 25
-    Top = 48
+    Top = 51
     Width = 104
     Caption = 'Insert'
     OnClick = InsertButtonClick
     TabOrder = 2
   end
   object PostButton: TButton
-    Left = 464
+    Left = 392
     Height = 25
-    Top = 88
+    Top = 94
     Width = 104
     Caption = 'Post'
     OnClick = PostButtonClick
     TabOrder = 3
   end
   object DeleteButton: TButton
-    Left = 464
+    Left = 392
     Height = 25
-    Top = 139
-    Width = 102
+    Top = 137
+    Width = 104
     Caption = 'Delete'
     OnClick = DeleteButtonClick
     TabOrder = 4
   end
   object OrderOffsetEdit: TSpinEdit
-    Left = 544
-    Height = 23
+    Left = 472
+    Height = 21
     Top = 191
-    Width = 46
+    Width = 40
     MaxValue = 10
     MinValue = -10
     TabOrder = 5
   end
   object ChangeOrderButton: TButton
-    Left = 464
+    Left = 392
     Height = 25
     Top = 189
     Width = 75
@@ -73,13 +86,14 @@ object MainForm: TMainForm
   object OrderedDataset: TLuiOrderedDataset
     SaveOnClose = True
     TableName = 'OrderedTable'
+    FieldDefs = <>
     OrderFieldName = 'OrderNo'
     left = 312
-    top = 24
+    top = 40
   end
   object OrderedDatasource: TDatasource
     DataSet = OrderedDataset
     left = 312
-    top = 58
+    top = 96
   end
 end
