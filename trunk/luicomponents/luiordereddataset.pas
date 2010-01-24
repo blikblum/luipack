@@ -184,6 +184,7 @@ end;
 procedure TLuiOrderedDataset.ChangeOrder(Offset: Integer);
 var
   CurrentItem, SiblingItem: PDataRecord;
+  CurrentAddIndex, SiblingAddIndex: Integer;
 begin
   if (FOrderFieldIndex = -1) or (Offset = 0) then
     Exit;
@@ -204,6 +205,21 @@ begin
         Inc(Offset);
       end;
       SwapOrder(CurrentItem, SiblingItem);
+      CurrentAddIndex := FAddedItems.IndexOf(CurrentItem);
+      SiblingAddIndex := FAddedItems.IndexOf(SiblingItem);
+      if (CurrentAddIndex > -1) xor (SiblingAddIndex > -1) then
+      begin
+        if SiblingAddIndex = -1 then
+        begin
+          FAddedItems.Delete(CurrentAddIndex);
+          FAddedItems.Add(SiblingItem);
+        end;
+        if CurrentAddIndex = -1 then
+        begin
+          FAddedItems.Delete(SiblingAddIndex);
+          FAddedItems.Add(CurrentItem);
+        end;
+      end;
       NotifyItemUpdate(CurrentItem);
       //Notify the update of sibling item only when Offset = 0 because otherwise
       //it will be notified as the current item
