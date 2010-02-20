@@ -257,6 +257,7 @@ type
   PNodeData = ^TNodeData;
   TNodeData= record
     RecordData: TRecordData;
+    RecNo: Integer;
   end;
 
   TRecordDataClass = class of TRecordData;
@@ -420,6 +421,7 @@ type
     procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var Text: String); override;
+    procedure DoInitNode(Parent, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: String); override;
     procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
@@ -2283,6 +2285,16 @@ begin
   end;
 end;
 
+procedure TCustomVirtualDBGrid.DoInitNode(Parent, Node: PVirtualNode;
+  var InitStates: TVirtualNodeInitStates);
+var
+  NodeData: PNodeData;
+begin
+  //inherited DoInitNode(Parent, Node, InitStates);
+  NodeData := InternalGetNodeData(Node);
+  NodeData^.RecNo := Node^.Index + 1;
+end;
+
 procedure TCustomVirtualDBGrid.DoNewText(Node: PVirtualNode;
   Column: TColumnIndex; const Text: String);
 var
@@ -2630,13 +2642,7 @@ begin
 
     if Data <> nil then
     begin
-      if Data^.RecordData = nil then
-      begin
-        //found the first record with data not loaded. Load the remaining
-        //todo: this will not work if the grid is sorted by the builtin feature (that is broken anyway)
-        UpdateDBTree(Node, RootNodeCount - Node^.Index, True, False);
-      end;
-      if (Data^.RecordData <> nil) and (Data.RecordData.RecNo = ARecNo) then
+      if Data^.RecNo = ARecNo then
       begin
         Result := Node;
         Break;
