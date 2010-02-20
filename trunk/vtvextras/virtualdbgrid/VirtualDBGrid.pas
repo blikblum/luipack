@@ -721,7 +721,10 @@ type
 implementation
 
 uses
-  Math, dbconst {$ifdef DEBUG_VDBGRID}, vtlogger{$endif};
+  Math, dbconst, fgl {$ifdef DEBUG_VDBGRID}, vtlogger{$endif};
+
+type
+  TIntegerList = specialize TFPGList <Integer>;
 
 function NullVar2Int(Value: Variant): Integer;
 begin
@@ -3124,7 +3127,7 @@ var
     Data:           PNodeData;
     RecordNo:       longint;
 
-    CalculatedColumns: TStrings;
+    CalculatedColumns: TIntegerList;
 begin
   Data := InternalGetNodeData(ANode);
   if Data = nil then
@@ -3141,9 +3144,8 @@ begin
       InitNode(ANode);
   end;
 
-  // CalculatedColumns to archive calculated column indexes
-  //todo: move CalculatedColumns to a field or at least create here only on demand
-  CalculatedColumns:= TStringList.Create;
+  // CalculatedColumns to archive calculated column indexes. Load on demand.
+  CalculatedColumns := nil;
   try
     RecordNo:= GetCurrentDBRecNo;
     // If current record number is other than -1 then setup RecordData.RecNo
@@ -3196,7 +3198,9 @@ begin
 
         ctCalculated:
         begin
-          CalculatedColumns.Add(Inttostr(I));
+          if CalculatedColumns = nil then
+            CalculatedColumns := TIntegerList.Create;
+          CalculatedColumns.Add(I);
         end;
 
         ctIndicator:
@@ -3207,20 +3211,18 @@ begin
     end;
 
     // fillup calculated columns
-    if (CalculatedColumns.Count > 0) then
+    if CalculatedColumns <> nil then
     begin
-      for I:= 0 to CalculatedColumns.Count-1 do
+      for I := 0 to CalculatedColumns.Count - 1 do
       begin
-        ColIdx:= StrToIntDef(CalculatedColumns[I], 0);
+        ColIdx := CalculatedColumns[I];
+        WCalcType := ftString;
+        WIDText := TVirtualDBTreeColumn(Header.Columns[ColIdx]).Text;
+        Idx := Data.RecordData.IndexOf(WIDText, ffCalculated);
 
-        WCalcType:= ftString;
-        WIDText:= TVirtualDBTreeColumn(Header.Columns[ColIdx]).Text;
-        Idx:= Data.RecordData.IndexOf(WIDText, ffCalculated);
-
-        WCalcValue:= '';
+        WCalcValue := '';
         DoCalculateValue(Header.Columns[ColIdx].Text, Header.Columns[ColIdx].Index,
-                         Data.RecordData, ANode.Index, WCalcValue, WCalcType);
-
+          Data.RecordData, ANode.Index, WCalcValue, WCalcType);
         if (Idx = -1)
            then Data.RecordData.Insert(ColIdx, WIDText, WCalcValue, WCalcType, ffCalculated)
            else begin
@@ -3229,10 +3231,8 @@ begin
            end;
       end;
     end;
-
     // Fireup OnLoadRecord event
     DoLoadRecord(Data.RecordData, ANode.Index);
-
   finally
     CalculatedColumns.Free;
   end;
