@@ -2682,8 +2682,9 @@ begin
 
   IncLoadingDataFlag;
   try
-    //todo use LinkedDataset.RecNo directly
-    LinkedDataSet.MoveBy(NewRecNo - GetCurrentDBRecNo);
+    //todo: use LinkedDataset.RecNo directly??
+    //Maybe not since some datasets don't support setting RecNo
+    LinkedDataSet.MoveBy(NewRecNo - LinkedDataSet.RecNo);
   finally
     DecLoadingDataFlag;
   end;
@@ -3044,13 +3045,11 @@ begin
     
   IncLoadingDataFlag;
   try
-    //todo: get recno directly from LinkedDataset since the check is alreay done above
     OldRecNo := LinkedDataSet.RecNo;
 
     // DeltaIndex - How many records we must move in database from
-    // where we can start loading CountToLoad records
+    // where we can start loading NodeCount records
 
-    //Run = TopNode
     DeltaIndex := Run.Index + 1;
 
     WasNewMoved := False;
@@ -3094,8 +3093,7 @@ begin
       Inc(Count);
       Run := GetNextSibling(Run);
     end;
-    //todo: get RecNo directly
-    if (GetCurrentDBRecNo <> OldRecNo) then
+    if (LinkedDataSet.RecNo <> OldRecNo) then
       GotoRecNo(OldRecNo);
 
   finally
