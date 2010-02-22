@@ -2989,7 +2989,8 @@ procedure TCustomVirtualDBGrid.UpdateCurrentRecord;
 var
   Node: PVirtualNode;
 begin
-  Node := FindNodeByRecNo(GetCurrentDBRecNo);
+  // Assume LinkedDataset <> nil
+  Node := FindNodeByRecNo(LinkedDataSet.RecNo);
   if Node <> nil then
   begin
     LoadRecordData(Node, True);
@@ -3023,15 +3024,15 @@ end;
 procedure TCustomVirtualDBGrid.UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
   AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
 var
-  DeltaIndex,
   Count: Cardinal;
 
   OldRecNo,
-  NewMove: LongInt;
+  DatasetRecNo,
+  NodeRecNo,
+  MoveCount: LongInt;
 
   Run: PVirtualNode;
 
-  WasNewMoved,
   DoLoad, DoCreateData : Boolean;
 begin
   //it's up to the caller check for LinkedDataset and IsDataLoading
@@ -3043,25 +3044,20 @@ begin
     
   IncLoadingDataFlag;
   try
-    OldRecNo := LinkedDataSet.RecNo;
-
-    // DeltaIndex - How many records we must move in database from
-    // where we can start loading NodeCount records
-
-    DeltaIndex := Run.Index + 1;
-
-    WasNewMoved := False;
-    NewMove := DeltaIndex - OldRecNo;
+    DatasetRecNo := LinkedDataSet.RecNo;
+    OldRecNo := DatasetRecNo;
 
     LinkedDataSet.DisableControls;
 
     DoLoad := AlwaysUpdate;
     DoCreateData := AlwaysUpdate;
     Count := 0;
-    while Assigned(Run) and
-      (not LinkedDataSet.Eof or (not WasNewMoved)) and
-      (Count <= NodeCount) do
+    while Assigned(Run) and not LinkedDataSet.Eof and (Count <= NodeCount) do
     begin
+      // Initialize node to ensure RecNo is set
+      if not (vsInitialized in Run^.States) then
+        InitNode(Run);
+      NodeRecNo := PNodeData(InternalGetNodeData(Run))^.RecNo;
       // If we dont want always update data, then we must test that
       // if node has data created, and if not than we can load data from database
       // to node's data
@@ -3073,18 +3069,12 @@ begin
 
       if DoLoad then
       begin
-         // If there wasnt newmove on database then do newmove
-         if not WasNewMoved then
-         begin
-           NewMove := (Run.Index - OldRecNo) + 1;
-           if NewMove <> 0 then
-             LinkedDataSet.MoveBy(NewMove);
-           WasNewMoved := True;
-         end;
-         {$ifdef DEBUG_VDBGRID}Logger.Send(lcAll, 'LoadingData', Run.Index);{$endif}
-         LoadRecordData(Run, DoCreateData); // load data from database
-
-         LinkedDataSet.Next;
+        //Move to the RecNo pointed by the run node
+        MoveCount := LinkedDataSet.MoveBy(NodeRecNo - DatasetRecNo);
+        //Update the DatasetRecNo
+        Inc(DatasetRecNo, MoveCount);
+        {$ifdef DEBUG_VDBGRID}Logger.Send(lcAll, 'LoadingData', Run.Index);{$endif}
+        LoadRecordData(Run, DoCreateData); // load data from database
       end;
 
 
@@ -3143,7 +3133,7 @@ begin
   // CalculatedColumns to archive calculated column indexes. Load on demand.
   CalculatedColumns := nil;
   try
-    RecordNo:= GetCurrentDBRecNo;
+    RecordNo := LinkedDataSet.RecNo;
     // If current record number is other than -1 then setup RecordData.RecNo
     if (RecordNo <> -1) then
       Data.RecordData.RecNo := RecordNo;
