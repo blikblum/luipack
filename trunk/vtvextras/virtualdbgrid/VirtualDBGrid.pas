@@ -2139,7 +2139,7 @@ procedure TCustomVirtualDBGrid.DoFocusChange(Node: PVirtualNode; Column: TColumn
 var
   Data: PNodeData;
 begin
-  if not IsDataLoading then
+  if (LinkedDataSet <> nil) and (LinkedDataSet.Active) and not IsDataLoading then
   begin
     Data := InternalGetNodeData(Node);
     if IsDataOk(Data) then
@@ -2677,9 +2677,7 @@ end;
 
 procedure TCustomVirtualDBGrid.GotoRecNo(NewRecNo: longint);
 begin
-  if (not Assigned(LinkedDataSet)) then exit;
-  if (not fDBOptions.DataLink.Active) then exit;
-
+  //Assumes LinkedDataset is <> nil and active
   IncLoadingDataFlag;
   try
     //todo: use LinkedDataset.RecNo directly??
