@@ -517,7 +517,7 @@ type
     procedure AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
     function GetNodeRecordData(Node: PVirtualNode): TRecordData;
     procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
-    procedure UpdateAllRecords;
+    procedure UpdateAllRecords(UpdateLoadedData: Boolean = True);
     // navigate trought the treeview
     function Navigate(FromPosition: TNavigateFromPosition; Delta: Longint): boolean;
     procedure ReInitializeDBGrid;
@@ -2998,7 +2998,7 @@ begin
   end;
 end;
 
-procedure TCustomVirtualDBGrid.UpdateAllRecords;
+procedure TCustomVirtualDBGrid.UpdateAllRecords(UpdateLoadedData: Boolean = True);
 var
   OldRecNo: Integer;
 begin
@@ -3010,7 +3010,7 @@ begin
   LinkedDataSet.DisableControls;
   try
     LinkedDataSet.First;
-    UpdateDBTree(GetFirst, VisibleCount, False, True);
+    UpdateDBTree(GetFirst, VisibleCount, False, UpdateLoadedData);
   finally
     //OldRecNo is invalid while appending
     if OldRecNo > -1 then
@@ -3336,7 +3336,7 @@ begin
              // autosort feature. Instead of this, sort the database by your way, and
              // then tell VirtualDBGrid to reload data(func. ReInitializeDBGrid) to see changes...
              //if (OldSortColumn <= NoColumn) then
-              UpdateAllRecords;
+             UpdateAllRecords(False);
 
              SortTree(Header.SortColumn, Header.SortDirection, False);
          end
