@@ -2999,24 +2999,13 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.UpdateAllRecords(UpdateLoadedData: Boolean = True);
-var
-  OldRecNo: Integer;
 begin
   if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
     Exit;
-  OldRecNo := LinkedDataSet.RecNo;
   BeginUpdate;
-  IncLoadingDataFlag;
-  LinkedDataSet.DisableControls;
   try
-    LinkedDataSet.First;
     UpdateDBTree(GetFirst, VisibleCount, False, UpdateLoadedData);
   finally
-    //OldRecNo is invalid while appending
-    if OldRecNo > -1 then
-      LinkedDataset.RecNo := OldRecNo;
-    LinkedDataset.EnableControls;
-    DecLoadingDataFlag;
     EndUpdate;
   end;
 end;
