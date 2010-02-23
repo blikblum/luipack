@@ -394,7 +394,7 @@ type
     procedure SetOptions(const Value: TStringTreeOptions);
     procedure WMSize(var Message: TWMSize); message WM_SIZE;
 
-    function InternalGetNodeData(Node: PVirtualNode): Pointer;
+    function InternalGetNodeData(Node: PVirtualNode): PNodeData;
     procedure InternalInitializeDBTree;
     procedure UpdateVisibleDBTree(AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
     procedure UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
@@ -2919,10 +2919,10 @@ begin
 end;
 
 
-function TCustomVirtualDBGrid.InternalGetNodeData(Node: PVirtualNode): Pointer;
+function TCustomVirtualDBGrid.InternalGetNodeData(Node: PVirtualNode): PNodeData;
 begin
   if (Node <> nil) and (Node <> RootNode) then
-    Result := PByte(Node) + FInternalDataOffset
+    Result := PNodeData(PByte(Node) + FInternalDataOffset)
   else
     Result := nil;
 end;
@@ -3046,7 +3046,7 @@ begin
       // Initialize node to ensure RecNo is set
       if not (vsInitialized in Run^.States) then
         InitNode(Run);
-      NodeRecNo := PNodeData(InternalGetNodeData(Run))^.RecNo;
+      NodeRecNo := InternalGetNodeData(Run)^.RecNo;
       // If we dont want always update data, then we must test that
       // if node has data created, and if not than we can load data from database
       // to node's data
@@ -3071,7 +3071,7 @@ begin
     end;
     if (LinkedDataSet.RecNo <> OldRecNo) then
       GotoRecNo(OldRecNo);
-    if (FocusedNode <> nil) and (OldRecNo <> PNodeData(InternalGetNodeData(FocusedNode))^.RecNo) then
+    if (FocusedNode <> nil) and (OldRecNo <> InternalGetNodeData(FocusedNode)^.RecNo) then
       SetFocusToNode(FindNodeByRecNo(OldRecNo), False);
 
   finally
