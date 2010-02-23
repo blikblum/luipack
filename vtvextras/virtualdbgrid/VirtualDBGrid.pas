@@ -2031,8 +2031,6 @@ begin
            ColumnPosition := IfThen(IndicatorColumn <> nil, 1, 0);
            FocusedColumn := Header.Columns.ColumnFromPosition(ColumnPosition);
          end;
-         if fRecordCount > 0 then
-           SetFocusToNode(GetFirst);
        end
        else
        begin
@@ -2046,18 +2044,26 @@ begin
      end;
 
      if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+     begin
+       //todo: refactor to call UpdateDBTree earlier
+       if (DBOptions.SortingType = stBuildIn) and (Header.SortColumn <> NoColumn) then
        begin
-          //todo: refactor to call UpdateDBTree earlier
-          UpdateVisibleDBTree(True);
-          //todo: see if is doable implementing auto sort after dataset changes
-          //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
-          //  DoSortColumn(Header.SortColumn);
-       end;
+         // The sort feature requires that all data be loaded
+         UpdateAllRecords(False);
+         SortTree(Header.SortColumn, Header.SortDirection);
+       end
+       else
+         UpdateVisibleDBTree(True);
 
+       if fRecordCount > 0 then
+         SetFocusToNode(FindNodeByRecNo(1), False);
+     end;
   end;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkChanged;
+var
+  DoSort: Boolean;
 begin
   // we can reflect changes in database(like insert or delete record(s))
   // only if DBOptions.RecordCountType = rcFromDataset is set and we know
@@ -2070,7 +2076,8 @@ begin
     if Assigned(LinkedDataSet) and LinkedDataSet.Active then
     begin
        {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataLinkChanged');{$endif}
-       //Skip GetRecordCount and retieve RecordCount directly from dataset
+       DoSort := (DBOptions.SortingType = stBuildIn) and (Header.SortColumn <> NoColumn);
+       //Skip GetRecordCount and retrieve RecordCount directly from dataset
        //since we already know that RecordCountType is rcFromDataset
        fRecordCount := LinkedDataSet.RecordCount;
        // If old record count(fLastRecordCount) <> to new record count
@@ -2080,6 +2087,11 @@ begin
        begin
           ReInitializeDBGrid;
           fLastRecordCount := fRecordCount;
+          if DoSort then
+          begin
+            UpdateAllRecords;
+            SortTree(Header.SortColumn, Header.SortDirection);
+          end;
        end
        else
        begin
@@ -2087,12 +2099,11 @@ begin
          if LinkedDataset.State <> dsInsert then
          begin
            UpdateAllRecords;
+           if DoSort then
+             SortTree(Header.SortColumn, Header.SortDirection);
            SetFocusToActualRecNo;
          end;
        end;
-       //todo: see if is doable implementing auto sort after dataset changes
-       //if (DBOptions.SortingType <> stNone) and not (LinkedDataset.State in dsEditModes) then
-       //  DoSortColumn(Header.SortColumn);
        {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DataLinkChanged');{$endif}
     end;
   end;
@@ -2106,6 +2117,14 @@ begin
      IncLoadingDataFlag;
      try
        UpdateCurrentRecord;
+       //check if the changed field is the sort field and do the sort if so
+       if (Field <> nil) and (DBOptions.SortingType = stBuildIn)
+         and (Header.SortColumn <> NoColumn)
+         and (TVirtualDBTreeColumns(Header.Columns).IndexOf(Field.FieldName, ctDBField) = Header.SortColumn) then
+       begin
+         UpdateAllRecords(False);
+         SortTree(Header.SortColumn, Header.SortDirection);
+       end;
      finally
        DecLoadingDataFlag;
      end;
