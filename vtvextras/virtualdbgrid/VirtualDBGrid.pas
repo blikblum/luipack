@@ -2117,7 +2117,9 @@ begin
      IncLoadingDataFlag;
      try
        UpdateCurrentRecord;
+       //disable the sort here because it'll be sorted later in response to post
        //check if the changed field is the sort field and do the sort if so
+       {
        if (Field <> nil) and (DBOptions.SortingType = stBuildIn)
          and (Header.SortColumn <> NoColumn)
          and (TVirtualDBTreeColumns(Header.Columns).IndexOf(Field.FieldName, ctDBField) = Header.SortColumn) then
@@ -2125,6 +2127,7 @@ begin
          UpdateAllRecords(False);
          SortTree(Header.SortColumn, Header.SortDirection);
        end;
+       }
      finally
        DecLoadingDataFlag;
      end;
