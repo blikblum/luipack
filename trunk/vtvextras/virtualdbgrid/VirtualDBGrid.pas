@@ -3033,15 +3033,15 @@ begin
     
   IncLoadingDataFlag;
   try
+    LinkedDataSet.CheckBrowseMode;
+    LinkedDataSet.DisableControls;
     DatasetRecNo := LinkedDataSet.RecNo;
     OldRecNo := DatasetRecNo;
-
-    LinkedDataSet.DisableControls;
 
     DoLoad := AlwaysUpdate;
     DoCreateData := AlwaysUpdate;
     Count := 0;
-    while Assigned(Run) and not LinkedDataSet.Eof and (Count <= NodeCount) do
+    while Assigned(Run) and (Count <= NodeCount) do
     begin
       // Initialize node to ensure RecNo is set
       if not (vsInitialized in Run^.States) then
@@ -3066,12 +3066,13 @@ begin
         LoadRecordData(Run, DoCreateData); // load data from database
       end;
 
-
       Inc(Count);
       Run := GetNextSibling(Run);
     end;
     if (LinkedDataSet.RecNo <> OldRecNo) then
       GotoRecNo(OldRecNo);
+    if (FocusedNode <> nil) and (OldRecNo <> PNodeData(InternalGetNodeData(FocusedNode))^.RecNo) then
+      SetFocusToNode(FindNodeByRecNo(OldRecNo), False);
 
   finally
     LinkedDataSet.EnableControls;
