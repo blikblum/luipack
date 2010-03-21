@@ -34,13 +34,13 @@ unit SearchEdit;
 
 
 {$mode objfpc}{$H+}
-{.$define DEBUG_SEARCHEDIT}
+{$define DEBUG_SEARCHEDIT}
 
 interface
 
 uses
   Forms, Classes, SysUtils, Controls, StdCtrls, LMessages, LCLProc, Graphics, ExtCtrls
-  {$ifdef DEBUG_SEARCHEDIT}, sharedlogger {$endif};
+  {$ifdef DEBUG_SEARCHEDIT}, sharedlogger, ipcchannel {$endif};
 
 type
 
@@ -223,8 +223,9 @@ begin
   {$ifdef DEBUG_SEARCHEDIT}
   Logger.SendCallStack('RealSetText');
   {$endif}
-  if not FIsEmpty then
-    inherited RealSetText(Value);
+  if FIsEmpty then
+    Font.Color := clWindowText;
+  inherited RealSetText(Value);
 end;
 
 procedure TSearchEdit.TextChanged;
@@ -284,6 +285,12 @@ begin
   if (FOnExecute <> nil) and (not FIsEmpty or (seoExecuteEmpty in FOptions)) then
     FOnExecute(Self);
 end;
+
+initialization
+  {$ifdef DEBUG_SEARCHEDIT}
+  if Logger.Channels.Count = 0 then
+    Logger.Channels.Add(TIPCChannel.Create);
+  {$endif}
 
 end.
 
