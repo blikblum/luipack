@@ -129,7 +129,7 @@ begin
     FOnNewValue(Self, S, FValidDate);
   if FValidDate then
   begin
-    FDataLink.Field.Text := S;
+    FDataLink.Field.AsDateTime := D;
     Color := clWindow;
   end
   else
@@ -164,7 +164,7 @@ end;
 
 procedure TDBDateMaskEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
-  PushMask(Text);
+  DisableMask(Text);
   //reset FDatalink to allow the user exit the control after the first message
   //maybe this can be removed when Pop/PushMask is incorporated in TDBEdit
   if not FValidDate and FErrorHandled then
@@ -176,7 +176,7 @@ procedure TDBDateMaskEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
   if not FValidDate and not FHandlingError then
     FErrorHandled := False;
-  PopMask(Text);
+  RestoreMask(Text);
   inherited;
 end;
 
@@ -188,7 +188,7 @@ begin
   //post pone mask build the maximum
   BuildEditMask;
   //Setting EditMask clears the text. Update again here and reset the mask
-  PushMask(OldText);
+  DisableMask(OldText);
   inherited CreateWnd;
 end;
 
