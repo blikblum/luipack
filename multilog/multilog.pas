@@ -159,6 +159,8 @@ type
     procedure Send(Classes: TDebugClasses; const AText: String; AValue: Double);overload;
     procedure Send(const AText: String; AValue: Int64); overload; {$ifdef fpc}inline;{$endif}
     procedure Send(Classes: TDebugClasses; const AText: String; AValue: Int64);overload;
+    procedure Send(const AText: String; AValue: QWord); overload; {$ifdef fpc}inline;{$endif}
+    procedure Send(Classes: TDebugClasses; const AText: String; AValue: QWord);overload;
     procedure Send(const AText: String; AValue: Boolean); overload; {$ifdef fpc}inline;{$endif}
     procedure Send(Classes: TDebugClasses; const AText: String; AValue: Boolean);overload;
     procedure Send(const AText: String; const ARect: TRect); overload; {$ifdef fpc}inline;{$endif}
@@ -509,6 +511,18 @@ begin
   SendStream(ltValue,AText+' = '+IntToStr(AValue),nil);
 end;
 
+procedure TLogger.Send(const AText: String; AValue: QWord);
+begin
+  Send(DefaultClasses,AText,AValue);
+end;
+
+procedure TLogger.Send(Classes: TDebugClasses; const AText: String; AValue: QWord
+  );
+begin
+  if Classes * ActiveClasses = [] then Exit;
+  SendStream(ltValue,AText+' = '+IntToStr(AValue),nil);
+end;
+
 procedure TLogger.Send(const AText: String; AValue: Boolean);
 begin
   Send(DefaultClasses, AText, AValue);
@@ -802,7 +816,8 @@ end;
 
 procedure TLogger.AddCheckPoint(Classes: TDebugClasses; const CheckName: String);
 var
-  i,j: Integer;
+  i: Integer;
+  j: PtrInt;
 begin
   if Classes * ActiveClasses = [] then Exit;
   i:=FCheckList.IndexOf(CheckName);
@@ -828,7 +843,8 @@ end;
 procedure TLogger.IncCounter(Classes: TDebugClasses; const CounterName: String
   );
 var
-  i, j: Integer;
+  i: Integer;
+  j: PtrInt;
 begin
   if Classes * ActiveClasses = [] then Exit;
   i := FCounterList.IndexOf(CounterName);
@@ -853,7 +869,8 @@ end;
 procedure TLogger.DecCounter(Classes: TDebugClasses; const CounterName: String
   );
 var
-  i, j: Integer;
+  i: Integer;
+  j: PtrInt;
 begin
   if Classes * ActiveClasses = [] then Exit;
   i := FCounterList.IndexOf(CounterName);
