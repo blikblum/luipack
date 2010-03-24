@@ -114,9 +114,8 @@ end;
 procedure TFileChannel.WriteComponent(AStream: TStream);
 var
   TextStream: TStringStream;
-  S:String;
 begin
-  TextStream:=TStringStream.Create(S);
+  TextStream:=TStringStream.Create('');
   AStream.Seek(0,soFromBeginning);
   ObjectBinaryToText(AStream,TextStream);
   //todo: better handling of format
