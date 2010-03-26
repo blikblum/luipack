@@ -34,7 +34,7 @@ unit SearchEdit;
 
 
 {$mode objfpc}{$H+}
-{$define DEBUG_SEARCHEDIT}
+{.$define DEBUG_SEARCHEDIT}
 
 interface
 
@@ -293,4 +293,4 @@ initialization
   {$endif}
 
 end.
-
+
