@@ -1,11 +1,13 @@
 unit DateEdit;
 
 {$mode objfpc}{$H+}
+{.Define DEBUG_DATEEDIT}
 
 interface
 
 uses
-  Classes, SysUtils, DbCtrls, LMessages, Graphics, Dialogs;
+  Classes, SysUtils, DbCtrls, LMessages, Graphics, Dialogs
+  {$ifdef DEBUG_DATEEDIT}, sharedlogger {$endif};
 
 type
 
@@ -136,8 +138,14 @@ begin
   begin
     FHandlingError := True;
     FErrorHandled := True;
+    {$ifdef DEBUG_DATEEDIT}
+    Logger.Send('Before ShowMessage');
+    {$endif}
     if FErrorMessage <> '' then
       ShowMessage(AnsiReplaceText(FErrorMessage, '$(NewValue)', S));
+    {$ifdef DEBUG_DATEEDIT}
+    Logger.Send('After ShowMessage');
+    {$endif}
     case FRecoverMode of
       rmNone: Color := FErrorColor;
       rmClear:
@@ -164,19 +172,23 @@ end;
 
 procedure TDBDateMaskEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
-  DisableMask(Text);
-  //reset FDatalink to allow the user exit the control after the first message
-  //maybe this can be removed when Pop/PushMask is incorporated in TDBEdit
-  if not FValidDate and FErrorHandled then
-    ResetDataLink;
+  {$ifdef DEBUG_DATEEDIT}
+  Logger.Send('KillFocus - FHandlingError: ' + BoolToStr(FHandlingError, True));
+  {$endif}
+  //todo: rework WMKillFocus to allow keep the not accepted value
+  //if not FValidDate and FErrorHandled then
+  //  ResetDataLink;
   inherited;
 end;
 
 procedure TDBDateMaskEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
-  if not FValidDate and not FHandlingError then
-    FErrorHandled := False;
-  RestoreMask(Text);
+  {$ifdef DEBUG_DATEEDIT}
+  Logger.Send('SetFocus');
+  {$endif}
+  //todo: rework WMSetFocus to allow keep the not accepted value
+  //if not FValidDate and not FHandlingError then
+  //  FErrorHandled := False;
   inherited;
 end;
 
