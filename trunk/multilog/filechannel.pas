@@ -27,6 +27,10 @@ uses
 
 type
 
+  TFileChannelOption = (fcoShowHeader, fcoShowPrefix, fcoShowTime);
+
+  TFileChannelOptions = set of TFileChannelOption;
+
   { TFileChannel }
 
   TFileChannel = class (TLogChannel)
@@ -38,14 +42,12 @@ type
     FShowHeader: Boolean;
     FShowTime: Boolean;
     FShowPrefix: Boolean;
-    FShowStrings: Boolean;
     procedure SetShowTime(const AValue: Boolean);
     procedure UpdateIdentation;
     procedure WriteStrings(AStream: TStream);
     procedure WriteComponent(AStream: TStream);
   public
-    constructor Create (const AFileName: String);
-    destructor Destroy; override;
+    constructor Create (const AFileName: String; ChannelOptions: TFileChannelOptions = [fcoShowHeader, fcoShowTime]);
     procedure Clear; override;
     procedure Deliver(const AMsg: TLogMessage);override;
     procedure Init; override;
@@ -123,18 +125,13 @@ begin
   TextStream.Destroy;
 end;
 
-constructor TFileChannel.Create(const AFileName: String);
+constructor TFileChannel.Create(const AFileName: String; ChannelOptions: TFileChannelOptions);
 begin
-  FShowPrefix := True;
-  FShowTime := True;
-  FShowStrings := True;
+  FShowPrefix := fcoShowPrefix in ChannelOptions;
+  FShowTime := fcoShowTime in ChannelOptions;
+  FShowHeader := fcoShowHeader in ChannelOptions;
   Active := True;
   FFileName := AFileName;
-end;
-
-destructor TFileChannel.Destroy;
-begin
-  //remove it?
 end;
 
 procedure TFileChannel.Clear;
@@ -155,7 +152,7 @@ begin
   if FShowPrefix then
     Write(FFileHandle,LogPrefixes[AMsg.MsgType]+': ');
   Writeln(FFileHandle,AMsg.MsgText);
-  if FShowStrings and (AMsg.Data <> nil) then
+  if AMsg.Data <> nil then
   begin
     case AMsg.MsgType of
       ltStrings,ltCallStack,ltHeapInfo,ltException:WriteStrings(AMsg.Data);
