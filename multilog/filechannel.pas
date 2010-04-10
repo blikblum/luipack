@@ -141,28 +141,30 @@ end;
 
 procedure TFileChannel.Deliver(const AMsg: TLogMessage);
 begin
-  Append(FFileHandle);
   //Exit method identation must be set before
-  if AMsg.MsgType = ltExitMethod then
-    if FRelativeIdent >= 2 then
-      Dec(FRelativeIdent,2);
-  if FShowTime then
-    Write(FFileHandle,FormatDateTime('hh:nn:ss:zzz',AMsg.MsgTime)+' ');
-  Write(FFileHandle,Space(FRelativeIdent));
-  if FShowPrefix then
-    Write(FFileHandle,LogPrefixes[AMsg.MsgType]+': ');
-  Writeln(FFileHandle,AMsg.MsgText);
-  if AMsg.Data <> nil then
-  begin
-    case AMsg.MsgType of
-      ltStrings,ltCallStack,ltHeapInfo,ltException:WriteStrings(AMsg.Data);
-      ltObject:WriteComponent(AMsg.Data);
+  if (AMsg.MsgType = ltExitMethod) and (FRelativeIdent >= 2) then
+    Dec(FRelativeIdent, 2);
+  Append(FFileHandle);
+  try
+    if FShowTime then
+      Write(FFileHandle, FormatDateTime('hh:nn:ss:zzz', AMsg.MsgTime) + ' ');
+    Write(FFileHandle, Space(FRelativeIdent));
+    if FShowPrefix then
+      Write(FFileHandle, LogPrefixes[AMsg.MsgType] + ': ');
+    Writeln(FFileHandle, AMsg.MsgText);
+    if AMsg.Data <> nil then
+    begin
+      case AMsg.MsgType of
+        ltStrings, ltCallStack, ltHeapInfo, ltException: WriteStrings(AMsg.Data);
+        ltObject: WriteComponent(AMsg.Data);
+      end;
     end;
+  finally
+    Close(FFileHandle);
+    //Update enter method identation
+    if AMsg.MsgType = ltEnterMethod then
+      Inc(FRelativeIdent, 2);
   end;
-  Close(FFileHandle);
-  //Update enter method identation
-  if AMsg.MsgType = ltEnterMethod then
-    Inc(FRelativeIdent,2);
 end;
 
 procedure TFileChannel.Init;
