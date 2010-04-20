@@ -691,6 +691,7 @@ type
   public
     property Canvas;
   published
+    property BorderSpacing;
     // New events by TVirtualDBGrid
     property DBOptions; 
     property OnGetRecordCount;
