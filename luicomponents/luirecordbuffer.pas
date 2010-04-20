@@ -15,6 +15,8 @@ type
 
   TGetPrimaryKeyEvent = procedure(Sender: TObject; out NewKey: Integer) of object;
 
+  TIncludeFieldEvent = procedure(Sender: TObject; const FieldName: String; var DoInclude: Boolean) of object;
+
   { TLuiRecordBuffer }
 
   TLuiRecordBuffer = class(TSqlite3Dataset)
@@ -27,6 +29,7 @@ type
     FBufferOptions: TLuiRecordBufferOptions;
     FOnClear: TNotifyEvent;
     FOnGetPrimaryKey: TGetPrimaryKeyEvent;
+    FOnIncludeField: TIncludeFieldEvent;
     FPrimaryKeyField: String;
     FSourceDataSet: TDataSet;
     procedure AddRecord;
@@ -40,6 +43,7 @@ type
     procedure DoBeforeSave; virtual;
     procedure DoClear; virtual;
     function DoGetPrimaryKey: Integer; virtual;
+    function DoIncludeField(const FieldName: String): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Clear;
@@ -55,6 +59,7 @@ type
     property BeforeSave: TNotifyEvent read FBeforeSave write FBeforeSave;
     property OnClear: TNotifyEvent read FOnClear write FOnClear;
     property OnGetPrimaryKey: TGetPrimaryKeyEvent read FOnGetPrimaryKey write FOnGetPrimaryKey;
+    property OnIncludeField: TIncludeFieldEvent read FOnIncludeField write FOnIncludeField;
   end;
 
 implementation
@@ -115,6 +120,13 @@ begin
   end
   else
     Result := SourceDataset.FieldByName(FPrimaryKeyField).AsInteger;
+end;
+
+function TLuiRecordBuffer.DoIncludeField(const FieldName: String): Boolean;
+begin
+  Result := True;
+  if Assigned(FOnIncludeField) then
+    FOnIncludeField(Self, FieldName, Result);
 end;
 
 constructor TLuiRecordBuffer.Create(AOwner: TComponent);
@@ -225,23 +237,26 @@ end;
 procedure TLuiRecordBuffer.InitTable;
 var
   i: Integer;
+  SrcDef: TFieldDef;
 begin
   FPrimaryKeyField := PrimaryKey;
   Close;
   FieldDefs.Clear;
   for i := 0 to FSourceDataset.FieldDefs.Count - 1 do
-    with FSourceDataset.FieldDefs[i] do
+  begin
+    SrcDef := FSourceDataset.FieldDefs[i];
+    if DoIncludeField(SrcDef.Name) then
     begin
-      if DataType = ftAutoInc then
+      if SrcDef.DataType = ftAutoInc then
       begin
         if FPrimaryKeyField = '' then
-          FPrimaryKeyField := Name;
-        FieldDefs.Add(Name, ftInteger, Size, Required)
+          FPrimaryKeyField := SrcDef.Name;
+        FieldDefs.Add(SrcDef.Name, ftInteger, SrcDef.Size, SrcDef.Required)
       end
       else
-        FieldDefs.Add(Name, DataType, Size, Required);
+        FieldDefs.Add(SrcDef.Name, SrcDef.DataType, SrcDef.Size, SrcDef.Required);
     end;
-
+  end;
   CreateTable;
   Open;
 end;
