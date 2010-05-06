@@ -13,6 +13,7 @@ type
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    SetSearchEditTextButton: TButton;
     CheckUnderline: TCheckBox;
     CheckBold: TCheckBox;
     CheckPopupOnMouseUp: TCheckBox;
@@ -84,6 +85,7 @@ type
     procedure MenuButton1Click(Sender: TObject);
     procedure MenuItem15Click(Sender: TObject);
     procedure SearchEdit1Execute(Sender: TObject);
+    procedure SetSearchEditTextButtonClick(Sender: TObject);
     procedure ToggleLabel2Change(Sender: TObject);
   private
     { private declarations }
@@ -198,6 +200,11 @@ end;
 procedure TfrmMain.SearchEdit1Execute(Sender: TObject);
 begin
   MemoSearchLog.Lines.Add('Search Executed - Text: "' + SearchEdit1.Text + '"');
+end;
+
+procedure TfrmMain.SetSearchEditTextButtonClick(Sender: TObject);
+begin
+  SearchEdit1.Text := 'Text Set Through Code';
 end;
 
 initialization
