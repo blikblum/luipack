@@ -191,7 +191,6 @@ end;
 procedure TMenuButton.ShowMenu;
 var
   P: TPoint;
-  SavedBidiMode: TBiDiMode;
 begin
   //Logger.SendCallStack('ShowMenu');
   if FMenu = nil then
@@ -199,14 +198,8 @@ begin
   //necessary to avoid Click eat when hitting multiple menubuttons successively
   //This will unlock update of previous clicked menubutton
   Application.ProcessMessages;
-  //show the menu right aligned with the control
-  P := ClientToScreen(Point(Width, Height));
-  if (FArrowButton <> nil) and FArrowButton.Visible then
-    Inc(P.X, FArrowButton.Width);
-  SavedBidiMode := FMenu.BidiMode;
-  FMenu.BidiMode := bdRightToLeft;
+  P := ClientToScreen(Point(0,Height));
   FMenu.PopUp(P.X, P.Y);
-  FMenu.BidiMode := SavedBidiMode;
 end;
 
 procedure TMenuButton.UpdateArrowPosition;
