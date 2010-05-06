@@ -13,35 +13,98 @@ object MainForm: TMainForm
     Height = 204
     Top = 0
     Width = 481
-    ActivePage = DBDateMaskEditTab
+    ActivePage = DBValidateEditTab
     Align = alTop
     TabIndex = 0
     TabOrder = 0
-    object DBDateMaskEditTab: TTabSheet
-      Caption = 'DBDateMaskEdit'
+    object DBValidateEditTab: TTabSheet
+      Caption = 'DBValidateEdit'
       ClientHeight = 178
       ClientWidth = 473
-      object DBDateMaskEdit1: TDBDateMaskEdit
-        Left = 4
+      object DBValidateEdit1: TDBValidateEdit
+        Left = 5
         Height = 21
         Top = 18
-        Width = 116
-        DataField = 'DateField'
+        Width = 120
+        DataField = 'StrField'
         DataSource = Datasource1
         CharCase = ecNormal
         MaxLength = 0
         TabOrder = 0
-        ErrorColor = clYellow
-        ErrorMessage = '"$(NewValue)" is not a valid date'
+        InvalidValueColor = clRed
+        InvalidValueMessage = 'Length must be < 10'
+        OnValidateData = DBValidateEdit1ValidateData
       end
+      object Label4: TLabel
+        Left = 5
+        Height = 14
+        Top = 2
+        Width = 28
+        Caption = 'Name'
+        ParentColor = False
+      end
+      object ValidateEditNullAsErrorBox: TCheckBox
+        Left = 140
+        Height = 17
+        Top = 18
+        Width = 142
+        Caption = 'Handle Null Value As Error'
+        OnChange = ValidateEditNullAsErrorBoxChange
+        TabOrder = 1
+      end
+      object Label5: TLabel
+        Left = 141
+        Height = 14
+        Top = 41
+        Width = 70
+        Caption = 'Recover Mode'
+        ParentColor = False
+      end
+      object ValidateEditRecoverModeComboBox: TComboBox
+        Left = 140
+        Height = 21
+        Top = 57
+        Width = 153
+        ItemHeight = 13
+        ItemIndex = 0
+        Items.Strings = (
+          'None'
+          'Clear'
+          'Restore'
+        )
+        Style = csDropDownList
+        TabOrder = 2
+        Text = 'None'
+      end
+      object Label6: TLabel
+        Left = 141
+        Height = 14
+        Top = 90
+        Width = 78
+        Caption = 'Invalid Message'
+        ParentColor = False
+      end
+      object ValidateEditErrorMessageEdit: TEdit
+        Left = 140
+        Height = 21
+        Top = 106
+        Width = 295
+        OnChange = ValidateEditErrorMessageEditChange
+        TabOrder = 3
+      end
+    end
+    object DBDateMaskEditTab: TTabSheet
+      Caption = 'DBDateMaskEdit'
+      ClientHeight = 178
+      ClientWidth = 473
       object DateEditNullAsErrorBox: TCheckBox
         Left = 163
         Height = 17
         Top = 18
-        Width = 144
+        Width = 142
         Caption = 'Handle Null Value As Error'
         OnChange = DateEditNullAsErrorBoxChange
-        TabOrder = 1
+        TabOrder = 0
       end
       object DateEditRecoverModeComboBox: TComboBox
         Left = 163
@@ -57,7 +120,7 @@ object MainForm: TMainForm
         )
         OnChange = DateEditRecoverModeComboBoxChange
         Style = csDropDownList
-        TabOrder = 2
+        TabOrder = 1
         Text = 'None'
       end
       object Label1: TLabel
@@ -74,14 +137,35 @@ object MainForm: TMainForm
         Top = 106
         Width = 295
         OnEditingDone = DateEditErrorMessageEditEditingDone
-        TabOrder = 3
+        TabOrder = 2
       end
       object Label2: TLabel
         Left = 164
         Height = 14
         Top = 90
-        Width = 70
-        Caption = 'Error Message'
+        Width = 78
+        Caption = 'Invalid Message'
+        ParentColor = False
+      end
+      object DBDateMaskEdit1: TDBDateMaskEdit
+        Left = 4
+        Height = 21
+        Top = 18
+        Width = 104
+        DataField = 'DateField'
+        DataSource = Datasource1
+        CharCase = ecNormal
+        MaxLength = 0
+        TabOrder = 3
+        InvalidValueColor = clRed
+        InvalidValueMessage = '$(NewValue) is not a valid date'
+      end
+      object Label3: TLabel
+        Left = 4
+        Height = 14
+        Top = 2
+        Width = 24
+        Caption = 'Date'
         ParentColor = False
       end
     end
@@ -113,6 +197,7 @@ object MainForm: TMainForm
     Top = 208
     Width = 481
     Align = alClient
+    Columns = <>
     DataSource = Datasource1
     TabOrder = 3
   end

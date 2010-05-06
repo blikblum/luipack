@@ -41,8 +41,8 @@ TSearchEdit
         <UnitName Value="SearchEdit"/>
       </Item4>
       <Item5>
-        <Filename Value="dateedit.pas"/>
-        <UnitName Value="dateedit"/>
+        <Filename Value="validateedit.pas"/>
+        <UnitName Value="validateedit"/>
       </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>

@@ -7,7 +7,9 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, fMain, luicontrols, LResources, DBFLaz;
+  Forms, fMain;
+
+{$R luicontrols_data_aware_demo.res}
 
 begin
   Application.Initialize;
