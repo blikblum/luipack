@@ -10,6 +10,8 @@ uses
   Forms
   { add your units here }, fmain;
 
+{$R luicontrols_demo.res}
+
 begin
   Application.Initialize;
   Application.CreateForm(TfrmMain, frmMain);
