@@ -1,0 +1,44 @@
+object MainForm: TMainForm
+  Left = 360
+  Height = 291
+  Top = 330
+  Width = 388
+  Caption = 'DB Dialogs Demo'
+  ClientHeight = 291
+  ClientWidth = 388
+  OnCreate = FormCreate
+  LCLVersion = '0.9.29'
+  object EditDatasetButton: TButton
+    Left = 288
+    Height = 41
+    Top = 8
+    Width = 96
+    Caption = 'Edit Dataset'
+    OnClick = EditDatasetButtonClick
+    TabOrder = 0
+  end
+  object DBGrid1: TDBGrid
+    Left = 8
+    Height = 272
+    Top = 8
+    Width = 272
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Columns = <>
+    DataSource = Datasource1
+    Options = [dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+    TabOrder = 1
+  end
+  object Datasource1: TDatasource
+    DataSet = Sqlite3Dataset1
+    left = 293
+    top = 62
+  end
+  object Sqlite3Dataset1: TSqlite3Dataset
+    FileName = 'data.db'
+    SaveOnClose = True
+    TableName = 'Test'
+    FieldDefs = <>
+    left = 293
+    top = 128
+  end
+end

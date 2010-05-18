@@ -1,0 +1,82 @@
+object EditDataSourceForm: TEditDataSourceForm
+  Left = 478
+  Height = 201
+  Top = 334
+  Width = 322
+  AutoSize = True
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'EditDataSourceForm'
+  ClientHeight = 201
+  ClientWidth = 322
+  OnCreate = FormCreate
+  Position = poOwnerFormCenter
+  LCLVersion = '0.9.29'
+  object Grid: TVirtualDBGrid
+    Left = 6
+    Height = 184
+    Top = 6
+    Width = 190
+    EditDelay = 200
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    Header.Options = [hoColumnResize, hoDrag, hoHotTrack, hoShowHint, hoShowSortGlyphs, hoVisible]
+    TabOrder = 0
+    OnEdited = GridEdited
+    BorderSpacing.Around = 4
+    DBOptions.DataSource = DataSource1
+    DBOptions.OddRowColor = 16119285
+    DBOptions.EvenRowColor = clWindow
+    DBOptions.SortColumnBgColor = 14745599
+    DBOptions.AdvOptions = [aoEditable, aoStrippedRows, aoShowHorzLines, aoShowVertLines, aoHighlightSortColumn, aoHourGlassCursor, aoSortDBFieldColumns, aoEditDBFieldColumns, aoSortCalculatedColumns, aoEditOnDblClick]
+  end
+  object AddButton: TBitBtn
+    AnchorSideLeft.Control = Grid
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Grid
+    Left = 202
+    Height = 30
+    Top = 6
+    Width = 113
+    BorderSpacing.Left = 6
+    Caption = 'Add'
+    Kind = bkOK
+    OnClick = AddButtonClick
+    TabOrder = 1
+  end
+  object DeleteButton: TBitBtn
+    AnchorSideLeft.Control = AddButton
+    AnchorSideTop.Control = AddButton
+    AnchorSideTop.Side = asrBottom
+    Left = 202
+    Height = 30
+    Top = 42
+    Width = 113
+    BorderSpacing.Top = 6
+    Cancel = True
+    Caption = 'Remove'
+    Kind = bkCancel
+    OnClick = DeleteButtonClick
+    TabOrder = 2
+  end
+  object CloseButton: TBitBtn
+    AnchorSideLeft.Control = DeleteButton
+    AnchorSideBottom.Control = Grid
+    AnchorSideBottom.Side = asrBottom
+    Left = 202
+    Height = 30
+    Top = 160
+    Width = 113
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Right = 4
+    Caption = '&Close'
+    Kind = bkClose
+    TabOrder = 3
+  end
+  object DataSource1: TDatasource
+    left = 232
+    top = 96
+  end
+end
