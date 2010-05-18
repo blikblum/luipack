@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <PathDelim Value="\"/>
+    <Name Value="luidialogs_package"/>
+    <CompilerOptions>
+      <Version Value="8"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="forms\;units\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="6">
+      <Item1>
+        <Filename Value="forms\fexportdataset.pas"/>
+        <UnitName Value="fExportDataset"/>
+      </Item1>
+      <Item2>
+        <Filename Value="luidialogs.pas"/>
+        <UnitName Value="LuiDialogs"/>
+      </Item2>
+      <Item3>
+        <Filename Value="units\spreadsheetexport.pas"/>
+        <UnitName Value="SpreadsheetExport"/>
+      </Item3>
+      <Item4>
+        <Filename Value="register_luidialogs.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_luidialogs"/>
+      </Item4>
+      <Item5>
+        <Filename Value="forms\fframeeditor.lfm"/>
+        <Type Value="LFM"/>
+      </Item5>
+      <Item6>
+        <Filename Value="forms\fframeeditor.pas"/>
+        <UnitName Value="fFrameEditor"/>
+      </Item6>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="6">
+      <Item1>
+        <PackageName Value="luicomponents"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="laz_fpspreadsheet"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="luicairo_extras"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="virtualdbgrid_package"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item6>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
