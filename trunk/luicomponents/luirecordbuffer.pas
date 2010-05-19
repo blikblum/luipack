@@ -172,9 +172,9 @@ begin
   else
     SourceDataset.Edit;
   DoBeforeSave;
-  for i := 0 to SourceDataset.FieldDefs.Count - 1 do
+  for i := 0 to FieldDefs.Count - 1 do
   begin
-    FieldName := SourceDataset.FieldDefs[i].Name;
+    FieldName := FieldDefs[i].Name;
     AssignFieldValue(SourceDataSet.FieldByName(FieldName), FieldByName(FieldName));
   end;
   DoAfterSave;
@@ -189,9 +189,9 @@ begin
   Append;
   if not FAppendMode then
   begin
-    for i := 0 to SourceDataset.FieldDefs.Count - 1 do
+    for i := 0 to FieldDefs.Count - 1 do
     begin
-      FieldName := SourceDataset.FieldDefs[i].Name;
+      FieldName := FieldDefs[i].Name;
       AssignFieldValue(FieldByName(FieldName), SourceDataset.FieldByName(FieldName));
     end;
   end;
