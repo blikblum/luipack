@@ -70,12 +70,14 @@ begin
   Form := FormClass.Create(Owner);
   try
     SetObjectProperties(Form, FormProperties);
+    Form.Perform(CM_INIT, 0, 0);
     Result := Form.ShowModal;
   finally
     Form.Destroy;
   end;
 end;
- function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl): TModalResult;
+
+function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl): TModalResult;
 begin
   Result := ShowFrame(FrameClass, Owner, []);
 end;
