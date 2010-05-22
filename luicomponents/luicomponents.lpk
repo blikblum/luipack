@@ -13,7 +13,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="5">
+    <Files Count="8">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -35,6 +35,18 @@
         <Filename Value="luirecordbuffer.pas"/>
         <UnitName Value="luirecordbuffer"/>
       </Item5>
+      <Item6>
+        <Filename Value="luimessages.pas"/>
+        <UnitName Value="luimessages"/>
+      </Item6>
+      <Item7>
+        <Filename Value="luidateutils.pas"/>
+        <UnitName Value="luidateutils"/>
+      </Item7>
+      <Item8>
+        <Filename Value="luirttiutils.pas"/>
+        <UnitName Value="luirttiutils"/>
+      </Item8>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">

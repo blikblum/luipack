@@ -1,4 +1,4 @@
-{ This file was automatically created by Lazarus. do not edit ! 
+{ This file was automatically created by Lazarus. Do not edit!
   This source is only used to compile and install the package.
  }
 
@@ -8,7 +8,7 @@ interface
 
 uses
     LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
-  LuiRecordBuffer, LazarusPackageIntf;
+  LuiRecordBuffer, LuiMessages, LuiDateUtils, LuiRTTIUtils, LazarusPackageIntf;
 
 implementation
 
