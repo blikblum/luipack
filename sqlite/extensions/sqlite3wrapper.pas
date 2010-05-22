@@ -65,25 +65,26 @@ type
 
   { TSqlite3Database }
 
-  TSqlite3Database = class (TComponent)
+  TSqlite3Database = class(TComponent)
   private
     FFileName: String;
     FHandle: Pointer;
     FReturnCode: Integer;
     FQuery: TSqlite3Query;
     FSharedHandle: Boolean;
-    procedure SetFileName (const AValue: String);
-    procedure SetHandle (AValue: Pointer);
+    procedure SetFileName(const AValue: String);
+    procedure SetHandle(AValue: Pointer);
   protected
   public
-    constructor Create (AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Close;
-    function Query (const SQL: String): TSqlite3Query;
+    function Query(const SQL: String): TSqlite3Query;
     procedure Open;
-    procedure ExecSql (const SQL: String);
+    procedure ExecSql(const SQL: String);
+    procedure ExecSql(const SQL: String; Arguments: array of const);
     function LastInsertRowId: Integer;
-    procedure Prepare (const SQL: String; Reader: TSqlite3DataReader);
+    procedure Prepare(const SQL: String; Reader: TSqlite3DataReader);
     function ReturnString: String;
     property FileName: String read FFileName write SetFileName;
     property Handle: Pointer read FHandle write SetHandle;
@@ -205,6 +206,12 @@ begin
   end
   else
     raise Exception.Create('Error in ExecSql: ' + ReturnString);
+end;
+
+procedure TSqlite3Database.ExecSql(const SQL: String;
+  Arguments: array of const);
+begin
+  ExecSql(Format(SQL, Arguments));
 end;
 
 function TSqlite3Database.LastInsertRowId: Integer;
