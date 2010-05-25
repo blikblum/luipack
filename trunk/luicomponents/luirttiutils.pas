@@ -95,7 +95,7 @@ begin
           SetOrdProp(Instance, PropInfo, VarRecToInteger(PropertyValue));
         tkInt64:
           SetInt64Prop(Instance, PropInfo, VarRecToInt64(PropertyValue));
-        tkObject:
+        tkClass:
           SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
         tkBool:
           SetOrdProp(Instance, PropInfo, VarRecToBoolean(PropertyValue));
