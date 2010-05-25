@@ -47,7 +47,7 @@ implementation
 
 uses
   fExportDataset, fFrameEditor,
-  StrUtils, FileUtil, LuiRTTIUtils;
+  StrUtils, FileUtil, LuiRTTIUtils, LuiMessages;
 
 function ShowExportDatasetDlg(AOwner: TWinControl; Dataset: TDataSet): Boolean;
 begin
