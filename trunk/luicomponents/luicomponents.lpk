@@ -13,7 +13,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="8">
+    <Files Count="9">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -47,6 +47,10 @@
         <Filename Value="luirttiutils.pas"/>
         <UnitName Value="luirttiutils"/>
       </Item8>
+      <Item9>
+        <Filename Value="luistrutils.pas"/>
+        <UnitName Value="luistrutils"/>
+      </Item9>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
