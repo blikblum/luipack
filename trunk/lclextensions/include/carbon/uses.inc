@@ -1,1 +1,1 @@
-  InterfaceBase, LCLIntf, Graphics, CarbonInt,
+  InterfaceBase, LCLIntf, Graphics, CarbonInt, CarbonCanvas, Math,

@@ -6,6 +6,12 @@
   Waiting for someone with a Mac to implement it
 }
 
+type
+  TTimerList = class;
+
+var
+  FTimerList: TTimerList;
+  
 function CF_UNICODETEXT: TClipboardFormat;
 begin
   //todo
@@ -62,4 +68,14 @@ begin
       OBJ_PEN: Result := HGDIOBJ(CurrentPen);
     end;
   end;
+end;
+
+function KillTimer(hWnd: THandle; nIDEvent: LongWord):Boolean;
+begin
+  Result := LCLIntf.KillTimer(hWnd, nIDEEvent);
+end;
+
+function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
+begin
+  Result := LCLIntf.SetTimer(hWnd, nIDEvent, uElapse, lpTimerFunc);
 end;
