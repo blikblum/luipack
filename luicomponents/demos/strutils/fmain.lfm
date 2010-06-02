@@ -1,0 +1,83 @@
+object MainForm: TMainForm
+  Left = 382
+  Height = 315
+  Top = 190
+  Width = 477
+  Caption = 'LuiStrUtils Demo'
+  ClientHeight = 315
+  ClientWidth = 477
+  LCLVersion = '0.9.29'
+  object MainPageControl: TPageControl
+    Left = 0
+    Height = 315
+    Top = 0
+    Width = 477
+    ActivePage = CapitalizeTabSheet
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object CapitalizeTabSheet: TTabSheet
+      Caption = 'Capitalize'
+      ClientHeight = 289
+      ClientWidth = 469
+      object CapitalizeTextEdit: TEdit
+        Left = 2
+        Height = 21
+        Top = 26
+        Width = 204
+        TabOrder = 0
+      end
+      object Label1: TLabel
+        Left = 2
+        Height = 14
+        Top = 10
+        Width = 85
+        Caption = 'Text to Capitalize'
+        ParentColor = False
+      end
+      object CapitalizeResultsMemo: TMemo
+        Left = 236
+        Height = 248
+        Top = 26
+        Width = 224
+        TabOrder = 1
+      end
+      object Label2: TLabel
+        Left = 236
+        Height = 14
+        Top = 10
+        Width = 78
+        Caption = 'Capitalized Text'
+        ParentColor = False
+      end
+      object CapitalizeExcludeMemo: TMemo
+        Left = 2
+        Height = 114
+        Top = 82
+        Width = 204
+        TabOrder = 2
+      end
+      object Label3: TLabel
+        Left = 2
+        Height = 14
+        Top = 66
+        Width = 206
+        Caption = 'Words to Exclude (Will NOT be Capitalized)'
+        ParentColor = False
+      end
+      object CapitalizeButton: TButton
+        AnchorSideTop.Control = CapitalizeTextEdit
+        AnchorSideBottom.Control = CapitalizeTextEdit
+        AnchorSideBottom.Side = asrBottom
+        Left = 210
+        Height = 21
+        Top = 26
+        Width = 22
+        Anchors = [akTop, akLeft, akBottom]
+        Caption = '>'
+        OnClick = CapitalizeButtonClick
+        TabOrder = 3
+      end
+    end
+  end
+end
