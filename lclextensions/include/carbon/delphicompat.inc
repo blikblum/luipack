@@ -7,7 +7,8 @@
 }
 
 type
-  TTimerList = class;
+  TTimerList = class
+  end;
 
 var
   FTimerList: TTimerList;
@@ -60,8 +61,8 @@ begin
     case uObjectType of
       OBJ_BITMAP:
         begin
-           if CarbonDC in TCarbonBitmapContext then
-             Result := TCarbonBitmapContext(CarbonDC).Bitmap;
+           if CarbonDC is TCarbonBitmapContext then
+             Result := HGDIOBJ(TCarbonBitmapContext(CarbonDC).Bitmap);
         end;   
       OBJ_BRUSH: Result := HGDIOBJ(CurrentBrush);
       OBJ_FONT: Result := HGDIOBJ(CurrentFont);
@@ -72,10 +73,10 @@ end;
 
 function KillTimer(hWnd: THandle; nIDEvent: LongWord):Boolean;
 begin
-  Result := LCLIntf.KillTimer(hWnd, nIDEEvent);
+  Result := LCLIntf.KillTimer(hWnd, nIDEvent);
 end;
 
 function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
 begin
-  Result := LCLIntf.SetTimer(hWnd, nIDEvent, uElapse, lpTimerFunc);
+  Result := LCLIntf.SetTimer(hWnd, nIDEvent, uElapse, nil{lpTimerFunc});
 end;
