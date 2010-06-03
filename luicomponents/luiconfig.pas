@@ -187,7 +187,7 @@ function ReplacePathMacrosUTF8(const Path: String): String;
 implementation
 
 uses
-  StrUtils, FileUtil, Variants;
+  StrUtils, Variants;
 
 function ReplacePathMacros(const Path: String): String;
 begin
@@ -198,9 +198,8 @@ end;
 
 function ReplacePathMacrosUTF8(const Path: String): String;
 begin
-  //todo: remove FileUtil/LCL dependency when fpc provides a unicode RTL
-  Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', GetAppConfigDirUTF8(False));
-  Result := AnsiReplaceText(Result, '$(EXE_DIR)', ExtractFileDir(ParamStrUTF8(0)));
+  Result := AnsiReplaceText(Path, '$(APP_CONFIG_DIR)', UTF8Encode(GetAppConfigDir(False)));
+  Result := AnsiReplaceText(Result, '$(EXE_DIR)', ExtractFileDir(UTF8Encode(ParamStr(0))));
   Result := AnsiReplaceText(Result, '$(PATH_DELIM)', PathDelim);
 end;
 
