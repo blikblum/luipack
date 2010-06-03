@@ -29,31 +29,31 @@
       </Item3>
       <Item4>
         <Filename Value="luiordereddataset.pas"/>
-        <UnitName Value="luiordereddataset"/>
+        <UnitName Value="LuiOrderedDataset"/>
       </Item4>
       <Item5>
         <Filename Value="luirecordbuffer.pas"/>
-        <UnitName Value="luirecordbuffer"/>
+        <UnitName Value="LuiRecordBuffer"/>
       </Item5>
       <Item6>
         <Filename Value="luimessages.pas"/>
-        <UnitName Value="luimessages"/>
+        <UnitName Value="LuiMessages"/>
       </Item6>
       <Item7>
         <Filename Value="luidateutils.pas"/>
-        <UnitName Value="luidateutils"/>
+        <UnitName Value="LuiDateUtils"/>
       </Item7>
       <Item8>
         <Filename Value="luirttiutils.pas"/>
-        <UnitName Value="luirttiutils"/>
+        <UnitName Value="LuiRTTIUtils"/>
       </Item8>
       <Item9>
         <Filename Value="luistrutils.pas"/>
-        <UnitName Value="luistrutils"/>
+        <UnitName Value="LuiStrUtils"/>
       </Item9>
       <Item10>
         <Filename Value="luimiscutils.pas"/>
-        <UnitName Value="luimiscutils"/>
+        <UnitName Value="LuiMiscUtils"/>
       </Item10>
     </Files>
     <Type Value="RunAndDesignTime"/>
