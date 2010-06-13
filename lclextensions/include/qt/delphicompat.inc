@@ -16,7 +16,6 @@ end;
 {$define HAS_GETBKCOLOR}
 {$define HAS_GETCURRENTOBJECT}
 {$define HAS_INVERTRECT}
-{$define HAS_MAPMODEFUNCTIONS}
 {$define HAS_GETTEXTEXTENTEXPOINT}
 {$define HAS_GETDOUBLECLICKTIME}
 {$define HAS_GETTEXTALIGN}
@@ -100,13 +99,6 @@ begin
     end;
   end;
 end;
-
-{$if lcl_release < 29}
-function GetMapMode(DC: HDC): LongInt;
-begin
-  Result := MM_TEXT;
-end;
-{$endif}
 
 function GetTextAlign(hDC:HDC): LongWord;
 var
@@ -205,79 +197,6 @@ begin
   QtDC.setBrushOrigin(nXorg, nYOrg);
   Result := True;
 end;
-
-{$if lcl_release < 29}
-function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
-var
-  Matrix: QMatrixH;
-  MatrixNew: QMatrixH;
-  dpi: TSize;
-  m11, m22: Double;
-  dx, dy: Double;
-  QtDC: TQtDeviceContext;
-
-  procedure SetM(const Am11, Am22: Double);
-  begin
-    m11 := Am11;
-    m22 := Am22;
-  end;
-
-begin
-  Result := 0;
-  if not QtWidgetSet.IsValidDC(DC) then
-    Exit;
-
-  {$note implement - wait for LCL}
-
-  {$ifdef VerboseQtWinAPI_MISSING_IMPLEMENTATION}
-  WriteLn('***** [WinAPI TQtWidgetSet.SetMapMode] missing implementation ');
-  {$endif}
-
-  QtDC := TQtDeviceContext(DC);
-
-  dpi.cx := QtWidgetSet.GetDeviceCaps(DC, LOGPIXELSX);
-  dpi.cy := QtWidgetSet.GetDeviceCaps(DC, LOGPIXELSY);
-
-  Result := GetMapMode(DC);
-
-  case fnMapMode of
-    MM_TEXT:
-      SetM(1, 1);
-
-    MM_LOMETRIC:
-      SetM((dpi.cx / 2.54) / 100, -(dpi.cy / 2.54) / 100);
-    MM_HIMETRIC:
-      SetM((dpi.cx / 2.54) / 1000, -(dpi.cy / 2.54) / 1000);
-
-    MM_LOENGLISH:
-      SetM(dpi.cx / 10, -dpi.cy / 10);
-    MM_HIENGLISH:
-      SetM(dpi.cx / 100, -dpi.cy / 100);
-
-    MM_TWIPS:
-      SetM(dpi.cx / 1440, -dpi.cy / 1440);
-    //MM_ISOTROPIC:
-  end;
-
-  if QPainter_worldMatrixEnabled(QtDC.Widget) then
-  begin
-    Matrix := QPainter_worldMatrix(QtDC.Widget);
-    dx := QMatrix_dx(Matrix);
-    dy := QMatrix_dy(Matrix);
-  end else
-  begin
-    dx := 0;
-    dy := 0;
-  end;
-
-  MatrixNew := QMatrix_create(m11, 0, 0, m22, dx, dy);
-  try
-    QPainter_setWorldMatrix(QtDC.Widget, MatrixNew, False);
-  finally
-    QMatrix_destroy(MatrixNew);
-  end;
-end;
-{$endif}
 
 
 type

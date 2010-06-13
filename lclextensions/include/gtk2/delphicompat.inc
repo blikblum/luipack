@@ -35,7 +35,6 @@
 {$define HAS_GETCURRENTOBJECT}
 {$define HAS_GETBKCOLOR}
 {$define HAS_GETTEXTEXTENTEXPOINT}
-{$define HAS_DRAWFRAMECONTROL}
 {$define HAS_SCROLLWINDOW}
 
 {$i ../generic/stubs.inc}
@@ -51,11 +50,6 @@ function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc,
 begin
   Result := GTK2WidgetSet.StretchCopyArea(DestDC, X, Y, Width, Height, SrcDC, XSrc, YSrc, Width, Height,
    0, XSrc, YSrc, Rop);
-end;
-
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
-begin
-  Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
 end;
 
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;

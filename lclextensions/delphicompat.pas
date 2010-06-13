@@ -167,7 +167,6 @@ procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
 
 function EndDeferWindowPos(hWinPosInfo:THandle):Boolean;
@@ -183,9 +182,6 @@ function GetDoubleClickTime: UINT;
 function GetKeyboardLayout(dwLayout:DWORD):THandle;
 function GetKeyboardState(lpKeyState:PBYTE):BOOLEAN;
 function GetLocaleInfo(Locale, LCType:LongWord; lpLCData:PChar; cchData:longint):longint;
-{$if lcl_release < 29}
-function GetMapMode(DC: HDC): LongInt;
-{$endif}
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 function GetTextAlign(hDC:HDC): LongWord;
 function GetTextExtentExPoint(DC: HDC; Str: PChar;
@@ -216,9 +212,6 @@ function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:Lon
 function ScrollDC(DC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
-{$if lcl_release < 29}
-function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
-{$endif}
 function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify): LongWord;
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): Boolean;
 

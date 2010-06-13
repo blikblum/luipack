@@ -1,10 +1,4 @@
 
-{$ifndef HAS_DRAWFRAMECONTROL}
-function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
-begin
-  Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
-end;
-{$endif}
 
 {$ifndef HAS_GETDOUBLECLICKTIME}
 function GetDoubleClickTime: UINT;
