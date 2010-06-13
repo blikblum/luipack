@@ -52,10 +52,7 @@ end;
 
 function DrawFrameControl(DC: HDC; const Rect: TRect; uType, uState: LongWord): Boolean;
 begin
-  //todo: There's a bug in gtk intf before 0.9.29
-  {$if lcl_release >= 29}
   Result := LCLIntf.DrawFrameControl(DC, Rect, uType, uState);
-  {$endif}
 end;
 
 function DrawTextW(hDC: HDC; lpString: PWideChar; nCount: Integer; var lpRect: TRect; uFormat: LongWord): Integer;
@@ -104,7 +101,6 @@ begin
   end;
 end;
 
-{$ifndef GTK2}
 function GetTextExtentExPoint(DC: HDC; Str: PChar; Count, MaxWidth: Integer;
   MaxCount, PartialWidths: ObjPas.PInteger; var Size: TSize): BOOL;
 var
@@ -162,7 +158,6 @@ begin
     end;
   end;
 end;
-{$endif}
 
 function InvertRect(DC: HDC; const lprc: TRect): Boolean;
 var
@@ -183,11 +178,7 @@ begin
       gdk_draw_rectangle(Drawable,GC,1,
         DCOrigin.X + lprc.Left, DCOrigin.Y + lprc.Top,
         lprc.Right - lprc.Left, lprc.Bottom - lprc.Top);
-      {$ifdef GTK2}
-      gdk_gc_set_function(GC,Values._function);
-      {$else}
       gdk_gc_set_function(GC,Values.thefunction);
-      {$endif}
     end;
   end;
 end;
