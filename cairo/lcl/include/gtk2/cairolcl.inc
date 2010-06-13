@@ -1,5 +1,5 @@
 uses
-  gtk2def, Gtk2Int, CairoXlib, gdk2, gdk2x, GtkWSControls, WSLCLClasses;
+  gtk2def, Gtk2Int, CairoXlib, gdk2, gdk2x, Gtk2WSControls, WSLCLClasses;
   
 procedure TCairoLCLFont.CreateHandle;
 begin

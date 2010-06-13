@@ -1,1 +1,2 @@
-{$i ../gtk/uses_lclext.inc}
+uses
+  Gtk2Int;
