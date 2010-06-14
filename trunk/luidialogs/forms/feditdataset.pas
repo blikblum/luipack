@@ -7,7 +7,7 @@ unit fEditDataSet;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   Buttons, VirtualDBGrid, db, LuiDBDialogs, VirtualTrees;
 
 type
@@ -36,6 +36,8 @@ type
   end;
 
 implementation
+
+{$R *.lfm}
 
 var
   strAddRecord: String = 'Add';
@@ -101,8 +103,6 @@ initialization
   {$ifdef USE_PORTUGUESE}
   LoadPortugueseStrings;
   {$endif}
-
-  {$I feditdataset.lrs}
 
 end.
 
