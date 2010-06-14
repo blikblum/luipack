@@ -5,7 +5,7 @@ unit fFrameEditor;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   Buttons, ExtCtrls, LMessages, LCLType, LuiMessages;
 
   { TFrameEditorForm }
@@ -28,6 +28,8 @@ type
   end; 
 
 implementation
+
+{$R *.lfm}
 
 uses
   LuiRTTIUtils;
@@ -86,7 +88,7 @@ begin
 end;
 
 initialization
-  {$I fframeeditor.lrs}
+
 
 end.
 

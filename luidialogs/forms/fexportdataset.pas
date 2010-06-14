@@ -5,7 +5,7 @@ unit fExportDataset;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, EditBtn, StdCtrls, Buttons, CheckLst, ControlSwitcher, LuiBar, db;
 
 type
@@ -58,6 +58,8 @@ type
   end;
 
 implementation
+
+{$R *.lfm}
 
 uses
   SpreadsheetExport, fpspreadsheet, GraphType;
@@ -251,7 +253,6 @@ begin
 end;
 
 initialization
-  {$I fexportdataset.lrs}
 
 end.
 
