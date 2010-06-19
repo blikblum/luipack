@@ -24,6 +24,7 @@ type
     procedure CreateWnd; override;
     procedure Paint; override;
     procedure VisibleChanged; override;
+    procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
   public
     constructor Create(AOwner: TComponent); override;
     property Message: String write SetMessage;
@@ -86,6 +87,11 @@ begin
     //auto destroy on hide
     Application.QueueAsyncCall(@DelayedDestroy, 0);
   end;
+end;
+
+procedure TDefaultOverlayControl.WMEraseBkgnd(var Message: TLMEraseBkgnd);
+begin
+  // Do nothing. Just to avoid flicker.
 end;
 
 constructor TDefaultOverlayControl.Create(AOwner: TComponent);
