@@ -32,7 +32,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LuiRTTIUtils;
+  LuiRTTIUtils, LuiMiscUtils;
 
 { TFrameEditorForm }
 
@@ -64,9 +64,9 @@ begin
   FFrame := FrameClass.Create(Self);
   //set the properties
   SetObjectProperties(FFrame, FrameProperties);
-  FFrame.SetBounds(0, 0, FFrame.Width, FFrame.Height);
   Height := FFrame.Height + ButtonPanel.Height;
   Width := FFrame.Width;
+  FFrame.Align := alClient;
   Position := poOwnerFormCenter;
   if ButtonCaptions <> '' then
   begin
@@ -83,7 +83,7 @@ begin
   end;
   FFrame.Parent := Self;
   Caption := FFrame.Caption;
-  FFrame.Perform(CM_INIT, 0, 0);
+  CallMethod(FFrame, 'InitControl');
   FFrame.Visible := True;
 end;
 
