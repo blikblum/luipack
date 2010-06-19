@@ -14,7 +14,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="6">
+    <Files Count="7">
       <Item1>
         <Filename Value="forms\fexportdataset.pas"/>
         <UnitName Value="fExportDataset"/>
@@ -40,6 +40,10 @@
         <Filename Value="forms\fframeeditor.pas"/>
         <UnitName Value="fFrameEditor"/>
       </Item6>
+      <Item7>
+        <Filename Value="units\overlaycontrols.pas"/>
+        <UnitName Value="overlaycontrols"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="6">
