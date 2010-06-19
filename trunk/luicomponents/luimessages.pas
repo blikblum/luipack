@@ -10,7 +10,6 @@ uses
 const
   CM_PARENTBUTTONPRESSED = LM_USER + 1;
   CM_CHILDDATACHANGED = LM_USER + 2;
-  CM_INIT = LM_USER + 3;
 
 function NotifyParentForm(Control: TControl; Msg:Cardinal; WParam: WParam; LParam: LParam): LRESULT;
 
