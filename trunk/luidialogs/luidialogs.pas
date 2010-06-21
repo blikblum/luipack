@@ -43,13 +43,13 @@ function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl): TModalRes
 function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl;
   FrameProperties: array of const; ButtonCaptions: String = ''): TModalResult;
 
-procedure ShowOverlayMessage(Owner: TWinControl; const Msg: String; Align: TAlign; TimeOut: Integer = 0);
+procedure ShowNotification(Owner: TWinControl; const Msg: String; Align: TAlign; TimeOut: Integer = 0);
 
 implementation
 
 uses
   fExportDataset, fFrameEditor,
-  OverlayControls,
+  NotificationControls,
   StrUtils, FileUtil, LuiRTTIUtils;
 
 function ShowExportDatasetDlg(AOwner: TWinControl; Dataset: TDataSet): Boolean;
@@ -97,17 +97,17 @@ begin
   end;
 end;
 
-procedure ShowOverlayMessage(Owner: TWinControl; const Msg: String;
+procedure ShowNotification(Owner: TWinControl; const Msg: String;
   Align: TAlign; TimeOut: Integer);
 var
-  OverlayControl: TDefaultOverlayControl;
+  Control: TDefaultNotificationControl;
 begin
-  OverlayControl := TDefaultOverlayControl.Create(Owner);
-  OverlayControl.Parent := Owner;
-  OverlayControl.Align := Align;
-  OverlayControl.Message := Msg;
-  OverlayControl.Timeout := TimeOut;
-  OverlayControl.Visible := True;
+  Control := TDefaultNotificationControl.Create(Owner);
+  Control.Parent := Owner;
+  Control.Align := Align;
+  Control.Message := Msg;
+  Control.Timeout := TimeOut;
+  Control.Visible := True;
 end;
 
 { TExportDatasetDialog }

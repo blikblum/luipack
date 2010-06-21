@@ -4,12 +4,17 @@
     <PathDelim Value="\"/>
     <Name Value="luidialogs_package"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="forms\;units\"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -41,8 +46,8 @@
         <UnitName Value="fFrameEditor"/>
       </Item6>
       <Item7>
-        <Filename Value="units\overlaycontrols.pas"/>
-        <UnitName Value="overlaycontrols"/>
+        <Filename Value="notificationcontrols.pas"/>
+        <UnitName Value="notificationcontrols"/>
       </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>

@@ -1,17 +1,17 @@
-unit OverlayControls;
+unit NotificationControls;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Forms, Classes, SysUtils, Controls, Graphics, LCLType, StdCtrls, ExtCtrls, Buttons;
+  Forms, Classes, SysUtils, Controls, Graphics, LCLType, StdCtrls, ExtCtrls, Buttons, LMessages;
 
 type
 
-  { TDefaultOverlayControl }
+  { TDefaultNotificationControl }
 
-  TDefaultOverlayControl = class(TCustomControl)
+  TDefaultNotificationControl = class(TCustomControl)
   private
     FLabel: TLabel;
     FTimer: TTimer;
@@ -36,24 +36,24 @@ implementation
 uses
   LCLIntf, Themes;
 
-{ TDefaultOverlayControl }
+{ TDefaultNotificationControl }
 
-procedure TDefaultOverlayControl.HideMessage(Sender: TObject);
+procedure TDefaultNotificationControl.HideMessage(Sender: TObject);
 begin
   Visible := False;
 end;
 
-procedure TDefaultOverlayControl.DelayedDestroy(Data: PtrInt);
+procedure TDefaultNotificationControl.DelayedDestroy(Data: PtrInt);
 begin
   Destroy;
 end;
 
-procedure TDefaultOverlayControl.SetMessage(const Value: String);
+procedure TDefaultNotificationControl.SetMessage(const Value: String);
 begin
   FLabel.Caption := Value;
 end;
 
-procedure TDefaultOverlayControl.SetTimeout(const Value: Integer);
+procedure TDefaultNotificationControl.SetTimeout(const Value: Integer);
 begin
   if FTimer  = nil then
   begin
@@ -63,18 +63,18 @@ begin
   FTimer.Interval := Value;
 end;
 
-procedure TDefaultOverlayControl.CreateWnd;
+procedure TDefaultNotificationControl.CreateWnd;
 begin
   inherited CreateWnd;
   Canvas.Brush.Color := clYellow;
 end;
 
-procedure TDefaultOverlayControl.Paint;
+procedure TDefaultNotificationControl.Paint;
 begin
   Canvas.Rectangle(0, 0, Width, Height);
 end;
 
-procedure TDefaultOverlayControl.VisibleChanged;
+procedure TDefaultNotificationControl.VisibleChanged;
 begin
   inherited VisibleChanged;
   if Visible then
@@ -89,12 +89,12 @@ begin
   end;
 end;
 
-procedure TDefaultOverlayControl.WMEraseBkgnd(var Message: TLMEraseBkgnd);
+procedure TDefaultNotificationControl.WMEraseBkgnd(var Message: TLMEraseBkgnd);
 begin
   // Do nothing. Just to avoid flicker.
 end;
 
-constructor TDefaultOverlayControl.Create(AOwner: TComponent);
+constructor TDefaultNotificationControl.Create(AOwner: TComponent);
 var
   CloseBitmap, CloseMask: HBITMAP;
 begin
