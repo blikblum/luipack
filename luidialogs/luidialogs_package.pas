@@ -8,7 +8,7 @@ interface
 
 uses
     fExportDataset, LuiDialogs, SpreadsheetExport, register_luidialogs, 
-  fFrameEditor, OverlayControls, LazarusPackageIntf;
+  fFrameEditor, NotificationControls, LazarusPackageIntf;
 
 implementation
 
