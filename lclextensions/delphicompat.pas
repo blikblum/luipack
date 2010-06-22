@@ -70,21 +70,6 @@ const
   //systemparametersinfo
   SPI_GETWORKAREA = 48;
   
-  { EnumObjects, GetCurrentObject, GetObjectType  }
-  OBJ_BRUSH = 2;
-  OBJ_PEN = 1;
-  OBJ_PAL = 5;
-  OBJ_FONT = 6;
-  OBJ_BITMAP = 7;
-  OBJ_EXTPEN = 11;
-  OBJ_REGION = 8;
-  OBJ_DC = 3;
-  OBJ_MEMDC = 10;
-  OBJ_METAFILE = 9;
-  OBJ_METADC = 4;
-  OBJ_ENHMETAFILE = 13;
-  OBJ_ENHMETADC = 12;
-  
   { RedrawWindow  }
   RDW_ERASE = 4;
   RDW_FRAME = 1024;
