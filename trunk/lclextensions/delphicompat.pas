@@ -152,13 +152,6 @@ type
   //timer
   TTimerNotify = procedure (TimerId: LongWord) of object;
 
-  TLMTimer = record
-    Msg: Cardinal;
-    TimerID: LongWord;
-    TimerProc: LPARAM; //TTimerNotify;
-    Result: LRESULT;
-  end;
-
 function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
 function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc, YSrc: Integer; Rop: DWORD): Boolean;
 
