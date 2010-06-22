@@ -105,14 +105,12 @@ function GetTextExtentPointW(DC: HDC; Str: PWideChar; Count: Integer; out Size: 
 function GetWindowDC(hWnd:THandle):HDC;
 
 function ImageList_DragShowNolock(fShow: Boolean): Boolean;
-function INDEXTOOVERLAYMASK(i : longint) : longint;
 function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
 
 function LPtoDP(DC: HDC; var Points; Count: Integer):Boolean;
 
-function MAKEROP4(fore,back : longint) : DWORD;
 function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
 function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
 
@@ -151,17 +149,6 @@ const
 var
   Logger: TLCLLogger;
 {$endif}
-
-function INDEXTOOVERLAYMASK(i : longint) : LongInt;
-{ return type might be wrong }
-begin
-  Result := i shl 8;
-end;
-
-function MAKEROP4(fore,back : longint) : DWORD;
-begin
-   Result := DWORD((DWORD(back shl 8) and $FF000000) or DWORD(fore));
-end;
 
 
 {$i delphicompat.inc}
