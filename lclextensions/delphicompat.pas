@@ -75,7 +75,6 @@ function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
 function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc, YSrc: Integer; Rop: DWORD): Boolean;
 
 function CF_UNICODETEXT: TClipboardFormat;
-procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
 function CopyImage(hImage: THandle; uType:LongWord; cxDesired, cyDesired: LongInt; fuFlags:LongWord):THandle;
 
 function DeferWindowPos(hWinPosInfo, hWnd, hWndInsertAfter:THandle; x, y, cx, cy:longint; uFlags:LongWord):THandle;
@@ -152,14 +151,6 @@ const
 var
   Logger: TLCLLogger;
 {$endif}
-
-procedure ChangeBiDiModeAlignment(var Alignment: TAlignment);
-begin
-  case Alignment of
-    taLeftJustify: Alignment := taRightJustify;
-    taRightJustify: Alignment := taLeftJustify;
-  end;
-end;
 
 function INDEXTOOVERLAYMASK(i : longint) : LongInt;
 { return type might be wrong }
