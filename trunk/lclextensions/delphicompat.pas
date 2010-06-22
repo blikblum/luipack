@@ -53,25 +53,7 @@ const
   WM_SIZE = LM_SIZE;
   WM_LBUTTONDBLCLK = LM_LBUTTONDBLCLK;
   WM_LBUTTONDOWN = LM_LBUTTONDOWN;
-  
-  //Misc Constants
-  MAXSHORT = $7FFF;
-  
-  IMAGE_BITMAP = 0;
-  IMAGE_CURSOR = 2;
-  IMAGE_ENHMETAFILE = 1;
-  IMAGE_ICON = 1;
-  LR_COPYDELETEORG = 8;
-  LR_COPYRETURNORG = 4;
-  LR_MONOCHROME = 1;
-  LR_CREATEDIBSECTION = 8192;
-  LR_DEFAULTSIZE = 64;
-  
-  //systemparametersinfo
-  SPI_GETWORKAREA = 48;
 
-  BS_OWNERDRAW = $b;
-  
 type
   //TWM* types
   TMessage = TLMessage;
