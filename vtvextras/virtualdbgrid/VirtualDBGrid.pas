@@ -37,6 +37,8 @@ unit VirtualDBGrid;
 
 {$mode delphi}
 
+{.$define VTV_VER_5}
+
 interface
 
 uses
@@ -423,7 +425,11 @@ type
       var Text: String); override;
     procedure DoInitNode(Parent, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: String); override;
+    {$ifdef VTV_VER_5}
+    procedure DoHeaderClick(HitInfo: TVTHeaderHitInfo);
+    {$else}
     procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    {$endif}
     procedure DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition); override;
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex): Boolean; override;
     procedure DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
@@ -2379,7 +2385,17 @@ begin
   inherited DoNewText(Node, Column, Text);
 end;
 
-
+{$ifdef VTV_VER_5}
+procedure TCustomVirtualDBGrid.DoHeaderClick(HitInfo: TVTHeaderHitInfo);
+begin
+  if (DBOptions.SortingType <> stNone) and (aoAllowSorting in DBOptions.AdvOptions) then
+  begin
+    DoSortColumn(HitInfo.Column);
+    DoChangeSort(Header.SortColumn, Header.SortDirection);
+  end;
+  inherited DoHeaderClick(HitInfo);
+end;
+{$else}
 procedure TCustomVirtualDBGrid.DoHeaderClick(Column: TColumnIndex;
     Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
@@ -2390,6 +2406,7 @@ begin
   end;
   inherited DoHeaderClick(Column, Button, Shift, X, Y);
 end;
+{$endif}
 
 
 procedure TCustomVirtualDBGrid.DoHeaderDragged(Column: TColumnIndex; OldPosition: TColumnPosition);
