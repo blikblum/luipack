@@ -16,6 +16,8 @@ type
 
   TValidateDataEvent = procedure(Sender: TObject; var NewData: String; var IsValid: Boolean) of object;
 
+  TValueChangeEvent = procedure(Sender: TObject; StateChanged: Boolean) of object;
+
   TDBValidateEditOption = (voNullValueAsError);
 
   TDBValidateEditOptions = set of TDBValidateEditOption;
@@ -28,7 +30,7 @@ type
     FInvalidValueColor: TColor;
     FInvalidValueMessage: String;
     FOldDataChange: TNotifyEvent;
-    FOnValueChange: TNotifyEvent;
+    FOnValueChange: TValueChangeEvent;
     FOptions: TDBValidateEditOptions;
     //FRecoverMode: TRecoverMode;
     FValueIsValid: Boolean;
@@ -39,7 +41,7 @@ type
   protected
     function DoValidateData(var NewData: String): Boolean; virtual; abstract;
     //events
-    property OnValueChange: TNotifyEvent read FOnValueChange write FOnValueChange;
+    property OnValueChange: TValueChangeEvent read FOnValueChange write FOnValueChange;
   public
     constructor Create(AOwner: TComponent); override;
     property ValueIsValid: Boolean read FValueIsValid;
@@ -71,6 +73,7 @@ type
     procedure CreateWnd; override;
     function DoValidateData(var NewData: String): Boolean; override;
   published
+    property OnValueChange;
   end;
 
 implementation
@@ -99,11 +102,13 @@ end;
 procedure TCustomDBValidateEdit.UpdateData(Sender: TObject);
 var
   S: String;
+  OldValueIsValid: Boolean;
 begin
   S := Text;
+  OldValueIsValid := FValueIsValid;
   FValueIsValid := DoValidateData(S);
   if Assigned(FOnValueChange) then
-    FOnValueChange(Self);
+    FOnValueChange(Self, FValueIsValid <> OldValueIsValid);
   if FValueIsValid then
   begin
     FDataLink.Field.AsString := S;
