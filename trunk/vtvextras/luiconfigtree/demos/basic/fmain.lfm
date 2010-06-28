@@ -18,17 +18,19 @@ object MainForm: TMainForm
     Colors.FocusedSelectionColor = clSilver
     Colors.FocusedSelectionBorderColor = clSilver
     Colors.GridLineColor = clSilver
-    Header.AutoSizeIndex = 1
+    Header.AutoSizeIndex = -1
     Header.Columns = <    
       item
+        Position = 0
         Text = 'Key'
         Width = 150
       end    
       item
         Position = 1
         Text = 'Data'
-        Width = 82
+        Width = 78
       end>
+    Header.DefaultHeight = 17
     Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoVisible, hoAutoSpring]
     Indent = 12
     LineStyle = lsSolid
@@ -55,6 +57,7 @@ object MainForm: TMainForm
     DataProvider = IniProvider
     ItemDefs = <    
       item
+        DataType = ldtString
         DefaultValue = 'Blargh!'
         DisplayText = 'My Str Option'
         Key = 'itemstr'
@@ -66,12 +69,14 @@ object MainForm: TMainForm
         Key = 'itemint'
       end    
       item
+        DataType = ldtString
         DefaultValue = '1'
         DisplayText = 'Should I Go?'
         Key = 'itembool'
         Section = 'Section2'
       end    
       item
+        DataType = ldtString
         DefaultValue = 'BlikBlum'
         DisplayText = 'Got Default'
         Key = 'itemx'
@@ -91,7 +96,7 @@ object MainForm: TMainForm
   end
   object IniProvider: TIniConfigProvider
     CacheUpdates = False
-    FileName = '$(EXE_PATH)/test.ini'
+    FileName = '$(EXE_DIR)$(PATH_DELIM)test.ini'
     left = 208
     top = 40
   end
