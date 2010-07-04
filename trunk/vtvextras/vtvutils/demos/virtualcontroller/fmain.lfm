@@ -3,23 +3,24 @@ object MainForm: TMainForm
   Height = 331
   Top = 240
   Width = 463
-  ActiveControl = EditStringsMemo
   Caption = 'Test Virtual Tree Controller'
   ClientHeight = 331
   ClientWidth = 463
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '0.9.25'
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
   object TestTree: TVirtualStringTree
     Left = 8
     Height = 303
     Top = 8
     Width = 215
-    BorderStyle = bsSingle
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
     Header.MainColumn = -1
     Header.Options = [hoColumnResize, hoDrag]
     TabOrder = 0
-    Header.Columns = <>
   end
   object EditStringsMemo: TMemo
     Left = 248

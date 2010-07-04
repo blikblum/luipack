@@ -42,7 +42,7 @@ begin
   SourceStrings := TStringList.Create;
   SourceStrings.Assign(EditStringsMemo.Lines);
   Controller.Strings := SourceStrings;
-  Controller.Connect(TestTree);
+  Controller.Tree := TestTree;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);

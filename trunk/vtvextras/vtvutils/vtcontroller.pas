@@ -20,6 +20,8 @@ type
     //for now connect to only one tree
     FTree: TVirtualStringTree;
     FEvents: TVTEvents;
+    procedure ConnectEvents;
+    procedure DisconnectEvents;
     //event bridges
     procedure FocusChangedEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure GetTextEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
@@ -28,6 +30,7 @@ type
       var InitialStates: TVirtualNodeInitStates);
 
     procedure SetNodeDataSize(const AValue: Integer);
+    procedure SetTree(const Value: TVirtualStringTree);
   protected
     //abstract event handlers
     procedure DoFocusChanged(Node: PVirtualNode; Column: TColumnIndex); virtual; abstract;
@@ -35,37 +38,23 @@ type
       TextType: TVSTTextType; var CellText: String); virtual; abstract;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitialStates: TVirtualNodeInitStates); virtual; abstract;
-
+    //LCL methods
+    procedure Loaded; override;
+    //Specific methods
+    procedure TreeChanged; virtual;
+    //Specific properties
     property Events: TVTEvents read FEvents write FEvents;
     property NodeDataSize: Integer read FNodeDataSize write SetNodeDataSize;
-    property Tree: TVirtualStringTree read FTree write FTree;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure Connect(ATree: TVirtualStringTree); virtual;
-    procedure Disconnect; virtual;
+    property Tree: TVirtualStringTree read FTree write SetTree;
   end;
 
 implementation
 
 
 { TCustomVirtualTreeController }
-
-procedure TCustomVirtualTreeController.Connect(ATree: TVirtualStringTree);
-begin
-  FTree := ATree;
-  if evGetText in FEvents then
-    FTree.OnGetText := @GetTextEvent;
-  if evFocusChanged in FEvents then
-    FTree.OnFocusChanged := @FocusChangedEvent;
-  if evInitNode in FEvents then
-    FTree.OnInitNode := @InitNodeEvent;
-end;
-
-procedure TCustomVirtualTreeController.Disconnect;
-begin
-  Tree := nil;
-end;
 
 constructor TCustomVirtualTreeController.Create(AOwner: TComponent);
 begin
@@ -76,12 +65,29 @@ destructor TCustomVirtualTreeController.Destroy;
 begin
   //todo: is necessary to handle the case when FTree is destroied before
   //  the controller
-  if FTree = nil then
-    Exit;
+  if FTree <> nil then
+    DisconnectEvents;
+  inherited Destroy;
+end;
+
+procedure TCustomVirtualTreeController.ConnectEvents;
+begin
+  if evGetText in FEvents then
+    FTree.OnGetText := @GetTextEvent;
+  if evFocusChanged in FEvents then
+    FTree.OnFocusChanged := @FocusChangedEvent;
+  if evInitNode in FEvents then
+    FTree.OnInitNode := @InitNodeEvent;
+end;
+
+procedure TCustomVirtualTreeController.DisconnectEvents;
+begin
   if evGetText in FEvents then
     FTree.OnGetText := nil;
-  FTree := nil;
-  inherited Destroy;
+  if evFocusChanged in FEvents then
+    FTree.OnFocusChanged := nil;
+  if evInitNode in FEvents then
+    FTree.OnInitNode := nil;
 end;
 
 procedure TCustomVirtualTreeController.FocusChangedEvent(
@@ -105,6 +111,28 @@ end;
 
 procedure TCustomVirtualTreeController.SetNodeDataSize(const AValue: Integer);
 begin
+end;
+
+procedure TCustomVirtualTreeController.SetTree(const Value: TVirtualStringTree);
+begin
+  if FTree <> nil then
+    DisconnectEvents;
+  FTree := Value;
+  if (FTree <> nil) and not (csLoading in ComponentState) then
+    ConnectEvents;
+  TreeChanged;
+end;
+
+procedure TCustomVirtualTreeController.Loaded;
+begin
+  inherited Loaded;
+  if FTree <> nil then
+    ConnectEvents;
+end;
+
+procedure TCustomVirtualTreeController.TreeChanged;
+begin
+  //
 end;
 
 end.
