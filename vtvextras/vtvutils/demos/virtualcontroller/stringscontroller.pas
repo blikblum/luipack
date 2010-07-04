@@ -25,10 +25,10 @@ type
   protected
     procedure DoGetText(Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: UTF8String); override;
+      var CellText: String); override;
+    procedure TreeChanged; override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure Connect(ATree: TVirtualStringTree); override;
     procedure UpdateTree;
     property Strings: TStrings read FStrings write SetStrings;
   end;
@@ -37,11 +37,9 @@ implementation
 
 { TStringsController }
 
-procedure TStringsController.Connect(ATree: TVirtualStringTree);
+procedure TStringsController.TreeChanged;
 begin
-  inherited Connect(ATree);
-  if FStrings <> nil then
-    UpdateTree;
+  UpdateTree;
 end;
 
 constructor TStringsController.Create(AOwner: TComponent);
@@ -51,7 +49,7 @@ begin
 end;
 
 procedure TStringsController.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: UTF8String);
+  TextType: TVSTTextType; var CellText: String);
 begin
   if not Assigned(FStrings) or (Node^.Index >= FStrings.Count) then
     Exit;
@@ -61,20 +59,16 @@ end;
 procedure TStringsController.SetStrings(const AValue: TStrings);
 begin
   FStrings := AValue;
-  if Tree <> nil then
-    UpdateTree;
+  UpdateTree;
 end;
 
 procedure TStringsController.UpdateTree;
-var
-  i: Integer;
 begin
-  if FStrings = nil then
+  if (FStrings = nil) or (Tree = nil) then
     Exit;
-  i := FStrings.Count;
   Tree.BeginUpdate;
   Tree.Clear;
-  Tree.RootNodeCount := i;
+  Tree.RootNodeCount := FStrings.Count;
   Tree.EndUpdate;
 end;
 
