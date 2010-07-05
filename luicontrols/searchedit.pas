@@ -61,10 +61,6 @@ type
     FOptions: TSearchEditOptions;
     FTimer: TTimer;
     procedure ClearEmptyText;
-    {$ifdef Windows}
-    //windows select all text when clearing the text inside LM_SETFOCUS
-    procedure DelayedClear(Data: PtrInt);
-    {$endif}
     procedure DisplayEmptyText;
     function GetExecuteDelay: Integer;
     procedure OnTimer(Sender: TObject);
@@ -140,13 +136,6 @@ uses
   LCLType;
 
 { TSearchEdit }
-
-{$ifdef Windows}
-procedure TSearchEdit.DelayedClear(Data: PtrInt);
-begin
-  ClearEmptyText;
-end;
-{$endif}
 
 procedure TSearchEdit.ClearEmptyText;
 begin
@@ -250,13 +239,7 @@ begin
   {$endif}
   //Clear the text before to avoid SelectAll call in DoEnter
   if FIsEmpty then
-  begin
-    {$ifdef Windows}
-    Application.QueueAsyncCall(@DelayedClear,0);
-    {$else}
     ClearEmptyText;
-    {$endif}
-  end;
   inherited WMSetFocus(Message);
   {$ifdef DEBUG_SEARCHEDIT}
   Logger.ExitMethod('WMSetFocus');
@@ -293,4 +276,4 @@ initialization
   {$endif}
 
 end.
-
+
