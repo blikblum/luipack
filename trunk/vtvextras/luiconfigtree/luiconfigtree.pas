@@ -384,9 +384,9 @@ procedure TLuiConfigTree.DoFreeNode(Node: PVirtualNode);
 var
   Data: PConfigData;
 begin
-  inherited DoFreeNode(Node);
   Data := GetConfigData(Node);
   Data^.Key := '';
+  inherited DoFreeNode(Node);
 end;
 
 procedure TLuiConfigTree.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
