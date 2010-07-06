@@ -1,0 +1,104 @@
+object MainForm: TMainForm
+  Left = 404
+  Height = 294
+  Top = 260
+  Width = 364
+  Caption = 'JSONInspector demo'
+  ClientHeight = 294
+  ClientWidth = 364
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.29'
+  object JSONInspector: TVirtualJSONInspector
+    Left = 4
+    Height = 106
+    Top = 44
+    Width = 356
+    Properties.Strings = (
+      'name;Nome'
+      'age;Idade'
+      'gender;Sexo'
+    )
+    OnFormatValue = JSONInspectorFormatValue
+    Align = alClient
+    BorderSpacing.Top = 40
+    BorderSpacing.Bottom = 140
+    BorderSpacing.Around = 4
+    BorderStyle = bsSingle
+    Header.AutoSizeIndex = -1
+    Header.Columns = <    
+      item
+        Position = 0
+        Text = 'Property'
+        Width = 150
+      end    
+      item
+        Position = 1
+        Text = 'Value'
+        Width = 202
+      end>
+    Header.DefaultHeight = 17
+    Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible, hoAutoSpring]
+    NodeDataSize = 12
+    TabOrder = 0
+    TreeOptions.AutoOptions = [toAutoDropExpand, toAutoScrollOnExpand, toAutoSpanColumns, toAutoTristateTracking, toAutoDeleteMovedNodes]
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus]
+  end
+  object JSONFileNameEdit: TFileNameEdit
+    Left = 4
+    Height = 21
+    Top = 16
+    Width = 332
+    OnAcceptFileName = JSONFileNameEditAcceptFileName
+    DialogOptions = []
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 0
+    Anchors = [akTop, akLeft, akRight]
+    MaxLength = 0
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 4
+    Height = 14
+    Top = 0
+    Width = 75
+    Caption = 'Open JSON File'
+    ParentColor = False
+  end
+  object PropertiesMemo: TMemo
+    Left = 4
+    Height = 82
+    Top = 176
+    Width = 356
+    Anchors = [akLeft, akRight, akBottom]
+    Lines.Strings = (
+      'name;Nome'
+      'age;Idade'
+      'gender;Sexo'
+    )
+    TabOrder = 2
+  end
+  object Label2: TLabel
+    Left = 4
+    Height = 14
+    Top = 160
+    Width = 190
+    Anchors = [akLeft, akBottom]
+    Caption = 'Properties (PropertyName;DisplayText)'
+    ParentColor = False
+  end
+  object ApplyPropertiesButton: TButton
+    Left = 192
+    Height = 25
+    Top = 264
+    Width = 168
+    Anchors = [akRight, akBottom]
+    Caption = 'Apply Properties'
+    OnClick = ApplyPropertiesButtonClick
+    TabOrder = 3
+  end
+end
