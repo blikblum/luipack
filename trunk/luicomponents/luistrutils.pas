@@ -42,6 +42,8 @@ function Capitalize(const U: UnicodeString; const ExcludeWords: array of Unicode
 
 function Capitalize(const S: AnsiString; const ExcludeWords: array of UnicodeString): AnsiString;
 
+procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String; Delimiter: Char = ';');
+
 implementation
 
 function MatchWords(const U: UnicodeString; const A: array of UnicodeString): Boolean;
@@ -136,6 +138,23 @@ end;
 function Capitalize(const S: AnsiString; const ExcludeWords: array of UnicodeString): AnsiString;
 begin
   Result := UTF8Encode(Capitalize(UTF8Decode(S), ExcludeWords));
+end;
+
+procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String; Delimiter: Char);
+var
+  DelimiterPos: Integer;
+begin
+  DelimiterPos := Pos(Delimiter, NameValuePair);
+  if DelimiterPos = 0 then
+  begin
+    Name := NameValuePair;
+    Value := '';
+  end
+  else
+  begin
+    Name := Copy(NameValuePair, 1, DelimiterPos - 1);
+    Value := Copy(NameValuePair, DelimiterPos + 1, Length(NameValuePair) - DelimiterPos);
+  end;
 end;
 
 end.
