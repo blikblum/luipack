@@ -50,7 +50,7 @@ implementation
 uses
   fExportDataset, fFrameEditor,
   NotificationControls,
-  StrUtils, FileUtil, LuiRTTIUtils;
+  StrUtils, FileUtil, LuiRTTIUtils, LuiStrUtils;
 
 function ShowExportDatasetDlg(AOwner: TWinControl; Dataset: TDataSet): Boolean;
 begin
@@ -131,25 +131,6 @@ begin
   inherited Destroy;
 end;
 
-
-procedure ExtractFieldDescription(const FullDescription: String; out FieldName, FieldText: String);
-var
-  iPos: Integer;
-begin
-  iPos := Pos(';', FullDescription);
-  if iPos = 0 then
-  begin
-    FieldName := FullDescription;
-    FieldText := '';
-  end
-  else
-  begin
-    FieldName := Copy(FullDescription, 1, iPos - 1);
-    FieldText := Copy(FullDescription, iPos + 1, Length(FullDescription) - iPos);
-  end;
-end;
-
-
 function TExportDatasetDialog.Execute(FormOwner: TControl = nil): Boolean;
 var
   i, j: Integer;
@@ -165,7 +146,7 @@ begin
   try
     for i := 0 to FIncludeFields.Count - 1 do
     begin
-      ExtractFieldDescription(FIncludeFields[i], FieldName, FieldText);
+      ExtractNameValue(FIncludeFields[i], FieldName, FieldText);
       Field := FDataset.FindField(FieldName);
       if Field <> nil then
         FieldList.AddObject(IfThen(FieldText = '', Field.DisplayLabel, FieldText), Field);
