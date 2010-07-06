@@ -28,11 +28,10 @@ type
   TLuiConfigTreeOptions = class(TCustomStringTreeOptions)
   private
     FConfigOptions: TVTLuiConfigOptions;
-    procedure SetConfigOptions(const AValue: TVTLuiConfigOptions);
   public
     constructor Create(AOwner: TBaseVirtualTree); override;
   published
-    property ConfigOptions: TVTLuiConfigOptions read FConfigOptions write SetConfigOptions default DefaultConfigOptions;
+    property ConfigOptions: TVTLuiConfigOptions read FConfigOptions write FConfigOptions default DefaultConfigOptions;
     property AnimationOptions;
     property AutoOptions;
     property MiscOptions;
@@ -273,8 +272,7 @@ type
 
 { TLuiConfigTree }
 
-procedure TLuiConfigTree.ConfigNotification(
-  NotificationType: TLuiConfigNotificationType; Data: PtrInt);
+procedure TLuiConfigTree.ConfigNotification(NotificationType: TLuiConfigNotificationType; Data: PtrInt);
 begin
   case NotificationType of
     lcnOpen:
@@ -346,8 +344,7 @@ begin
   EditNode(Node, 1);
 end;
 
-function TLuiConfigTree.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex
-  ): Boolean;
+function TLuiConfigTree.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean;
 begin
   Result := (Node^.Parent = RootNode) and (Column = 1);
 end;
@@ -486,7 +483,6 @@ begin
   inherited Create(AOwner);
   FConfigDataOffset := AllocateInternalDataArea(SizeOf(TConfigData));
   DefaultText := '';
-  NodeDataSize := SizeOf(TConfigData);
   FItems := TStringList.Create;
   FSections := TStringList.Create;
   FVisibleSections := TStringList.Create;
@@ -513,13 +509,6 @@ begin
 end;
 
 { TLuiConfigTreeOptions }
-
-procedure TLuiConfigTreeOptions.SetConfigOptions(
-  const AValue: TVTLuiConfigOptions);
-begin
-  if FConfigOptions=AValue then exit;
-  FConfigOptions:=AValue;
-end;
 
 constructor TLuiConfigTreeOptions.Create(AOwner: TBaseVirtualTree);
 begin
