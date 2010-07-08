@@ -33,13 +33,14 @@ type
 
   TVirtualJSONInspector = class(TCustomVirtualStringTree)
   private
+    FItemDataOffset: Cardinal;
     FProperties: TStrings;
     FJSONObject: TJSONObject;
     FOnFormatValue: TVTJSONFormatValue;
-    procedure AddNode(const PropText: String; const PropName: String;
-      const PropIndex: Integer);
+    function GetItemData(Node: PVirtualNode): Pointer;
     function GetOptions: TJSONInspectorTreeOptions;
     procedure InitHeader;
+    function InitJSONNode(Node: PVirtualNode; JSONData: TJSONData): Cardinal;
     procedure LoadObject;
     procedure SetProperties(const Value: TStrings);
     procedure SetJSONObject(Value: TJSONObject);
@@ -50,6 +51,8 @@ type
     procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: String); override;
+    procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    procedure DoInitNode(ParentNode, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -239,24 +242,17 @@ uses
   LuiStrUtils;
 
 type
-  TPropertyData = record
-    PropIndex: Integer;
-    PropName: String;
-    PropText: String;
+  TItemData = record
+    DisplayText: String;
+    Name: String;
+    JSONData: TJSONData;
+    Children: array of Integer;
   end;
-  PPropertyData = ^TPropertyData;
+  PItemData = ^TItemData;
 
 { TVirtualJSONInspector }
 
 procedure TVirtualJSONInspector.LoadObject;
-var
-  PropIndex, i: Integer;
-  PropName, PropText: String;
-
-  function MatchFilters(Data: TJSONData): Boolean;
-  begin
-    Result := not ((jioSkipNull in TreeOptions.JSONOptions) and (Data.JSONType = jtNull))
-  end;
 begin
   if FJSONObject = nil then
     Clear
@@ -264,45 +260,17 @@ begin
   begin
     BeginUpdate;
     Clear;
-    if FProperties.Count > 0 then
-    begin
-      for i := 0 to FProperties.Count - 1 do
-      begin
-        ExtractNameValue(FProperties[i], PropName, PropText);
-        PropIndex := FJSONObject.IndexOfName(PropName);
-        if (PropIndex <> -1) and MatchFilters(FJSONObject.Items[PropIndex]) then
-        begin
-          AddNode(PropText, PropName, PropIndex);
-        end;
-      end;
-    end
-    else
-    begin
-      for i := 0 to FJSONObject.Count - 1 do
-      begin
-        if MatchFilters(FJSONObject.Items[i]) then
-        begin
-          PropName := FJSONObject.Names[i];
-          AddNode(PropName, PropName, i);
-        end;
-      end;
-    end;
+    RootNodeCount := InitJSONNode(RootNode, FJSONObject);
     EndUpdate;
   end;
 end;
 
-procedure TVirtualJSONInspector.AddNode(const PropText: String;
-  const PropName: String; const PropIndex: Integer);
-var
-  NodeData: PPropertyData;
-  Node: PVirtualNode;
+function TVirtualJSONInspector.GetItemData(Node: PVirtualNode): Pointer;
 begin
-  Node := AddChild(nil);
-  NodeData := GetNodeData(Node);
-  NodeData ^ .PropIndex := PropIndex;
-  NodeData ^ .PropName := PropName;
-  NodeData ^ .PropText := PropText;
-  ValidateNode(Node, False);
+  if Node = nil then
+    Result := nil
+  else
+    Result := PByte(Node) + FItemDataOffset;
 end;
 
 function TVirtualJSONInspector.GetOptions: TJSONInspectorTreeOptions;
@@ -321,6 +289,49 @@ begin
   Column.Text := 'Value';
   Header.AutoSizeIndex := 1;
   Header.Options := Header.Options + [hoVisible, hoAutoResize, hoAutoSpring];
+end;
+
+function TVirtualJSONInspector.InitJSONNode(Node: PVirtualNode;
+  JSONData: TJSONData): Cardinal;
+var
+  ItemData: PItemData;
+  ItemCount, ChildIndex, ItemIndex, i: Integer;
+  PropName, PropText: String;
+
+  function MatchFilters(Data: TJSONData): Boolean;
+  begin
+    Result := not ((jioSkipNull in TreeOptions.JSONOptions) and (Data.JSONType = jtNull))
+  end;
+
+begin
+  ItemData := GetItemData(Node);
+  ItemData^.Name := '';
+  ItemData^.JSONData := JSONData;
+  ItemCount := JSONData.Count;
+  SetLength(ItemData^.Children, ItemCount);
+
+  if (FProperties.Count > 0) and (JSONData.JSONType = jtObject) then
+  begin
+    ChildIndex := 0;
+    for i := 0 to FProperties.Count - 1 do
+    begin
+      ExtractNameValue(FProperties[i], PropName, PropText);
+      ItemIndex := TJSONObject(JSONData).IndexOfName(PropName);
+      if (ItemIndex <> -1) and MatchFilters(JSONData.Items[ItemIndex]) then
+      begin
+        ItemData^.Children[ChildIndex] := ItemIndex;
+        Inc(ChildIndex);
+      end;
+    end;
+    SetLength(ItemData^.Children, ChildIndex);
+    Result := ChildIndex;
+  end
+  else
+  begin
+    for i := 0 to ItemCount - 1 do
+      ItemData^.Children[i] := i;
+    Result := ItemCount;
+  end;
 end;
 
 procedure TVirtualJSONInspector.SetProperties(const Value: TStrings);
@@ -359,6 +370,7 @@ begin
     Exit;
   case PropData.JSONType of
     jtString, jtNumber, jtBoolean: Result := PropData.AsString;
+    jtObject, jtArray: Result := '';
   else
     Result := PropData.AsJSON;
   end;
@@ -366,38 +378,73 @@ end;
 
 procedure TVirtualJSONInspector.DoFreeNode(Node: PVirtualNode);
 var
-  NodeData: PPropertyData;
+  ItemData: PItemData;
 begin
-  NodeData := GetNodeData(Node);
-  NodeData^.PropName := '';
-  NodeData^.PropText := '';
+  ItemData := GetItemData(Node);
+  SetLength(ItemData^.Children, 0);
+  ItemData^.Name := '';
+  ItemData^.DisplayText := '';
   inherited DoFreeNode(Node);
+end;
+
+procedure TVirtualJSONInspector.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal);
+var
+  Data: PItemData;
+begin
+  Data := GetItemData(Node);
+  NodeChildCount := Length(Data^.Children);
 end;
 
 procedure TVirtualJSONInspector.DoGetText(Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
 var
-  NodeData: PPropertyData;
-const
-  PropUnknownStrs: array[0..1] of String = ('[Unknown Property]', '[Unknown Value]');
+  ItemData: PItemData;
 begin
-  NodeData := GetNodeData(Node);
-  //check for consistency since JSONObject structure could be changed between LoadObject and now
-  if FJSONObject.IndexOfName(NodeData^.PropName) <> NodeData^.PropIndex then
-    CellText := PropUnknownStrs[Column]
-  else
-  begin
-    case Column of
-      0:
-      begin
-        CellText := NodeData^.PropText;
-      end;
-      1:
-      begin
-        CellText := DoFormatValue(NodeData^.PropName, FJSONObject.Items[NodeData^.PropIndex]);
-      end;
+  ItemData := GetItemData(Node);
+  case Column of
+    0:
+    begin
+      CellText := ItemData^.DisplayText;
+      if CellText = '' then
+        CellText := ItemData^.Name;
+    end;
+    1:
+    begin
+      CellText := DoFormatValue(ItemData^.Name, ItemData^.JSONData);
     end;
   end;
+end;
+
+procedure TVirtualJSONInspector.DoInitNode(ParentNode, Node: PVirtualNode;
+  var InitStates: TVirtualNodeInitStates);
+var
+  ParentData, Data: PItemData;
+  ParentJSONData: TJSONData;
+  NodeChildCount: Cardinal;
+  i: Integer;
+begin
+  ParentData := GetItemData(Node^.Parent);
+  ParentJSONData := ParentData^.JSONData;
+  NodeChildCount := InitJSONNode(Node, ParentJSONData.Items[Node^.Index]);
+  Data := GetItemData(Node);
+
+  case ParentJSONData.JSONType of
+    jtObject:
+      begin
+        Data^.DisplayText := '';
+        Data^.Name := TJSONObject(ParentJSONData).Names[Node^.Index];
+        i := FProperties.IndexOfName(Data^.Name);
+        if i <> -1 then
+          Data^.DisplayText := FProperties.ValueFromIndex[i];
+      end;
+    jtArray:
+      begin
+        Data^.DisplayText := IntToStr(Node^.Index);
+      end;
+  end;
+  if NodeChildCount > 0 then
+    InitStates := InitStates + [ivsHasChildren];
 end;
 
 function TVirtualJSONInspector.GetOptionsClass: TTreeOptionsClass;
@@ -408,13 +455,14 @@ end;
 constructor TVirtualJSONInspector.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  NodeDataSize := SizeOf(TPropertyData);
+  FItemDataOffset := AllocateInternalDataArea(SizeOf(TItemData));
   FProperties := TStringList.Create;
+  FProperties.NameValueSeparator := ';';
   InitHeader;
   with TreeOptions do
   begin
     AutoOptions := AutoOptions + [toAutoSpanColumns];
-    PaintOptions := PaintOptions - [toShowTreeLines, toShowRoot] +
+    PaintOptions := PaintOptions {- [toShowTreeLines, toShowRoot]} +
       [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
     SelectionOptions := SelectionOptions + [toExtendedFocus];
     MiscOptions := MiscOptions + [toEditable, toGridExtensions];
