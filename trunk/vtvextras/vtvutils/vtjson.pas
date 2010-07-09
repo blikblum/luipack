@@ -35,7 +35,7 @@ type
   private
     FItemDataOffset: Cardinal;
     FProperties: TStrings;
-    FJSONObject: TJSONObject;
+    FJSONData: TJSONData;
     FOnFormatValue: TVTJSONFormatValue;
     function GetItemData(Node: PVirtualNode): Pointer;
     function GetOptions: TJSONInspectorTreeOptions;
@@ -43,7 +43,7 @@ type
     function InitJSONNode(Node: PVirtualNode; JSONData: TJSONData): Cardinal;
     procedure LoadObject;
     procedure SetProperties(const Value: TStrings);
-    procedure SetJSONObject(Value: TJSONObject);
+    procedure SetJSONData(Value: TJSONData);
     procedure SetOptions(Value: TJSONInspectorTreeOptions);
   protected
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
@@ -58,7 +58,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Reload;
-    property JSONObject: TJSONObject read FJSONObject write SetJSONObject;
+    property JSONData: TJSONData read FJSONData write SetJSONData;
   published
     property Properties: TStrings read FProperties write SetProperties;
     property OnFormatValue: TVTJSONFormatValue read FOnFormatValue write FOnFormatValue;
@@ -254,13 +254,13 @@ type
 
 procedure TVirtualJSONInspector.LoadObject;
 begin
-  if FJSONObject = nil then
+  if FJSONData = nil then
     Clear
   else
   begin
     BeginUpdate;
     Clear;
-    RootNodeCount := InitJSONNode(RootNode, FJSONObject);
+    RootNodeCount := InitJSONNode(RootNode, FJSONData);
     EndUpdate;
   end;
 end;
@@ -340,9 +340,9 @@ begin
   LoadObject;
 end;
 
-procedure TVirtualJSONInspector.SetJSONObject(Value: TJSONObject);
+procedure TVirtualJSONInspector.SetJSONData(Value: TJSONData);
 begin
-  FJSONObject := Value;
+  FJSONData := Value;
   LoadObject;
 end;
 
