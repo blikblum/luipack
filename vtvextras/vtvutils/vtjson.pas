@@ -9,6 +9,8 @@ uses
 
 type
 
+  TVirtualJSONInspector= class;
+
   TVTJSONFormatValue = procedure (const PropName: String; PropData: TJSONData;
     var Result: String; var Handled: Boolean) of object;
 
@@ -27,6 +29,36 @@ type
     property PaintOptions;
     property SelectionOptions;
     property StringOptions;
+  end;
+
+  { TJSONPropertyDef }
+
+  TJSONPropertyDef = class(TCollectionItem)
+  private
+    FDisplayName: String;
+    FName: String;
+  protected
+    function GetDisplayName: String; override;
+    procedure SetDisplayName(const Value: String); override;
+  public
+    procedure Assign(Source: TPersistent); override;
+  published
+    property Name: String read FName write FName;
+  end;
+
+  { TJSONPropertyDefs }
+
+  TJSONPropertyDefs = class(TCollection)
+  private
+    FOwner: TVirtualJSONInspector;
+    function GetItem(Index: Integer): TJSONPropertyDef;
+  protected
+    function GetOwner: TPersistent; override;
+  public
+    constructor Create(AOwner: TVirtualJSONInspector);
+    function Add: TJSONPropertyDef;
+    function Find(const Name: String): TJSONPropertyDef;
+    property Items[Index: Integer]: TJSONPropertyDef read GetItem; default;
   end;
 
   { TVirtualJSONInspector }
@@ -478,6 +510,68 @@ end;
 procedure TVirtualJSONInspector.Reload;
 begin
   LoadObject;
+end;
+
+{ TJSONPropertyDef }
+
+function TJSONPropertyDef.GetDisplayName: String;
+begin
+  if FDisplayName <> '' then
+    Result := FDisplayName
+  else
+    Result := FName;
+end;
+
+procedure TJSONPropertyDef.SetDisplayName(const Value: String);
+begin
+  FDisplayName := Value;
+end;
+
+procedure TJSONPropertyDef.Assign(Source: TPersistent);
+begin
+  if Source is TJSONPropertyDef then
+  begin
+    FDisplayName := TJSONPropertyDef(Source).FDisplayName;
+    FName := TJSONPropertyDef(Source).FName;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+{ TJSONPropertyDefs }
+
+function TJSONPropertyDefs.GetItem(Index: Integer): TJSONPropertyDef;
+begin
+  Result := TJSONPropertyDef(inherited GetItem(Index));
+end;
+
+function TJSONPropertyDefs.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
+constructor TJSONPropertyDefs.Create(AOwner: TVirtualJSONInspector);
+begin
+  inherited Create(TJSONPropertyDef);
+  FOwner := AOwner;
+end;
+
+function TJSONPropertyDefs.Add: TJSONPropertyDef;
+begin
+  Result := TJSONPropertyDef(inherited Add);
+end;
+
+function TJSONPropertyDefs.Find(const Name: String): TJSONPropertyDef;
+var
+  i: Integer;
+begin
+  for i := 0 to Count - 1 do
+  begin
+    Result := TJSONPropertyDef(inherited GetItem(i));
+    if Name = Result.Name then
+      Exit;
+  end;
+  Result := nil;
 end;
 
 end.
