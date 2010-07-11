@@ -141,16 +141,6 @@ begin
   end;
 end;
 
-{
-function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
-var
-  P: TQtPoint;
-begin
-  //TODO: Use QPainter_combinedTransform(), but we are missing QTransform implementation !
-  //Result := False;
-end;
-}
-
 function OffsetRgn(hrgn:HRGN; nxOffset, nYOffset:longint):longint;
 var
   Region: TQtRegion;

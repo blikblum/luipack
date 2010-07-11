@@ -110,10 +110,6 @@ begin
 end;
 {$endif}
 
-function LPtoDP(DC: HDC; var Points; Count: Integer): BOOLEAN;
-begin
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
 
 function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
 begin
