@@ -27,7 +27,7 @@ type
       PropData: TJSONData; var Result: String; var Handled: Boolean);
   private
     { private declarations }
-    JObject: TJSONObject;
+    JSONData: TJSONData;
   public
     { public declarations }
   end; 
@@ -46,8 +46,8 @@ uses
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  JObject := TJSONObject.Create(['name', 'Luiz Américo', 'age', 32, 'gender', 'M']);
-  JSONInspector.JSONObject := JObject;
+  JSONData := TJSONObject.Create(['name', 'Luiz Américo', 'age', 32, 'gender', 'M']);
+  JSONInspector.JSONData := JSONData;
 end;
 
 procedure TMainForm.ApplyPropertiesButtonClick(Sender: TObject);
@@ -57,7 +57,7 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  JObject.Destroy;
+  JSONData.Destroy;
 end;
 
 procedure TMainForm.JSONFileNameEditAcceptFileName(Sender: TObject;
@@ -84,14 +84,18 @@ begin
   end;
   if Data <> nil then
   begin
-    if Data is TJSONObject then
+    if Data.JSONType in [jtObject, jtArray] then
     begin
-      JObject.Free;
-      JObject := TJSONObject(Data);
-      JSONInspector.JSONObject := JObject;
+      JSONData.Free;
+      JSONData := Data;
+      JSONInspector.JSONData := JSONData;
+      JSONInspector.FullExpand;
     end
     else
+    begin
       ShowMessage(Format('Expecting a TJSONObject got "%s"', [Data.ClassName]));
+      Data.Destroy;
+    end;
   end;
 end;
 
