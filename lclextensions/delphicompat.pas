@@ -109,8 +109,6 @@ function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
 
 function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
 
-function LPtoDP(DC: HDC; var Points; Count: Integer):Boolean;
-
 function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
 function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
 
