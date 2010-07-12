@@ -9,20 +9,25 @@ uses
 
 type
 
-  TVirtualJSONInspector= class;
+  TVirtualJSONInspector = class;
 
   TVTJSONFormatValue = procedure (const PropName: String; PropData: TJSONData;
     var Result: String; var Handled: Boolean) of object;
 
-  TVTJSONInspectorOption = (jioSkipNull);
+  TVTJSONInspectorOption = (jioSkipNullProperties, jioSkipUnknownProperties);
 
   TVTJSONInspectorOptions = set of TVTJSONInspectorOption;
+
+  { TJSONInspectorTreeOptions }
 
   TJSONInspectorTreeOptions = class(TCustomStringTreeOptions)
   private
     FJSONOptions: TVTJSONInspectorOptions;
+    procedure SetJSONOptions(const Value: TVTJSONInspectorOptions);
+  public
+    procedure AssignTo(Dest: TPersistent); override;
   published
-    property JSONOptions: TVTJSONInspectorOptions read FJSONOptions write FJSONOptions default [];
+    property JSONOptions: TVTJSONInspectorOptions read FJSONOptions write SetJSONOptions default [];
     property AnimationOptions;
     property AutoOptions;
     property MiscOptions;
@@ -57,6 +62,7 @@ type
   public
     constructor Create(AOwner: TVirtualJSONInspector);
     function Add: TJSONPropertyDef;
+    function Add(const Name, DisplayName: String): TJSONPropertyDef;
     function Find(const Name: String): TJSONPropertyDef;
     property Items[Index: Integer]: TJSONPropertyDef read GetItem; default;
   end;
@@ -66,17 +72,18 @@ type
   TVirtualJSONInspector = class(TCustomVirtualStringTree)
   private
     FItemDataOffset: Cardinal;
-    FProperties: TStrings;
-    FJSONData: TJSONData;
+    FRootData: TJSONData;
     FOnFormatValue: TVTJSONFormatValue;
+    FPropertyDefs: TJSONPropertyDefs;
     function GetItemData(Node: PVirtualNode): Pointer;
     function GetOptions: TJSONInspectorTreeOptions;
     procedure InitHeader;
     function InitJSONNode(Node: PVirtualNode; JSONData: TJSONData): Cardinal;
     procedure LoadObject;
-    procedure SetProperties(const Value: TStrings);
-    procedure SetJSONData(Value: TJSONData);
+    function MatchFilters(ParentJSONData, JSONData: TJSONData; Index: Integer): Boolean;
+    procedure SetRootData(Value: TJSONData);
     procedure SetOptions(Value: TJSONInspectorTreeOptions);
+    procedure SetPropertyDefs(const Value: TJSONPropertyDefs);
   protected
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
     function DoFormatValue(const PropName: String; PropData: TJSONData): String;
@@ -90,9 +97,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Reload;
-    property JSONData: TJSONData read FJSONData write SetJSONData;
+    property RootData: TJSONData read FRootData write SetRootData;
   published
-    property Properties: TStrings read FProperties write SetProperties;
+    property PropertyDefs: TJSONPropertyDefs read FPropertyDefs write SetPropertyDefs;
     property OnFormatValue: TVTJSONFormatValue read FOnFormatValue write FOnFormatValue;
    //inherited properties
     property Action;
@@ -270,9 +277,6 @@ type
 
 implementation
 
-uses
-  LuiStrUtils;
-
 type
   TItemData = record
     DisplayText: String;
@@ -286,15 +290,32 @@ type
 
 procedure TVirtualJSONInspector.LoadObject;
 begin
-  if FJSONData = nil then
+  if FRootData = nil then
     Clear
   else
   begin
     BeginUpdate;
     Clear;
-    RootNodeCount := InitJSONNode(RootNode, FJSONData);
+    RootNodeCount := InitJSONNode(RootNode, FRootData);
     EndUpdate;
   end;
+end;
+
+function TVirtualJSONInspector.MatchFilters(ParentJSONData, JSONData: TJSONData; Index: Integer): Boolean;
+var
+  PropName: String;
+begin
+  Result := True;
+  if ParentJSONData.JSONType = jtObject then
+  begin
+    Result := not ((jioSkipNullProperties in TreeOptions.FJSONOptions) and (JSONData.JSONType = jtNull));
+    if Result and (jioSkipUnknownProperties in TreeOptions.FJSONOptions) then
+    begin
+      PropName := TJSONObject(ParentJSONData).Names[Index];
+      Result := FPropertyDefs.Find(PropName) <> nil;
+    end;
+  end;
+  //todo: add OnFilterXXX
 end;
 
 function TVirtualJSONInspector.GetItemData(Node: PVirtualNode): Pointer;
@@ -327,60 +348,41 @@ function TVirtualJSONInspector.InitJSONNode(Node: PVirtualNode;
   JSONData: TJSONData): Cardinal;
 var
   ItemData: PItemData;
-  ItemCount, ChildIndex, ItemIndex, i: Integer;
-  PropName, PropText: String;
-
-  function MatchFilters(Data: TJSONData): Boolean;
-  begin
-    Result := not ((jioSkipNull in TreeOptions.JSONOptions) and (Data.JSONType = jtNull))
-  end;
-
+  ItemCount, ChildIndex, i: Integer;
 begin
   ItemData := GetItemData(Node);
   ItemData^.Name := '';
   ItemData^.JSONData := JSONData;
+  //parse children
   ItemCount := JSONData.Count;
   SetLength(ItemData^.Children, ItemCount);
-
-  if (FProperties.Count > 0) and (JSONData.JSONType = jtObject) then
+  ChildIndex := 0;
+  for i := 0 to ItemCount - 1 do
   begin
-    ChildIndex := 0;
-    for i := 0 to FProperties.Count - 1 do
+    if MatchFilters(JSONData, JSONData.Items[i], i) then
     begin
-      ExtractNameValue(FProperties[i], PropName, PropText);
-      ItemIndex := TJSONObject(JSONData).IndexOfName(PropName);
-      if (ItemIndex <> -1) and MatchFilters(JSONData.Items[ItemIndex]) then
-      begin
-        ItemData^.Children[ChildIndex] := ItemIndex;
-        Inc(ChildIndex);
-      end;
+      ItemData^.Children[ChildIndex] := i;
+      Inc(ChildIndex);
     end;
-    SetLength(ItemData^.Children, ChildIndex);
-    Result := ChildIndex;
-  end
-  else
-  begin
-    for i := 0 to ItemCount - 1 do
-      ItemData^.Children[i] := i;
-    Result := ItemCount;
   end;
+  SetLength(ItemData^.Children, ChildIndex);
+  Result := ChildIndex;
 end;
 
-procedure TVirtualJSONInspector.SetProperties(const Value: TStrings);
+procedure TVirtualJSONInspector.SetRootData(Value: TJSONData);
 begin
-  FProperties.Assign(Value);
-  LoadObject;
-end;
-
-procedure TVirtualJSONInspector.SetJSONData(Value: TJSONData);
-begin
-  FJSONData := Value;
+  FRootData := Value;
   LoadObject;
 end;
 
 procedure TVirtualJSONInspector.SetOptions(Value: TJSONInspectorTreeOptions);
 begin
   TreeOptions.Assign(Value);
+end;
+
+procedure TVirtualJSONInspector.SetPropertyDefs(const Value: TJSONPropertyDefs);
+begin
+  FPropertyDefs.Assign(Value);
 end;
 
 procedure TVirtualJSONInspector.DoCanEdit(Node: PVirtualNode;
@@ -454,7 +456,7 @@ var
   ParentData, Data: PItemData;
   ParentJSONData: TJSONData;
   NodeChildCount: Cardinal;
-  i: Integer;
+  PropertyDef: TJSONPropertyDef;
 begin
   ParentData := GetItemData(Node^.Parent);
   ParentJSONData := ParentData^.JSONData;
@@ -466,9 +468,9 @@ begin
       begin
         Data^.DisplayText := '';
         Data^.Name := TJSONObject(ParentJSONData).Names[Node^.Index];
-        i := FProperties.IndexOfName(Data^.Name);
-        if i <> -1 then
-          Data^.DisplayText := FProperties.ValueFromIndex[i];
+        PropertyDef := FPropertyDefs.Find(Data^.Name);
+        if PropertyDef <> nil then
+          Data^.DisplayText := PropertyDef.DisplayName;
       end;
     jtArray:
       begin
@@ -488,8 +490,7 @@ constructor TVirtualJSONInspector.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FItemDataOffset := AllocateInternalDataArea(SizeOf(TItemData));
-  FProperties := TStringList.Create;
-  FProperties.NameValueSeparator := ';';
+  FPropertyDefs := TJSONPropertyDefs.Create(Self);
   InitHeader;
   with TreeOptions do
   begin
@@ -503,7 +504,7 @@ end;
 
 destructor TVirtualJSONInspector.Destroy;
 begin
-  FProperties.Destroy;
+  FPropertyDefs.Destroy;
   inherited Destroy;
 end;
 
@@ -561,6 +562,13 @@ begin
   Result := TJSONPropertyDef(inherited Add);
 end;
 
+function TJSONPropertyDefs.Add(const Name, DisplayName: String): TJSONPropertyDef;
+begin
+  Result := TJSONPropertyDef(inherited Add);
+  Result.FName := Name;
+  Result.FDisplayName := DisplayName;
+end;
+
 function TJSONPropertyDefs.Find(const Name: String): TJSONPropertyDef;
 var
   i: Integer;
@@ -572,6 +580,27 @@ begin
       Exit;
   end;
   Result := nil;
+end;
+
+{ TJSONInspectorTreeOptions }
+
+procedure TJSONInspectorTreeOptions.SetJSONOptions(const Value: TVTJSONInspectorOptions);
+begin
+  if Value = FJSONOptions then
+    Exit;
+  FJSONOptions := Value;
+  if not (csLoading in Owner.ComponentState) then
+    TVirtualJSONInspector(Owner).Reload;
+end;
+
+procedure TJSONInspectorTreeOptions.AssignTo(Dest: TPersistent);
+begin
+  if Dest is TJSONInspectorTreeOptions then
+  begin
+    with TJSONInspectorTreeOptions(Dest) do
+      JSONOptions := Self.JSONOptions;
+  end;
+  inherited AssignTo(Dest);
 end;
 
 end.
