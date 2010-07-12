@@ -454,27 +454,29 @@ procedure TVirtualJSONInspector.DoInitNode(ParentNode, Node: PVirtualNode;
   var InitStates: TVirtualNodeInitStates);
 var
   ParentData, Data: PItemData;
+  ItemIndex: Integer;
   ParentJSONData: TJSONData;
   NodeChildCount: Cardinal;
   PropertyDef: TJSONPropertyDef;
 begin
   ParentData := GetItemData(Node^.Parent);
   ParentJSONData := ParentData^.JSONData;
-  NodeChildCount := InitJSONNode(Node, ParentJSONData.Items[Node^.Index]);
+  ItemIndex := ParentData^.Children[Node^.Index];
+  NodeChildCount := InitJSONNode(Node, ParentJSONData.Items[ItemIndex]);
   Data := GetItemData(Node);
 
   case ParentJSONData.JSONType of
     jtObject:
       begin
         Data^.DisplayText := '';
-        Data^.Name := TJSONObject(ParentJSONData).Names[Node^.Index];
+        Data^.Name := TJSONObject(ParentJSONData).Names[ItemIndex];
         PropertyDef := FPropertyDefs.Find(Data^.Name);
         if PropertyDef <> nil then
           Data^.DisplayText := PropertyDef.DisplayName;
       end;
     jtArray:
       begin
-        Data^.DisplayText := IntToStr(Node^.Index);
+        Data^.DisplayText := IntToStr(ItemIndex);
       end;
   end;
   if NodeChildCount > 0 then
