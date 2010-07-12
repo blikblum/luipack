@@ -13,13 +13,17 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
-    ApplyPropertiesButton: TButton;
+    UpdatePropertyDefsButton: TButton;
+    SkipUnknownCheckBox: TCheckBox;
+    SkipNullCheckBox: TCheckBox;
     JSONFileNameEdit: TFileNameEdit;
     JSONInspector: TVirtualJSONInspector;
     Label1: TLabel;
     Label2: TLabel;
     PropertiesMemo: TMemo;
-    procedure ApplyPropertiesButtonClick(Sender: TObject);
+    procedure SkipNullCheckBoxChange(Sender: TObject);
+    procedure SkipUnknownCheckBoxChange(Sender: TObject);
+    procedure UpdatePropertyDefsButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure JSONFileNameEditAcceptFileName(Sender: TObject; var Value: String);
@@ -38,7 +42,7 @@ var
 implementation
 
 uses
-  strutils, jsonparser;
+  strutils, jsonparser, LuiStrUtils;
 
 {$R *.lfm}
 
@@ -47,12 +51,38 @@ uses
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   JSONData := TJSONObject.Create(['name', 'Luiz Américo', 'age', 32, 'gender', 'M']);
-  JSONInspector.JSONData := JSONData;
+  JSONInspector.RootData := JSONData;
 end;
 
-procedure TMainForm.ApplyPropertiesButtonClick(Sender: TObject);
+procedure TMainForm.UpdatePropertyDefsButtonClick(Sender: TObject);
+var
+  i: Integer;
+  AName, DisplayName: String;
 begin
-  JSONInspector.Properties := PropertiesMemo.Lines;
+  JSONInspector.PropertyDefs.Clear;
+  for i := 0 to PropertiesMemo.Lines.Count - 1 do
+  begin
+    ExtractNameValue(Trim(PropertiesMemo.Lines[i]), AName, DisplayName);
+    if Name <> '' then
+      JSONInspector.PropertyDefs.Add(AName, DisplayName);
+  end;
+  JSONInspector.Reload;
+end;
+
+procedure TMainForm.SkipNullCheckBoxChange(Sender: TObject);
+begin
+  if SkipNullCheckBox.Checked then
+    JSONInspector.TreeOptions.JSONOptions := JSONInspector.TreeOptions.JSONOptions + [jioSkipNullProperties]
+  else
+    JSONInspector.TreeOptions.JSONOptions := JSONInspector.TreeOptions.JSONOptions - [jioSkipNullProperties];
+end;
+
+procedure TMainForm.SkipUnknownCheckBoxChange(Sender: TObject);
+begin
+  if SkipUnknownCheckBox.Checked then
+    JSONInspector.TreeOptions.JSONOptions := JSONInspector.TreeOptions.JSONOptions + [jioSkipUnknownProperties]
+  else
+    JSONInspector.TreeOptions.JSONOptions := JSONInspector.TreeOptions.JSONOptions - [jioSkipUnknownProperties];
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -88,12 +118,12 @@ begin
     begin
       JSONData.Free;
       JSONData := Data;
-      JSONInspector.JSONData := JSONData;
+      JSONInspector.RootData := JSONData;
       JSONInspector.FullExpand;
     end
     else
     begin
-      ShowMessage(Format('Expecting a TJSONObject got "%s"', [Data.ClassName]));
+      ShowMessage(Format('Expecting a TJSONObject/Array got "%s"', [Data.ClassName]));
       Data.Destroy;
     end;
   end;
