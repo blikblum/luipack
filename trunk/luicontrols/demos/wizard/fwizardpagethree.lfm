@@ -1,0 +1,19 @@
+object PageThreeFrame: TPageThreeFrame
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  TabOrder = 0
+  DesignLeft = 317
+  DesignTop = 140
+  object Label1: TLabel
+    Left = 16
+    Height = 14
+    Top = 39
+    Width = 34
+    Caption = 'Page 3'
+    ParentColor = False
+  end
+end
