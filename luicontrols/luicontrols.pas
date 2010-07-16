@@ -1,4 +1,4 @@
-{ This file was automatically created by Lazarus. do not edit ! 
+{ This file was automatically created by Lazarus. Do not edit!
   This source is only used to compile and install the package.
  }
 
@@ -7,14 +7,14 @@ unit luicontrols;
 interface
 
 uses
-    ToggleLabel, MenuButton, registermisccontrols, SearchEdit, ValidateEdit, 
-  LazarusPackageIntf;
+    ToggleLabel, MenuButton, register_luicontrols, SearchEdit, ValidateEdit, 
+  WizardTypes, WizardControls, LazarusPackageIntf;
 
 implementation
 
 procedure Register; 
 begin
-  RegisterUnit('registermisccontrols', @registermisccontrols.Register); 
+  RegisterUnit('register_luicontrols', @register_luicontrols.Register); 
 end; 
 
 initialization

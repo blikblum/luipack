@@ -1,0 +1,91 @@
+object MainForm: TMainForm
+  Left = 349
+  Height = 406
+  Top = 192
+  Width = 570
+  Caption = 'Wizard Demo'
+  ClientHeight = 406
+  ClientWidth = 570
+  OnCreate = FormCreate
+  LCLVersion = '0.9.29'
+  object BottomPanel: TPanel
+    Left = 0
+    Height = 50
+    Top = 356
+    Width = 570
+    Align = alBottom
+    ClientHeight = 50
+    ClientWidth = 570
+    TabOrder = 0
+    object ButtonNext: TButton
+      Left = 472
+      Height = 25
+      Top = 12
+      Width = 75
+      Caption = 'Next'
+      OnClick = ButtonNextClick
+      TabOrder = 0
+    end
+    object ButtonPrevious: TButton
+      Left = 376
+      Height = 25
+      Top = 12
+      Width = 75
+      Caption = 'Previous'
+      OnClick = ButtonPreviousClick
+      TabOrder = 1
+    end
+  end
+  object TopPanel: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 570
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 570
+    Color = clWhite
+    ParentColor = False
+    TabOrder = 1
+    object TitleLabel: TLabel
+      Left = 8
+      Height = 20
+      Top = 1
+      Width = 83
+      Caption = 'TitleLabel'
+      Font.Height = -16
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object DescriptionLabel: TLabel
+      Left = 16
+      Height = 14
+      Top = 28
+      Width = 79
+      Caption = 'DescriptionLabel'
+      ParentColor = False
+    end
+  end
+  object WizardController: TWizardController
+    Pages = <    
+      item
+        Title = 'Page One'
+        Description = 'First Step'
+        ControlClassName = 'TPageOneFrame'
+      end    
+      item
+        Title = 'Page Two'
+        Description = 'Almost There'
+        ControlClassName = 'TPageTwoFrame'
+      end    
+      item
+        Title = 'Page Three'
+        Description = 'Finish!!'
+        ControlClassName = 'TPageThreeFrame'
+      end>
+    OnShowPage = WizardControllerShowPage
+    left = 44
+    top = 88
+  end
+end

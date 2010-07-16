@@ -1,0 +1,19 @@
+object PageTwoFrame: TPageTwoFrame
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  TabOrder = 0
+  DesignLeft = 333
+  DesignTop = 177
+  object Label1: TLabel
+    Left = 53
+    Height = 14
+    Top = 32
+    Width = 31
+    Caption = 'Page2'
+    ParentColor = False
+  end
+end

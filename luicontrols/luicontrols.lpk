@@ -5,11 +5,16 @@
     <Name Value="luicontrols"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -22,7 +27,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="5">
+    <Files Count="7">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -32,9 +37,9 @@ TSearchEdit
         <UnitName Value="MenuButton"/>
       </Item2>
       <Item3>
-        <Filename Value="registermisccontrols.pas"/>
+        <Filename Value="register_luicontrols.pas"/>
         <HasRegisterProc Value="True"/>
-        <UnitName Value="registermisccontrols"/>
+        <UnitName Value="register_luicontrols"/>
       </Item3>
       <Item4>
         <Filename Value="searchedit.pas"/>
@@ -42,14 +47,25 @@ TSearchEdit
       </Item4>
       <Item5>
         <Filename Value="validateedit.pas"/>
-        <UnitName Value="validateedit"/>
+        <UnitName Value="ValidateEdit"/>
       </Item5>
+      <Item6>
+        <Filename Value="wizardtypes.pas"/>
+        <UnitName Value="WizardTypes"/>
+      </Item6>
+      <Item7>
+        <Filename Value="wizardcontrols.pas"/>
+        <UnitName Value="WizardControls"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="1">
+    <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>
