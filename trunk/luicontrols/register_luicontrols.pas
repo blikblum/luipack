@@ -38,7 +38,7 @@ end;
 
 procedure RegisterUnitWizardControls;
 begin
-  RegisterComponents(ComponentPage, [TWizardController]);
+  RegisterComponents(ComponentPage, [TWizardController, TWizardButtonPanel]);
 end;
 
 
