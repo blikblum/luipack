@@ -7,6 +7,10 @@ interface
 uses
   Classes, SysUtils;
 
+const
+  WizardPageIntfID = 'lui_wizardpage';
+  WizardControllerIntfID = 'lui_wizardcontroller';
+
 type
   TWizardButton = (wbBack, wbNext, wbFinish, wbCancel, wbHelp);
 
@@ -14,8 +18,9 @@ type
 
   TWizardPageInfo = record
     Title: String;
-    LongTitle: String;
     Description: String;
+    VisibleButtons: TWizardButtons;
+    EnabledButtons: TWizardButtons;
   end;
 
   {$INTERFACES CORBA}
@@ -23,17 +28,18 @@ type
   { IWizardController }
 
   IWizardController = interface
+    [WizardControllerIntfID]
     function GetPageCount: Integer;
     procedure Previous;
     procedure Next;
-    procedure UpdateEnabledButtons(Buttons: TWizardButtons);
+    procedure UpdateButton(Button: TWizardButton; Visible, Enabled: Boolean);
   end;
 
   { IWizardPage }
 
   IWizardPage = interface
+    [WizardPageIntfID]
     procedure GetPageInfo(out PageInfo: TWizardPageInfo);
-    procedure GetButtons(out VisibleButtons, EnabledButtons: TWizardButtons);
     procedure RegisterController(Controller: IWizardController);
   end;
 

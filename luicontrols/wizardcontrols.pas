@@ -5,7 +5,7 @@ unit WizardControls;
 interface
 
 uses
-  Classes, SysUtils, WizardTypes, Controls;
+  Classes, SysUtils, WizardTypes, Controls, ExtCtrls, Buttons;
 
 type
 
@@ -19,16 +19,21 @@ type
     FControlClass: TControlClass;
     FControlClassName: String;
     FDescription: String;
+    FEnabledButtons: TWizardButtons;
     FTitle: String;
+    FVisibleButtons: TWizardButtons;
+    procedure SetControl(Value: TControl);
   protected
     function GetDisplayName: String; override;
   public
     property ControlClass: TControlClass read FControlClass write FControlClass;
   published
-    property Title: String read FTitle write FTitle;
-    property Description: String read FDescription write FDescription;
-    property Control: TControl read FControl write FControl;
+    property Control: TControl read FControl write SetControl;
     property ControlClassName: String read FControlClassName write FControlClassName;
+    property Description: String read FDescription write FDescription;
+    property EnabledButtons: TWizardButtons read FEnabledButtons write FEnabledButtons;
+    property Title: String read FTitle write FTitle;
+    property VisibleButtons: TWizardButtons read FVisibleButtons write FVisibleButtons;
   end;
 
   { TWizardPages }
@@ -63,7 +68,7 @@ type
     function GetPageCount: Integer;
     procedure Previous;
     procedure Next;
-    procedure UpdateEnabledButtons(Buttons: TWizardButtons);
+    procedure UpdateButton(Button: TWizardButton; Visible, Enabled: Boolean);
     //
     procedure AddPage(const Title, Description: String; ControlClass: TControlClass);
     procedure AddPage(const Title, Description: String; Control: TControl);
@@ -75,10 +80,84 @@ type
     property OnShowPage: TWizardShowPage read FOnShowPage write FOnShowPage;
   end;
 
+  { TWizardButtonPanel }
+
+  TWizardButtonPanel = class(TCustomPanel)
+  private
+    FCancelButton: TBitBtn;
+    FFinishButton: TBitBtn;
+    FNextButton: TBitBtn;
+    FPreviousButton: TBitBtn;
+  public
+    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property CancelButton: TBitBtn read FCancelButton;
+    property FinishButton: TBitBtn read FFinishButton;
+    property NextButton: TBitBtn read FNextButton;
+    property PreviousButton: TBitBtn read FPreviousButton;
+    //
+    property Align;
+    property Alignment;
+    property Anchors;
+    property AutoSize;
+    property BorderSpacing;
+    property BevelInner;
+    property BevelOuter;
+    property BevelWidth;
+    property BidiMode;
+    property BorderWidth;
+    property BorderStyle;
+    property Caption;
+    property ChildSizing;
+    property ClientHeight;
+    property ClientWidth;
+    property Color;
+    property Constraints;
+    property DockSite;
+    property DragCursor;
+    property DragKind;
+    property DragMode;
+    property Enabled;
+    property Font;
+    property FullRepaint;
+    property ParentBidiMode;
+    property ParentColor;
+    property ParentFont;
+    property ParentShowHint;
+    property PopupMenu;
+    property ShowHint;
+    property TabOrder;
+    property TabStop;
+    property UseDockManager default True;
+    property Visible;
+    property OnClick;
+    property OnDockDrop;
+    property OnDockOver;
+    property OnDblClick;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDock;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    property OnGetSiteInfo;
+    property OnGetDockCaption;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnResize;
+    property OnStartDock;
+    property OnStartDrag;
+    property OnUnDock;
+  end;
+
 implementation
 
 uses
-  LuiMiscUtils;
+  LuiMiscUtils{, LuiRTTIUtils};
 
 { TWizardController }
 
@@ -122,10 +201,14 @@ begin
     begin
       Parent := Owner as TWinControl;
       PageControl := PageControlClass.Create(Parent);
-      CallMethod(PageControl, 'InitControl');
+      //seems that currently fpc does not allow to set a corba interface through RTTI
+      //SetObjectProperties(PageControl, ['WizardController', IWizardController(Self)]);
       PageControl.Align := alClient;
       PageControl.Parent := Parent;
+      //setting control register the wizard in the page
       NextPage.Control := PageControl;
+      //InitControl should be called after setting Control property
+      CallMethod(PageControl, 'InitControl');
     end;
   end;
   if PageControl <> nil then
@@ -176,7 +259,8 @@ begin
   ShowPage(FPageIndex + 1);
 end;
 
-procedure TWizardController.UpdateEnabledButtons(Buttons: TWizardButtons);
+procedure TWizardController.UpdateButton(Button: TWizardButton; Visible,
+  Enabled: Boolean);
 begin
 
 end;
@@ -206,6 +290,25 @@ end;
 
 { TWizardPage }
 
+procedure TWizardPage.SetControl(Value: TControl);
+var
+  WizardPage: IWizardPage;
+  PageInfo: TWizardPageInfo;
+begin
+  if FControl = Value then
+    Exit;
+  FControl := Value;
+  if (FControl<> nil) and FControl.GetInterface(WizardPageIntfID, WizardPage) then
+  begin
+    WizardPage.RegisterController(((Collection as TWizardPages).FOwner) as IWizardController);
+    WizardPage.GetPageInfo(PageInfo);
+    Title := PageInfo.Title;
+    Description := PageInfo.Description;
+    EnabledButtons := PageInfo.EnabledButtons;
+    VisibleButtons := PageInfo.VisibleButtons;
+  end;
+end;
+
 function TWizardPage.GetDisplayName: String;
 begin
   Result := FTitle;
@@ -222,6 +325,56 @@ constructor TWizardPages.Create(AOwner: TWizardController);
 begin
   inherited Create(TWizardPage);
   FOwner := AOwner;
+end;
+
+{ TWizardButtonPanel }
+
+constructor TWizardButtonPanel.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+  FCancelButton := TBitBtn.Create(Self);
+  FCancelButton.Parent := Self;
+  FCancelButton.Caption := 'Cancel';
+  FCancelButton.Anchors := [akRight, akTop];
+  FCancelButton.AnchorParallel(akRight, 4, Self);
+  FCancelButton.AnchorVerticalCenterTo(Self);
+  FCancelButton.BorderSpacing.Around := 4;
+
+  FFinishButton := TBitBtn.Create(Self);
+  FFinishButton.Parent := Self;
+  FFinishButton.Caption := 'Finish';
+  FFinishButton.Anchors := [akRight, akTop];
+  FFinishButton.AnchorToNeighbour(akRight, 4, FCancelButton);
+  FFinishButton.AnchorVerticalCenterTo(Self);
+  FFinishButton.BorderSpacing.Around := 4;
+
+
+  FNextButton := TBitBtn.Create(Self);
+  FNextButton.Parent := Self;
+  FNextButton.Caption := 'Next';
+  FNextButton.Anchors := [akRight, akTop];
+  FNextButton.AnchorToNeighbour(akRight, 4, FFinishButton);
+  FNextButton.AnchorVerticalCenterTo(Self);
+  FNextButton.BorderSpacing.Around := 4;
+
+
+  FPreviousButton := TBitBtn.Create(Self);
+  FPreviousButton.Parent := Self;
+  FPreviousButton.Caption := 'Previous';
+  FPreviousButton.Anchors := [akRight, akTop];
+  FPreviousButton.AnchorToNeighbour(akRight, 4, FNextButton);
+  FPreviousButton.AnchorVerticalCenterTo(Self);
+  FPreviousButton.BorderSpacing.Around := 4;
+
+end;
+
+destructor TWizardButtonPanel.Destroy;
+begin
+  FNextButton.Destroy;
+  FPreviousButton.Destroy;
+  FCancelButton.Destroy;
+  FFinishButton.Destroy;
+  inherited Destroy;
 end;
 
 end.
