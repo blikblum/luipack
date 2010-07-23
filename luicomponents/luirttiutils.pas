@@ -85,6 +85,15 @@ begin
   end;
 end;
 
+function VarRecToInterface(const VarRec: TVarRec): IInterface;
+begin
+  case VarRec.VType of
+    vtInterface: Result := IInterface(VarRec.VInterface);
+  else
+    raise Exception.Create('Type mismatch: is not possible convert TVarRec to Interface');
+  end;
+end;
+
 function VarRecToBoolean(const VarRec: TVarRec): Integer;
 begin
   case VarRec.VType of
@@ -129,6 +138,8 @@ begin
           SetInt64Prop(Instance, PropInfo, VarRecToInt64(PropertyValue));
         tkClass:
           SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
+        tkInterface:
+          SetInterfaceProp(Instance, PropInfo, VarRecToInterface(PropertyValue));
         tkBool:
           SetOrdProp(Instance, PropInfo, VarRecToBoolean(PropertyValue));
       else
