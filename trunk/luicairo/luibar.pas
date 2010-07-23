@@ -1,6 +1,7 @@
 unit LuiBar;
 
 {$mode objfpc}{$H+}
+{.$define DEBUG_LUIBAR}
 
 interface
 
@@ -308,7 +309,8 @@ type
 implementation
 
 uses
-  sharedlogger, CairoUtils;
+  {$ifdef DEBUG_LUIBAR}sharedlogger,{$endif}
+  CairoUtils;
 
 { TLuiBarCellList }
 
@@ -458,7 +460,7 @@ begin
         FOwner.FClientBounds.Right := FOwner.Width;
       end;
   end;
-  Logger.Send('ClientArea', FOwner.ClientBounds);
+  {$ifdef DEBUG_LUIBAR}Logger.Send('LuiBar - ClientArea', FOwner.ClientBounds);{$endif}
   FRequiresUpdate := False;
 end;
 
