@@ -8,8 +8,8 @@ interface
 
 uses
     LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
-  LuiRecordBuffer, LuiMessages, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, 
-  LuiMiscUtils, LazarusPackageIntf;
+  LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
+  LazarusPackageIntf;
 
 implementation
 
