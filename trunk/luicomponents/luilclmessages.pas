@@ -1,4 +1,4 @@
-unit LuiMessages;
+unit LuiLCLMessages;
 
 {$mode objfpc}{$H+}
 

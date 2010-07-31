@@ -4,16 +4,21 @@
     <PathDelim Value="\"/>
     <Name Value="luicomponents"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="10">
+    <Files Count="9">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -36,35 +41,28 @@
         <UnitName Value="LuiRecordBuffer"/>
       </Item5>
       <Item6>
-        <Filename Value="luimessages.pas"/>
-        <UnitName Value="LuiMessages"/>
-      </Item6>
-      <Item7>
         <Filename Value="luidateutils.pas"/>
         <UnitName Value="LuiDateUtils"/>
-      </Item7>
-      <Item8>
+      </Item6>
+      <Item7>
         <Filename Value="luirttiutils.pas"/>
         <UnitName Value="LuiRTTIUtils"/>
-      </Item8>
-      <Item9>
+      </Item7>
+      <Item8>
         <Filename Value="luistrutils.pas"/>
         <UnitName Value="LuiStrUtils"/>
-      </Item9>
-      <Item10>
+      </Item8>
+      <Item9>
         <Filename Value="luimiscutils.pas"/>
         <UnitName Value="LuiMiscUtils"/>
-      </Item10>
+      </Item9>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="2">
+    <RequiredPkgs Count="1">
       <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item2>
+      </Item1>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>
