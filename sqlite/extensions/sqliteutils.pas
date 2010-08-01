@@ -9,29 +9,62 @@ uses
 
 type
 
-  TSqliteQueryBuilderOption = (sqoSaveToSqlList);
+  TSqliteQueryBuilder = class;
 
-  TSqliteQueryBuilderOptions = set of TSqliteQueryBuilderOption;
+  //TSqliteQueryBuilderOption = (sqoSaveToSqlList);
+
+  //TSqliteQueryBuilderOptions = set of TSqliteQueryBuilderOption;
 
   TIntegerList = specialize TFPGList <Integer>;
 
-  //todo: add ability to create query for more than one Table
+  { TSqliteTableDef }
+
+  TSqliteTableDef = class(TCollectionItem)
+  private
+    FExcludeFields: TStrings;
+    FIncludeFields: TStrings;
+    FPrimaryKey: String;
+    FTableName: String;
+    procedure SetExcludeFields(const Value: TStrings);
+    procedure SetIncludeFields(const Value: TStrings);
+  protected
+    function GetDisplayName: string; override;
+  public
+    constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
+    procedure Assign(Source: TPersistent); override;
+  published
+    property ExcludeFields: TStrings read FExcludeFields write SetExcludeFields;
+    property IncludeFields: TStrings read FIncludeFields write SetIncludeFields;
+    property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
+    property TableName: String read FTableName write FTableName;
+  end;
+
+  { TSqliteTableDefs }
+
+  TSqliteTableDefs = class(TCollection)
+  private
+    FOwner: TSqliteQueryBuilder;
+    function GetItems(Index: Integer): TSqliteTableDef;
+  protected
+    function GetOwner: TPersistent; override;
+  public
+    constructor Create(AOwner: TSqliteQueryBuilder);
+    function Find(const TableName: String): TSqliteTableDef;
+    property Items[Index: Integer]: TSqliteTableDef read GetItems; default;
+  end;
 
   { TSqliteQueryBuilder }
 
   TSqliteQueryBuilder = class(TComponent)
   private
     FDataset: TCustomSqliteDataset;
-    FExcludeFields: TStrings;
-    FIncludeFields: TStrings;
-    FOptions: TSqliteQueryBuilderOptions;
-    FPrimaryKey: TStrings;
+    //FOptions: TSqliteQueryBuilderOptions;
     FRecordStates: TRecordStateSet;
     FSQL: TStrings;
     FFieldList: TIntegerList;
     FPrimaryKeyList: TIntegerList;
-    FTableName: String;
-    FWorkSql: TStrings;
+    FTableDefs: TSqliteTableDefs;
     FWorkTableName: String;
     //templates
     FDeleteTemplate: String;
@@ -40,26 +73,24 @@ type
     FPrimaryKeyTemplate: String;
     FFieldValues: array of String;
     FFieldPrimaryKey: array of String;
-    procedure BuildTemplates;
+    procedure BuildPrimaryKeyList(TableDef: TSqliteTableDef);
+    procedure BuildTableSQL(TableDef: TSqliteTableDef);
+    procedure BuildTemplates(TableDef: TSqliteTableDef);
     function FormatPrimaryKeyList(Values: PPChar): String;
     function FormatValueList(const Template: String; Values: PPChar): String;
+    function GetMappedFieldName(TableDef: TSqliteTableDef; FieldIndex: Integer): String;
     procedure ParseUpdate(UserData: Pointer; Values: PPChar; ABookmark: TBookmark; State: TRecordState);
-    procedure SetExcludeFields(const AValue: TStrings);
-    procedure SetIncludeFields(const AValue: TStrings);
-    procedure SetPrimaryKey(const AValue: TStrings);
+    procedure SetTableDefs(Value: TSqliteTableDefs);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure Execute;
+    procedure BuildSQL(const TableName: String = '');
     property SQL: TStrings read FSQL;
   published
     property Dataset: TCustomSqliteDataset read FDataset write FDataset;
-    property ExcludeFields: TStrings read FExcludeFields write SetExcludeFields;
-    property IncludeFields: TStrings read FIncludeFields write SetIncludeFields;
-    property Options: TSqliteQueryBuilderOptions read FOptions write FOptions default [sqoSaveToSqlList];
-    property PrimaryKey: TStrings read FPrimaryKey write SetPrimaryKey;
+    //property Options: TSqliteQueryBuilderOptions read FOptions write FOptions default [sqoSaveToSqlList];
     property RecordStates: TRecordStateSet read FRecordStates write FRecordStates default [rsAdded, rsUpdated, rsDeleted];
-    property TableName: String read FTableName write FTableName;
+    property TableDefs: TSqliteTableDefs read FTableDefs write SetTableDefs;
   end;
 
 implementation
@@ -115,7 +146,82 @@ end;
 
 { TSqliteQueryBuilder }
 
-procedure TSqliteQueryBuilder.BuildTemplates;
+procedure TSqliteQueryBuilder.BuildPrimaryKeyList(TableDef: TSqliteTableDef);
+var
+  PrimaryKeyStrList: TStringList;
+  i, j: Integer;
+  FieldName: String;
+begin
+  PrimaryKeyStrList := TStringList.Create;
+  PrimaryKeyStrList.Delimiter := ',';
+  PrimaryKeyStrList.StrictDelimiter := True;
+  PrimaryKeyStrList.DelimitedText := TableDef.PrimaryKey;
+
+  if PrimaryKeyStrList.Count = 0 then
+    PrimaryKeyStrList.DelimitedText := FDataset.PrimaryKey;
+  FPrimaryKeyList.Clear;
+  for i := 0 to PrimaryKeyStrList.Count - 1 do
+  begin
+    FieldName := PrimaryKeyStrList.Names[i];
+    if FieldName = '' then
+      FieldName := PrimaryKeyStrList[i];
+    j := FDataset.FieldDefs.IndexOf(FieldName);
+    if j <> -1 then
+      FPrimaryKeyList.Add(j);
+  end;
+  if ([rsUpdated, rsDeleted] * FRecordStates <> []) and (FPrimaryKeyList.Count = 0) then
+    raise Exception.CreateFmt('PrimaryKey "%s" invalid. A valid key is required for update or delete records',
+      [PrimaryKeyStrList.DelimitedText]);
+  SetLength(FFieldPrimaryKey, FPrimaryKeyList.Count);
+
+  PrimaryKeyStrList.Destroy;
+end;
+
+procedure TSqliteQueryBuilder.BuildTableSQL(TableDef: TSqliteTableDef);
+var
+  i, j: Integer;
+  FieldName: String;
+begin
+  FFieldList.Clear;
+  //add the fields of the include list
+  for i := 0 to TableDef.IncludeFields.Count - 1 do
+  begin
+    FieldName := TableDef.IncludeFields.Names[i];
+    if FieldName = '' then
+      FieldName := TableDef.IncludeFields[i];
+    j := FDataset.FieldDefs.IndexOf(FieldName);
+    if j <> -1 then
+      FFieldList.Add(j);
+  end;
+  //if include list is empty or if no field is found, add all
+  if FFieldList.Count = 0 then
+  begin
+    for i := 0 to FDataset.FieldDefs.Count - 1 do
+      FFieldList.Add(i);
+  end;
+
+  //now remove the fields of the exclude list
+  for i := 0 to TableDef.ExcludeFields.Count - 1 do
+    FFieldList.Remove(FDataset.FieldDefs.IndexOf(TableDef.ExcludeFields[i]));
+  if FFieldList.Count = 0 then
+    raise Exception.Create('No field specified');
+  SetLength(FFieldValues, FFieldList.Count);
+
+  //build primary key list
+  BuildPrimaryKeyList(TableDef);
+
+  if TableDef.TableName = '' then
+    FWorkTableName := FDataset.TableName
+  else
+    FWorkTableName := TableDef.TableName;
+
+  BuildTemplates(TableDef);
+  FSql.Add('BEGIN;');
+  FDataset.QueryUpdates(FRecordStates, @ParseUpdate);
+  FSql.Add('COMMIT;');
+end;
+
+procedure TSqliteQueryBuilder.BuildTemplates(TableDef: TSqliteTableDef);
 var
   i: Integer;
   FieldName, ValueList: String;
@@ -127,13 +233,13 @@ begin
   for i := 0 to FFieldList.Count - 2 do
   begin
     ValueList := ValueList + '%' + IntToStr(i) + '%,';
-    FieldName := FDataset.FieldDefs[i].Name;
+    FieldName := GetMappedFieldName(TableDef, FFieldList[i]);
     FInsertTemplate := FInsertTemplate + FieldName + ',';
     FUpdateTemplate := FUpdateTemplate + FieldName + ' = %' + IntToStr(i) + '%,';
   end;
   //set the last field
   i := FFieldList.Count - 1;
-  FieldName := FDataset.FieldDefs[i].Name;
+  FieldName := GetMappedFieldName(TableDef, FFieldList[i]);
   ValueList := ValueList + '%' + IntToStr(i) + '%';
   FInsertTemplate := FInsertTemplate + FieldName + ') VALUES (' + ValueList + ');';
   FUpdateTemplate := FUpdateTemplate + FieldName + '= %' + IntToStr(i) + '% WHERE ';
@@ -142,7 +248,7 @@ begin
   FPrimaryKeyTemplate := '';
   for i := 0 to FPrimaryKeyList.Count - 1 do
   begin
-    FieldName := FDataset.FieldDefs[i].Name;
+    FieldName := GetMappedFieldName(TableDef, FPrimaryKeyList[i]);
     FPrimaryKeyTemplate := FPrimaryKeyTemplate + FieldName + ' = %' + IntToStr(i) + '%';
     if i < FPrimaryKeyList.Count - 1 then
       FPrimaryKeyTemplate := FPrimaryKeyTemplate + ' AND '
@@ -169,128 +275,155 @@ begin
   Result := ReplaceParams(Template, FFieldValues);
 end;
 
+function TSqliteQueryBuilder.GetMappedFieldName(TableDef: TSqliteTableDef; FieldIndex: Integer): String;
+var
+  i: Integer;
+begin
+  i := TableDef.IncludeFields.IndexOfName(FDataset.FieldDefs[FieldIndex].Name);
+  if i <> -1 then
+    Result := TableDef.IncludeFields.ValueFromIndex[i]
+  else
+    Result := FDataset.FieldDefs[FieldIndex].Name;
+end;
+
 procedure TSqliteQueryBuilder.ParseUpdate(UserData: Pointer; Values: PPChar;
   ABookmark: TBookmark; State: TRecordState);
 begin
   case State of
     rsAdded:
     begin
-      FWorkSql.Add(FormatValueList(FInsertTemplate, Values));
+      FSql.Add(FormatValueList(FInsertTemplate, Values));
     end;
     rsDeleted:
     begin
-      FWorkSql.Add(FDeleteTemplate + FormatPrimaryKeyList(Values));
+      FSql.Add(FDeleteTemplate + FormatPrimaryKeyList(Values));
     end;
     rsUpdated:
     begin
-      FWorkSql.Add(FormatValueList(FUpdateTemplate, Values) +
+      FSql.Add(FormatValueList(FUpdateTemplate, Values) +
         FormatPrimaryKeyList(Values));
     end;
   end;
 end;
 
-procedure TSqliteQueryBuilder.SetExcludeFields(const AValue: TStrings);
+procedure TSqliteQueryBuilder.SetTableDefs(Value: TSqliteTableDefs);
 begin
-  FExcludeFields.Assign(AValue);
-end;
-
-procedure TSqliteQueryBuilder.SetIncludeFields(const AValue: TStrings);
-begin
-  FIncludeFields.Assign(AValue);
-end;
-
-procedure TSqliteQueryBuilder.SetPrimaryKey(const AValue: TStrings);
-begin
-  FPrimaryKey.Assign(AValue);
+  FTableDefs.Assign(Value);
 end;
 
 constructor TSqliteQueryBuilder.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FIncludeFields := TStringList.Create;
-  FExcludeFields := TStringList.Create;
+  FTableDefs := TSqliteTableDefs.Create(Self);
   FSQL := TStringList.Create;
   FFieldList := TIntegerList.Create;
   FPrimaryKeyList := TIntegerList.Create;
-  FPrimaryKey := TStringList.Create;
-  FPrimaryKey.Delimiter := ',';
-  FPrimaryKey.StrictDelimiter := True;
   FRecordStates := [rsAdded, rsUpdated, rsDeleted];
-  FOptions := [sqoSaveToSqlList];
 end;
 
 destructor TSqliteQueryBuilder.Destroy;
 begin
-  FIncludeFields.Destroy;
-  FExcludeFields.Destroy;
+  FTableDefs.Destroy;
   FSQL.Destroy;
   FFieldList.Destroy;
   FPrimaryKeyList.Destroy;
-  FPrimaryKey.Destroy;
   inherited Destroy;
 end;
 
-procedure TSqliteQueryBuilder.Execute;
+procedure TSqliteQueryBuilder.BuildSQL(const TableName: String);
 var
-  i, j: Integer;
-  EmptyPrimaryKey: Boolean;
+  i: Integer;
+  TableDef: TSqliteTableDef;
 begin
   if FDataset = nil then
     raise Exception.Create('Dataset not set');
-
-  FFieldList.Clear;
-  //add the fields of the include list
-  for i := 0 to FIncludeFields.Count - 1 do
+  FSql.Clear;
+  if TableName <> '' then
   begin
-    j := FDataset.FieldDefs.IndexOf(FIncludeFields[i]);
-    if j <> -1 then
-      FFieldList.Add(j);
-  end;
-  //if include list is empty or if no field is found, add all
-  if FFieldList.Count = 0 then
-  begin
-    for i := 0 to FDataset.FieldDefs.Count - 1 do
-      FFieldList.Add(i);
-  end;
-  //now remove the fields of the exclude list
-  for i := 0 to FExcludeFields.Count - 1 do
-    FFieldList.Remove(FDataset.FieldDefs.IndexOf(FExcludeFields[i]));
-  if FFieldList.Count = 0 then
-    raise Exception.Create('No field specified');
-  SetLength(FFieldValues, FFieldList.Count);
-
-  //build primary key list
-  EmptyPrimaryKey := FPrimaryKey.Count = 0;
-  if EmptyPrimaryKey then
-    FPrimaryKey.DelimitedText := FDataset.PrimaryKey;
-  FPrimaryKeyList.Clear;
-  for i := 0 to FPrimaryKey.Count - 1 do
-  begin
-    j := FDataset.FieldDefs.IndexOf(FPrimaryKey[i]);
-    if j <> -1 then
-      FPrimaryKeyList.Add(j);
-  end;
-  if ([rsUpdated, rsDeleted] * FRecordStates <> []) and (FPrimaryKeyList.Count = 0) then
-    Exception.Create('A primary key must be set for updated or deleted records');
-  if EmptyPrimaryKey then
-    FPrimaryKey.Clear;
-  SetLength(FFieldPrimaryKey, FPrimaryKeyList.Count);
-
-  if sqoSaveToSqlList in FOptions then
-    FWorkSql := FDataset.SQLList
+    TableDef := FTableDefs.Find(TableName);
+    if TableDef <> nil then
+      BuildTableSQL(TableDef);
+  end
   else
-    FWorkSql := FSQL;
+  begin
+    for i := 0 to FTableDefs.Count - 1 do
+      BuildTableSQL(TSqliteTableDef(FTableDefs.Items[i]));
+  end;
+end;
 
-  if FTableName = '' then
-    FWorkTableName := FDataset.TableName
+{ TSqliteTableDef }
+
+procedure TSqliteTableDef.SetExcludeFields(const Value: TStrings);
+begin
+  FExcludeFields.Assign(Value);
+end;
+
+procedure TSqliteTableDef.SetIncludeFields(const Value: TStrings);
+begin
+  FIncludeFields.Assign(Value);
+end;
+
+function TSqliteTableDef.GetDisplayName: string;
+begin
+  Result := FTableName;
+end;
+
+constructor TSqliteTableDef.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  FIncludeFields := TStringList.Create;
+  FExcludeFields := TStringList.Create;
+end;
+
+destructor TSqliteTableDef.Destroy;
+begin
+  FIncludeFields.Destroy;
+  FExcludeFields.Destroy;
+  inherited Destroy;
+end;
+
+procedure TSqliteTableDef.Assign(Source: TPersistent);
+begin
+  if Source is TSqliteTableDef then
+  begin
+    ExcludeFields := TSqliteTableDef(Source).ExcludeFields;
+    IncludeFields := TSqliteTableDef(Source).IncludeFields;
+    TableName := TSqliteTableDef(Source).TableName;
+    PrimaryKey := TSqliteTableDef(Source).PrimaryKey;
+  end
   else
-    FWorkTableName := FTableName;
+    inherited Assign(Source);
+end;
 
-  BuildTemplates;
-  FWorkSql.Clear;
-  FWorkSql.Add('BEGIN;');
-  FDataset.QueryUpdates(FRecordStates, @ParseUpdate);
-  FWorkSql.Add('COMMIT;');
+{ TSqliteTableDefs }
+
+function TSqliteTableDefs.GetItems(Index: Integer): TSqliteTableDef;
+begin
+  Result := TSqliteTableDef(inherited GetItem(Index));
+end;
+
+function TSqliteTableDefs.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
+constructor TSqliteTableDefs.Create(AOwner: TSqliteQueryBuilder);
+begin
+  inherited Create(TSqliteTableDef);
+  FOwner := AOwner;
+end;
+
+function TSqliteTableDefs.Find(const TableName: String): TSqliteTableDef;
+var
+  i: Integer;
+begin
+  for i := 0 to Count - 1 do
+  begin
+    Result := TSqliteTableDef(inherited GetItem(i));
+    if CompareText(TableName, Result.TableName) = 0 then
+      Exit;
+  end;
+  Result := nil;
 end;
 
 end.
