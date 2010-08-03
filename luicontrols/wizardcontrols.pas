@@ -131,6 +131,8 @@ type
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure SetButtonsState(VisibleButtons, EnabledButtons: TWizardButtons);
+  protected
+    procedure DoOnResize; override;
   published
     property Controller: TWizardController read FController write SetController;
     property CancelButton: TWizardPanelBitBtn read FCancelButton;
@@ -150,7 +152,6 @@ type
     property BidiMode;
     property BorderWidth;
     property BorderStyle;
-    property Caption;
     property ChildSizing;
     property ClientHeight;
     property ClientWidth;
@@ -462,20 +463,15 @@ begin
   FCancelButton := CreateButton(wbCancel);
   FCancelButton.AnchorParallel(akRight, 4, Self);
   FCancelButton.AnchorVerticalCenterTo(Self);
-  FCancelButton.BorderSpacing.Around := 4;
 
   FFinishButton := CreateButton(wbFinish);
-  FFinishButton.AnchorToNeighbour(akRight, 4, FCancelButton);
   FFinishButton.AnchorVerticalCenterTo(Self);
-  FFinishButton.BorderSpacing.Around := 4;
+
 
   FNextButton := CreateButton(wbNext);
-  FNextButton.AnchorToNeighbour(akRight, 8, FFinishButton);
   FNextButton.AnchorVerticalCenterTo(Self);
-  FNextButton.BorderSpacing.Right := 8;
 
   FPreviousButton := CreateButton(wbPrevious);
-  FPreviousButton.AnchorToNeighbour(akRight, 2, FNextButton);
   FPreviousButton.AnchorVerticalCenterTo(Self);
 end;
 
@@ -493,6 +489,7 @@ procedure TWizardButtonPanel.SetButtonsState(VisibleButtons,
 begin
   FCancelButton.Visible := wbCancel in VisibleButtons;
   FFinishButton.Visible := wbFinish in VisibleButtons;
+
   FNextButton.Visible := wbNext in VisibleButtons;
   FPreviousButton.Visible := wbPrevious in VisibleButtons;
 
@@ -500,6 +497,14 @@ begin
   FFinishButton.Enabled := wbFinish in EnabledButtons;
   FNextButton.Enabled := wbNext in EnabledButtons;
   FPreviousButton.Enabled := wbPrevious in EnabledButtons;
+end;
+
+procedure TWizardButtonPanel.DoOnResize;
+begin
+  inherited DoOnResize;
+  FFinishButton.Left := FCancelButton.Left - FFinishButton.Width - 8;
+  FNextButton.Left := FFinishButton.Left - FNextButton.Width - 8;
+  FPreviousButton.Left := FNextButton.Left - FPreviousButton.Width - 2;
 end;
 
 { TWizardPanelBitBtn }
