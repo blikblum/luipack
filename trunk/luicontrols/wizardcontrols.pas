@@ -130,7 +130,7 @@ type
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
-    procedure SetButtonsState(VisibleButtons, EnabledButtons: TWizardButtons);
+    procedure UpdateButtons(Page: TWizardPage);
   protected
     procedure DoOnResize; override;
   published
@@ -484,12 +484,15 @@ begin
   inherited Destroy;
 end;
 
-procedure TWizardButtonPanel.SetButtonsState(VisibleButtons,
-  EnabledButtons: TWizardButtons);
+procedure TWizardButtonPanel.UpdateButtons(Page: TWizardPage);
+var
+  VisibleButtons, EnabledButtons: TWizardButtons;
 begin
+  VisibleButtons := Page.VisibleButtons;
+  EnabledButtons := Page.EnabledButtons;
+
   FCancelButton.Visible := wbCancel in VisibleButtons;
   FFinishButton.Visible := wbFinish in VisibleButtons;
-
   FNextButton.Visible := wbNext in VisibleButtons;
   FPreviousButton.Visible := wbPrevious in VisibleButtons;
 
