@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  Buttons, ExtCtrls, LMessages, LCLType, LuiMessages;
+  Buttons, ExtCtrls, LMessages, LCLType, LuiLCLMessages;
 
   { TFrameEditorForm }
 
