@@ -12,7 +12,11 @@ const
   WizardControllerIntfID = 'lui_wizardcontroller';
 
 type
-  TWizardButton = (wbBack, wbNext, wbFinish, wbCancel, wbHelp);
+  TWizardButton = (wbPrevious, wbNext, wbFinish, wbCancel, wbHelp);
+
+  TWizardAction = (waPrevious, waNext, waFinish, waCancel, waHelp, waCustom);
+
+  TWizardDirection = (wdNext, wdPrevious);
 
   TWizardButtons = set of TWizardButton;
 
@@ -30,16 +34,15 @@ type
   IWizardController = interface
     [WizardControllerIntfID]
     function GetPageCount: Integer;
-    procedure Previous;
-    procedure Next;
-    procedure UpdateButton(Button: TWizardButton; Visible, Enabled: Boolean);
+    procedure MoveBy(Offset: Integer);
+    procedure PageStateChanged;
   end;
 
   { IWizardPage }
 
   IWizardPage = interface
     [WizardPageIntfID]
-    procedure GetPageInfo(out PageInfo: TWizardPageInfo);
+    procedure GetPageInfo(var PageInfo: TWizardPageInfo);
     procedure RegisterController(Controller: IWizardController);
   end;
 
@@ -52,7 +55,7 @@ type
   end;
 
 const
-  AllWizardButtons = [wbBack, wbNext, wbFinish, wbCancel, wbHelp];
+  AllWizardButtons = [wbPrevious, wbNext, wbFinish, wbCancel, wbHelp];
 
 implementation
 

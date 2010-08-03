@@ -7,9 +7,14 @@ interface
 uses
   Classes, SysUtils, WizardTypes, Controls, ExtCtrls, Buttons;
 
+const
+  WizardDefaultButtons = [wbPrevious, wbNext, wbCancel];
+
 type
 
   TWizardController = class;
+
+  TWizardButtonPanel = class;
 
   { TWizardPage }
 
@@ -20,20 +25,23 @@ type
     FControlClassName: String;
     FDescription: String;
     FEnabledButtons: TWizardButtons;
+    FPageIntf: IWizardPage;
     FTitle: String;
     FVisibleButtons: TWizardButtons;
     procedure SetControl(Value: TControl);
+    procedure UpdatePageInfo;
   protected
     function GetDisplayName: String; override;
   public
+    constructor Create(ACollection: TCollection); override;
     property ControlClass: TControlClass read FControlClass write FControlClass;
   published
     property Control: TControl read FControl write SetControl;
     property ControlClassName: String read FControlClassName write FControlClassName;
     property Description: String read FDescription write FDescription;
-    property EnabledButtons: TWizardButtons read FEnabledButtons write FEnabledButtons;
+    property EnabledButtons: TWizardButtons read FEnabledButtons write FEnabledButtons default WizardDefaultButtons;
     property Title: String read FTitle write FTitle;
-    property VisibleButtons: TWizardButtons read FVisibleButtons write FVisibleButtons;
+    property VisibleButtons: TWizardButtons read FVisibleButtons write FVisibleButtons default WizardDefaultButtons;
   end;
 
   { TWizardPages }
@@ -48,13 +56,14 @@ type
     property Items[Index: Integer]: TWizardPage read GetItem; default;
   end;
 
-  TWizardShowPage = procedure(Sender: TWizardController; Page: TWizardPage) of object;
+  TWizardPageEvent = procedure(Sender: TWizardController; Page: TWizardPage) of object;
 
   { TWizardController }
 
   TWizardController = class(TComponent, IWizardController)
   private
-    FOnShowPage: TWizardShowPage;
+    FOnPageStateChange: TWizardPageEvent;
+    FOnShowPage: TWizardPageEvent;
     FPageIndex: Integer;
     FPages: TWizardPages;
     procedure AddPage(const Title, Description: String; Control: TControl;
@@ -66,36 +75,69 @@ type
     destructor Destroy; override;
     //IWizardController
     function GetPageCount: Integer;
-    procedure Previous;
-    procedure Next;
-    procedure UpdateButton(Button: TWizardButton; Visible, Enabled: Boolean);
+    procedure MoveBy(Offset: Integer);
+    procedure PageStateChanged;
     //
     procedure AddPage(const Title, Description: String; ControlClass: TControlClass);
     procedure AddPage(const Title, Description: String; Control: TControl);
     procedure AddPage(const Title, Description, ControlClassName: String);
-    procedure First;
+    procedure Start;
   published
     property Pages: TWizardPages read FPages write SetPages;
     //events
-    property OnShowPage: TWizardShowPage read FOnShowPage write FOnShowPage;
+    property OnPageStateChange: TWizardPageEvent read FOnPageStateChange write FOnPageStateChange;
+    property OnShowPage: TWizardPageEvent read FOnShowPage write FOnShowPage;
+
+  end;
+
+  { TWizardPanelBitBtn }
+
+  TWizardPanelBitBtn = class(TCustomBitBtn)
+  private
+    FButtonType: TWizardButton;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property ButtonType: TWizardButton read FButtonType;
+  published
+    property Caption stored True;
+    property Left stored False;
+    property Top stored False;
+    property Width stored False;
+    property Height stored False;
+    property Enabled;
+    property Font;
+    property Glyph;
+    property Name stored True;
+    property ShowHint;
+    property OnClick;
   end;
 
   { TWizardButtonPanel }
 
   TWizardButtonPanel = class(TCustomPanel)
   private
-    FCancelButton: TBitBtn;
-    FFinishButton: TBitBtn;
-    FNextButton: TBitBtn;
-    FPreviousButton: TBitBtn;
+    FBevel: TBevel;
+    FCancelButton: TWizardPanelBitBtn;
+    FController: TWizardController;
+    FFinishButton: TWizardPanelBitBtn;
+    FNextButton: TWizardPanelBitBtn;
+    FPreviousButton: TWizardPanelBitBtn;
+    FShowBevel: Boolean;
+    procedure ButtonClick(Sender: TObject);
+    function CreateButton(ButtonType: TWizardButton): TWizardPanelBitBtn;
+    procedure SetController(const Value: TWizardController);
+    procedure SetShowBevel(const Value: Boolean);
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+    procedure SetButtonsState(VisibleButtons, EnabledButtons: TWizardButtons);
   published
-    property CancelButton: TBitBtn read FCancelButton;
-    property FinishButton: TBitBtn read FFinishButton;
-    property NextButton: TBitBtn read FNextButton;
-    property PreviousButton: TBitBtn read FPreviousButton;
+    property Controller: TWizardController read FController write SetController;
+    property CancelButton: TWizardPanelBitBtn read FCancelButton;
+    property FinishButton: TWizardPanelBitBtn read FFinishButton;
+    property NextButton: TWizardPanelBitBtn read FNextButton;
+    property PreviousButton: TWizardPanelBitBtn read FPreviousButton;
+    property ShowBevel: Boolean read FShowBevel write SetShowBevel default false;
     //
     property Align;
     property Alignment;
@@ -103,7 +145,7 @@ type
     property AutoSize;
     property BorderSpacing;
     property BevelInner;
-    property BevelOuter;
+    property BevelOuter default bvNone;
     property BevelWidth;
     property BidiMode;
     property BorderWidth;
@@ -158,6 +200,15 @@ implementation
 
 uses
   LuiMiscUtils{, LuiRTTIUtils};
+
+const
+  WizardButtonNames: array[TWizardButton] of String = (
+    'Previous',
+    'Next',
+    'Finish',
+    'Cancel',
+    'Help'
+  );
 
 { TWizardController }
 
@@ -249,20 +300,23 @@ begin
   Result := FPages.Count;
 end;
 
-procedure TWizardController.Previous;
+procedure TWizardController.MoveBy(Offset: Integer);
 begin
-  ShowPage(FPageIndex - 1);
+  //ShowPage takes care of index bounds
+  ShowPage(FPageIndex + Offset);
 end;
 
-procedure TWizardController.Next;
+procedure TWizardController.PageStateChanged;
+var
+  ActivePage: TWizardPage;
 begin
-  ShowPage(FPageIndex + 1);
-end;
-
-procedure TWizardController.UpdateButton(Button: TWizardButton; Visible,
-  Enabled: Boolean);
-begin
-
+  if FPageIndex <> -1 then
+  begin
+    ActivePage := FPages[FPageIndex];
+    ActivePage.UpdatePageInfo;
+    if Assigned(FOnPageStateChange) then
+      FOnPageStateChange(Self, ActivePage);
+  end;
 end;
 
 procedure TWizardController.AddPage(const Title, Description: String;
@@ -283,7 +337,7 @@ begin
   AddPage(Title, Description, nil, nil, ControlClassName);
 end;
 
-procedure TWizardController.First;
+procedure TWizardController.Start;
 begin
   ShowPage(0);
 end;
@@ -291,27 +345,46 @@ end;
 { TWizardPage }
 
 procedure TWizardPage.SetControl(Value: TControl);
-var
-  WizardPage: IWizardPage;
-  PageInfo: TWizardPageInfo;
 begin
   if FControl = Value then
     Exit;
   FControl := Value;
-  if (FControl<> nil) and FControl.GetInterface(WizardPageIntfID, WizardPage) then
+  if (FControl<> nil) and FControl.GetInterface(WizardPageIntfID, FPageIntf) then
   begin
-    WizardPage.RegisterController(((Collection as TWizardPages).FOwner) as IWizardController);
-    WizardPage.GetPageInfo(PageInfo);
-    Title := PageInfo.Title;
-    Description := PageInfo.Description;
-    EnabledButtons := PageInfo.EnabledButtons;
-    VisibleButtons := PageInfo.VisibleButtons;
+    FPageIntf.RegisterController(((Collection as TWizardPages).FOwner) as IWizardController);
+    UpdatePageInfo;
   end;
+end;
+
+procedure TWizardPage.UpdatePageInfo;
+var
+  PageInfo: TWizardPageInfo;
+begin
+  if FPageIntf = nil then
+    Exit;
+  PageInfo.Title := Title;
+  PageInfo.Description := Description;
+  PageInfo.EnabledButtons := EnabledButtons;
+  PageInfo.VisibleButtons := VisibleButtons;
+
+  FPageIntf.GetPageInfo(PageInfo);
+
+  Title := PageInfo.Title;
+  Description := PageInfo.Description;
+  EnabledButtons := PageInfo.EnabledButtons;
+  VisibleButtons := PageInfo.VisibleButtons;
 end;
 
 function TWizardPage.GetDisplayName: String;
 begin
   Result := FTitle;
+end;
+
+constructor TWizardPage.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  FVisibleButtons := WizardDefaultButtons;
+  FEnabledButtons := WizardDefaultButtons;
 end;
 
 { TWizardPages }
@@ -329,43 +402,81 @@ end;
 
 { TWizardButtonPanel }
 
+procedure TWizardButtonPanel.ButtonClick(Sender: TObject);
+begin
+  if FController = nil then
+    Exit;
+  with Sender as TWizardPanelBitBtn do
+  begin
+    case ButtonType of
+      wbNext: FController.MoveBy(1);
+      wbPrevious: FController.MoveBy(-1);
+    end;
+  end;
+end;
+
+function TWizardButtonPanel.CreateButton(ButtonType: TWizardButton): TWizardPanelBitBtn;
+begin
+  Result := TWizardPanelBitBtn.Create(Self);
+  Result.Parent := Self;
+  Result.Anchors := [akRight, akTop];
+  Result.FButtonType := ButtonType;
+  Result.Caption := WizardButtonNames[ButtonType];
+  Result.Name := WizardButtonNames[ButtonType] + 'Button';
+  Result.OnClick := @ButtonClick;
+end;
+
+procedure TWizardButtonPanel.SetController(const Value: TWizardController);
+begin
+  if Value = FController then
+    Exit;
+  FController := Value;
+end;
+
+procedure TWizardButtonPanel.SetShowBevel(const Value: Boolean);
+begin
+  if FShowBevel = Value then exit;
+  FShowBevel := Value;
+  if Value then
+  begin
+    if FBevel = nil then
+      FBevel := TBevel.Create(Self);
+    FBevel.Parent := Self;
+    FBevel.Height := 2;
+    FBevel.Shape := bsTopLine;
+    FBevel.Align := alTop;
+    FBevel.Visible := True;
+  end
+  else
+  begin
+    if FBevel <> nil then
+      FBevel.Visible := False;
+  end;
+end;
+
 constructor TWizardButtonPanel.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
-  FCancelButton := TBitBtn.Create(Self);
-  FCancelButton.Parent := Self;
-  FCancelButton.Caption := 'Cancel';
-  FCancelButton.Anchors := [akRight, akTop];
+  BevelOuter := bvNone;
+  //create the buttons
+  FCancelButton := CreateButton(wbCancel);
   FCancelButton.AnchorParallel(akRight, 4, Self);
   FCancelButton.AnchorVerticalCenterTo(Self);
   FCancelButton.BorderSpacing.Around := 4;
 
-  FFinishButton := TBitBtn.Create(Self);
-  FFinishButton.Parent := Self;
-  FFinishButton.Caption := 'Finish';
-  FFinishButton.Anchors := [akRight, akTop];
+  FFinishButton := CreateButton(wbFinish);
   FFinishButton.AnchorToNeighbour(akRight, 4, FCancelButton);
   FFinishButton.AnchorVerticalCenterTo(Self);
   FFinishButton.BorderSpacing.Around := 4;
 
-
-  FNextButton := TBitBtn.Create(Self);
-  FNextButton.Parent := Self;
-  FNextButton.Caption := 'Next';
-  FNextButton.Anchors := [akRight, akTop];
-  FNextButton.AnchorToNeighbour(akRight, 4, FFinishButton);
+  FNextButton := CreateButton(wbNext);
+  FNextButton.AnchorToNeighbour(akRight, 8, FFinishButton);
   FNextButton.AnchorVerticalCenterTo(Self);
-  FNextButton.BorderSpacing.Around := 4;
+  FNextButton.BorderSpacing.Right := 8;
 
-
-  FPreviousButton := TBitBtn.Create(Self);
-  FPreviousButton.Parent := Self;
-  FPreviousButton.Caption := 'Previous';
-  FPreviousButton.Anchors := [akRight, akTop];
-  FPreviousButton.AnchorToNeighbour(akRight, 4, FNextButton);
+  FPreviousButton := CreateButton(wbPrevious);
+  FPreviousButton.AnchorToNeighbour(akRight, 2, FNextButton);
   FPreviousButton.AnchorVerticalCenterTo(Self);
-  FPreviousButton.BorderSpacing.Around := 4;
-
 end;
 
 destructor TWizardButtonPanel.Destroy;
@@ -375,6 +486,28 @@ begin
   FCancelButton.Destroy;
   FFinishButton.Destroy;
   inherited Destroy;
+end;
+
+procedure TWizardButtonPanel.SetButtonsState(VisibleButtons,
+  EnabledButtons: TWizardButtons);
+begin
+  FCancelButton.Visible := wbCancel in VisibleButtons;
+  FFinishButton.Visible := wbFinish in VisibleButtons;
+  FNextButton.Visible := wbNext in VisibleButtons;
+  FPreviousButton.Visible := wbPrevious in VisibleButtons;
+
+  FCancelButton.Enabled := wbCancel in EnabledButtons;
+  FFinishButton.Enabled := wbFinish in EnabledButtons;
+  FNextButton.Enabled := wbNext in EnabledButtons;
+  FPreviousButton.Enabled := wbPrevious in EnabledButtons;
+end;
+
+{ TWizardPanelBitBtn }
+
+constructor TWizardPanelBitBtn.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SetSubComponent(True);
 end;
 
 end.
