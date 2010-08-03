@@ -25,6 +25,8 @@ type
     Description: String;
     VisibleButtons: TWizardButtons;
     EnabledButtons: TWizardButtons;
+    NextOffset: Cardinal;
+    PreviousOffset: Cardinal;
   end;
 
   {$INTERFACES CORBA}
@@ -34,7 +36,7 @@ type
   IWizardController = interface
     [WizardControllerIntfID]
     function GetPageCount: Integer;
-    procedure MoveBy(Offset: Integer);
+    function MoveBy(Offset: Integer): Boolean;
     procedure PageStateChanged;
   end;
 
@@ -43,6 +45,7 @@ type
   IWizardPage = interface
     [WizardPageIntfID]
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
+    //function HandleActionRequest(AnAction: TWizardAction; var Data: PtrInt): Boolean;
     procedure RegisterController(Controller: IWizardController);
   end;
 

@@ -13,16 +13,14 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
-    ButtonNext: TButton;
-    BottomPanel: TPanel;
-    ButtonPrevious: TButton;
     TitleLabel: TLabel;
     DescriptionLabel: TLabel;
     TopPanel: TPanel;
+    WizardButtonPanel1: TWizardButtonPanel;
     WizardController: TWizardController;
-    procedure ButtonNextClick(Sender: TObject);
-    procedure ButtonPreviousClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure WizardControllerPageStateChange(Sender: TWizardController;
+      Page: TWizardPage);
     procedure WizardControllerShowPage(Sender: TWizardController;
       Page: TWizardPage);
   private
@@ -35,23 +33,25 @@ var
 
 implementation
 
+uses
+  fWizardPageFour, fWizardPageFive;
+
 {$R *.lfm}
 
 { TMainForm }
 
-procedure TMainForm.ButtonNextClick(Sender: TObject);
-begin
-  WizardController.Next;
-end;
-
-procedure TMainForm.ButtonPreviousClick(Sender: TObject);
-begin
-  WizardController.Previous;
-end;
-
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  WizardController.First;
+  //you can add the class dinamically
+  WizardController.Pages[3].ControlClass := TPageFourFrame;
+  WizardController.Pages[4].ControlClass := TPageFiveFrame;
+  WizardController.Start;
+end;
+
+procedure TMainForm.WizardControllerPageStateChange(Sender: TWizardController;
+  Page: TWizardPage);
+begin
+  WizardButtonPanel1.UpdateButtons(Page);
 end;
 
 procedure TMainForm.WizardControllerShowPage(Sender: TWizardController;
@@ -59,6 +59,7 @@ procedure TMainForm.WizardControllerShowPage(Sender: TWizardController;
 begin
   TitleLabel.Caption := Page.Title;
   DescriptionLabel.Caption := Page.Description;
+  WizardButtonPanel1.UpdateButtons(Page);
 end;
 
 end.

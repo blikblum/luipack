@@ -1,52 +1,24 @@
 object MainForm: TMainForm
-  Left = 349
-  Height = 406
+  Left = 338
+  Height = 432
   Top = 192
-  Width = 570
+  Width = 581
   Caption = 'Wizard Demo'
-  ClientHeight = 406
-  ClientWidth = 570
+  ClientHeight = 432
+  ClientWidth = 581
   OnCreate = FormCreate
   LCLVersion = '0.9.29'
-  object BottomPanel: TPanel
-    Left = 0
-    Height = 50
-    Top = 356
-    Width = 570
-    Align = alBottom
-    ClientHeight = 50
-    ClientWidth = 570
-    TabOrder = 0
-    object ButtonNext: TButton
-      Left = 472
-      Height = 25
-      Top = 12
-      Width = 75
-      Caption = 'Next'
-      OnClick = ButtonNextClick
-      TabOrder = 0
-    end
-    object ButtonPrevious: TButton
-      Left = 376
-      Height = 25
-      Top = 12
-      Width = 75
-      Caption = 'Previous'
-      OnClick = ButtonPreviousClick
-      TabOrder = 1
-    end
-  end
   object TopPanel: TPanel
     Left = 0
     Height = 50
     Top = 0
-    Width = 570
+    Width = 581
     Align = alTop
     ClientHeight = 50
-    ClientWidth = 570
+    ClientWidth = 581
     Color = clWhite
     ParentColor = False
-    TabOrder = 1
+    TabOrder = 0
     object TitleLabel: TLabel
       Left = 8
       Height = 20
@@ -67,23 +39,57 @@ object MainForm: TMainForm
       ParentColor = False
     end
   end
+  object WizardButtonPanel1: TWizardButtonPanel
+    Left = 0
+    Height = 50
+    Top = 382
+    Width = 581
+    Controller = WizardController
+    CancelButton.Name = 'CancelButton'
+    CancelButton.Caption = 'Cancel'
+    FinishButton.Name = 'FinishButton'
+    FinishButton.Caption = 'Finish'
+    NextButton.Name = 'NextButton'
+    NextButton.Caption = 'Next'
+    PreviousButton.Name = 'PreviousButton'
+    PreviousButton.Caption = 'Previous'
+    ShowBevel = True
+    Align = alBottom
+    ClientHeight = 50
+    ClientWidth = 581
+    TabOrder = 1
+  end
   object WizardController: TWizardController
     Pages = <    
       item
-        Title = 'Page One'
-        Description = 'First Step'
         ControlClassName = 'TPageOneFrame'
+        Description = 'First Step'
+        EnabledButtons = [wbPrevious, wbNext, wbFinish, wbCancel]
+        Title = 'Introduction'
+        VisibleButtons = [wbNext, wbCancel]
       end    
       item
-        Title = 'Page Two'
-        Description = 'Almost There'
         ControlClassName = 'TPageTwoFrame'
+        Description = 'The software terms'
+        EnabledButtons = [wbPrevious, wbCancel]
+        Title = 'Agreement'
       end    
       item
-        Title = 'Page Three'
-        Description = 'Finish!!'
         ControlClassName = 'TPageThreeFrame'
+        Description = 'Choose a default or customized configuration'
+        Title = 'Configuration'
+      end    
+      item
+        Description = 'Set the configuration'
+        Title = 'Configuration'
+      end    
+      item
+        Description = 'It''s done'
+        EnabledButtons = [wbPrevious, wbNext, wbFinish, wbCancel]
+        Title = 'Finish'
+        VisibleButtons = [wbPrevious, wbFinish, wbCancel]
       end>
+    OnPageStateChange = WizardControllerPageStateChange
     OnShowPage = WizardControllerShowPage
     left = 44
     top = 88
