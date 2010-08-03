@@ -6,14 +6,14 @@ object PageOneFrame: TPageOneFrame
   ClientHeight = 240
   ClientWidth = 320
   TabOrder = 0
-  DesignLeft = 317
-  DesignTop = 140
+  DesignLeft = 371
+  DesignTop = 305
   object Label1: TLabel
-    Left = 38
-    Height = 14
-    Top = 55
-    Width = 34
-    Caption = 'Page 1'
+    Left = 88
+    Height = 27
+    Top = 72
+    Width = 123
+    Caption = 'Hello!'#13#10'Let''s do a software install'
     ParentColor = False
   end
 end

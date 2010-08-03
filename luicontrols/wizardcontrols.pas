@@ -25,7 +25,9 @@ type
     FControlClassName: String;
     FDescription: String;
     FEnabledButtons: TWizardButtons;
+    FNextOffset: Cardinal;
     FPageIntf: IWizardPage;
+    FPreviousOffset: Cardinal;
     FTitle: String;
     FVisibleButtons: TWizardButtons;
     procedure SetControl(Value: TControl);
@@ -40,6 +42,8 @@ type
     property ControlClassName: String read FControlClassName write FControlClassName;
     property Description: String read FDescription write FDescription;
     property EnabledButtons: TWizardButtons read FEnabledButtons write FEnabledButtons default WizardDefaultButtons;
+    property NextOffset: Cardinal read FNextOffset write FNextOffset default 1;
+    property PreviousOffset: Cardinal read FPreviousOffset write FPreviousOffset default 1;
     property Title: String read FTitle write FTitle;
     property VisibleButtons: TWizardButtons read FVisibleButtons write FVisibleButtons default WizardDefaultButtons;
   end;
@@ -68,26 +72,26 @@ type
     FPages: TWizardPages;
     procedure AddPage(const Title, Description: String; Control: TControl;
       ControlClass: TControlClass; const ControlClassName: String);
-    procedure ShowPage(Index: Integer);
+    function ShowPage(Index: Integer): Boolean;
     procedure SetPages(const Value: TWizardPages);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     //IWizardController
     function GetPageCount: Integer;
-    procedure MoveBy(Offset: Integer);
+    function MoveBy(Offset: Integer): Boolean;
     procedure PageStateChanged;
     //
     procedure AddPage(const Title, Description: String; ControlClass: TControlClass);
     procedure AddPage(const Title, Description: String; Control: TControl);
     procedure AddPage(const Title, Description, ControlClassName: String);
+    procedure DoAction(Action: TWizardAction);
     procedure Start;
   published
     property Pages: TWizardPages read FPages write SetPages;
     //events
     property OnPageStateChange: TWizardPageEvent read FOnPageStateChange write FOnPageStateChange;
     property OnShowPage: TWizardPageEvent read FOnShowPage write FOnShowPage;
-
   end;
 
   { TWizardPanelBitBtn }
@@ -226,7 +230,7 @@ begin
   NewPage.ControlClassName := ControlClassName;
 end;
 
-procedure TWizardController.ShowPage(Index: Integer);
+function TWizardController.ShowPage(Index: Integer): Boolean;
 var
   NextPage: TWizardPage;
   PageControl: TControl;
@@ -235,6 +239,7 @@ var
   Parent: TWinControl;
   OldIndex: Integer;
 begin
+  Result := False;
   if (Index < 0) or (Index >= FPages.Count) or (FPageIndex = Index) then
     Exit;
   OldIndex := FPageIndex;
@@ -276,6 +281,7 @@ begin
     if PageControl <> nil then
       PageControl.Visible := False;
   end;
+  Result := True;
 end;
 
 procedure TWizardController.SetPages(const Value: TWizardPages);
@@ -301,10 +307,10 @@ begin
   Result := FPages.Count;
 end;
 
-procedure TWizardController.MoveBy(Offset: Integer);
+function TWizardController.MoveBy(Offset: Integer): Boolean;
 begin
   //ShowPage takes care of index bounds
-  ShowPage(FPageIndex + Offset);
+  Result := ShowPage(FPageIndex + Offset);
 end;
 
 procedure TWizardController.PageStateChanged;
@@ -338,6 +344,30 @@ begin
   AddPage(Title, Description, nil, nil, ControlClassName);
 end;
 
+procedure TWizardController.DoAction(Action: TWizardAction);
+var
+  ActivePage: TWizardPage;
+  Offset: Integer;
+begin
+  if FPageIndex <> -1 then
+  begin
+    ActivePage := FPages[FPageIndex];
+    case Action of
+      waNext:
+        begin
+          Offset := ActivePage.NextOffset;
+          if MoveBy(Offset) then
+          begin
+            //set the PreviousOffset of the new activepage
+            ActivePage := FPages[FPageIndex];
+            ActivePage.PreviousOffset := Offset;
+          end;
+        end;
+      waPrevious: MoveBy(-ActivePage.PreviousOffset);
+    end;
+  end;
+end;
+
 procedure TWizardController.Start;
 begin
   ShowPage(0);
@@ -367,6 +397,8 @@ begin
   PageInfo.Description := Description;
   PageInfo.EnabledButtons := EnabledButtons;
   PageInfo.VisibleButtons := VisibleButtons;
+  PageInfo.NextOffset := NextOffset;
+  PageInfo.PreviousOffset := PreviousOffset;
 
   FPageIntf.GetPageInfo(PageInfo);
 
@@ -374,6 +406,8 @@ begin
   Description := PageInfo.Description;
   EnabledButtons := PageInfo.EnabledButtons;
   VisibleButtons := PageInfo.VisibleButtons;
+  PreviousOffset := PageInfo.PreviousOffset;
+  NextOffset := PageInfo.NextOffset;
 end;
 
 function TWizardPage.GetDisplayName: String;
@@ -386,6 +420,8 @@ begin
   inherited Create(ACollection);
   FVisibleButtons := WizardDefaultButtons;
   FEnabledButtons := WizardDefaultButtons;
+  FNextOffset := 1;
+  FPreviousOffset := 1;
 end;
 
 { TWizardPages }
@@ -410,8 +446,8 @@ begin
   with Sender as TWizardPanelBitBtn do
   begin
     case ButtonType of
-      wbNext: FController.MoveBy(1);
-      wbPrevious: FController.MoveBy(-1);
+      wbNext: FController.DoAction(waNext);
+      wbPrevious: FController.DoAction(waPrevious);
     end;
   end;
 end;

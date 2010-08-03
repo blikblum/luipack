@@ -6,14 +6,46 @@ object PageTwoFrame: TPageTwoFrame
   ClientHeight = 240
   ClientWidth = 320
   TabOrder = 0
-  DesignLeft = 333
-  DesignTop = 177
+  DesignLeft = 363
+  DesignTop = 287
   object Label1: TLabel
-    Left = 53
+    Left = 16
     Height = 14
-    Top = 32
-    Width = 31
-    Caption = 'Page2'
+    Top = 16
+    Width = 123
+    Caption = 'Read carefully the terms:'
     ParentColor = False
+  end
+  object Memo1: TMemo
+    Left = 16
+    Height = 138
+    Top = 40
+    Width = 277
+    Lines.Strings = (
+      'If this software ruin your computer is your problem!'
+    )
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object DontAcceptRadioButton: TRadioButton
+    Left = 16
+    Height = 17
+    Top = 208
+    Width = 184
+    Caption = 'Do you think i''m crazy? No thanks.'
+    Checked = True
+    OnChange = AcceptRadioButtonChange
+    State = cbChecked
+    TabOrder = 1
+  end
+  object AcceptRadioButton: TRadioButton
+    Left = 16
+    Height = 17
+    Top = 184
+    Width = 182
+    Caption = 'God''s will be done. Let''s continue.'
+    OnChange = AcceptRadioButtonChange
+    TabOrder = 2
+    TabStop = False
   end
 end
