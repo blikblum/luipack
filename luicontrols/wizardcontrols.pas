@@ -204,7 +204,7 @@ type
 implementation
 
 uses
-  LuiMiscUtils{, LuiRTTIUtils};
+  LuiMiscUtils, LuiRTTIUtils;
 
 const
   WizardButtonNames: array[TWizardButton] of String = (
@@ -258,8 +258,6 @@ begin
     begin
       Parent := Owner as TWinControl;
       PageControl := PageControlClass.Create(Parent);
-      //seems that currently fpc does not allow to set a corba interface through RTTI
-      //SetObjectProperties(PageControl, ['WizardController', IWizardController(Self)]);
       PageControl.Align := alClient;
       PageControl.Parent := Parent;
       //setting control register the wizard in the page
@@ -380,9 +378,9 @@ begin
   if FControl = Value then
     Exit;
   FControl := Value;
-  if (FControl<> nil) and FControl.GetInterface(WizardPageIntfID, FPageIntf) then
+  if (Value <> nil) and FControl.GetInterface(WizardPageIntfID, FPageIntf) then
   begin
-    FPageIntf.RegisterController(((Collection as TWizardPages).FOwner) as IWizardController);
+    SetObjectProperties(Value, ['WizardController', ((Collection as TWizardPages).FOwner) as IWizardController]);
     UpdatePageInfo;
   end;
 end;

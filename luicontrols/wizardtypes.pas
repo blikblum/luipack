@@ -46,15 +46,6 @@ type
     [WizardPageIntfID]
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
     //function HandleActionRequest(AnAction: TWizardAction; var Data: PtrInt): Boolean;
-    procedure RegisterController(Controller: IWizardController);
-  end;
-
-  { IWizardObserver }
-
-  IWizardObserver = interface
-    procedure EnabledButtonsChanged(Buttons: TWizardButtons);
-    procedure PageChanged(PageIndex: Integer; Page: IWizardPage);
-    procedure RegisterController(Controller: IWizardController);
   end;
 
 const
