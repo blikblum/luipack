@@ -7,6 +7,7 @@ object MainForm: TMainForm
   ClientHeight = 432
   ClientWidth = 581
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '0.9.29'
   object TopPanel: TPanel
     Left = 0
@@ -46,12 +47,22 @@ object MainForm: TMainForm
     Width = 581
     Controller = WizardController
     CancelButton.Name = 'CancelButton'
+    CancelButton.AnchorSideTop.Control = WizardButtonPanel1
+    CancelButton.AnchorSideTop.Side = asrCenter
+    CancelButton.AnchorSideRight.Control = WizardButtonPanel1
+    CancelButton.AnchorSideRight.Side = asrBottom
     CancelButton.Caption = 'Cancel'
     FinishButton.Name = 'FinishButton'
+    FinishButton.AnchorSideTop.Control = WizardButtonPanel1
+    FinishButton.AnchorSideTop.Side = asrCenter
     FinishButton.Caption = 'Finish'
     NextButton.Name = 'NextButton'
+    NextButton.AnchorSideTop.Control = WizardButtonPanel1
+    NextButton.AnchorSideTop.Side = asrCenter
     NextButton.Caption = 'Next'
     PreviousButton.Name = 'PreviousButton'
+    PreviousButton.AnchorSideTop.Control = WizardButtonPanel1
+    PreviousButton.AnchorSideTop.Side = asrCenter
     PreviousButton.Caption = 'Previous'
     ShowBevel = True
     Align = alBottom
@@ -89,6 +100,7 @@ object MainForm: TMainForm
         Title = 'Finish'
         VisibleButtons = [wbPrevious, wbFinish, wbCancel]
       end>
+    OnCreatePageControl = WizardControllerCreatePageControl
     OnPageStateChange = WizardControllerPageStateChange
     OnShowPage = WizardControllerShowPage
     left = 44

@@ -66,6 +66,7 @@ type
 
   TWizardController = class(TComponent, IWizardController)
   private
+    FOnCreatePageControl: TWizardPageEvent;
     FOnPageStateChange: TWizardPageEvent;
     FOnShowPage: TWizardPageEvent;
     FPageIndex: Integer;
@@ -90,6 +91,7 @@ type
   published
     property Pages: TWizardPages read FPages write SetPages;
     //events
+    property OnCreatePageControl: TWizardPageEvent read FOnCreatePageControl write FOnCreatePageControl;
     property OnPageStateChange: TWizardPageEvent read FOnPageStateChange write FOnPageStateChange;
     property OnShowPage: TWizardPageEvent read FOnShowPage write FOnShowPage;
   end;
@@ -262,6 +264,8 @@ begin
       PageControl.Parent := Parent;
       //setting control register the wizard in the page
       NextPage.Control := PageControl;
+      if Assigned(FOnCreatePageControl) then
+        FOnCreatePageControl(Self, NextPage);
       //InitControl should be called after setting Control property
       CallMethod(PageControl, 'InitControl');
     end;
@@ -270,6 +274,7 @@ begin
   begin
     if FOnShowPage <> nil then
       FOnShowPage(Self, NextPage);
+    CallMethod(PageControl, 'UpdateControl');
     PageControl.Visible := True;
     FPageIndex := Index;
   end;

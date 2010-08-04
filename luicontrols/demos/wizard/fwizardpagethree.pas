@@ -21,7 +21,8 @@ type
   public
     { public declarations }
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
-    procedure RegisterController(Controller: IWizardController);
+  published
+    property WizardController: IWizardController read FWizard write FWizard;
   end; 
 
 implementation
@@ -42,11 +43,6 @@ begin
     PageInfo.NextOffset := 2
   else
     PageInfo.NextOffset := 1;
-end;
-
-procedure TPageThreeFrame.RegisterController(Controller: IWizardController);
-begin
-  FWizard := Controller;
 end;
 
 initialization

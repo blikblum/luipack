@@ -9,7 +9,7 @@ object PageFiveFrame: TPageFiveFrame
   DesignLeft = 331
   DesignTop = 280
   object Label1: TLabel
-    Left = 44
+    Left = 40
     Height = 14
     Top = 67
     Width = 45
@@ -23,5 +23,13 @@ object PageFiveFrame: TPageFiveFrame
     Width = 110
     Caption = 'Show the Read Me'
     TabOrder = 0
+  end
+  object LabelConfigData: TLabel
+    Left = 40
+    Height = 14
+    Top = 91
+    Width = 80
+    Caption = 'LabelConfigData'
+    ParentColor = False
   end
 end
