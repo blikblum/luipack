@@ -48,6 +48,11 @@ type
     //function HandleActionRequest(AnAction: TWizardAction; var Data: PtrInt): Boolean;
   end;
 
+  IWizardObserver = interface
+    procedure PageChanged(PageIndex: Integer);
+    procedure PageStateChanged(PageIndex: Integer);
+  end;
+
 const
   AllWizardButtons = [wbPrevious, wbNext, wbFinish, wbCancel, wbHelp];
 

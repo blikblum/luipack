@@ -22,8 +22,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure WizardControllerCreatePageControl(Sender: TWizardController;
       Page: TWizardPage);
-    procedure WizardControllerPageStateChange(Sender: TWizardController;
-      Page: TWizardPage);
     procedure WizardControllerShowPage(Sender: TWizardController;
       Page: TWizardPage);
   private
@@ -65,18 +63,11 @@ begin
   SetObjectProperties(Page.Control, ['ConfigData', FConfigData]);
 end;
 
-procedure TMainForm.WizardControllerPageStateChange(Sender: TWizardController;
-  Page: TWizardPage);
-begin
-  WizardButtonPanel1.UpdateButtons(Page);
-end;
-
 procedure TMainForm.WizardControllerShowPage(Sender: TWizardController;
   Page: TWizardPage);
 begin
   TitleLabel.Caption := Page.Title;
   DescriptionLabel.Caption := Page.Description;
-  WizardButtonPanel1.UpdateButtons(Page);
 end;
 
 end.

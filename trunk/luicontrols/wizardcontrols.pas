@@ -5,7 +5,7 @@ unit WizardControls;
 interface
 
 uses
-  Classes, SysUtils, WizardTypes, Controls, ExtCtrls, Buttons;
+  Classes, SysUtils, WizardTypes, Controls, ExtCtrls, Buttons, fgl;
 
 const
   WizardDefaultButtons = [wbPrevious, wbNext, wbCancel];
@@ -62,10 +62,13 @@ type
 
   TWizardPageEvent = procedure(Sender: TWizardController; Page: TWizardPage) of object;
 
+  TWizardObserverList = specialize TFPGList <IWizardObserver>;
+
   { TWizardController }
 
   TWizardController = class(TComponent, IWizardController)
   private
+    FObserverList: TWizardObserverList;
     FOnCreatePageControl: TWizardPageEvent;
     FOnPageStateChange: TWizardPageEvent;
     FOnShowPage: TWizardPageEvent;
@@ -87,6 +90,7 @@ type
     procedure AddPage(const Title, Description: String; Control: TControl);
     procedure AddPage(const Title, Description, ControlClassName: String);
     procedure DoAction(Action: TWizardAction);
+    procedure RegisterObserver(Value: IWizardObserver);
     procedure Start;
   published
     property Pages: TWizardPages read FPages write SetPages;
@@ -120,7 +124,7 @@ type
 
   { TWizardButtonPanel }
 
-  TWizardButtonPanel = class(TCustomPanel)
+  TWizardButtonPanel = class(TCustomPanel, IWizardObserver)
   private
     FBevel: TBevel;
     FCancelButton: TWizardPanelBitBtn;
@@ -139,6 +143,9 @@ type
     procedure UpdateButtons(Page: TWizardPage);
   protected
     procedure DoOnResize; override;
+  public
+    procedure PageChanged(PageIndex: Integer);
+    procedure PageStateChanged(PageIndex: Integer);
   published
     property Controller: TWizardController read FController write SetController;
     property CancelButton: TWizardPanelBitBtn read FCancelButton;
@@ -239,7 +246,7 @@ var
   PageControlClass: TControlClass;
   FoundClass: TPersistentClass;
   Parent: TWinControl;
-  OldIndex: Integer;
+  OldIndex, i: Integer;
 begin
   Result := False;
   if (Index < 0) or (Index >= FPages.Count) or (FPageIndex = Index) then
@@ -272,6 +279,8 @@ begin
   end;
   if PageControl <> nil then
   begin
+    for i := 0 to FObserverList.Count - 1 do
+      FObserverList[i].PageChanged(Index);
     if FOnShowPage <> nil then
       FOnShowPage(Self, NextPage);
     CallMethod(PageControl, 'UpdateControl');
@@ -297,10 +306,12 @@ begin
   inherited Create(AOwner);
   FPages := TWizardPages.Create(Self);
   FPageIndex := -1;
+  FObserverList := TWizardObserverList.Create;
 end;
 
 destructor TWizardController.Destroy;
 begin
+  FObserverList.Destroy;
   FPages.Destroy;
   inherited Destroy;
 end;
@@ -319,11 +330,14 @@ end;
 procedure TWizardController.PageStateChanged;
 var
   ActivePage: TWizardPage;
+  i: Integer;
 begin
   if FPageIndex <> -1 then
   begin
     ActivePage := FPages[FPageIndex];
     ActivePage.UpdatePageInfo;
+    for i := 0 to FObserverList.Count - 1 do
+      FObserverList[i].PageStateChanged(FPageIndex);
     if Assigned(FOnPageStateChange) then
       FOnPageStateChange(Self, ActivePage);
   end;
@@ -369,6 +383,13 @@ begin
       waPrevious: MoveBy(-ActivePage.PreviousOffset);
     end;
   end;
+end;
+
+procedure TWizardController.RegisterObserver(Value: IWizardObserver);
+begin
+  if Value = nil then
+    Exit;
+  FObserverList.Add(Value);
 end;
 
 procedure TWizardController.Start;
@@ -471,6 +492,8 @@ begin
   if Value = FController then
     Exit;
   FController := Value;
+  if Value <> nil then
+    Value.RegisterObserver(Self as IWizardObserver);
 end;
 
 procedure TWizardButtonPanel.SetShowBevel(const Value: Boolean);
@@ -547,6 +570,18 @@ begin
   FFinishButton.Left := FCancelButton.Left - FFinishButton.Width - 8;
   FNextButton.Left := FFinishButton.Left - FNextButton.Width - 8;
   FPreviousButton.Left := FNextButton.Left - FPreviousButton.Width - 2;
+end;
+
+procedure TWizardButtonPanel.PageChanged(PageIndex: Integer);
+begin
+  if FController = nil then
+    Exit;
+  UpdateButtons(FController.Pages[PageIndex]);
+end;
+
+procedure TWizardButtonPanel.PageStateChanged(PageIndex: Integer);
+begin
+  PageChanged(PageIndex);
 end;
 
 { TWizardPanelBitBtn }
