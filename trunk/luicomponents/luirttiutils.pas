@@ -46,6 +46,38 @@ implementation
 uses
   typinfo;
 
+//local fix to bug 17003
+procedure SetInterfacePropFixed(Instance: TObject; PropInfo: PPropInfo; const Value: Pointer);
+type
+  TSetIntfStrProcIndex=procedure(index:longint;const i:Pointer) of object;
+  TSetIntfStrProc=procedure(i:Pointer) of object;
+var
+  AMethod : TMethod;
+begin
+  case Propinfo^.PropType^.Kind of
+    tkInterface, tkInterfaceRaw:
+      begin
+        case (PropInfo^.PropProcs shr 2) and 3 of
+          ptField:
+            PPointer(Pointer(Instance)+PtrUInt(PropInfo^.SetProc))^:=Value;
+          ptstatic,
+          ptvirtual :
+            begin
+              if ((PropInfo^.PropProcs shr 2) and 3)=ptStatic then
+                AMethod.Code:=PropInfo^.SetProc
+              else
+                AMethod.Code:=PPointer(Pointer(Instance.ClassType)+PtrUInt(PropInfo^.SetProc))^;
+              AMethod.Data:=Instance;
+              if ((PropInfo^.PropProcs shr 6) and 1)<>0 then
+                TSetIntfStrProcIndex(AMethod)(PropInfo^.Index,Value)
+              else
+                TSetIntfStrProc(AMethod)(Value);
+            end;
+        end;
+      end;
+  end;
+end;
+
 function VarRecToString(const VarRec: TVarRec): String;
 begin
   case VarRec.VType of
@@ -85,10 +117,10 @@ begin
   end;
 end;
 
-function VarRecToInterface(const VarRec: TVarRec): IInterface;
+function VarRecToInterface(const VarRec: TVarRec): Pointer;
 begin
   case VarRec.VType of
-    vtInterface: Result := IInterface(VarRec.VInterface);
+    vtInterface: Result := VarRec.VInterface;
   else
     raise Exception.Create('Type mismatch: is not possible convert TVarRec to Interface');
   end;
@@ -138,8 +170,8 @@ begin
           SetInt64Prop(Instance, PropInfo, VarRecToInt64(PropertyValue));
         tkClass:
           SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
-        tkInterface:
-          SetInterfaceProp(Instance, PropInfo, VarRecToInterface(PropertyValue));
+        tkInterface, tkInterfaceRaw:
+          SetInterfacePropFixed(Instance, PropInfo, VarRecToInterface(PropertyValue));
         tkBool:
           SetOrdProp(Instance, PropInfo, VarRecToBoolean(PropertyValue));
       else
