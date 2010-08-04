@@ -23,7 +23,8 @@ type
   public
     { public declarations }
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
-    procedure RegisterController(Controller: IWizardController);
+  published
+    property WizardController: IWizardController read FWizard write FWizard;
   end; 
 
 implementation
@@ -46,10 +47,6 @@ begin
     Exclude(PageInfo.EnabledButtons, wbNext);
 end;
 
-procedure TPageTwoFrame.RegisterController(Controller: IWizardController);
-begin
-  FWizard := Controller;
-end;
 
 initialization
   RegisterClass(TPageTwoFrame);

@@ -13,6 +13,7 @@ object PageFourFrame: TPageFourFrame
     Height = 21
     Top = 72
     Width = 200
+    OnEditingDone = ConfigEditEditingDone
     TabOrder = 0
     Text = 'default'
   end

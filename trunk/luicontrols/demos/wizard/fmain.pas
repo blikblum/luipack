@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, WizardControls;
+  ExtCtrls, WizardControls, fpjson;
 
 type
 
@@ -19,11 +19,15 @@ type
     WizardButtonPanel1: TWizardButtonPanel;
     WizardController: TWizardController;
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure WizardControllerCreatePageControl(Sender: TWizardController;
+      Page: TWizardPage);
     procedure WizardControllerPageStateChange(Sender: TWizardController;
       Page: TWizardPage);
     procedure WizardControllerShowPage(Sender: TWizardController;
       Page: TWizardPage);
   private
+    FConfigData: TJSONObject;
   public
     { public declarations }
   end; 
@@ -34,7 +38,7 @@ var
 implementation
 
 uses
-  fWizardPageFour, fWizardPageFive;
+  fWizardPageFour, fWizardPageFive, LuiRTTIUtils;
 
 {$R *.lfm}
 
@@ -42,10 +46,23 @@ uses
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  //data that will be shared between pages
+  FConfigData := TJSONObject.Create(['name', 'Luiz Américo']);
   //you can add the class dinamically
   WizardController.Pages[3].ControlClass := TPageFourFrame;
   WizardController.Pages[4].ControlClass := TPageFiveFrame;
   WizardController.Start;
+end;
+
+procedure TMainForm.FormDestroy(Sender: TObject);
+begin
+  FConfigData.Destroy;
+end;
+
+procedure TMainForm.WizardControllerCreatePageControl(
+  Sender: TWizardController; Page: TWizardPage);
+begin
+  SetObjectProperties(Page.Control, ['ConfigData', FConfigData]);
 end;
 
 procedure TMainForm.WizardControllerPageStateChange(Sender: TWizardController;
