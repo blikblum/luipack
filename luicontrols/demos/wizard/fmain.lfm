@@ -101,7 +101,6 @@ object MainForm: TMainForm
         VisibleButtons = [wbPrevious, wbFinish, wbCancel]
       end>
     OnCreatePageControl = WizardControllerCreatePageControl
-    OnPageStateChange = WizardControllerPageStateChange
     OnShowPage = WizardControllerShowPage
     left = 44
     top = 88
