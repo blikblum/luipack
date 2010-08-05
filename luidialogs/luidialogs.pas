@@ -43,13 +43,10 @@ function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl): TModalRes
 function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl;
   FrameProperties: array of const; ButtonCaptions: String = ''): TModalResult;
 
-procedure ShowNotification(Owner: TWinControl; const Msg: String; Align: TAlign; TimeOut: Integer = 0);
-
 implementation
 
 uses
   fExportDataset, fFrameEditor,
-  NotificationControls,
   StrUtils, FileUtil, LuiRTTIUtils, LuiStrUtils;
 
 function ShowExportDatasetDlg(AOwner: TWinControl; Dataset: TDataSet): Boolean;
@@ -95,19 +92,6 @@ begin
   finally
     Form.Destroy;
   end;
-end;
-
-procedure ShowNotification(Owner: TWinControl; const Msg: String;
-  Align: TAlign; TimeOut: Integer);
-var
-  Control: TDefaultNotificationControl;
-begin
-  Control := TDefaultNotificationControl.Create(Owner);
-  Control.Parent := Owner;
-  Control.Align := Align;
-  Control.Message := Msg;
-  Control.Timeout := TimeOut;
-  Control.Visible := True;
 end;
 
 { TExportDatasetDialog }
