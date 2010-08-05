@@ -1,32 +1,61 @@
 object MainForm: TMainForm
   Left = 360
-  Height = 291
+  Height = 442
   Top = 330
-  Width = 388
+  Width = 438
   Caption = 'DB Dialogs Demo'
-  ClientHeight = 291
-  ClientWidth = 388
+  ClientHeight = 442
+  ClientWidth = 438
   OnCreate = FormCreate
   LCLVersion = '0.9.29'
   object EditDatasetButton: TButton
-    Left = 288
+    Left = 312
     Height = 41
-    Top = 8
-    Width = 96
+    Top = 296
+    Width = 120
+    Anchors = [akLeft, akBottom]
     Caption = 'Edit Dataset'
     OnClick = EditDatasetButtonClick
     TabOrder = 0
   end
   object DBGrid1: TDBGrid
     Left = 8
-    Height = 272
+    Height = 264
     Top = 8
-    Width = 272
+    Width = 427
     Anchors = [akTop, akLeft, akRight, akBottom]
     Columns = <>
     DataSource = Datasource1
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
     TabOrder = 1
+  end
+  object OptionsRadioGroup: TRadioGroup
+    Left = 8
+    Height = 135
+    Top = 288
+    Width = 288
+    Anchors = [akLeft, akBottom]
+    AutoFill = True
+    Caption = 'Options'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 117
+    ClientWidth = 284
+    ItemIndex = 0
+    Items.Strings = (
+      'Show Name Field'
+      'Show Name Field With Custom Title'
+      'Show Id and Name Fields'
+      'Show Id and Name Fields With Custom Width'
+      'Show All Fields With Mixed Properties'
+    )
+    TabOrder = 2
   end
   object Datasource1: TDatasource
     DataSet = Sqlite3Dataset1
@@ -37,7 +66,6 @@ object MainForm: TMainForm
     FileName = 'data.db'
     SaveOnClose = True
     TableName = 'Test'
-    FieldDefs = <>
     left = 293
     top = 128
   end
