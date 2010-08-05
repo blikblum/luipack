@@ -11,27 +11,25 @@ type
   TDataModification = (dmAdd, dmDelete, dmUpdate);
   TDataModifications = set of TDataModification;
 
-  TDataDialogInfo = record
-    FieldNames: String;
-    FieldWidths: array of Integer;
-    Title: String;
-  end;
-
-function EditDataSet(ADataSet: TDataSet; AParent: TWinControl; const DialogInfo: TDataDialogInfo): TDataModifications;
+function EditDataSet(ADataSet: TDataSet; AParent: TWinControl; const DialogInfo: String): TDataModifications;
 
 implementation
 
 uses
-  fEditDataSet, Math;
+  fEditDataSet, LuiJSONUtils, fpjson;
 
 function EditDataSet(ADataSet: TDataSet; AParent: TWinControl;
-  const DialogInfo: TDataDialogInfo): TDataModifications;
+  const DialogInfo: String): TDataModifications;
+
+var
+  DialogData: TJSONData;
+  EditForm: TEditDataSourceForm;
 
   function GetDefaultFieldWidth(FieldType: TFieldType): Integer;
   begin
     case FieldType of
-      ftInteger, ftLargeint, ftWord:
-        Result := 20;
+      ftInteger, ftLargeint, ftWord, ftAutoInc:
+        Result := 30;
       ftFloat, ftCurrency:
         Result := 30;
       ftDate, ftDateTime, ftTime:
@@ -41,44 +39,79 @@ function EditDataSet(ADataSet: TDataSet; AParent: TWinControl;
     end;
   end;
 
-  procedure SetupGrid(AGrid: TVirtualDBGrid);
-  var
-    Fields: TList;
-    Field: TField;
-    i, FieldWidth, TotalFieldWidth: Integer;
+  procedure AddField(Field: TField; Title: String; Width: Integer);
   begin
-    Fields := TList.Create;
-    try
-      ADataSet.GetFieldList(Fields, DialogInfo.FieldNames);
+    if Field = nil then
+      Exit;
+    if Width = -1 then
+      Width := GetDefaultFieldWidth(Field.DataType);
+    if Title = '' then
+      Title := Field.DisplayLabel;
+    EditForm.Grid.AddDBColumn(Field.FieldName, Title, Width);
+  end;
 
-      if Fields.Count > 0 then
-      begin
-        TotalFieldWidth := 0;
-        for i := 0 to Fields.Count - 1 do
+  procedure ParseFieldData(const FieldData: TJSONData);
+  var
+    FieldObject: TJSONObject absolute FieldData;
+    i: Integer;
+  begin
+    case FieldData.JSONType of
+      //passed only one field
+      jtString:
         begin
-          Field := TField(Fields[i]);
-          FieldWidth := IfThen(i > High(DialogInfo.FieldWidths),
-            GetDefaultFieldWidth(Field.DataType), DialogInfo.FieldWidths[i]);
-          Inc(TotalFieldWidth, FieldWidth);
-          AGrid.AddDBColumn(Field.FieldName, Field.DisplayLabel, FieldWidth);
+          AddField(ADataSet.FindField(FieldData.AsString), '', -1);
         end;
-        AGrid.Width := Max(TotalFieldWidth + 20, AGrid.Width);
-      end;
-    finally
-      Fields.Destroy;
+      //passed an array of objects or strings
+      jtArray:
+        begin
+          for i := 0 to FieldData.Count - 1 do
+            ParseFieldData(FieldData.Items[i]);
+        end;
+      //passed as an object
+      jtObject:
+        begin
+          AddField(ADataSet.FindField(GetJSONProp(FieldObject, 'name', '')),
+            GetJSONProp(FieldObject, 'title', ''),
+            GetJSONProp(FieldObject, 'width', -1));
+        end;
     end;
   end;
 
+  procedure ParseDialogData;
+  var
+    FieldData: TJSONData;
+    DialogObject: TJSONObject absolute DialogData;
+  begin
+    case DialogData.JSONType of
+      jtObject:
+        begin
+          FieldData := GetJSONProp(DialogObject, 'fields');
+          EditForm.Caption := GetJSONProp(DialogObject, 'title', EditForm.Caption);
+        end;
+      jtArray, jtString:
+        FieldData := DialogData;
+    end;
+    if FieldData = nil then
+      raise Exception.Create('EditDataSet - Field Data Not Set');
+    ParseFieldData(FieldData);
+  end;
+
 begin
-  with TEditDataSourceForm.Create(AParent) do
+  DialogData := nil;
   try
-    Caption := DialogInfo.Title;
-    SetupGrid(Grid);
-    DataSet := ADataSet;
-    ShowModal;
-    Result := Modifications;
+    DialogData := StringToJSONData(DialogInfo);
+    EditForm := TEditDataSourceForm.Create(AParent);
+    with EditForm do
+    try
+      ParseDialogData;
+      DataSet := ADataSet;
+      ShowModal;
+      Result := Modifications;
+    finally
+      Destroy;
+    end;
   finally
-    Destroy;
+    FreeAndNil(DialogData);
   end;
 end;
 

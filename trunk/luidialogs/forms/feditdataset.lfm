@@ -6,7 +6,7 @@ object EditDataSourceForm: TEditDataSourceForm
   AutoSize = True
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = 'EditDataSourceForm'
+  Caption = 'Edit Data'
   ClientHeight = 201
   ClientWidth = 322
   OnCreate = FormCreate

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, DBGrids, db, Sqlite3DS;
+  StdCtrls, DBGrids, ExtCtrls, db, Sqlite3DS;
 
 type
 
@@ -16,6 +16,7 @@ type
     Datasource1: TDatasource;
     DBGrid1: TDBGrid;
     EditDatasetButton: TButton;
+    OptionsRadioGroup: TRadioGroup;
     Sqlite3Dataset1: TSqlite3Dataset;
     procedure EditDatasetButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -49,15 +50,27 @@ begin
   Sqlite3Dataset1.Open;
 end;
 
-procedure TMainForm.EditDatasetButtonClick(Sender: TObject);
 const
-  Info: TDataDialogInfo = (
-    FieldNames: 'Name';
-    FieldWidths: nil;
-    Title: 'Edit Test Dataset'
-    );
+  OnlyName = '"Name"';
+  NameCustomTitle = '{"title": "Edit Test Dataset", "fields": {"name": "Name", "title": "Person"}}';
+  IdName = '["Id", "Name"]';
+  IdNameCustomWidth = '{"title": "Edit Test Dataset",'+
+    '"fields": [{"name": "Id", "width": 100}, {"name": "Name", "width": 200}]}';
+  AllCustomMixed = '{"title": "Edit Test Dataset",'+
+    '"fields": ["Id", {"name": "Name", "title": "Person"}, { "name": "Phone", "width": 100}]}';
+
+procedure TMainForm.EditDatasetButtonClick(Sender: TObject);
+var
+  DialogInfo: String;
 begin
-  EditDataSet(Sqlite3Dataset1, Self, Info);
+  case OptionsRadioGroup.ItemIndex of
+    0: DialogInfo := OnlyName;
+    1: DialogInfo := NameCustomTitle;
+    2: DialogInfo := IdName;
+    3: DialogInfo := IdNameCustomWidth;
+    4: DialogInfo := AllCustomMixed;
+  end;
+  EditDataSet(Sqlite3Dataset1, Self, DialogInfo);
 end;
 
 end.
