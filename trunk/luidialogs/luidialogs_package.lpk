@@ -19,7 +19,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="8">
+    <Files Count="7">
       <Item1>
         <Filename Value="forms\fexportdataset.pas"/>
         <UnitName Value="fExportDataset"/>
@@ -46,13 +46,9 @@
         <UnitName Value="fFrameEditor"/>
       </Item6>
       <Item7>
-        <Filename Value="notificationcontrols.pas"/>
-        <UnitName Value="NotificationControls"/>
-      </Item7>
-      <Item8>
         <Filename Value="luinotifications.pas"/>
-        <UnitName Value="luinotifications"/>
-      </Item8>
+        <UnitName Value="LuiNotifications"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="6">
