@@ -11,8 +11,11 @@ type
 
   TVirtualJSONInspector = class;
 
-  TVTJSONFormatValue = procedure (const PropName: String; PropData: TJSONData;
-    var Result: String; var Handled: Boolean) of object;
+  TVTJSONFormatValue = procedure (Sender: TVirtualJSONInspector; const PropertyName: String;
+    Data: TJSONData; var DisplayText: String) of object;
+
+  TVTJSONFormatName = procedure (Sender: TVirtualJSONInspector;
+    ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String) of object;
 
   TVTJSONInspectorOption = (jioSkipNullProperties, jioSkipUnknownProperties);
 
@@ -48,6 +51,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
   published
+    property DisplayName;
     property Name: String read FName write FName;
   end;
 
@@ -72,6 +76,7 @@ type
   TVirtualJSONInspector = class(TCustomVirtualStringTree)
   private
     FItemDataOffset: Cardinal;
+    FOnFormatName: TVTJSONFormatName;
     FRootData: TJSONData;
     FOnFormatValue: TVTJSONFormatValue;
     FPropertyDefs: TJSONPropertyDefs;
@@ -100,6 +105,7 @@ type
     property RootData: TJSONData read FRootData write SetRootData;
   published
     property PropertyDefs: TJSONPropertyDefs read FPropertyDefs write SetPropertyDefs;
+    property OnFormatName: TVTJSONFormatName read FOnFormatName write FOnFormatName;
     property OnFormatValue: TVTJSONFormatValue read FOnFormatValue write FOnFormatValue;
    //inherited properties
     property Action;
@@ -279,7 +285,7 @@ implementation
 
 type
   TItemData = record
-    DisplayText: String;
+    DisplayName: String;
     Name: String;
     JSONData: TJSONData;
     Children: array of Integer;
@@ -393,21 +399,16 @@ end;
 
 function TVirtualJSONInspector.DoFormatValue(const PropName: String;
   PropData: TJSONData): String;
-var
-  Handled: Boolean;
 begin
-  Handled := False;
-  Result := '';
-  if Assigned(FOnFormatValue) then
-    FOnFormatValue(PropName, PropData, Result, Handled);
-  if Handled then
-    Exit;
   case PropData.JSONType of
     jtString, jtNumber, jtBoolean: Result := PropData.AsString;
     jtObject, jtArray: Result := '';
   else
     Result := PropData.AsJSON;
   end;
+  //todo: move OnFormatValue to PropertyDefs??
+  if Assigned(FOnFormatValue) then
+    FOnFormatValue(Self, PropName, PropData, Result);
 end;
 
 procedure TVirtualJSONInspector.DoFreeNode(Node: PVirtualNode);
@@ -417,7 +418,7 @@ begin
   ItemData := GetItemData(Node);
   SetLength(ItemData^.Children, 0);
   ItemData^.Name := '';
-  ItemData^.DisplayText := '';
+  ItemData^.DisplayName := '';
   inherited DoFreeNode(Node);
 end;
 
@@ -439,7 +440,7 @@ begin
   case Column of
     0:
     begin
-      CellText := ItemData^.DisplayText;
+      CellText := ItemData^.DisplayName;
       if CellText = '' then
         CellText := ItemData^.Name;
     end;
@@ -465,20 +466,22 @@ begin
   NodeChildCount := InitJSONNode(Node, ParentJSONData.Items[ItemIndex]);
   Data := GetItemData(Node);
 
-  case ParentJSONData.JSONType of
-    jtObject:
-      begin
-        Data^.DisplayText := '';
-        Data^.Name := TJSONObject(ParentJSONData).Names[ItemIndex];
-        PropertyDef := FPropertyDefs.Find(Data^.Name);
-        if PropertyDef <> nil then
-          Data^.DisplayText := PropertyDef.DisplayName;
-      end;
-    jtArray:
-      begin
-        Data^.DisplayText := IntToStr(ItemIndex);
-      end;
+  Data^.DisplayName := '';
+  if ParentJSONData.JSONType = jtObject then
+  begin
+    Data^.Name := TJSONObject(ParentJSONData).Names[ItemIndex];
+    PropertyDef := FPropertyDefs.Find(Data^.Name);
+    if PropertyDef <> nil then
+      Data^.DisplayName := PropertyDef.DisplayName;
   end;
+
+  if Assigned(FOnFormatName) then
+    FOnFormatName(Self, ParentJSONData, ItemIndex, Data^.DisplayName);
+
+  //if is array and DisplayText not set then use default value
+  if (ParentJSONData.JSONType = jtArray) and (Data^.DisplayName = '') then
+    Data^.DisplayName := IntToStr(ItemIndex);
+
   if NodeChildCount > 0 then
     InitStates := InitStates + [ivsHasChildren];
 end;

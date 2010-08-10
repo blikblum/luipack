@@ -15,6 +15,7 @@ object MainForm: TMainForm
     Top = 44
     Width = 539
     PropertyDefs = <>
+    OnFormatName = JSONInspectorFormatName
     OnFormatValue = JSONInspectorFormatValue
     Align = alClient
     BorderSpacing.Top = 40
@@ -116,5 +117,14 @@ object MainForm: TMainForm
     Caption = 'Skip Properties With Null Value'
     OnChange = SkipNullCheckBoxChange
     TabOrder = 5
+  end
+  object FormatNameCheckBox: TCheckBox
+    Left = 328
+    Height = 17
+    Top = 335
+    Width = 150
+    Caption = 'Enable Format Name Event'
+    OnChange = FormatNameCheckBoxChange
+    TabOrder = 6
   end
 end
