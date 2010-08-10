@@ -13,6 +13,7 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
+    FormatNameCheckBox: TCheckBox;
     UpdatePropertyDefsButton: TButton;
     SkipUnknownCheckBox: TCheckBox;
     SkipNullCheckBox: TCheckBox;
@@ -21,14 +22,17 @@ type
     Label1: TLabel;
     Label2: TLabel;
     PropertiesMemo: TMemo;
+    procedure FormatNameCheckBoxChange(Sender: TObject);
+    procedure JSONInspectorFormatName(Sender: TVirtualJSONInspector;
+      ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String);
+    procedure JSONInspectorFormatValue(Sender: TVirtualJSONInspector;
+      const PropertyName: String; Data: TJSONData; var DisplayText: String);
     procedure SkipNullCheckBoxChange(Sender: TObject);
     procedure SkipUnknownCheckBoxChange(Sender: TObject);
     procedure UpdatePropertyDefsButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure JSONFileNameEditAcceptFileName(Sender: TObject; var Value: String);
-    procedure JSONInspectorFormatValue(const PropName: String;
-      PropData: TJSONData; var Result: String; var Handled: Boolean);
   private
     { private declarations }
     JSONData: TJSONData;
@@ -77,6 +81,38 @@ begin
     JSONInspector.TreeOptions.JSONOptions := JSONInspector.TreeOptions.JSONOptions - [jioSkipNullProperties];
 end;
 
+procedure TMainForm.JSONInspectorFormatValue(Sender: TVirtualJSONInspector;
+  const PropertyName: String; Data: TJSONData; var DisplayText: String);
+begin
+  if PropertyName = 'gender' then
+  begin
+    DisplayText := IfThen(Data.AsString = 'M', 'Masculino', 'Feminino');
+  end;
+end;
+
+procedure TMainForm.JSONInspectorFormatName(Sender: TVirtualJSONInspector;
+  ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String);
+var
+  PropertyName: String;
+begin
+  if (DisplayName <> '') or not (FormatNameCheckBox.Checked) then
+    Exit;
+  case ParentData.JSONType of
+    jtObject:
+      begin
+        PropertyName := TJSONObject(ParentData).Names[ItemIndex];
+        DisplayName := '(' + AnsiProperCase(PropertyName, [' ']) + ')';
+      end;
+    jtArray:
+      DisplayName := 'Item ' + IntToStr(ItemIndex);
+  end;
+end;
+
+procedure TMainForm.FormatNameCheckBoxChange(Sender: TObject);
+begin
+  JSONInspector.Reload;
+end;
+
 procedure TMainForm.SkipUnknownCheckBoxChange(Sender: TObject);
 begin
   if SkipUnknownCheckBox.Checked then
@@ -101,16 +137,21 @@ begin
   Parser := nil;
   Data := nil;
   try
-    Stream := TFileStream.Create(Value, fmOpenRead);
-    Parser := TJSONParser.Create(Stream);
     try
+      Stream := TFileStream.Create(Value, fmOpenRead);
+      Parser := TJSONParser.Create(Stream);
       Data := Parser.Parse;
-    except
-      ShowMessage(Format('Error parsing "%s"', [Value]));
+    finally
+      Parser.Free;
+      Stream.Free;
     end;
-  finally
-    Parser.Free;
-    Stream.Free;
+  except
+    on E: EFOpenError do
+      ShowMessageFmt('Error opening "%s" : %s', [Value, E.Message]);
+    on E: EJSONScanner do
+    begin
+      ShowMessageFmt('Error parsing "%s" : %s', [Value, E.Message]);
+    end;
   end;
   if Data <> nil then
   begin
@@ -123,19 +164,9 @@ begin
     end
     else
     begin
-      ShowMessage(Format('Expecting a TJSONObject/Array got "%s"', [Data.ClassName]));
+      ShowMessageFmt('Expecting a TJSONObject/Array got "%s"', [Data.ClassName]);
       Data.Destroy;
     end;
-  end;
-end;
-
-procedure TMainForm.JSONInspectorFormatValue(const PropName: String;
-  PropData: TJSONData; var Result: String; var Handled: Boolean);
-begin
-  if PropName = 'gender' then
-  begin
-    Result := IfThen(PropData.AsString = 'M', 'Masculino', 'Feminino');
-    Handled := True;
   end;
 end;
 
