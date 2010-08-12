@@ -51,26 +51,29 @@
       </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="6">
+    <RequiredPkgs Count="7">
       <Item1>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="LuiLCLComponents"/>
       </Item1>
       <Item2>
-        <PackageName Value="laz_fpspreadsheet"/>
+        <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="laz_fpspreadsheet"/>
       </Item3>
       <Item4>
-        <PackageName Value="luicairo_extras"/>
+        <PackageName Value="LCL"/>
       </Item4>
       <Item5>
-        <PackageName Value="virtualdbgrid_package"/>
+        <PackageName Value="luicairo_extras"/>
       </Item5>
       <Item6>
+        <PackageName Value="virtualdbgrid_package"/>
+      </Item6>
+      <Item7>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item6>
+      </Item7>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
