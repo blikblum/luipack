@@ -22,6 +22,7 @@ var
   MyWorkbook: TsWorkbook;
   MyWorksheet: TsWorksheet;
   Col, Row, OldRecNo: Integer;
+  Field: TField;
 begin
   MyWorkbook := TsWorkbook.Create;
   try
@@ -36,7 +37,15 @@ begin
       while not Dataset.EOF do
       begin
         for Col := 0 to FieldList.Count - 1 do
-          MyWorksheet.WriteUTF8Text(Row, Col, TField(FieldList.Objects[Col]).Text);
+        begin
+          Field := TField(FieldList.Objects[Col]);
+          case Field.DataType of
+            ftInteger, ftFloat, ftSmallint, ftLargeint, ftWord:
+              MyWorksheet.WriteNumber(Row, Col, Field.AsFloat)
+          else
+            MyWorksheet.WriteUTF8Text(Row, Col, Field.Text);
+          end;
+        end;
         Inc(Row);
         Dataset.Next;
       end;
