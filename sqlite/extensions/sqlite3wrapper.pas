@@ -60,7 +60,6 @@ type
     function GetString(Column: Integer = 0; Finalize: Boolean = True): String;
     function IsEmpty: Boolean;
     function IsNull(Column: Integer = 0; Finalize: Boolean = False): Boolean;
-    
   end;
 
   { TSqlite3Database }
@@ -86,9 +85,10 @@ type
     function LastInsertRowId: Integer;
     procedure Prepare(const SQL: String; Reader: TSqlite3DataReader);
     function ReturnString: String;
-    property FileName: String read FFileName write SetFileName;
     property Handle: Pointer read FHandle write SetHandle;
     property ReturnCode: Integer read FReturnCode;
+  published
+    property FileName: String read FFileName write SetFileName;
   end;
 
   { TSqlite3DataReader }
