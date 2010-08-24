@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Package Version="3">
+    <PathDelim Value="\"/>
+    <Name Value="luirest_package"/>
+    <CompilerOptions>
+      <Version Value="9"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Other>
+        <CompilerPath Value="$(CompPath)"/>
+      </Other>
+    </CompilerOptions>
+    <Files Count="3">
+      <Item1>
+        <Filename Value="luirest.pas"/>
+        <UnitName Value="LuiREST"/>
+      </Item1>
+      <Item2>
+        <Filename Value="register_luirest.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_luirest"/>
+      </Item2>
+      <Item3>
+        <Filename Value="luirestsql.pas"/>
+        <UnitName Value="LuiRESTSQL"/>
+      </Item3>
+    </Files>
+    <Type Value="RunAndDesignTime"/>
+    <RequiredPkgs Count="4">
+      <Item1>
+        <PackageName Value="IDEIntf"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="weblaz"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="luicomponents"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item4>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)\"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
