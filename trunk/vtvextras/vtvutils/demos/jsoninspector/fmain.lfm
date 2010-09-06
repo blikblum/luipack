@@ -8,6 +8,7 @@ object MainForm: TMainForm
   ClientWidth = 547
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  Position = poScreenCenter
   LCLVersion = '0.9.29'
   object JSONInspector: TVirtualJSONInspector
     Left = 4
@@ -111,7 +112,7 @@ object MainForm: TMainForm
   object SkipNullCheckBox: TCheckBox
     Left = 328
     Height = 17
-    Top = 304
+    Top = 305
     Width = 165
     Anchors = [akLeft, akBottom]
     Caption = 'Skip Properties With Null Value'
@@ -121,8 +122,9 @@ object MainForm: TMainForm
   object FormatNameCheckBox: TCheckBox
     Left = 328
     Height = 17
-    Top = 335
+    Top = 334
     Width = 150
+    Anchors = [akLeft, akBottom]
     Caption = 'Enable Format Name Event'
     OnChange = FormatNameCheckBoxChange
     TabOrder = 6
