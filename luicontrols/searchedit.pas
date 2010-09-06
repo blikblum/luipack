@@ -67,6 +67,7 @@ type
     procedure SetEmptyText(const AValue: String);
     procedure SetExecuteDelay(const AValue: Integer);
   protected
+    procedure Change; override;
     procedure KeyUp(var Key: Word; Shift: TShiftState); override;
     procedure Loaded; override;
     function RealGetText: TCaption; override;
@@ -177,8 +178,24 @@ begin
   begin
     FTimer := TTimer.Create(Self);
     FTimer.OnTimer := @OnTimer;
+    FTimer.Enabled := False;
   end;
   FTimer.Interval := AValue;
+end;
+
+procedure TSearchEdit.Change;
+begin
+  {$ifdef DEBUG_SEARCHEDIT}
+  Logger.SendCallStack('TextChanged');
+  Logger.Send('IsEmpty', FIsEmpty);
+  {$endif}
+  FIsEmpty := Trim(RealGetText) = '';
+  if FTimer <> nil then
+  begin
+    FTimer.Enabled := False;
+    FTimer.Enabled := True;
+  end;
+  inherited Change;
 end;
 
 procedure TSearchEdit.KeyUp(var Key: Word; Shift: TShiftState);
@@ -219,16 +236,6 @@ end;
 
 procedure TSearchEdit.TextChanged;
 begin
-  {$ifdef DEBUG_SEARCHEDIT}
-  Logger.SendCallStack('TextChanged');
-  Logger.Send('IsEmpty', FIsEmpty);
-  {$endif}
-  FIsEmpty := Trim(RealGetText) = '';
-  if FTimer <> nil then
-  begin
-    FTimer.Enabled := False;
-    FTimer.Enabled := True;
-  end;
   inherited TextChanged;
 end;
 
