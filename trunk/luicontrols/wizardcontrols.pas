@@ -274,7 +274,7 @@ begin
       if Assigned(FOnCreatePageControl) then
         FOnCreatePageControl(Self, NextPage);
       //InitControl should be called after setting Control property
-      CallMethod(PageControl, 'InitControl');
+      CallMethod(PageControl, 'InitPage');
     end;
   end;
   if PageControl <> nil then
@@ -283,7 +283,7 @@ begin
       FObserverList[i].PageChanged(Index);
     if FOnShowPage <> nil then
       FOnShowPage(Self, NextPage);
-    CallMethod(PageControl, 'UpdateControl');
+    CallMethod(PageControl, 'ShowPage');
     PageControl.Visible := True;
     FPageIndex := Index;
   end;
@@ -291,7 +291,10 @@ begin
   begin
     PageControl := FPages[OldIndex].Control;
     if PageControl <> nil then
+    begin
+      CallMethod(PageControl, 'HidePage');
       PageControl.Visible := False;
+    end;
   end;
   Result := True;
 end;

@@ -21,7 +21,7 @@ type
   public
     { public declarations }
   published
-    procedure UpdateControl;
+    procedure ShowPage;
     property ConfigData: TJSONObject write FConfigData;
   end; 
 
@@ -31,7 +31,7 @@ implementation
 
 { TPageFiveFrame }
 
-procedure TPageFiveFrame.UpdateControl;
+procedure TPageFiveFrame.ShowPage;
 begin
   if FConfigData <> nil then
     LabelConfigData.Caption := 'Config: ' + FConfigData.Strings['name'];
