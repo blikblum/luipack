@@ -5,7 +5,7 @@ unit VTJSON;
 interface
 
 uses
-  Classes, SysUtils, VirtualTrees, fpjson;
+  Classes, SysUtils, VirtualTrees, fpjson, Controls;
 
 type
 
@@ -90,6 +90,7 @@ type
     procedure SetOptions(Value: TJSONInspectorTreeOptions);
     procedure SetPropertyDefs(const Value: TJSONPropertyDefs);
   protected
+    function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
     procedure DoCanEdit(Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean); override;
     function DoFormatValue(const PropName: String; PropData: TJSONData): String;
     procedure DoFreeNode(Node: PVirtualNode); override;
@@ -121,7 +122,7 @@ type
     property BackgroundOffsetY;
     property BiDiMode;
     property BorderSpacing;
-    property BorderStyle;
+    property BorderStyle default bsSingle;
     property BottomSpace;
     property ButtonFillMode;
     property ButtonStyle;
@@ -389,6 +390,24 @@ end;
 procedure TVirtualJSONInspector.SetPropertyDefs(const Value: TJSONPropertyDefs);
 begin
   FPropertyDefs.Assign(Value);
+end;
+
+function TVirtualJSONInspector.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean;
+var
+  ParentItemData, ItemData: PItemData;
+begin
+  //todo: cache this info?
+  Result := (Column = 1);
+  if Result then
+  begin
+    ParentItemData := GetItemData(Node^.Parent);
+    Result := (ParentItemData^.JSONData.JSONType = jtArray);
+    if Result then
+    begin
+      ItemData := GetItemData(Node);
+      Result := (ItemData^.JSONData.JSONType in [jtArray, jtObject]);
+    end;
+  end;
 end;
 
 procedure TVirtualJSONInspector.DoCanEdit(Node: PVirtualNode;
