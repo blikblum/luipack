@@ -1939,7 +1939,7 @@ begin
   begin
     //AnimationOptions:= [];
     AutoOptions:=      [toAutoDropExpand, toAutoScroll, toAutoTristateTracking,
-                       toAutoDeleteMovedNodes, toDisableAutoscrollOnFocus];
+                       toAutoDeleteMovedNodes];
     MiscOptions:=      [toAcceptOLEDrop, toGridExtensions, toInitOnSave,
                        toToggleOnDblClick, toWheelPanning];
     PaintOptions:=     [toHideFocusRect, toShowDropmark, toThemeAware, toUseBlendedImages];
@@ -3111,9 +3111,6 @@ begin
     end;
     if (LinkedDataSet.RecNo <> OldRecNo) then
       GotoRecNo(OldRecNo);
-    if (FocusedNode <> nil) and (OldRecNo <> InternalGetNodeData(FocusedNode)^.RecNo) then
-      SetFocusToNode(FindNodeByRecNo(OldRecNo), False);
-
   finally
     LinkedDataSet.EnableControls;
     DecLoadingDataFlag;
