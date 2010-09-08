@@ -26,6 +26,8 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Bool
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
 
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double;
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
@@ -39,33 +41,44 @@ uses
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 var
-  i: Integer;
+  Data: TJSONData;
 begin
-  i := JSONObj.IndexOfName(PropName);
-  if i <> -1 then
-    Result := JSONObj.Items[i].AsBoolean
+  Data := GetJSONProp(JSONObj, PropName);
+  if (Data <> nil) and (Data.JSONType <> jtNull) then
+    Result := Data.AsBoolean
   else
     Result := Default;
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
 var
-  i: Integer;
+  Data: TJSONData;
 begin
-  i := JSONObj.IndexOfName(PropName);
-  if i <> -1 then
-    Result := JSONObj.Items[i].AsInteger
+  Data := GetJSONProp(JSONObj, PropName);
+  if (Data <> nil) and (Data.JSONType <> jtNull) then
+    Result := Data.AsInteger
+  else
+    Result := Default;
+end;
+
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double;
+var
+  Data: TJSONData;
+begin
+  Data := GetJSONProp(JSONObj, PropName);
+  if (Data <> nil) and (Data.JSONType <> jtNull) then
+    Result := Data.AsFloat
   else
     Result := Default;
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String;
 var
-  i: Integer;
+  Data: TJSONData;
 begin
-  i := JSONObj.IndexOfName(PropName);
-  if i <> -1 then
-    Result := JSONObj.Items[i].AsString
+  Data := GetJSONProp(JSONObj, PropName);
+  if (Data <> nil) and (Data.JSONType <> jtNull) then
+    Result := Data.AsString
   else
     Result := Default;
 end;
