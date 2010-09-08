@@ -55,11 +55,12 @@ type
 
   TSearchEdit = class (TCustomEdit)
   private
-    FIsEmpty: Boolean;
     FEmptyText: String;
     FOnExecute: TNotifyEvent;
     FOptions: TSearchEditOptions;
     FTimer: TTimer;
+    FIsEmpty: Boolean;
+    FSettingText: Boolean;
     procedure ClearEmptyText;
     procedure DisplayEmptyText;
     function GetExecuteDelay: Integer;
@@ -72,7 +73,6 @@ type
     procedure Loaded; override;
     function RealGetText: TCaption; override;
     procedure RealSetText(const Value: TCaption); override;
-    procedure TextChanged; override;
     procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
     procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
   public
@@ -190,7 +190,7 @@ begin
   Logger.Send('IsEmpty', FIsEmpty);
   {$endif}
   FIsEmpty := Trim(RealGetText) = '';
-  if FTimer <> nil then
+  if (FTimer <> nil) and not FSettingText then
   begin
     FTimer.Enabled := False;
     FTimer.Enabled := True;
@@ -231,12 +231,9 @@ begin
   {$endif}
   if FIsEmpty then
     Font.Color := clWindowText;
+  FSettingText := True;
   inherited RealSetText(Value);
-end;
-
-procedure TSearchEdit.TextChanged;
-begin
-  inherited TextChanged;
+  FSettingText := False;
 end;
 
 procedure TSearchEdit.WMSetFocus(var Message: TLMSetFocus);
