@@ -119,10 +119,11 @@ type
     property Glyph;
     property Name stored True;
     property ShowHint;
-    property OnClick;
   end;
 
   { TWizardButtonPanel }
+
+  TWizardButtonPanelButtonClick = procedure(Sender: TObject; ButtonType: TWizardButton) of object;
 
   TWizardButtonPanel = class(TCustomPanel, IWizardObserver)
   private
@@ -131,6 +132,7 @@ type
     FController: TWizardController;
     FFinishButton: TWizardPanelBitBtn;
     FNextButton: TWizardPanelBitBtn;
+    FOnButtonClick: TWizardButtonPanelButtonClick;
     FPreviousButton: TWizardPanelBitBtn;
     FShowBevel: Boolean;
     procedure ButtonClick(Sender: TObject);
@@ -153,6 +155,8 @@ type
     property NextButton: TWizardPanelBitBtn read FNextButton;
     property PreviousButton: TWizardPanelBitBtn read FPreviousButton;
     property ShowBevel: Boolean read FShowBevel write SetShowBevel default false;
+    //events
+    property OnButtonClick: TWizardButtonPanelButtonClick read FOnButtonClick write FOnButtonClick;
     //
     property Align;
     property Alignment;
@@ -476,6 +480,8 @@ begin
       wbNext: FController.DoAction(waNext);
       wbPrevious: FController.DoAction(waPrevious);
     end;
+    if Assigned(FOnButtonClick) then
+      FOnButtonClick(Self, ButtonType);
   end;
 end;
 
