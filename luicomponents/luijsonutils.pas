@@ -32,6 +32,8 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): Str
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
 
+function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
+
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 implementation
@@ -92,6 +94,17 @@ begin
     Result := JSONObj.Items[i]
   else
     Result := nil;
+end;
+
+function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
+var
+  Data: TJSONData;
+begin
+  Data := GetJSONProp(JSONObj, PropName);
+  if Data = nil then
+    Result := Null
+  else
+    Result := Data.Value;
 end;
 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
