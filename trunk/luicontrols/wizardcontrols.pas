@@ -112,11 +112,13 @@ type
     property Caption stored True;
     property Left stored False;
     property Top stored False;
-    property Width stored False;
-    property Height stored False;
+    property Width;
+    property Height;
     property Enabled;
     property Font;
     property Glyph;
+    property Kind;
+    property ModalResult;
     property Name stored True;
     property ShowHint;
   end;
@@ -532,12 +534,13 @@ begin
   BevelOuter := bvNone;
   //create the buttons
   FCancelButton := CreateButton(wbCancel);
+  FCancelButton.Kind := bkCancel;
   FCancelButton.AnchorParallel(akRight, 4, Self);
   FCancelButton.AnchorVerticalCenterTo(Self);
 
   FFinishButton := CreateButton(wbFinish);
+  FFinishButton.Kind := bkOK;
   FFinishButton.AnchorVerticalCenterTo(Self);
-
 
   FNextButton := CreateButton(wbNext);
   FNextButton.AnchorVerticalCenterTo(Self);
