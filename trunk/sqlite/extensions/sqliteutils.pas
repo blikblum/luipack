@@ -93,6 +93,8 @@ type
     property TableDefs: TSqliteTableDefs read FTableDefs write SetTableDefs;
   end;
 
+  function FloatToSQL(D: Double): String;
+
 implementation
 
 //replace parameters
@@ -142,6 +144,11 @@ begin
       end;
     end;
   Result := ResStr;
+end;
+
+function FloatToSQL(D: Double): String;
+begin
+  Str(D, Result);
 end;
 
 { TSqliteQueryBuilder }
