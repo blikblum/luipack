@@ -117,6 +117,7 @@ type
     property Enabled;
     property Font;
     property Glyph;
+    property GlyphShowMode;
     property Kind;
     property ModalResult;
     property Name stored True;
