@@ -34,12 +34,14 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
 
 function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
 
+procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
+
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 implementation
 
 uses
-  jsonparser;
+  jsonparser, Variants;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 var
@@ -105,6 +107,23 @@ begin
     Result := Null
   else
     Result := Data.Value;
+end;
+
+procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
+var
+  VariantType: tvartype;
+begin
+  VariantType := VarType(Value);
+  case VariantType of
+    varnull: JSONObj.Elements[PropName] := TJSONNull.Create;
+    varstring: JSONObj.Elements[PropName] := TJSONString.Create(Value);
+    vardouble: JSONObj.Elements[PropName] := TJSONFloatNumber.Create(Value);
+    varinteger, varlongword: JSONObj.Elements[PropName] := TJSONIntegerNumber.Create(Value);
+    varint64, varqword: JSONObj.Elements[PropName] := TJSONInt64Number.Create(Value);
+    varboolean: JSONObj.Elements[PropName] := TJSONBoolean.Create(Value);
+  else
+    raise Exception.CreateFmt('SetJSONPropValue - Type %d not handled', [VariantType]);
+  end
 end;
 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
