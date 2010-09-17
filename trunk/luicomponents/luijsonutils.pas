@@ -38,6 +38,8 @@ procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: 
 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
+function StreamToJSONData(Stream: TStream): TJSONData;
+
 implementation
 
 uses
@@ -131,6 +133,18 @@ var
   Parser: TJSONParser;
 begin
   Parser := TJSONParser.Create(JSONStr);
+  try
+    Result := Parser.Parse;
+  finally
+    Parser.Destroy;
+  end;
+end;
+
+function StreamToJSONData(Stream: TStream): TJSONData;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(Stream);
   try
     Result := Parser.Parse;
   finally
