@@ -101,6 +101,9 @@ type
 
 implementation
 
+uses
+  LuiMiscUtils;
+
 { TControlSwitcher }
 
 procedure TControlSwitcher.SetControlList(const AValue: TControlList);
@@ -164,6 +167,7 @@ begin
           Control.Parent := Parent;
           FControlList[NewCell].FControl := Control;
           DoControlCreate(Control);
+          CallMethod(Control, 'InitControl');
        end;
      end;
      if Control <> nil then
