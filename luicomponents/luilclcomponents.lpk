@@ -7,23 +7,35 @@
       <Version Value="9"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="1">
+    <Files Count="3">
       <Item1>
         <Filename Value="luilclmessages.pas"/>
-        <UnitName Value="luilclmessages"/>
+        <UnitName Value="LuiLCLMessages"/>
       </Item1>
+      <Item2>
+        <Filename Value="luijsonlclviews.pas"/>
+        <UnitName Value="LuiJSONLCLViews"/>
+      </Item2>
+      <Item3>
+        <Filename Value="register_luilclcomponents.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="register_luilclcomponents"/>
+      </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="1">
+    <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="IDEIntf"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

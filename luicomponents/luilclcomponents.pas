@@ -7,12 +7,15 @@ unit LuiLCLComponents;
 interface
 
 uses
-  LuiLCLMessages, LazarusPackageIntf;
+    LuiLCLMessages, LuiJSONLCLViews, register_luilclcomponents, 
+  LazarusPackageIntf;
 
 implementation
 
 procedure Register; 
 begin
+  RegisterUnit('register_luilclcomponents', @register_luilclcomponents.Register
+    ); 
 end; 
 
 initialization
