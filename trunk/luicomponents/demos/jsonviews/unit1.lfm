@@ -1,0 +1,90 @@
+object MainForm: TMainForm
+  Left = 407
+  Height = 338
+  Top = 268
+  Width = 229
+  Caption = 'JSONObject Views Demo'
+  ClientHeight = 338
+  ClientWidth = 229
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
+  object ShortStrEdit: TEdit
+    Left = 8
+    Height = 21
+    Top = 24
+    Width = 208
+    TabOrder = 0
+    Text = 'ShortStrEdit'
+  end
+  object MultiLineStrMemo: TMemo
+    Left = 8
+    Height = 98
+    Top = 56
+    Width = 208
+    Lines.Strings = (
+      'MultiLineStrMemo'
+    )
+    TabOrder = 1
+  end
+  object ShortStrLabel: TLabel
+    Left = 8
+    Height = 14
+    Top = 5
+    Width = 66
+    Caption = 'ShortStrLabel'
+    ParentColor = False
+  end
+  object LoadButton: TButton
+    Left = 8
+    Height = 25
+    Top = 164
+    Width = 75
+    Caption = 'Load'
+    OnClick = LoadButtonClick
+    TabOrder = 2
+  end
+  object SaveButton: TButton
+    Left = 141
+    Height = 25
+    Top = 164
+    Width = 75
+    Caption = 'Save'
+    OnClick = SaveButtonClick
+    TabOrder = 3
+  end
+  object DumpButton: TButton
+    Left = 8
+    Height = 25
+    Top = 199
+    Width = 75
+    Caption = 'Dump'
+    OnClick = DumpButtonClick
+    TabOrder = 4
+  end
+  object DumpMemo: TMemo
+    Left = 8
+    Height = 96
+    Top = 232
+    Width = 212
+    TabOrder = 5
+  end
+  object JSONObjectViewManager: TJSONObjectViewManager
+    PropertyViews = <    
+      item
+        Control = ShortStrEdit
+        PropertyName = 'shortstr'
+      end    
+      item
+        Control = MultiLineStrMemo
+        PropertyName = 'multilinestr'
+      end    
+      item
+        Control = ShortStrLabel
+        PropertyName = 'shortstr'
+      end>
+    left = 144
+    top = 64
+  end
+end
