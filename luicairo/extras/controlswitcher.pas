@@ -47,7 +47,7 @@ type
 
   { TControlSwitcher }
 
-  TControlSwitcher = class(TLuiBar)
+  TControlSwitcher = class(TCustomLuiBar)
   private
     FControlList: TControlList;
     FOnControlCreate: TControlCreateEvent;
@@ -66,7 +66,8 @@ type
   published
     property ControlList: TControlList read FControlList write SetControlList;
     property OnControlCreate: TControlCreateEvent read FOnControlCreate write FOnControlCreate;
-
+    property Align;
+    property BorderSpacing;
     property CellAlign;
     property CellHeight;
     property CellRoundRadius;
@@ -85,7 +86,6 @@ type
     property Spacing;
     property TextAlign;
     property TextPadding;
-
     property OnAfterDraw;
     property OnDrawBackground;
     property OnDrawCell;
@@ -97,6 +97,10 @@ type
     property OnGetCellPattern;
     property OnSelect;
     property OnSelecting;
+    property OnCreateContext;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
   end;
 
 implementation

@@ -11,7 +11,7 @@ uses
 
 type
 
-  TLuiBar = class;
+  TCustomLuiBar = class;
   
   TLuiBarCell = class;
   
@@ -38,23 +38,23 @@ type
   
   TLuiBarTextAlign = (taCenter, taLeft, taRight);
   
-  TLuiBarEvent = procedure (Sender: TLuiBar) of object;
+  TLuiBarEvent = procedure (Sender: TCustomLuiBar) of object;
 
-  TLuiBarSelectingEvent = procedure (Sender: TLuiBar; OldCell, NewCell: Integer;
+  TLuiBarSelectingEvent = procedure (Sender: TCustomLuiBar; OldCell, NewCell: Integer;
     var Allowed: Boolean) of object;
   
-  TLuiBarDrawCellEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell) of object;
+  TLuiBarDrawCellEvent = procedure (Sender: TCustomLuiBar; Cell: TLuiBarCell) of object;
 
-  TLuiBarDrawingEvent = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
+  TLuiBarDrawingEvent = procedure (Sender: TCustomLuiBar; Cell: TLuiBarCell;
     DrawType: TLuiBarDrawType; var Allowed: Boolean) of object;
   
   TLuiBarPatternType = (ptSelected, ptNormal, ptHover, ptText, ptSelectedText,
     ptBackground, ptOutLine, ptClientArea);
   
-  TLuiBarCreatePattern = procedure (Sender: TLuiBar; PatternType: TLuiBarPatternType;
+  TLuiBarCreatePattern = procedure (Sender: TCustomLuiBar; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern) of object;
   
-  TLuiBarGetCellPattern = procedure (Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+  TLuiBarGetCellPattern = procedure (Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
     var Pattern: TCairoPattern) of object;
   
   TLuiBarImageInfo = record
@@ -62,19 +62,19 @@ type
     Effect: TGraphicsDrawEffect;
   end;
 
-  TLuiBarGetImageInfo = procedure (Sender: TLuiBar; Cell: TLuiBarCell;
+  TLuiBarGetImageInfo = procedure (Sender: TCustomLuiBar; Cell: TLuiBarCell;
     var ImageInfo: TLuiBarImageInfo) of object;
 
   { TLuiBarColors }
 
   TLuiBarColors = class(TPersistent)
   private
-    FOwner: TLuiBar;
+    FOwner: TCustomLuiBar;
     FColors: array[0..7] of TColor;
     function GetColor(const Index: Integer): TColor; inline;
     procedure SetColor(const Index: Integer; const Value: TColor);
   public
-    constructor Create(AOwner: TLuiBar);
+    constructor Create(AOwner: TCustomLuiBar);
     procedure Assign(Source: TPersistent); override;
   published
     property Normal: TColor index 0 read GetColor write SetColor default clSkyBlue;
@@ -162,14 +162,14 @@ type
   TLuiBarCellList = class
   private
     FList: TFpList;
-    FOwner: TLuiBar;
+    FOwner: TCustomLuiBar;
     FRequiresUpdate: Boolean;
     function GetCount: Integer;
     function GetItems(Index: Integer): TLuiBarCell; inline;
   protected
     property RequiresUpdate: Boolean read FRequiresUpdate write FRequiresUpdate;
   public
-    constructor Create(Owner: TLuiBar);
+    constructor Create(Owner: TCustomLuiBar);
     destructor Destroy; override;
     function Add(const Title: String): TLuiBarCell;
     procedure Clear;
@@ -178,9 +178,9 @@ type
     property Items[Index: Integer]: TLuiBarCell read GetItems; default;
   end;
   
-  { TLuiBar }
+  { TCustomLuiBar }
 
-  TLuiBar = class(TLuiContainer)
+  TCustomLuiBar = class(TLuiContainer)
   private
     FCellAlign: TLuiBarCellAlign;
     FCellHeight: Integer;
@@ -297,7 +297,40 @@ type
     property OnGetCellPattern: TLuiBarGetCellPattern read FOnGetCellPattern write FOnGetCellPattern;
     property OnSelect: TLuiBarEvent read FOnSelect write FOnSelect;
     property OnSelecting: TLuiBarSelectingEvent read FOnSelecting write FOnSelecting;
+  end;
+
+  TLuiBar = class (TCustomLuiBar)
   published
+    property CellAlign;
+    property CellHeight;
+    property CellRoundRadius;
+    property CellWidth;
+    property Colors;
+    property ImagePadding;
+    property ImagePosition;
+    property Images;
+    property InitialSpace;
+    property Options;
+    property OuterOffset;
+    property OutLineWidth;
+    property Patterns;
+    property Position;
+    property SelectedIndex;
+    property Spacing;
+    property TextAlign;
+    property TextPadding;
+    //events
+    property OnAfterDraw;
+    property OnDrawBackground;
+    property OnDrawCell;
+    property OnDrawCellPath;
+    property OnDrawCellText;
+    property OnDrawing;
+    property OnGetImageInfo;
+    property OnCreatePattern;
+    property OnGetCellPattern;
+    property OnSelect;
+    property OnSelecting;
     property Align;
     property BorderSpacing;
     property OnCreateContext;
@@ -305,6 +338,7 @@ type
     property OnMouseMove;
     property OnMouseUp;
   end;
+
 
 implementation
 
@@ -319,7 +353,7 @@ begin
   Result := TLuiBarCell(FList[Index]);
 end;
 
-constructor TLuiBarCellList.Create(Owner: TLuiBar);
+constructor TLuiBarCellList.Create(Owner: TCustomLuiBar);
 begin
   FList := TFPList.Create;
   FOwner := Owner;
@@ -486,9 +520,9 @@ begin
   FPatterns.Destroy;
 end;
 
-{ TLuiBar }
+{ TCustomLuiBar }
 
-function TLuiBar.CellInPos(X, Y: Integer): Integer;
+function TCustomLuiBar.CellInPos(X, Y: Integer): Integer;
 var
   i: Integer;
 begin
@@ -498,7 +532,7 @@ begin
       Exit(i);
 end;
 
-function TLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
+function TCustomLuiBar.GetAlignOffset(CellSize, ControlSize: Integer): Integer;
 begin
   case FCellAlign of
     caDefault:
@@ -510,7 +544,7 @@ begin
   end;
 end;
 
-function TLuiBar.DoDrawing(Cell: TLuiBarCell; DrawType: TLuiBarDrawType
+function TCustomLuiBar.DoDrawing(Cell: TLuiBarCell; DrawType: TLuiBarDrawType
   ): Boolean;
 begin
   Result := True;
@@ -518,7 +552,7 @@ begin
     FOnDrawing(Self, Cell, DrawType, Result);
 end;
 
-function TLuiBar.GetRealCellWidth: Integer;
+function TCustomLuiBar.GetRealCellWidth: Integer;
 begin
   if FCellWidth > 0 then
     Result := FCellWidth
@@ -531,7 +565,7 @@ begin
   end;
 end;
 
-function TLuiBar.GetTextWidth(const AText: String): Double;
+function TCustomLuiBar.GetTextWidth(const AText: String): Double;
 var
   Extents: cairo_text_extents_t;
 begin
@@ -542,7 +576,7 @@ begin
   end;
 end;
 
-function TLuiBar.IndexToPatternType(Index: Integer): TLuiBarPatternType;
+function TCustomLuiBar.IndexToPatternType(Index: Integer): TLuiBarPatternType;
 begin
   if Index = FSelectedIndex then
     Result := ptSelected
@@ -553,7 +587,7 @@ begin
       Result := ptNormal;
 end;
 
-procedure TLuiBar.SetCellAlign(const AValue: TLuiBarCellAlign);
+procedure TCustomLuiBar.SetCellAlign(const AValue: TLuiBarCellAlign);
 begin
   if FCellAlign = AValue then
     Exit;
@@ -561,7 +595,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetCellHeight(const AValue: Integer);
+procedure TCustomLuiBar.SetCellHeight(const AValue: Integer);
 begin
   if FCellHeight = AValue then
     Exit;
@@ -569,7 +603,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetCellRoundRadius(const AValue: Integer);
+procedure TCustomLuiBar.SetCellRoundRadius(const AValue: Integer);
 begin
   if FCellRoundRadius = AValue then
     Exit;
@@ -577,7 +611,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetCellWidth(const AValue: Integer);
+procedure TCustomLuiBar.SetCellWidth(const AValue: Integer);
 begin
   if FCellWidth = AValue then
     Exit;
@@ -585,12 +619,12 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetColors(const AValue: TLuiBarColors);
+procedure TCustomLuiBar.SetColors(const AValue: TLuiBarColors);
 begin
   FColors.Assign(AValue);
 end;
 
-procedure TLuiBar.SetImagePadding(const AValue: Integer);
+procedure TCustomLuiBar.SetImagePadding(const AValue: Integer);
 begin
   if FImagePadding = AValue then
     Exit;
@@ -598,7 +632,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetImagePosition(const AValue: TLuiBarImagePosition);
+procedure TCustomLuiBar.SetImagePosition(const AValue: TLuiBarImagePosition);
 begin
   if FImagePosition = AValue then
     Exit;
@@ -606,13 +640,13 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetImages(const AValue: TImageList);
+procedure TCustomLuiBar.SetImages(const AValue: TImageList);
 begin
   if FImages=AValue then exit;
   FImages:=AValue;
 end;
 
-procedure TLuiBar.SetInitialSpace(const AValue: Integer);
+procedure TCustomLuiBar.SetInitialSpace(const AValue: Integer);
 begin
   if FInitialSpace = AValue then
     Exit;
@@ -620,7 +654,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetOptions(const AValue: TLuiBarOptions);
+procedure TCustomLuiBar.SetOptions(const AValue: TLuiBarOptions);
 begin
   if FOptions = AValue then
     Exit;
@@ -628,7 +662,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetOuterOffset(const AValue: Integer);
+procedure TCustomLuiBar.SetOuterOffset(const AValue: Integer);
 begin
   if FOuterOffset = AValue then
     Exit;
@@ -636,7 +670,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetOutLineWidth(const AValue: Integer);
+procedure TCustomLuiBar.SetOutLineWidth(const AValue: Integer);
 begin
   if FOutLineWidth = AValue then
     Exit;
@@ -644,7 +678,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetPosition(const AValue: TLuiBarPosition);
+procedure TCustomLuiBar.SetPosition(const AValue: TLuiBarPosition);
 begin
   if FPosition = AValue then
     Exit;
@@ -652,7 +686,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.DoUpdatePatterns;
+procedure TCustomLuiBar.DoUpdatePatterns;
 
   function DoGetPattern(AType: TLuiBarPatternType; DefaultColor: TColor): TCairoPattern;
   begin
@@ -679,7 +713,7 @@ begin
   end;
 end;
 
-procedure TLuiBar.DoDrawCellPath(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DoDrawCellPath(Cell: TLuiBarCell);
 begin
   if DoDrawing(Cell, dtCellPath) then
     DefaultDrawCellPath(Cell);
@@ -687,7 +721,7 @@ begin
     FOnDrawCellPath(Self, Cell);
 end;
 
-procedure TLuiBar.DoDrawCellText(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DoDrawCellText(Cell: TLuiBarCell);
 begin
   if DoDrawing(Cell, dtCellText) then
     DefaultDrawCellText(Cell);
@@ -695,7 +729,7 @@ begin
     FOnDrawCellText(Self, Cell);
 end;
 
-procedure TLuiBar.DoDrawClientArea;
+procedure TCustomLuiBar.DoDrawClientArea;
 var
   LineOffset: Double;
 
@@ -855,7 +889,7 @@ begin
   end;
 end;
 
-function TLuiBar.DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType): TCairoPattern;
+function TCustomLuiBar.DoGetCellPattern(Cell: TLuiBarCell; PatternType: TLuiBarPatternType): TCairoPattern;
 begin
   //todo: see if is necessary this mechanism
   Result := nil;
@@ -915,7 +949,7 @@ begin
   end;
 end;
 
-function TLuiBar.DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo;
+function TCustomLuiBar.DoGetImageInfo(Cell: TLuiBarCell): TLuiBarImageInfo;
 begin
   Result.Index := -1;
   Result.Effect := gdeNormal;
@@ -923,14 +957,14 @@ begin
     FOnGetImageInfo(Self, Cell, Result);
 end;
 
-procedure TLuiBar.DoOnResize;
+procedure TCustomLuiBar.DoOnResize;
 begin
   inherited DoOnResize;
   if FCellAlign in [caInvert, caCenter] then
     FCells.RequiresUpdate := True;
 end;
 
-procedure TLuiBar.SetSelectedIndex(const AValue: Integer);
+procedure TCustomLuiBar.SetSelectedIndex(const AValue: Integer);
 begin
   if FSelectedIndex = AValue then
     Exit;
@@ -940,7 +974,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetSpacing(const AValue: Integer);
+procedure TCustomLuiBar.SetSpacing(const AValue: Integer);
 begin
   if FSpacing = AValue then
     Exit;
@@ -948,7 +982,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetTextAlign(const AValue: TLuiBarTextAlign);
+procedure TCustomLuiBar.SetTextAlign(const AValue: TLuiBarTextAlign);
 begin
   if FTextAlign = AValue then
     Exit;
@@ -956,7 +990,7 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.SetTextPadding(const AValue: Integer);
+procedure TCustomLuiBar.SetTextPadding(const AValue: Integer);
 begin
   if FTextPadding = AValue then
     Exit;
@@ -964,13 +998,13 @@ begin
   Changed;
 end;
 
-procedure TLuiBar.DoAfterDraw;
+procedure TCustomLuiBar.DoAfterDraw;
 begin
   if Assigned(FOnAfterDraw) then
     FOnAfterDraw(Self);
 end;
 
-function TLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
+function TCustomLuiBar.DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
 begin
   if FPosition in [poTop, poBottom] then
   begin
@@ -1001,7 +1035,7 @@ begin
   end;
 end;
 
-procedure TLuiBar.DoDraw;
+procedure TCustomLuiBar.DoDraw;
 var
   i: Integer;
   Cell: TLuiBarCell;
@@ -1027,7 +1061,7 @@ begin
   DoAfterDraw;
 end;
 
-procedure TLuiBar.DoDrawCell(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DoDrawCell(Cell: TLuiBarCell);
 begin
   if DoDrawing(Cell, dtCell) then
     DefaultDrawCell(Cell);
@@ -1035,20 +1069,20 @@ begin
     FOnDrawCell(Self, Cell);
 end;
 
-procedure TLuiBar.DoSelect;
+procedure TCustomLuiBar.DoSelect;
 begin
   if Assigned(FOnSelect) then
     FOnSelect(Self);
 end;
 
-function TLuiBar.DoSelecting(OldCell, NewCell: Integer): Boolean;
+function TCustomLuiBar.DoSelecting(OldCell, NewCell: Integer): Boolean;
 begin
   Result := True;
   if Assigned(FOnSelecting) then
     FOnSelecting(Self, OldCell, NewCell, Result);
 end;
 
-procedure TLuiBar.DoDrawBackground;
+procedure TCustomLuiBar.DoDrawBackground;
 begin
   with Context do
   begin
@@ -1064,7 +1098,7 @@ begin
     Restore;
   end;
 end;
-procedure TLuiBar.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
+procedure TCustomLuiBar.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
   Y: Integer);
 var
   ClickedCell: Integer;
@@ -1088,7 +1122,7 @@ begin
   inherited MouseDown(Button, Shift, X, Y);
 end;
 
-procedure TLuiBar.MouseLeave;
+procedure TCustomLuiBar.MouseLeave;
 begin
   if FHoverIndex <> -1 then
   begin
@@ -1098,7 +1132,7 @@ begin
   inherited MouseLeave;
 end;
 
-procedure TLuiBar.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TCustomLuiBar.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   NewHoverIndex: Integer;
 begin
@@ -1114,7 +1148,7 @@ begin
   inherited MouseMove(Shift, X, Y);
 end;
 
-constructor TLuiBar.Create(AOwner: TComponent);
+constructor TCustomLuiBar.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FCells := TLuiBarCellList.Create(Self);
@@ -1130,7 +1164,7 @@ begin
   SetInitialBounds(0, 0, 100, 30);
 end;
 
-procedure TLuiBar.DefaultDrawCell(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DefaultDrawCell(Cell: TLuiBarCell);
 begin
   with Context do
   begin
@@ -1154,7 +1188,7 @@ begin
   end;
 end;
 
-procedure TLuiBar.DefaultDrawCellPath(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DefaultDrawCellPath(Cell: TLuiBarCell);
 var
   InnerRadius: Integer;
   R: TDoubleRect;
@@ -1262,7 +1296,7 @@ begin
     Context.ClosePath;
 end;
 
-procedure TLuiBar.DefaultDrawCellText(Cell: TLuiBarCell);
+procedure TCustomLuiBar.DefaultDrawCellText(Cell: TLuiBarCell);
 const
   TextPatternMap: array[Boolean] of TLuiBarPatternType = (ptText, ptSelectedText);
 var
@@ -1394,7 +1428,7 @@ begin
   end;
 end;
 
-destructor TLuiBar.Destroy;
+destructor TCustomLuiBar.Destroy;
 begin
   FCells.Destroy;
   FColors.Destroy;
@@ -1568,7 +1602,7 @@ begin
   FOwner.Changed;
 end;
 
-constructor TLuiBarColors.Create(AOwner: TLuiBar);
+constructor TLuiBarColors.Create(AOwner: TCustomLuiBar);
 begin
   FOwner := AOwner;
   //todo: find better initial collors
