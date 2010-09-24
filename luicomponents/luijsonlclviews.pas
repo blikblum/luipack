@@ -310,8 +310,35 @@ end;
 
 class procedure TJSONCaptionMediator.DoJSONToGUI(JSONObject: TJSONObject;
   const PropName: String; Control: TControl; Options: TJSONData);
+var
+  FormatStr, TemplateStr, ValueStr: String;
+  PropData: TJSONData;
 begin
-  Control.Caption := JSONObject.Strings[PropName];
+  PropData := JSONObject.Elements[PropName];
+  ValueStr := PropData.AsString;
+  if Options <> nil then
+  begin
+    case Options.JSONType of
+      jtObject:
+        begin
+          FormatStr := GetJSONProp(TJSONObject(Options), 'format', '');
+          if FormatStr = 'date' then
+            ValueStr := DateToStr(PropData.AsFloat)
+          else if FormatStr = 'datetime' then
+            ValueStr := DateTimeToStr(PropData.AsFloat);
+          TemplateStr := GetJSONProp(TJSONObject(Options), 'template', '%s');
+        end;
+      jtString: //template
+        TemplateStr := Options.AsString;
+    else
+    begin
+      TemplateStr := '%s';
+    end;
+    end;
+    Control.Caption := Format(TemplateStr, [ValueStr]);
+  end
+  else
+    Control.Caption := ValueStr;
 end;
 
 class procedure TJSONCaptionMediator.DoGUIToJSON(Control: TControl;
