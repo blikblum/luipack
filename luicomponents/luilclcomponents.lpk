@@ -13,7 +13,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="luilclmessages.pas"/>
         <UnitName Value="LuiLCLMessages"/>
@@ -27,6 +27,10 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_luilclcomponents"/>
       </Item3>
+      <Item4>
+        <Filename Value="luilclinterfaces.pas"/>
+        <UnitName Value="luilclinterfaces"/>
+      </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
