@@ -8,7 +8,7 @@ interface
 
 uses
     LuiLCLMessages, LuiJSONLCLViews, register_luilclcomponents, 
-  LazarusPackageIntf;
+  LuiLCLInterfaces, LazarusPackageIntf;
 
 implementation
 
