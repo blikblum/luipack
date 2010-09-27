@@ -85,7 +85,8 @@ type
   aoMultiSelect,            // enable multi select
   aoAutoToggleBoolean,      // toggle boolean fields when the cell is double clicked
   aoEditOnClick,            // Editing mode can be entered with a single click
-  aoEditOnDblClick         // Editing mode can be entered with a double click
+  aoEditOnDblClick,         // Editing mode can be entered with a double click
+  aoAddDefaultColumns       // Add default columns even if one or more column(s) are added at design time
   );
 
   TVTDBAdvOptions = set of TVTDBAdvOption;
@@ -284,17 +285,17 @@ type
     fFieldName:  String;
     fField:      TField;
     fColumnType: TColumnType;
-
     fSavedMainColumn: TColumnIndex;
+    FIsDefault: Boolean;
     procedure InternalSetFieldName(const AFieldName: String);
     procedure SetFieldName(const AFieldName: String);
     procedure SetColumnType(value: TColumnType);
     function GetOwnerTree: TCustomVirtualDBGrid;
+    property IsDefault: Boolean read FIsDefault write FIsDefault;
   protected
     function GetDisplayName: string; override;
   public
     constructor Create(Collection: TCollection); override;
-
     procedure Assign(Source: TPersistent); override;
     function Equals(OtherColumn: TObject): Boolean; override;
     procedure LoadFromStream(const Stream: TStream; Version: Integer);
@@ -390,6 +391,8 @@ type
     fIndicatorBMP:            TBitmap;
 
     function GetHeader: TVTDBHeader;
+    procedure AddDefaultColumns;
+    procedure RemoveDefaultColumns;
     procedure SetHeader(Value: TVTDBHeader);
     procedure SetDBOptions(const Value: TVTDBOptions);
     function GetOptions: TStringTreeOptions;
@@ -405,8 +408,7 @@ type
     // Return number of current record in database
     //   - if database is closed, returns 0
     function GetCurrentDBRecNo: LongInt;
-    procedure AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string; AWidth: Integer=-1;
-                        AUpdateDBTree: boolean= true);
+    function AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string; AWidth: Integer=-1): TVirtualDBTreeColumn;
     procedure IncLoadingDataFlag;
     procedure DecLoadingDataFlag;
     function IsDataLoading: boolean;
@@ -415,7 +417,7 @@ type
     procedure SetFocusToActualRecNo;
     procedure UpdateCurrentRecord;
   protected
-    procedure CreateWnd; override;
+    procedure InitializeWnd; override;
     procedure DoFocusChange(Node: PVirtualNode; Column: TColumnIndex); override;
     procedure DoBeforeCellPaint(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect); override;
@@ -516,11 +518,9 @@ type
   public
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
-
     procedure AddDBColumn(const AFieldName, ACaption: string; AWidth: Integer=-1);
     procedure AddCalcColumn(const IDText: string; AWidth: Integer);
     procedure AddIndicatorColumn(AWidth: Integer);
-    procedure AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
     function GetNodeRecordData(Node: PVirtualNode): TRecordData;
     procedure SetSortColumn(const ColumnTitle: string; Direction: TSortDirection);
     procedure UpdateAllRecords(UpdateLoadedData: Boolean = True);
@@ -1280,7 +1280,6 @@ var
   Tree: TCustomVirtualDBGrid;
   Empty: boolean;
   str:   string;
-  Ok:    boolean;
   size:  integer;
   CaptionWidth,
   FieldWidth: Integer;
@@ -1291,64 +1290,56 @@ begin
   Tree := GetOwnerTree;
   FField := nil;
   FFieldName := AFieldName;
-  Empty := Self.Text = '';
+  Empty := Text = '';
   if Empty then
-    Self.Text := FFieldName;
+    Text := FFieldName;
   if not Assigned(Tree.LinkedDataSet) then
     Exit;
-  //todo: see why this call here
-  Tree.DataLinkActiveChanged;
 
-  Ok := not Tree.LinkedDataSet.Active or (FFieldName <> '');
+  FField := Tree.LinkedDataSet.FindField(FFieldName);
 
-  if Ok then
+  if FField <> nil then
   begin
-     FField := Tree.LinkedDataSet.FindField(FFieldName);
-     if FField <> nil then
+     if Empty and (FField.DisplayLabel <> '') then
+       Text := FField.DisplayLabel;
+
+     // Calculate width
+     CalcCanvas := TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
+     CalcCanvas.Font := Owner.Header.Font;
+     // width of column caption
+     GetTextExtentPoint32(CalcCanvas.Handle, PChar(Text), Length(Text), TextSize);
+     CaptionWidth := TextSize.cx + Spacing + Margin * 2;
+
+     // width of field caption
+     Size := FField.DisplayWidth;
+     if Size = 0 then
+       Size := FField.Size;
+
+     case FField.DataType of
+       ftString:
+         Str := StringOfChar('w', Min(Size, 40));
+       ftInteger, ftWord:
+         Str := '999999';
+       ftBoolean:
+         Str := 'False';
+       else
+         Str := '99999999999999';
+     end;
+
+     CalcCanvas := Tree.Canvas;
+     CalcCanvas.Font := Tree.Font;
+     GetTextExtentPoint32(CalcCanvas.Handle, PChar(Str), Length(Str), TextSize);
+     FieldWidth := TextSize.cx + Tree.Margin * 2;
+
+     // which width size is greater then set it
+     if CaptionWidth > FieldWidth then
      begin
-         // Assign Text
-         FFieldName := FField.FieldName;
-         if Empty and (FField.DisplayLabel <> '') then
-           Self.Text := FField.DisplayLabel;
-
-         // Calculate width
-         CalcCanvas := TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
-         CalcCanvas.Font := Owner.Header.Font;
-         // width of column caption
-         GetTextExtentPoint32W(CalcCanvas.Handle, PWideChar(self.Text), Length(self.Text), TextSize);
-         CaptionWidth := TextSize.cx + Spacing + Margin * 2;
-
-         // width of field caption
-         Size := FField.DisplayWidth;
-         if Size = 0 then
-           Size := FField.Size;
-
-         case FField.DataType of
-           ftString:
-             Str := StringOfChar('w', Min(Size, 40));
-           ftInteger, ftWord:
-             Str := '999999';
-           ftBoolean:
-             Str := 'False';
-           else
-             Str := '99999999999999';
-         end;
-
-         CalcCanvas := Tree.Canvas;
-         CalcCanvas.Font := Tree.Font;
-         GetTextExtentPoint32W(CalcCanvas.Handle, PWideChar(Str), Length(Str), TextSize);
-         FieldWidth := TextSize.cx + Tree.Margin * 2;
-
-         // which width size is greater then set it
-         if CaptionWidth > FieldWidth then
-         begin
-           if CaptionWidth > -1 then
-             Width := CaptionWidth;
-         end
-         else begin
-           if FieldWidth > -1 then
-             Width := FieldWidth + (2 * GetOwnerTree.TextMargin);
-         end;
+       if CaptionWidth > -1 then
+         Width := CaptionWidth;
+     end
+     else begin
+       if FieldWidth > -1 then
+         Width := FieldWidth + (2 * GetOwnerTree.TextMargin);
      end;
   end;
 end;
@@ -1911,6 +1902,55 @@ begin
   Result := TVTDBHeader(inherited Header);
 end;
 
+procedure TCustomVirtualDBGrid.AddDefaultColumns;
+var
+  FieldList: TFields;
+  Field: TField;
+  Column: TVirtualDBTreeColumn;
+  i: Integer;
+begin
+  FieldList := LinkedDataSet.Fields;
+  if FieldList.Count = 0 then
+    Exit;
+  Header.Columns.BeginUpdate;
+  try
+    // If aoAutoInsertIndicator is set then automatically add indicator column
+    if aoAutoInsertIndicator in DBOptions.AdvOptions then
+      AddColumn(ctIndicator, '', '', 15);
+    for i := 0 to FieldList.Count - 1 do
+    begin
+      Field := FieldList[i];
+      Column := AddColumn(ctDBField, Field.FieldName, Field.DisplayName, - 1);
+      Column.IsDefault := True;
+    end;
+  finally
+    Header.Columns.EndUpdate;
+  end;
+end;
+
+procedure TCustomVirtualDBGrid.RemoveDefaultColumns;
+var
+  i: Integer;
+  Column: TVirtualDBTreeColumn;
+  Columns: TVirtualDBTreeColumns;
+begin
+  Columns :=  TVirtualDBTreeColumns(Header.Columns);
+  Columns.BeginUpdate;
+  try
+    i := 0;
+    while i < Columns.Count do
+    begin
+      Column :=  TVirtualDBTreeColumn(Columns[i]);
+      if Column.IsDefault then
+        Column.Destroy
+      else
+        Inc(i);
+    end;
+  finally
+    Columns.EndUpdate;
+  end;
+end;
+
 procedure TCustomVirtualDBGrid.SetHeader(Value: TVTDBHeader);
 begin
   inherited Header := Value;
@@ -1983,9 +2023,9 @@ begin
       Result:= TVirtualDBTreeColumn(Header.Columns[Index]);
 end;
 
-procedure TCustomVirtualDBGrid.CreateWnd;
+procedure TCustomVirtualDBGrid.InitializeWnd;
 begin
-  inherited CreateWnd;
+  inherited InitializeWnd;
   //Set the selected node after the handle is created
   if FocusedNode <> nil then
     Selected[FocusedNode] := True;
@@ -2030,8 +2070,8 @@ begin
        begin
          fRecordCount := GetRecordCount;
          fLastRecordCount := fRecordCount;
-         if Header.Columns.Count = 0 then
-           AddDefaultFieldsToColumns;
+         if (Header.Columns.Count = 0) or (aoAddDefaultColumns in DBOptions.AdvOptions) then
+           AddDefaultColumns;
          InternalInitializeDBTree;
          if Header.Columns.Count > 0 then
          begin
@@ -2043,6 +2083,7 @@ begin
        begin
          fRecordCount := 0;
          fLastRecordCount := 0;
+         RemoveDefaultColumns;
          Clear;
        end;
      finally
@@ -2772,41 +2813,24 @@ begin
      end;
 end;
 
-procedure TCustomVirtualDBGrid.AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string;
-                                  AWidth: Integer=-1; AUpdateDBTree: boolean= true);
-var Column: TVirtualTreeColumn;
+function TCustomVirtualDBGrid.AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string;
+  AWidth: Integer=-1): TVirtualDBTreeColumn;
 begin
-   // If we want to add indicator column then we must test for if there isnt
-   // already any indicator column. If exists then we cannot add new column
-   if (AColumnType = ctIndicator) then
-      if (IndicatorColumn <> nil) then exit;
+  // If we want to add indicator column then we must test for if there isnt
+  // already any indicator column. If exists then we cannot add new column
+  if (AColumnType = ctIndicator) and (IndicatorColumn <> nil) then
+    Exit;
 
+  Result := TVirtualDBTreeColumn(Header.Columns.Add);
+  Result.ColumnType := AColumnType;
 
-   BeginUpdate;
-   try
-     IncLoadingDataFlag;
-     try
+  if AColumnType = ctDBField then
+    Result.FieldName := AFieldName;
 
-       Column:= Header.Columns.Add;
-       TVirtualDBTreeColumn(Column).ColumnType:= AColumnType;
+  Result.Text := ACaption;
 
-       if (AColumnType = ctDBField) then
-         TVirtualDBTreeColumn(Column).FieldName:=  AFieldName;
-
-       TVirtualDBTreeColumn(Column).Text:= ACaption;
-
-       if (AWidth <> -1) then
-          TVirtualDBTreeColumn(Column).Width:= AWidth;
-
-     finally
-       DecLoadingDataFlag;
-     end;
-   finally
-     EndUpdate;
-   end;
-
-   if (AUpdateDBTree) then //UpdateDBTree(true);
-      ReInitializeDBGrid;
+  if AWidth <> -1 then
+    Result.Width := AWidth;
 end;
 
 procedure TCustomVirtualDBGrid.IncLoadingDataFlag;
@@ -2838,56 +2862,6 @@ end;
 procedure TCustomVirtualDBGrid.AddIndicatorColumn(AWidth: Integer);
 begin
   AddColumn(ctIndicator, '', '', AWidth);
-end;
-
-procedure TCustomVirtualDBGrid.AddDefaultFieldsToColumns(ClearOldColumns: boolean= true);
-var
-  I: Integer;
-  fromDefs: Boolean;
-  NoFieldsToAdd: Boolean;
-begin
-   if (not Assigned(LinkedDataSet)) then exit;
-
-
-   BeginUpdate;
-
-   if (ClearOldColumns) then
-      Header.Columns.Clear;
-
-   // determine if there wasn't any fields in dataset and then we havent
-   // any fields to add to colums
-   NoFieldsToAdd:= (LinkedDataSet.FieldDefs.Count = 0) and
-                   (LinkedDataSet.Fields.Count = 0);
-
-
-   // If aoAutoInsertIndicator is set, and NoFieldsToAdd(at least one column from fields will be add)
-   // then automatically add indicator column
-   if (aoAutoInsertIndicator in DBOptions.AdvOptions) and
-      (not NoFieldsToAdd) then AddColumn(ctIndicator, '', '', 15, false);
-
-
-   IncLoadingDataFlag;
-   try
-     fromDefs:= LinkedDataSet.FieldDefs.Count > 0;
-     if (fromDefs) then
-       begin
-          for I:= 0 to LinkedDataSet.FieldDefs.Count-1 do
-            AddColumn(ctDBField, LinkedDataSet.FieldDefs[I].Name,
-                        LinkedDataSet.FieldDefs[I].DisplayName, -1, false);
-       end
-       else begin
-          for I:= 0 to LinkedDataSet.Fields.Count-1 do
-            AddColumn(ctDBField, LinkedDataSet.Fields[I].FieldName,
-                        LinkedDataSet.Fields[I].DisplayName, -1, false);
-       end;
-
-   finally
-     DecLoadingDataFlag;
-   end;
-
-   EndUpdate;
-
-   //ReInitializeDBGrid;
 end;
 
 function TCustomVirtualDBGrid.GetNodeRecordData(Node: PVirtualNode): TRecordData;
