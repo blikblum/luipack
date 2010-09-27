@@ -114,12 +114,12 @@ type
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure DBGridCalculateValue(Sender: TObject; IDText: String;
       Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal; 
-      var CalculatedValue: UTF8String;
-      var CalculatedValueType: TFieldType);
+      var CalculatedValue: String; var CalculatedValueType: TFieldType);
   private
     function GetIndicatorColor: TColor;
     procedure OpenDataset;
     procedure CloseDataset;
+    procedure SetupGrid;
     procedure UpdateButtons;
   public
     { Public declarations }
@@ -131,18 +131,13 @@ var
   OrderByStr,
   SortDirStr  : string;
 
-const
-     sqlQuery = 'SELECT * FROM "StreetsBig.DBF" ORDER BY %s %s';
-
-
 
 implementation
 
 
-
-
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  SetupGrid;
 
   Dbf1.FilePathFull := ExtractFilePath(paramstr(0));
   Dbf1.TableName := 'StreetsBig.DBF';
@@ -214,22 +209,8 @@ procedure TMainForm.OpenDataset;
 var
    I: Integer;
 begin
-  Dbf1.Active := false;
-
-  DBGrid.AddCalcColumn('RowNumber', 80);
-  DBGrid.AddCalcColumn('Time', 50);
-  DBGrid.AddCalcColumn('Numb1+Numb2', 100);
-
-  // Assign datasource to dbgrid, you can also assign datasource at design time
-  DBGrid.DBOptions.DataSource:= DataSource1;
-
-  //Query1.SQL.Text:= Format(sqlQuery, [OrderByStr, SortDirStr]);
-
-  // open query, this automatically load up data to virtualdbgrid
-  Dbf1.Active:= true;
-
-  DBGrid.AddDefaultFieldsToColumns(false);
-  //DBGrid.ReInitializeDBTree;
+  // open dataset, this automatically load up data to virtualdbgrid
+  Dbf1.Active := True;
 
   cmbSortColumn.Items.Clear;
   for I:= 0 to DBGrid.Header.Columns.Count-1 do
@@ -364,6 +345,15 @@ begin
   cmbSortDirection.ItemIndex:= -1; 
 end;
 
+procedure TMainForm.SetupGrid;
+begin
+  // Assign datasource to dbgrid, you can also assign datasource at design time
+  DBGrid.DBOptions.DataSource := DataSource1;
+  DBGrid.AddCalcColumn('RowNumber', 80);
+  DBGrid.AddCalcColumn('Time', 80);
+  DBGrid.AddCalcColumn('Numb1+Numb2', 100);
+end;
+
 
 procedure TMainForm.lbOddRowColorMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -422,7 +412,6 @@ begin
     SortDirStr:= SortDirectionStr[SortDirection];
 
     Dbf1.Active:= false;
-    //Query1.SQL.Text:= Format(sqlQuery, [OrderByStr, SortDirStr]);
     Dbf1.Active:= true;
 
     RefreshGrid:= false;
@@ -544,20 +533,21 @@ procedure TMainForm.DBGridPaintText(Sender: TBaseVirtualTree;
   TextType: TVSTTextType);
 
 var
-   Data: PNodeData;
+  RecordData: TRecordData;
+  VDBGridColumn: TVirtualDBTreeColumn;
 begin
   if (Column <= NoColumn) then exit;
-
-  if (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).ColumnType = ctCalculated) and
-     (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).Text = 'RowNumber')
-  then begin
-    Data:= Sender.GetNodeData(Node);
-    if (DBGrid.IsDataOk(Data)) then
+  VDBGridColumn := TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]);
+  if (VDBGridColumn.ColumnType = ctCalculated) and (VDBGridColumn.Text = 'RowNumber') then
+  begin
+    RecordData := DBGrid.GetNodeRecordData(Node);
+    if RecordData <> nil then
     begin
-       TargetCanvas.Font.Style:= [fsBold];
-       if Odd(Data.RecordData.RecNo)
-          then TargetCanvas.Font.Color:= clBlack
-          else TargetCanvas.Font.Color:= clNavy;
+      TargetCanvas.Font.Style := [fsBold];
+      if Odd(RecordData.RecNo) then
+        TargetCanvas.Font.Color := clBlack
+      else
+        TargetCanvas.Font.Color := clNavy;
     end;
   end;
 end;
@@ -565,67 +555,52 @@ end;
 procedure TMainForm.DBGridBeforeCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+var
+  VDBGridColumn: TVirtualDBTreeColumn;
 begin
   if (Column <= NoColumn) then exit;
+  VDBGridColumn := TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]);
 
-  if (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).ColumnType = ctCalculated) and
-     (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).Text = 'RowNumber')
-  then begin
-    with TargetCanvas do
+  if VDBGridColumn.ColumnType = ctCalculated then
+  begin
+    if VDBGridColumn.Text = 'RowNumber' then
     begin
-      Brush.Color:= clSilver;
-      FillRect(CellRect);
+      TargetCanvas.Brush.Color := clSilver;
+      TargetCanvas.FillRect(CellRect);
+    end else if VDBGridColumn.Text = 'Numb1+Numb2' then
+    begin
+      TargetCanvas.Brush.Color := clWhiteSmoke;
+      TargetCanvas.FillRect(CellRect);
     end;
   end;
-
-  if (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).ColumnType = ctCalculated) and
-     (TVirtualDBTreeColumn(DBGrid.Header.Columns[Column]).Text = 'Numb1+Numb2')
-  then begin
-    with TargetCanvas do
-    begin
-      Brush.Color:= clWhiteSmoke;
-      FillRect(CellRect);
-    end;
-  end;
-
 end;
 
 procedure TMainForm.DBGridCalculateValue(Sender: TObject; IDText: String;
   Column: TColumnIndex; RecordData: TRecordData; RowIndex: Cardinal; 
-  var CalculatedValue: UTF8String; var CalculatedValueType: TFieldType);
+  var CalculatedValue: String; var CalculatedValueType: TFieldType);
 
 var
-   numb1s,
-   numb2s: string;
    numb1,
-   numb2: integer;
+   numb2: Variant;
 begin
-  if (IDText = 'RowNumber') then
+  if IDText = 'RowNumber' then
   begin
      CalculatedValue:= Format('%.5d', [RecordData.RecNo]);
      CalculatedValueType:= ftString;
-  end;
-
-  if (IDText = 'Time') then
+  end else if IDText = 'Time' then
   begin
      CalculatedValue:= FormatDateTime('hh: nn: ss', now);
      CalculatedValueType:= ftString;
-  end;
-
-  if (IDText = 'Numb1+Numb2') then
+  end else if IDText = 'Numb1+Numb2' then
   begin
-     numb1:= 0;
-     numb2:= 0;
-     numb1s:= VarToStr(RecordData.FieldValue['Number1']);
-     numb2s:= VarToStr(RecordData.FieldValue['Number2']);
-     if (numb1s <> '') then
-        numb1:= strtoint(numb1s);
-     if (numb2s <> '') then
-        numb2:= strtoint(numb2s);
-     CalculatedValue:= Inttostr(numb1 + numb2);
-     CalculatedValueType:= ftInteger;
+     numb1 := RecordData.FieldValue['Number1'];
+     numb2 := RecordData.FieldValue['Number2'];
+     if not VarIsNull(numb1) and not VarIsNull(numb2) then
+     begin
+       CalculatedValue := numb1 + numb2;
+       CalculatedValueType := ftInteger;
+     end;
   end;
-
 end;
 
 initialization
