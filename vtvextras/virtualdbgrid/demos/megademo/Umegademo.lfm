@@ -3,7 +3,6 @@ object MainForm: TMainForm
   Height = 846
   Top = 118
   Width = 869
-  ActiveControl = NTB
   Caption = 'VirtualDBGrid Demo (MegaDemo)'
   ClientHeight = 846
   ClientWidth = 869
@@ -12,7 +11,7 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   OnCreate = FormCreate
-  LCLVersion = '0.9.27'
+  LCLVersion = '0.9.29'
   object Panel1: TPanel
     Left = 0
     Height = 38
@@ -47,6 +46,12 @@ object MainForm: TMainForm
       Top = 5
       Width = 241
       BevelOuter = bvNone
+      ChildSizing.EnlargeHorizontal = crsScaleChilds
+      ChildSizing.EnlargeVertical = crsScaleChilds
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 100
       ClientHeight = 25
       ClientWidth = 241
       DataSource = DataSource1
@@ -463,77 +468,94 @@ object MainForm: TMainForm
     end
     object DBEdit1: TDBEdit
       Left = 6
-      Height = 22
+      Height = 20
       Top = 23
       Width = 100
       DataField = 'CODE_ID'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 0
     end
     object DBEdit2: TDBEdit
       Left = 110
-      Height = 22
+      Height = 20
       Top = 23
       Width = 62
       DataField = 'CODE'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 1
     end
     object DBEdit3: TDBEdit
       Left = 369
-      Height = 22
+      Height = 20
       Top = 23
       Width = 77
       DataField = 'TS'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 2
     end
     object DBEdit4: TDBEdit
       Left = 266
-      Height = 22
+      Height = 20
       Top = 23
       Width = 100
       DataField = 'DESCRIP'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 3
     end
     object DBEdit5: TDBEdit
       Left = 449
-      Height = 22
+      Height = 20
       Top = 23
       Width = 100
       DataField = 'XHOST_ID'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 4
     end
     object DBNavigator1: TDBNavigator
       Left = 670
-      Height = 19
-      Top = 23
-      Width = 60
+      Height = 23
+      Top = 22
+      Width = 230
+      AutoSize = True
       BevelOuter = bvNone
-      ClientHeight = 19
-      ClientWidth = 60
+      ChildSizing.EnlargeHorizontal = crsScaleChilds
+      ChildSizing.EnlargeVertical = crsScaleChilds
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 100
+      ClientHeight = 23
+      ClientWidth = 230
       DataSource = DataSource1
       Flat = True
       TabOrder = 5
@@ -541,27 +563,31 @@ object MainForm: TMainForm
     end
     object DBEdit6: TDBEdit
       Left = 176
-      Height = 22
+      Height = 20
       Top = 23
       Width = 86
       DataField = 'NAME'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 6
     end
     object DBEdit7: TDBEdit
       Left = 553
-      Height = 22
+      Height = 20
       Top = 23
       Width = 100
       DataField = 'XHOST_DATE'
       DataSource = DataSource1
+      CharCase = ecNormal
       Font.CharSet = EASTEUROPE_CHARSET
       Font.Height = -9
       Font.Name = 'Small Fonts'
+      MaxLength = 0
       ParentFont = False
       TabOrder = 7
     end
@@ -579,7 +605,7 @@ object MainForm: TMainForm
       Left = 6
       Height = 14
       Top = 4
-      Width = 61
+      Width = 60
       Caption = 'Sort column:'
       ParentColor = False
     end
@@ -587,7 +613,7 @@ object MainForm: TMainForm
       Left = 176
       Height = 14
       Top = 3
-      Width = 69
+      Width = 66
       Caption = 'Sort direction:'
       ParentColor = False
     end
@@ -714,7 +740,6 @@ object MainForm: TMainForm
         Top = 0
         Width = 861
         Align = alClient
-        BorderStyle = bsSingle
         Colors.FocusedSelectionColor = clTeal
         Colors.FocusedSelectionBorderColor = clTeal
         Header.AutoSizeIndex = -1
@@ -734,6 +759,7 @@ object MainForm: TMainForm
         DBOptions.OddRowColor = 16119285
         DBOptions.EvenRowColor = clWindow
         DBOptions.SortColumnBgColor = 14745599
+        DBOptions.AdvOptions = [aoEditable, aoStrippedRows, aoShowHorzLines, aoShowVertLines, aoAutoInsertIndicator, aoAllowSorting, aoHighlightSortColumn, aoHourGlassCursor, aoSortDBFieldColumns, aoEditDBFieldColumns, aoSortCalculatedColumns, aoAddDefaultColumns]
         OnCalculateValue = DBGridCalculateValue
         OnFormatFieldValue = DBGridFormatFieldValue
         OnCustomSort = DBGridCustomSort

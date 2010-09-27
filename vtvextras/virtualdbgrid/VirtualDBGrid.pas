@@ -280,6 +280,8 @@ type
   end;
 
 
+  { TVirtualDBTreeColumn }
+
   TVirtualDBTreeColumn = class(TVirtualTreeColumn)
   private
     fFieldName:  String;
@@ -287,6 +289,7 @@ type
     fColumnType: TColumnType;
     fSavedMainColumn: TColumnIndex;
     FIsDefault: Boolean;
+    procedure CalculateWidth(Tree: TCustomVirtualDBGrid);
     procedure InternalSetFieldName(const AFieldName: String);
     procedure SetFieldName(const AFieldName: String);
     procedure SetColumnType(value: TColumnType);
@@ -305,9 +308,12 @@ type
     property ColumnType: TColumnType read fColumnType write SetColumnType;
   end;
 
+  { TVirtualDBTreeColumns }
+
   TVirtualDBTreeColumns = class(TVirtualTreeColumns)
   private
     fLastCount: Integer;
+    procedure CalculateDefaultColumnsWidth;
   protected
     {.$IFDEF COMPILER_6_UP}
     //procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
@@ -1278,69 +1284,72 @@ end;
 procedure TVirtualDBTreeColumn.InternalSetFieldName(const AFieldName: String);
 var
   Tree: TCustomVirtualDBGrid;
-  Empty: boolean;
-  str:   string;
-  size:  integer;
-  CaptionWidth,
-  FieldWidth: Integer;
-
-  TextSize: TSize;
-  CalcCanvas: TCanvas;
+  Dataset: TDataSet;
 begin
-  Tree := GetOwnerTree;
-  FField := nil;
+  Tree := TCustomVirtualDBGrid(GetOwnerTree);
+  Dataset := Tree.LinkedDataSet;
   FFieldName := AFieldName;
-  Empty := Text = '';
-  if Empty then
-    Text := FFieldName;
-  if not Assigned(Tree.LinkedDataSet) then
-    Exit;
+  if Assigned(Dataset) then
+  begin
+    FField := Dataset.FindField(FFieldName);
+    if FField <> nil then
+      Text := FField.DisplayLabel;
+    if Tree.HandleAllocated then
+      CalculateWidth(Tree);
+  end
+  else
+    FField := nil;
+  //todo improve text setting when changing fieldname
+  if Text = '' then
+    Text := AFieldName;
+end;
 
-  FField := Tree.LinkedDataSet.FindField(FFieldName);
-
+procedure TVirtualDBTreeColumn.CalculateWidth(Tree: TCustomVirtualDBGrid);
+var
+  CalcCanvas: TCanvas;
+  TextSize: TSize;
+  FieldWidth: Integer;
+  CaptionWidth: Integer;
+  TestStr: String;
+begin
   if FField <> nil then
   begin
-     if Empty and (FField.DisplayLabel <> '') then
-       Text := FField.DisplayLabel;
+    // Calculate width
+    CalcCanvas := TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
+    CalcCanvas.Font := Owner.Header.Font;
+    // width of column caption
+    GetTextExtentPoint32(CalcCanvas.Handle, PChar(Text), Length(Text), TextSize);
+    CaptionWidth := TextSize.cx + Spacing + Margin * 2;
 
-     // Calculate width
-     CalcCanvas := TVirtualDBTreeColumns(Owner).HeaderBitmap.Canvas;
-     CalcCanvas.Font := Owner.Header.Font;
-     // width of column caption
-     GetTextExtentPoint32(CalcCanvas.Handle, PChar(Text), Length(Text), TextSize);
-     CaptionWidth := TextSize.cx + Spacing + Margin * 2;
+    //todo: see how to handle DisplayWidth
+    //FieldSize := FField.DisplayWidth;
 
-     // width of field caption
-     Size := FField.DisplayWidth;
-     if Size = 0 then
-       Size := FField.Size;
+    case FField.DataType of
+     ftString:
+       TestStr := StringOfChar('w', Min(FField.Size, 40));
+     ftInteger, ftWord:
+       TestStr := '999999';
+     ftBoolean:
+       TestStr := 'False';
+     else
+       TestStr := '99999999999999';
+    end;
 
-     case FField.DataType of
-       ftString:
-         Str := StringOfChar('w', Min(Size, 40));
-       ftInteger, ftWord:
-         Str := '999999';
-       ftBoolean:
-         Str := 'False';
-       else
-         Str := '99999999999999';
-     end;
+    CalcCanvas := Tree.Canvas;
+    CalcCanvas.Font := Tree.Font;
+    GetTextExtentPoint32(CalcCanvas.Handle, PChar(TestStr), Length(TestStr), TextSize);
+    FieldWidth := TextSize.cx + Tree.Margin * 2;
 
-     CalcCanvas := Tree.Canvas;
-     CalcCanvas.Font := Tree.Font;
-     GetTextExtentPoint32(CalcCanvas.Handle, PChar(Str), Length(Str), TextSize);
-     FieldWidth := TextSize.cx + Tree.Margin * 2;
-
-     // which width size is greater then set it
-     if CaptionWidth > FieldWidth then
-     begin
-       if CaptionWidth > -1 then
-         Width := CaptionWidth;
-     end
-     else begin
-       if FieldWidth > -1 then
-         Width := FieldWidth + (2 * GetOwnerTree.TextMargin);
-     end;
+    // which width FieldSize is greater then set it
+    if CaptionWidth > FieldWidth then
+    begin
+      if CaptionWidth > - 1 then
+        Width := CaptionWidth;
+    end
+    else begin
+      if FieldWidth > - 1 then
+        Width := FieldWidth;
+    end;
   end;
 end;
 
@@ -1615,6 +1624,20 @@ begin
   end;
 end;
 
+procedure TVirtualDBTreeColumns.CalculateDefaultColumnsWidth;
+var
+  i: Integer;
+  Column: TVirtualDBTreeColumn;
+  Tree: TCustomVirtualDBGrid;
+begin
+  Tree := TCustomVirtualDBGrid(Header.Treeview);
+  for i := 0 to Count - 1 do
+  begin
+    Column := TVirtualDBTreeColumn(Items[i]);
+    if Column.IsDefault then
+      Column.CalculateWidth(Tree);
+  end;
+end;
 
 procedure TVirtualDBTreeColumns.Update(Item: TCollectionItem);
 var
@@ -2029,6 +2052,7 @@ begin
   //Set the selected node after the handle is created
   if FocusedNode <> nil then
     Selected[FocusedNode] := True;
+  TVirtualDBTreeColumns(Header.Columns).CalculateDefaultColumnsWidth;
 end;
 
 function TCustomVirtualDBGrid.GetHeaderClass: TVTHeaderClass;
@@ -2823,11 +2847,12 @@ begin
 
   Result := TVirtualDBTreeColumn(Header.Columns.Add);
   Result.ColumnType := AColumnType;
-
-  if AColumnType = ctDBField then
-    Result.FieldName := AFieldName;
-
   Result.Text := ACaption;
+
+  case AColumnType of
+    ctDBField: Result.FieldName := AFieldName;
+    ctIndicator: Result.Index := 0;
+  end;
 
   if AWidth <> -1 then
     Result.Width := AWidth;
