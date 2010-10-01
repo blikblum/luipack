@@ -286,11 +286,12 @@ begin
   end;
   if PageControl <> nil then
   begin
-    for i := 0 to FObserverList.Count - 1 do
-      FObserverList[i].PageChanged(Index);
     if FOnShowPage <> nil then
       FOnShowPage(Self, NextPage);
     CallMethod(PageControl, 'ShowPage');
+    NextPage.UpdatePageInfo;
+    for i := 0 to FObserverList.Count - 1 do
+      FObserverList[i].PageChanged(Index);
     PageControl.Visible := True;
     FPageIndex := Index;
   end;
@@ -414,11 +415,8 @@ begin
   if FControl = Value then
     Exit;
   FControl := Value;
-  if (Value <> nil) and FControl.GetInterface(WizardPageIntfID, FPageIntf) then
-  begin
-    SetObjectProperties(Value, ['WizardController', ((Collection as TWizardPages).FOwner) as IWizardController]);
-    UpdatePageInfo;
-  end;
+  if (FControl <> nil) and FControl.GetInterface(WizardPageIntfID, FPageIntf) then
+    SetObjectProperties(FControl, ['WizardController', ((Collection as TWizardPages).FOwner) as IWizardController]);
 end;
 
 procedure TWizardPage.UpdatePageInfo;
