@@ -1939,7 +1939,10 @@ begin
   try
     // If aoAutoInsertIndicator is set then automatically add indicator column
     if aoAutoInsertIndicator in DBOptions.AdvOptions then
-      AddColumn(ctIndicator, '', '', 15);
+    begin
+      Column := AddColumn(ctIndicator, '', '', 15);
+      Column.IsDefault := True;
+    end;
     for i := 0 to FieldList.Count - 1 do
     begin
       Field := FieldList[i];
