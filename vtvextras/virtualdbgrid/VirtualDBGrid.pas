@@ -2267,88 +2267,72 @@ end;
 
 
 procedure TCustomVirtualDBGrid.DoAfterCellPaint(Canvas: TCanvas; Node: PVirtualNode;
-     Column: TColumnIndex; const CellRect: TRect);
+  Column: TColumnIndex; const CellRect: TRect);
 var
-   DoInh: boolean;
-   X, Y: Integer;
-   IconWidth, IconHeight: Integer;
-   R: TRect;
+  X, Y, IconWidth, IconHeight, ImageIndex: Integer;
+  R: TRect;
+  GridColumn: TVirtualDBTreeColumn;
 begin
-  DoInh := True;
-  R := CellRect;
-  if (Column > NoColumn) then
-    if (TVirtualDBTreeColumn(Header.Columns[Column]).ColumnType = ctIndicator) then
+  GridColumn := TVirtualDBTreeColumn(Header.Columns[Column]);
+  if GridColumn.ColumnType = ctIndicator then
+  begin
+    R := CellRect;
+    // draw indicator arrow
+    with Canvas do
     begin
+      if toShowVertGridLines in TreeOptions.PaintOptions then
+        Inc(R.Right);
+      if toShowHorzGridLines in TreeOptions.PaintOptions then
+        Inc(R.Bottom);
 
-      // draw indicator arrow
-      with Canvas do
+      Brush.Color := GridColumn.Color;
+      FillRect(R);
+      DrawEdge(Handle, R, BDR_RAISEDINNER, BF_RECT {or BF_MIDDLE});
+
+      if Node = FocusedNode then
       begin
-        if toShowVertGridLines in TreeOptions.PaintOptions then
-          Inc(R.Right);
-        if toShowHorzGridLines in TreeOptions.PaintOptions then
-          Inc(R.Bottom);
-
-        Brush.Color:= Header.Columns[Column].Color;
-        FillRect(R);
-        DrawEdge(Handle, R, BDR_RAISEDINNER, BF_RECT {or BF_MIDDLE});
-
-        if (Node = FocusedNode) then
+        ImageIndex := DBOptions.IndicatorImageIndex;
+        // Get Indicator bitmap width
+        if (ImageIndex > -1) and (Images <> nil) and (ImageIndex < Images.Count) then
         begin
-           X:= 0;
-           Y:= 0;
-
-           // Get Indicator bitmap width
-           if (DBOptions.IndicatorImageIndex = -1)
-             then begin
-               IconWidth:= fIndicatorBMP.Width;
-               IconHeight:= fIndicatorBMP.Height;
-             end
-             else begin
-               IconWidth:= Images.Width;
-               IconHeight:= Images.Height;
-             end;
-
-           // Calculate X coordinate
-           case (DBOptions.IndicatorAlign) of
-                aiLeft:
-                   X:= 0;
-
-                aiCenter: begin
-                   X:= ((R.Right - R.Left) - IconWidth) div 2 + 1;
-                end;
-
-                aiRight: begin
-                   X:= (R.Right - R.Left) - IconWidth;
-                end;
-           end;
-
-           // Calculate Y coordinate
-           case (DBOptions.IndicatorVAlign) of
-                aiTop:
-                   Y:= 0;
-
-                aiMiddle: begin
-                   Y:= ((R.Bottom - R.Top) - IconHeight) div 2 + 1;
-                end;
-
-                aiBottom: begin
-                   Y:= (R.Bottom - R.Top) - IconHeight;
-                end;
-           end;
-
-
-
-           if (DBOptions.IndicatorImageIndex = -1)
-              then Canvas.Draw(X, Y, fIndicatorBMP)
-              else Images.Draw(Canvas, X, Y, DBOptions.IndicatorImageIndex);
+          IconWidth := Images.Width;
+          IconHeight := Images.Height;
+        end
+        else begin
+          IconWidth := fIndicatorBMP.Width;
+          IconHeight := fIndicatorBMP.Height;
+          ImageIndex := -1;
         end;
 
+        // Calculate X coordinate
+        case DBOptions.IndicatorAlign of
+          aiLeft:
+            X := 0;
+          aiCenter:
+            X := ((R.Right - R.Left) - IconWidth) div 2 + 1;
+          aiRight:
+            X := (R.Right - R.Left) - IconWidth;
+        end;
+
+        // Calculate Y coordinate
+        case DBOptions.IndicatorVAlign of
+          aiTop:
+            Y := 0;
+          aiMiddle:
+            Y := ((R.Bottom - R.Top) - IconHeight) div 2 + 1;
+          aiBottom:
+            Y := (R.Bottom - R.Top) - IconHeight;
+         end;
+
+         if ImageIndex = -1 then
+           Canvas.Draw(X, Y, fIndicatorBMP)
+         else
+           Images.Draw(Canvas, X, Y, ImageIndex);
       end;
-
-      DoInh:= false;
     end;
-
-  if (DoInh) then inherited DoAfterCellPaint(Canvas, Node, Column, R);
+  end
+  else
+    inherited DoAfterCellPaint(Canvas, Node, Column, CellRect);
 end;
 
 procedure TCustomVirtualDBGrid.DoFreeNode(Node: PVirtualNode);
