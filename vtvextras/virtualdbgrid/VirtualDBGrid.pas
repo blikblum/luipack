@@ -1741,9 +1741,8 @@ procedure TVTDBOptions.SetIndicatorImIndex(Value: TImageIndex);
 begin
   if Value <> fIndicatorImIndex then
   begin
-     fIndicatorImIndex := Value;
-     if (Treeview.HandleAllocated) then
-        Treeview.Invalidate;
+    fIndicatorImIndex := Value;
+    Treeview.Invalidate;
   end;
 end;
 
@@ -1751,9 +1750,8 @@ procedure TVTDBOptions.SetIndicatorAlign(Value: TIndicatorAlign);
 begin
   if Value <> fIndicatorAlign then
   begin
-     fIndicatorAlign := Value;
-     if (Treeview.HandleAllocated) then
-        Treeview.Invalidate;
+    fIndicatorAlign := Value;
+    Treeview.Invalidate;
   end;
 end;
 
@@ -1761,30 +1759,26 @@ procedure TVTDBOptions.SetIndicatorVAlign(Value: TIndicatorVAlign);
 begin
   if Value <> fIndicatorVAlign then
   begin
-     fIndicatorVAlign := Value;
-     if (Treeview.HandleAllocated) then
-        Treeview.Invalidate;
+    fIndicatorVAlign := Value;
+    Treeview.Invalidate;
   end;
 end;
 
-
 procedure TVTDBOptions.SetOddRowColor(value: tcolor);
 begin
-  if (fOddRowColor <> value) then
+  if fOddRowColor <> Value then
   begin
-    fOddRowColor:= value;
-    if (Treeview.HandleAllocated) then
-       Treeview.Invalidate;
+    fOddRowColor := Value;
+    Treeview.Invalidate;
   end;
 end;
 
 procedure TVTDBOptions.SetEvenRowColor(value: tcolor);
 begin
-  if (fEvenRowColor <> value) then
+  if fEvenRowColor <> Value then
   begin
-    fEvenRowColor:= value;
-    if (Treeview.HandleAllocated) then
-       Treeview.Invalidate;
+    fEvenRowColor := Value;
+    Treeview.Invalidate;
   end;
 end;
 
@@ -1846,19 +1840,16 @@ begin
   Treeview.TreeOptions.MiscOptions:= WMiscOptions;
   Treeview.TreeOptions.PaintOptions:= WPaintOptions;
   Treeview.TreeOptions.SelectionOptions:= WSelectionOptions;
-
-  if (Treeview.HandleAllocated) then
-     Treeview.Invalidate;
+  Treeview.Invalidate;
 end;
 
 
 procedure TVTDBOptions.SetSortColumnBgColor(Value: TColor);
 begin
-  if (fSortColumnBgColor <> value) then
+  if fSortColumnBgColor <> value then
   begin
     fSortColumnBgColor:= value;
-    if (Treeview.HandleAllocated) then
-       Treeview.Invalidate;
+    Treeview.Invalidate;
   end;
 end;
 
