@@ -1461,7 +1461,7 @@ begin
   begin
     ReadBuffer(Dummy, SizeOf(Dummy));
     SetLength(S, Dummy);
-    ReadBuffer(PWideChar(S)^, 2 * Dummy);
+    ReadBuffer(PChar(S)^, Dummy);
     FieldName := S;
   end;
 end;
@@ -1475,7 +1475,7 @@ begin
   begin
     Dummy := Length(FFieldName);
     WriteBuffer(Dummy, SizeOf(Dummy));
-    WriteBuffer(PWideChar(FFieldName)^, Dummy);
+    WriteBuffer(PChar(FFieldName)^, Dummy);
   end;
 end;
 
