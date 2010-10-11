@@ -43,11 +43,9 @@ interface
 
 uses
   LCLType, types, delphicompat, LCLIntf, SysUtils, Classes, Controls, VirtualTrees, DB, Dialogs,
-  Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LResources, LMessages;
+  Variants, ImgList, Forms, Graphics, ExtCtrls, Buttons, LMessages;
 
 const
-  ResBMP_INDICATOR    = 'INDICATOR';
-
   clWhiteSmoke  : TColor = $00F5F5F5;
   clLightYellow : TColor = $00E0FFFF;
 
@@ -397,6 +395,7 @@ type
 
     function GetHeader: TVTDBHeader;
     procedure AddDefaultColumns;
+    procedure IndicatorBitmapNeeded;
     procedure RemoveDefaultColumns;
     procedure SetHeader(Value: TVTDBHeader);
     procedure SetDBOptions(const Value: TVTDBOptions);
@@ -1373,6 +1372,7 @@ begin
     if Value = ctIndicator then
     begin
       OwnerTree := GetOwnerTree;
+      OwnerTree.IndicatorBitmapNeeded;
       if OwnerTree.IndicatorColumn <> nil then
         raise Exception.Create('Duplicate Indicator Column');
       //force the first position
@@ -1939,6 +1939,25 @@ begin
   end;
 end;
 
+procedure TCustomVirtualDBGrid.IndicatorBitmapNeeded;
+begin
+  if fIndicatorBMP = nil then
+  begin
+    fIndicatorBMP := TBitmap.Create;
+    fIndicatorBMP.SetSize(10, 10);
+    fIndicatorBMP.Canvas.Brush.Color := clFuchsia;
+    fIndicatorBMP.Canvas.FillRect(0, 0, 12, 12);
+
+    fIndicatorBMP.Canvas.Brush.Color := clBlack;
+    fIndicatorBMP.Canvas.Pen.Color := clBlack;
+    fIndicatorBMP.Canvas.Polygon([Point(0, 0), Point(4, 4), Point(4, 5), Point(0, 9)]);
+    fIndicatorBMP.Canvas.Polygon([Point(5, 0), Point(9, 4), Point(9, 5), Point(5, 9)]);
+    fIndicatorBMP.TransparentMode := tmFixed;
+    fIndicatorBMP.TransparentColor := clFuchsia;
+    fIndicatorBMP.Transparent := True;
+  end;
+end;
+
 procedure TCustomVirtualDBGrid.RemoveDefaultColumns;
 var
   i: Integer;
@@ -1970,13 +1989,6 @@ end;
 constructor TCustomVirtualDBGrid.Create(Owner: TComponent);
 begin
   inherited;
-
-  fIndicatorBMP := TBitmap.Create;
-  fIndicatorBMP.LoadFromLazarusResource(ResBMP_INDICATOR);
-  fIndicatorBMP.TransparentMode := tmFixed;
-  fIndicatorBMP.TransparentColor := clFuchsia;
-  fIndicatorBMP.Transparent := True;
-
   DefaultText := '';
   FInternalDataOffset := AllocateInternalDataArea(SizeOf(TNodeData));
   //fLoadingDataFlag := 0;
@@ -3358,8 +3370,5 @@ end;
 
 { --- TCustomVirtualDBGrid --------------------------------------------------- }
 { ============================================================================ }
-
-initialization
-  {$i resources.lrs}
 
 end.
