@@ -287,12 +287,11 @@ type
     fFieldName:  String;
     fField:      TField;
     fColumnType: TColumnType;
-    fSavedMainColumn: TColumnIndex;
     FIsDefault: Boolean;
     procedure CalculateWidth(Tree: TCustomVirtualDBGrid);
     procedure InternalSetFieldName(const AFieldName: String);
     procedure SetFieldName(const AFieldName: String);
-    procedure SetColumnType(value: TColumnType);
+    procedure SetColumnType(Value: TColumnType);
     function GetOwnerTree: TCustomVirtualDBGrid;
     property IsDefault: Boolean read FIsDefault write FIsDefault;
   protected
@@ -1365,41 +1364,36 @@ begin
 end;
 
 
-procedure TVirtualDBTreeColumn.SetColumnType(value: TColumnType);
+procedure TVirtualDBTreeColumn.SetColumnType(Value: TColumnType);
+var
+  OwnerTree: TCustomVirtualDBGrid;
 begin
-  if (Value <> fColumnType) then
+  if Value <> fColumnType then
   begin
-    if (Value = ctIndicator)and(Position <> 0) then
+    if Value = ctIndicator then
     begin
-      //MessageDlg('Only column with position 0 can be set as ctIndicator', mtError, [mbok], 0);
-      //exit;
-      Position:= 0;
+      OwnerTree := GetOwnerTree;
+      if OwnerTree.IndicatorColumn <> nil then
+        raise Exception.Create('Duplicate Indicator Column');
+      //force the first position
+      if Position <> 0 then
+        Position := 0;
     end;
 
-    if (fColumnType = ctIndicator) and
-       (Value <> ctIndicator)
-    then begin
-      if (fSavedMainColumn > -1) and
-         (fSavedMainColumn < GetOwnerTree.Header.Columns.Count)
-         then GetOwnerTree.Header.MainColumn:= fSavedMainColumn;
-    end;
+    fColumnType := Value;
 
-    fColumnType:= value;
-
-    if (fColumnType <> ctDBField) then
+    if Value <> ctDBField then
     begin
-       fFieldName:= '';
-       if (fColumnType = ctIndicator) then
-       begin
-         Self.Text:= '';
-         fSavedMainColumn:= GetOwnerTree.Header.MainColumn;
-         if (not (csLoading in GetOwnerTree.ComponentState)) then
-         begin
-           Options:= Options - [coDraggable, coResizable, coShowDropMark];
-           Color:= DefaultIndicatorColor;
-         end;
-         GetOwnerTree.Header.MainColumn:= 0;
-       end;
+      fFieldName := '';
+      if Value = ctIndicator then
+      begin
+        Text := '';
+        if not (csLoading in OwnerTree.ComponentState) then
+        begin
+          Options := Options - [coDraggable, coResizable, coShowDropMark];
+          Color := DefaultIndicatorColor;
+        end;
+      end;
     end;
     InternalSetFieldName(fFieldName);
   end;
@@ -2818,19 +2812,12 @@ end;
 function TCustomVirtualDBGrid.AddColumn(AColumnType: TColumnType; const AFieldName, ACaption: string;
   AWidth: Integer=-1): TVirtualDBTreeColumn;
 begin
-  // If we want to add indicator column then we must test for if there isnt
-  // already any indicator column. If exists then we cannot add new column
-  if (AColumnType = ctIndicator) and (IndicatorColumn <> nil) then
-    Exit;
-
   Result := TVirtualDBTreeColumn(Header.Columns.Add);
   Result.ColumnType := AColumnType;
   Result.Text := ACaption;
 
-  case AColumnType of
-    ctDBField: Result.FieldName := AFieldName;
-    ctIndicator: Result.Index := 0;
-  end;
+  if AColumnType = ctDBField then
+     Result.FieldName := AFieldName;
 
   if AWidth <> -1 then
     Result.Width := AWidth;
