@@ -1376,8 +1376,9 @@ begin
       if OwnerTree.IndicatorColumn <> nil then
         raise Exception.Create('Duplicate Indicator Column');
       //force the first position
-      if Position <> 0 then
-        Position := 0;
+      //necessary to set Index to 0 also to work inside Begin/EndUpdate
+      Index := 0;
+      Position := 0;
     end;
 
     fColumnType := Value;
