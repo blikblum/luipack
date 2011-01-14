@@ -9,18 +9,19 @@ object frmMain: TfrmMain
   ClientWidth = 400
   Position = poDesktopCenter
   LCLVersion = '0.9.29'
-  object NotebookMain: TNotebook
+  object NotebookMain: TPageControl
     Left = 0
     Height = 300
     Top = 0
     Width = 400
+    ActivePage = PageToggleLabel
     Align = alClient
-    PageIndex = 0
+    TabIndex = 0
     TabOrder = 0
-    object PageToggleLabel: TPage
+    object PageToggleLabel: TTabSheet
       Caption = 'TToggleLabel'
-      ClientWidth = 392
       ClientHeight = 274
+      ClientWidth = 392
       object ToggleLabel1: TToggleLabel
         Left = 12
         Height = 14
@@ -52,7 +53,6 @@ object frmMain: TfrmMain
         ButtonColorSize = 16
         ButtonColor = clBlack
         Caption = 'Label Color     '
-        Color = clBtnFace
         Layout = blGlyphRight
         OnColorChanged = ButtonLabelColorColorChanged
       end
@@ -65,7 +65,6 @@ object frmMain: TfrmMain
         ButtonColorSize = 16
         ButtonColor = clBlack
         Caption = 'Arrow Color    '
-        Color = clBtnFace
         Layout = blGlyphRight
         OnColorChanged = ButtonArrowColorColorChanged
       end
@@ -78,7 +77,6 @@ object frmMain: TfrmMain
         ButtonColorSize = 20
         ButtonColor = clWhite
         Caption = 'Highlight Color'
-        Color = clBtnFace
         Layout = blGlyphRight
         OnColorChanged = ButtonHighlightColorColorChanged
       end
@@ -95,7 +93,7 @@ object frmMain: TfrmMain
         Left = 243
         Height = 17
         Top = 95
-        Width = 112
+        Width = 114
         Caption = 'Underline On Hover'
         OnChange = CheckUnderlineChange
         TabOrder = 1
@@ -104,16 +102,16 @@ object frmMain: TfrmMain
         Left = 244
         Height = 17
         Top = 122
-        Width = 87
+        Width = 89
         Caption = 'Bold On Hover'
         OnChange = CheckBoldChange
         TabOrder = 2
       end
     end
-    object PageMenuButton: TPage
+    object PageMenuButton: TTabSheet
       Caption = 'TMenuButton'
-      ClientWidth = 392
       ClientHeight = 274
+      ClientWidth = 392
       object MenuButton1: TMenuButton
         Left = 26
         Height = 22
@@ -121,7 +119,6 @@ object frmMain: TfrmMain
         Width = 23
         Menu = PopupMenu1
         Style = mbsCombo
-        Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -160,7 +157,6 @@ object frmMain: TfrmMain
         Width = 23
         Menu = PopupMenu2
         Style = mbsSingle
-        Color = clBtnFace
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
           080000000000000100000000000000000000000100000000000000000000C6C6
@@ -215,7 +211,6 @@ object frmMain: TfrmMain
         Width = 23
         Menu = PopupMenu3
         Style = mbsCombo
-        Color = clBtnFace
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -255,7 +250,6 @@ object frmMain: TfrmMain
         Width = 23
         Menu = PopupMenu4
         Style = mbsSingle
-        Color = clBtnFace
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -313,7 +307,6 @@ object frmMain: TfrmMain
         Options = [mboShowIndicator]
         Style = mbsSingle
         Caption = 'Only Text'
-        Color = clBtnFace
         Flat = True
         NumGlyphs = 0
       end
@@ -334,7 +327,6 @@ object frmMain: TfrmMain
         Options = [mboShowIndicator]
         Style = mbsSingle
         Caption = 'Text and Glyph'
-        Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           1800000000000003000000000000000000000000000000000000000055000054
@@ -373,7 +365,6 @@ object frmMain: TfrmMain
         Menu = PopupMenu7
         Options = [mboShowIndicator]
         Style = mbsSingle
-        Color = clBtnFace
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           1800000000000003000000000000000000000000000000000000FFFFFF8A8F8D
@@ -414,10 +405,10 @@ object frmMain: TfrmMain
         TabOrder = 0
       end
     end
-    object PageSearchEdit: TPage
+    object PageSearchEdit: TTabSheet
       Caption = 'TSearchEdit'
-      ClientWidth = 392
       ClientHeight = 274
+      ClientWidth = 392
       object SearchEdit1: TSearchEdit
         Left = 6
         Height = 21

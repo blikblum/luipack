@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit;
+  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, ComCtrls;
 
 type
 
@@ -59,10 +59,10 @@ type
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
-    NotebookMain: TNotebook;
-    PageSearchEdit: TPage;
-    PageMenuButton: TPage;
-    PageToggleLabel: TPage;
+    MainPageControl: TPageControl;
+    SearchEditTab: TTabSheet;
+    MenuButtonTab: TTabSheet;
+    ToggleLabelTab: TTabSheet;
     Panel1: TPanel;
     PopupMenu1: TPopupMenu;
     PopupMenu2: TPopupMenu;
@@ -164,9 +164,9 @@ var
   i: Integer;
   AControl: TControl;
 begin
-  for i:= 0 to PageMenuButton.ControlCount - 1 do
+  for i:= 0 to MenuButtonTab.ControlCount - 1 do
   begin
-    AControl := PageMenuButton.Controls[i];
+    AControl := MenuButtonTab.Controls[i];
     if AControl is TMenuButton then
     begin
       if CheckPopupOnMouseUp.Checked then
