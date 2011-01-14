@@ -288,11 +288,11 @@ begin
   begin
     if FOnShowPage <> nil then
       FOnShowPage(Self, NextPage);
+    PageControl.Visible := True;
     CallMethod(PageControl, 'ShowPage');
     NextPage.UpdatePageInfo;
     for i := 0 to FObserverList.Count - 1 do
       FObserverList[i].PageChanged(Index);
-    PageControl.Visible := True;
     FPageIndex := Index;
   end;
   if OldIndex <> -1 then
