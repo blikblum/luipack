@@ -4,10 +4,10 @@
     <PathDelim Value="\"/>
     <Name Value="luidialogs_package"/>
     <CompilerOptions>
-      <Version Value="9"/>
+      <Version Value="10"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="forms\;units\"/>
+        <OtherUnitFiles Value="forms;units"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -19,7 +19,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="6">
       <Item1>
         <Filename Value="forms\fexportdataset.pas"/>
         <UnitName Value="fExportDataset"/>
@@ -29,29 +29,25 @@
         <UnitName Value="LuiDialogs"/>
       </Item2>
       <Item3>
-        <Filename Value="units\spreadsheetexport.pas"/>
-        <UnitName Value="SpreadsheetExport"/>
-      </Item3>
-      <Item4>
         <Filename Value="register_luidialogs.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_luidialogs"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="forms\fframeeditor.lfm"/>
         <Type Value="LFM"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="forms\fframeeditor.pas"/>
         <UnitName Value="fFrameEditor"/>
-      </Item6>
-      <Item7>
+      </Item5>
+      <Item6>
         <Filename Value="luinotifications.pas"/>
         <UnitName Value="LuiNotifications"/>
-      </Item7>
+      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="7">
+    <RequiredPkgs Count="6">
       <Item1>
         <PackageName Value="LuiLCLComponents"/>
       </Item1>
@@ -59,21 +55,18 @@
         <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="laz_fpspreadsheet"/>
+        <PackageName Value="LCL"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicairo_extras"/>
       </Item4>
       <Item5>
-        <PackageName Value="luicairo_extras"/>
+        <PackageName Value="virtualdbgrid_package"/>
       </Item5>
       <Item6>
-        <PackageName Value="virtualdbgrid_package"/>
-      </Item6>
-      <Item7>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item7>
+      </Item6>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
