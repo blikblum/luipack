@@ -21,21 +21,20 @@ type
     UnselectAllButton: TButton;
     FieldsCheckListBox: TCheckListBox;
     ControlSwitcher: TControlSwitcher;
-    Label3: TLabel;
+    SelectFieldsLabel: TLabel;
     SelectFieldsPanel: TPanel;
     DirectoryEdit: TDirectoryEdit;
     FileNameEdit: TEdit;
     FileSettingsPanel: TPanel;
     FileTypeGroup: TRadioGroup;
     Label1: TLabel;
-    Label2: TLabel;
+    FileNameLabel: TLabel;
     procedure ControlSwitcherGetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell;
       var ImageInfo: TLuiBarImageInfo);
     procedure DirectoryEditAcceptDirectory(Sender: TObject; var Value: String);
     procedure FileNameEditChange(Sender: TObject);
     procedure FileNameEditEditingDone(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure SaveFileButtonClick(Sender: TObject);
     procedure ControlSwitcherSelecting(Sender: TLuiBar; OldCell,
       NewCell: Integer; var Allowed: Boolean);
     procedure SelectAllButtonClick(Sender: TObject);
@@ -46,7 +45,6 @@ type
     FDataset: TDataset;
     FFileSettingsIsValid: Boolean;
     FFieldSelectionIsValid: Boolean;
-    function CheckFilePath(const FilePath: String): Boolean;
     procedure UpdateSaveFileButton;
     { private declarations }
     property FileSettingsIsValid: Boolean read FFileSettingsIsValid;
@@ -54,6 +52,7 @@ type
   public
     { public declarations }
     class function Execute(AOwner: TWinControl; Dataset: TDataSet): Boolean;
+    procedure GetCheckedFields(FieldList: TStrings);
     property Dataset: TDataset read FDataset write FDataset;
   end;
 
@@ -62,7 +61,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SpreadsheetExport, fpspreadsheet, GraphType;
+  GraphType;
 
 procedure SetCheckListState(List: TCheckListBox; CheckState: Boolean);
 var
@@ -159,43 +158,6 @@ begin
   end;
 end;
 
-function TExportDatasetForm.CheckFilePath(const FilePath: String): Boolean;
-begin
-  //todo make this optional
-  Result := not FileExistsUTF8(FilePath);
-  if not Result then
-  begin
-    Result := MessageDlg('Confirmar Substituição de Arquivo',
-      'O arquivo ' + FilePath + ' já existe' + LineEnding +
-      'Deseja substituir o arquivo existente?', mtConfirmation, mbYesNo, 0) = mrYes;
-    if Result then
-    begin
-      Result := DeleteFileUTF8(FilePath);
-      if not Result then
-        ShowMessage('Não foi possível apagar o arquivo' + LineEnding +
-          'Verifique se ele está sendo usado por outro programa');
-    end;
-  end;
-end;
-
-procedure TExportDatasetForm.SaveFileButtonClick(Sender: TObject);
-var
-  FieldList: TStrings;
-  FilePath: String;
-begin
-  FilePath := IncludeTrailingPathDelimiter(DirectoryEdit.Directory) + FileNameEdit.Text + '.xls';
-  if not CheckFilePath(FilePath) then
-    Exit;
-  FieldList := TStringList.Create;
-  try
-    GetCheckListCheckedItems(FieldsCheckListBox, FieldList);
-    ConvertDatasetToSpreadSheet(FDataset, FieldList, FilePath, sfExcel8);
-  finally
-    FieldList.Destroy;
-  end;
-  ModalResult := mrOK;
-end;
-
 procedure TExportDatasetForm.ControlSwitcherGetImageInfo(Sender: TLuiBar;
   Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 var
@@ -250,6 +212,11 @@ begin
   finally
     Destroy;
   end;
+end;
+
+procedure TExportDatasetForm.GetCheckedFields(FieldList: TStrings);
+begin
+  GetCheckListCheckedItems(FieldsCheckListBox, FieldList);
 end;
 
 initialization

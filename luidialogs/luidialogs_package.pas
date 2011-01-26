@@ -7,8 +7,8 @@ unit luidialogs_package;
 interface
 
 uses
-    fExportDataset, LuiDialogs, SpreadsheetExport, register_luidialogs, 
-  fFrameEditor, LuiNotifications, LazarusPackageIntf;
+  fExportDataset, LuiDialogs, register_luidialogs, fFrameEditor, 
+  LuiNotifications, LazarusPackageIntf;
 
 implementation
 

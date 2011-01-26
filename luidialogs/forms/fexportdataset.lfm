@@ -1,145 +1,21 @@
 object ExportDatasetForm: TExportDatasetForm
   Left = 444
-  Height = 253
+  Height = 256
   Top = 345
-  Width = 353
+  Width = 301
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsDialog
+  BorderStyle = bsSizeToolWin
   Caption = 'Exportar Banco de Dados'
-  ClientHeight = 253
-  ClientWidth = 353
+  ClientHeight = 256
+  ClientWidth = 301
   OnShow = FormShow
   Position = poOwnerFormCenter
-  LCLVersion = '0.9.29'
-  object SelectFieldsPanel: TPanel
-    Left = 0
-    Height = 189
-    Top = 24
-    Width = 353
-    Align = alClient
-    BorderSpacing.Bottom = 40
-    BevelOuter = bvNone
-    ClientHeight = 189
-    ClientWidth = 353
-    ParentColor = False
-    TabOrder = 1
-    Visible = False
-    object FieldsCheckListBox: TCheckListBox
-      Left = 8
-      Height = 157
-      Top = 19
-      Width = 186
-      ItemHeight = 0
-      OnClickCheck = UpdateFieldSelectionStatus
-      TabOrder = 0
-    end
-    object Label3: TLabel
-      Left = 8
-      Height = 14
-      Top = 5
-      Width = 90
-      Caption = 'Escolha os campos'
-      ParentColor = False
-    end
-    object SelectAllButton: TButton
-      Left = 200
-      Height = 25
-      Top = 18
-      Width = 139
-      Caption = 'Marcar Todos'
-      OnClick = SelectAllButtonClick
-      TabOrder = 1
-    end
-    object UnselectAllButton: TButton
-      Left = 200
-      Height = 25
-      Top = 50
-      Width = 139
-      Caption = 'Desmarcar Todos'
-      OnClick = UnselectAllButtonClick
-      TabOrder = 2
-    end
-  end
-  object FileSettingsPanel: TPanel
-    Left = 0
-    Height = 189
-    Top = 24
-    Width = 353
-    Align = alClient
-    BorderSpacing.Bottom = 40
-    BevelOuter = bvNone
-    ClientHeight = 189
-    ClientWidth = 353
-    ParentColor = False
-    TabOrder = 0
-    object FileTypeGroup: TRadioGroup
-      Left = 9
-      Height = 56
-      Top = 8
-      Width = 340
-      AutoFill = True
-      Caption = 'Tipo de Arquivo'
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.TopBottomSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 1
-      ClientHeight = 38
-      ClientWidth = 336
-      ItemIndex = 0
-      Items.Strings = (
-        'Planilha (Excel)'
-      )
-      TabOrder = 0
-    end
-    object DirectoryEdit: TDirectoryEdit
-      Left = 8
-      Height = 21
-      Top = 144
-      Width = 312
-      OnAcceptDirectory = DirectoryEditAcceptDirectory
-      ShowHidden = False
-      ButtonWidth = 23
-      DirectInput = False
-      NumGlyphs = 0
-      MaxLength = 0
-      TabOrder = 1
-    end
-    object Label2: TLabel
-      Left = 8
-      Height = 14
-      Top = 80
-      Width = 162
-      Caption = 'Nome do Arquivo (Sem extensão)'
-      ParentColor = False
-    end
-    object Label1: TLabel
-      Left = 8
-      Height = 14
-      Top = 128
-      Width = 96
-      Caption = 'Diretório de Destino'
-      ParentColor = False
-    end
-    object FileNameEdit: TEdit
-      Left = 8
-      Height = 21
-      Top = 96
-      Width = 240
-      OnChange = FileNameEditChange
-      OnEditingDone = FileNameEditEditingDone
-      TabOrder = 2
-    end
-  end
+  LCLVersion = '0.9.31'
   object ControlSwitcher: TControlSwitcher
     Left = 0
     Height = 24
     Top = 0
-    Width = 353
-    Align = alTop
+    Width = 301
     ControlList = <    
       item
         Caption = 'Arquivo'
@@ -149,6 +25,7 @@ object ExportDatasetForm: TExportDatasetForm
         Caption = 'Campos'
         Control = SelectFieldsPanel
       end>
+    Align = alTop
     CellAlign = caDefault
     CellRoundRadius = 0
     CellWidth = 0
@@ -172,38 +49,198 @@ object ExportDatasetForm: TExportDatasetForm
     OnSelecting = ControlSwitcherSelecting
   end
   object SaveFileButton: TBitBtn
-    Left = 58
+    Left = 48
     Height = 30
-    Top = 221
-    Width = 139
+    Top = 224
+    Width = 120
+    Anchors = [akRight, akBottom]
     Caption = 'Salvar'
     Enabled = False
     Kind = bkOK
-    OnClick = SaveFileButtonClick
     TabOrder = 3
   end
   object Bevel1: TBevel
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 3
-    Top = 213
-    Width = 362
+    Top = 216
+    Width = 310
+    Anchors = [akLeft, akRight, akBottom]
     Shape = bsBottomLine
   end
   object CancelButton: TBitBtn
-    Left = 212
+    Left = 179
     Height = 30
-    Top = 221
-    Width = 139
+    Top = 224
+    Width = 120
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = 'Cancelar'
     Kind = bkCancel
     ModalResult = 2
     TabOrder = 4
   end
+  object SelectFieldsPanel: TPanel
+    Left = 0
+    Height = 192
+    Top = 24
+    Width = 301
+    Align = alClient
+    AutoSize = True
+    BorderSpacing.Bottom = 40
+    BevelOuter = bvNone
+    ClientHeight = 192
+    ClientWidth = 301
+    ParentColor = False
+    TabOrder = 1
+    Visible = False
+    object FieldsCheckListBox: TCheckListBox
+      AnchorSideLeft.Control = SelectFieldsLabel
+      AnchorSideTop.Control = SelectFieldsLabel
+      AnchorSideTop.Side = asrBottom
+      Left = 2
+      Height = 161
+      Top = 20
+      Width = 158
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      ItemHeight = 0
+      OnClickCheck = UpdateFieldSelectionStatus
+      TabOrder = 0
+    end
+    object SelectFieldsLabel: TLabel
+      Left = 2
+      Height = 14
+      Top = 4
+      Width = 297
+      Align = alTop
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 2
+      Caption = 'Escolha os campos'
+      ParentColor = False
+    end
+    object SelectAllButton: TButton
+      AnchorSideLeft.Control = FieldsCheckListBox
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FieldsCheckListBox
+      Left = 164
+      Height = 25
+      Top = 20
+      Width = 131
+      BorderSpacing.Left = 4
+      Caption = 'Marcar Todos'
+      OnClick = SelectAllButtonClick
+      TabOrder = 1
+    end
+    object UnselectAllButton: TButton
+      AnchorSideLeft.Control = FieldsCheckListBox
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = SelectAllButton
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Side = asrBottom
+      Left = 164
+      Height = 25
+      Top = 49
+      Width = 131
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      Caption = 'Desmarcar Todos'
+      OnClick = UnselectAllButtonClick
+      TabOrder = 2
+    end
+  end
+  object FileSettingsPanel: TPanel
+    Left = 0
+    Height = 192
+    Top = 24
+    Width = 301
+    Align = alClient
+    AutoSize = True
+    BorderSpacing.Bottom = 40
+    BevelOuter = bvNone
+    ClientHeight = 192
+    ClientWidth = 301
+    ParentColor = False
+    TabOrder = 0
+    object FileTypeGroup: TRadioGroup
+      Left = 2
+      Height = 18
+      Top = 2
+      Width = 297
+      Align = alTop
+      AutoFill = True
+      AutoSize = True
+      BorderSpacing.Around = 2
+      Caption = 'Tipo de Arquivo'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.TopBottomSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      TabOrder = 0
+    end
+    object DirectoryEdit: TDirectoryEdit
+      AnchorSideTop.Control = Label1
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 21
+      Top = 81
+      Width = 270
+      OnAcceptDirectory = DirectoryEditAcceptDirectory
+      ShowHidden = False
+      ButtonWidth = 23
+      DirectInput = False
+      NumGlyphs = 0
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 2
+      MaxLength = 0
+      TabOrder = 1
+    end
+    object FileNameLabel: TLabel
+      AnchorSideLeft.Control = FileTypeGroup
+      AnchorSideTop.Control = FileTypeGroup
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 14
+      Top = 24
+      Width = 162
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 2
+      Caption = 'Nome do Arquivo (Sem extensão)'
+      ParentColor = False
+    end
+    object Label1: TLabel
+      AnchorSideTop.Control = FileNameEdit
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 14
+      Top = 65
+      Width = 96
+      BorderSpacing.Top = 2
+      BorderSpacing.Around = 2
+      Caption = 'Diretório de Destino'
+      ParentColor = False
+    end
+    object FileNameEdit: TEdit
+      AnchorSideTop.Control = FileNameLabel
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 21
+      Top = 40
+      Width = 295
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Right = 20
+      BorderSpacing.Around = 2
+      OnChange = FileNameEditChange
+      OnEditingDone = FileNameEditEditingDone
+      TabOrder = 2
+    end
+  end
   object ImageList1: TImageList
-    left = 296
-    top = 152
+    left = 96
+    top = 168
     Bitmap = {
       4C69020000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
