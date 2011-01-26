@@ -7,9 +7,9 @@ unit luicomponents;
 interface
 
 uses
-    LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
+  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
   LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
-  LuiJSONUtils, LazarusPackageIntf;
+  LuiJSONUtils, LuiDBExport, LazarusPackageIntf;
 
 implementation
 
