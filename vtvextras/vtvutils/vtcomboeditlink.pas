@@ -15,7 +15,7 @@ type
   TVTComboEditLinkEvent = procedure(Link: TVTCustomComboEditLink) of object;
 
   TVTPrepareComboEvent = procedure(Link: TVTCustomComboEditLink; Node: PVirtualNode;
-    Column: TColumnIndex; const NodeText: UTF8String) of object;
+    Column: TColumnIndex; const NodeText: String) of object;
 
   TCustomComboBoxClass = class of TCustomComboBox;
 
@@ -38,7 +38,7 @@ type
     procedure NotifyEndEdit;
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
-      const NodeText: UTF8String); virtual;
+      const NodeText: String); virtual;
     procedure DoEditingDone; virtual;
     procedure DoSelect; virtual;
     class function GetComboClass: TCustomComboBoxClass; virtual; abstract;
@@ -66,7 +66,7 @@ type
   TVTComboEditLink = class (TVTCustomComboEditLink)
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
-      const NodeText: UTF8String); override;
+      const NodeText: String); override;
     procedure DoEditingDone; override;
     class function GetComboClass: TCustomComboBoxClass; override;
   public
@@ -102,7 +102,7 @@ type
     procedure SetListSource(const AValue: TDataSource);
   protected
     procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
-      const NodeText: UTF8String); override;
+      const NodeText: String); override;
     class function GetComboClass: TCustomComboBoxClass; override;
   public
     property DataField: String read GetDataField write SetDataField;
@@ -156,7 +156,7 @@ begin
 end;
 
 procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
-  Column: TColumnIndex; const NodeText: UTF8String);
+  Column: TColumnIndex; const NodeText: String);
 begin
   if Assigned(FOnPrepareCombo) then
     FOnPrepareCombo(Self, Node, Column, NodeText);
@@ -239,7 +239,7 @@ end;
 function TVTCustomComboEditLink.PrepareEdit(ATree: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
 var
-  NodeText: UTF8String;
+  NodeText: String;
 begin
   Result := ATree is TCustomVirtualStringTree;
   if Result then
@@ -323,7 +323,7 @@ end;
 { TVTComboEditLink }
 
 procedure TVTComboEditLink.DoPrepareCombo(Node: PVirtualNode;
-  Column: TColumnIndex; const NodeText: UTF8String);
+  Column: TColumnIndex; const NodeText: String);
 begin
   Combo.Text := NodeText;
   inherited DoPrepareCombo(Node, Column, NodeText);
@@ -383,7 +383,7 @@ begin
 end;
 
 procedure TVTDBLookupComboEditLink.DoPrepareCombo(Node: PVirtualNode;
-  Column: TColumnIndex; const NodeText: UTF8String);
+  Column: TColumnIndex; const NodeText: String);
 begin
   inherited DoPrepareCombo(Node, Column, NodeText);
   (Combo as TDBLookupComboBox).DataSource := FDataSource;
