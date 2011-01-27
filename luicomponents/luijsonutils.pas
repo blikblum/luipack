@@ -5,7 +5,7 @@ unit LuiJSONUtils;
 interface
 
 uses
-  Classes, SysUtils, fpjson;
+  Classes, SysUtils, fpjson, db;
 
 type
 
@@ -39,6 +39,8 @@ procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
+
+function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
 
 implementation
 
@@ -119,7 +121,7 @@ begin
   case VariantType of
     varnull: JSONObj.Elements[PropName] := TJSONNull.Create;
     varstring: JSONObj.Elements[PropName] := TJSONString.Create(Value);
-    vardouble: JSONObj.Elements[PropName] := TJSONFloatNumber.Create(Value);
+    vardouble, vardate: JSONObj.Elements[PropName] := TJSONFloatNumber.Create(Value);
     varinteger, varlongword: JSONObj.Elements[PropName] := TJSONIntegerNumber.Create(Value);
     varint64, varqword: JSONObj.Elements[PropName] := TJSONInt64Number.Create(Value);
     varboolean: JSONObj.Elements[PropName] := TJSONBoolean.Create(Value);
@@ -149,6 +151,39 @@ begin
     Result := Parser.Parse;
   finally
     Parser.Destroy;
+  end;
+end;
+
+function DatasetRecToJSONObject(Dataset: TDataset): TJSONObject;
+var
+  i: Integer;
+  Field: TField;
+begin
+  Result := TJSONObject.Create;
+  for i := 0 to Dataset.Fields.Count - 1 do
+  begin
+    Field := Dataset.Fields[i];
+    //todo: add option to preserve case
+    //todo: add option to map fields
+    SetJSONPropValue(Result, LowerCase(Field.FieldName), Field.AsVariant);
+  end;
+end;
+
+function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
+var
+  OptionsData: TJSONData;
+begin
+  OptionsData := StringToJSONData(Options);
+  try
+    case OptionsData.JSONType of
+      jtObject:
+        if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
+          Result := DatasetRecToJSONObject(Dataset);
+      jtArray:
+        ;
+    end;
+  finally
+    OptionsData.Free;
   end;
 end;
 
