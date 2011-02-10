@@ -267,7 +267,7 @@ begin
     if PageControlClass = nil then
     begin
       FoundClass := FindClass(NextPage.ControlClassName);
-      if FoundClass.InheritsFrom(PageControlClass) then
+      if FoundClass.InheritsFrom(TControl) then
         PageControlClass := TControlClass(FoundClass);
     end;
     if PageControlClass <> nil then
