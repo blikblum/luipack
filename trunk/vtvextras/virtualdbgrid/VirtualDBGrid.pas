@@ -568,6 +568,7 @@ type
     property Constraints;
     property CustomCheckImages;
     property DefaultPasteMode;
+    property DefaultNodeHeight;
     property DragCursor;
     property DragHeight;
     property DragKind;
