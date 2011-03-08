@@ -40,7 +40,7 @@ interface
 
 
 uses
-  LCLType, LCLProc, Types, Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics
+  LCLType, LCLProc, Types, Forms, Classes, SysUtils, Buttons, Menus, LMessages, Controls, ActnList, Graphics, LCLVersion
   {$ifdef DEBUG_MENUBUTTON}, sharedlogger {$endif};
 
 type
@@ -123,8 +123,8 @@ type
     procedure UpdateStyle;
   protected
     procedure DoButtonDown; override;
-    function GetGlyphSize(PaintRect: TRect): TSize; override;
-    function GetTextSize(PaintRect: TRect): TSize; override;
+    function GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
+    function GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
     procedure Loaded; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
@@ -258,9 +258,9 @@ begin
       ShowMenu;
 end;
 
-function TMenuButton.GetGlyphSize(PaintRect: TRect): TSize;
+function TMenuButton.GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
 begin
-  Result := inherited GetGlyphSize(PaintRect);
+  Result := inherited GetGlyphSize({$if lcl_release >= 31}Drawing, {$endif} PaintRect);
   if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
   begin
     FClientWidth := PaintRect.Right - PaintRect.Left;
@@ -271,9 +271,9 @@ begin
   end;
 end;
 
-function TMenuButton.GetTextSize(PaintRect: TRect): TSize;
+function TMenuButton.GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
 begin
-  Result := inherited GetTextSize(PaintRect);
+  Result := inherited GetTextSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
   if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
   begin
     Inc(FContentWidth, Result.Cx);
