@@ -36,6 +36,8 @@ function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
 
+function FileToJSONData(const FileName: String): TJSONData;
+
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
@@ -128,6 +130,18 @@ begin
   else
     raise Exception.CreateFmt('SetJSONPropValue - Type %d not handled', [VariantType]);
   end
+end;
+
+function FileToJSONData(const FileName: String): TJSONData;
+var
+  Stream: TFileStream;
+begin
+  Stream := TFileStream.Create(FileName, fmOpenRead);
+  try
+    Result := StreamToJSONData(Stream);
+  finally
+    Stream.Destroy;
+  end;
 end;
 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
