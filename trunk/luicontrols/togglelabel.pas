@@ -37,7 +37,7 @@ unit ToggleLabel;
 interface
 
 uses
-  Classes, SysUtils, Controls, StdCtrls, Graphics, LMessages, LCLVersion;
+  Classes, SysUtils, Controls, StdCtrls, Graphics, LMessages;
 
 type
 
@@ -81,8 +81,7 @@ type
   public
     constructor Create(TheOwner: TComponent); override;
     procedure Paint; override;
-    procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: Integer
-      {$ifdef lcl_release = 28};Lock: Boolean = True{$endif}); override;
+    procedure SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: Integer); override;
   published
     property ArrowColor: TColor read FArrowColor write SetArrowColor default clBlack;
     property ExpandedCaption: String read FExpandedCaption write SetExpandedCaption;
@@ -291,11 +290,9 @@ begin
   inherited Create(TheOwner);
 end;
 
-procedure TToggleLabel.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer
-  {$ifdef lcl_release = 28};Lock: boolean{$endif});
+procedure TToggleLabel.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer);
 begin
-  inherited SetBoundsKeepBase(aLeft, aTop, aWidth + FTextOffset, aHeight
-    {$ifdef lcl_release = 28},Lock{$endif});
+  inherited SetBoundsKeepBase(aLeft, aTop, aWidth + FTextOffset, aHeight);
 end;
 
 procedure TToggleLabel.Paint;
