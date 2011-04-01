@@ -18,7 +18,7 @@ type
   private
     FNodeDataSize: Integer;
     //for now connect to only one tree
-    FTree: TVirtualStringTree;
+    FTree: TCustomVirtualStringTree;
     FEvents: TVTEvents;
     procedure ConnectEvents;
     procedure DisconnectEvents;
@@ -30,7 +30,7 @@ type
       var InitialStates: TVirtualNodeInitStates);
 
     procedure SetNodeDataSize(const AValue: Integer);
-    procedure SetTree(const Value: TVirtualStringTree);
+    procedure SetTree(const Value: TCustomVirtualStringTree);
   protected
     //abstract event handlers
     procedure DoFocusChanged(Node: PVirtualNode; Column: TColumnIndex); virtual; abstract;
@@ -48,11 +48,14 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property Tree: TVirtualStringTree read FTree write SetTree;
+    property Tree: TCustomVirtualStringTree read FTree write SetTree;
   end;
 
 implementation
 
+type
+  TVTAccess = class(TCustomVirtualStringTree)
+  end;
 
 { TCustomVirtualTreeController }
 
@@ -73,21 +76,21 @@ end;
 procedure TCustomVirtualTreeController.ConnectEvents;
 begin
   if evGetText in FEvents then
-    FTree.OnGetText := @GetTextEvent;
+    TVTAccess(FTree).OnGetText := @GetTextEvent;
   if evFocusChanged in FEvents then
-    FTree.OnFocusChanged := @FocusChangedEvent;
+    TVTAccess(FTree).OnFocusChanged := @FocusChangedEvent;
   if evInitNode in FEvents then
-    FTree.OnInitNode := @InitNodeEvent;
+    TVTAccess(FTree).OnInitNode := @InitNodeEvent;
 end;
 
 procedure TCustomVirtualTreeController.DisconnectEvents;
 begin
   if evGetText in FEvents then
-    FTree.OnGetText := nil;
+    TVTAccess(FTree).OnGetText := nil;
   if evFocusChanged in FEvents then
-    FTree.OnFocusChanged := nil;
+    TVTAccess(FTree).OnFocusChanged := nil;
   if evInitNode in FEvents then
-    FTree.OnInitNode := nil;
+    TVTAccess(FTree).OnInitNode := nil;
 end;
 
 procedure TCustomVirtualTreeController.FocusChangedEvent(
@@ -113,7 +116,7 @@ procedure TCustomVirtualTreeController.SetNodeDataSize(const AValue: Integer);
 begin
 end;
 
-procedure TCustomVirtualTreeController.SetTree(const Value: TVirtualStringTree);
+procedure TCustomVirtualTreeController.SetTree(const Value: TCustomVirtualStringTree);
 begin
   if FTree <> nil then
     DisconnectEvents;
