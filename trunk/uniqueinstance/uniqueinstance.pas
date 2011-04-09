@@ -68,9 +68,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property Enabled: Boolean read FEnabled write FEnabled;
+    property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
-    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval;
+    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval default 1000;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
   end;
 
@@ -204,4 +204,4 @@ end;
 
 
 end.
-
+
