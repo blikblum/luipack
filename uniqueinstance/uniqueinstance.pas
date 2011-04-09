@@ -60,6 +60,7 @@ type
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
     procedure SetUpdateInterval(const AValue: Cardinal);
+    procedure TerminateApp(Data: Ptrint);
     {$ifdef unix}
     procedure CheckMessage(Sender: TObject);
     {$endif}
@@ -136,6 +137,11 @@ begin
   {$endif}
 end;
 
+procedure TUniqueInstance.TerminateApp(Data: Ptrint);
+begin
+  Application.Terminate;
+end;
+
 function TUniqueInstance.GetServerId: String;
 begin
   if FIdentifier <> '' then
@@ -166,7 +172,7 @@ begin
         FIPCClient.SendStringMessage(ParamCount, TempStr);
       end;
       Application.ShowMainForm := False;
-      Application.Terminate;
+      Application.QueueAsyncCall(@TerminateApp, 0);
     end
     else
     begin
@@ -198,6 +204,7 @@ begin
   FUpdateInterval := 1000;
   {$ifdef unix}
   FTimer := TTimer.Create(Self);
+  FTimer.Enabled := False;
   FTimer.OnTimer := @CheckMessage;
   {$endif}
 end;
