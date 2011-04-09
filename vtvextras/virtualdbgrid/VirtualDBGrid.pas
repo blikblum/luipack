@@ -38,6 +38,7 @@ unit VirtualDBGrid;
 {$mode delphi}
 
 {.$define VTV_VER_5}
+{.$define DEBUG_VDBGRID}
 
 interface
 
@@ -470,7 +471,7 @@ type
     function GetNodeByIndex(Index: Cardinal): PVirtualNode;
 
     function GetSelectedRecord(Index: Integer): TRecordData;
-    function GetFullyVisibleCount: Cardinal;
+    function GetVisibleNodesCount: Cardinal;
     // Value -1 in SortDirection mean that to autodetect sortdirection of column to sort by
     procedure DoSortColumn(AColumn: TColumnIndex; ASortDirection: Integer= -1);
     //procedure RemoveColumnFromRecordData(ColumnItem: TVirtualDBTreeColumn);
@@ -2962,7 +2963,7 @@ procedure TCustomVirtualDBGrid.UpdateVisibleDBTree(AlwaysUpdate: Boolean;
 begin
   if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
     Exit;
-  UpdateDBTree(TopNode, GetFullyVisibleCount, AlwaysUpdate, UpdateLoadedData);
+  UpdateDBTree(TopNode, GetVisibleNodesCount, AlwaysUpdate, UpdateLoadedData);
 end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
@@ -3044,7 +3045,8 @@ var
 begin
   //it's up to the caller check for LinkedDataset and IsDataLoading
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'UpdateDBTree');{$endif}
-  //Logger.SendCallStack(lcAll, 'Stack');
+  {$ifdef DEBUG_VDBGRID}Logger.Send(lcAll, 'NodeCount: %d AlwaysUpdate: %s UpdateLoadedData: %s',
+    [NodeCount, BoolToStr(AlwaysUpdate, True), BoolToStr(UpdateLoadedData, True)]);{$endif}
   Run := StartNode;
   if not Assigned(Run) then
     Exit;
@@ -3235,7 +3237,7 @@ begin
   UpdateVisibleDBTree(False);
 end;
 
-function TCustomVirtualDBGrid.GetFullyVisibleCount: Cardinal;
+function TCustomVirtualDBGrid.GetVisibleNodesCount: Cardinal;
 var
   Node: PVirtualNode;
   AHeight, AControlHeight: Integer;
@@ -3248,9 +3250,8 @@ begin
   while Node <> nil do
   begin
     Inc(AHeight, Node.NodeHeight);
-    if AHeight < AControlHeight then
-      Inc(Result)
-    else
+    Inc(Result);
+    if AHeight >= AControlHeight then
       Break;
     Node := GetNextVisibleSibling(Node);
   end;
