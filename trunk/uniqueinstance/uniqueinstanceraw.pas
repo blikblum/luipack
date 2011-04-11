@@ -106,10 +106,7 @@ begin
 end;
 
 finalization
-  if FIPCServer <> nil then
-  begin
-    ShutDownServer(FIPCServer);
-    FIPCServer.Destroy;
-  end;
+  FIPCServer.Free;
+
 end.
 
