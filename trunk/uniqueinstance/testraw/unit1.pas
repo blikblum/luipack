@@ -25,19 +25,23 @@ var
 
 implementation
 
+{$R *.lfm}
+
+{$ifdef unix}
+uses
+  BaseUnix;
+{$endif}
+
 { TForm1 }
 
 procedure TForm1.ButCrashAppClick(Sender: TObject);
-var
-  d: Double;
-  x: Integer;
 begin
-  x := 0;
-  d := 1 / x;
+  {$ifdef unix}
+  FpKill(FpGetpid, 9);
+  {$endif}
 end;
 
 initialization
-  {$I unit1.lrs}
 
 end.
-
+

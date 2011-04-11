@@ -1,4 +1,4 @@
-unit ftesform;
+unit fMain;
 
 {$mode objfpc}{$H+}
 
@@ -31,6 +31,13 @@ var
 
 implementation
 
+{$ifdef unix}
+uses
+  BaseUnix;
+{$endif}
+
+{$R *.lfm}
+
 { TForm1 }
 
 procedure TForm1.UniqueInstance1OtherInstance(Sender: TObject; Count: Integer;
@@ -46,18 +53,11 @@ begin
 end;
 
 procedure TForm1.ButCrashAppClick(Sender: TObject);
-var
-  d: Double;
-  x: integer;
 begin
-  x := 0;
-  d := 1 / x;
+  {$ifdef unix}
+  FpKill(FpGetpid, 9);
+  {$endif}
 end;
-
-
-
-initialization
-  {$I ftesform.lrs}
 
 end.
 

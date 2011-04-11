@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms
-  { add your units here }, Unit1, uniqueinstanceraw, uniqueinstance_package;
+  { add your units here }, Unit1, UniqueInstanceRaw;
 
 begin
   if not InstanceRunning('project1ver3') then
@@ -18,4 +18,4 @@ begin
     Application.Run;
   end;
 end.
-
+
