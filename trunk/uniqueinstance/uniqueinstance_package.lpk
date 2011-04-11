@@ -5,14 +5,16 @@
     <Name Value="uniqueinstance_package"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="10"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -20,7 +22,7 @@
     <Description Value="UniqueInstance provides a component to limits one instance per application"/>
     <License Value="Modified LGPL"/>
     <Version Minor="2"/>
-    <Files Count="3">
+    <Files Count="4">
       <Item1>
         <Filename Value="uniqueinstance.pas"/>
         <UnitName Value="UniqueInstance"/>
@@ -34,6 +36,10 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="registeruniqueinstance"/>
       </Item3>
+      <Item4>
+        <Filename Value="simpleipcwrapper.pas"/>
+        <UnitName Value="simpleipcwrapper"/>
+      </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
@@ -49,4 +55,4 @@
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
-</CONFIG>
+</CONFIG>
