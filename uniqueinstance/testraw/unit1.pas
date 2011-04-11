@@ -32,6 +32,11 @@ uses
   BaseUnix;
 {$endif}
 
+{$ifdef windows}
+uses
+  Windows;
+{$endif}
+
 { TForm1 }
 
 procedure TForm1.ButCrashAppClick(Sender: TObject);
@@ -39,9 +44,12 @@ begin
   {$ifdef unix}
   FpKill(FpGetpid, 9);
   {$endif}
+  {$ifdef windows}
+  TerminateProcess(GetCurrentProcess, 0);
+  {$endif}
 end;
 
 initialization
 
 end.
-
+
