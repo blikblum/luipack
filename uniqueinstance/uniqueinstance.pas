@@ -60,7 +60,7 @@ type
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
     procedure SetUpdateInterval(const AValue: Cardinal);
-    procedure TerminateApp(Data: Ptrint);
+    procedure TerminateApp(Sender: TObject; var Done: Boolean);
     {$ifdef unix}
     procedure CheckMessage(Sender: TObject);
     {$endif}
@@ -138,9 +138,11 @@ begin
   {$endif}
 end;
 
-procedure TUniqueInstance.TerminateApp(Data: Ptrint);
+procedure TUniqueInstance.TerminateApp(Sender: TObject; var Done: Boolean);
 begin
   Application.Terminate;
+  //necessary to avoid being a zombie
+  Done := False;
 end;
 
 function TUniqueInstance.GetServerId: String;
@@ -173,7 +175,15 @@ begin
         FIPCClient.SendStringMessage(ParamCount, TempStr);
       end;
       Application.ShowMainForm := False;
-      Application.QueueAsyncCall(@TerminateApp, 0);
+      //Calling Terminate directly here would cause a crash under gtk2 in LCL < 0.9.31
+      //todo: remove the workaround after a release with LCL > 0.9.31
+      //Application.Terminate;
+
+      //calling as an async call will not work also since it will lead to a zombie process
+      //Application.QueueAsyncCall(@TerminateApp, 0);
+
+      //New try:
+      Application.AddOnIdleHandler(@TerminateApp);
     end
     else
     begin
