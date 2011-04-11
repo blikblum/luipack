@@ -48,7 +48,6 @@ type
 
   TUniqueInstance = class(TComponent)
   private
-    FEnabled: Boolean;
     FIdentifier: String;
     FIPCServer: TSimpleIPCServer;
     FIPCClient: TSimpleIPCClient;
@@ -57,6 +56,7 @@ type
     FTimer: TTimer;
     {$endif}
     FUpdateInterval: Cardinal;
+    FEnabled: Boolean;
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
     procedure SetUpdateInterval(const AValue: Cardinal);
@@ -68,7 +68,6 @@ type
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
   published
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
@@ -200,8 +199,7 @@ begin
       //there's no more need for FIPCClient
       FIPCClient.Free;
       {$ifdef unix}
-      if Assigned(FOnOtherInstance) then
-        FTimer.Enabled := True;
+      FTimer.Enabled := Assigned(FOnOtherInstance);
       {$endif}
     end;
   end;//if
@@ -219,14 +217,6 @@ begin
   FTimer.OnTimer := @CheckMessage;
   {$endif}
 end;
-
-destructor TUniqueInstance.Destroy;
-begin
-  if FIPCServer <> nil then
-    ShutDownServer(FIPCServer);
-  inherited Destroy;
-end;
-
 
 end.
 
