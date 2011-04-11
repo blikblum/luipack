@@ -68,6 +68,7 @@ type
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
@@ -78,7 +79,7 @@ type
 implementation
 
 uses
-  StrUtils;
+  StrUtils, SimpleIPCWrapper;
 
 const
   BaseServerId = 'tuniqueinstance_';
@@ -159,7 +160,7 @@ begin
   if not (csDesigning in ComponentState) and FEnabled then
   begin
     FIPCClient.ServerId := GetServerId;
-    if FIPCClient.ServerRunning then
+    if IsServerRunning(FIPCClient) then
     begin
       //A instance is already running
       //Send a message and then exit
@@ -184,7 +185,7 @@ begin
         ServerID := FIPCClient.ServerId;
         Global := True;
         OnMessage := @ReceiveMessage;
-        StartServer;
+        InitServer(FIPCServer);
       end;
       //there's no more need for FIPCClient
       FIPCClient.Free;
@@ -207,6 +208,13 @@ begin
   FTimer.Enabled := False;
   FTimer.OnTimer := @CheckMessage;
   {$endif}
+end;
+
+destructor TUniqueInstance.Destroy;
+begin
+  if FIPCServer <> nil then
+    ShutDownServer(FIPCServer);
+  inherited Destroy;
 end;
 
 
