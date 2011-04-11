@@ -45,6 +45,9 @@ uses
 
 implementation
 
+uses
+  SimpleIPCWrapper;
+
 const
   BaseServerId = 'tuniqueinstance_';
   Separator = '|';
@@ -65,12 +68,14 @@ function InstanceRunning(const Identifier: String; SendParameters: Boolean = Fal
 var
   TempStr: String;
   i: Integer;
+  Client: TSimpleIPCClient;
   
 begin
-  with TSimpleIPCClient.Create(nil) do
+  Client := TSimpleIPCClient.Create(nil);
+  with Client do
   try
     ServerId := GetServerId;
-    Result := ServerRunning;
+    Result := IsServerRunning(Client);
     if not Result then
     begin
       //It's the first instance. Init the server
@@ -78,7 +83,7 @@ begin
         FIPCServer := TSimpleIPCServer.Create(nil);
       FIPCServer.ServerID := ServerId;
       FIPCServer.Global := True;
-      FIPCServer.StartServer;
+      InitServer(FIPCServer);
     end
     else
       // an instance already exists
@@ -100,7 +105,11 @@ begin
   Result := InstanceRunning('');
 end;
 
-finalization  
-  FIPCServer.Free;
+finalization
+  if FIPCServer <> nil then
+  begin
+    ShutDownServer(FIPCServer);
+    FIPCServer.Destroy;
+  end;
 end.
-
+
