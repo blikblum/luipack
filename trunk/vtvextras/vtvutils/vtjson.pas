@@ -527,7 +527,11 @@ begin
 end;
 
 destructor TVirtualJSONInspector.Destroy;
+var
+  ItemData: PItemData;
 begin
+  ItemData := GetItemData(RootNode);
+  SetLength(ItemData^.Children, 0);
   FPropertyDefs.Destroy;
   inherited Destroy;
 end;
