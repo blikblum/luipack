@@ -401,7 +401,7 @@ begin
   if Result then
   begin
     ParentItemData := GetItemData(Node^.Parent);
-    Result := (ParentItemData^.JSONData.JSONType = jtArray);
+    Result := (ParentItemData^.JSONData.JSONType in [jtArray, jtObject]);
     if Result then
     begin
       ItemData := GetItemData(Node);
