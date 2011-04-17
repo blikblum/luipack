@@ -54,6 +54,15 @@ const
 
 var
   FIPCServer: TSimpleIPCServer;
+
+function GetFormattedParams: String;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 1 to ParamCount do
+    Result := Result + ParamStr(i) + Separator;
+end;
   
 function InstanceRunning(const Identifier: String; SendParameters: Boolean = False): Boolean;
 
@@ -66,8 +75,6 @@ function InstanceRunning(const Identifier: String; SendParameters: Boolean = Fal
   end;
   
 var
-  TempStr: String;
-  i: Integer;
   Client: TSimpleIPCClient;
   
 begin
@@ -89,11 +96,8 @@ begin
       // an instance already exists
       if SendParameters then
       begin
-        TempStr := '';
-        for i := 1 to ParamCount do
-          TempStr := TempStr + ParamStr(i) + Separator;
         Active := True;
-        SendStringMessage(ParamCount, TempStr);
+        SendStringMessage(ParamCount, GetFormattedParams);
       end;
   finally
     Free;
