@@ -3,7 +3,7 @@
   <Package Version="3">
     <PathDelim Value="\"/>
     <Name Value="uniqueinstance_package"/>
-    <Author Value="Luiz Américo Pereira Câmara"/>
+    <Author Value="Luiz Amï¿½rico Pereira Cï¿½mara"/>
     <CompilerOptions>
       <Version Value="10"/>
       <PathDelim Value="\"/>
@@ -15,13 +15,18 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="2"/>
+        </Optimizations>
+      </CodeGeneration>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
     <Description Value="UniqueInstance provides a component to limits one instance per application"/>
     <License Value="Modified LGPL"/>
-    <Version Minor="2"/>
+    <Version Major="1"/>
     <Files Count="4">
       <Item1>
         <Filename Value="uniqueinstance.pas"/>
@@ -38,7 +43,7 @@
       </Item3>
       <Item4>
         <Filename Value="simpleipcwrapper.pas"/>
-        <UnitName Value="simpleipcwrapper"/>
+        <UnitName Value="SimpleIPCWrapper"/>
       </Item4>
     </Files>
     <Type Value="RunAndDesignTime"/>
@@ -48,11 +53,11 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
   </Package>
-</CONFIG>
+</CONFIG>
