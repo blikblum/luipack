@@ -55,7 +55,6 @@ type
     FEnabled: Boolean;
     function GetServerId: String;
     procedure ReceiveMessage(Sender: TObject);
-    procedure SetUpdateInterval(const AValue: Cardinal);
     procedure TerminateApp(Sender: TObject; var Done: Boolean);
     {$ifdef unix}
     procedure CheckMessage(Sender: TObject);
@@ -67,7 +66,7 @@ type
   published
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
-    property UpdateInterval: Cardinal read FUpdateInterval write SetUpdateInterval default 1000;
+    property UpdateInterval: Cardinal read FUpdateInterval write FUpdateInterval default 1000;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
   end;
 
@@ -131,13 +130,6 @@ begin
   FIPCServer.PeekMessage(1, True);
 end;
 {$endif}
-
-procedure TUniqueInstance.SetUpdateInterval(const AValue: Cardinal);
-begin
-  if FUpdateInterval = AValue then
-    Exit;
-  FUpdateInterval := AValue;
-end;
 
 procedure TUniqueInstance.TerminateApp(Sender: TObject; var Done: Boolean);
 begin
@@ -216,4 +208,4 @@ begin
 end;
 
 end.
-
+
