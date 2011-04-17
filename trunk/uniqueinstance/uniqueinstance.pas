@@ -50,11 +50,7 @@ type
   private
     FIdentifier: String;
     FIPCServer: TSimpleIPCServer;
-    FIPCClient: TSimpleIPCClient;
     FOnOtherInstance: TOnOtherInstance;
-    {$ifdef unix}
-    FTimer: TTimer;
-    {$endif}
     FUpdateInterval: Cardinal;
     FEnabled: Boolean;
     function GetServerId: String;
@@ -132,9 +128,6 @@ begin
   if FUpdateInterval = AValue then
     Exit;
   FUpdateInterval := AValue;
-  {$ifdef unix}
-  FTimer.Interval := AValue;
-  {$endif}
 end;
 
 procedure TUniqueInstance.TerminateApp(Sender: TObject; var Done: Boolean);
@@ -157,11 +150,16 @@ procedure TUniqueInstance.Loaded;
 var
   TempStr: String;
   i: Integer;
+  IPCClient: TSimpleIPCClient;
+  {$ifdef unix}
+  Timer: TTimer;
+  {$endif}
 begin
   if not (csDesigning in ComponentState) and FEnabled then
   begin
-    FIPCClient.ServerId := GetServerId;
-    if IsServerRunning(FIPCClient) then
+    IPCClient := TSimpleIPCClient.Create(Self);
+    IPCClient.ServerId := GetServerId;
+    if IsServerRunning(IPCClient) then
     begin
       //A instance is already running
       //Send a message and then exit
@@ -170,8 +168,8 @@ begin
         TempStr := '';
         for i := 1 to ParamCount do
           TempStr := TempStr + ParamStr(i) + Separator;
-        FIPCClient.Active := True;
-        FIPCClient.SendStringMessage(ParamCount, TempStr);
+        IPCClient.Active := True;
+        IPCClient.SendStringMessage(ParamCount, TempStr);
       end;
       Application.ShowMainForm := False;
       //Calling Terminate directly here would cause a crash under gtk2 in LCL < 0.9.31
@@ -187,19 +185,20 @@ begin
     else
     begin
       //It's the first instance. Init the server
-      if FIPCServer = nil then
-        FIPCServer := TSimpleIPCServer.Create(Self);
-      with FIPCServer do
-      begin
-        ServerID := FIPCClient.ServerId;
-        Global := True;
-        OnMessage := @ReceiveMessage;
-        InitServer(FIPCServer);
-      end;
-      //there's no more need for FIPCClient
-      FIPCClient.Free;
+      FIPCServer := TSimpleIPCServer.Create(Self);
+      FIPCServer.ServerID := IPCClient.ServerId;
+      FIPCServer.Global := True;
+      FIPCServer.OnMessage := @ReceiveMessage;
+      InitServer(FIPCServer);
+      //there's no more need for IPCClient
+      IPCClient.Destroy;
       {$ifdef unix}
-      FTimer.Enabled := Assigned(FOnOtherInstance);
+      if Assigned(FOnOtherInstance) then
+      begin
+        Timer := TTimer.Create(Self);
+        Timer.Interval := FUpdateInterval;
+        Timer.OnTimer := @CheckMessage;
+      end;
       {$endif}
     end;
   end;//if
@@ -209,13 +208,7 @@ end;
 constructor TUniqueInstance.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FIPCClient := TSimpleIPCClient.Create(Self);
   FUpdateInterval := 1000;
-  {$ifdef unix}
-  FTimer := TTimer.Create(Self);
-  FTimer.Enabled := False;
-  FTimer.OnTimer := @CheckMessage;
-  {$endif}
 end;
 
 end.
