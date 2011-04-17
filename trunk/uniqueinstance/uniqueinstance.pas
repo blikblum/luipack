@@ -80,6 +80,15 @@ const
   BaseServerId = 'tuniqueinstance_';
   Separator = '|';
 
+function GetFormattedParams: String;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 1 to ParamCount do
+    Result := Result + ParamStr(i) + Separator;
+end;
+
 { TUniqueInstance }
 
 procedure TUniqueInstance.ReceiveMessage(Sender: TObject);
@@ -148,8 +157,6 @@ end;
 
 procedure TUniqueInstance.Loaded;
 var
-  TempStr: String;
-  i: Integer;
   IPCClient: TSimpleIPCClient;
   {$ifdef unix}
   Timer: TTimer;
@@ -165,11 +172,8 @@ begin
       //Send a message and then exit
       if Assigned(FOnOtherInstance) then
       begin
-        TempStr := '';
-        for i := 1 to ParamCount do
-          TempStr := TempStr + ParamStr(i) + Separator;
         IPCClient.Active := True;
-        IPCClient.SendStringMessage(ParamCount, TempStr);
+        IPCClient.SendStringMessage(ParamCount, GetFormattedParams);
       end;
       Application.ShowMainForm := False;
       //Calling Terminate directly here would cause a crash under gtk2 in LCL < 0.9.31
