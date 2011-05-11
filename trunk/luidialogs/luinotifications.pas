@@ -182,7 +182,7 @@ begin
     raise Exception.Create('ShowNotification: AnchorControl not defined');
   if Position in [npSiblingAbove, npSiblingBelow] then
   begin
-    ParentControl := AnchorControl.Parent
+    ParentControl := AnchorControl.Parent;
     if ParentControl = nil then
       raise Exception.Create('ShowNotification: ParentControl not found');
   end
