@@ -24,7 +24,7 @@ procedure HideNotification(ParentControl: TWinControl; NotificationTypes: TNotif
 implementation
 
 uses
-  LCLIntf, Themes;
+  LCLIntf;
 
 const
   NotificationControlIntfId = 'lui_notificationcontrol';
@@ -127,7 +127,7 @@ end;
 
 constructor TDefaultNotificationControl.Create(AOwner: TComponent);
 var
-  CloseBitmap, CloseMask: HBITMAP;
+  CloseBitmap: TCustomBitmap;
 begin
   inherited Create(AOwner);
   BorderSpacing.Around := 2;
@@ -136,9 +136,12 @@ begin
   FCloseButton.Parent := Self;
   FCloseButton.OnClick := @HideMessage;
   FCloseButton.Flat := True;
-  ThemeServices.GetStockImage(idButtonClose, CloseBitmap, CloseMask);
-  FCloseButton.Glyph.Handle := CloseBitmap;
-  FCloseButton.Glyph.MaskHandle := CloseMask;
+  CloseBitmap := GetButtonIcon(idButtonCancel);
+  try
+    FCloseButton.Glyph.Assign(CloseBitmap);
+  finally
+    CloseBitmap.Free;
+  end;
   FCloseButton.Width := FCloseButton.Glyph.Width + 2;
   FCloseButton.Height := FCloseButton.Glyph.Height + 2;
   FCloseButton.Top := 2;
@@ -175,8 +178,14 @@ var
   Control: TDefaultNotificationControl;
   ParentControl: TWinControl;
 begin
+  if AnchorControl = nil then
+    raise Exception.Create('ShowNotification: AnchorControl not defined');
   if Position in [npSiblingAbove, npSiblingBelow] then
+  begin
     ParentControl := AnchorControl.Parent
+    if ParentControl = nil then
+      raise Exception.Create('ShowNotification: ParentControl not found');
+  end
   else
     ParentControl := AnchorControl;
   Control := TDefaultNotificationControl.Create(ParentControl);
