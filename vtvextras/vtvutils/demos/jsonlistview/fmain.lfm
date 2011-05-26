@@ -1,0 +1,82 @@
+object MainForm: TMainForm
+  Left = 400
+  Height = 510
+  Top = 247
+  Width = 652
+  Caption = 'JSONListView Demo'
+  ClientHeight = 510
+  ClientWidth = 652
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.31'
+  object JSONListView: TVirtualJSONListView
+    Left = 8
+    Height = 288
+    Top = 32
+    Width = 478
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+  end
+  object FileNameEdit: TFileNameEdit
+    Left = 8
+    Height = 21
+    Top = 3
+    Width = 456
+    OnAcceptFileName = FileNameEditAcceptFileName
+    DialogOptions = []
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 0
+    MaxLength = 0
+    TabOrder = 1
+  end
+  object DefaultFieldNameEdit: TLabeledEdit
+    Left = 488
+    Height = 21
+    Top = 48
+    Width = 152
+    EditLabel.AnchorSideLeft.Control = DefaultFieldNameEdit
+    EditLabel.AnchorSideBottom.Control = DefaultFieldNameEdit
+    EditLabel.Left = 488
+    EditLabel.Height = 14
+    EditLabel.Top = 31
+    EditLabel.Width = 88
+    EditLabel.Caption = 'Default FieldName'
+    EditLabel.ParentColor = False
+    TabOrder = 2
+    OnEditingDone = DefaultFieldNameEditEditingDone
+  end
+  object EnableCheckItemsCheckBox: TCheckBox
+    Left = 488
+    Height = 17
+    Top = 80
+    Width = 110
+    Caption = 'Enable check items'
+    OnChange = EnableCheckItemsCheckBoxChange
+    TabOrder = 3
+  end
+  object ShowCheckedButton: TButton
+    Left = 8
+    Height = 25
+    Top = 328
+    Width = 168
+    Caption = 'Show Checked Items'
+    OnClick = ShowCheckedButtonClick
+    TabOrder = 4
+  end
+  object LogMemo: TMemo
+    Left = 8
+    Height = 144
+    Top = 360
+    Width = 478
+    ScrollBars = ssAutoBoth
+    TabOrder = 5
+  end
+end

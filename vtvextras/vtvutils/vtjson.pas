@@ -11,10 +11,10 @@ type
 
   TVirtualJSONInspector = class;
 
-  TVTJSONFormatValue = procedure (Sender: TVirtualJSONInspector; const PropertyName: String;
+  TVTJSONInspectorFormatValue = procedure (Sender: TVirtualJSONInspector; const PropertyName: String;
     Data: TJSONData; var DisplayText: String) of object;
 
-  TVTJSONFormatName = procedure (Sender: TVirtualJSONInspector;
+  TVTJSONInspectorFormatName = procedure (Sender: TVirtualJSONInspector;
     ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String) of object;
 
   TVTJSONInspectorOption = (jioSkipNullProperties, jioSkipUnknownProperties);
@@ -76,9 +76,9 @@ type
   TVirtualJSONInspector = class(TCustomVirtualStringTree)
   private
     FItemDataOffset: Cardinal;
-    FOnFormatName: TVTJSONFormatName;
+    FOnFormatName: TVTJSONInspectorFormatName;
     FRootData: TJSONData;
-    FOnFormatValue: TVTJSONFormatValue;
+    FOnFormatValue: TVTJSONInspectorFormatValue;
     FPropertyDefs: TJSONPropertyDefs;
     function GetItemData(Node: PVirtualNode): Pointer;
     function GetOptions: TJSONInspectorTreeOptions;
@@ -106,8 +106,8 @@ type
     property RootData: TJSONData read FRootData write SetRootData;
   published
     property PropertyDefs: TJSONPropertyDefs read FPropertyDefs write SetPropertyDefs;
-    property OnFormatName: TVTJSONFormatName read FOnFormatName write FOnFormatName;
-    property OnFormatValue: TVTJSONFormatValue read FOnFormatValue write FOnFormatValue;
+    property OnFormatName: TVTJSONInspectorFormatName read FOnFormatName write FOnFormatName;
+    property OnFormatValue: TVTJSONInspectorFormatValue read FOnFormatValue write FOnFormatValue;
    //inherited properties
     property Action;
     property Align;
@@ -282,6 +282,224 @@ type
     property OnUpdating;
   end;
 
+  TVirtualJSONListView = class;
+
+  TVTJSONListViewFormatValue = procedure (Sender: TVirtualJSONListView; Column: TColumnIndex;
+    Data: TJSONData; var DisplayText: String) of object;
+
+  { TVirtualJSONListViewColumn }
+
+  TVirtualJSONListViewColumn = class(TVirtualTreeColumn)
+  private
+    FFieldName: String;
+    procedure SetFieldName(const Value: String);
+  published
+    property FieldName: String read FFieldName write SetFieldName;
+  end;
+
+  { TVirtualJSONListView }
+
+  TVirtualJSONListView = class(TCustomVirtualStringTree)
+  private
+    FCheckedData: TJSONArray;
+    FData: TJSONData;
+    FDefaultFieldName: String;
+    FItemDataOffset: Integer;
+    function GetCheckedData: TJSONArray;
+    function GetItemData(Node: PVirtualNode): Pointer;
+    function GetOptions: TStringTreeOptions;
+    procedure LoadCheckedData;
+    procedure SetData(const Value: TJSONData);
+    procedure SetOptions(const Value: TStringTreeOptions);
+  protected
+    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: String); override;
+    procedure DoInitNode(ParentNode, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
+    procedure DoChecked(Node: PVirtualNode); override;
+    function GetColumnClass: TVirtualTreeColumnClass; override;
+    function GetOptionsClass: TTreeOptionsClass; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    property CheckedData: TJSONArray read GetCheckedData;
+    property Data: TJSONData read FData write SetData;
+    procedure LoadData;
+  published
+    property DefaultFieldName: String read FDefaultFieldName write FDefaultFieldName;
+    //inherited properties
+    property Action;
+    property Align;
+    property Alignment;
+    property Anchors;
+    property AnimationDuration;
+    property AutoExpandDelay;
+    property AutoScrollDelay;
+    property AutoScrollInterval;
+    property Background;
+    property BackgroundOffsetX;
+    property BackgroundOffsetY;
+    property BiDiMode;
+    property BorderSpacing;
+    property BorderStyle default bsSingle;
+    property BottomSpace;
+    property ButtonFillMode;
+    property ButtonStyle;
+    property BorderWidth;
+    property ChangeDelay;
+    property CheckImageKind;
+    property ClipboardFormats;
+    property Color;
+    property Colors;
+    property Constraints;
+    property DefaultNodeHeight;
+    property DefaultPasteMode;
+    property DefaultText;
+    property DragCursor;
+    property DragHeight;
+    property DragKind;
+    property DragImageKind;
+    property DragMode;
+    property DragOperations;
+    property DragType;
+    property DragWidth;
+    property DrawSelectionMode;
+    property EditDelay;
+    property Enabled;
+    property Font;
+    property Header;
+    property HintMode;
+    property HotCursor;
+    property Images;
+    property IncrementalSearch;
+    property IncrementalSearchDirection;
+    property IncrementalSearchStart;
+    property IncrementalSearchTimeout;
+    property Indent;
+    property LineMode;
+    property LineStyle;
+    property Margin;
+    property NodeAlignment;
+    property NodeDataSize;
+    property ParentBiDiMode;
+    property ParentColor default False;
+    property ParentFont;
+    property ParentShowHint;
+    property PopupMenu;
+    property RootNodeCount;
+    property ScrollBarOptions;
+    property SelectionBlendFactor;
+    property SelectionCurveRadius;
+    property ShowHint;
+    property StateImages;
+    property TabOrder;
+    property TabStop default True;
+    property TextMargin;
+    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property Visible;
+    property WantTabs;
+
+    property OnAdvancedHeaderDraw;
+    property OnAfterAutoFitColumns;
+    property OnAfterCellPaint;
+    property OnAfterGetMaxColumnWidth;
+    property OnAfterItemErase;
+    property OnAfterItemPaint;
+    property OnAfterPaint;
+    property OnBeforeAutoFitColumns;
+    property OnBeforeCellPaint;
+    property OnBeforeGetMaxColumnWidth;
+    property OnBeforeItemErase;
+    property OnBeforeItemPaint;
+    property OnBeforePaint;
+    property OnCanSplitterResizeColumn;
+    property OnChange;
+    property OnChecked;
+    property OnChecking;
+    property OnClick;
+    property OnCollapsed;
+    property OnCollapsing;
+    property OnColumnClick;
+    property OnColumnDblClick;
+    property OnColumnResize;
+    property OnCompareNodes;
+    property OnContextPopup;
+    property OnCreateDataObject;
+    property OnCreateDragManager;
+    property OnCreateEditor;
+    property OnDblClick;
+    property OnDragAllowed;
+    property OnDragOver;
+    property OnDragDrop;
+    property OnEditCancelled;
+    property OnEdited;
+    //property OnEditing;
+    property OnEndDock;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    property OnExpanded;
+    property OnExpanding;
+    property OnFocusChanged;
+    property OnFocusChanging;
+    property OnFreeNode;
+    property OnGetCellIsEmpty;
+    property OnGetCursor;
+    property OnGetHeaderCursor;
+    property OnGetText;
+    property OnPaintText;
+    property OnGetHelpContext;
+    property OnGetImageIndex;
+    property OnGetImageIndexEx;
+    property OnGetImageText;
+    property OnGetHint;
+    property OnGetLineStyle;
+    property OnGetNodeDataSize;
+    property OnGetPopupMenu;
+    property OnGetUserClipboardFormats;
+    property OnHeaderClick;
+    property OnHeaderDblClick;
+    property OnHeaderDragged;
+    property OnHeaderDraggedOut;
+    property OnHeaderDragging;
+    property OnHeaderDraw;
+    property OnHeaderDrawQueryElements;
+    property OnHeaderMouseDown;
+    property OnHeaderMouseMove;
+    property OnHeaderMouseUp;
+    property OnHotChange;
+    property OnIncrementalSearch;
+    //property OnInitChildren;
+    //property OnInitNode;
+    property OnKeyAction;
+    property OnKeyDown;
+    property OnKeyPress;
+    property OnKeyUp;
+    property OnLoadNode;
+    property OnMeasureItem;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnNewText;
+    property OnNodeCopied;
+    property OnNodeCopying;
+    property OnNodeMoved;
+    property OnNodeMoving;
+    property OnPaintBackground;
+    property OnRenderOLEData;
+    property OnResetNode;
+    property OnResize;
+    property OnSaveNode;
+    property OnScroll;
+    property OnShortenString;
+    property OnShowScrollbar;
+    property OnStartDock;
+    property OnStartDrag;
+    property OnStateChange;
+    property OnStructureChange;
+    property OnUpdating;
+  end;
+
 implementation
 
 type
@@ -292,6 +510,155 @@ type
     Children: array of Integer;
   end;
   PItemData = ^TItemData;
+
+  TLVItemData = record
+    JSONData: TJSONData;
+  end;
+  PLVItemData = ^TLVItemData;
+
+{ TVirtualJSONListViewColumn }
+
+procedure TVirtualJSONListViewColumn.SetFieldName(const Value: String);
+begin
+  if FFieldName = Value then exit;
+  if (Text = '') or (Text = FFieldName) then
+    Text := Value;
+  FFieldName := Value;
+end;
+
+
+{ TVirtualJSONListView }
+
+function TVirtualJSONListView.GetItemData(Node: PVirtualNode): Pointer;
+begin
+  if Node = nil then
+    Result := nil
+  else
+    Result := PByte(Node) + FItemDataOffset;
+end;
+
+function TVirtualJSONListView.GetOptions: TStringTreeOptions;
+begin
+  Result := TStringTreeOptions(inherited TreeOptions);
+end;
+
+procedure TVirtualJSONListView.LoadCheckedData;
+var
+  Node: PVirtualNode;
+  ItemData: PLVItemData;
+begin
+  FCheckedData := TJSONArray.Create;
+  Node := GetFirstChecked;
+  while Node <> nil do
+  begin
+    ItemData := GetItemData(Node);
+    FCheckedData.Add(ItemData^.JSONData.Clone);
+    Node := GetNextChecked(Node);
+  end;
+end;
+
+procedure TVirtualJSONListView.LoadData;
+begin
+  if FData = nil then
+    Clear
+  else
+  begin
+    //todo handle object
+    if FData.JSONType = jtArray then
+    begin
+      BeginUpdate;
+      Clear;
+      RootNodeCount := FData.Count;
+      EndUpdate;
+    end;
+  end;
+end;
+
+function TVirtualJSONListView.GetCheckedData: TJSONArray;
+begin
+  if FCheckedData = nil then
+    LoadCheckedData;
+  Result := FCheckedData;
+end;
+
+procedure TVirtualJSONListView.SetData(const Value: TJSONData);
+begin
+  if FData = Value then exit;
+  FData := Value;
+end;
+
+procedure TVirtualJSONListView.SetOptions(const Value: TStringTreeOptions);
+begin
+  TreeOptions.Assign(Value);
+end;
+
+procedure TVirtualJSONListView.DoGetText(Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+var
+  ItemData: PLVItemData;
+  JSONData: TJSONData;
+  JSONObject: TJSONObject absolute JSONData;
+  PropIndex: Integer;
+begin
+  ItemData := GetItemData(Node);
+  JSONData := ItemData^.JSONData;
+  if JSONData.JSONType = jtObject then
+  begin
+    //todo: cache PropIndex ??
+    if Header.UseColumns then
+      PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).FieldName)
+    else
+      PropIndex := JSONObject.IndexOfName(FDefaultFieldName);
+    if PropIndex <> -1 then
+      CellText := JSONObject.Items[PropIndex].AsString;
+  end;
+end;
+
+procedure TVirtualJSONListView.DoInitNode(ParentNode, Node: PVirtualNode;
+  var InitStates: TVirtualNodeInitStates);
+var
+  ItemData: PLVItemData;
+begin
+  ItemData := GetItemData(Node);
+  ItemData^.JSONData := FData.Items[Node^.Index];
+  Node^.CheckType := ctCheckBox;
+end;
+
+procedure TVirtualJSONListView.DoChecked(Node: PVirtualNode);
+begin
+  FreeAndNil(FCheckedData);
+  inherited DoChecked(Node);
+end;
+
+function TVirtualJSONListView.GetColumnClass: TVirtualTreeColumnClass;
+begin
+  Result := TVirtualJSONListViewColumn;
+end;
+
+function TVirtualJSONListView.GetOptionsClass: TTreeOptionsClass;
+begin
+  Result := TStringTreeOptions;
+end;
+
+constructor TVirtualJSONListView.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  DefaultText := '';
+  FItemDataOffset := AllocateInternalDataArea(SizeOf(TLVItemData));
+  with TreeOptions do
+  begin
+    PaintOptions := PaintOptions - [toShowRoot] +
+      [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
+    SelectionOptions := SelectionOptions + [toExtendedFocus, toFullRowSelect];
+    MiscOptions := MiscOptions + [toEditable, toGridExtensions];
+  end;
+end;
+
+destructor TVirtualJSONListView.Destroy;
+begin
+  FCheckedData.Free;
+  inherited Destroy;
+end;
 
 { TVirtualJSONInspector }
 
