@@ -13,7 +13,7 @@ implementation
 
 procedure RegisterUnitVTJSON;
 begin
-  RegisterComponents('Virtual Controls', [TVirtualJSONInspector, TVirtualJSONListView]);
+  RegisterComponents('Virtual Controls', [TVirtualJSONInspector, TVirtualJSONListView, TVirtualJSONTreeView]);
 end;
 
 procedure Register;

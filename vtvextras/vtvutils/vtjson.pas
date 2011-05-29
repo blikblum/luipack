@@ -500,6 +500,204 @@ type
     property OnUpdating;
   end;
 
+  { TVirtualJSONTreeView }
+
+  TVirtualJSONTreeView = class(TCustomVirtualStringTree)
+  private
+    FData: TJSONData;
+    FItemDataOffset: Integer;
+    FRootData: TJSONArray;
+    FTextField: String;
+    function GetItemData(Node: PVirtualNode): Pointer;
+    function GetOptions: TStringTreeOptions;
+    procedure SetData(const Value: TJSONData);
+    procedure SetOptions(const Value: TStringTreeOptions);
+  protected
+    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: String); override;
+    procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    procedure DoInitNode(ParentNode, Node: PVirtualNode;
+      var InitStates: TVirtualNodeInitStates); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure LoadData;
+    property Data: TJSONData read FData write SetData;
+  published
+    property TextField: String read FTextField write FTextField;
+   //inherited properties
+    property Action;
+    property Align;
+    property Alignment;
+    property Anchors;
+    property AnimationDuration;
+    property AutoExpandDelay;
+    property AutoScrollDelay;
+    property AutoScrollInterval;
+    property Background;
+    property BackgroundOffsetX;
+    property BackgroundOffsetY;
+    property BiDiMode;
+    property BorderSpacing;
+    property BorderStyle default bsSingle;
+    property BottomSpace;
+    property ButtonFillMode;
+    property ButtonStyle;
+    property BorderWidth;
+    property ChangeDelay;
+    property CheckImageKind;
+    property ClipboardFormats;
+    property Color;
+    property Colors;
+    property Constraints;
+    property DefaultNodeHeight;
+    property DefaultPasteMode;
+    property DefaultText;
+    property DragCursor;
+    property DragHeight;
+    property DragKind;
+    property DragImageKind;
+    property DragMode;
+    property DragOperations;
+    property DragType;
+    property DragWidth;
+    property DrawSelectionMode;
+    property EditDelay;
+    property Enabled;
+    property Font;
+    property Header;
+    property HintMode;
+    property HotCursor;
+    property Images;
+    property IncrementalSearch;
+    property IncrementalSearchDirection;
+    property IncrementalSearchStart;
+    property IncrementalSearchTimeout;
+    property Indent;
+    property LineMode;
+    property LineStyle;
+    property Margin;
+    property NodeAlignment;
+    property NodeDataSize;
+    property ParentBiDiMode;
+    property ParentColor default False;
+    property ParentFont;
+    property ParentShowHint;
+    property PopupMenu;
+    property RootNodeCount;
+    property ScrollBarOptions;
+    property SelectionBlendFactor;
+    property SelectionCurveRadius;
+    property ShowHint;
+    property StateImages;
+    property TabOrder;
+    property TabStop default True;
+    property TextMargin;
+    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property Visible;
+    property WantTabs;
+
+    property OnAdvancedHeaderDraw;
+    property OnAfterAutoFitColumns;
+    property OnAfterCellPaint;
+    property OnAfterGetMaxColumnWidth;
+    property OnAfterItemErase;
+    property OnAfterItemPaint;
+    property OnAfterPaint;
+    property OnBeforeAutoFitColumns;
+    property OnBeforeCellPaint;
+    property OnBeforeGetMaxColumnWidth;
+    property OnBeforeItemErase;
+    property OnBeforeItemPaint;
+    property OnBeforePaint;
+    property OnCanSplitterResizeColumn;
+    property OnChange;
+    property OnChecked;
+    property OnChecking;
+    property OnClick;
+    property OnCollapsed;
+    property OnCollapsing;
+    property OnColumnClick;
+    property OnColumnDblClick;
+    property OnColumnResize;
+    property OnCompareNodes;
+    property OnContextPopup;
+    property OnCreateDataObject;
+    property OnCreateDragManager;
+    property OnCreateEditor;
+    property OnDblClick;
+    property OnDragAllowed;
+    property OnDragOver;
+    property OnDragDrop;
+    property OnEditCancelled;
+    property OnEdited;
+    //property OnEditing;
+    property OnEndDock;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    property OnExpanded;
+    property OnExpanding;
+    property OnFocusChanged;
+    property OnFocusChanging;
+    property OnFreeNode;
+    property OnGetCellIsEmpty;
+    property OnGetCursor;
+    property OnGetHeaderCursor;
+    property OnGetText;
+    property OnPaintText;
+    property OnGetHelpContext;
+    property OnGetImageIndex;
+    property OnGetImageIndexEx;
+    property OnGetImageText;
+    property OnGetHint;
+    property OnGetLineStyle;
+    property OnGetNodeDataSize;
+    property OnGetPopupMenu;
+    property OnGetUserClipboardFormats;
+    property OnHeaderClick;
+    property OnHeaderDblClick;
+    property OnHeaderDragged;
+    property OnHeaderDraggedOut;
+    property OnHeaderDragging;
+    property OnHeaderDraw;
+    property OnHeaderDrawQueryElements;
+    property OnHeaderMouseDown;
+    property OnHeaderMouseMove;
+    property OnHeaderMouseUp;
+    property OnHotChange;
+    property OnIncrementalSearch;
+    //property OnInitChildren;
+    //property OnInitNode;
+    property OnKeyAction;
+    property OnKeyDown;
+    property OnKeyPress;
+    property OnKeyUp;
+    property OnLoadNode;
+    property OnMeasureItem;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnNewText;
+    property OnNodeCopied;
+    property OnNodeCopying;
+    property OnNodeMoved;
+    property OnNodeMoving;
+    property OnPaintBackground;
+    property OnRenderOLEData;
+    property OnResetNode;
+    property OnResize;
+    property OnSaveNode;
+    property OnScroll;
+    property OnShortenString;
+    property OnShowScrollbar;
+    property OnStartDock;
+    property OnStartDrag;
+    property OnStateChange;
+    property OnStructureChange;
+    property OnUpdating;
+  end;
+
 implementation
 
 type
@@ -515,6 +713,137 @@ type
     JSONData: TJSONData;
   end;
   PLVItemData = ^TLVItemData;
+
+  TTVItemData = record
+    JSONData: TJSONData;
+    ChildrenData: TJSONArray;
+  end;
+  PTVItemData = ^TTVItemData;
+
+
+{ TVirtualJSONTreeView }
+
+function TVirtualJSONTreeView.GetItemData(Node: PVirtualNode): Pointer;
+begin
+  if Node = nil then
+    Result := nil
+  else
+    Result := PByte(Node) + FItemDataOffset;
+end;
+
+function TVirtualJSONTreeView.GetOptions: TStringTreeOptions;
+begin
+  Result := TStringTreeOptions(inherited TreeOptions)
+end;
+
+procedure TVirtualJSONTreeView.SetData(const Value: TJSONData);
+begin
+  if FData = Value then exit;
+  FData := Value;
+  //todo handle object values
+  if FData.JSONType = jtArray then
+    FRootData := TJSONArray(FData)
+  else
+    raise Exception.Create('JSON Array expected');
+  LoadData;
+end;
+
+procedure TVirtualJSONTreeView.SetOptions(const Value: TStringTreeOptions);
+begin
+  TreeOptions.Assign(Value);
+end;
+
+procedure TVirtualJSONTreeView.DoGetText(Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+var
+  ItemData: PTVItemData;
+  JSONData: TJSONData;
+  JSONObject: TJSONObject absolute JSONData;
+  TextIndex: Integer;
+begin
+  ItemData := GetItemData(Node);
+  JSONData := ItemData^.JSONData;
+  if JSONData.JSONType = jtObject then
+  begin
+    TextIndex := JSONObject.IndexOfName(FTextField);
+    if TextIndex <> -1 then
+      CellText := JSONObject.Items[TextIndex].AsString;
+  end;
+end;
+
+procedure TVirtualJSONTreeView.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal);
+var
+  ItemData: PTVItemData;
+begin
+  ItemData := GetItemData(Node);
+  NodeChildCount := ItemData^.ChildrenData.Count;
+end;
+
+procedure TVirtualJSONTreeView.DoInitNode(ParentNode, Node: PVirtualNode;
+  var InitStates: TVirtualNodeInitStates);
+var
+  ItemData, ParentItemData: PTVItemData;
+  ParentChildrenData: TJSONArray;
+  JSONData: TJSONData;
+  JSONObject: TJSONObject absolute JSONData;
+  ChildrenIndex: Integer;
+begin
+  if ParentNode = nil then
+    ParentChildrenData := FRootData
+  else
+  begin
+    ParentItemData := GetItemData(ParentNode);
+    ParentChildrenData := ParentItemData^.ChildrenData;
+  end;
+  ItemData := GetItemData(Node);
+  JSONData := ParentChildrenData.Items[Node^.Index];
+  ItemData^.JSONData := JSONData;
+  //todo: handle non JSONObject
+  if JSONData.JSONType = jtObject then
+  begin
+    ChildrenIndex := JSONObject.IndexOfName('children');
+    if ChildrenIndex <> -1 then
+    begin
+      ItemData^.ChildrenData := JSONObject.Items[ChildrenIndex] as TJSONArray;
+      if ItemData^.ChildrenData.Count > 0 then
+        InitStates := InitStates + [ivsHasChildren];
+    end
+    else
+      ItemData^.ChildrenData := nil;
+  end
+  else
+    raise Exception.Create('JSONObject expected');
+end;
+
+constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  DefaultText := '';
+  FTextField := 'text';
+  FItemDataOffset := AllocateInternalDataArea(SizeOf(TTVItemData));
+  with TreeOptions do
+  begin
+    //PaintOptions := PaintOptions +
+    //  [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
+    //SelectionOptions := SelectionOptions + [toExtendedFocus, toFullRowSelect];
+    //MiscOptions := MiscOptions + [toEditable, toGridExtensions];
+  end;
+
+end;
+
+procedure TVirtualJSONTreeView.LoadData;
+begin
+  if FRootData = nil then
+    Clear
+  else
+  begin
+    BeginUpdate;
+    Clear;
+    RootNodeCount := FRootData.Count;
+    EndUpdate;
+  end;
+end;
 
 { TVirtualJSONListViewColumn }
 

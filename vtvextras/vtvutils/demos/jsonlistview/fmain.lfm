@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 400
+  Left = 940
   Height = 510
-  Top = 247
+  Top = 335
   Width = 652
   Caption = 'JSONListView Demo'
   ClientHeight = 510
