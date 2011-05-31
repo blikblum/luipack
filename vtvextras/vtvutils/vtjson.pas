@@ -303,7 +303,7 @@ type
   private
     FCheckedData: TJSONArray;
     FData: TJSONData;
-    FDefaultFieldName: String;
+    FTextProperty: String;
     FItemDataOffset: Integer;
     function GetCheckedData: TJSONArray;
     function GetItemData(Node: PVirtualNode): Pointer;
@@ -325,7 +325,7 @@ type
     property Data: TJSONData read FData write SetData;
     procedure LoadData;
   published
-    property DefaultFieldName: String read FDefaultFieldName write FDefaultFieldName;
+    property TextProperty: String read FTextProperty write FTextProperty;
     //inherited properties
     property Action;
     property Align;
@@ -507,7 +507,7 @@ type
     FData: TJSONData;
     FItemDataOffset: Integer;
     FRootData: TJSONArray;
-    FTextField: String;
+    FTextProperty: String;
     function GetItemData(Node: PVirtualNode): Pointer;
     function GetOptions: TStringTreeOptions;
     procedure SetData(const Value: TJSONData);
@@ -523,7 +523,7 @@ type
     procedure LoadData;
     property Data: TJSONData read FData write SetData;
   published
-    property TextField: String read FTextField write FTextField;
+    property TextProperty: String read FTextProperty write FTextProperty;
    //inherited properties
     property Action;
     property Align;
@@ -765,7 +765,7 @@ begin
   JSONData := ItemData^.JSONData;
   if JSONData.JSONType = jtObject then
   begin
-    TextIndex := JSONObject.IndexOfName(FTextField);
+    TextIndex := JSONObject.IndexOfName(FTextProperty);
     if TextIndex <> -1 then
       CellText := JSONObject.Items[TextIndex].AsString;
   end;
@@ -820,7 +820,7 @@ constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   DefaultText := '';
-  FTextField := 'text';
+  FTextProperty := 'text';
   FItemDataOffset := AllocateInternalDataArea(SizeOf(TTVItemData));
   with TreeOptions do
   begin
@@ -937,7 +937,7 @@ begin
     if Header.UseColumns then
       PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).FieldName)
     else
-      PropIndex := JSONObject.IndexOfName(FDefaultFieldName);
+      PropIndex := JSONObject.IndexOfName(FTextProperty);
     if PropIndex <> -1 then
       CellText := JSONObject.Items[PropIndex].AsString;
   end;
