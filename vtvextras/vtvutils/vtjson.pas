@@ -135,7 +135,7 @@ type
     property Constraints;
     property DefaultNodeHeight;
     property DefaultPasteMode;
-    property DefaultText;
+    //property DefaultText;
     property DragCursor;
     property DragHeight;
     property DragKind;
@@ -353,7 +353,7 @@ type
     property Constraints;
     property DefaultNodeHeight;
     property DefaultPasteMode;
-    property DefaultText;
+    //property DefaultText;
     property DragCursor;
     property DragHeight;
     property DragKind;
@@ -551,7 +551,7 @@ type
     property Constraints;
     property DefaultNodeHeight;
     property DefaultPasteMode;
-    property DefaultText;
+    //property DefaultText;
     property DragCursor;
     property DragHeight;
     property DragKind;
