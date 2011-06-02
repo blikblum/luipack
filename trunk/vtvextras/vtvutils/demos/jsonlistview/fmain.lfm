@@ -1,11 +1,11 @@
 object MainForm: TMainForm
-  Left = 940
+  Left = 580
   Height = 510
-  Top = 335
-  Width = 652
+  Top = 187
+  Width = 676
   Caption = 'JSONListView Demo'
   ClientHeight = 510
-  ClientWidth = 652
+  ClientWidth = 676
   OnDestroy = FormDestroy
   LCLVersion = '0.9.31'
   object JSONListView: TVirtualJSONListView
@@ -13,7 +13,6 @@ object MainForm: TMainForm
     Height = 288
     Top = 32
     Width = 478
-    DefaultText = 'Node'
     Header.AutoSizeIndex = 0
     Header.Columns = <>
     Header.DefaultHeight = 17
@@ -30,6 +29,7 @@ object MainForm: TMainForm
     Width = 456
     OnAcceptFileName = FileNameEditAcceptFileName
     DialogOptions = []
+    Filter = 'JSON Files|*.json;*.js|Text Files|*.txt|All Files|*.*'
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23
@@ -37,30 +37,14 @@ object MainForm: TMainForm
     MaxLength = 0
     TabOrder = 1
   end
-  object DefaultFieldNameEdit: TLabeledEdit
-    Left = 488
-    Height = 21
-    Top = 48
-    Width = 152
-    EditLabel.AnchorSideLeft.Control = DefaultFieldNameEdit
-    EditLabel.AnchorSideBottom.Control = DefaultFieldNameEdit
-    EditLabel.Left = 488
-    EditLabel.Height = 14
-    EditLabel.Top = 31
-    EditLabel.Width = 88
-    EditLabel.Caption = 'Default FieldName'
-    EditLabel.ParentColor = False
-    TabOrder = 2
-    OnEditingDone = DefaultFieldNameEditEditingDone
-  end
   object EnableCheckItemsCheckBox: TCheckBox
     Left = 488
     Height = 17
-    Top = 80
+    Top = 32
     Width = 110
     Caption = 'Enable check items'
     OnChange = EnableCheckItemsCheckBoxChange
-    TabOrder = 3
+    TabOrder = 2
   end
   object ShowCheckedButton: TButton
     Left = 8
@@ -69,7 +53,7 @@ object MainForm: TMainForm
     Width = 168
     Caption = 'Show Checked Items'
     OnClick = ShowCheckedButtonClick
-    TabOrder = 4
+    TabOrder = 3
   end
   object LogMemo: TMemo
     Left = 8
@@ -77,6 +61,61 @@ object MainForm: TMainForm
     Top = 360
     Width = 478
     ScrollBars = ssAutoBoth
+    TabOrder = 4
+  end
+  object PropertiesComboBox: TComboBox
+    Left = 488
+    Height = 21
+    Top = 96
+    Width = 188
+    ItemHeight = 13
+    OnEditingDone = TextPropertyEditEditingDone
     TabOrder = 5
+  end
+  object TextPropertyLabel: TLabel
+    Left = 488
+    Height = 14
+    Top = 80
+    Width = 68
+    Caption = 'Text Property'
+    ParentColor = False
+  end
+  object UseColumnsCheckBox: TCheckBox
+    Left = 488
+    Height = 17
+    Top = 56
+    Width = 81
+    Caption = 'Use Columns'
+    OnChange = UseColumnsCheckBoxChange
+    TabOrder = 6
+  end
+  object PropertiesGrid: TStringGrid
+    Left = 488
+    Height = 176
+    Top = 80
+    Width = 188
+    ColCount = 3
+    Columns = <    
+      item
+        ButtonStyle = cbsCheckboxColumn
+        Title.Caption = ' '
+        Width = 20
+      end    
+      item
+        ReadOnly = True
+        Title.Caption = 'Property'
+        Width = 70
+      end    
+      item
+        Title.Caption = 'Display Text'
+        Width = 70
+      end>
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goEditing, goSmoothScroll]
+    RowCount = 1
+    TabOrder = 7
+    Visible = False
+    OnCheckboxToggled = PropertiesGridCheckboxToggled
+    OnEditingDone = PropertiesGridEditingDone
   end
 end

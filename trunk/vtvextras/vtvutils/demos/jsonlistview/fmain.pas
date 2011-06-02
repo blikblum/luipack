@@ -6,27 +6,38 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, EditBtn,
-  ExtCtrls, StdCtrls, VTJSON, fpjson, jsonparser, jsonscanner, VirtualTrees;
+  ExtCtrls, StdCtrls, Grids, VTJSON, fpjson, jsonparser, jsonscanner,
+  VirtualTrees;
 
 type
 
   { TMainForm }
 
   TMainForm = class(TForm)
+    PropertiesGrid: TStringGrid;
+    UseColumnsCheckBox: TCheckBox;
+    TextPropertyLabel: TLabel;
+    PropertiesComboBox: TComboBox;
     LogMemo: TMemo;
     ShowCheckedButton: TButton;
     EnableCheckItemsCheckBox: TCheckBox;
     FileNameEdit: TFileNameEdit;
     JSONListView: TVirtualJSONListView;
-    DefaultFieldNameEdit: TLabeledEdit;
-    procedure DefaultFieldNameEditEditingDone(Sender: TObject);
+    procedure PropertiesGridCheckboxToggled(sender: TObject; aCol,
+      aRow: Integer; aState: TCheckboxState);
+    procedure PropertiesGridEditingDone(Sender: TObject);
+    procedure TextPropertyEditEditingDone(Sender: TObject);
     procedure EnableCheckItemsCheckBoxChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure FormDestroy(Sender: TObject);
     procedure ShowCheckedButtonClick(Sender: TObject);
+    procedure UseColumnsCheckBoxChange(Sender: TObject);
   private
     { private declarations }
     JSONData: TJSONData;
+    procedure LoadPropertyNames;
+    procedure UpdateListViewColumns;
+    procedure UpdatePropertiesDisplay;
   public
     { public declarations }
   end; 
@@ -77,7 +88,10 @@ begin
     begin
       JSONData.Free;
       JSONData := Data;
+      LoadPropertyNames;
+      UpdatePropertiesDisplay;
       JSONListView.Data := JSONData;
+      JSONListView.LoadData;
     end
     else
     begin
@@ -97,10 +111,96 @@ begin
   LogMemo.Lines.Text := JSONListView.CheckedData.FormatJSON([foSingleLineObject]);
 end;
 
-procedure TMainForm.DefaultFieldNameEditEditingDone(Sender: TObject);
+procedure TMainForm.UseColumnsCheckBoxChange(Sender: TObject);
 begin
-  JSONListView.DefaultFieldName := DefaultFieldNameEdit.Text;
-  JSONListView.LoadData;
+  UpdatePropertiesDisplay;
+end;
+
+procedure TMainForm.LoadPropertyNames;
+var
+  JSONObject: TJSONObject;
+  PropertyName: String;
+  i: Integer;
+begin
+  PropertiesComboBox.Clear;
+  PropertiesGrid.RowCount := 1;
+  if (JSONData.JSONType = jtArray) and (JSONData.Count > 0) then
+  begin
+    if JSONData.Items[0].JSONType = jtObject then
+    begin
+      JSONObject := TJSONObject(JSONData.Items[0]);
+      for i := 0 to JSONObject.Count -1 do
+      begin
+        PropertiesGrid.RowCount := PropertiesGrid.RowCount + 1;
+        PropertyName := JSONObject.Names[i];
+        PropertiesComboBox.Items.Add(PropertyName);
+        PropertiesGrid.Cells[0, i + 1] := '1';
+        PropertiesGrid.Cells[1, i + 1] := PropertyName;
+        PropertiesGrid.Cells[2, i + 1] := PropertyName;
+      end;
+    end;
+  end;
+  if PropertiesComboBox.Items.Count > 0 then
+  begin
+    PropertiesComboBox.ItemIndex := 0;
+    JSONListView.TextProperty := PropertiesComboBox.Text;
+  end;
+end;
+
+procedure TMainForm.UpdateListViewColumns;
+var
+  i: Integer;
+  Column: TVirtualJSONListViewColumn;
+begin
+  JSONListView.Header.Columns.BeginUpdate;
+  for i := 1 to PropertiesGrid.RowCount -1 do
+  begin
+    if PropertiesGrid.Cells[0, i] = '1' then
+    begin
+      Column := TVirtualJSONListViewColumn(JSONListView.Header.Columns.Add);
+      Column.PropertyName := PropertiesGrid.Cells[1, i];
+      Column.Text := PropertiesGrid.Cells[2, i];
+      Column.Width := 64;
+    end;
+  end;
+  JSONListView.Header.Columns.EndUpdate;
+end;
+
+procedure TMainForm.UpdatePropertiesDisplay;
+var
+  UseColumns: Boolean;
+begin
+  UseColumns := UseColumnsCheckBox.Checked;
+  PropertiesGrid.Visible := UseColumns;
+  PropertiesComboBox.Visible := not UseColumns;
+  TextPropertyLabel.Visible := not UseColumns;
+  JSONListView.Header.Columns.Clear;
+  if UseColumns then
+  begin
+    JSONListView.Header.Options := JSONListView.Header.Options + [hoVisible];
+    UpdateListViewColumns;
+  end
+  else
+    JSONListView.Header.Options := JSONListView.Header.Options - [hoVisible];
+end;
+
+procedure TMainForm.TextPropertyEditEditingDone(Sender: TObject);
+begin
+  JSONListView.TextProperty := PropertiesComboBox.Text;
+  JSONListView.Invalidate;
+end;
+
+procedure TMainForm.PropertiesGridCheckboxToggled(sender: TObject; aCol,
+  aRow: Integer; aState: TCheckboxState);
+begin
+  JSONListView.Header.Columns.Clear;
+  UpdateListViewColumns;
+end;
+
+procedure TMainForm.PropertiesGridEditingDone(Sender: TObject);
+begin
+  JSONListView.Header.Columns.Clear;
+  UpdateListViewColumns;
 end;
 
 procedure TMainForm.EnableCheckItemsCheckBoxChange(Sender: TObject);
