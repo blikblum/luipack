@@ -291,10 +291,10 @@ type
 
   TVirtualJSONListViewColumn = class(TVirtualTreeColumn)
   private
-    FFieldName: String;
-    procedure SetFieldName(const Value: String);
+    FPropertyName: String;
+    procedure SetPropertyName(const Value: String);
   published
-    property FieldName: String read FFieldName write SetFieldName;
+    property PropertyName: String read FPropertyName write SetPropertyName;
   end;
 
   { TVirtualJSONListView }
@@ -847,12 +847,12 @@ end;
 
 { TVirtualJSONListViewColumn }
 
-procedure TVirtualJSONListViewColumn.SetFieldName(const Value: String);
+procedure TVirtualJSONListViewColumn.SetPropertyName(const Value: String);
 begin
-  if FFieldName = Value then exit;
-  if (Text = '') or (Text = FFieldName) then
+  if FPropertyName = Value then exit;
+  if (Text = '') or (Text = FPropertyName) then
     Text := Value;
-  FFieldName := Value;
+  FPropertyName := Value;
 end;
 
 
@@ -935,7 +935,7 @@ begin
   begin
     //todo: cache PropIndex ??
     if Header.UseColumns then
-      PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).FieldName)
+      PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).PropertyName)
     else
       PropIndex := JSONObject.IndexOfName(FTextProperty);
     if PropIndex <> -1 then
