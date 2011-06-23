@@ -102,6 +102,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function GetData(Node: PVirtualNode): TJSONData;
     procedure Reload;
     property RootData: TJSONData read FRootData write SetRootData;
   published
@@ -321,9 +322,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function GetData(Node: PVirtualNode): TJSONData;
+    procedure LoadData;
     property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
-    procedure LoadData;
   published
     property TextProperty: String read FTextProperty write FTextProperty;
     //inherited properties
@@ -509,6 +511,7 @@ type
     FRootData: TJSONArray;
     FTextProperty: String;
     function GetItemData(Node: PVirtualNode): Pointer;
+    function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
     function GetOptions: TStringTreeOptions;
     procedure SetData(const Value: TJSONData);
     procedure SetOptions(const Value: TStringTreeOptions);
@@ -520,6 +523,7 @@ type
       var InitStates: TVirtualNodeInitStates); override;
   public
     constructor Create(AOwner: TComponent); override;
+    function GetData(Node: PVirtualNode): TJSONData;
     procedure LoadData;
     property Data: TJSONData read FData write SetData;
   published
@@ -731,6 +735,21 @@ begin
     Result := PByte(Node) + FItemDataOffset;
 end;
 
+function TVirtualJSONTreeView.GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
+var
+  ParentItemData: PTVItemData;
+  ParentChildrenData: TJSONArray;
+begin
+  if ParentNode = nil then
+    ParentChildrenData := FRootData
+  else
+  begin
+    ParentItemData := GetItemData(ParentNode);
+    ParentChildrenData := ParentItemData^.ChildrenData;
+  end;
+  Result := ParentChildrenData.Items[Node^.Index];
+end;
+
 function TVirtualJSONTreeView.GetOptions: TStringTreeOptions;
 begin
   Result := TStringTreeOptions(inherited TreeOptions)
@@ -783,21 +802,13 @@ end;
 procedure TVirtualJSONTreeView.DoInitNode(ParentNode, Node: PVirtualNode;
   var InitStates: TVirtualNodeInitStates);
 var
-  ItemData, ParentItemData: PTVItemData;
-  ParentChildrenData: TJSONArray;
+  ItemData: PTVItemData;
   JSONData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
   ChildrenIndex: Integer;
 begin
-  if ParentNode = nil then
-    ParentChildrenData := FRootData
-  else
-  begin
-    ParentItemData := GetItemData(ParentNode);
-    ParentChildrenData := ParentItemData^.ChildrenData;
-  end;
+  JSONData := GetJSONData(ParentNode, Node);
   ItemData := GetItemData(Node);
-  JSONData := ParentChildrenData.Items[Node^.Index];
   ItemData^.JSONData := JSONData;
   //todo: handle non JSONObject
   if JSONData.JSONType = jtObject then
@@ -830,6 +841,19 @@ begin
     //MiscOptions := MiscOptions + [toEditable, toGridExtensions];
   end;
 
+end;
+
+function TVirtualJSONTreeView.GetData(Node: PVirtualNode): TJSONData;
+var
+  ItemData: PTVItemData;
+begin
+  if Node <> nil then
+  begin
+    ItemData := GetItemData(Node);
+    Result := ItemData^.JSONData;
+  end
+  else
+    Result := nil;
 end;
 
 procedure TVirtualJSONTreeView.LoadData;
@@ -987,6 +1011,19 @@ destructor TVirtualJSONListView.Destroy;
 begin
   FCheckedData.Free;
   inherited Destroy;
+end;
+
+function TVirtualJSONListView.GetData(Node: PVirtualNode): TJSONData;
+var
+  ItemData: PLVItemData;
+begin
+  if Node <> nil then
+  begin
+    ItemData := GetItemData(Node);
+    Result := ItemData^.JSONData;
+  end
+  else
+    Result := nil;
 end;
 
 { TVirtualJSONInspector }
@@ -1169,33 +1206,33 @@ end;
 procedure TVirtualJSONInspector.DoInitNode(ParentNode, Node: PVirtualNode;
   var InitStates: TVirtualNodeInitStates);
 var
-  ParentData, Data: PItemData;
+  ParentItemData, ItemData: PItemData;
   ItemIndex: Integer;
   ParentJSONData: TJSONData;
   NodeChildCount: Cardinal;
   PropertyDef: TJSONPropertyDef;
 begin
-  ParentData := GetItemData(Node^.Parent);
-  ParentJSONData := ParentData^.JSONData;
-  ItemIndex := ParentData^.Children[Node^.Index];
+  ParentItemData := GetItemData(Node^.Parent);
+  ParentJSONData := ParentItemData^.JSONData;
+  ItemIndex := ParentItemData^.Children[Node^.Index];
   NodeChildCount := InitJSONNode(Node, ParentJSONData.Items[ItemIndex]);
-  Data := GetItemData(Node);
+  ItemData := GetItemData(Node);
 
-  Data^.DisplayName := '';
+  ItemData^.DisplayName := '';
   if ParentJSONData.JSONType = jtObject then
   begin
-    Data^.Name := TJSONObject(ParentJSONData).Names[ItemIndex];
-    PropertyDef := FPropertyDefs.Find(Data^.Name);
+    ItemData^.Name := TJSONObject(ParentJSONData).Names[ItemIndex];
+    PropertyDef := FPropertyDefs.Find(ItemData^.Name);
     if PropertyDef <> nil then
-      Data^.DisplayName := PropertyDef.DisplayName;
+      ItemData^.DisplayName := PropertyDef.DisplayName;
   end;
 
   if Assigned(FOnFormatName) then
-    FOnFormatName(Self, ParentJSONData, ItemIndex, Data^.DisplayName);
+    FOnFormatName(Self, ParentJSONData, ItemIndex, ItemData^.DisplayName);
 
   //if is array and DisplayText not set then use default value
-  if (ParentJSONData.JSONType = jtArray) and (Data^.DisplayName = '') then
-    Data^.DisplayName := IntToStr(ItemIndex);
+  if (ParentJSONData.JSONType = jtArray) and (ItemData^.DisplayName = '') then
+    ItemData^.DisplayName := IntToStr(ItemIndex);
 
   if NodeChildCount > 0 then
     InitStates := InitStates + [ivsHasChildren];
@@ -1230,6 +1267,19 @@ begin
   SetLength(ItemData^.Children, 0);
   FPropertyDefs.Destroy;
   inherited Destroy;
+end;
+
+function TVirtualJSONInspector.GetData(Node: PVirtualNode): TJSONData;
+var
+  ItemData: PItemData;
+begin
+  if Node <> nil then
+  begin
+    ItemData := GetItemData(Node);
+    Result := ItemData^.JSONData;
+  end
+  else
+    Result := nil;
 end;
 
 procedure TVirtualJSONInspector.Reload;
