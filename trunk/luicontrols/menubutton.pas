@@ -235,7 +235,8 @@ begin
         ArrowWidth := EnsureRange(Self.Width div 3, 10, 14);
         if Odd(ArrowWidth) then
           Inc(ArrowWidth);
-        SetBounds(Self.Left + Self.Width, Self.Top, ArrowWidth, Self.Height);
+        Width := ArrowWidth;
+        AnchorToCompanion(akLeft, 0, Self);
       end;
     end;
     ToggleMode := False;
