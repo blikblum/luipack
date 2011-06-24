@@ -183,6 +183,30 @@ begin
   end;
 end;
 
+//todo implement array of arrays
+function DatasetToJSONArray(Dataset: TDataset): TJSONArray;
+var
+  OldRecNo: Integer;
+  RecObj: TJSONObject;
+begin
+  Result := TJSONArray.Create;
+  if Dataset.IsEmpty then
+    Exit;
+  Dataset.DisableControls;
+  OldRecNo := Dataset.RecNo;
+  try
+    Dataset.First;
+    while not Dataset.EOF do
+    begin
+      Result.Add(DatasetRecToJSONObject(Dataset));
+      Dataset.Next;
+    end;
+  finally
+    Dataset.RecNo := OldRecNo;
+    Dataset.EnableControls;
+  end;
+end;
+
 function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
 var
   OptionsData: TJSONData;
@@ -191,8 +215,12 @@ begin
   try
     case OptionsData.JSONType of
       jtObject:
+      begin
         if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
-          Result := DatasetRecToJSONObject(Dataset);
+          Result := DatasetRecToJSONObject(Dataset)
+        else
+          Result := DatasetToJSONArray(Dataset);
+      end;
       jtArray:
         ;
     end;
