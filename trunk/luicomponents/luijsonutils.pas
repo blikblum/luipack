@@ -185,10 +185,10 @@ begin
 end;
 
 //todo implement array of arrays
+//todo implement null as undefined
 function DatasetToJSONArray(Dataset: TDataset): TJSONArray;
 var
   OldRecNo: Integer;
-  RecObj: TJSONObject;
 begin
   Result := TJSONArray.Create;
   if Dataset.IsEmpty then
@@ -214,16 +214,21 @@ var
 begin
   OptionsData := StringToJSONData(Options);
   try
-    case OptionsData.JSONType of
-      jtObject:
-      begin
-        if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
-          Result := DatasetRecToJSONObject(Dataset)
-        else
-          Result := DatasetToJSONArray(Dataset);
+    if OptionsData = nil then
+      Result := DatasetToJSONArray(Dataset)
+    else
+    begin
+      case OptionsData.JSONType of
+        jtObject:
+        begin
+          if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
+            Result := DatasetRecToJSONObject(Dataset)
+          else
+            Result := DatasetToJSONArray(Dataset);
+        end;
+        jtArray:
+          ;
       end;
-      jtArray:
-        ;
     end;
   finally
     OptionsData.Free;
