@@ -18,6 +18,7 @@ type
   public
     destructor Destroy; override;
     procedure Load;
+    class procedure Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
     property Data: TJSONData read FData ;
     property FileName: String read FFileName write FFileName;
   end;
@@ -265,6 +266,19 @@ begin
        FData.Free;
        raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [FFileName, E.Message]);
     end;
+  end;
+end;
+
+class procedure TJSONFile.Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
+var
+  Output: TStringList;
+begin
+  Output := TStringList.Create;
+  try
+    Output.Text := AData.FormatJSON(FormatOptions);
+    Output.SaveToFile(AFileName);
+  finally
+    Output.Destroy;
   end;
 end;
 
