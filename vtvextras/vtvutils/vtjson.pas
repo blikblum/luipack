@@ -951,6 +951,7 @@ var
   ItemData: PLVItemData;
   JSONData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
+  PropJSONData: TJSONData;
   PropIndex: Integer;
 begin
   ItemData := GetItemData(Node);
@@ -958,12 +959,18 @@ begin
   if JSONData.JSONType = jtObject then
   begin
     //todo: cache PropIndex ??
+    //todo: add option to ignore case
     if Header.UseColumns then
       PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).PropertyName)
     else
       PropIndex := JSONObject.IndexOfName(FTextProperty);
     if PropIndex <> -1 then
-      CellText := JSONObject.Items[PropIndex].AsString;
+    begin
+      PropJSONData := JSONObject.Items[PropIndex];
+      //todo: add display options for null value
+      if PropJSONData.JSONType <> jtNull then
+        CellText := JSONObject.Items[PropIndex].AsString;
+    end;
   end;
 end;
 
