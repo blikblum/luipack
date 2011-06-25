@@ -24,6 +24,16 @@ type
 
   TCustomDatasetExporterClass = class of TCustomDatasetExporter;
 
+  { TCSVDatasetExporter }
+
+  TCSVDatasetExporter = class(TCustomDatasetExporter)
+  public
+    class procedure Save(Dataset: TDataset; FieldList: TStrings;
+      const FileName: String); override;
+    class function DisplayText: String; override;
+    class function Extension: String; override;
+  end;
+
   procedure LoadExporters(RequestList, Result: TStrings);
 
   procedure RegisterExporter(const Id: ShortString; ExporterClass: TCustomDatasetExporterClass);
@@ -73,6 +83,24 @@ begin
   if ExporterManager = nil then
     ExporterManager := TDatasetExporterManager.Create;
   ExporterManager.RegisterExporter(Id, ExporterClass);
+end;
+
+{ TCSVDatasetExporter }
+
+class procedure TCSVDatasetExporter.Save(Dataset: TDataset;
+  FieldList: TStrings; const FileName: String);
+begin
+  //inherited Save(Dataset, FieldList, FileName);
+end;
+
+class function TCSVDatasetExporter.DisplayText: String;
+begin
+  //Result := inherited DisplayText;
+end;
+
+class function TCSVDatasetExporter.Extension: String;
+begin
+  //Result := inherited Extension;
 end;
 
 { TExportFileTypeManager }
