@@ -157,5 +157,59 @@ begin
   end;
 end;
 
+//from http://delphi.about.com/b/2010/08/30/vigenere-cipher-algorithm-delphi-implementation-comments-by-alan-lloyd.htm
+function Vigenere(const Src, Key: string; Encrypt : boolean): string;
+const
+  OrdMinChar : Integer = Ord('A');
+  OrdMaxChar : Integer = Ord('Z');
+  IncludeChars : set of char = ['A'..'Z'];
+var
+  CharRangeCount, i, j, KeyLen, KeyInc, SrcOrd, CryptOrd : Integer;
+  SrcA : string;
+begin
+  CharRangeCount := OrdMaxChar - OrdMinChar + 1;
+  KeyLen := Length(Key);
+  SetLength(SrcA, Length(Src));
+  If Encrypt then
+  begin
+    // transfer only included characters to SrcA for encryption
+    j := 1;
+    for i := 1 to Length(Src) do
+      begin
+      if (Src[i] in IncludeChars) then
+      begin
+        SrcA[j] := Src[i];
+        inc(j);
+      end;
+    end;
+    SetLength(SrcA, j - 1);
+  end;
+  SetLength(Result, Length(SrcA));
+  if Encrypt then
+    begin
+    // Encrypt to Result
+    for i := 1 to Length(SrcA) do
+    begin
+      SrcOrd := Ord(Src[i]) - OrdMinChar;
+      KeyInc := Ord(Key[((i - 1 ) mod KeyLen)+ 1]) - OrdMinChar;
+      CryptOrd := ((SrcOrd + KeyInc) mod CharRangeCount) + OrdMinChar;
+      Result[i] := Char(CryptOrd);
+    end;
+  end
+  else
+  begin
+    // Decrypt to Result
+    for i := 1 to Length(SrcA) do
+    begin
+      SrcOrd := Ord(Src[i]) - OrdMinChar;
+      KeyInc := Ord(Key[((i - 1 ) mod KeyLen)+ 1]) - OrdMinChar;
+      CryptOrd := ((SrcOrd - KeyInc + CharRangeCount) mod CharRangeCount) + OrdMinChar;
+      // KeyInc may be larger than SrcOrd
+      Result[i] := Char(CryptOrd);
+    end;
+  end;
+end;
+
+
 end.
 
