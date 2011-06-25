@@ -6,13 +6,13 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  Buttons, ExtCtrls, LMessages, LCLType, LuiLCLMessages;
+  Buttons, ExtCtrls, LMessages, LCLType, LuiLCLMessages, LuiLCLInterfaces;
 
   { TFrameEditorForm }
 
 type
 
-  TFrameEditorForm = class(TForm)
+  TFrameEditorForm = class(TForm, IFrameController)
     OKButton: TBitBtn;
     CancelButton: TBitBtn;
     ButtonPanel: TPanel;
@@ -20,6 +20,8 @@ type
   private
     FFrame: TCustomFrame;
     { private declarations }
+    //todo: remove msg
+    procedure FrameMessage(Sender: TCustomFrame; const MessageId: String; Data: Variant);
     procedure CMChildDataChanged(var Msg: TLMessage); message CM_CHILDDATACHANGED;
   public
     { public declarations }
@@ -32,7 +34,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LuiRTTIUtils, LuiMiscUtils;
+  LuiRTTIUtils, LuiMiscUtils, Variants;
 
 { TFrameEditorForm }
 
@@ -47,6 +49,26 @@ begin
     else
       ModalResult := mrCancel;
   end;
+  if BitButton = OKButton then
+    CallMethod(FFrame, 'save');
+end;
+
+procedure TFrameEditorForm.FrameMessage(Sender: TCustomFrame;
+  const MessageId: String; Data: Variant);
+var
+  ButtonId: String;
+begin
+  ButtonId := VarToStr(Data);
+  if MessageId = 'enable-action' then
+  begin
+    if ButtonId = 'save' then
+      OKButton.Enabled := True;
+  end
+  else if MessageId = 'disable-action' then
+  begin
+    if ButtonId = 'save' then
+      OKButton.Enabled := False;
+  end
 end;
 
 procedure TFrameEditorForm.CMChildDataChanged(var Msg: TLMessage);
@@ -83,6 +105,7 @@ begin
   end;
   FFrame.Parent := Self;
   Caption := FFrame.Caption;
+  SetObjectProperties(FFrame, ['FrameController', Self as IFrameController]);
   CallMethod(FFrame, 'InitControl');
   FFrame.Visible := True;
 end;
