@@ -1,0 +1,30 @@
+object MainForm: TMainForm
+  Left = 460
+  Height = 385
+  Top = 249
+  Width = 498
+  Caption = 'VirtualJSONTreeView Owner Draw Demo'
+  ClientHeight = 385
+  ClientWidth = 498
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  LCLVersion = '0.9.31'
+  object JSONTreeView: TVirtualJSONTreeView
+    Left = 0
+    Height = 385
+    Top = 0
+    Width = 498
+    OnGetText = JSONTreeViewGetText
+    TextProperty = 'name'
+    Align = alClient
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    TabOrder = 0
+    TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnBeforePaint = JSONTreeViewBeforePaint
+    OnDrawText = JSONTreeViewDrawText
+    OnMeasureItem = JSONTreeViewMeasureItem
+  end
+end
