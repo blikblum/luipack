@@ -521,6 +521,7 @@ type
     procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
     function GetData(Node: PVirtualNode): TJSONData;
@@ -825,6 +826,11 @@ begin
   end
   else
     raise Exception.Create('JSONObject expected');
+end;
+
+function TVirtualJSONTreeView.GetOptionsClass: TTreeOptionsClass;
+begin
+  Result := TStringTreeOptions;
 end;
 
 constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
