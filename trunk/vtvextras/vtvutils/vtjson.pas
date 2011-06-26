@@ -432,6 +432,7 @@ type
     property OnDragAllowed;
     property OnDragOver;
     property OnDragDrop;
+    property OnDrawText;
     property OnEditCancelled;
     property OnEdited;
     //property OnEditing;
@@ -633,6 +634,7 @@ type
     property OnDragAllowed;
     property OnDragOver;
     property OnDragDrop;
+    property OnDrawText;
     property OnEditCancelled;
     property OnEdited;
     //property OnEditing;
