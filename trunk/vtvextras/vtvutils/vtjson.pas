@@ -288,6 +288,9 @@ type
   TVTJSONListViewFormatValue = procedure (Sender: TVirtualJSONListView; Column: TColumnIndex;
     Data: TJSONData; var DisplayText: String) of object;
 
+  TVTJSONViewGetText = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: TJSONData; Column: TColumnIndex;
+    TextType: TVSTTextType; var CellText: String) of object;
+
   { TVirtualJSONListViewColumn }
 
   TVirtualJSONListViewColumn = class(TVirtualTreeColumn)
@@ -304,6 +307,7 @@ type
   private
     FCheckedData: TJSONArray;
     FData: TJSONData;
+    FOnGetText: TVTJSONViewGetText;
     FTextProperty: String;
     FItemDataOffset: Integer;
     function GetCheckedData: TJSONArray;
@@ -327,6 +331,7 @@ type
     property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
   published
+    property OnGetText: TVTJSONViewGetText read FOnGetText write FOnGetText;
     property TextProperty: String read FTextProperty write FTextProperty;
     //inherited properties
     property Action;
@@ -448,7 +453,6 @@ type
     property OnGetCellIsEmpty;
     property OnGetCursor;
     property OnGetHeaderCursor;
-    property OnGetText;
     property OnPaintText;
     property OnGetHelpContext;
     property OnGetImageIndex;
@@ -509,6 +513,7 @@ type
   private
     FData: TJSONData;
     FItemDataOffset: Integer;
+    FOnGetText: TVTJSONViewGetText;
     FRootData: TJSONArray;
     FTextProperty: String;
     function GetItemData(Node: PVirtualNode): Pointer;
@@ -529,6 +534,7 @@ type
     procedure LoadData;
     property Data: TJSONData read FData write SetData;
   published
+    property OnGetText: TVTJSONViewGetText read FOnGetText write FOnGetText;
     property TextProperty: String read FTextProperty write FTextProperty;
    //inherited properties
     property Action;
@@ -650,7 +656,6 @@ type
     property OnGetCellIsEmpty;
     property OnGetCursor;
     property OnGetHeaderCursor;
-    property OnGetText;
     property OnPaintText;
     property OnGetHelpContext;
     property OnGetImageIndex;
@@ -791,6 +796,8 @@ begin
     if TextIndex <> -1 then
       CellText := JSONObject.Items[TextIndex].AsString;
   end;
+  if Assigned(FOnGetText) then
+    FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
 end;
 
 procedure TVirtualJSONTreeView.DoInitChildren(Node: PVirtualNode;
@@ -980,6 +987,8 @@ begin
         CellText := JSONObject.Items[PropIndex].AsString;
     end;
   end;
+  if Assigned(FOnGetText) then
+    FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
 end;
 
 procedure TVirtualJSONListView.DoInitNode(ParentNode, Node: PVirtualNode;
