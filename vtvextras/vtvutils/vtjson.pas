@@ -511,14 +511,17 @@ type
 
   TVirtualJSONTreeView = class(TCustomVirtualStringTree)
   private
+    FCheckedData: TJSONArray;
     FData: TJSONData;
     FItemDataOffset: Integer;
     FOnGetText: TVTJSONViewGetText;
     FRootData: TJSONArray;
     FTextProperty: String;
+    function GetCheckedData: TJSONArray;
     function GetItemData(Node: PVirtualNode): Pointer;
     function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
     function GetOptions: TStringTreeOptions;
+    procedure LoadCheckedData;
     procedure SetData(const Value: TJSONData);
     procedure SetOptions(const Value: TStringTreeOptions);
   protected
@@ -532,6 +535,7 @@ type
     constructor Create(AOwner: TComponent); override;
     function GetData(Node: PVirtualNode): TJSONData;
     procedure LoadData;
+    property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
   published
     property OnGetText: TVTJSONViewGetText read FOnGetText write FOnGetText;
@@ -743,6 +747,13 @@ begin
     Result := PByte(Node) + FItemDataOffset;
 end;
 
+function TVirtualJSONTreeView.GetCheckedData: TJSONArray;
+begin
+  if FCheckedData = nil then
+    LoadCheckedData;
+  Result := FCheckedData;
+end;
+
 function TVirtualJSONTreeView.GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
 var
   ParentItemData: PTVItemData;
@@ -761,6 +772,21 @@ end;
 function TVirtualJSONTreeView.GetOptions: TStringTreeOptions;
 begin
   Result := TStringTreeOptions(inherited TreeOptions)
+end;
+
+procedure TVirtualJSONTreeView.LoadCheckedData;
+var
+  Node: PVirtualNode;
+  ItemData: PTVItemData;
+begin
+  FCheckedData := TJSONArray.Create;
+  Node := GetFirstChecked;
+  while Node <> nil do
+  begin
+    ItemData := GetItemData(Node);
+    FCheckedData.Add(ItemData^.JSONData.Clone);
+    Node := GetNextChecked(Node);
+  end;
 end;
 
 procedure TVirtualJSONTreeView.SetData(const Value: TJSONData);
