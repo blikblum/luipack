@@ -475,8 +475,8 @@ type
     property OnHeaderMouseUp;
     property OnHotChange;
     property OnIncrementalSearch;
-    //property OnInitChildren;
-    //property OnInitNode;
+    property OnInitChildren;
+    property OnInitNode;
     property OnKeyAction;
     property OnKeyDown;
     property OnKeyPress;
@@ -678,8 +678,8 @@ type
     property OnHeaderMouseUp;
     property OnHotChange;
     property OnIncrementalSearch;
-    //property OnInitChildren;
-    //property OnInitNode;
+    property OnInitChildren;
+    property OnInitNode;
     property OnKeyAction;
     property OnKeyDown;
     property OnKeyPress;
@@ -835,6 +835,8 @@ begin
   end
   else
     raise Exception.Create('JSONObject expected');
+  Node^.CheckType := ctCheckBox;
+  inherited DoInitNode(ParentNode, Node, InitStates);
 end;
 
 function TVirtualJSONTreeView.GetOptionsClass: TTreeOptionsClass;
@@ -999,6 +1001,7 @@ begin
   ItemData := GetItemData(Node);
   ItemData^.JSONData := FData.Items[Node^.Index];
   Node^.CheckType := ctCheckBox;
+  inherited DoInitNode(ParentNode, Node, InitStates);
 end;
 
 procedure TVirtualJSONListView.DoChecked(Node: PVirtualNode);
