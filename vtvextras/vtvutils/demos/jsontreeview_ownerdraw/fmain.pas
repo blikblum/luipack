@@ -16,6 +16,9 @@ type
     JSONTreeView: TVirtualJSONTreeView;
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure JSONTreeViewBeforeItemErase(Sender: TBaseVirtualTree;
+      TargetCanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
+      var ItemColor: TColor; var EraseAction: TItemEraseAction);
     procedure JSONTreeViewBeforePaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas);
     procedure JSONTreeViewDrawText(Sender: TBaseVirtualTree;
@@ -24,8 +27,13 @@ type
     procedure JSONTreeViewGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Data: TJSONData; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String);
+    procedure JSONTreeViewInitNode(Sender: TBaseVirtualTree; ParentNode,
+      Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
     procedure JSONTreeViewMeasureItem(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+    procedure JSONTreeViewPaintText(Sender: TBaseVirtualTree;
+      const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      TextType: TVSTTextType);
   private
     { private declarations }
     Data: TJSONData;
@@ -42,6 +50,9 @@ implementation
 uses
   strutils, LCLIntf, LCLType, Math, Types;
 
+const
+  ITEM_SPACE = 3;
+
 {$R *.lfm}
 
 function NormalizeDateTime(ADate, ATime: TDateTime): String;
@@ -49,36 +60,37 @@ var
   DateStr: string;
 begin
   DateTimeToString(DateStr, 'dd/mm/yyyy', ADate);
-  Result := DateStr + ' - ' + TimeToStr(ATime);
+  Result := DateStr + ' ' + TimeToStr(ATime);
 end;
 
 procedure PaintDetails(Canvas: TCanvas; Details: TJSONArray; const CellRect: TRect);
 const
   ColorMap: array[0..5] of TColor = (clPurple, clBlue, clGreen, clRed, clBlack, clFuchsia);
 var
-  i, x, y: Integer;
+  i, x, y, TextWidth: Integer;
   Obj: TJSONObject;
   BackColor: TColor;
   ExameText: String;
 begin
   x := CellRect.Left;
-  y := CellRect.Top + 20;
+  y := CellRect.Top;
   SetBkMode(Canvas.Handle, OPAQUE);
   Canvas.Font.Color := clWhite;
   Canvas.Font.Style := [fsBold];
-  for i := 0 to Details.Count -1 do
+  for i := 0 to Details.Count - 1 do
   begin
-    Obj := Details.Items[i] as TJSONObject;
+    Obj := Details.Objects[i];
     BackColor := ColorMap[Obj.Integers['status']];
     Canvas.Brush.Color := BackColor;
     ExameText := ' ' + Obj.Strings['exame'] + ' ';
-    Canvas.TextOut(x, y, ExameText);
-    Inc(x, Canvas.TextWidth(ExameText) + 3);
-    if x > (CellRect.Right - CellRect.Left) then
+    TextWidth := Canvas.TextWidth(ExameText);
+    if (x + TextWidth) > CellRect.Right then
     begin
       x := CellRect.Left;
-      Inc(y, Canvas.TextHeight(ExameText));
+      Inc(y, Canvas.TextHeight(ExameText) + 4);
     end;
+    Canvas.TextOut(x, y, ExameText);
+    Inc(x, TextWidth + ITEM_SPACE);
   end;
 end;
 
@@ -89,25 +101,26 @@ var
   ExameText: String;
   TextSize: TSize;
 begin
-  Canvas.Font.Color := clWhite;
   Canvas.Font.Style := [fsBold];
   Width := 0;
-  MaxHeight := 0;
-  Result := 0;
+  MaxHeight := 16;
+  Result := 1;
   for i := 0 to Details.Count -1 do
   begin
-    Obj := Details.Items[i] as TJSONObject;
+    Obj := Details.Objects[i];
     ExameText := ' ' + Obj.Strings['exame'] + ' ';
     TextSize := Canvas.TextExtent(ExameText);
-    Inc(Width, TextSize.cx + 2);
-    MaxHeight := Max(MaxHeight, TextSize.cy + 2);
+    Inc(Width, TextSize.cx);
+    MaxHeight := Max(MaxHeight, TextSize.cy + 4);
     if Width > MaxWidth then
     begin
-      Width := TextSize.cx;
-      Inc(Result, MaxHeight);
-    end;
+      Width := TextSize.cx + ITEM_SPACE;
+      Inc(Result);
+    end
+    else
+      Inc(Width, ITEM_SPACE);
   end;
-  Inc(Result, MaxHeight);
+  Result := Result * MaxHeight;
 end;
 
 { TMainForm }
@@ -157,6 +170,17 @@ begin
   end;
 end;
 
+procedure TMainForm.JSONTreeViewBeforeItemErase(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
+  var ItemColor: TColor; var EraseAction: TItemEraseAction);
+begin
+  if Sender.GetNodeLevel(Node) = 0 then
+  begin
+    EraseAction := eaColor;
+    ItemColor := clSilver;
+  end;
+end;
+
 procedure TMainForm.JSONTreeViewBeforePaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas);
 begin
@@ -164,9 +188,9 @@ begin
   if Sender.GetTreeRect.Bottom > Sender.ClientHeight then
     Dec(FCellWidth, GetSystemMetrics(SM_CXVSCROLL));
   if toShowRoot in JSONTreeView.TreeOptions.PaintOptions then
-    Dec(FCellWidth, 2 * JSONTreeView.Indent + JSONTreeView.Margin)
+    Dec(FCellWidth, 2 * JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin))
   else
-    Dec(FCellWidth, JSONTreeView.Indent + JSONTreeView.Margin);
+    Dec(FCellWidth, JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin));
 end;
 
 procedure TMainForm.JSONTreeViewDrawText(Sender: TBaseVirtualTree;
@@ -174,7 +198,6 @@ procedure TMainForm.JSONTreeViewDrawText(Sender: TBaseVirtualTree;
   const CellText: String; var CellRect: TRect; var DefaultDraw: Boolean);
 var
   ObjData: TJSONObject;
-  DateTimeStr: String;
   R: TRect;
 begin
   DefaultDraw := Sender.GetNodeLevel(Node) = 0;
@@ -182,9 +205,9 @@ begin
   begin
     ObjData := JSONTreeView.GetData(Node) as TJSONObject;
     R := CellRect;
+    Inc(R.Top, 2);
     DrawText(TargetCanvas.Handle, PChar(CellText), Length(CellText), R, DT_LEFT or DT_TOP);
-    DateTimeStr := NormalizeDateTime(ObjData.Floats['date'], ObjData.Floats['time']);
-    DrawText(TargetCanvas.Handle, PChar(DateTimeStr), Length(DateTimeStr), R, DT_RIGHT or DT_TOP);
+    Inc(R.Top, 16);
     PaintDetails(TargetCanvas, ObjData.Arrays['details'], R);
   end;
 end;
@@ -198,8 +221,18 @@ begin
   if (Sender.GetNodeLevel(Node) = 0) and (Data.JSONType = jtObject) then
   begin
     CellText := AddChar('0', ObjData.Strings['bednumber'], 2) +
-      ' - ' + ObjData.Strings['name'];
-  end;
+      ' - ' + CellText;
+  end
+  else
+    CellText := NormalizeDateTime(ObjData.Floats['date'], ObjData.Floats['time']) +
+      ' - ' + CellText;
+end;
+
+procedure TMainForm.JSONTreeViewInitNode(Sender: TBaseVirtualTree; ParentNode,
+  Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+begin
+  if ParentNode = nil then
+    Node^.CheckType := ctNone;
 end;
 
 procedure TMainForm.JSONTreeViewMeasureItem(Sender: TBaseVirtualTree;
@@ -215,6 +248,14 @@ begin
     NodeHeight := 18 + CalcDetailsHeight(TargetCanvas, ObjData.Arrays['details'],
       FCellWidth);
   end;
+end;
+
+procedure TMainForm.JSONTreeViewPaintText(Sender: TBaseVirtualTree;
+  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType);
+begin
+  if Sender.GetNodeLevel(Node) = 0 then
+    TargetCanvas.Font.Style := [fsBold];
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
