@@ -525,6 +525,7 @@ type
     procedure SetData(const Value: TJSONData);
     procedure SetOptions(const Value: TStringTreeOptions);
   protected
+    procedure DoChecked(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String); override;
     procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
@@ -804,6 +805,12 @@ end;
 procedure TVirtualJSONTreeView.SetOptions(const Value: TStringTreeOptions);
 begin
   TreeOptions.Assign(Value);
+end;
+
+procedure TVirtualJSONTreeView.DoChecked(Node: PVirtualNode);
+begin
+  FreeAndNil(FCheckedData);
+  inherited DoChecked(Node);
 end;
 
 procedure TVirtualJSONTreeView.DoGetText(Node: PVirtualNode;
