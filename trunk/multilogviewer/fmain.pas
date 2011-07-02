@@ -69,15 +69,15 @@ type
     MIExit: TMenuItem;
     MIHelp: TMenuItem;
     MIFile: TMenuItem;
-    nbWatches: TNotebook;
+    nbWatches: TPageControl;
     nbViewer: TNotebook;
-    PageHistory: TPage;
+    PageHistory: TTabSheet;
     PageBitmap: TPage;
     PageHexViewer: TPage;
     pageNull: TPage;
     pageText: TPage;
-    pageSelected: TPage;
-    pageLastest: TPage;
+    pageSelected: TTabSheet;
+    pageLastest: TTabSheet;
     PanelImageViewer: TPanel;
     panelFilter: TPanel;
     panelMessages: TPanel;
@@ -216,7 +216,7 @@ begin
   FWatches.Clear;
   ComboWatchHistory.Clear;
   //memoViewer.Lines.Clear;
-  nbViewer.ActivePageComponent:=pageNull;
+  nbViewer.PageIndex:=0;//pageNull;
   FMessageCount:=0;
   FLastNode:=nil;
   FLastParent:=nil;
@@ -347,7 +347,7 @@ begin
   begin
     if MsgData = nil then
     begin
-      nbViewer.ActivePageComponent:=pageNull;
+      nbViewer.PageIndex:=0;//pageNull;
       Exit;
     end;
     MsgData.Position:=0;
@@ -355,27 +355,27 @@ begin
     ltStrings,ltCallStack,ltException,ltHeapInfo,ltCustomData:
     begin
       memoViewer.Lines.LoadFromStream(MsgData);
-      nbViewer.ActivePageComponent:=pageText;
+      nbViewer.PageIndex:=1;//pageText;
     end;
     ltObject:
     begin
       AStream:=TStringStream.Create('');
       ObjectBinaryToText(MsgData,AStream);
       memoViewer.Lines.Text:=AStream.DataString;
-      nbViewer.ActivePageComponent:=pageText;
+      nbViewer.PageIndex:=1;//pageText;
       AStream.Destroy;
     end;
     ltBitmap:
     begin
       ImgViewer.Picture.Bitmap.LoadFromStream(MsgData);
-      nbViewer.ActivePageComponent:=PageBitmap;
+      nbViewer.PageIndex:=2;//PageBitmap;
       ShowBitmapInfo(ImgViewer.Picture.Bitmap);
     end;
     ltMemory:
     begin
       lbMemorySize.Caption := 'Size: ' + IntToStr(MsgData.Size);
       BinHexViewer.OpenStream(MsgData);
-      nbViewer.ActivePageComponent:=PageHexViewer;
+      nbViewer.PageIndex:=3;//PageHexViewer;
     end;
     end;
   end;

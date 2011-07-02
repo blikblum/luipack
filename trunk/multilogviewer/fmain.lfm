@@ -1,22 +1,22 @@
 object frmMain: TfrmMain
-  Left = 218
+  Left = 423
   Height = 604
-  Top = 224
-  Width = 890
+  Top = 142
+  Width = 881
   Caption = 'Multilog Viewer 0.3'
   ClientHeight = 585
-  ClientWidth = 890
+  ClientWidth = 881
   Menu = MainMenu1
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDesktopCenter
-  LCLVersion = '0.9.27'
+  LCLVersion = '0.9.31'
   object toolbarMain: TToolBar
     Left = 4
     Height = 38
     Top = 0
-    Width = 886
+    Width = 877
     BorderSpacing.Left = 4
     ButtonHeight = 36
     ButtonWidth = 36
@@ -43,8 +43,8 @@ object frmMain: TfrmMain
       Top = 0
       Caption = 'ButStop'
       ImageIndex = 1
-      Style = tbsCheck
       OnClick = ButStopClick
+      Style = tbsCheck
     end
     object ButAlwaysOnTop: TToolButton
       Left = 73
@@ -52,29 +52,29 @@ object frmMain: TfrmMain
       Top = 0
       Caption = 'ButAlwaysOnTop'
       ImageIndex = 2
-      Style = tbsCheck
       OnClick = ButAlwaysOnTopClick
+      Style = tbsCheck
     end
   end
   object panelLeft: TPanel
     Left = 291
     Height = 547
     Top = 38
-    Width = 599
+    Width = 590
     Align = alClient
     BevelOuter = bvNone
     ClientHeight = 547
-    ClientWidth = 599
+    ClientWidth = 590
     TabOrder = 0
     object panelViewer: TPanel
       Left = 0
       Height = 175
       Top = 372
-      Width = 599
+      Width = 590
       Align = alBottom
       BevelOuter = bvNone
       ClientHeight = 175
-      ClientWidth = 599
+      ClientWidth = 590
       TabOrder = 0
       object Label1: TLabel
         AnchorSideLeft.Control = nbViewer
@@ -82,7 +82,7 @@ object frmMain: TfrmMain
         Left = 4
         Height = 18
         Top = 0
-        Width = 595
+        Width = 586
         Align = alTop
         Anchors = [akLeft, akBottom]
         BorderSpacing.Left = 4
@@ -93,16 +93,14 @@ object frmMain: TfrmMain
         Left = 0
         Height = 157
         Top = 18
-        Width = 599
-        Align = alClient
+        Width = 590
         PageIndex = 0
-        ShowTabs = False
+        Align = alClient
         TabOrder = 0
+        TabStop = True
         object pageNull: TPage
-          Caption = 'pageNull'
         end
         object pageText: TPage
-          Caption = 'pageText'
           ClientWidth = 591
           ClientHeight = 149
           object memoViewer: TMemo
@@ -120,7 +118,6 @@ object frmMain: TfrmMain
           end
         end
         object PageBitmap: TPage
-          Caption = 'PageBitmap'
           ClientWidth = 591
           ClientHeight = 149
           object StringGridBitmap: TStringGrid
@@ -179,7 +176,6 @@ object frmMain: TfrmMain
           end
         end
         object PageHexViewer: TPage
-          Caption = 'PageHexViewer'
           ClientWidth = 591
           ClientHeight = 149
           object lbMemorySize: TLabel
@@ -199,11 +195,13 @@ object frmMain: TfrmMain
             Width = 591
             Align = alClient
             BorderStyle = bsSingle
+            Font.Color = clWindowText
             Font.Height = -13
             Font.Name = 'Courier New'
             ParentColor = False
             TabOrder = 0
             FontOEM.CharSet = OEM_CHARSET
+            FontOEM.Color = clWindowText
             FontOEM.Height = -12
             FontOEM.Name = 'Terminal'
             Mode = vbmodeHex
@@ -216,7 +214,7 @@ object frmMain: TfrmMain
       Left = 0
       Height = 5
       Top = 367
-      Width = 599
+      Width = 590
       Align = alBottom
       Beveled = True
       ResizeAnchor = akBottom
@@ -225,24 +223,23 @@ object frmMain: TfrmMain
       Left = 0
       Height = 367
       Top = 0
-      Width = 599
+      Width = 590
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
       ClientHeight = 367
-      ClientWidth = 599
+      ClientWidth = 590
       TabOrder = 1
       object vtreeMessages: TVirtualStringTree
         AnchorSideTop.Control = panelFilter
-        AnchorSideTop.Side = asrBottom
         Left = 0
         Height = 245
         Top = 122
-        Width = 599
+        Width = 590
         Align = alClient
-        BorderStyle = bsSingle
         DefaultText = 'Node'
         Header.AutoSizeIndex = 0
+        Header.Columns = <>
         Header.DefaultHeight = 17
         Header.MainColumn = -1
         Header.Options = [hoColumnResize, hoDrag]
@@ -259,31 +256,30 @@ object frmMain: TfrmMain
         Left = 0
         Height = 122
         Top = 0
-        Width = 599
+        Width = 590
         Align = alTop
         BevelOuter = bvNone
         ClientHeight = 122
-        ClientWidth = 599
+        ClientWidth = 590
         TabOrder = 1
         object ToggleOptions: TToggleLabel
           AnchorSideTop.Control = EditFilterMessages
           AnchorSideTop.Side = asrCenter
           Left = 301
           Height = 14
-          Top = 6
+          Top = 5
           Width = 74
           ExpandedCaption = 'Less Options'
           Expanded = True
           OnChange = ToggleOptionsChange
-          Options = []
           Caption = 'More Options'
           ParentColor = False
         end
         object checkInfo: TCheckBox
           Left = 2
-          Height = 19
+          Height = 17
           Top = 28
-          Width = 44
+          Width = 40
           Caption = 'Info'
           Checked = True
           State = cbChecked
@@ -292,9 +288,9 @@ object frmMain: TfrmMain
         object checkError: TCheckBox
           Tag = 1
           Left = 2
-          Height = 19
+          Height = 17
           Top = 52
-          Width = 48
+          Width = 44
           Caption = 'Error'
           Checked = True
           State = cbChecked
@@ -305,7 +301,7 @@ object frmMain: TfrmMain
           Left = 2
           Height = 17
           Top = 100
-          Width = 47
+          Width = 46
           Caption = 'Value'
           Checked = True
           State = cbChecked
@@ -314,9 +310,9 @@ object frmMain: TfrmMain
         object checkConditional: TCheckBox
           Tag = 6
           Left = 101
-          Height = 19
+          Height = 17
           Top = 28
-          Width = 78
+          Width = 73
           Caption = 'Conditional'
           Checked = True
           State = cbChecked
@@ -325,9 +321,9 @@ object frmMain: TfrmMain
         object checkCheckPoint: TCheckBox
           Tag = 7
           Left = 101
-          Height = 19
+          Height = 17
           Top = 52
-          Width = 81
+          Width = 73
           Caption = 'CheckPoint'
           Checked = True
           State = cbChecked
@@ -338,7 +334,7 @@ object frmMain: TfrmMain
           Left = 101
           Height = 17
           Top = 76
-          Width = 52
+          Width = 53
           Caption = 'Strings'
           Checked = True
           State = cbChecked
@@ -347,9 +343,9 @@ object frmMain: TfrmMain
         object checkObject: TCheckBox
           Tag = 10
           Left = 213
-          Height = 19
+          Height = 17
           Top = 28
-          Width = 57
+          Width = 52
           Caption = 'Object'
           Checked = True
           State = cbChecked
@@ -369,9 +365,9 @@ object frmMain: TfrmMain
         object checkCallStack: TCheckBox
           Tag = 9
           Left = 101
-          Height = 19
+          Height = 17
           Top = 100
-          Width = 71
+          Width = 63
           Caption = 'CallStack'
           Checked = True
           State = cbChecked
@@ -382,7 +378,7 @@ object frmMain: TfrmMain
           Left = 306
           Height = 17
           Top = 28
-          Width = 57
+          Width = 58
           Caption = 'Memory'
           Checked = True
           State = cbChecked
@@ -393,7 +389,7 @@ object frmMain: TfrmMain
           Left = 306
           Height = 17
           Top = 52
-          Width = 81
+          Width = 82
           Caption = 'Custom Data'
           Checked = True
           State = cbChecked
@@ -402,9 +398,9 @@ object frmMain: TfrmMain
         object checkBitmap: TCheckBox
           Tag = 12
           Left = 213
-          Height = 19
+          Height = 17
           Top = 76
-          Width = 58
+          Width = 52
           Caption = 'Bitmap'
           Checked = True
           State = cbChecked
@@ -413,9 +409,9 @@ object frmMain: TfrmMain
         object checkWarning: TCheckBox
           Tag = 2
           Left = 2
-          Height = 19
+          Height = 17
           Top = 76
-          Width = 66
+          Width = 60
           Caption = 'Warning'
           Checked = True
           State = cbChecked
@@ -424,9 +420,9 @@ object frmMain: TfrmMain
         object checkHeapInfo: TCheckBox
           Tag = 13
           Left = 213
-          Height = 19
+          Height = 17
           Top = 100
-          Width = 70
+          Width = 65
           Caption = 'HeapInfo'
           Checked = True
           State = cbChecked
@@ -454,7 +450,7 @@ object frmMain: TfrmMain
         end
         object EditFilterMessages: TSearchEdit
           Left = 5
-          Height = 23
+          Height = 21
           Top = 2
           Width = 288
           EmptyText = '<Filter Messages>'
@@ -477,19 +473,20 @@ object frmMain: TfrmMain
     ClientHeight = 547
     ClientWidth = 286
     TabOrder = 1
-    object nbWatches: TNotebook
+    object nbWatches: TPageControl
       Left = 0
       Height = 175
       Top = 372
       Width = 286
+      ActivePage = pageLastest
       Align = alBottom
-      OnPageChanged = nbWatchesPageChanged
-      PageIndex = 0
+      TabIndex = 0
       TabOrder = 0
-      object pageLastest: TPage
+      OnPageChanged = nbWatchesPageChanged
+      object pageLastest: TTabSheet
         Caption = 'Last'
-        ClientWidth = 278
         ClientHeight = 149
+        ClientWidth = 278
         object gridLastestWatch: TStringGrid
           Left = 0
           Height = 149
@@ -501,21 +498,27 @@ object frmMain: TfrmMain
           Columns = <          
             item
               Title.Caption = 'Variable'
+              Title.PrefixOption = poNone
               Width = 137
             end          
             item
               Title.Caption = 'Value'
+              Title.PrefixOption = poNone
               Width = 137
             end>
           FixedCols = 0
           RowCount = 1
           TabOrder = 0
+          ColWidths = (
+            137
+            137
+          )
         end
       end
-      object pageSelected: TPage
+      object pageSelected: TTabSheet
         Caption = 'Selected'
-        ClientWidth = 278
         ClientHeight = 149
+        ClientWidth = 278
         object gridSelectedWatch: TStringGrid
           Left = 0
           Height = 149
@@ -527,30 +530,34 @@ object frmMain: TfrmMain
           Columns = <          
             item
               Title.Caption = 'Variable'
+              Title.PrefixOption = poNone
               Width = 137
             end          
             item
               Title.Caption = 'Value'
+              Title.PrefixOption = poNone
               Width = 137
             end>
           FixedCols = 0
           RowCount = 1
           TabOrder = 0
+          ColWidths = (
+            137
+            137
+          )
         end
       end
-      object PageHistory: TPage
+      object PageHistory: TTabSheet
         Caption = 'History'
-        ClientWidth = 278
         ClientHeight = 149
+        ClientWidth = 278
         object ComboWatchHistory: TComboBox
           Left = 0
           Height = 21
           Top = 0
           Width = 278
           Align = alTop
-          AutoComplete = False
           ItemHeight = 13
-          ItemWidth = 0
           OnSelect = ComboWatchHistorySelect
           Style = csDropDownList
           TabOrder = 0
@@ -598,11 +605,15 @@ object frmMain: TfrmMain
       Columns = <      
         item
           Title.Caption = 'CallStack'
+          Title.PrefixOption = poNone
           Width = 277
         end>
       FixedCols = 0
       RowCount = 1
       TabOrder = 1
+      ColWidths = (
+        277
+      )
     end
     object Splitter4: TSplitter
       Left = 0
@@ -619,7 +630,6 @@ object frmMain: TfrmMain
     Beveled = True
   end
   object imgMessages: TImageList
-    Masked = False
     left = 176
     top = 416
     Bitmap = {
@@ -1140,7 +1150,6 @@ object frmMain: TfrmMain
   end
   object imgToolbar: TImageList
     Height = 32
-    Masked = False
     Width = 32
     left = 72
     top = 440
