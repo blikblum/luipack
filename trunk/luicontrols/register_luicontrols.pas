@@ -7,7 +7,8 @@ interface
 
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
-  ToggleLabel, MenuButton, SearchEdit, ValidateEdit, WizardControls;
+  ToggleLabel, MenuButton, SearchEdit, ValidateEdit, WizardControls,
+  DropDownWindow;
   
 procedure Register;
 
@@ -41,6 +42,10 @@ begin
   RegisterComponents(ComponentPage, [TWizardController, TWizardButtonPanel]);
 end;
 
+procedure RegisterUnitDropDownWindow;
+begin
+  RegisterComponents(ComponentPage, [TDropDownWindow]);
+end;
 
 procedure Register;
 
@@ -50,6 +55,7 @@ begin
   RegisterUnit('SearchEdit',@RegisterUnitSearchEdit);
   RegisterUnit('ValidateEdit',@RegisterUnitValidateEdit);
   RegisterUnit('WizardControls',@RegisterUnitWizardControls);
+  RegisterUnit('DropDownWindow',@RegisterUnitDropDownWindow);
 end; 
 
 initialization
