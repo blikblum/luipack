@@ -1,0 +1,61 @@
+object Form1: TForm1
+  Left = 450
+  Height = 240
+  Top = 283
+  Width = 320
+  Caption = 'Form1'
+  ClientHeight = 240
+  ClientWidth = 320
+  LCLVersion = '0.9.31'
+  object Panel1: TPanel
+    Left = 8
+    Height = 166
+    Top = 27
+    Width = 199
+    ClientHeight = 166
+    ClientWidth = 199
+    TabOrder = 0
+    Visible = False
+    object Edit1: TEdit
+      Left = 23
+      Height = 21
+      Top = 38
+      Width = 80
+      TabOrder = 0
+      Text = 'Edit1'
+    end
+    object Button1: TButton
+      Left = 112
+      Height = 25
+      Top = 133
+      Width = 75
+      Caption = 'Done'
+      OnClick = Button1Click
+      TabOrder = 1
+    end
+    object Label1: TLabel
+      Left = 24
+      Height = 14
+      Top = 21
+      Width = 32
+      Caption = 'Label1'
+      ParentColor = False
+    end
+  end
+  object ToggleBox1: TToggleBox
+    Left = 8
+    Height = 23
+    Top = 3
+    Width = 90
+    Caption = 'Set Options'
+    OnChange = ToggleBox1Change
+    TabOrder = 1
+  end
+  object DropDownWindow1: TDropDownWindow
+    Control = Panel1
+    MasterControl = ToggleBox1
+    OnHide = DropDownWindow1Hide
+    left = 248
+    top = 24
+  end
+end
