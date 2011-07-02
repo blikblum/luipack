@@ -169,6 +169,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
   StrUtils, LCLIntf, LCLType, fAbout;
 
@@ -245,9 +247,9 @@ end;
 procedure TfrmMain.ButAlwaysOnTopClick(Sender: TObject);
 begin
   if ButAlwaysOnTop.Down then
-    SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE)
+    FormStyle := fsSystemStayOnTop
   else
-    SetWindowPos(Handle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE or SWP_NOMOVE);
+    FormStyle := fsNormal;
 end;
 
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: boolean);
@@ -652,7 +654,6 @@ end;
 {$endif}
 
 initialization
-  {$I fmain.lrs}
 
 end.
 
