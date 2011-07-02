@@ -27,8 +27,9 @@ var
 
 implementation
 
+{$R *.lfm}
+
 initialization
-  {$I fabout.lrs}
 
 end.
 

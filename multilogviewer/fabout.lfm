@@ -7,7 +7,7 @@ object FormAbout: TFormAbout
   ClientHeight = 181
   ClientWidth = 332
   Position = poOwnerFormCenter
-  LCLVersion = '0.9.27'
+  LCLVersion = '0.9.31'
   object LabelTitle: TLabel
     Left = 72
     Height = 26
@@ -23,7 +23,7 @@ object FormAbout: TFormAbout
     Height = 14
     Top = 96
     Width = 257
-    Caption = 'Copyright 2006-2008 by Luiz Américo Pereira Câmara'
+    Caption = 'Copyright 2006-2008 by Luiz AmÃ©rico Pereira CÃ¢mara'
     ParentColor = False
   end
   object ButtonClose: TBitBtn
