@@ -44,7 +44,12 @@ function Capitalize(const S: AnsiString; const ExcludeWords: array of UnicodeStr
 
 procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String; Delimiter: Char = ';');
 
+function ExtractInitials(const S: AnsiString; const ExcludeWords: array of String): AnsiString;
+
 implementation
+
+uses
+  strutils;
 
 function MatchWords(const U: UnicodeString; const A: array of UnicodeString): Boolean;
 var
@@ -154,6 +159,24 @@ begin
   begin
     Name := Copy(NameValuePair, 1, DelimiterPos - 1);
     Value := Copy(NameValuePair, DelimiterPos + 1, Length(NameValuePair) - DelimiterPos);
+  end;
+end;
+
+function ExtractInitials(const S: AnsiString;
+  const ExcludeWords: array of String): AnsiString;
+var
+  WordIndex, WordPos: Integer;
+  Word: String;
+begin
+  Result := '';
+  WordIndex := 1;
+  Word := ExtractWordPos(WordIndex, S, StdWordDelims, WordPos);
+  while WordPos <> 0 do
+  begin
+    if not AnsiMatchText(Word, ExcludeWords) then
+      Result := Result + Word[1];
+    Inc(WordIndex);
+    Word := ExtractWordPos(WordIndex, S, StdWordDelims, WordPos);
   end;
 end;
 
