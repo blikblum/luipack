@@ -28,10 +28,10 @@ object MainForm: TMainForm
     TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toFullRowSelect]
     OnBeforeItemErase = JSONTreeViewBeforeItemErase
-    OnBeforePaint = JSONTreeViewBeforePaint
     OnDrawText = JSONTreeViewDrawText
     OnPaintText = JSONTreeViewPaintText
     OnInitNode = JSONTreeViewInitNode
     OnMeasureItem = JSONTreeViewMeasureItem
+    OnResize = JSONTreeViewResize
   end
 end
