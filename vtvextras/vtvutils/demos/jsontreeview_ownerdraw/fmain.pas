@@ -19,8 +19,6 @@ type
     procedure JSONTreeViewBeforeItemErase(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
       var ItemColor: TColor; var EraseAction: TItemEraseAction);
-    procedure JSONTreeViewBeforePaint(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas);
     procedure JSONTreeViewDrawText(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       const CellText: String; var CellRect: TRect; var DefaultDraw: Boolean);
@@ -34,6 +32,7 @@ type
     procedure JSONTreeViewPaintText(Sender: TBaseVirtualTree;
       const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType);
+    procedure JSONTreeViewResize(Sender: TObject);
   private
     { private declarations }
     Data: TJSONData;
@@ -181,18 +180,6 @@ begin
   end;
 end;
 
-procedure TMainForm.JSONTreeViewBeforePaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas);
-begin
-  FCellWidth := JSONTreeView.ClientWidth;
-  if Sender.GetTreeRect.Bottom > Sender.ClientHeight then
-    Dec(FCellWidth, GetSystemMetrics(SM_CXVSCROLL));
-  if toShowRoot in JSONTreeView.TreeOptions.PaintOptions then
-    Dec(FCellWidth, 2 * JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin))
-  else
-    Dec(FCellWidth, JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin));
-end;
-
 procedure TMainForm.JSONTreeViewDrawText(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   const CellText: String; var CellRect: TRect; var DefaultDraw: Boolean);
@@ -256,6 +243,18 @@ procedure TMainForm.JSONTreeViewPaintText(Sender: TBaseVirtualTree;
 begin
   if Sender.GetNodeLevel(Node) = 0 then
     TargetCanvas.Font.Style := [fsBold];
+end;
+
+procedure TMainForm.JSONTreeViewResize(Sender: TObject);
+begin
+  FCellWidth := JSONTreeView.ClientWidth;
+  if JSONTreeView.GetTreeRect.Bottom > JSONTreeView.ClientHeight then
+    Dec(FCellWidth, GetSystemMetrics(SM_CXVSCROLL));
+  if toShowRoot in JSONTreeView.TreeOptions.PaintOptions then
+    Dec(FCellWidth, 2 * JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin))
+  else
+    Dec(FCellWidth, JSONTreeView.Indent + JSONTreeView.Margin + (2 * JSONTreeView.TextMargin));
+  JSONTreeView.InvalidateChildren(nil, True);
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
