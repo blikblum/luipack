@@ -240,7 +240,7 @@ begin
       ParseDefaultLine(ReadLine);
     if ExitStatus <> 0 then
       if not HandleError(ErrorStr) then
-        raise Exception.Create('Error In Load: ' + ErrorStr);
+        raise Exception.Create('TSevenZipReader.ParseDefaultOutput (Load): ' + ErrorStr);
   end;
 end;
 
@@ -306,7 +306,7 @@ begin
       ParseDetailedLine(ReadLine);
     if ExitStatus <> 0 then
       if not HandleError(ErrorStr) then
-        raise Exception.Create('Error In Load: ' + ErrorStr);
+        raise Exception.Create('TSevenZipReader.ParseDetailedOutput (Load): ' + ErrorStr);
   end;
 end;
 
@@ -326,7 +326,7 @@ end;
 procedure TSevenZipReader.Extract(Index: Integer; const Directory: String);
 begin
   if (Index < 0) or (Index >= FPackedFiles.Count) then
-    raise Exception.Create('Error In Extract: Index Out Of Bounds');
+    raise Exception.Create('TSevenZipReader.Extract: Index Out Of Bounds');
   Extract(FPackedFiles[Index].Path, Directory);
 end;
 
@@ -347,7 +347,7 @@ begin
       //grab the error str (the 6th line)
       ErrorStr := ReadLine(5);
       if not HandleError(ErrorStr) then
-        raise Exception.Create('Error In Extract: ' + ErrorStr);
+        raise Exception.Create('TSevenZipReader.Extract: ' + ErrorStr);
     end;
   end;
 end;
