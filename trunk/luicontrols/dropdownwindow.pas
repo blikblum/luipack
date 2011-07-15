@@ -23,10 +23,12 @@ type
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
     function GetVisible: Boolean;
     procedure RemoveHandlers;
+    procedure SetState(DoEvents: Boolean);
     procedure SetVisible(const Value: Boolean);
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
   public
     destructor Destroy; override;
+    procedure UpdateState;
     property Visible: Boolean read GetVisible write SetVisible;
   published
     property Control: TWinControl read FControl write FControl;
@@ -65,17 +67,12 @@ begin
   Screen.RemoveHandlerActiveControlChanged(@FocusChangeHandler);
 end;
 
-procedure TDropDownWindow.SetVisible(const Value: Boolean);
+procedure TDropDownWindow.SetState(DoEvents: Boolean);
 begin
-  if FControl = nil then
-    raise Exception.Create('TDropDownWindow.Visible: Control not set');
-  if FControl.Visible = Value then
-    Exit;
-  FControl.Visible := Value;
-  if Value then
+  if FControl.Visible then
   begin
     FControl.SetFocus;
-    if Assigned(FOnShow) then
+    if Assigned(FOnShow) and DoEvents then
       FOnShow(Self);
     Application.AddOnUserInputHandler(@UserInputHandler);
     Screen.AddHandlerActiveControlChanged(@FocusChangeHandler);
@@ -83,9 +80,19 @@ begin
   else
   begin
     RemoveHandlers;
-    if Assigned(FOnHide) then
+    if Assigned(FOnHide) and DoEvents then
       FOnHide(Self);
   end;
+end;
+
+procedure TDropDownWindow.SetVisible(const Value: Boolean);
+begin
+  if FControl = nil then
+    raise Exception.Create('TDropDownWindow.Visible: Control not set');
+  if FControl.Visible = Value then
+    Exit;
+  FControl.Visible := Value;
+  SetState(True);
 end;
 
 procedure TDropDownWindow.UserInputHandler(Sender: TObject; Msg: Cardinal);
@@ -104,6 +111,12 @@ destructor TDropDownWindow.Destroy;
 begin
   RemoveHandlers;
   inherited Destroy;
+end;
+
+procedure TDropDownWindow.UpdateState;
+begin
+  if FControl <> nil then
+    SetState(False);
 end;
 
 end.
