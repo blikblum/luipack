@@ -19,7 +19,7 @@ type
     FMasterControl: TControl;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
-    function ControlIsUnknown(AControl: TControl): Boolean;
+    function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
     function GetVisible: Boolean;
     procedure RemoveHandlers;
@@ -41,15 +41,15 @@ implementation
 
 { TDropDownWindow }
 
-function TDropDownWindow.ControlIsUnknown(AControl: TControl): Boolean;
+function TDropDownWindow.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
   Result := (AControl <> FControl) and (AControl <> FMasterControl) and
-    not FControl.IsParentOf(AControl);
+    not FControl.IsParentOf(AControl) and (GetParentForm(FControl) = GetParentForm(AControl));
 end;
 
 procedure TDropDownWindow.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
-  if ControlIsUnknown(Screen.ActiveControl) then
+  if ControlGrabsFocus(Screen.ActiveControl) then
     Visible := False;
 end;
 
@@ -101,7 +101,7 @@ begin
     LM_LBUTTONDOWN, LM_LBUTTONDBLCLK, LM_RBUTTONDOWN, LM_RBUTTONDBLCLK,
     LM_MBUTTONDOWN, LM_MBUTTONDBLCLK, LM_XBUTTONDOWN, LM_XBUTTONDBLCLK:
     begin
-      if ControlIsUnknown(Application.MouseControl) then
+      if ControlGrabsFocus(Application.MouseControl) then
         Visible := False;
     end;
   end;
