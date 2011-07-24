@@ -21,15 +21,15 @@ type
     FOnShow: TNotifyEvent;
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
-    function GetVisible: Boolean;
+    function GetDroppedDown: Boolean;
     procedure RemoveHandlers;
     procedure SetState(DoEvents: Boolean);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetDroppedDown(const Value: Boolean);
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
   public
     destructor Destroy; override;
     procedure UpdateState;
-    property Visible: Boolean read GetVisible write SetVisible;
+    property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
   published
     property Control: TWinControl read FControl write FControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
@@ -50,10 +50,10 @@ end;
 procedure TDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
   if ControlGrabsFocus(Screen.ActiveControl) then
-    Visible := False;
+    DroppedDown := False;
 end;
 
-function TDropDownManager.GetVisible: Boolean;
+function TDropDownManager.GetDroppedDown: Boolean;
 begin
   if FControl <> nil then
     Result := FControl.Visible
@@ -85,7 +85,7 @@ begin
   end;
 end;
 
-procedure TDropDownManager.SetVisible(const Value: Boolean);
+procedure TDropDownManager.SetDroppedDown(const Value: Boolean);
 begin
   if FControl = nil then
     raise Exception.Create('TDropDownWindow.Visible: Control not set');
@@ -102,7 +102,7 @@ begin
     LM_MBUTTONDOWN, LM_MBUTTONDBLCLK, LM_XBUTTONDOWN, LM_XBUTTONDBLCLK:
     begin
       if ControlGrabsFocus(Application.MouseControl) then
-        Visible := False;
+        DroppedDown := False;
     end;
   end;
 end;
