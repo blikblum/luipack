@@ -26,6 +26,8 @@ type
     procedure SetState(DoEvents: Boolean);
     procedure SetDroppedDown(const Value: Boolean);
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
+  protected
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     destructor Destroy; override;
     procedure UpdateState;
@@ -104,6 +106,19 @@ begin
       if ControlGrabsFocus(Application.MouseControl) then
         DroppedDown := False;
     end;
+  end;
+end;
+
+procedure TDropDownManager.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    if AComponent = FControl then
+      FControl := nil
+    else if AComponent = FMasterControl then
+      FMasterControl := nil;;
   end;
 end;
 
