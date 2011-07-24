@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, DropDownWindow;
+  ExtCtrls, StdCtrls, DropDownManager;
 
 type
 
@@ -14,7 +14,7 @@ type
 
   TForm1 = class(TForm)
     Button1: TButton;
-    DropDownWindow1: TDropDownWindow;
+    DropDownWindow1: TDropDownManager;
     Edit1: TEdit;
     Label1: TLabel;
     Panel1: TPanel;

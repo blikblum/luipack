@@ -59,8 +59,8 @@ TSearchEdit
         <UnitName Value="WizardControls"/>
       </Item7>
       <Item8>
-        <Filename Value="dropdownwindow.pas"/>
-        <UnitName Value="dropdownwindow"/>
+        <Filename Value="dropdownmanager.pas"/>
+        <UnitName Value="dropdownmanager"/>
       </Item8>
     </Files>
     <Type Value="RunAndDesignTime"/>

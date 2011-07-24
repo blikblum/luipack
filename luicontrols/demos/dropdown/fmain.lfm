@@ -51,7 +51,7 @@ object Form1: TForm1
     OnChange = ToggleBox1Change
     TabOrder = 1
   end
-  object DropDownWindow1: TDropDownWindow
+  object DropDownWindow1: TDropDownManager
     Control = Panel1
     MasterControl = ToggleBox1
     OnHide = DropDownWindow1Hide

@@ -1,4 +1,4 @@
-unit DropDownWindow;
+unit DropDownManager;
 
 {$mode objfpc}{$H+}
 
@@ -9,11 +9,11 @@ uses
 
 type
 
-  { TDropDownWindow }
+  { TDropDownManager }
 
   //todo: add create control on demand, OnCreateControl
   // specific code for TForm/TFrame (make use of window shadow)
-  TDropDownWindow = class(TComponent)
+  TDropDownManager = class(TComponent)
   private
     FControl: TWinControl;
     FMasterControl: TControl;
@@ -39,21 +39,21 @@ type
 
 implementation
 
-{ TDropDownWindow }
+{ TDropDownManager }
 
-function TDropDownWindow.ControlGrabsFocus(AControl: TControl): Boolean;
+function TDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
   Result := (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and (GetParentForm(FControl) = GetParentForm(AControl));
 end;
 
-procedure TDropDownWindow.FocusChangeHandler(Sender: TObject; LastControl: TControl);
+procedure TDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
   if ControlGrabsFocus(Screen.ActiveControl) then
     Visible := False;
 end;
 
-function TDropDownWindow.GetVisible: Boolean;
+function TDropDownManager.GetVisible: Boolean;
 begin
   if FControl <> nil then
     Result := FControl.Visible
@@ -61,13 +61,13 @@ begin
     Result := False;
 end;
 
-procedure TDropDownWindow.RemoveHandlers;
+procedure TDropDownManager.RemoveHandlers;
 begin
   Application.RemoveOnUserInputHandler(@UserInputHandler);
   Screen.RemoveHandlerActiveControlChanged(@FocusChangeHandler);
 end;
 
-procedure TDropDownWindow.SetState(DoEvents: Boolean);
+procedure TDropDownManager.SetState(DoEvents: Boolean);
 begin
   if FControl.Visible then
   begin
@@ -85,7 +85,7 @@ begin
   end;
 end;
 
-procedure TDropDownWindow.SetVisible(const Value: Boolean);
+procedure TDropDownManager.SetVisible(const Value: Boolean);
 begin
   if FControl = nil then
     raise Exception.Create('TDropDownWindow.Visible: Control not set');
@@ -95,7 +95,7 @@ begin
   SetState(True);
 end;
 
-procedure TDropDownWindow.UserInputHandler(Sender: TObject; Msg: Cardinal);
+procedure TDropDownManager.UserInputHandler(Sender: TObject; Msg: Cardinal);
 begin
   case Msg of
     LM_LBUTTONDOWN, LM_LBUTTONDBLCLK, LM_RBUTTONDOWN, LM_RBUTTONDBLCLK,
@@ -107,13 +107,13 @@ begin
   end;
 end;
 
-destructor TDropDownWindow.Destroy;
+destructor TDropDownManager.Destroy;
 begin
   RemoveHandlers;
   inherited Destroy;
 end;
 
-procedure TDropDownWindow.UpdateState;
+procedure TDropDownManager.UpdateState;
 begin
   if FControl <> nil then
     SetState(False);
