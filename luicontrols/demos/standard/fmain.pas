@@ -98,6 +98,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 { TfrmMain }
 
 procedure TfrmMain.ToggleLabel2Change(Sender: TObject);
@@ -206,9 +208,6 @@ procedure TfrmMain.SetSearchEditTextButtonClick(Sender: TObject);
 begin
   SearchEdit1.Text := 'Text Set Through Code';
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 
