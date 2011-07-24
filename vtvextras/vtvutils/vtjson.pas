@@ -534,6 +534,7 @@ type
     function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     function GetData(Node: PVirtualNode): TJSONData;
     procedure LoadData;
     property CheckedData: TJSONArray read GetCheckedData;
@@ -891,6 +892,12 @@ begin
     //MiscOptions := MiscOptions + [toEditable, toGridExtensions];
   end;
 
+end;
+
+destructor TVirtualJSONTreeView.Destroy;
+begin
+  FCheckedData.Free;
+  inherited Destroy;
 end;
 
 function TVirtualJSONTreeView.GetData(Node: PVirtualNode): TJSONData;
