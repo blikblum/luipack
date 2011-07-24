@@ -28,7 +28,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="8">
+    <Files Count="9">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -62,6 +62,10 @@ TSearchEdit
         <Filename Value="dropdownmanager.pas"/>
         <UnitName Value="dropdownmanager"/>
       </Item8>
+      <Item9>
+        <Filename Value="dropdownbutton.pas"/>
+        <UnitName Value="dropdownbutton"/>
+      </Item9>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
