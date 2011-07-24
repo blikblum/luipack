@@ -3,22 +3,22 @@ object frmMain: TfrmMain
   Height = 300
   Top = 233
   Width = 400
-  ActiveControl = NotebookMain
+  ActiveControl = MainPageControl
   Caption = 'Lui Controls 0.3 Demo'
   ClientHeight = 300
   ClientWidth = 400
   Position = poDesktopCenter
-  LCLVersion = '0.9.29'
-  object NotebookMain: TPageControl
+  LCLVersion = '0.9.31'
+  object MainPageControl: TPageControl
     Left = 0
     Height = 300
     Top = 0
     Width = 400
-    ActivePage = PageToggleLabel
+    ActivePage = ToggleLabelTab
     Align = alClient
     TabIndex = 0
     TabOrder = 0
-    object PageToggleLabel: TTabSheet
+    object ToggleLabelTab: TTabSheet
       Caption = 'TToggleLabel'
       ClientHeight = 274
       ClientWidth = 392
@@ -82,7 +82,7 @@ object frmMain: TfrmMain
       end
       object Panel1: TPanel
         Left = 12
-        Height = 106
+        Height = 152
         Top = 90
         Width = 216
         Caption = 'Panel1'
@@ -108,7 +108,7 @@ object frmMain: TfrmMain
         TabOrder = 2
       end
     end
-    object PageMenuButton: TTabSheet
+    object MenuButtonTab: TTabSheet
       Caption = 'TMenuButton'
       ClientHeight = 274
       ClientWidth = 392
@@ -284,17 +284,17 @@ object frmMain: TfrmMain
       end
       object Label1: TLabel
         Left = 27
-        Height = 18
+        Height = 14
         Top = 82
-        Width = 84
+        Width = 63
         Caption = 'Flat Buttons:'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 26
-        Height = 18
+        Height = 14
         Top = 10
-        Width = 103
+        Width = 74
         Caption = 'Normal Buttons'
         ParentColor = False
       end
@@ -312,9 +312,9 @@ object frmMain: TfrmMain
       end
       object Label3: TLabel
         Left = 26
-        Height = 18
+        Height = 14
         Top = 162
-        Width = 175
+        Width = 129
         Caption = 'Buttons with inlined arrow:'
         ParentColor = False
       end
@@ -397,15 +397,15 @@ object frmMain: TfrmMain
       end
       object CheckPopupOnMouseUp: TCheckBox
         Left = 166
-        Height = 22
+        Height = 17
         Top = 34
-        Width = 151
+        Width = 114
         Caption = 'Popup On MouseUp'
         OnChange = CheckPopupOnMouseUpChange
         TabOrder = 0
       end
     end
-    object PageSearchEdit: TTabSheet
+    object SearchEditTab: TTabSheet
       Caption = 'TSearchEdit'
       ClientHeight = 274
       ClientWidth = 392
@@ -431,7 +431,7 @@ object frmMain: TfrmMain
         Left = 190
         Height = 17
         Top = 8
-        Width = 138
+        Width = 140
         Caption = 'Execute If Text Is Empty'
         OnClick = CheckExecuteEmptyClick
         TabOrder = 2
@@ -440,7 +440,7 @@ object frmMain: TfrmMain
         Left = 190
         Height = 17
         Top = 34
-        Width = 117
+        Width = 119
         Caption = 'Execute On KillFocus'
         OnClick = CheckExecuteKillFocusClick
         TabOrder = 3
