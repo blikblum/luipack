@@ -206,11 +206,21 @@ procedure TMenuButton.UpdateArrowPosition;
 var
   XOffset: Integer;
 begin
-  XOffset := (FClientWidth - FContentWidth) div 2;
-  if XOffset >= 6 then
-    Dec(XOffset, 1)
+  if Margin = -1 then
+  begin
+    XOffset := (FClientWidth - FContentWidth) div 2;
+    if XOffset >= 6 then
+      Dec(XOffset, 1)
+    else
+      Dec(XOffset, 2);
+  end
   else
-    Dec(XOffset, 2);
+  begin
+    if Glyph.Empty then
+      XOffset := Margin + 2
+    else
+      XOffset := Margin + 7;
+  end;
   CalculateArrowPoints(FContentWidth + XOffset, 10, Height)
 end;
 
