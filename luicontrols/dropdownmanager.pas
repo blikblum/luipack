@@ -73,7 +73,8 @@ procedure TDropDownManager.SetState(DoEvents: Boolean);
 begin
   if FControl.Visible then
   begin
-    FControl.SetFocus;
+    if FControl.CanFocus then
+      FControl.SetFocus;
     if Assigned(FOnShow) and DoEvents then
       FOnShow(Self);
     Application.AddOnUserInputHandler(@UserInputHandler);
