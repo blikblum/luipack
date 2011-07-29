@@ -6,21 +6,27 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, DropDownManager;
+  ExtCtrls, StdCtrls, ComCtrls, DropDownManager, DropDownButton;
 
 type
 
-  { TForm1 }
+  { TMainForm }
 
-  TForm1 = class(TForm)
+  TMainForm = class(TForm)
     Button1: TButton;
+    DropDownButton1: TDropDownButton;
     DropDownWindow1: TDropDownManager;
     Edit1: TEdit;
     Label1: TLabel;
+    PageControl1: TPageControl;
     Panel1: TPanel;
+    RadioGroup1: TRadioGroup;
+    StandaloneTab: TTabSheet;
+    SpecializedTab: TTabSheet;
     ToggleBox1: TToggleBox;
     procedure Button1Click(Sender: TObject);
     procedure DropDownWindow1Hide(Sender: TObject);
+    procedure RadioGroup1Click(Sender: TObject);
     procedure ToggleBox1Change(Sender: TObject);
   private
   public
@@ -28,27 +34,33 @@ type
   end; 
 
 var
-  Form1: TForm1; 
+  MainForm: TMainForm;
 
 implementation
 
 {$R *.lfm}
 
-{ TForm1 }
+{ TMainForm }
 
-procedure TForm1.DropDownWindow1Hide(Sender: TObject);
+procedure TMainForm.DropDownWindow1Hide(Sender: TObject);
 begin
  ToggleBox1.Checked := False;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TMainForm.RadioGroup1Click(Sender: TObject);
 begin
-  DropDownWindow1.Visible := False;
+  DropDownButton1.Caption := RadioGroup1.Items[RadioGroup1.ItemIndex];
+  DropDownButton1.DroppedDown := False;
 end;
 
-procedure TForm1.ToggleBox1Change(Sender: TObject);
+procedure TMainForm.Button1Click(Sender: TObject);
 begin
-  DropDownWindow1.Visible := ToggleBox1.Checked;
+  DropDownWindow1.DroppedDown := False;
+end;
+
+procedure TMainForm.ToggleBox1Change(Sender: TObject);
+begin
+  DropDownWindow1.DroppedDown := ToggleBox1.Checked;
 end;
 
 end.

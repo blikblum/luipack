@@ -1,55 +1,111 @@
-object Form1: TForm1
+object MainForm: TMainForm
   Left = 450
   Height = 240
   Top = 283
   Width = 320
-  Caption = 'Form1'
+  Caption = 'DropDown Controls demo'
   ClientHeight = 240
   ClientWidth = 320
   LCLVersion = '0.9.31'
-  object Panel1: TPanel
-    Left = 8
-    Height = 166
-    Top = 27
-    Width = 199
-    ClientHeight = 166
-    ClientWidth = 199
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 320
+    ActivePage = StandaloneTab
+    Align = alClient
+    TabIndex = 0
     TabOrder = 0
-    Visible = False
-    object Edit1: TEdit
-      Left = 23
-      Height = 21
-      Top = 38
-      Width = 80
-      TabOrder = 0
-      Text = 'Edit1'
+    object StandaloneTab: TTabSheet
+      Caption = 'Standalone'
+      ClientHeight = 214
+      ClientWidth = 312
+      object Panel1: TPanel
+        Left = 8
+        Height = 166
+        Top = 27
+        Width = 199
+        ClientHeight = 166
+        ClientWidth = 199
+        TabOrder = 0
+        Visible = False
+        object Edit1: TEdit
+          Left = 23
+          Height = 21
+          Top = 38
+          Width = 80
+          TabOrder = 0
+          Text = 'Edit1'
+        end
+        object Button1: TButton
+          Left = 112
+          Height = 25
+          Top = 133
+          Width = 75
+          Caption = 'Done'
+          OnClick = Button1Click
+          TabOrder = 1
+        end
+        object Label1: TLabel
+          Left = 24
+          Height = 14
+          Top = 21
+          Width = 32
+          Caption = 'Label1'
+          ParentColor = False
+        end
+      end
+      object ToggleBox1: TToggleBox
+        Left = 8
+        Height = 23
+        Top = 3
+        Width = 90
+        Caption = 'Set Options'
+        OnChange = ToggleBox1Change
+        TabOrder = 1
+      end
     end
-    object Button1: TButton
-      Left = 112
-      Height = 25
-      Top = 133
-      Width = 75
-      Caption = 'Done'
-      OnClick = Button1Click
-      TabOrder = 1
+    object SpecializedTab: TTabSheet
+      Caption = 'Specialized Button'
+      ClientHeight = 214
+      ClientWidth = 312
+      object DropDownButton1: TDropDownButton
+        Left = 12
+        Height = 22
+        Top = 10
+        Width = 126
+        DropDownControl = RadioGroup1
+        Caption = '<Choose an option>'
+        NumGlyphs = 0
+      end
+      object RadioGroup1: TRadioGroup
+        Left = 12
+        Height = 105
+        Top = 34
+        Width = 158
+        AutoFill = True
+        Caption = 'RadioGroup1'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ClientHeight = 87
+        ClientWidth = 154
+        Items.Strings = (
+          'Option 1'
+          'Option 2'
+          'Option 3'
+          'Option 4'
+        )
+        OnClick = RadioGroup1Click
+        TabOrder = 0
+        Visible = False
+      end
     end
-    object Label1: TLabel
-      Left = 24
-      Height = 14
-      Top = 21
-      Width = 32
-      Caption = 'Label1'
-      ParentColor = False
-    end
-  end
-  object ToggleBox1: TToggleBox
-    Left = 8
-    Height = 23
-    Top = 3
-    Width = 90
-    Caption = 'Set Options'
-    OnChange = ToggleBox1Change
-    TabOrder = 1
   end
   object DropDownWindow1: TDropDownManager
     Control = Panel1
