@@ -6,13 +6,14 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, ComCtrls;
+  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, ComCtrls, Spin;
 
 type
 
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    Label4: TLabel;
     SetSearchEditTextButton: TButton;
     CheckUnderline: TCheckBox;
     CheckBold: TCheckBox;
@@ -62,6 +63,7 @@ type
     MainPageControl: TPageControl;
     SearchEditTab: TTabSheet;
     MenuButtonTab: TTabSheet;
+    MenuButtonMarginEdit: TSpinEdit;
     ToggleLabelTab: TTabSheet;
     Panel1: TPanel;
     PopupMenu1: TPopupMenu;
@@ -83,6 +85,7 @@ type
     procedure CheckPopupOnMouseUpChange (Sender: TObject );
     procedure CheckUnderlineChange(Sender: TObject);
     procedure MenuButton1Click(Sender: TObject);
+    procedure MenuButtonMarginEditChange(Sender: TObject);
     procedure MenuItem15Click(Sender: TObject);
     procedure SearchEdit1Execute(Sender: TObject);
     procedure SetSearchEditTextButtonClick(Sender: TObject);
@@ -111,6 +114,12 @@ procedure TfrmMain.MenuButton1Click(Sender: TObject);
 begin
   with TMenuButton(Sender) do
     ShowMessage('Clicked - (Flat: ' + BoolToStr(Flat, True)+ ')');
+end;
+
+procedure TfrmMain.MenuButtonMarginEditChange(Sender: TObject);
+begin
+  MenuButton5.Margin := MenuButtonMarginEdit.Value;
+  MenuButton6.Margin := MenuButtonMarginEdit.Value;
 end;
 
 procedure TfrmMain.CheckExecuteEmptyClick(Sender: TObject);

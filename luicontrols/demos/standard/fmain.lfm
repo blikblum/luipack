@@ -301,7 +301,7 @@ object frmMain: TfrmMain
       object MenuButton5: TMenuButton
         Left = 23
         Height = 22
-        Top = 193
+        Top = 191
         Width = 133
         Menu = PopupMenu5
         Options = [mboShowIndicator]
@@ -403,6 +403,24 @@ object frmMain: TfrmMain
         Caption = 'Popup On MouseUp'
         OnChange = CheckPopupOnMouseUpChange
         TabOrder = 0
+      end
+      object MenuButtonMarginEdit: TSpinEdit
+        Left = 27
+        Height = 21
+        Top = 234
+        Width = 60
+        MinValue = -1
+        OnChange = MenuButtonMarginEditChange
+        TabOrder = 1
+        Value = -1
+      end
+      object Label4: TLabel
+        Left = 27
+        Height = 14
+        Top = 218
+        Width = 33
+        Caption = 'Margin'
+        ParentColor = False
       end
     end
     object SearchEditTab: TTabSheet
@@ -515,8 +533,8 @@ object frmMain: TfrmMain
     end
   end
   object ImageList1: TImageList
-    left = 48
-    top = 250
+    left = 184
+    top = 152
     Bitmap = {
       4C69010000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00874A
       20FF874A20FF874A20FF874A20FF874A20FF874A20FF874A20FF874A20FFFFFF
@@ -554,8 +572,8 @@ object frmMain: TfrmMain
     }
   end
   object PopupMenu5: TPopupMenu
-    left = 57
-    top = 216
+    left = 224
+    top = 120
     object MenuItem15: TMenuItem
       Caption = 'New Item1'
       OnClick = MenuItem15Click
@@ -574,8 +592,8 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu6: TPopupMenu
-    left = 113
-    top = 216
+    left = 184
+    top = 120
     object MenuItem19: TMenuItem
       Caption = 'New Item1'
     end
@@ -590,8 +608,8 @@ object frmMain: TfrmMain
     end
   end
   object PopupMenu7: TPopupMenu
-    left = 113
-    top = 256
+    left = 224
+    top = 152
     object MenuItem23: TMenuItem
       Caption = 'New Item1'
     end
