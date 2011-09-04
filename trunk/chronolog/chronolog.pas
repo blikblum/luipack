@@ -49,20 +49,25 @@ type
   //todo: see effect of inlining Stop/Mark in the size
   //      add lap
   //      compare precision with ZenTimer
+  // add StartSEction
+  // rename RegisterId to RegisterAction
   TChronoLog = class
   private
     FZenTimer:TZenTimer;
     FResults: TInt64Array;
     FActions: TIntArray;
     FCount: Integer;
+    FCapacity: Cardinal;
     FDescriptions: TStringList;
     FSessionName: String;
     FComments: String;
+    procedure Expand;
     function FormatedString (Value: Int64):String;
     function GetAverage:Int64;
     function GetLastResult:Int64;
     function GetAccumulated: Int64;
-    procedure SetCapacity(Value: Integer);
+    procedure SetCapacity(Value: Cardinal);
+    procedure UpdateCount;
   public
     constructor Create;
     destructor Destroy; override;
@@ -86,7 +91,7 @@ type
     property Accumulated: Int64 read GetAccumulated;
     property SessionName: String read FSessionName write FSessionName;
     property Comments: String read FComments write FComments;
-    property Capacity: Integer write SetCapacity;
+    property Capacity: Cardinal read FCapacity write SetCapacity;
     property Count: Integer read FCount;
   end;
     
@@ -96,8 +101,7 @@ uses
   
 constructor TChronoLog.Create;
 begin
-  SetLength(FActions,100);
-  SetLength(FResults,100);
+  Capacity:=128;
   FZenTimer:=TZenTimer.Create;
   FZenTimer.AutoReset:=True;
   FDescriptions:=TStringList.Create;
@@ -118,7 +122,7 @@ procedure TChronoLog.Stop(AId:Integer);
 begin
   FResults[FCount]:=FZenTimer.Stop;
   FActions[FCount]:=AId;
-  Inc(FCount);
+  UpdateCount;
 end;
 
 procedure TChronoLog.Stop; inline;
@@ -136,7 +140,7 @@ procedure TChronoLog.Mark(AId:Integer);
 begin
   FResults[FCount]:=FZenTimer.Stop;
   FActions[FCount]:=AId;
-  Inc(FCount);
+  UpdateCount;
   FZenTimer.Start;
 end;
 
@@ -173,6 +177,22 @@ end;
 function TChronoLog.AsMicroSecondStr (Index: Integer): String;
 begin
   Result:=FormatedString(FResults[Index]);
+end;
+
+procedure TChronoLog.Expand;
+var
+  IncSize : Longint;
+begin
+  if FCount < FCapacity then
+    Exit;
+  //alghoritm borrowed from FPList
+  if FCapacity > 3 then
+    IncSize := 8
+  else
+    IncSize := 4;
+  if FCapacity > 8 then Inc(IncSize, 8);
+  if FCapacity > 127 then Inc(IncSize, FCapacity shr 2);
+  SetCapacity(FCapacity + IncSize);
 end;
 
 function TChronoLog.FormatedString (Value: Int64):String;
@@ -235,11 +255,21 @@ begin
   Result:=GetCPUString(this_cpu);
 end;
 
-procedure TChronoLog.SetCapacity(Value: Integer);
+procedure TChronoLog.SetCapacity(Value: Cardinal);
 begin
+  if Value < FCount then
+    Exit;
+  FCapacity := Value;
   //todo: see if Setlength keeps previous data
-  SetLength(FResults,Value);
-  SetLength(FActions,Value);
+  SetLength(FResults, Value);
+  SetLength(FActions, Value);
+end;
+
+procedure TChronoLog.UpdateCount;
+begin
+  if FCount = FCapacity then
+    Expand;
+  Inc(FCount);
 end;
 
 procedure TChronoLog.SaveToText (const FileName: String; ClearFile: Boolean = False);
