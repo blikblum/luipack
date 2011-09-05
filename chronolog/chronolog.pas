@@ -44,6 +44,16 @@ uses
 type
   TInt64Array = array of Int64;
   TIntArray = array of longint;
+
+  TSessionInfo = record
+    Results: TInt64Array;
+    Actions: TIntArray;
+    Name: String;
+    Count: Integer;
+    Capacity: Cardinal;
+  end;
+
+  TSessionInfoArray = array of TSessionInfo;
   
   { TChronoLog }
   //todo: see effect of inlining Stop/Mark in the size
@@ -56,18 +66,23 @@ type
     FZenTimer:TZenTimer;
     FResults: TInt64Array;
     FActions: TIntArray;
-    FCount: Integer;
+    FCount: Cardinal;
+    FSessions: TSessionInfoArray;
     FCapacity: Cardinal;
     FDescriptions: TStringList;
     FSessionName: String;
     FComments: String;
     procedure Expand;
     function FormatedString (Value: Int64):String;
+    function FindSession(const Name: String): Integer;
     function GetAverage:Int64;
     function GetLastResult:Int64;
     function GetAccumulated: Int64;
     procedure SetCapacity(Value: Cardinal);
+    procedure SetSessionName(const Value: String);
     procedure UpdateCount;
+    procedure UpdateCurrentSession;
+    procedure UpdateSessionName(const NewSessionName: String);
   public
     constructor Create;
     destructor Destroy; override;
@@ -89,19 +104,22 @@ type
     property Average: Int64 read GetAverage;
     property LastResult: Int64 read GetLastResult;
     property Accumulated: Int64 read GetAccumulated;
-    property SessionName: String read FSessionName write FSessionName;
+    property SessionName: String read FSessionName write SetSessionName;
     property Comments: String read FComments write FComments;
-    property Capacity: Cardinal read FCapacity write SetCapacity;
-    property Count: Integer read FCount;
+    property Count: Cardinal read FCount;
   end;
     
 implementation
+
 uses
   StrUtils;
+
+const
+  DEFAULT_CAPACITY = 64;
   
 constructor TChronoLog.Create;
 begin
-  Capacity:=128;
+  SetCapacity(DEFAULT_CAPACITY);
   FZenTimer:=TZenTimer.Create;
   FZenTimer.AutoReset:=True;
   FDescriptions:=TStringList.Create;
@@ -181,17 +199,14 @@ end;
 
 procedure TChronoLog.Expand;
 var
-  IncSize : Longint;
+  IncSize: Cardinal;
 begin
   if FCount < FCapacity then
     Exit;
   //alghoritm borrowed from FPList
-  if FCapacity > 3 then
-    IncSize := 8
-  else
-    IncSize := 4;
-  if FCapacity > 8 then Inc(IncSize, 8);
-  if FCapacity > 127 then Inc(IncSize, FCapacity shr 2);
+  IncSize := 16;
+  if FCapacity > 127 then
+    Inc(IncSize, FCapacity shr 2);
   SetCapacity(FCapacity + IncSize);
 end;
 
@@ -215,6 +230,18 @@ begin
   end;    
 end;
 
+function TChronoLog.FindSession(const Name: String): Integer;
+begin
+  Result := 0;
+  while Result < Length(FSessions) do
+  begin
+    if FSessions[Result].Name = Name then
+      Exit;
+    Inc(Result);
+  end;
+  Result := -1;
+end;
+
 function TChronoLog.GetAverage:Int64;
 begin
   if FCount > 0 then
@@ -235,6 +262,57 @@ begin
   Result:=0;
   for i := 0 to FCount - 1 do
     Result:=Result+FResults[i];
+end;
+
+procedure TChronoLog.UpdateSessionName(const NewSessionName: String);
+var
+  i, SessionsCount: Integer;
+begin
+  SessionsCount := Length(FSessions);
+  i := FindSession(FSessionName);
+  if i <> -1 then
+  begin
+    //update current session
+    FSessions[i].Count := FCount;
+    FSessions[i].Actions := FActions;
+    FSessions[i].Results := FResults;
+    FSessions[i].Capacity := FCapacity;
+  end
+  else
+  begin
+    // if there's already log calls and no session found. create an unammed session
+    if FCount > 0 then
+    begin
+      SetLength(FSessions, SessionsCount + 1);
+      FSessions[SessionsCount].Count := FCount;
+      FSessions[SessionsCount].Actions := FActions;
+      FSessions[SessionsCount].Results := FResults;
+      FSessions[SessionsCount].Capacity := FCapacity;
+      Inc(SessionsCount);
+    end;
+  end;
+
+  i := FindSession(NewSessionName);
+  if i <> -1 then
+  begin
+    //session already exists update the data
+    FCount := FSessions[i].Count;
+    FActions := FSessions[i].Actions;
+    FResults := FSessions[i].Results;
+    FCapacity := FSessions[i].Capacity;
+  end
+  else
+  begin
+    //no session create a new session
+    SetLength(FSessions, SessionsCount + 1);
+    FSessions[SessionsCount].Name := NewSessionName;
+    FSessions[SessionsCount].Count := 0;
+    FSessions[SessionsCount].Capacity := DEFAULT_CAPACITY;
+    SetLength(FSessions[SessionsCount].Actions, DEFAULT_CAPACITY);
+    SetLength(FSessions[SessionsCount].Results, DEFAULT_CAPACITY);
+    //Inc(SessionsCount);
+  end;
+  FSessionName := NewSessionName;
 end;
 
 function TChronoLog.GetActionStr(AIndex: Integer): String;
@@ -265,11 +343,31 @@ begin
   SetLength(FActions, Value);
 end;
 
+procedure TChronoLog.SetSessionName(const Value: String);
+begin
+  if FSessionName = Value then Exit;
+  UpdateSessionName(Value);
+end;
+
 procedure TChronoLog.UpdateCount;
 begin
   if FCount = FCapacity then
     Expand;
   Inc(FCount);
+end;
+
+procedure TChronoLog.UpdateCurrentSession;
+var
+  i: Integer;
+begin
+  i := FindSession(FSessionName);
+  if i <> -1 then
+  begin
+    FSessions[i].Count := FCount;
+    FSessions[i].Actions := FActions;
+    FSessions[i].Results := FResults;
+    FSessions[i].Capacity := FCapacity;
+  end;
 end;
 
 procedure TChronoLog.SaveToText (const FileName: String; ClearFile: Boolean = False);
