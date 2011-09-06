@@ -83,6 +83,10 @@ type
     procedure UpdateCount;
     procedure UpdateCurrentSession;
     procedure UpdateSessionName(const NewSessionName: String);
+    procedure WriteSessionResults(var AFile: Text; ACount: Cardinal;
+      AResults: TInt64Array; AActions: TIntArray; const Session: String);
+    procedure WriteActionResults(var AFile: Text; ACount: Cardinal;
+      AResults: TInt64Array; AActions: TIntArray; const Session: String; ActionId: Integer);
   public
     constructor Create;
     destructor Destroy; override;
@@ -293,15 +297,7 @@ begin
   end;
 
   i := FindSession(NewSessionName);
-  if i <> -1 then
-  begin
-    //session already exists update the data
-    FCount := FSessions[i].Count;
-    FActions := FSessions[i].Actions;
-    FResults := FSessions[i].Results;
-    FCapacity := FSessions[i].Capacity;
-  end
-  else
+  if i = -1 then
   begin
     //no session create a new session
     SetLength(FSessions, SessionsCount + 1);
@@ -310,9 +306,52 @@ begin
     FSessions[SessionsCount].Capacity := DEFAULT_CAPACITY;
     SetLength(FSessions[SessionsCount].Actions, DEFAULT_CAPACITY);
     SetLength(FSessions[SessionsCount].Results, DEFAULT_CAPACITY);
-    //Inc(SessionsCount);
+    i := SessionsCount;
   end;
+  // update data with the new selected session
+  FCount := FSessions[i].Count;
+  FActions := FSessions[i].Actions;
+  FResults := FSessions[i].Results;
+  FCapacity := FSessions[i].Capacity;
   FSessionName := NewSessionName;
+end;
+
+procedure TChronoLog.WriteSessionResults(var AFile: Text; ACount: Cardinal; AResults: TInt64Array; AActions: TIntArray; const Session: String);
+var
+  j, i: Integer;
+  ATime: Int64;
+begin
+  Writeln(AFile, LineEnding, PadRight('Session: "' + Session +'" (' + IntToStr(ACount) + ' results)', 43),'microsec     milisec     seconds');
+  Writeln(AFile, '-------------------------------------   -----------   ---------   ---------');
+  for i := 0 to ACount - 1 do
+  begin
+    //todo: reposition text
+    j := FDescriptions.IndexOfObject(TObject(AActions[i]));
+    if j <> - 1 then
+      Write(AFile, PadRight(IntToStr(i) + ' - ' + FDescriptions[j], 38))
+    else
+      Write(AFile, PadRight(IntToStr(i) + ' - ' + '#No Description#', 38));
+    ATime := AResults[i];
+    WriteLn(AFile, FormatedString(ATime): 13, FormatedString(Round(ATime/1000)): 12,
+      FormatedString(Round(ATime/1000000)): 12);
+  end;
+end;
+
+procedure TChronoLog.WriteActionResults(var AFile: Text; ACount: Cardinal;
+  AResults: TInt64Array; AActions: TIntArray; const Session: String; ActionId: Integer);
+var
+  i: Integer;
+  ATime: Int64;
+begin
+  for i := 0 to ACount - 1 do
+  begin
+    if AActions[i] <> ActionId then
+      continue;
+    Write(AFile, PadRight(Session, 38));
+    ATime := AResults[i];
+    WriteLn(AFile, FormatedString(ATime): 13, FormatedString(Round(ATime/1000)): 12,
+      FormatedString(Round(ATime/1000000)): 12);
+  end;
 end;
 
 function TChronoLog.GetActionStr(AIndex: Integer): String;
@@ -373,8 +412,11 @@ end;
 procedure TChronoLog.SaveToText (const FileName: String; ClearFile: Boolean = False);
 var
   AFile:Text;
-  Counter, Idx:Integer;
+  SessionCount, i, j: Integer;
+  ActionId: PtrInt;
+  SessionInfo: TSessionInfo;
 begin
+  UpdateCurrentSession;
   Assign(AFile, FileName);
   if FileExists(FileName) and not ClearFile then
   begin
@@ -386,24 +428,43 @@ begin
 
   Writeln(AFile,'########################################');
   Writeln(AFile,'TChronoLog results - ',FormatDateTime(ShortDateFormat+' hh:nn:ss',Now));
-  WriteLn(AFile,'Session: ',FSessionName);
 
-  Writeln(AFile,'Results (',FCount,'):                              microsec     milisec     seconds');
-  Writeln(AFile,'-------------------------------------   -----------   ---------   ---------');
-  for Counter:= 0 to FCount -1 do
+  SessionCount := Length(FSessions);
+  if SessionCount = 0 then
   begin
-    //todo: reposition text
-    Idx:=FDescriptions.IndexOfObject(TObject(FActions[Counter]));
-    if Idx <> -1 then
-      Write(AFile,PadRight(IntToStr(Counter)+' - '+FDescriptions[Idx],38))
-    else
-      Write(AFile,PadRight(IntToStr(Counter)+' - '+'#No Description#',38));
-    WriteLn(AFile,AsMicroSecondStr(Counter):13,
-      AsMiliSecondStr(Counter):12,AsSecondStr(Counter):12);
-  end;
+    WriteLn(AFile,'No Session Defined');
+    WriteSessionResults(AFile, FCount, FResults, FActions, '');
+  end
+  else
+  begin
+    WriteLn(AFile);
+    WriteLn(AFile, '===================');
+    WriteLn(AFile, 'Grouped By Sessions');
+    WriteLn(AFile, '===================');
+    for i := 0 to SessionCount - 1 do
+    begin
+      SessionInfo := FSessions[i];
+      WriteSessionResults(AFile, SessionInfo.Count, SessionInfo.Results, SessionInfo.Actions, SessionInfo.Name);
+    end;
+    WriteLn(AFile);
+    WriteLn(AFile, '==================');
+    WriteLn(AFile, 'Grouped By Actions');
+    WriteLn(AFile, '==================');
 
+    for j := 0 to FDescriptions.Count - 1 do
+    begin
+      ActionId := PtrInt(FDescriptions.Objects[j]);
+      WriteLn(AFile, LineEnding, PadRight('Action: "' + FDescriptions[j] + '"', 43), 'microsec     milisec     seconds');
+      Writeln(AFile, '-------------------------------------   -----------   ---------   ---------');
+      for i := 0 to SessionCount - 1 do
+      begin
+        SessionInfo := FSessions[i];
+        WriteActionResults(AFile, SessionInfo.Count, SessionInfo.Results, SessionInfo.Actions, SessionInfo.Name, ActionId);
+      end;
+    end;
+  end;
   WriteLn(AFile);
-  Writeln(AFile, 'Accumulated (Miliseconds): ', FormatedString(Round(Accumulated/1000)):12);
+  //Writeln(AFile, 'Accumulated (Miliseconds): ', FormatedString(Round(Accumulated/1000)):12);
   Close(AFile);
 end;
 
