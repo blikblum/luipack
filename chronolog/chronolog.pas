@@ -74,7 +74,7 @@ type
     function FormatedString (Value: Int64):String;
     function FindSession(const Name: String): Integer;
     function GetAverage:Int64;
-    function GetLastResult:Int64;
+    function GetElapsedTime: Int64;
     function GetAccumulated: Int64;
     procedure SetCapacity(Value: Cardinal);
     procedure SetSessionName(const Value: String);
@@ -104,7 +104,7 @@ type
     function GetSystemInfo:String;
     procedure SaveToText (const FileName: String; ClearFile: Boolean = False);
     property Average: Int64 read GetAverage;
-    property LastResult: Int64 read GetLastResult;
+    property ElapsedTime: Int64 read GetElapsedTime;
     property Accumulated: Int64 read GetAccumulated;
     property SessionName: String read FSessionName write SetSessionName;
     property Comments: String read FComments write FComments;
@@ -252,7 +252,7 @@ begin
     Result:=Accumulated;    
 end;
 
-function TChronoLog.GetLastResult: Int64;
+function TChronoLog.GetElapsedTime: Int64;
 begin
   Result:=FResults[FCount-1];
 end;
