@@ -59,8 +59,6 @@ type
   //todo: see effect of inlining Stop/Mark in the size
   //      add lap
   //      compare precision with ZenTimer
-  // add StartSEction
-  // rename RegisterId to RegisterAction
   TChronoLog = class
   private
     FZenTimer:TZenTimer;
@@ -69,7 +67,7 @@ type
     FCount: Cardinal;
     FSessions: TSessionInfoArray;
     FCapacity: Cardinal;
-    FDescriptions: TStringList;
+    FActionDefs: TStringList;
     FSessionName: String;
     FComments: String;
     procedure Expand;
@@ -95,7 +93,7 @@ type
     procedure Stop; inline;
     procedure Reset;
     procedure Mark(AId:Integer);
-    procedure RegisterId(AId:longint;const ADesc: String);
+    procedure RegisterAction(ActionId: PtrInt; const ActionName: String);
     function AsSecond (Index: Integer): Int64;
     function AsSecondStr (Index: Integer): String;
     function AsMiliSecond (Index: Integer): Int64;
@@ -126,13 +124,13 @@ begin
   SetCapacity(DEFAULT_CAPACITY);
   FZenTimer:=TZenTimer.Create;
   FZenTimer.AutoReset:=True;
-  FDescriptions:=TStringList.Create;
+  FActionDefs:=TStringList.Create;
 end;
 
 destructor TChronoLog.Destroy;
 begin
   FZenTimer.Destroy;
-  FDescriptions.Destroy;
+  FActionDefs.Destroy;
 end;
 
 procedure TChronoLog.Start;
@@ -166,9 +164,9 @@ begin
   FZenTimer.Start;
 end;
 
-procedure TChronoLog.RegisterId(AId: longint; const ADesc: String);
+procedure TChronoLog.RegisterAction(ActionId: PtrInt; const ActionName: String);
 begin
-  FDescriptions.AddObject(ADesc,TObject(AId))
+  FActionDefs.AddObject(ActionName, TObject(ActionId));
 end;
 
 function TChronoLog.AsSecond (Index: Integer): Int64;
@@ -326,9 +324,9 @@ begin
   for i := 0 to ACount - 1 do
   begin
     //todo: reposition text
-    j := FDescriptions.IndexOfObject(TObject(AActions[i]));
+    j := FActionDefs.IndexOfObject(TObject(AActions[i]));
     if j <> - 1 then
-      Write(AFile, PadRight(IntToStr(i) + ' - ' + FDescriptions[j], 38))
+      Write(AFile, PadRight(IntToStr(i) + ' - ' + FActionDefs[j], 38))
     else
       Write(AFile, PadRight(IntToStr(i) + ' - ' + '#No Description#', 38));
     ATime := AResults[i];
@@ -359,9 +357,9 @@ var
   i,AId:Integer;
 begin
   AId:=FActions[AIndex];
-  i:=FDescriptions.IndexOfObject(TObject(AId));
+  i:=FActionDefs.IndexOfObject(TObject(AId));
   if i <> -1 then
-    Result:=FDescriptions[i]
+    Result:=FActionDefs[i]
   else
     Result:='';
 end;
@@ -451,10 +449,10 @@ begin
     WriteLn(AFile, 'Grouped By Actions');
     WriteLn(AFile, '==================');
 
-    for j := 0 to FDescriptions.Count - 1 do
+    for j := 0 to FActionDefs.Count - 1 do
     begin
-      ActionId := PtrInt(FDescriptions.Objects[j]);
-      WriteLn(AFile, LineEnding, PadRight('Action: "' + FDescriptions[j] + '"', 43), 'microsec     milisec     seconds');
+      ActionId := PtrInt(FActionDefs.Objects[j]);
+      WriteLn(AFile, LineEnding, PadRight('Action: "' + FActionDefs[j] + '"', 43), 'microsec     milisec     seconds');
       Writeln(AFile, '-------------------------------------   -----------   ---------   ---------');
       for i := 0 to SessionCount - 1 do
       begin
