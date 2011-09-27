@@ -72,19 +72,14 @@ implementation
  
 function TStrBuf.GetAsString: String;
 begin
-  if FBuffer = '' then
-    FLength := 0;
   Result := LeftStr(FBuffer, FLength);
 end;
  
 procedure TStrBuf.Append(const S: String);
-var Len, Len1: Integer;
+var
+  Len, Len1: Integer;
 begin
   Len := Length(S);
-  if Len = 0 then
-    Exit;
-  if FBuffer = '' then
-    FLength := 0;
   Len1 := FLength + Len;
   if Len1 > Length(FBuffer) then
     SetLength(FBuffer, 2 * Len1);
