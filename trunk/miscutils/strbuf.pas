@@ -35,6 +35,12 @@ unit StrBuf;
   along with this library; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
+
+{
+  Based on http://freepascal-bits.blogspot.com/2010/02/simple-string-buffer.html
+  Modications by Luiz Américo:
+  - Renamed methods / properties to more sensible names
+}
  
 interface
  
@@ -47,13 +53,13 @@ type
  
   TStrBuf = object
   private
-    FLen: Integer;
-    FS: String;
-    function GetS: String;
+    FLength: Integer;
+    FBuffer: String;
+    function GetAsString: String;
   public
-    procedure W(const S: String);
-    procedure W(const Fmt: String; Args: array of const);
-    property S: String read GetS;
+    procedure Append(const S: String);
+    procedure Append(const Fmt: String; Args: array of const);
+    property AsString: String read GetAsString;
   end;
  
 operator +(var Buf: TStrBuf; const S: String): TStrBuf;
@@ -64,49 +70,49 @@ implementation
  
 { TStrBuf }
  
-function TStrBuf.GetS: String;
+function TStrBuf.GetAsString: String;
 begin
-  if FS = '' then
-    FLen := 0;
-  Result := LeftStr(FS, FLen);
+  if FBuffer = '' then
+    FLength := 0;
+  Result := LeftStr(FBuffer, FLength);
 end;
  
-procedure TStrBuf.W(const S: String);
+procedure TStrBuf.Append(const S: String);
 var Len, Len1: Integer;
 begin
   Len := Length(S);
   if Len = 0 then
     Exit;
-  if FS = '' then
-    FLen := 0;
-  Len1 := FLen + Len;
-  if Len1 > Length(FS) then
-    SetLength(FS, 2 * Len1);
-  Move(S[1], FS[FLen + 1], Len);
-  FLen += Len;
+  if FBuffer = '' then
+    FLength := 0;
+  Len1 := FLength + Len;
+  if Len1 > Length(FBuffer) then
+    SetLength(FBuffer, 2 * Len1);
+  Move(S[1], FBuffer[FLength + 1], Len);
+  FLength += Len;
 end;
  
-procedure TStrBuf.W(const Fmt: String; Args: array of const);
+procedure TStrBuf.Append(const Fmt: String; Args: array of const);
 begin
-  W(Format(Fmt, Args));
+  Append(Format(Fmt, Args));
 end;
  
 operator +(var Buf: TStrBuf; const S: String): TStrBuf;
 begin
-  Result.FS := Buf.FS;
-  Result.FLen := Buf.FLen;
-  Result.W(S);
+  Result.FBuffer := Buf.FBuffer;
+  Result.FLength := Buf.FLength;
+  Result.Append(S);
 end;
  
 operator :=(const S: String): TStrBuf;
 begin
-  Result.FLen := Length(S);
-  Result.FS := S;
+  Result.FLength := Length(S);
+  Result.FBuffer := S;
 end;
  
 operator :=(var Buf: TStrBuf): String;
 begin
-  Result := Buf.S;
+  Result := Buf.AsString;
 end;
  
 end.
