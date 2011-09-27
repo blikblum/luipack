@@ -40,6 +40,7 @@ unit StrBuf;
   Based on http://freepascal-bits.blogspot.com/2010/02/simple-string-buffer.html
   Modications by Luiz Américo:
   - Renamed methods / properties to more sensible names
+  - Code cleanup
 }
  
 interface
@@ -77,14 +78,14 @@ end;
  
 procedure TStrBuf.Append(const S: String);
 var
-  Len, Len1: Integer;
+  SLength, NewLength: Integer;
 begin
-  Len := Length(S);
-  Len1 := FLength + Len;
-  if Len1 > Length(FBuffer) then
-    SetLength(FBuffer, 2 * Len1);
-  Move(S[1], FBuffer[FLength + 1], Len);
-  FLength += Len;
+  SLength := Length(S);
+  NewLength := FLength + SLength;
+  if NewLength > Length(FBuffer) then
+    SetLength(FBuffer, 2 * NewLength);
+  Move(S[1], FBuffer[FLength + 1], SLength);
+  FLength := NewLength;
 end;
  
 procedure TStrBuf.Append(const Fmt: String; Args: array of const);
