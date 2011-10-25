@@ -11,6 +11,8 @@ type
 
   TControlSwitcher = class;
 
+  TVarRecArray = array of TVarRec;
+
   TControlCreateEvent = procedure(Sender: TControlSwitcher; NewControl: TControl) of object;
 
   { TControlInfo }
@@ -20,11 +22,13 @@ type
     FCaption: String;
     FControl: TControl;
     FControlClass: TControlClass;
+    FProperties: TVarRecArray;
     procedure SetControl(Value: TControl);
   protected
     function GetDisplayName: String; override;
   public
     property ControlClass: TControlClass read FControlClass write FControlClass;
+    property Properties: TVarRecArray read FProperties write FProperties;
   published
     property Caption: String read FCaption write FCaption;
     property Control: TControl read FControl write SetControl;
@@ -62,7 +66,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure AttachControl(const Title: String; Control: TControl);
-    procedure AttachControlClass(const Title: String; ControlClass: TControlClass);
+    procedure AttachControlClass(const Title: String; ControlClass: TControlClass;
+      const Properties: TVarRecArray = nil);
   published
     property ControlList: TControlList read FControlList write SetControlList;
     property OnControlCreate: TControlCreateEvent read FOnControlCreate write FOnControlCreate;
@@ -106,7 +111,7 @@ type
 implementation
 
 uses
-  LuiMiscUtils;
+  LuiMiscUtils, LuiRTTIUtils;
 
 { TControlSwitcher }
 
@@ -152,16 +157,18 @@ function TControlSwitcher.DoSelecting(OldCell, NewCell: Integer): Boolean;
 var
   Control: TControl;
   ControlClass: TControlClass;
+  ControlInfo: TControlInfo;
 begin
   Result := inherited DoSelecting(OldCell, NewCell);
   if Result then
   begin
    if (NewCell <> -1) then
    begin
-     Control := FControlList[NewCell].Control;
+     ControlInfo := FControlList[NewCell];
+     Control := ControlInfo.Control;
      if (Control = nil) then
      begin
-       ControlClass := FControlList[NewCell].ControlClass;
+       ControlClass := ControlInfo.ControlClass;
        if (ControlClass <> nil) and (Parent <> nil) then
        begin
           Control := ControlClass.Create(Parent);
@@ -169,7 +176,8 @@ begin
           //todo customize the size/location (maybe use the dock sites?)
           Control.Align := alClient;
           Control.Parent := Parent;
-          FControlList[NewCell].FControl := Control;
+          ControlInfo.FControl := Control;
+          SetObjectProperties(Control, ControlInfo.Properties);
           DoControlCreate(Control);
           CallMethod(Control, 'InitControl');
        end;
@@ -209,13 +217,14 @@ begin
 end;
 
 procedure TControlSwitcher.AttachControlClass(const Title: String;
-  ControlClass: TControlClass);
+  ControlClass: TControlClass; const Properties: TVarRecArray);
 var
   NewControlInfo: TControlInfo;
 begin
   NewControlInfo := TControlInfo(FControlList.Add);
   NewControlInfo.ControlClass := ControlClass;
   NewControlInfo.Caption := Title;
+  NewControlInfo.Properties := Properties;
   Cells.Add(Title);
 end;
 
