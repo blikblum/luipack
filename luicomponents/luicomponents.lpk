@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="luicomponents"/>
+    <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
       <Version Value="10"/>
       <PathDelim Value="\"/>
@@ -14,11 +15,17 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
+      <Linking>
+        <Debugging>
+          <GenerateDebugInfo Value="True"/>
+          <DebugInfoType Value="dsAuto"/>
+        </Debugging>
+      </Linking>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="11">
+    <Files Count="13">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -64,6 +71,14 @@
         <Filename Value="luidbexport.pas"/>
         <UnitName Value="LuiDBExport"/>
       </Item11>
+      <Item12>
+        <Filename Value="luiobjectutils.pas"/>
+        <UnitName Value="luiobjectutils"/>
+      </Item12>
+      <Item13>
+        <Filename Value="luiservices.pas"/>
+        <UnitName Value="luiservices"/>
+      </Item13>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
