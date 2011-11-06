@@ -20,10 +20,8 @@ type
   end;
   }
 
-  TVarRecArray = array of TVarRec;
 
-  TCreateObjectEvent = procedure(var Instance: TObject; const ProfileId: String;
-    const Params: TVarRecArray) of object;
+  TCreateObjectEvent = procedure(var Instance: TObject; const ProfileId: String) of object;
 
   TObjectToStringMap = specialize TFPGMap<PtrInt, String>;
 
@@ -36,16 +34,15 @@ type
     FActiveList: TObjectToStringMap;
     FAvailableList: TStringToObjectMap;
     FBaseClass: TClass;
-    FProfileList: TFPHashObjectList;
+    //FProfileList: TFPHashObjectList;
   protected
-    procedure DoCreateObject(var Instance: TObject; const ProfileId: String;
-      const Params: TVarRecArray); virtual; abstract;
+    procedure DoCreateObject(var Instance: TObject; const ProfileId: String); virtual; abstract;
     property BaseClass: TClass read FBaseClass write FBaseClass;
   public
     constructor Create;
     destructor Destroy; override;
     function Acquire(const ProfileId: string = ''): TObject;
-    procedure RegisterProfile(const ProfileId: String; const Params: TVarRecArray);
+    //procedure RegisterProfile(const ProfileId: String);
     procedure Release(Instance: TObject);
   end;
 
@@ -55,8 +52,7 @@ type
   private
     FOnCreateObject: TCreateObjectEvent;
   protected
-    procedure DoCreateObject(var Instance: TObject; const ProfileId: String;
-      const Params: TVarRecArray); override;
+    procedure DoCreateObject(var Instance: TObject; const ProfileId: String); override;
   public
     property BaseClass;
     property OnCreateObject: TCreateObjectEvent read FOnCreateObject write FOnCreateObject;
@@ -81,30 +77,11 @@ end;
 
 }
 
-type
 
-  { TObjectProfile }
-
-  TObjectProfile = class
-  private
-    FParams: TVarRecArray;
-  public
-    constructor Create(AParams: TVarRecArray);
-    property Params: TVarRecArray read FParams;
-  end;
-
-procedure TObjectPool.DoCreateObject(var Instance: TObject; const ProfileId: String;
-  const Params: TVarRecArray);
+procedure TObjectPool.DoCreateObject(var Instance: TObject; const ProfileId: String);
 begin
   if Assigned(FOnCreateObject) then
-    FOnCreateObject(Instance, ProfileId, Params);
-end;
-
-{ TObjectProfile }
-
-constructor TObjectProfile.Create(AParams: TVarRecArray);
-begin
-  FParams := AParams;
+    FOnCreateObject(Instance, ProfileId);
 end;
 
 { TCustomObjectPool }
@@ -134,15 +111,14 @@ begin
     Obj.Free;
   end;
   FActiveList.Destroy;
-  FProfileList.Free;
+  //FProfileList.Free;
   inherited Destroy;
 end;
 
 function TCustomObjectPool.Acquire(const ProfileId: string = ''): TObject;
 var
   i: Integer;
-  Profile: TObjectProfile;
-  Params: TVarRecArray;
+  //Profile: TObjectProfile;
 begin
   i := FAvailableList.IndexOf(ProfileId);
   if i > -1 then
@@ -156,15 +132,14 @@ begin
   begin
     // create an new object
     Result := nil;
-    Params := nil;
+    {
     if FProfileList <> nil then
     begin
       Profile := TObjectProfile(FProfileList.Find(ProfileId));
-      if Profile <> nil then
-        Params := Profile.Params;
-      //todo add option to exceptionif not found
+      //todo add option to exception if not found
     end;
-    DoCreateObject(Result, ProfileId, Params);
+    }
+    DoCreateObject(Result, ProfileId);
     if Result = nil then
       raise Exception.Create('ObjectPool.Acquire: Object not created');
     if not Result.InheritsFrom(BaseClass) then
@@ -173,13 +148,14 @@ begin
   end;
 end;
 
-procedure TCustomObjectPool.RegisterProfile(const ProfileId: String;
-  const Params: TVarRecArray);
+{
+procedure TCustomObjectPool.RegisterProfile(const ProfileId: String);
 begin
   if FProfileList = nil then
     FProfileList := TFPHashObjectList.Create(True);
   FProfileList.Add(ProfileId, TObjectProfile.Create(Params));
 end;
+}
 
 procedure TCustomObjectPool.Release(Instance: TObject);
 var
