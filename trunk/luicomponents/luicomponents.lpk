@@ -4,6 +4,7 @@
     <PathDelim Value="\"/>
     <Name Value="luicomponents"/>
     <AddToProjectUsesSection Value="True"/>
+    <Author Value="Luiz Américo Pereira Câmara / Rudy Velthuis (VarRecUtils)"/>
     <CompilerOptions>
       <Version Value="10"/>
       <PathDelim Value="\"/>
@@ -22,10 +23,14 @@
         </Debugging>
       </Linking>
       <Other>
+        <CompilerMessages>
+          <UseMsgFile Value="True"/>
+        </CompilerMessages>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="12">
+    <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
+    <Files Count="13">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -65,7 +70,7 @@
       </Item9>
       <Item10>
         <Filename Value="luijsonutils.pas"/>
-        <UnitName Value="luijsonutils"/>
+        <UnitName Value="LuiJSONUtils"/>
       </Item10>
       <Item11>
         <Filename Value="luidbexport.pas"/>
@@ -73,8 +78,12 @@
       </Item11>
       <Item12>
         <Filename Value="luiobjectutils.pas"/>
-        <UnitName Value="luiobjectutils"/>
+        <UnitName Value="LuiObjectUtils"/>
       </Item12>
+      <Item13>
+        <Filename Value="varrecutils.pas"/>
+        <UnitName Value="VarRecUtils"/>
+      </Item13>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
@@ -84,7 +93,7 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
