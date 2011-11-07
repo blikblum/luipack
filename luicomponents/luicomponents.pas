@@ -9,7 +9,7 @@ interface
 uses
   LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
   LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
-  LuiJSONUtils, LuiDBExport, LuiObjectUtils, LazarusPackageIntf;
+  LuiJSONUtils, LuiDBExport, LuiObjectUtils, VarRecUtils, LazarusPackageIntf;
 
 implementation
 
