@@ -5,13 +5,11 @@ unit ControlSwitcher;
 interface
 
 uses
-  Classes, SysUtils, LuiBar, Controls;
+  Classes, SysUtils, LuiBar, Controls, VarRecUtils;
 
 type
 
   TControlSwitcher = class;
-
-  TVarRecArray = array of TVarRec;
 
   TControlCreateEvent = procedure(Sender: TControlSwitcher; NewControl: TControl) of object;
 
@@ -22,13 +20,15 @@ type
     FCaption: String;
     FControl: TControl;
     FControlClass: TControlClass;
-    FProperties: TVarRecArray;
+    FProperties: TConstArray;
     procedure SetControl(Value: TControl);
   protected
     function GetDisplayName: String; override;
   public
+    destructor Destroy; override;
+    procedure SetProperties(Elements: array of const);
     property ControlClass: TControlClass read FControlClass write FControlClass;
-    property Properties: TVarRecArray read FProperties write FProperties;
+    property Properties: TConstArray read FProperties;
   published
     property Caption: String read FCaption write FCaption;
     property Control: TControl read FControl write SetControl;
@@ -67,7 +67,7 @@ type
     destructor Destroy; override;
     procedure AttachControl(const Title: String; Control: TControl);
     procedure AttachControlClass(const Title: String; ControlClass: TControlClass;
-      const Properties: TVarRecArray = nil);
+      const Properties: array of const);
   published
     property ControlList: TControlList read FControlList write SetControlList;
     property OnControlCreate: TControlCreateEvent read FOnControlCreate write FOnControlCreate;
@@ -217,14 +217,14 @@ begin
 end;
 
 procedure TControlSwitcher.AttachControlClass(const Title: String;
-  ControlClass: TControlClass; const Properties: TVarRecArray);
+  ControlClass: TControlClass; const Properties: array of const);
 var
   NewControlInfo: TControlInfo;
 begin
   NewControlInfo := TControlInfo(FControlList.Add);
   NewControlInfo.ControlClass := ControlClass;
   NewControlInfo.Caption := Title;
-  NewControlInfo.Properties := Properties;
+  NewControlInfo.SetProperties(Properties);
   Cells.Add(Title);
 end;
 
@@ -240,6 +240,17 @@ end;
 function TControlInfo.GetDisplayName: String;
 begin
   Result := FCaption;
+end;
+
+destructor TControlInfo.Destroy;
+begin
+  FinalizeConstArray(FProperties);
+  inherited Destroy;
+end;
+
+procedure TControlInfo.SetProperties(Elements: array of const);
+begin
+  FProperties := CreateConstArray(Elements);
 end;
 
 { TControlList }
