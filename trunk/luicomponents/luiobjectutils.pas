@@ -23,6 +23,8 @@ type
 
   TCreateObjectEvent = procedure(var Instance: TObject; const ProfileId: String) of object;
 
+  TNotifyObjectEvent = procedure(Instance: TObject; const ProfileId: String) of object;
+
   TObjectToStringMap = specialize TFPGMap<PtrInt, String>;
 
   TStringToObjectMap = specialize TFPGMap<String, PtrInt>;
@@ -34,10 +36,16 @@ type
     FActiveList: TObjectToStringMap;
     FAvailableList: TStringToObjectMap;
     FBaseClass: TClass;
+    FOnAcquireObject: TNotifyObjectEvent;
+    FOnReleaseObject: TNotifyObjectEvent;
     //FProfileList: TFPHashObjectList;
   protected
+    procedure DoAcquireObject(Instance: TObject; const ProfileId: String); virtual;
     procedure DoCreateObject(var Instance: TObject; const ProfileId: String); virtual; abstract;
+    procedure DoReleaseObject(Instance: TObject; const ProfileId: String); virtual;
     property BaseClass: TClass read FBaseClass write FBaseClass;
+    property OnAcquireObject: TNotifyObjectEvent read FOnAcquireObject write FOnAcquireObject;
+    property OnReleaseObject: TNotifyObjectEvent read FOnReleaseObject write FOnReleaseObject;
   public
     constructor Create;
     destructor Destroy; override;
@@ -55,7 +63,9 @@ type
     procedure DoCreateObject(var Instance: TObject; const ProfileId: String); override;
   public
     property BaseClass;
+    property OnAcquireObject;
     property OnCreateObject: TCreateObjectEvent read FOnCreateObject write FOnCreateObject;
+    property OnReleaseObject;
   end;
 
 
@@ -85,6 +95,19 @@ begin
 end;
 
 { TCustomObjectPool }
+
+procedure TCustomObjectPool.DoAcquireObject(Instance: TObject; const ProfileId: String);
+begin
+  if Assigned(FOnAcquireObject) then
+    FOnAcquireObject(Instance, ProfileId);
+end;
+
+procedure TCustomObjectPool.DoReleaseObject(Instance: TObject;
+  const ProfileId: String);
+begin
+  if Assigned(FOnReleaseObject) then
+    FOnReleaseObject(Instance, ProfileId);
+end;
 
 constructor TCustomObjectPool.Create;
 begin
@@ -146,6 +169,7 @@ begin
       raise Exception.Create('ObjectPool.Acquire: Instance does not inherits from BaseClass');
     FActiveList.Add(PtrInt(Result), ProfileId);
   end;
+  DoAcquireObject(Result, ProfileId);
 end;
 
 {
@@ -168,6 +192,7 @@ begin
     ProfileId := FActiveList.Data[i];
     FActiveList.Delete(i);
     FAvailableList.Add(ProfileId, PtrInt(Instance));
+    DoReleaseObject(Instance, ProfileId);
   end
   else
     raise Exception.Create('ObjectPool.Release: Instance not active');
