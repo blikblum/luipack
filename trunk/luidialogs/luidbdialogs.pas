@@ -103,7 +103,8 @@ begin
     EditForm := TEditDataSourceForm.Create(AParent);
     with EditForm do
     try
-      ParseDialogData;
+      if DialogData <> nil then
+        ParseDialogData;
       DataSet := ADataSet;
       ShowModal;
       Result := Modifications;
