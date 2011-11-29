@@ -30,7 +30,7 @@
       </Other>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="13">
+    <Files Count="14">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -84,6 +84,10 @@
         <Filename Value="varrecutils.pas"/>
         <UnitName Value="VarRecUtils"/>
       </Item13>
+      <Item14>
+        <Filename Value="luidbutils.pas"/>
+        <UnitName Value="LuiDBUtils"/>
+      </Item14>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
