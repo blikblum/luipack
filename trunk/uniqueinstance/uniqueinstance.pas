@@ -92,23 +92,23 @@ end;
 
 procedure TUniqueInstance.ReceiveMessage(Sender: TObject);
 var
-  TempArray: array of String;
-  Count,i: Integer;
+  ParamsArray: array of String;
+  Count: Integer;
 
-  procedure GetParams(const AStr: String);
+  procedure FillParamsArray(const ParamsStr: String);
   var
-    pos1,pos2:Integer;
+    pos1, pos2, i: Integer;
   begin
-    SetLength(TempArray, Count);
+    SetLength(ParamsArray, Count);
     //fill params
     i := 0;
-    pos1:=1;
-    pos2:=pos(Separator, AStr);
+    pos1 := 1;
+    pos2 := pos(Separator, ParamsStr);
     while pos1 < pos2 do
     begin
-      TempArray[i] := Copy(AStr, pos1, pos2 - pos1);
+      ParamsArray[i] := Copy(ParamsStr, pos1, pos2 - pos1);
       pos1 := pos2+1;
-      pos2 := posex(Separator, AStr, pos1);
+      pos2 := posex(Separator, ParamsStr, pos1);
       inc(i);
     end;
   end;
@@ -118,9 +118,8 @@ begin
   begin
     //MsgType stores ParamCount
     Count := FIPCServer.MsgType;
-    GetParams(FIPCServer.StringMessage);
-    FOnOtherInstance(Self, Count, TempArray);
-    SetLength(TempArray, 0);
+    FillParamsArray(FIPCServer.StringMessage);
+    FOnOtherInstance(Self, Count, ParamsArray);
   end;
 end;
 
