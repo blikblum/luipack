@@ -7,7 +7,7 @@ unit LuiSqliteComponents;
 interface
 
 uses
-  LuiDatasetCache, LazarusPackageIntf;
+  LuiDataCache, LazarusPackageIntf;
 
 implementation
 
