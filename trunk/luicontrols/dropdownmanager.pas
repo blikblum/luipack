@@ -11,15 +11,21 @@ type
 
   { TDropDownManager }
 
-  //todo: add create control on demand, OnCreateControl
+  //todo:
   // specific code for TForm/TFrame (make use of window shadow)
+
+  TDropDownCreateControl = procedure(Sender: TObject; Control: TControl) of object;
+
   TDropDownManager = class(TComponent)
   private
     FControl: TWinControl;
+    FControlClass: TWinControlClass;
     FMasterControl: TControl;
+    FOnCreateControl: TDropDownCreateControl;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
     function ControlGrabsFocus(AControl: TControl): Boolean;
+    procedure ControlNeeded;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
     function GetDroppedDown: Boolean;
     procedure RemoveHandlers;
@@ -31,10 +37,12 @@ type
   public
     destructor Destroy; override;
     procedure UpdateState;
+    property ControlClass: TWinControlClass read FControlClass write FControlClass;
     property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
   published
     property Control: TWinControl read FControl write FControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
+    property OnCreateControl: TDropDownCreateControl read FOnCreateControl write FOnCreateControl;
     property OnHide: TNotifyEvent read FOnHide write FOnHide;
     property OnShow: TNotifyEvent read FOnShow write FOnShow;
   end;
@@ -47,6 +55,27 @@ function TDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
   Result := (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and (GetParentForm(FControl) = GetParentForm(AControl));
+end;
+
+procedure TDropDownManager.ControlNeeded;
+begin
+  if FControl = nil then
+  begin
+    if FControlClass <> nil then
+    begin
+      FControl := FControlClass.Create(Self);
+      if FMasterControl <> nil then
+      begin
+        FControl.Parent := FMasterControl.Parent;
+        FControl.AnchorParallel(akLeft, 0, FMasterControl);
+        FControl.AnchorToNeighbour(akTop, 2, FMasterControl);
+      end;
+      if Assigned(FOnCreateControl) then
+        FOnCreateControl(Self, FControl);
+    end;
+    if FControl = nil then
+      raise Exception.Create('TDropDownWindow: Control not defined');
+  end;
 end;
 
 procedure TDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
@@ -90,8 +119,7 @@ end;
 
 procedure TDropDownManager.SetDroppedDown(const Value: Boolean);
 begin
-  if FControl = nil then
-    raise Exception.Create('TDropDownWindow.Visible: Control not set');
+  ControlNeeded;
   if FControl.Visible = Value then
     Exit;
   FControl.Visible := Value;
@@ -131,8 +159,8 @@ end;
 
 procedure TDropDownManager.UpdateState;
 begin
-  if FControl <> nil then
-    SetState(False);
+  ControlNeeded;
+  SetState(False);
 end;
 
 end.
