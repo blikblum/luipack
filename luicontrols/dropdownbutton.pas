@@ -5,30 +5,43 @@ unit DropDownButton;
 interface
 
 uses
-  Classes, SysUtils, DropDownManager, Controls, LCLType, Buttons, Forms;
+  Types, Classes, SysUtils, DropDownManager, Controls, LCLType, Buttons, Forms,
+  Graphics, LCLVersion;
 
 type
 
-  { TDropDownButton }
+  TDropDownButtonOption = (dboShowIndicator);
 
+  TDropDownButtonOptions = set of TDropDownButtonOption;
+
+  { TDropDownButton }
+  //todo add TDropDownBaseButton or TCustomDropDownButton to merge functions of TMenuButton
   TDropDownButton = class(TCustomSpeedButton)
   private
+    FClientWidth: Integer;
+    FContentWidth: Integer;
     FManager: TDropDownManager;
+    FOptions: TDropDownButtonOptions;
     procedure DropDownHide(Sender: TObject);
     procedure FormVisibleChange(Sender: TObject; Form: TCustomForm);
     function GetDropDownControl: TWinControl;
     function GetDroppedDown: Boolean;
     procedure SetDropDownControl(const Value: TWinControl);
     procedure SetDroppedDown(const Value: Boolean);
+    procedure SetOptions(Value: TDropDownButtonOptions);
   protected
+    function GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
+    function GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Click; override;
+    procedure Paint; override;
     property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
   published
     property DropDownControl: TWinControl read GetDropDownControl write SetDropDownControl;
+    property Options: TDropDownButtonOptions read FOptions write SetOptions default [dboShowIndicator];
     //
     property Action;
     property Align;
@@ -66,6 +79,39 @@ type
   end;
 
 implementation
+
+uses
+  MenuButton;
+
+function SuccPoint(const P: TPoint): TPoint;
+begin
+  Result := Point(P.x+1,P.y+1);
+end;
+
+function CalculateArrowPoints(XOffset, AWidth, AHeight: Integer): TArrowPoints;
+var
+  ArrowTop, ArrowWidth: Integer;
+begin
+  ArrowWidth := (AWidth - 1) div 2;
+  if Odd(ArrowWidth) then
+    Dec(ArrowWidth);
+  ArrowTop := (AHeight - (ArrowWidth div 2)) div 2;
+  with Result[acLeft] do
+  begin
+    X := ((AWidth - ArrowWidth) div 2) - 1 + XOffset;
+    Y := ArrowTop;
+  end;
+  with Result[acRight] do
+  begin
+    X := Result[acLeft].X + ArrowWidth;
+    Y := ArrowTop;
+  end;
+  with Result[acBottom] do
+  begin
+    X := Result[acLeft].X + (ArrowWidth div 2);
+    Y := ArrowTop + (ArrowWidth div 2);
+  end;
+end;
 
 
 { TDropDownButton }
@@ -106,6 +152,42 @@ begin
   FManager.DroppedDown := Value;
 end;
 
+procedure TDropDownButton.SetOptions(Value: TDropDownButtonOptions);
+begin
+  if FOptions = Value then exit;
+  FOptions := Value;
+end;
+
+function TDropDownButton.GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+begin
+  Result := inherited GetGlyphSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
+  if (dboShowIndicator in FOptions) then
+  begin
+    Inc(FContentWidth, Result.Cx);
+    if Result.cx > 0 then
+    begin
+      //if no glyph the returned text width must be smaller
+      if Result.cx = FContentWidth then
+        Inc(Result.cx, 6)
+      else
+        Inc(Result.cx, 12);
+    end;
+  end;
+end;
+
+function TDropDownButton.GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+begin
+  Result := inherited GetTextSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
+  if (dboShowIndicator in FOptions) then
+  begin
+    FClientWidth := PaintRect.Right - PaintRect.Left;
+    if Layout in [blGlyphLeft, blGlyphRight] then
+      Inc(FContentWidth, Result.cx);
+    if not ShowCaption or (Caption = '') then
+      Inc(Result.Cx, 6);
+  end;
+end;
+
 procedure TDropDownButton.Loaded;
 begin
   inherited Loaded;
@@ -121,6 +203,7 @@ begin
   //necessary to the button toggle
   AllowAllUp := True;
   GroupIndex := 1;
+  FOptions := [dboShowIndicator];
 end;
 
 destructor TDropDownButton.Destroy;
@@ -133,6 +216,32 @@ procedure TDropDownButton.Click;
 begin
   inherited Click;
   FManager.DroppedDown := Down;
+end;
+
+procedure TDropDownButton.Paint;
+var
+  ArrowPoints: TArrowPoints;
+  XOffset: Integer;
+begin
+  FContentWidth := 0;
+  inherited Paint;
+  {
+  if (dboShowIndicator in FOptions) then
+  begin
+    Canvas.Brush.Color := clBlack;
+    XOffset := (FClientWidth - FContentWidth) div 2;
+    if XOffset >= 6 then
+      Dec(XOffset, 1)
+    else
+      Dec(XOffset, 2);
+    ArrowPoints := CalculateArrowPoints(FContentWidth + XOffset, 10, Height);
+    if FState = bsDown then
+      Canvas.Polygon([SuccPoint(ArrowPoints[acLeft]), SuccPoint(ArrowPoints[acRight]),
+        SuccPoint(ArrowPoints[acBottom])])
+    else
+      Canvas.Polygon([ArrowPoints[acLeft], ArrowPoints[acRight], ArrowPoints[acBottom]]);
+  end;
+  }
 end;
 
 end.
