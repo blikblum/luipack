@@ -18,6 +18,7 @@ type
   public
     destructor Destroy; override;
     procedure Load;
+    class function Load(const AFileName: String): TJSONData;
     class procedure Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
     property Data: TJSONData read FData ;
     property FileName: String read FFileName write FFileName;
@@ -270,6 +271,37 @@ begin
     begin
        FData.Free;
        raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [FFileName, E.Message]);
+    end;
+  end;
+end;
+
+class function TJSONFile.Load(const AFileName: String): TJSONData;
+var
+  Parser: TJSONParser;
+  Stream: TFileStream;
+begin
+  Result := nil;
+  //todo: handle UTF-8
+  if not FileExists(AFileName) then
+    raise Exception.CreateFmt('TJSONFile - File "%s" does not exist', [AFileName]);
+  Stream := nil;
+  Parser := nil;
+  try
+    try
+      Stream := TFileStream.Create(AFileName, fmOpenRead);
+      Parser := TJSONParser.Create(Stream);
+      Result := Parser.Parse;
+    finally
+      Parser.Free;
+      Stream.Free;
+    end;
+  except
+    on E: EFOpenError do
+      raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [AFileName, E.Message]);
+    on E: EJSONScanner do
+    begin
+       Result.Free;
+       raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [AFileName, E.Message]);
     end;
   end;
 end;
