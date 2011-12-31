@@ -737,7 +737,7 @@ uses
   Math, dbconst, fgl {$ifdef DEBUG_VDBGRID}, vtlogger{$endif};
 
 type
-  TIntegerList = specialize TFPGList <Integer>;
+  TIntegerList = {$ifdef VER2_4}specialize{$endif} TFPGList <Integer>;
 
 function NullVar2Int(Value: Variant): Integer;
 begin
