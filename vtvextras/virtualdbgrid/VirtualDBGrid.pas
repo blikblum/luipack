@@ -1233,6 +1233,7 @@ constructor TVirtualDBGridDataLink.Create(Grid: TCustomVirtualDBGrid);
 begin
   inherited Create;
   FGrid := Grid;
+  VisualControl := True;
 end;
 
 procedure TVirtualDBGridDataLink.ActiveChanged;
