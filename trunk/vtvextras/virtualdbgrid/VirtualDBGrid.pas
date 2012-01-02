@@ -264,13 +264,13 @@ type
 
   TRecordDataClass = class of TRecordData;
 
-  { TVirtualDBTreeDataLink }
+  { TVirtualDBGridDataLink }
 
-  TVirtualDBTreeDataLink = class(TDataLink)
+  TVirtualDBGridDataLink = class(TDataLink)
   private
-    FVirtualDBTree: TCustomVirtualDBGrid;
+    FGrid: TCustomVirtualDBGrid;
   public
-    constructor Create(ATree: TCustomVirtualDBGrid); virtual;
+    constructor Create(Grid: TCustomVirtualDBGrid);
   protected
     procedure ActiveChanged; override;
     procedure DataSetChanged; override;
@@ -332,7 +332,7 @@ type
   TVTDBOptions = class(TPersistent)
   private
     fOwner:             TCustomVirtualDBGrid;
-    fDataLink:          TVirtualDBTreeDataLink;
+    fDataLink:          TVirtualDBGridDataLink;
     fIndicatorImIndex:  TImageIndex;
     fIndicatorAlign:    TIndicatorAlign;
     fIndicatorVAlign:   TIndicatorVAlign;
@@ -359,7 +359,7 @@ type
     procedure Assign(Source: TPersistent); override;
 
     property Treeview: TCustomVirtualDBGrid read FOwner;
-    property DataLink: TVirtualDBTreeDataLink read FDataLink;
+    property DataLink: TVirtualDBGridDataLink read FDataLink;
   published
     property DataSource:          TDataSource      read GetDataSource      write SetDataSource;
     property IndicatorImageIndex: TImageIndex      read fIndicatorImIndex  write SetIndicatorImIndex default -1;
@@ -484,7 +484,8 @@ type
     function GetRecordDataClass: TRecordDataClass; virtual;
 
     procedure DataLinkActiveChanged; virtual;
-    procedure DataLinkChanged; virtual;
+    procedure DataLinkDatasetChanged; virtual;
+    procedure DataLinkDatasetScrolled(Distance: Integer); virtual;
     procedure DataLinkRecordChanged(Field: TField); virtual;
 
     function GetDataSet: TDataSet; inline;
@@ -1226,54 +1227,52 @@ end;
 
 
 { ============================================================================ }
-{ --- TVirtualDBTreeDataLink ------------------------------------------------- }
+{ --- TVirtualDBGridDataLink ------------------------------------------------- }
 
-constructor TVirtualDBTreeDataLink.Create(ATree: TCustomVirtualDBGrid);
+constructor TVirtualDBGridDataLink.Create(Grid: TCustomVirtualDBGrid);
 begin
   inherited Create;
-  FVirtualDBTree := ATree;
+  FGrid := Grid;
 end;
 
-procedure TVirtualDBTreeDataLink.ActiveChanged;
+procedure TVirtualDBGridDataLink.ActiveChanged;
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'ActiveChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'ActiveChanged');
-  if Active and Assigned(DataSource) then
-    if Assigned(DataSource.DataSet) then
-      if DataSource.DataSet.IsUnidirectional then
-        DatabaseError(SUniDirectional);
+  if Active and DataSet.IsUnidirectional then
+    DatabaseError(SUniDirectional);
 
-  FVirtualDBTree.DataLinkActiveChanged;
+  FGrid.DataLinkActiveChanged;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ActiveChanged');{$endif}
 end;
 
-procedure TVirtualDBTreeDataLink.DataSetChanged;
+procedure TVirtualDBGridDataLink.DataSetChanged;
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DatasetChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetChanged');
-  FVirtualDBTree.DataLinkChanged;
+  FGrid.DataLinkDatasetChanged;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DatasetChanged');{$endif}
 end;
 
-procedure TVirtualDBTreeDataLink.RecordChanged(Field: TField);
+procedure TVirtualDBGridDataLink.RecordChanged(Field: TField);
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'RecordChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'RecordChanged');
-  FVirtualDBTree.DataLinkRecordChanged(Field);
+  FGrid.DataLinkRecordChanged(Field);
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'RecordChanged');{$endif}
 end;
 
 
-procedure TVirtualDBTreeDataLink.DataSetScrolled(Distance: Integer);
+procedure TVirtualDBGridDataLink.DataSetScrolled(Distance: Integer);
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataSetScrolled');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetScrolled');
-  FVirtualDBTree.SetFocusToActualRecNo;
+  FGrid.DataLinkDatasetScrolled(Distance);
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DataSetScrolled');{$endif}
 end;
 
 
-{ --- TVirtualDBTreeDataLink ------------------------------------------------- }
+{ --- TVirtualDBGridDataLink ------------------------------------------------- }
 { ============================================================================ }
 
 
@@ -1861,7 +1860,7 @@ constructor TVTDBOptions.Create(AOwner: TCustomVirtualDBGrid);
 begin
   inherited Create;
   FOwner:=             AOwner;
-  FDataLink:=          TVirtualDBTreeDataLink.Create(AOwner);
+  FDataLink:=          TVirtualDBGridDataLink.Create(AOwner);
   fIndicatorImIndex:=  -1;
   fIndicatorAlign:=    aiCenter;
   fIndicatorVAlign:=   aiMiddle;
@@ -2136,7 +2135,7 @@ begin
   end;
 end;
 
-procedure TCustomVirtualDBGrid.DataLinkChanged;
+procedure TCustomVirtualDBGrid.DataLinkDatasetChanged;
 var
   DoSort: Boolean;
 begin
@@ -2183,6 +2182,11 @@ begin
     end;
   end;
 
+end;
+
+procedure TCustomVirtualDBGrid.DataLinkDatasetScrolled(Distance: Integer);
+begin
+  SetFocusToActualRecNo;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkRecordChanged(Field: TField);
