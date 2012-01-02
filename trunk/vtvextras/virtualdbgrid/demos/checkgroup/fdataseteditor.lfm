@@ -1,0 +1,62 @@
+object DatasetEditorFrame: TDatasetEditorFrame
+  Left = 0
+  Height = 376
+  Top = 0
+  Width = 253
+  ClientHeight = 376
+  ClientWidth = 253
+  TabOrder = 0
+  DesignLeft = 411
+  DesignTop = 244
+  object Grid: TVirtualDBGrid
+    Left = 2
+    Height = 372
+    Top = 2
+    Width = 211
+    Align = alClient
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Color = clBtnFace
+        Options = [coAllowClick, coEnabled, coParentBidiMode, coVisible, coAllowFocus]
+        Position = 0
+        Width = 15
+        ColumnType = ctIndicator
+      end    
+      item
+        Position = 1
+        Text = 'Name'
+        Width = 160
+        FieldName = 'Name'
+        ColumnType = ctDBField
+      end>
+    Header.DefaultHeight = 17
+    Header.Options = [hoColumnResize, hoDrag, hoHotTrack, hoShowHint, hoShowSortGlyphs, hoVisible]
+    TabOrder = 0
+    BorderSpacing.Right = 38
+    BorderSpacing.Around = 2
+    DBOptions.OddRowColor = 16119285
+    DBOptions.EvenRowColor = clWindow
+    DBOptions.SortColumnBgColor = 14745599
+  end
+  object AddButton: TButton
+    Left = 217
+    Height = 32
+    Top = 2
+    Width = 32
+    Anchors = [akTop, akRight]
+    Caption = '+'
+    OnClick = AddButtonClick
+    TabOrder = 1
+  end
+  object DeleteButton: TButton
+    Left = 217
+    Height = 32
+    Top = 38
+    Width = 32
+    Anchors = [akTop, akRight]
+    Caption = '-'
+    OnClick = DeleteButtonClick
+    TabOrder = 2
+  end
+end

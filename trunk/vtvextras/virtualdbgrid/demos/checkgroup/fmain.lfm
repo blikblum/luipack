@@ -1,0 +1,187 @@
+object MainForm: TMainForm
+  Left = 398
+  Height = 334
+  Top = 253
+  Width = 487
+  Caption = 'VirtualDBCheckGroup Demo'
+  ClientHeight = 334
+  ClientWidth = 487
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '0.9.31'
+  object Label1: TLabel
+    Left = 8
+    Height = 14
+    Top = 9
+    Width = 28
+    Caption = 'Items'
+    ParentColor = False
+  end
+  object DetailsGroupBox: TGroupBox
+    Left = 256
+    Height = 313
+    Top = 9
+    Width = 216
+    Caption = 'Details'
+    ClientHeight = 295
+    ClientWidth = 212
+    TabOrder = 0
+    object Label2: TLabel
+      Left = 10
+      Height = 14
+      Top = 1
+      Width = 28
+      Caption = 'Name'
+      ParentColor = False
+    end
+    object TagsLabel: TLabel
+      Left = 10
+      Height = 14
+      Top = 48
+      Width = 24
+      Caption = 'Tags'
+      ParentColor = False
+    end
+    object NameEdit: TDBEdit
+      Left = 10
+      Height = 21
+      Top = 16
+      Width = 188
+      DataField = 'Name'
+      DataSource = ItemsDatasource
+      CharCase = ecNormal
+      MaxLength = 0
+      TabOrder = 0
+    end
+    object EditTagsButton: TButton
+      Left = 134
+      Height = 25
+      Top = 263
+      Width = 75
+      Caption = 'Edit Tags'
+      OnClick = EditTagsButtonClick
+      TabOrder = 1
+    end
+  end
+  inline DatasetEditorFrame1: TDatasetEditorFrame
+    Height = 298
+    Top = 24
+    ClientHeight = 298
+    TabOrder = 1
+    inherited Grid: TVirtualDBGrid
+      Height = 294
+      DBOptions.DataSource = ItemsDatasource
+    end
+  end
+  object ItemsDataset: TSqlite3Dataset
+    FileName = 'data.db'
+    SaveOnClose = True
+    TableName = 'Items'
+    left = 48
+    top = 48
+    object ItemsDatasetId: TAutoIncField
+      DisplayWidth = 10
+      FieldKind = fkData
+      FieldName = 'Id'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ItemsDatasetName: TStringField
+      DisplayWidth = 255
+      FieldKind = fkData
+      FieldName = 'Name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+  end
+  object TagsDataset: TSqlite3Dataset
+    FileName = 'data.db'
+    TableName = 'Tags'
+    left = 48
+    top = 104
+    object TagsDatasetId: TAutoIncField
+      DisplayWidth = 10
+      FieldKind = fkData
+      FieldName = 'Id'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object TagsDatasetName: TStringField
+      DisplayWidth = 255
+      FieldKind = fkData
+      FieldName = 'Name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+  end
+  object ItemTagsDataset: TSqlite3Dataset
+    IndexFieldNames = 'Item'
+    FileName = 'data.db'
+    SaveOnClose = True
+    SaveOnRefetch = True
+    TableName = 'ItemTags'
+    MasterSource = ItemsDatasource
+    MasterFields = 'Id'
+    left = 48
+    top = 176
+    object ItemTagsDatasetTag: TLongintField
+      DisplayWidth = 10
+      FieldKind = fkData
+      FieldName = 'Tag'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ItemTagsDatasetItem: TLongintField
+      DisplayWidth = 10
+      FieldKind = fkData
+      FieldName = 'Item'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ItemTagsDatasetId: TAutoIncField
+      DisplayWidth = 10
+      FieldKind = fkData
+      FieldName = 'Id'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object ItemsDatasource: TDatasource
+    DataSet = ItemsDataset
+    left = 136
+    top = 48
+  end
+  object TagsDatasource: TDatasource
+    DataSet = TagsDataset
+    left = 136
+    top = 104
+  end
+  object ItemTagsDatasource: TDatasource
+    DataSet = ItemTagsDataset
+    left = 136
+    top = 176
+  end
+end

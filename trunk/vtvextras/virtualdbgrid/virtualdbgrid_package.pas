@@ -1,5 +1,5 @@
 { This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+  This source is only used to compile and install the package.
  }
 
 unit virtualdbgrid_package; 
@@ -7,7 +7,7 @@ unit virtualdbgrid_package;
 interface
 
 uses
-  VirtualDBGrid, registervirtualdbgrid, LazarusPackageIntf; 
+  VirtualDBGrid, registervirtualdbgrid, VirtualDBCheckGroup, LazarusPackageIntf;
 
 implementation
 
