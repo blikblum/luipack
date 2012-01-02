@@ -1239,8 +1239,8 @@ begin
   //Logger.SendCallStack(lcAll, 'ActiveChanged');
   if Active and DataSet.IsUnidirectional then
     DatabaseError(SUniDirectional);
-
-  FGrid.DataLinkActiveChanged;
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.DataLinkActiveChanged;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'ActiveChanged');{$endif}
 end;
 
@@ -1248,7 +1248,8 @@ procedure TVirtualDBGridDataLink.DataSetChanged;
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DatasetChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetChanged');
-  FGrid.DataLinkDatasetChanged;
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.DataLinkDatasetChanged;
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DatasetChanged');{$endif}
 end;
 
@@ -1256,7 +1257,8 @@ procedure TVirtualDBGridDataLink.RecordChanged(Field: TField);
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'RecordChanged');{$endif}
   //Logger.SendCallStack(lcAll, 'RecordChanged');
-  FGrid.DataLinkRecordChanged(Field);
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.DataLinkRecordChanged(Field);
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'RecordChanged');{$endif}
 end;
 
@@ -1265,7 +1267,8 @@ procedure TVirtualDBGridDataLink.DataSetScrolled(Distance: Integer);
 begin
   {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataSetScrolled');{$endif}
   //Logger.SendCallStack(lcAll, 'DatasetScrolled');
-  FGrid.DataLinkDatasetScrolled(Distance);
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.DataLinkDatasetScrolled(Distance);
   {$ifdef DEBUG_VDBGRID}Logger.ExitMethod(lcAll, 'DataSetScrolled');{$endif}
 end;
 
@@ -2075,8 +2078,7 @@ procedure TCustomVirtualDBGrid.DataLinkActiveChanged;
 var
   ColumnPosition: Integer;
 begin
-  if (not (csLoading in ComponentState)) and
-     (not IsDataLoading) then
+  if not IsDataLoading then
   begin
      IncLoadingDataFlag;
      BeginUpdate;
@@ -2132,9 +2134,7 @@ begin
   // only if DBOptions.RecordCountType = rcFromDataset is set and we know
   // how many records is in the dataset
 
-  if (not (csLoading in ComponentState)) and
-     (DBOptions.RecordCountType = rcFromDataset) and
-     (not IsDataLoading) then
+  if (DBOptions.RecordCountType = rcFromDataset) and not IsDataLoading then
   begin
     if fDataLink.Active then
     begin
@@ -2175,13 +2175,12 @@ end;
 
 procedure TCustomVirtualDBGrid.DataLinkDatasetScrolled(Distance: Integer);
 begin
-  if not (csLoading in ComponentState) then
-    SetFocusToActualRecNo;
+  SetFocusToActualRecNo;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkRecordChanged(Field: TField);
 begin
-  if not (csLoading in ComponentState) and not IsDataLoading then
+  if not IsDataLoading then
   begin
      IncLoadingDataFlag;
      try
