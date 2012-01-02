@@ -19,6 +19,7 @@ type
     FKeyField: String;
     FCheckField: String;
     FUpdatingCheckState: Boolean;
+    procedure Changed;
     procedure CheckDataLinkActiveChanged;
     procedure CheckDataLinkDatasetChanged;
     function FindNodeByValue(const FieldName: String; Value: Variant): PVirtualNode;
@@ -29,9 +30,11 @@ type
     procedure SetCheckField(const Value: String);
     procedure UpdateCheckStates;
   protected
+    procedure DataLinkDatasetChanged; override;
     procedure DoChecked(Node: PVirtualNode); override;
     procedure DoInitNode(AParent, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -83,12 +86,14 @@ end;
 
 procedure TVirtualDBCheckGroupDataLink.ActiveChanged;
 begin
-  FGrid.CheckDataLinkActiveChanged;
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.CheckDataLinkActiveChanged;
 end;
 
 procedure TVirtualDBCheckGroupDataLink.DataSetChanged;
 begin
-  FGrid.CheckDataLinkDatasetChanged;
+  if not (csLoading in FGrid.ComponentState) then
+    FGrid.CheckDataLinkDatasetChanged;
 end;
 
 { TVirtualDBCheckGroup }
@@ -96,6 +101,12 @@ end;
 procedure TVirtualDBCheckGroup.SetCheckSource(Value: TDataSource);
 begin
   FCheckDataLink.DataSource := Value;
+end;
+
+procedure TVirtualDBCheckGroup.Changed;
+begin
+  if not (csLoading in ComponentState) then
+    UpdateCheckStates;
 end;
 
 procedure TVirtualDBCheckGroup.CheckDataLinkActiveChanged;
@@ -149,12 +160,14 @@ procedure TVirtualDBCheckGroup.SetKeyField(const Value: String);
 begin
   if FKeyField = Value then Exit;
   FKeyField := Value;
+  Changed;
 end;
 
 procedure TVirtualDBCheckGroup.SetCheckField(const Value: String);
 begin
   if FCheckField = Value then Exit;
   FCheckField := Value;
+  Changed;
 end;
 
 procedure TVirtualDBCheckGroup.UpdateCheckStates;
@@ -202,6 +215,13 @@ begin
   end;
 end;
 
+procedure TVirtualDBCheckGroup.DataLinkDatasetChanged;
+begin
+  inherited DataLinkDatasetChanged;
+  if LinkedDataSet.State <> dsInsert then
+    UpdateCheckStates;
+end;
+
 procedure TVirtualDBCheckGroup.DoChecked(Node: PVirtualNode);
 var
   OldRecNo: Integer;
@@ -240,12 +260,19 @@ begin
   Node^.CheckType := ctCheckBox;
 end;
 
+procedure TVirtualDBCheckGroup.Loaded;
+begin
+  inherited Loaded;
+  Changed;
+end;
+
 constructor TVirtualDBCheckGroup.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FCheckDataLink := TVirtualDBCheckGroupDataLink.Create(Self);
   Header.Options := Header.Options - [hoVisible];
   TreeOptions.MiscOptions := TreeOptions.MiscOptions + [toCheckSupport];
+  TreeOptions.PaintOptions := TreeOptions.PaintOptions + [toAlwaysHideSelection] - [toHideFocusRect];
 end;
 
 destructor TVirtualDBCheckGroup.Destroy;
