@@ -2229,7 +2229,7 @@ procedure TCustomVirtualDBGrid.DoFocusChange(Node: PVirtualNode; Column: TColumn
 var
   Data: PNodeData;
 begin
-  if (LinkedDataSet <> nil) and (LinkedDataSet.Active) and not IsDataLoading then
+  if fDataLink.Active and not IsDataLoading then
   begin
     Data := InternalGetNodeData(Node);
     if IsDataOk(Data) then
@@ -2412,7 +2412,7 @@ begin
     PostChanges := False;
     DoPostChanges(DBColumn.FieldName, Column, DBColumn.ColumnType, Data.RecordData,
       Node.Index, PostText, PostChanges);
-    if PostChanges and Assigned(LinkedDataSet) and LinkedDataSet.CanModify then
+    if PostChanges and fDataLink.Active and LinkedDataSet.CanModify then
     begin
       WField := LinkedDataSet.FindField(DBColumn.FieldName);
       if WField <> nil then
@@ -2709,7 +2709,7 @@ begin
   Result := 0;
   if DBOptions.RecordCountType = rcFromDataset then
   begin
-    if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+    if fDataLink.Active then
       Result := LinkedDataSet.RecordCount;
   end
   else
@@ -2954,9 +2954,8 @@ end;
 procedure TCustomVirtualDBGrid.UpdateVisibleDBTree(AlwaysUpdate: Boolean;
   UpdateLoadedData: Boolean);
 begin
-  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
-    Exit;
-  UpdateDBTree(TopNode, GetVisibleNodesCount, AlwaysUpdate, UpdateLoadedData);
+  if fDataLink.Active and not IsDataLoading then
+    UpdateDBTree(TopNode, GetVisibleNodesCount, AlwaysUpdate, UpdateLoadedData);
 end;
 
 procedure TCustomVirtualDBGrid.ReInitializeDBGrid;
@@ -3012,13 +3011,14 @@ end;
 
 procedure TCustomVirtualDBGrid.UpdateAllRecords(UpdateLoadedData: Boolean = True);
 begin
-  if not Assigned(LinkedDataSet) or not LinkedDataSet.Active or IsDataLoading then
-    Exit;
-  BeginUpdate;
-  try
-    UpdateDBTree(GetFirst, VisibleCount, False, UpdateLoadedData);
-  finally
-    EndUpdate;
+  if fDataLink.Active and not IsDataLoading then
+  begin
+    BeginUpdate;
+    try
+      UpdateDBTree(GetFirst, VisibleCount, False, UpdateLoadedData);
+    finally
+      EndUpdate;
+    end;
   end;
 end;
 
@@ -3358,7 +3358,7 @@ end;
 
 function TCustomVirtualDBGrid.GetCurrentDBRecNo: LongInt;
 begin
-  if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+  if fDataLink.Active then
     Result := LinkedDataSet.RecNo
   else
     Result := 0;
