@@ -332,7 +332,6 @@ type
   TVTDBOptions = class(TPersistent)
   private
     fOwner:             TCustomVirtualDBGrid;
-    fDataLink:          TVirtualDBGridDataLink;
     fIndicatorImIndex:  TImageIndex;
     fIndicatorAlign:    TIndicatorAlign;
     fIndicatorVAlign:   TIndicatorVAlign;
@@ -354,12 +353,9 @@ type
   protected
     function GetOwner: TPersistent; override;
   public
-    constructor Create(AOwner: TCustomVirtualDBGrid); virtual;
-    destructor Destroy; override;
+    constructor Create(AOwner: TCustomVirtualDBGrid);
     procedure Assign(Source: TPersistent); override;
-
     property Treeview: TCustomVirtualDBGrid read FOwner;
-    property DataLink: TVirtualDBGridDataLink read FDataLink;
   published
     property DataSource:          TDataSource      read GetDataSource      write SetDataSource;
     property IndicatorImageIndex: TImageIndex      read fIndicatorImIndex  write SetIndicatorImIndex default -1;
@@ -377,6 +373,7 @@ type
 
   TCustomVirtualDBGrid = class(TCustomVirtualStringTree)
   private
+    fDataLink:                TVirtualDBGridDataLink;
     FInternalDataOffset:      longword;
     fLoadingDataFlag:         integer;
     fLastRecordCount:         longint;
@@ -1726,12 +1723,12 @@ end;
 
 function TVTDBOptions.GetDataSource: TDataSource;
 begin
-  Result := FDataLink.DataSource;
+  Result := FOwner.FDataLink.DataSource;
 end;
 
 procedure TVTDBOptions.SetDataSource(Value: TDataSource);
 begin
-  FDataLink.DataSource := Value;
+  FOwner.FDataLink.DataSource := Value;
 end;
 
 procedure TVTDBOptions.SetIndicatorImIndex(Value: TImageIndex);
@@ -1861,7 +1858,6 @@ constructor TVTDBOptions.Create(AOwner: TCustomVirtualDBGrid);
 begin
   inherited Create;
   FOwner:=             AOwner;
-  FDataLink:=          TVirtualDBGridDataLink.Create(AOwner);
   fIndicatorImIndex:=  -1;
   fIndicatorAlign:=    aiCenter;
   fIndicatorVAlign:=   aiMiddle;
@@ -1872,16 +1868,6 @@ begin
   fSortColumnBgColor:= clLightYellow;
   AdvOptions:=         DefaultAdvOptions;
 end;
-
-
-
-destructor TVTDBOptions.Destroy;
-begin
-  fDataLink.Destroy;
-  inherited Destroy;
-end;
-
-
 
 procedure TVTDBOptions.Assign(Source: TPersistent);
 begin
@@ -1992,6 +1978,7 @@ end;
 constructor TCustomVirtualDBGrid.Create(Owner: TComponent);
 begin
   inherited;
+  fDataLink := TVirtualDBGridDataLink.Create(Self);
   DefaultText := '';
   FInternalDataOffset := AllocateInternalDataArea(SizeOf(TNodeData));
   //fLoadingDataFlag := 0;
@@ -2018,6 +2005,7 @@ end;
 
 destructor TCustomVirtualDBGrid.Destroy;
 begin
+  fDataLink.Destroy;
   fDBOptions.Free;
   fIndicatorBMP.Free;
   inherited Destroy;
@@ -2093,7 +2081,7 @@ begin
      IncLoadingDataFlag;
      BeginUpdate;
      try
-       if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+       if fDataLink.Active then
        begin
          fRecordCount := GetRecordCount;
          fLastRecordCount := fRecordCount;
@@ -2118,7 +2106,7 @@ begin
        DecLoadingDataFlag;
      end;
 
-     if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+     if fDataLink.Active then
      begin
        //todo: refactor to call UpdateDBTree earlier
        if (DBOptions.SortingType = stBuildIn) and (Header.SortColumn <> NoColumn) then
@@ -2148,7 +2136,7 @@ begin
      (DBOptions.RecordCountType = rcFromDataset) and
      (not IsDataLoading) then
   begin
-    if Assigned(LinkedDataSet) and LinkedDataSet.Active then
+    if fDataLink.Active then
     begin
        {$ifdef DEBUG_VDBGRID}Logger.EnterMethod(lcAll, 'DataLinkChanged');{$endif}
        DoSort := (DBOptions.SortingType = stBuildIn) and (Header.SortColumn <> NoColumn);
@@ -2193,7 +2181,7 @@ end;
 
 procedure TCustomVirtualDBGrid.DataLinkRecordChanged(Field: TField);
 begin
-  if not (csLoading in ComponentState) and not IsDataLoading and Assigned(LinkedDataSet) then
+  if not (csLoading in ComponentState) and not IsDataLoading then
   begin
      IncLoadingDataFlag;
      try
@@ -2217,7 +2205,7 @@ end;
 
 function TCustomVirtualDBGrid.GetDataSet: TDataSet;
 begin
-  Result := fDBOptions.fDataLink.DataSet;
+  Result := fDataLink.DataSet;
 end;
 
 procedure TCustomVirtualDBGrid.DoBeforeItemErase(Canvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect; var Color: TColor;
