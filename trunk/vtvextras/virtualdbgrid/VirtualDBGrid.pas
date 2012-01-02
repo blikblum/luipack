@@ -2187,7 +2187,8 @@ end;
 
 procedure TCustomVirtualDBGrid.DataLinkDatasetScrolled(Distance: Integer);
 begin
-  SetFocusToActualRecNo;
+  if not (csLoading in ComponentState) then
+    SetFocusToActualRecNo;
 end;
 
 procedure TCustomVirtualDBGrid.DataLinkRecordChanged(Field: TField);
@@ -3001,7 +3002,7 @@ procedure TCustomVirtualDBGrid.SetFocusToActualRecNo;
 var
   WRecNo: LongInt;
 begin
-  if not (csLoading in ComponentState) and not IsDataLoading then
+  if not IsDataLoading then
   begin
     WRecNo := GetCurrentDBRecNo;
     if WRecNo <> 0 then
