@@ -1,0 +1,29 @@
+object TagsEditorForm: TTagsEditorForm
+  Left = 423
+  Height = 337
+  Top = 207
+  Width = 256
+  Caption = 'Tags Editor'
+  ClientHeight = 337
+  ClientWidth = 256
+  Position = poOwnerFormCenter
+  LCLVersion = '0.9.31'
+  inline DatasetEditorFrame1: TDatasetEditorFrame
+    Height = 296
+    ClientHeight = 296
+    inherited Grid: TVirtualDBGrid
+      Height = 292
+      DBOptions.DataSource = MainForm.TagsDatasource
+    end
+  end
+  object CloseButton: TBitBtn
+    Left = 144
+    Height = 30
+    Top = 301
+    Width = 107
+    DefaultCaption = True
+    Kind = bkClose
+    ModalResult = 11
+    TabOrder = 1
+  end
+end
