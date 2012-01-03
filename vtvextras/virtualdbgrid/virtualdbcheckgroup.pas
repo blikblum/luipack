@@ -241,10 +241,14 @@ begin
       else
       begin
         if FCheckDataLink.DataSet.Locate(FCheckField, GetNodeFieldValue(Node, FKeyField), []) then
+        begin
+          if FCheckDataLink.DataSet.RecNo <= OldRecNo then
+            Dec(OldRecNo);
           FCheckDataLink.DataSet.Delete;
+        end;
       end;
     finally
-      if OldRecNo <> -1 then
+      if OldRecNo > 0 then
         FCheckDataLink.DataSet.RecNo := OldRecNo;
       FCheckDataLink.DataSet.EnableControls;
       FUpdatingCheckState := False;
