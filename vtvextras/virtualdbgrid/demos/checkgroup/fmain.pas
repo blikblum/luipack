@@ -33,6 +33,7 @@ type
     ItemTagsDataset: TSqlite3Dataset;
     TagsDatasetId: TAutoIncField;
     TagsDatasetName: TStringField;
+    TagsCheckGroup: TVirtualDBCheckGroup;
     procedure EditTagsButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -55,15 +56,6 @@ uses
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  FDBCheckGroup := TVirtualDBCheckGroup.Create(Self);
-  FDBCheckGroup.Parent := DetailsGroupBox;
-  FDBCheckGroup.AnchorToNeighbour(akTop, 2, TagsLabel);
-  FDBCheckGroup.AnchorParallel(akLeft, 0, TagsLabel);
-  FDBCheckGroup.AddDBColumn('Name', 'Name', 180);
-  FDBCheckGroup.DBOptions.DataSource := TagsDatasource;
-  FDBCheckGroup.CheckSource := ItemTagsDatasource;
-  FDBCheckGroup.KeyField := 'Id';
-  FDBCheckGroup.CheckField := 'Tag';
   TagsDataset.Open;
   ItemsDataset.Open;
   ItemTagsDataset.Open;

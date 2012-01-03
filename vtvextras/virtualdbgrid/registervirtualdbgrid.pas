@@ -7,7 +7,7 @@ interface
 
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
-  VirtualDBGrid;
+  VirtualDBGrid, VirtualDBCheckGroup;
   
 procedure Register;
 
@@ -17,11 +17,16 @@ procedure RegisterUnitVirtualDbGrid;
 begin
   RegisterComponents('Virtual Controls', [TVirtualDbGrid]);
 end;  
+procedure RegisterUnitVirtualDbCheckGroup;
+begin
+  RegisterComponents('Virtual Controls', [TVirtualDBCheckGroup]);
+end;
 
 procedure Register;
 
 begin
   RegisterUnit('VirtualDbGrid',@RegisterUnitVirtualDbGrid);
+  RegisterUnit('VirtualDBCheckGroup',@RegisterUnitVirtualDbCheckGroup);
 end; 
 
 initialization
