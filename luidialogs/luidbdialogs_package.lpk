@@ -1,14 +1,15 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="luidbdialogs_package"/>
+    <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
-      <Version Value="9"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="forms\"/>
-        <OtherUnitFiles Value="forms\"/>
+        <IncludeFiles Value="forms"/>
+        <OtherUnitFiles Value="forms"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -30,16 +31,19 @@
       </Item3>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="3">
+    <RequiredPkgs Count="4">
       <Item1>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="FCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="virtualdbgrid_package"/>
+        <PackageName Value="LCL"/>
       </Item3>
+      <Item4>
+        <PackageName Value="virtualdbgrid_package"/>
+      </Item4>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
