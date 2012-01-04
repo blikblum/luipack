@@ -19,28 +19,36 @@ type
     DataSource1: TDatasource;
     DeleteButton: TBitBtn;
     CloseButton: TBitBtn;
+    EditButton: TBitBtn;
     Grid: TVirtualDBGrid;
     procedure AddButtonClick(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
+    procedure EditButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure GridEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
   private
     FModifications: TDataModifications;
+    FEditorClass: TFormClass;
+    FEditorForm: TForm;
     procedure SetDataSet(const Value: TDataSet);
-    { private declarations }
+    procedure SetEditorClassName(const Value: String);
   public
-    { public declarations }
     property DataSet: TDataSet write SetDataSet;
+    property EditorClassName: String write SetEditorClassName;
     property Modifications: TDataModifications read FModifications;
   end;
 
 implementation
 
+uses
+  LuiRTTIUtils;
+
 {$R *.lfm}
 
 var
   strAddRecord: String = 'Add';
+  strEditRecord: String = 'Edit';
   strDeleteRecord: String = 'Remove';
   strCloseDialog: String = 'Close';
 
@@ -48,6 +56,7 @@ var
 procedure LoadPortugueseStrings;
 begin
   strAddRecord := 'Adicionar';
+  strEditRecord := 'Editar';
   strDeleteRecord := 'Excluir';
   strCloseDialog := 'Fechar';
 end;
@@ -81,6 +90,17 @@ begin
   end;
 end;
 
+procedure TEditDataSourceForm.EditButtonClick(Sender: TObject);
+begin
+  if FEditorForm = nil then
+  begin
+    FEditorForm := FEditorClass.Create(Self);
+    SetObjectProperties(FEditorForm, ['DataSource', DataSource1]);
+  end;
+  FEditorForm.Position := poOwnerFormCenter;
+  FEditorForm.ShowModal;
+end;
+
 procedure TEditDataSourceForm.FormCreate(Sender: TObject);
 begin
   AddButton.Caption := strAddRecord;
@@ -97,6 +117,21 @@ end;
 procedure TEditDataSourceForm.SetDataSet(const Value: TDataSet);
 begin
   DataSource1.DataSet := Value;
+end;
+
+procedure TEditDataSourceForm.SetEditorClassName(const Value: String);
+var
+  AClass: TClass;
+begin
+  if Value <> '' then
+  begin
+    AClass := FindClass(Value);
+    if AClass.InheritsFrom(TForm) then
+    begin
+      FEditorClass := TFormClass(AClass);
+      EditButton.Visible := True;
+    end;
+  end;
 end;
 
 initialization

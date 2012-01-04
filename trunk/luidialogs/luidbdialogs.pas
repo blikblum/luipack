@@ -5,7 +5,7 @@ unit LuiDBDialogs;
 interface
 
 uses
-  Classes, SysUtils, db, Controls, VirtualDBGrid;
+  Classes, SysUtils, db, Controls;
 
 type
   TDataModification = (dmAdd, dmDelete, dmUpdate);
@@ -87,6 +87,7 @@ var
         begin
           FieldData := GetJSONProp(DialogObject, 'fields');
           EditForm.Caption := GetJSONProp(DialogObject, 'title', EditForm.Caption);
+          EditForm.EditorClassName := GetJSONProp(DialogObject, 'editor', '');
         end;
       jtArray, jtString:
         FieldData := DialogData;
