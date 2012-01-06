@@ -105,6 +105,7 @@ procedure TEditDataSourceForm.FormCreate(Sender: TObject);
 begin
   AddButton.Caption := strAddRecord;
   DeleteButton.Caption := strDeleteRecord;
+  EditButton.Caption := strEditRecord;
   CloseButton.Caption := strCloseDialog;
 end;
 
