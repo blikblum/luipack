@@ -64,6 +64,7 @@ begin
     if FControlClass <> nil then
     begin
       FControl := FControlClass.Create(Self);
+      FControl.Visible := False;
       if FMasterControl <> nil then
       begin
         FControl.Parent := FMasterControl.Parent;
@@ -119,6 +120,8 @@ end;
 
 procedure TDropDownManager.SetDroppedDown(const Value: Boolean);
 begin
+  if (FControl = nil) and not Value then
+    Exit;
   ControlNeeded;
   if FControl.Visible = Value then
     Exit;
@@ -159,8 +162,8 @@ end;
 
 procedure TDropDownManager.UpdateState;
 begin
-  ControlNeeded;
-  SetState(False);
+  if FControl <> nil then
+    SetState(False);
 end;
 
 end.
