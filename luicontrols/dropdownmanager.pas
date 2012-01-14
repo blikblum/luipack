@@ -12,7 +12,11 @@ type
   { TDropDownManager }
 
   //todo:
-  // specific code for TForm/TFrame (make use of window shadow)
+  // make use of window shadow
+
+  TDropDownOption = (ddoUsePopupForm);
+
+  TDropDownOptions = set of TDropDownOption;
 
   TDropDownCreateControl = procedure(Sender: TObject; Control: TControl) of object;
 
@@ -24,6 +28,8 @@ type
     FOnCreateControl: TDropDownCreateControl;
     FOnHide: TNotifyEvent;
     FOnShow: TNotifyEvent;
+    FOptions: TDropDownOptions;
+    FPopupForm: TForm;
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure ControlNeeded;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
@@ -42,6 +48,7 @@ type
   published
     property Control: TWinControl read FControl write FControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
+    property Options: TDropDownOptions read FOptions write FOptions;
     property OnCreateControl: TDropDownCreateControl read FOnCreateControl write FOnCreateControl;
     property OnHide: TNotifyEvent read FOnHide write FOnHide;
     property OnShow: TNotifyEvent read FOnShow write FOnShow;
@@ -54,7 +61,7 @@ implementation
 function TDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
   Result := (AControl <> FControl) and (AControl <> FMasterControl) and
-    not FControl.IsParentOf(AControl) and (GetParentForm(FControl) = GetParentForm(AControl));
+    not FControl.IsParentOf(AControl) and ((ddoUsePopupForm in FOptions) or (GetParentForm(FControl) = GetParentForm(AControl)));
 end;
 
 procedure TDropDownManager.ControlNeeded;
@@ -64,12 +71,26 @@ begin
     if FControlClass <> nil then
     begin
       FControl := FControlClass.Create(Self);
-      FControl.Visible := False;
-      if FMasterControl <> nil then
+      if ddoUsePopupForm in FOptions then
       begin
-        FControl.Parent := FMasterControl.Parent;
-        FControl.AnchorParallel(akLeft, 0, FMasterControl);
-        FControl.AnchorToNeighbour(akTop, 2, FMasterControl);
+        if FPopupForm = nil then
+        begin
+          FPopupForm := TForm.Create(nil);
+          FPopupForm.BorderStyle := bsNone;
+          FPopupForm.PopupMode := pmAuto;
+        end;
+        FPopupForm.SetBounds(FPopupForm.Left, FPopupForm.Top, FControl.Width, FControl.Height);
+        FControl.Parent := FPopupForm;
+      end
+      else
+      begin
+        FControl.Visible := False;
+        if FMasterControl <> nil then
+        begin
+          FControl.Parent := FMasterControl.Parent;
+          FControl.AnchorParallel(akLeft, 0, FMasterControl);
+          FControl.AnchorToNeighbour(akTop, 2, FMasterControl);
+        end;
       end;
       if Assigned(FOnCreateControl) then
         FOnCreateControl(Self, FControl);
@@ -81,7 +102,7 @@ end;
 
 procedure TDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
-  if ControlGrabsFocus(Screen.ActiveControl) then
+  if ControlGrabsFocus(Application.MouseControl) then
     DroppedDown := False;
 end;
 
@@ -100,8 +121,14 @@ begin
 end;
 
 procedure TDropDownManager.SetState(DoEvents: Boolean);
+var
+  ControlIsVisible: Boolean;
 begin
-  if FControl.Visible then
+  if (ddoUsePopupForm in FOptions) and (FPopupForm <> nil) then
+    ControlIsVisible := FPopupForm.Visible
+  else
+    ControlIsVisible := FControl.Visible;
+  if ControlIsVisible then
   begin
     if FControl.CanFocus then
       FControl.SetFocus;
@@ -119,13 +146,35 @@ begin
 end;
 
 procedure TDropDownManager.SetDroppedDown(const Value: Boolean);
+var
+  P: TPoint;
 begin
   if (FControl = nil) and not Value then
     Exit;
   ControlNeeded;
-  if FControl.Visible = Value then
-    Exit;
-  FControl.Visible := Value;
+  if (ddoUsePopupForm in FOptions) then
+  begin
+    if FPopupForm.Visible = Value then
+      Exit;
+    if Value then
+    begin
+      if FMasterControl <> nil then
+      begin
+        P := Point(0, FMasterControl.Height);
+        P := FMasterControl.ClientToScreen(P);
+        FPopupForm.SetBounds(P.x, p.y + 2, FPopupForm.Width, FPopupForm.Height);
+      end;
+      FPopupForm.Show;
+    end
+    else
+      FPopupForm.Hide;
+  end
+  else
+  begin
+    if FControl.Visible = Value then
+      Exit;
+    FControl.Visible := Value;
+  end;
   SetState(True);
 end;
 
@@ -150,13 +199,14 @@ begin
     if AComponent = FControl then
       FControl := nil
     else if AComponent = FMasterControl then
-      FMasterControl := nil;;
+      FMasterControl := nil;
   end;
 end;
 
 destructor TDropDownManager.Destroy;
 begin
   RemoveHandlers;
+  FPopupForm.Free;
   inherited Destroy;
 end;
 
