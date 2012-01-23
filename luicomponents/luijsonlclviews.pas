@@ -39,6 +39,15 @@ type
       const PropName: String; Options: TJSONData); override;
   end;
 
+  { TJSONSpinEditMediator }
+
+  TJSONSpinEditMediator = class(TCustomJSONGUIMediator)
+    class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
+      Control: TControl; Options: TJSONData); override;
+    class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
+      const PropName: String; Options: TJSONData); override;
+  end;
+
   { TJSONObjectPropertyView }
 
   TJSONObjectPropertyView = class(TCollectionItem)
@@ -100,7 +109,7 @@ type
 implementation
 
 uses
-  contnrs, LuiJSONUtils, strutils;
+  contnrs, LuiJSONUtils, strutils, spin;
 
 type
 
@@ -129,6 +138,39 @@ procedure RegisterJSONMediator(ControlClass: TControlClass;
   MediatorClass: TCustomJSONGUIMediatorClass);
 begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
+end;
+
+{ TJSONSpinEditMediator }
+
+class procedure TJSONSpinEditMediator.DoJSONToGUI(JSONObject: TJSONObject;
+  const PropName: String; Control: TControl; Options: TJSONData);
+var
+  PropData: TJSONData;
+  SpinEdit: TCustomFloatSpinEdit;
+begin
+  SpinEdit := Control as TCustomFloatSpinEdit;
+  PropData := JSONObject.Elements[PropName];
+  if PropData.JSONType = jtNull then
+    SpinEdit.ValueEmpty := True
+  else
+    SpinEdit.Value := PropData.AsFloat;
+end;
+
+class procedure TJSONSpinEditMediator.DoGUIToJSON(Control: TControl;
+  JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
+var
+  SpinEdit: TCustomFloatSpinEdit;
+begin
+  SpinEdit := Control as TCustomFloatSpinEdit;
+  if not SpinEdit.ValueEmpty then
+  begin
+    if SpinEdit.DecimalPlaces = 0 then
+      JSONObject.Integers[PropName] := round(SpinEdit.Value)
+    else
+      JSONObject.Floats[PropName] := SpinEdit.Value;
+  end
+  else
+    JSONObject.Nulls[PropName] := True;
 end;
 
 { TJSONGUIMediatorStore }
@@ -366,6 +408,8 @@ initialization
   RegisterJSONMediator(TEdit, TJSONEditMediator);
   RegisterJSONMediator(TMemo, TJSONEditMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
+  RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
+  RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
 
 finalization
   MediatorManager.Destroy;
