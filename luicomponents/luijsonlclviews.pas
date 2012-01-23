@@ -87,6 +87,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Load;
+    procedure Load(const Properties: array of String);
     procedure Save;
     property JSONObject: TJSONObject read FJSONObject write SetJSONObject;
   published
@@ -99,7 +100,7 @@ type
 implementation
 
 uses
-  contnrs, LuiJSONUtils;
+  contnrs, LuiJSONUtils, strutils;
 
 type
 
@@ -188,6 +189,19 @@ begin
   begin
     View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
     View.Load(FJSONObject);
+  end;
+end;
+
+procedure TJSONObjectViewManager.Load(const Properties: array of String);
+var
+  i: Integer;
+  View: TJSONObjectPropertyView;
+begin
+  for i := 0 to FPropertyViews.Count -1 do
+  begin
+    View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
+    if AnsiMatchText(View.PropertyName, Properties) then
+      View.Load(FJSONObject);
   end;
 end;
 
