@@ -24,6 +24,8 @@ type
     property FileName: String read FFileName write FFileName;
   end;
 
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String; SetUndefined: Boolean = False);
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
@@ -50,6 +52,26 @@ implementation
 
 uses
   jsonparser, Variants;
+
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String;
+  SetUndefined: Boolean);
+var
+  PropertyName: String;
+  i, j: Integer;
+begin
+  for i := 0 to Length(Properties) - 1 do
+  begin
+    PropertyName := Properties[i];
+    j := SrcObj.IndexOfName(PropertyName);
+    if j <> -1 then
+      DestObj.Elements[PropertyName] := SrcObj.Items[j].Clone
+    else
+    begin
+      if SetUndefined then
+        DestObj.Nulls[PropertyName] := True;
+    end;
+  end;
+end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 var
