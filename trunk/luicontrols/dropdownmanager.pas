@@ -60,7 +60,7 @@ implementation
 
 function TDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
-  Result := (AControl <> FControl) and (AControl <> FMasterControl) and
+  Result := (AControl <> nil) and (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and ((ddoUsePopupForm in FOptions) or (GetParentForm(FControl) = GetParentForm(AControl)));
 end;
 
