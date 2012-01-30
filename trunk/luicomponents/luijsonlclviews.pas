@@ -21,9 +21,9 @@ type
 
   TCustomJSONGUIMediatorClass = class of TCustomJSONGUIMediator;
 
-  { TJSONEditMediator }
+  { TJSONGenericMediator }
 
-  TJSONEditMediator = class(TCustomJSONGUIMediator)
+  TJSONGenericMediator = class(TCustomJSONGUIMediator)
     class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
       Control: TControl; Options: TJSONData); override;
     class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
@@ -109,7 +109,7 @@ type
 implementation
 
 uses
-  contnrs, LuiJSONUtils, strutils, spin;
+  contnrs, LuiJSONUtils, strutils, spin, typinfo;
 
 type
 
@@ -153,7 +153,10 @@ begin
   if PropData.JSONType = jtNull then
     SpinEdit.ValueEmpty := True
   else
+  begin
     SpinEdit.Value := PropData.AsFloat;
+    SpinEdit.ValueEmpty := False;
+  end;
 end;
 
 class procedure TJSONSpinEditMediator.DoGUIToJSON(Control: TControl;
@@ -348,18 +351,23 @@ begin
   //
 end;
 
-{ TJSONEditMediator }
+{ TJSONGenericMediator }
 
-class procedure TJSONEditMediator.DoJSONToGUI(JSONObject: TJSONObject;
+type
+  TControlAccess = class(TControl)
+
+  end;
+
+class procedure TJSONGenericMediator.DoJSONToGUI(JSONObject: TJSONObject;
   const PropName: String; Control: TControl; Options: TJSONData);
 begin
-  (Control as TCustomEdit).Text := JSONObject.Strings[PropName];
+  TControlAccess(Control).Text := JSONObject.Strings[PropName];
 end;
 
-class procedure TJSONEditMediator.DoGUIToJSON(Control: TControl;
+class procedure TJSONGenericMediator.DoGUIToJSON(Control: TControl;
   JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
 begin
-  JSONObject.Strings[PropName] := (Control as TCustomEdit).Text;
+  JSONObject.Strings[PropName] := TControlAccess(Control).Text;
 end;
 
 { TJSONCaptionMediator }
@@ -405,8 +413,9 @@ end;
 
 initialization
   MediatorManager := TJSONGUIMediatorManager.Create;
-  RegisterJSONMediator(TEdit, TJSONEditMediator);
-  RegisterJSONMediator(TMemo, TJSONEditMediator);
+  RegisterJSONMediator(TEdit, TJSONGenericMediator);
+  RegisterJSONMediator(TMemo, TJSONGenericMediator);
+  RegisterJSONMediator(TComboBox, TJSONGenericMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
   RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
   RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
