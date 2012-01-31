@@ -108,6 +108,18 @@ begin
   end;
 end;
 
+function VarRecToFloat(const VarRec: TVarRec): Double;
+begin
+  case VarRec.VType of
+    vtInteger: Result := VarRec.VInteger;
+    vtInt64: Result := (VarRec.VInt64)^;
+    vtExtended: Result := (VarRec.VExtended)^;
+  else
+    raise Exception.Create('Type mismatch: is not possible convert TVarRec to Double');
+  end;
+end;
+
+
 function VarRecToObject(const VarRec: TVarRec): TObject;
 begin
   case VarRec.VType of
@@ -168,6 +180,8 @@ begin
           SetOrdProp(Instance, PropInfo, VarRecToInteger(PropertyValue));
         tkInt64:
           SetInt64Prop(Instance, PropInfo, VarRecToInt64(PropertyValue));
+        tkFloat:
+          SetFloatProp(Instance, PropInfo, VarRecToFloat(PropertyValue));
         tkClass:
           SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
         tkInterface, tkInterfaceRaw:
