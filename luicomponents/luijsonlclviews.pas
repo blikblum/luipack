@@ -317,7 +317,7 @@ end;
 function TJSONObjectPropertyView.GetDisplayName: string;
 begin
   Result := FPropertyName;
-  if Result <> '' then
+  if Result = '' then
     Result := ClassName;
 end;
 
