@@ -1,0 +1,24 @@
+{
+"name": "Luiz Américo",
+"items":
+[
+{
+"name": "item1",
+"value": 1
+},
+{
+"name": "item2",
+"value": 2
+},
+{
+"name": "item3",
+"value": 3
+}
+],
+"info":
+{
+"name": "infoname",
+"value": "infovalue"
+},
+"none": null
+}
