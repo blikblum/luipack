@@ -1,0 +1,19 @@
+object Form1: TForm1
+  Left = 363
+  Height = 446
+  Top = 160
+  Width = 704
+  Caption = 'Form1'
+  ClientHeight = 446
+  ClientWidth = 704
+  LCLVersion = '0.9.31'
+  object ShowReportButton: TButton
+    Left = 75
+    Height = 25
+    Top = 80
+    Width = 133
+    Caption = 'ShowReportButton'
+    OnClick = ShowReportButtonClick
+    TabOrder = 0
+  end
+end
