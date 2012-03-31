@@ -17,7 +17,7 @@ type
   protected
     procedure DoCheckEOF(var IsEof: Boolean); override;
   public
-    procedure DoGetValue(const ParName: String; var ParValue: Variant); override;
+    procedure GetValue(const ParName: String; var ParValue: Variant);
     property Data: TJSONData read FData write FData;
   end;
 
@@ -40,7 +40,7 @@ type
   TfrJSONReport = class(TfrReport)
   private
     FJSONObject: TJSONObject;
-    FDataSourceDefs: TFPObjectList;
+    FDataSourceDefs: TFPHashObjectList;
     FNullValues: TJSONObject;
     procedure GetValue(const ParName: String; var ParValue: Variant);
     procedure BeginDoc;
@@ -82,7 +82,7 @@ begin
   end;
 end;
 
-procedure TfrJSONDataset.DoGetValue(const ParName: String; var ParValue: Variant);
+procedure TfrJSONDataset.GetValue(const ParName: String; var ParValue: Variant);
 var
   ArrayItem: TJSONData;
   PropData: TJSONData;
@@ -114,20 +114,38 @@ procedure TfrJSONReport.GetValue(const ParName: String;
   var ParValue: Variant);
 var
   PropData: TJSONData;
+  DataSourceDef: TfrJSONDataSourceDef;
+  PropertyName: String;
+  DotPos: Integer;
 begin
-  PropData := GetJSONProp(FJSONObject, ParName);
-  if (PropData <> nil) and (PropData.JSONType <> jtNull) then
-    ParValue := PropData.Value
-  else
+  DotPos := Pos('.', ParName);
+  if DotPos = 0 then
   begin
-    PropData := GetJSONProp(FNullValues, ParName);
-    if PropData <> nil then
+    PropData := GetJSONProp(FJSONObject, ParName);
+    if (PropData <> nil) and (PropData.JSONType <> jtNull) then
       ParValue := PropData.Value
     else
     begin
-      //cheat to allow call of userfunction
-      if Pos('IFNULL', ParName) <> 1 then
-        ParValue := Null;
+      PropData := GetJSONProp(FNullValues, ParName);
+      if PropData <> nil then
+        ParValue := PropData.Value
+      else
+      begin
+        //cheat to allow call of userfunction
+        if Pos('IFNULL', ParName) <> 1 then
+          ParValue := Null;
+      end;
+    end;
+  end
+  else
+  begin
+    PropertyName := Copy(ParName, 1, DotPos - 1);
+    DataSourceDef := TfrJSONDataSourceDef(FDataSourceDefs.Find(PropertyName));
+    if DataSourceDef <> nil then
+    begin
+      Assert(DataSourceDef.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
+      PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
+      DataSourceDef.Dataset.GetValue(PropertyName, ParValue);
     end;
   end;
 end;
@@ -211,7 +229,7 @@ begin
   OnGetValue := @GetValue;
   OnBeginDoc := @BeginDoc;
   OnUserFunction := @UserFunction;
-  FDataSourceDefs := TFPObjectList.Create(True);
+  FDataSourceDefs := TFPHashObjectList.Create(True);
   FNullValues := TJSONObject.Create;
 end;
 
@@ -228,7 +246,7 @@ end;
 
 procedure TfrJSONReport.RegisterDataSource(const BandName, PropertyName: String);
 begin
-  FDataSourceDefs.Add(TfrJSONDataSourceDef.Create(BandName, PropertyName));
+  FDataSourceDefs.Add(PropertyName, TfrJSONDataSourceDef.Create(BandName, PropertyName));
 end;
 
 end.

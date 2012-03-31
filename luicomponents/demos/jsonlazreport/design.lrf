@@ -162,7 +162,7 @@
           <Data>
             <Format Value="556"/>
             <FormatStr Value=""/>
-            <Memo Value="Info Name: [name]  Value: [value]&#xD;&#xA;"/>
+            <Memo Value="Info Name: [info.name]  Value: [info.value]&#xD;&#xA;"/>
             <Script Value=""/>
           </Data>
           <Font>
@@ -205,7 +205,7 @@
           <Data>
             <Format Value="556"/>
             <FormatStr Value=""/>
-            <Memo Value="Item Name: [name]  Value: [value]&#xD;&#xA;"/>
+            <Memo Value="Item Name: [items.name]  Value: [items.value]&#xD;&#xA;"/>
             <Script Value=""/>
           </Data>
           <Font>
