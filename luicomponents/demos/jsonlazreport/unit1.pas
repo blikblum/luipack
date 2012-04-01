@@ -41,6 +41,7 @@ begin
     Rep.LoadFromFile('design.lrf');
     Rep.RegisterDataSource('InfoData', 'info');
     Rep.RegisterDataSource('ItemsData', 'items');
+    Rep.RegisterCrossDataSource('TableData', 'CrossData', 'table');
     Rep.JSONObject := Obj;
     Rep.ShowReport;
   finally
