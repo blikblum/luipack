@@ -9,7 +9,7 @@ uses
 
 type
 
-  TVTEvent = (evGetText, evFocusChanged, evInitNode, evDrawText, evMeasureItem, evResize);
+  TVTEvent = (evGetText, evFocusChanged, evInitNode, evDrawText, evMeasureItem, evResize, evChecked);
   TVTEvents = set of TVTEvent;
   
   { TCustomVirtualTreeController }
@@ -23,7 +23,8 @@ type
     procedure ConnectEvents;
     procedure DisconnectEvents;
     //event bridges
-   procedure DrawTextEvent(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+    procedure CheckedEvent(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure DrawTextEvent(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       const CellText: String; const CellRect: TRect; var DefaultDraw: Boolean);
     procedure FocusChangedEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure GetTextEvent(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
@@ -36,6 +37,7 @@ type
     procedure SetTree(const Value: TCustomVirtualStringTree);
   protected
     //abstract event handlers
+    procedure DoChecked(Node: PVirtualNode); virtual; abstract;
     procedure DoDrawText(TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       const CellText: String; const CellRect: TRect; var DefaultDraw: Boolean); virtual; abstract;
     procedure DoFocusChanged(Node: PVirtualNode; Column: TColumnIndex); virtual; abstract;
@@ -58,6 +60,7 @@ type
     destructor Destroy; override;
     property Tree: TCustomVirtualStringTree read FTree write SetTree;
   end;
+
 
 implementation
 
@@ -95,6 +98,8 @@ begin
     TVTAccess(FTree).OnMeasureItem := @MeasureItemEvent;
   if evResize in FEvents then
     TVTAccess(FTree).OnResize := @DoResize;
+  if evChecked in FEvents then
+    TVTAccess(FTree).OnChecked := @CheckedEvent;
 end;
 
 procedure TCustomVirtualTreeController.DisconnectEvents;
@@ -111,6 +116,14 @@ begin
     TVTAccess(FTree).OnMeasureItem := nil;
   if evResize in FEvents then
     TVTAccess(FTree).OnResize := nil;
+  if evChecked in FEvents then
+    TVTAccess(FTree).OnChecked := nil;
+end;
+
+procedure TCustomVirtualTreeController.CheckedEvent(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+begin
+  DoChecked(Node);
 end;
 
 procedure TCustomVirtualTreeController.DrawTextEvent(Sender: TBaseVirtualTree;
