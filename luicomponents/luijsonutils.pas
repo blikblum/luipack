@@ -24,6 +24,7 @@ type
     property FileName: String read FFileName write FFileName;
   end;
 
+//todo: implement Overwrite, RemoveNull, SetUndefinedAsNull
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String; SetUndefined: Boolean = False);
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
@@ -37,6 +38,8 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): Str
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
 
 function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
+
+procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
 
@@ -137,6 +140,15 @@ begin
     Result := Null
   else
     Result := Data.Value;
+end;
+
+procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
+var
+  i: Integer;
+begin
+  i := JSONObj.IndexOfName(PropName);
+  if i <> -1 then
+    JSONObj.Delete(i);
 end;
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
