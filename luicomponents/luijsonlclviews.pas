@@ -149,8 +149,8 @@ var
   SpinEdit: TCustomFloatSpinEdit;
 begin
   SpinEdit := Control as TCustomFloatSpinEdit;
-  PropData := JSONObject.Elements[PropName];
-  if PropData.JSONType = jtNull then
+  PropData := GetJSONProp(JSONObject, PropName);
+  if (PropData = nil) or (PropData.JSONType = jtNull) then
     SpinEdit.ValueEmpty := True
   else
   begin
@@ -163,6 +163,7 @@ class procedure TJSONSpinEditMediator.DoGUIToJSON(Control: TControl;
   JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
 var
   SpinEdit: TCustomFloatSpinEdit;
+  i: Integer;
 begin
   SpinEdit := Control as TCustomFloatSpinEdit;
   if not SpinEdit.ValueEmpty then
@@ -173,7 +174,13 @@ begin
       JSONObject.Floats[PropName] := SpinEdit.Value;
   end
   else
-    JSONObject.Nulls[PropName] := True;
+  begin
+    //todo add option to configure undefined/null
+    i := JSONObject.IndexOfName(PropName);
+    if i <> -1 then
+      JSONObject.Delete(i);
+    //JSONObject.Nulls[PropName] := True;
+  end;
 end;
 
 { TJSONGUIMediatorStore }
@@ -361,13 +368,19 @@ type
 class procedure TJSONGenericMediator.DoJSONToGUI(JSONObject: TJSONObject;
   const PropName: String; Control: TControl; Options: TJSONData);
 begin
-  TControlAccess(Control).Text := JSONObject.Strings[PropName];
+  TControlAccess(Control).Text := GetJSONProp(JSONObject, PropName, '');
 end;
 
 class procedure TJSONGenericMediator.DoGUIToJSON(Control: TControl;
   JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
+var
+  i: Integer;
+  ControlText: String;
 begin
-  JSONObject.Strings[PropName] := TControlAccess(Control).Text;
+  i := JSONObject.IndexOfName(PropName);
+  ControlText := TControlAccess(Control).Text;
+  if (i <> -1) or (ControlText <> '') then
+    JSONObject.Strings[PropName] := ControlText;
 end;
 
 { TJSONCaptionMediator }
@@ -378,18 +391,24 @@ var
   FormatStr, TemplateStr, ValueStr: String;
   PropData: TJSONData;
 begin
-  PropData := JSONObject.Elements[PropName];
-  ValueStr := PropData.AsString;
+  PropData := GetJSONProp(JSONObject, PropName);
+  if PropData <> nil then
+    ValueStr := PropData.AsString
+  else
+    ValueStr := '';
   if Options <> nil then
   begin
     case Options.JSONType of
       jtObject:
         begin
-          FormatStr := GetJSONProp(TJSONObject(Options), 'format', '');
-          if FormatStr = 'date' then
-            ValueStr := DateToStr(PropData.AsFloat)
-          else if FormatStr = 'datetime' then
-            ValueStr := DateTimeToStr(PropData.AsFloat);
+          if PropData <> nil then
+          begin
+            FormatStr := GetJSONProp(TJSONObject(Options), 'format', '');
+            if FormatStr = 'date' then
+              ValueStr := DateToStr(PropData.AsFloat)
+            else if FormatStr = 'datetime' then
+              ValueStr := DateTimeToStr(PropData.AsFloat);
+          end;
           TemplateStr := GetJSONProp(TJSONObject(Options), 'template', '%s');
         end;
       jtString: //template
