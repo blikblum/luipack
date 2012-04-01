@@ -2,21 +2,21 @@
   This source is only used to compile and install the package.
  }
 
-unit vtvutils_package; 
+unit vtvutils_package;
 
 interface
 
 uses
-    VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, 
-  VTJSON, register_vtvutils, LazarusPackageIntf;
+  VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, VTJSON, 
+  register_vtvutils, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('register_vtvutils', @register_vtvutils.Register); 
-end; 
+  RegisterUnit('register_vtvutils', @register_vtvutils.Register);
+end;
 
 initialization
-  RegisterPackage('vtvutils_package', @Register); 
+  RegisterPackage('vtvutils_package', @Register);
 end.
