@@ -143,7 +143,7 @@ begin
               if PropData <> nil then
                 ParValue := PropData.Value;
             end;
-          jtNumber, jtString, jtBoolean, jtNull:
+          jtNumber, jtString, jtBoolean:
             begin
               ParValue := ArrayItem.Value;
             end;
@@ -182,19 +182,7 @@ begin
   begin
     PropData := GetJSONProp(FJSONObject, ParName);
     if (PropData <> nil) and (PropData.JSONType <> jtNull) then
-      ParValue := PropData.Value
-    else
-    begin
-      PropData := GetJSONProp(FNullValues, ParName);
-      if PropData <> nil then
-        ParValue := PropData.Value
-      else
-      begin
-        //cheat to allow call of userfunction
-        if Pos('IFNULL', ParName) <> 1 then
-          ParValue := Null;
-      end;
-    end;
+      ParValue := PropData.Value;
   end
   else
   begin
@@ -205,6 +193,18 @@ begin
       Assert(DataSourceDef.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
       PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
       DataSourceDef.Dataset.GetValue(PropertyName, ParValue);
+    end;
+  end;
+  if VarIsEmpty(ParValue) then
+  begin
+    PropData := GetJSONProp(FNullValues, ParName);
+    if PropData <> nil then
+      ParValue := PropData.Value
+    else
+    begin
+      //cheat to allow call of userfunction
+      if Pos('IFNULL', ParName) <> 1 then
+        ParValue := Null;
     end;
   end;
 end;

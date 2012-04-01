@@ -42,6 +42,7 @@ begin
     Rep.RegisterDataSource('InfoData', 'info');
     Rep.RegisterDataSource('ItemsData', 'items');
     Rep.RegisterCrossDataSource('TableData', 'CrossData', 'table');
+    Rep.NullValues.Strings['table.item'] := 'ND';
     Rep.JSONObject := Obj;
     Rep.ShowReport;
   finally
