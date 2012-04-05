@@ -36,9 +36,9 @@ type
     property MasterDataset: TfrJSONDataset read FMasterDataset write FMasterDataset;
   end;
 
-  { TfrJSONDataSourceDef }
+  { TfrJSONDataLink }
 
-  TfrJSONDataSourceDef = class
+  TfrJSONDataLink = class
   private
     FBandName: String;
     FCrossBandName: String;
@@ -64,7 +64,7 @@ type
     FConfigData: TJSONObject;
     FData: TJSONObject;
     FJSONObject: TJSONObject;
-    FDataSourceDefs: TFPHashObjectList;
+    FDataLinks: TFPHashObjectList;
     FNullValues: TJSONObject;
     FOwnsConfigData: Boolean;
     FOwnsReportData: Boolean;
@@ -82,8 +82,8 @@ type
     procedure LoadData(ReportData: TJSONObject; OwnsReportData: Boolean = False);
     procedure LoadData(ReportData, ConfigData: TJSONObject; OwnsReportData: Boolean = False;
       OwnsConfigData: Boolean = False);
-    procedure RegisterCrossDataSource(const BandName, CrossBandName, PropertyName: String);
-    procedure RegisterDataSource(const BandName, PropertyName: String);
+    procedure RegisterCrossDataLink(const BandName, CrossBandName, PropertyName: String);
+    procedure RegisterDataLink(const BandName, PropertyName: String);
     property ConfigProperty: String read FConfigProperty write FConfigProperty;
     property DataProperty: String read FDataProperty write FDataProperty;
     property JSONObject: TJSONObject read FJSONObject write FJSONObject;
@@ -116,9 +116,9 @@ begin
   UpdateMasterData;
 end;
 
-{ TfrJSONDataSourceDef }
+{ TfrJSONDataLink }
 
-constructor TfrJSONDataSourceDef.Create(const ABandName, APropertyName, ACrossBandName: String);
+constructor TfrJSONDataLink.Create(const ABandName, APropertyName, ACrossBandName: String);
 begin
   FBandName := ABandName;
   FPropertyName := APropertyName;
@@ -195,7 +195,7 @@ procedure TfrJSONReport.GetValue(const ParName: String;
   var ParValue: Variant);
 var
   PropData: TJSONData;
-  DataSourceDef: TfrJSONDataSourceDef;
+  DataLink: TfrJSONDataLink;
   PropertyName: String;
   DotPos: Integer;
 begin
@@ -209,12 +209,12 @@ begin
   else
   begin
     PropertyName := Copy(ParName, 1, DotPos - 1);
-    DataSourceDef := TfrJSONDataSourceDef(FDataSourceDefs.Find(PropertyName));
-    if DataSourceDef <> nil then
+    DataLink := TfrJSONDataLink(FDataLinks.Find(PropertyName));
+    if DataLink <> nil then
     begin
-      Assert(DataSourceDef.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
+      Assert(DataLink.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
       PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
-      DataSourceDef.Dataset.GetValue(PropertyName, ParValue);
+      DataLink.Dataset.GetValue(PropertyName, ParValue);
     end;
   end;
   if VarIsEmpty(ParValue) then
@@ -234,60 +234,60 @@ end;
 procedure TfrJSONReport.BeginDoc;
 var
   i: Integer;
-  Def: TfrJSONDataSourceDef;
+  DataLink: TfrJSONDataLink;
   Data: TJSONData;
   Band: TfrBandView;
 begin
   if FJSONObject = nil then
     raise Exception.Create('TJSONObjectReport.JSONObject = nil');
-  for i := 0 to FDataSourceDefs.Count - 1 do
+  for i := 0 to FDataLinks.Count - 1 do
   begin
-    Def := TfrJSONDataSourceDef(FDataSourceDefs[i]);
-    Data := FJSONObject.Elements[Def.PropertyName];
-    if Def.Dataset = nil then
-      Def.Dataset := CreateJSONDataset(TfrJSONDataset, i);
-    Band := FindObject(Def.BandName) as TfrBandView;
+    DataLink := TfrJSONDataLink(FDataLinks[i]);
+    Data := FJSONObject.Elements[DataLink.PropertyName];
+    if DataLink.Dataset = nil then
+      DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
+    Band := FindObject(DataLink.BandName) as TfrBandView;
     if Band = nil then
-      raise Exception.CreateFmt('Band "%s" not found', [Def.BandName]);
-    Band.DataSet := Def.Dataset.Name;
-    Def.Dataset.Data := Data;
-    if Def.CrossBandName <> '' then
+      raise Exception.CreateFmt('Band "%s" not found', [DataLink.BandName]);
+    Band.DataSet := DataLink.Dataset.Name;
+    DataLink.Dataset.Data := Data;
+    if DataLink.CrossBandName <> '' then
     begin
-      Band := FindObject(Def.CrossBandName) as TfrBandView;
+      Band := FindObject(DataLink.CrossBandName) as TfrBandView;
       if Band = nil then
-        raise Exception.CreateFmt('CrossBand "%s" not found', [Def.CrossBandName]);
+        raise Exception.CreateFmt('CrossBand "%s" not found', [DataLink.CrossBandName]);
       if Band.BandType <> btCrossData then
-        raise Exception.CreateFmt('Band "%s" type different from CrossData', [Def.CrossBandName]);
-      if Def.CrossDataset = nil then
-        Def.CrossDataset := CreateJSONDataset(TfrJSONCrossDataset, i);
-      TfrJSONCrossDataset(Def.CrossDataset).MasterDataset := Def.Dataset;
-      Band.DataSet := Def.BandName + '=' + Def.CrossDataset.Name + ';';
-      Band.DataSet := Def.CrossDataset.Name;
-      Def.CrossDataset.Data := Data;
+        raise Exception.CreateFmt('Band "%s" type different from CrossData', [DataLink.CrossBandName]);
+      if DataLink.CrossDataset = nil then
+        DataLink.CrossDataset := CreateJSONDataset(TfrJSONCrossDataset, i);
+      TfrJSONCrossDataset(DataLink.CrossDataset).MasterDataset := DataLink.Dataset;
+      Band.DataSet := DataLink.BandName + '=' + DataLink.CrossDataset.Name + ';';
+      Band.DataSet := DataLink.CrossDataset.Name;
+      DataLink.CrossDataset.Data := Data;
     end;
   end;
 end;
 
 procedure TfrJSONReport.ParseConfigData;
 var
-  DataSourceDefsData: TJSONData;
+  DataLinksData: TJSONData;
   NullValuesData: TJSONData;
   i: Integer;
 begin
   if FConfigData = nil then
   begin
-    DataSourceDefsData := nil;
+    DataLinksData := nil;
     NullValuesData := nil;
   end
   else
   begin
-    i := FConfigData.IndexOfName('datasources');
+    i := FConfigData.IndexOfName('datalinks');
     if i <> -1 then
     begin
 
     end
     else
-      DataSourceDefsData := nil;
+      DataLinksData := nil;
     i := FConfigData.IndexOfName('nullvalues');
     if i <> -1 then
     begin
@@ -302,12 +302,12 @@ begin
   end
   else
     FNullValues.Clear;
-  if DataSourceDefsData <> nil then
+  if DataLinksData <> nil then
   begin
 
   end
   else
-    FDataSourceDefs.Clear;
+    FDataLinks.Clear;
 end;
 
 procedure TfrJSONReport.UserFunction(const AName: String; p1, p2, p3: Variant;
@@ -342,18 +342,18 @@ procedure TfrJSONReport.Notification(AComponent: TComponent;
   Operation: TOperation);
 var
   i: Integer;
-  Def: TfrJSONDataSourceDef;
+  DataLink: TfrJSONDataLink;
 begin
   inherited Notification(AComponent, Operation);
   if (Operation = opRemove) and (AComponent is TfrJSONDataset) then
   begin
-    for i := 0 to FDataSourceDefs.Count - 1 do
+    for i := 0 to FDataLinks.Count - 1 do
     begin
-      Def := TfrJSONDataSourceDef(FDataSourceDefs[i]);
-      if Def.Dataset = AComponent then
-        Def.Dataset := nil
-      else if Def.CrossDataset = AComponent then
-        Def.CrossDataset := nil;
+      DataLink := TfrJSONDataLink(FDataLinks[i]);
+      if DataLink.Dataset = AComponent then
+        DataLink.Dataset := nil
+      else if DataLink.CrossDataset = AComponent then
+        DataLink.CrossDataset := nil;
     end;
   end;
 end;
@@ -364,7 +364,7 @@ begin
   OnGetValue := @GetValue;
   OnBeginDoc := @BeginDoc;
   OnUserFunction := @UserFunction;
-  FDataSourceDefs := TFPHashObjectList.Create(True);
+  FDataLinks := TFPHashObjectList.Create(True);
   FNullValues := TJSONObject.Create;
   FConfigProperty := 'report.config';
 end;
@@ -372,16 +372,16 @@ end;
 destructor TfrJSONReport.Destroy;
 var
   i: Integer;
-  Def: TfrJSONDataSourceDef;
+  DataLink: TfrJSONDataLink;
 begin
-  for i := 0 to FDataSourceDefs.Count - 1 do
+  for i := 0 to FDataLinks.Count - 1 do
   begin
-    Def := TfrJSONDataSourceDef(FDataSourceDefs[i]);
-    Def.Dataset.Free;
-    Def.CrossDataset.Free;
+    DataLink := TfrJSONDataLink(FDataLinks[i]);
+    DataLink.Dataset.Free;
+    DataLink.CrossDataset.Free;
   end;
   FreeOwnedData;
-  FDataSourceDefs.Destroy;
+  FDataLinks.Destroy;
   FNullValues.Destroy;
   inherited Destroy;
 end;
@@ -423,15 +423,15 @@ begin
   ParseConfigData;
 end;
 
-procedure TfrJSONReport.RegisterCrossDataSource(const BandName, CrossBandName,
+procedure TfrJSONReport.RegisterCrossDataLink(const BandName, CrossBandName,
   PropertyName: String);
 begin
-  FDataSourceDefs.Add(PropertyName, TfrJSONDataSourceDef.Create(BandName, PropertyName, CrossBandName));
+  FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(BandName, PropertyName, CrossBandName));
 end;
 
-procedure TfrJSONReport.RegisterDataSource(const BandName, PropertyName: String);
+procedure TfrJSONReport.RegisterDataLink(const BandName, PropertyName: String);
 begin
-  FDataSourceDefs.Add(PropertyName, TfrJSONDataSourceDef.Create(BandName, PropertyName, ''));
+  FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(BandName, PropertyName, ''));
 end;
 
 end.

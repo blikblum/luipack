@@ -39,9 +39,9 @@ begin
   Rep := TfrJSONReport.Create(Self);
   try
     Rep.LoadFromFile('design.lrf');
-    Rep.RegisterDataSource('InfoData', 'info');
-    Rep.RegisterDataSource('ItemsData', 'items');
-    Rep.RegisterCrossDataSource('TableData', 'CrossData', 'table');
+    Rep.RegisterDataLink('InfoData', 'info');
+    Rep.RegisterDataLink('ItemsData', 'items');
+    Rep.RegisterCrossDataLink('TableData', 'CrossData', 'table');
     Rep.NullValues.Strings['table.item'] := 'ND';
     Rep.JSONObject := Obj;
     Rep.ShowReport;
