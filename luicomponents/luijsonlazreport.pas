@@ -58,20 +58,34 @@ type
 
   TfrJSONReport = class(TfrReport)
   private
+    FConfigProperty: String;
+    FDataProperty: String;
+    FReportData: TJSONObject;
+    FConfigData: TJSONObject;
+    FData: TJSONObject;
     FJSONObject: TJSONObject;
     FDataSourceDefs: TFPHashObjectList;
     FNullValues: TJSONObject;
+    FOwnsConfigData: Boolean;
+    FOwnsReportData: Boolean;
     function CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
+    procedure FreeOwnedData;
     procedure GetValue(const ParName: String; var ParValue: Variant);
     procedure BeginDoc;
+    procedure ParseConfigData;
     procedure UserFunction(const AName: String; p1, p2, p3: Variant; var Val: Variant);
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure LoadData(ReportData: TJSONObject; OwnsReportData: Boolean = False);
+    procedure LoadData(ReportData, ConfigData: TJSONObject; OwnsReportData: Boolean = False;
+      OwnsConfigData: Boolean = False);
     procedure RegisterCrossDataSource(const BandName, CrossBandName, PropertyName: String);
     procedure RegisterDataSource(const BandName, PropertyName: String);
+    property ConfigProperty: String read FConfigProperty write FConfigProperty;
+    property DataProperty: String read FDataProperty write FDataProperty;
     property JSONObject: TJSONObject read FJSONObject write FJSONObject;
     property NullValues: TJSONObject read FNullValues;
   end;
@@ -169,6 +183,14 @@ begin
   Result.FreeNotification(Self);
 end;
 
+procedure TfrJSONReport.FreeOwnedData;
+begin
+  if FOwnsReportData then
+    FreeAndNil(FReportData);
+  if FOwnsConfigData then
+    FreeAndNil(FConfigData);
+end;
+
 procedure TfrJSONReport.GetValue(const ParName: String;
   var ParValue: Variant);
 var
@@ -246,6 +268,48 @@ begin
   end;
 end;
 
+procedure TfrJSONReport.ParseConfigData;
+var
+  DataSourceDefsData: TJSONData;
+  NullValuesData: TJSONData;
+  i: Integer;
+begin
+  if FConfigData = nil then
+  begin
+    DataSourceDefsData := nil;
+    NullValuesData := nil;
+  end
+  else
+  begin
+    i := FConfigData.IndexOfName('datasources');
+    if i <> -1 then
+    begin
+
+    end
+    else
+      DataSourceDefsData := nil;
+    i := FConfigData.IndexOfName('nullvalues');
+    if i <> -1 then
+    begin
+
+    end
+    else
+      NullValuesData := nil;
+  end;
+  if NullValuesData <> nil then
+  begin
+
+  end
+  else
+    FNullValues.Clear;
+  if DataSourceDefsData <> nil then
+  begin
+
+  end
+  else
+    FDataSourceDefs.Clear;
+end;
+
 procedure TfrJSONReport.UserFunction(const AName: String; p1, p2, p3: Variant;
   var Val: Variant);
 var
@@ -302,6 +366,7 @@ begin
   OnUserFunction := @UserFunction;
   FDataSourceDefs := TFPHashObjectList.Create(True);
   FNullValues := TJSONObject.Create;
+  FConfigProperty := 'report.config';
 end;
 
 destructor TfrJSONReport.Destroy;
@@ -315,9 +380,47 @@ begin
     Def.Dataset.Free;
     Def.CrossDataset.Free;
   end;
+  FreeOwnedData;
   FDataSourceDefs.Destroy;
   FNullValues.Destroy;
   inherited Destroy;
+end;
+
+procedure TfrJSONReport.LoadData(ReportData: TJSONObject;
+  OwnsReportData: Boolean);
+begin
+  if ReportData = nil then
+    raise Exception.Create('TfrJSONReport.LoadData ReportData = nil');
+  FreeOwnedData;
+  FReportData := ReportData;
+  FOwnsReportData := OwnsReportData;
+  if FDataProperty <> '' then
+    FData := ReportData.Objects[FDataProperty]
+  else
+    FData := ReportData;
+  if FConfigProperty <> '' then
+    FConfigData := ReportData.Objects[FConfigProperty]
+  else
+    FConfigData := nil;
+  FOwnsConfigData := False;
+  ParseConfigData;
+end;
+
+procedure TfrJSONReport.LoadData(ReportData, ConfigData: TJSONObject;
+  OwnsReportData, OwnsConfigData: Boolean);
+begin
+  if ReportData = nil then
+    raise Exception.Create('TfrJSONReport.LoadData ReportData = nil');
+  FreeOwnedData;
+  FReportData := ReportData;
+  FOwnsReportData := OwnsReportData;
+  if FDataProperty <> '' then
+    FData := ReportData.Objects[FDataProperty]
+  else
+    FData := ReportData;
+  FConfigData := ConfigData;
+  FOwnsConfigData := OwnsConfigData;
+  ParseConfigData;
 end;
 
 procedure TfrJSONReport.RegisterCrossDataSource(const BandName, CrossBandName,
