@@ -27,6 +27,8 @@ type
 //todo: implement Overwrite, RemoveNull, SetUndefinedAsNull
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String; SetUndefined: Boolean = False);
 
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
@@ -74,6 +76,14 @@ begin
         DestObj.Nulls[PropertyName] := True;
     end;
   end;
+end;
+
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
+var
+  i: Integer;
+begin
+  for i := 0 to SrcObj.Count - 1 do
+    DestObj.Add(SrcObj.Names[i], SrcObj.Items[i].Clone);
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
