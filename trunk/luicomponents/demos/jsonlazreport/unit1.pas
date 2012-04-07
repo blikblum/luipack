@@ -39,17 +39,12 @@ begin
   Rep := TfrJSONReport.Create(Self);
   try
     Rep.LoadFromFile('design.lrf');
-    Rep.RegisterDataLink('InfoData', 'info');
-    Rep.RegisterDataLink('ItemsData', 'items');
-    Rep.RegisterCrossDataLink('TableData', 'CrossData', 'table');
-    Rep.NullValues.Strings['table.item'] := 'ND';
-    Rep.JSONObject := Obj;
+    Rep.LoadData(Obj);
     Rep.ShowReport;
   finally
     Rep.Destroy;
     Obj.Free;
   end;
-
 end;
 
 end.

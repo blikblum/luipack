@@ -1,4 +1,27 @@
 {
+"report.config":
+{
+"datalinks":
+  [
+  {
+  "band": "InfoData",
+  "property": "info"
+  },
+  {
+  "band": "ItemsData",
+  "property": "items"
+  },
+  {
+  "band": "TableData",
+  "crossband": "CrossData",
+  "property": "table"
+  }
+  ],
+"nullvalues":
+{
+"table.item": "nd"
+}
+},
 "name": "Luiz Américo",
 "items":
 [

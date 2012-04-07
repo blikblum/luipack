@@ -63,7 +63,6 @@ type
     FReportData: TJSONObject;
     FConfigData: TJSONObject;
     FData: TJSONObject;
-    FJSONObject: TJSONObject;
     FDataLinks: TFPHashObjectList;
     FNullValues: TJSONObject;
     FOwnsConfigData: Boolean;
@@ -86,7 +85,6 @@ type
     procedure RegisterDataLink(const BandName, PropertyName: String);
     property ConfigProperty: String read FConfigProperty write FConfigProperty;
     property DataProperty: String read FDataProperty write FDataProperty;
-    property JSONObject: TJSONObject read FJSONObject write FJSONObject;
     property NullValues: TJSONObject read FNullValues;
   end;
 
@@ -202,7 +200,7 @@ begin
   DotPos := Pos('.', ParName);
   if DotPos = 0 then
   begin
-    PropData := GetJSONProp(FJSONObject, ParName);
+    PropData := GetJSONProp(FData, ParName);
     if (PropData <> nil) and (PropData.JSONType <> jtNull) then
       ParValue := PropData.Value;
   end
@@ -235,22 +233,22 @@ procedure TfrJSONReport.BeginDoc;
 var
   i: Integer;
   DataLink: TfrJSONDataLink;
-  Data: TJSONData;
+  PropertyData: TJSONData;
   Band: TfrBandView;
 begin
-  if FJSONObject = nil then
-    raise Exception.Create('TJSONObjectReport.JSONObject = nil');
+  if FData = nil then
+    raise Exception.Create('TJSONObjectReport.FData = nil');
   for i := 0 to FDataLinks.Count - 1 do
   begin
     DataLink := TfrJSONDataLink(FDataLinks[i]);
-    Data := FJSONObject.Elements[DataLink.PropertyName];
+    PropertyData := FData.Elements[DataLink.PropertyName];
     if DataLink.Dataset = nil then
       DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
     Band := FindObject(DataLink.BandName) as TfrBandView;
     if Band = nil then
       raise Exception.CreateFmt('Band "%s" not found', [DataLink.BandName]);
     Band.DataSet := DataLink.Dataset.Name;
-    DataLink.Dataset.Data := Data;
+    DataLink.Dataset.Data := PropertyData;
     if DataLink.CrossBandName <> '' then
     begin
       Band := FindObject(DataLink.CrossBandName) as TfrBandView;
@@ -263,13 +261,15 @@ begin
       TfrJSONCrossDataset(DataLink.CrossDataset).MasterDataset := DataLink.Dataset;
       Band.DataSet := DataLink.BandName + '=' + DataLink.CrossDataset.Name + ';';
       Band.DataSet := DataLink.CrossDataset.Name;
-      DataLink.CrossDataset.Data := Data;
+      DataLink.CrossDataset.Data := PropertyData;
     end;
   end;
 end;
 
 procedure TfrJSONReport.ParseConfigData;
 var
+  ItemData: TJSONData;
+  ItemObject: TJSONObject absolute ItemData;
   DataLinksData: TJSONData;
   NullValuesData: TJSONData;
   i: Integer;
@@ -281,33 +281,44 @@ begin
   end
   else
   begin
-    i := FConfigData.IndexOfName('datalinks');
-    if i <> -1 then
-    begin
-
-    end
-    else
-      DataLinksData := nil;
-    i := FConfigData.IndexOfName('nullvalues');
-    if i <> -1 then
-    begin
-
-    end
-    else
-      NullValuesData := nil;
+    DataLinksData := GetJSONProp(FConfigData, 'datalinks');
+    NullValuesData := GetJSONProp(FConfigData, 'nullvalues');
   end;
+  FNullValues.Clear;
   if NullValuesData <> nil then
   begin
+    case NullValuesData.JSONType of
+    jtObject:
+      CopyJSONObject(TJSONObject(NullValuesData), FNullValues);
+    jtArray:
+      begin
+        for i := 0 to NullValuesData.Count - 1 do
+        begin
+          ItemData := NullValuesData.Items[i];
+          case ItemData.JSONType of
+            jtString:
+              FNullValues.Add(ItemData.AsString, '');
+            jtObject:
+              CopyJSONObject(ItemObject, FNullValues);
+          end;
+        end;
+      end;
+    end;
+  end;
 
-  end
-  else
-    FNullValues.Clear;
+  FDataLinks.Clear;
   if DataLinksData <> nil then
   begin
-
-  end
-  else
-    FDataLinks.Clear;
+    for i := 0 to DataLinksData.Count - 1 do
+    begin
+      ItemData := DataLinksData.Items[i];
+      if ItemData.JSONType = jtObject then
+      begin
+        RegisterCrossDataLink(GetJSONProp(ItemObject, 'band', ''),
+          GetJSONProp(ItemObject, 'crossband', ''), GetJSONProp(ItemObject, 'property', ''));
+      end;
+    end;
+  end;
 end;
 
 procedure TfrJSONReport.UserFunction(const AName: String; p1, p2, p3: Variant;
