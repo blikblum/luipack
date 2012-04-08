@@ -72,12 +72,12 @@ type
     procedure FreeDataLinks;
     function CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
     procedure FreeOwnedData;
-    procedure GetValue(const ParName: String; var ParValue: Variant);
-    procedure BeginDoc;
     procedure LoadConfigData;
     procedure ParseConfigData(Data: TJSONObject);
-    procedure UserFunction(const AName: String; p1, p2, p3: Variant; var Val: Variant);
   protected
+    procedure DoBeginDoc; override;
+    procedure DoGetValue(const ParName: String; var ParValue: Variant); override;
+    procedure DoUserFunction(const AName: String; p1, p2, p3: Variant; var Val: Variant); override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -215,77 +215,6 @@ begin
     FreeAndNil(FConfigData);
 end;
 
-procedure TfrJSONReport.GetValue(const ParName: String;
-  var ParValue: Variant);
-var
-  PropData: TJSONData;
-  DataLink: TfrJSONDataLink;
-  PropertyName: String;
-  DotPos: Integer;
-begin
-  DotPos := Pos('.', ParName);
-  if DotPos = 0 then
-  begin
-    PropData := GetJSONProp(FData, ParName);
-    if (PropData <> nil) and (PropData.JSONType <> jtNull) then
-      ParValue := PropData.Value;
-  end
-  else
-  begin
-    PropertyName := Copy(ParName, 1, DotPos - 1);
-    DataLink := TfrJSONDataLink(FDataLinks.Find(PropertyName));
-    if DataLink <> nil then
-    begin
-      Assert(DataLink.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
-      PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
-      DataLink.Dataset.GetValue(PropertyName, ParValue);
-    end;
-  end;
-  if VarIsEmpty(ParValue) then
-  begin
-    PropData := GetJSONProp(FNullValues, ParName);
-    if PropData <> nil then
-      ParValue := PropData.Value;
-  end;
-end;
-
-procedure TfrJSONReport.BeginDoc;
-var
-  i: Integer;
-  DataLink: TfrJSONDataLink;
-  PropertyData: TJSONData;
-  Band: TfrBandView;
-begin
-  if FData = nil then
-    raise Exception.Create('TJSONObjectReport.FData = nil');
-  for i := 0 to FDataLinks.Count - 1 do
-  begin
-    DataLink := TfrJSONDataLink(FDataLinks[i]);
-    PropertyData := FData.Elements[DataLink.PropertyName];
-    if DataLink.Dataset = nil then
-      DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
-    Band := FindObject(DataLink.BandName) as TfrBandView;
-    if Band = nil then
-      raise Exception.CreateFmt('Band "%s" not found', [DataLink.BandName]);
-    Band.DataSet := DataLink.Dataset.Name;
-    DataLink.Dataset.Data := PropertyData;
-    if DataLink.CrossBandName <> '' then
-    begin
-      Band := FindObject(DataLink.CrossBandName) as TfrBandView;
-      if Band = nil then
-        raise Exception.CreateFmt('CrossBand "%s" not found', [DataLink.CrossBandName]);
-      if Band.BandType <> btCrossData then
-        raise Exception.CreateFmt('Band "%s" type different from CrossData', [DataLink.CrossBandName]);
-      if DataLink.CrossDataset = nil then
-        DataLink.CrossDataset := CreateJSONDataset(TfrJSONCrossDataset, i);
-      TfrJSONCrossDataset(DataLink.CrossDataset).MasterDataset := DataLink.Dataset;
-      Band.DataSet := DataLink.BandName + '=' + DataLink.CrossDataset.Name + ';';
-      Band.DataSet := DataLink.CrossDataset.Name;
-      DataLink.CrossDataset.Data := PropertyData;
-    end;
-  end;
-end;
-
 procedure TfrJSONReport.LoadConfigData;
 begin
   FreeDataLinks;
@@ -350,8 +279,83 @@ begin
   end;
 end;
 
-procedure TfrJSONReport.UserFunction(const AName: String; p1, p2, p3: Variant;
-  var Val: Variant);
+procedure TfrJSONReport.DoBeginDoc;
+var
+  i: Integer;
+  DataLink: TfrJSONDataLink;
+  PropertyData: TJSONData;
+  Band: TfrBandView;
+begin
+  if FData = nil then
+    raise Exception.Create('TJSONObjectReport.FData = nil');
+  for i := 0 to FDataLinks.Count - 1 do
+  begin
+    DataLink := TfrJSONDataLink(FDataLinks[i]);
+    PropertyData := FData.Elements[DataLink.PropertyName];
+    if DataLink.Dataset = nil then
+      DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
+    Band := FindObject(DataLink.BandName) as TfrBandView;
+    if Band = nil then
+      raise Exception.CreateFmt('Band "%s" not found', [DataLink.BandName]);
+    Band.DataSet := DataLink.Dataset.Name;
+    DataLink.Dataset.Data := PropertyData;
+    if DataLink.CrossBandName <> '' then
+    begin
+      Band := FindObject(DataLink.CrossBandName) as TfrBandView;
+      if Band = nil then
+        raise Exception.CreateFmt('CrossBand "%s" not found', [DataLink.CrossBandName]);
+      if Band.BandType <> btCrossData then
+        raise Exception.CreateFmt('Band "%s" type different from CrossData', [DataLink.CrossBandName]);
+      if DataLink.CrossDataset = nil then
+        DataLink.CrossDataset := CreateJSONDataset(TfrJSONCrossDataset, i);
+      TfrJSONCrossDataset(DataLink.CrossDataset).MasterDataset := DataLink.Dataset;
+      Band.DataSet := DataLink.BandName + '=' + DataLink.CrossDataset.Name + ';';
+      Band.DataSet := DataLink.CrossDataset.Name;
+      DataLink.CrossDataset.Data := PropertyData;
+    end;
+  end;
+  inherited DoBeginDoc;
+end;
+
+procedure TfrJSONReport.DoGetValue(const ParName: String; var ParValue: Variant);
+var
+  PropData: TJSONData;
+  DataLink: TfrJSONDataLink;
+  PropertyName: String;
+  DotPos: Integer;
+begin
+  inherited DoGetValue(ParName, ParValue);
+  if VarIsEmpty(ParValue) then
+  begin
+    DotPos := Pos('.', ParName);
+    if DotPos = 0 then
+    begin
+      PropData := GetJSONProp(FData, ParName);
+      if (PropData <> nil) and (PropData.JSONType <> jtNull) then
+        ParValue := PropData.Value;
+    end
+    else
+    begin
+      PropertyName := Copy(ParName, 1, DotPos - 1);
+      DataLink := TfrJSONDataLink(FDataLinks.Find(PropertyName));
+      if DataLink <> nil then
+      begin
+        Assert(DataLink.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
+        PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
+        DataLink.Dataset.GetValue(PropertyName, ParValue);
+      end;
+    end;
+    if VarIsEmpty(ParValue) then
+    begin
+      PropData := GetJSONProp(FNullValues, ParName);
+      if PropData <> nil then
+        ParValue := PropData.Value;
+    end;
+  end;
+end;
+
+procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
+  p3: Variant; var Val: Variant);
 var
   V1: Variant;
   S2, S3: String;
@@ -375,7 +379,9 @@ begin
       else
         Val := frParser.Calc(S3);
     end;
-  end;
+  end
+  else
+    inherited;
 end;
 
 procedure TfrJSONReport.Notification(AComponent: TComponent;
@@ -401,9 +407,6 @@ end;
 constructor TfrJSONReport.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  OnGetValue := @GetValue;
-  OnBeginDoc := @BeginDoc;
-  OnUserFunction := @UserFunction;
   FDataLinks := TFPHashObjectList.Create(True);
   FNullValues := TJSONObject.Create;
   FConfigProperty := 'report.config';
