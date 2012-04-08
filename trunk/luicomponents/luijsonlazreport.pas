@@ -203,7 +203,7 @@ end;
 function TfrJSONReport.CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
 begin
   Result := DatasetClass.Create(Self.Owner);
-  Result.Name := Result.Owner.Name + DatasetClass.ClassName + IntToStr(Index);
+  Result.Name := Name + DatasetClass.ClassName + IntToStr(Index);
   Result.FreeNotification(Self);
 end;
 
