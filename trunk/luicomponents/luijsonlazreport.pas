@@ -438,10 +438,7 @@ begin
     FData := ReportData.Objects[FDataProperty]
   else
     FData := ReportData;
-  if FConfigProperty <> '' then
-    FConfigData := ReportData.Objects[FConfigProperty]
-  else
-    FConfigData := nil;
+  FConfigData := GetJSONProp(ReportData, FConfigProperty) as TJSONObject;
   FOwnsConfigData := False;
   LoadConfigData;
 end;
