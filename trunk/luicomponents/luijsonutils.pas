@@ -24,6 +24,11 @@ type
     property FileName: String read FFileName write FFileName;
   end;
 
+  TJSONArraySortCompare = function(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
+
+
+function CompareJSONData(Data1, Data2: TJSONData): Integer;
+
 //todo: implement Overwrite, RemoveNull, SetUndefinedAsNull
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String; SetUndefined: Boolean = False);
 
@@ -43,6 +48,8 @@ function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant
 
 procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
+procedure SortJSONArray(JSONArray: TJSONArray);
+
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
 
 function FileToJSONData(const FileName: String): TJSONData;
@@ -56,7 +63,37 @@ function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
 implementation
 
 uses
-  jsonparser, Variants;
+  jsonparser, Variants, math;
+
+function CompareJSONData(Data1, Data2: TJSONData): Integer;
+const
+  RelationshipIntegerMap: array[TVariantRelationship] of Integer = (0, -1, 1, 0);
+var
+  JSONType1, JSONType2: TJSONtype;
+begin
+  JSONType1 := Data1.JSONType;
+  JSONType2 := Data2.JSONType;
+  if JSONType1 = JSONType2 then
+  begin
+    case JSONType1 of
+    jtNumber:
+      Result := CompareValue(Data1.AsInt64, Data2.AsInt64);
+    jtString:
+      Result := CompareText(Data1.AsString, Data2.AsString);
+    jtBoolean:
+      Result := CompareValue(Ord(Data1.AsBoolean), Ord(Data2.AsBoolean));
+    jtNull, jtObject, jtArray:
+      Result := 0;
+    end;
+  end
+  else
+  begin
+    if (JSONType1 in [jtObject, jtArray]) or (JSONType2 in [jtObject, jtArray]) then
+      Result := 0
+    else
+      Result := RelationshipIntegerMap[VarCompareValue(Data1.Value, Data2.Value)];
+  end;
+end;
 
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String;
   SetUndefined: Boolean);
@@ -159,6 +196,55 @@ begin
   i := JSONObj.IndexOfName(PropName);
   if i <> -1 then
     JSONObj.Delete(i);
+end;
+
+//based in TStringList.QuickSort
+procedure JSONArrayQuickSort(JSONArray: TJSONArray; L, R: Integer; CompareFn: TJSONArraySortCompare);
+var
+  Pivot, vL, vR: Integer;
+begin
+  if R - L <= 1 then begin // a little bit of time saver
+    if L < R then
+      if CompareFn(JSONArray, L, R) > 0 then
+        JSONArray.Exchange(L, R);
+
+    Exit;
+  end;
+
+  vL := L;
+  vR := R;
+
+  Pivot := L + Random(R - L); // they say random is best
+
+  while vL < vR do begin
+    while (vL < Pivot) and (CompareFn(JSONArray, vL, Pivot) <= 0) do
+      Inc(vL);
+
+    while (vR > Pivot) and (CompareFn(JSONArray, vR, Pivot) > 0) do
+      Dec(vR);
+
+    JSONArray.Exchange(vL, vR);
+
+    if Pivot = vL then // swap pivot if we just hit it from one side
+      Pivot := vR
+    else if Pivot = vR then
+      Pivot := vL;
+  end;
+
+  if Pivot - 1 >= L then
+    JSONArrayQuickSort(JSONArray, L, Pivot - 1, CompareFn);
+  if Pivot + 1 <= R then
+    JSONArrayQuickSort(JSONArray, Pivot + 1, R, CompareFn);
+end;
+
+function JSONArraySimpleCompare(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
+begin
+  Result := CompareJSONData(JSONArray.Items[Index1], JSONArray.Items[Index2]);
+end;
+
+procedure SortJSONArray(JSONArray: TJSONArray);
+begin
+  JSONArrayQuickSort(JSONArray, 0, JSONArray.Count - 1, @JSONArraySimpleCompare);
 end;
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
@@ -311,7 +397,7 @@ begin
   except
     on E: EFOpenError do
       raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [FFileName, E.Message]);
-    on E: EJSONScanner do
+    on E: EParserError do
     begin
        FData.Free;
        raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [FFileName, E.Message]);
@@ -342,7 +428,7 @@ begin
   except
     on E: EFOpenError do
       raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [AFileName, E.Message]);
-    on E: EJSONScanner do
+    on E: EParserError do
     begin
        Result.Free;
        raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [AFileName, E.Message]);
