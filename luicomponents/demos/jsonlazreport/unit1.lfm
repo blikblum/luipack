@@ -1,19 +1,46 @@
-object Form1: TForm1
+object MainForm: TMainForm
   Left = 363
-  Height = 446
-  Top = 160
-  Width = 704
-  Caption = 'Form1'
-  ClientHeight = 446
-  ClientWidth = 704
+  Height = 552
+  Top = 136
+  Width = 787
+  Caption = 'JSONLazReport Demo'
+  ClientHeight = 552
+  ClientWidth = 787
+  OnCreate = FormCreate
   LCLVersion = '1.1'
   object ShowReportButton: TButton
-    Left = 75
+    Left = 651
     Height = 25
-    Top = 80
+    Top = 522
     Width = 133
-    Caption = 'ShowReportButton'
+    Anchors = [akRight, akBottom]
+    Caption = 'Show Report'
     OnClick = ShowReportButtonClick
     TabOrder = 0
+  end
+  object JSONDataMemo: TMemo
+    Left = 2
+    Height = 512
+    Top = 2
+    Width = 783
+    Align = alClient
+    BorderSpacing.Bottom = 36
+    BorderSpacing.Around = 2
+    ScrollBars = ssAutoBoth
+    TabOrder = 1
+  end
+  object EditReportButton: TButton
+    Left = 504
+    Height = 25
+    Top = 522
+    Width = 133
+    Anchors = [akRight, akBottom]
+    Caption = 'Edit Report'
+    OnClick = EditReportButtonClick
+    TabOrder = 2
+  end
+  object frDesigner1: TfrDesigner
+    left = 360
+    top = 520
   end
 end

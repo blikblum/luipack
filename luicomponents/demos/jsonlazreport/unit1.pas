@@ -5,46 +5,82 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls, LuiJSONLazReport,
-  LuiJSONUtils, fpjson;
+  Classes, SysUtils, FileUtil, LR_Desgn, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, LuiJSONLazReport, LuiJSONUtils, fpjson;
 
 type
 
-  { TForm1 }
+  { TMainForm }
 
-  TForm1 = class(TForm)
+  TMainForm = class(TForm)
+    frDesigner1: TfrDesigner;
+    JSONDataMemo: TMemo;
     ShowReportButton: TButton;
+    EditReportButton: TButton;
+    procedure EditReportButtonClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure ShowReportButtonClick(Sender: TObject);
   private
     { private declarations }
+    FJSONData: TJSONObject;
+    FReport: TfrJSONReport;
+    function GetJSONData: TJSONObject;
   public
     { public declarations }
   end;
 
 var
-  Form1: TForm1;
+  MainForm: TMainForm;
 
 implementation
 
 {$R *.lfm}
 
-{ TForm1 }
+{ TMainForm }
 
-procedure TForm1.ShowReportButtonClick(Sender: TObject);
+procedure TMainForm.ShowReportButtonClick(Sender: TObject);
 var
-  Obj: TJSONObject;
-  Rep: TfrJSONReport;
+  ReportData: TJSONObject;
 begin
-  Obj := TJSONFile.Load('test.json') as TJSONObject;
-  Rep := TfrJSONReport.Create(Self);
-  try
-    Rep.LoadFromFile('design.lrf');
-    Rep.LoadData(Obj);
-    Rep.ShowReport;
-  finally
-    Rep.Destroy;
-    Obj.Free;
+  ReportData := GetJSONData;
+  if ReportData <> nil then
+  begin
+    FReport.LoadData(ReportData, True);
+    FReport.ShowReport;
   end;
+end;
+
+function TMainForm.GetJSONData: TJSONObject;
+var
+  Stream: TMemoryStream;
+begin
+  Result := nil;
+  FreeAndNil(FJSONData);
+  Stream := TMemoryStream.Create;
+  try
+    JSONDataMemo.Lines.SaveToStream(Stream);
+    Stream.Position := 0;
+    try
+      Result := StreamToJSONData(Stream) as TJSONObject;
+    except
+      on E: Exception do
+        ShowMessage(E.Message);
+    end;
+  finally
+    Stream.Destroy;
+  end;
+end;
+
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  JSONDataMemo.Lines.LoadFromFile('test.json');
+  FReport := TfrJSONReport.Create(Self);
+  FReport.LoadFromFile('design.lrf');
+end;
+
+procedure TMainForm.EditReportButtonClick(Sender: TObject);
+begin
+  FReport.DesignReport;
 end;
 
 end.
