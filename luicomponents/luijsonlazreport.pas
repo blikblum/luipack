@@ -167,7 +167,6 @@ begin
       end;
     jtObject:
       begin
-        // todo: add option to handle not defined fields
         PropData := GetJSONProp(TJSONObject(FData), ParName);
         if PropData <> nil then
           ParValue := PropData.Value;
