@@ -1,6 +1,7 @@
 unit LuiJSONLazReport;
 
 {$mode objfpc}{$H+}
+{$define LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
 
 interface
 
@@ -241,6 +242,16 @@ begin
   begin
     DataLinksData := GetJSONProp(Data, 'datalinks');
     NullValuesData := GetJSONProp(Data, 'nullvalues');
+    {$ifdef LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
+    ItemData := GetJSONProp(Data, 'ignorenotfoundsymbol');
+    if (ItemData <> nil) and (ItemData.JSONtype = jtBoolean) then
+    begin
+      if ItemData.AsBoolean then
+        Options := Options + [roIgnoreSymbolNotFound]
+      else
+        Options := Options - [roIgnoreSymbolNotFound];
+    end;
+    {$endif}
   end;
   if NullValuesData <> nil then
   begin
