@@ -254,7 +254,7 @@ begin
           ItemData := NullValuesData.Items[i];
           case ItemData.JSONType of
             jtString:
-              FNullValues.Add(ItemData.AsString, '');
+              FNullValues.Add(ItemData.AsString);
             jtObject:
               CopyJSONObject(ItemObject, FNullValues);
           end;
