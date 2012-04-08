@@ -69,6 +69,7 @@ type
     FOwnsConfigData: Boolean;
     FOwnsReportData: Boolean;
     procedure BaseConfigDataNeeded;
+    procedure FreeDataLinks;
     function CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
     procedure FreeOwnedData;
     procedure GetValue(const ParName: String; var ParValue: Variant);
@@ -186,6 +187,19 @@ begin
   end;
 end;
 
+procedure TfrJSONReport.FreeDataLinks;
+var
+  DataLink: TfrJSONDataLink;
+  i: Integer;
+begin
+  for i := 0 to FDataLinks.Count - 1 do
+  begin
+    DataLink := TfrJSONDataLink(FDataLinks[i]);
+    DataLink.Dataset.Free;
+    DataLink.CrossDataset.Free;
+  end;
+end;
+
 function TfrJSONReport.CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
 begin
   Result := DatasetClass.Create(Self.Owner);
@@ -280,6 +294,7 @@ end;
 
 procedure TfrJSONReport.LoadConfigData;
 begin
+  FreeDataLinks;
   FNullValues.Clear;
   FDataLinks.Clear;
   ParseConfigData(FBaseConfigData);
@@ -401,16 +416,8 @@ begin
 end;
 
 destructor TfrJSONReport.Destroy;
-var
-  i: Integer;
-  DataLink: TfrJSONDataLink;
 begin
-  for i := 0 to FDataLinks.Count - 1 do
-  begin
-    DataLink := TfrJSONDataLink(FDataLinks[i]);
-    DataLink.Dataset.Free;
-    DataLink.CrossDataset.Free;
-  end;
+  FreeDataLinks;
   FreeOwnedData;
   FDataLinks.Destroy;
   FNullValues.Destroy;
