@@ -380,6 +380,11 @@ begin
         Val := frParser.Calc(S3);
     end;
   end
+  else if AName = 'ISNULL' then
+  begin
+    V1 := frParser.Calc(P1);
+    Val := VarIsNull(V1);
+  end
   else
     inherited;
 end;
