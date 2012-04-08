@@ -1,54 +1,63 @@
 {
-"report.config":
-{
-"datalinks":
-  [
-  {
-  "band": "InfoData",
-  "property": "info"
+  "report.config":{
+    "datalinks":[
+      {
+        "band":"InfoData",
+        "property":"info"
+      },
+      {
+        "band":"ItemsData",
+        "property":"items"
+      },
+      {
+        "band":"TableData",
+        "crossband":"CrossData",
+        "property":"table"
+      }
+    ],
+    "nullvalues":{
+      "table.item":"nd"
+    }
   },
-  {
-  "band": "ItemsData",
-  "property": "items"
-  },
-  {
-  "band": "TableData",
-  "crossband": "CrossData",
-  "property": "table"
-  }
+  "name":"Luiz Américo",
+  "items":[
+    {
+      "name":"item1",
+      "value":1
+    },
+    {
+      "name":"item2",
+      "value":2
+    },
+    {
+      "name":"item3",
+      "value":3
+    }
   ],
-"nullvalues":
-{
-"table.item": "nd"
-}
-},
-"name": "Luiz Américo",
-"items":
-[
-{
-"name": "item1",
-"value": 1
-},
-{
-"name": "item2",
-"value": 2
-},
-{
-"name": "item3",
-"value": 3
-}
-],
-"info":
-{
-"name": "infoname",
-"value": "infovalue"
-},
-"none": null,
-"table":
-[
-["1-1", "1-2", "1-3"],
-["2-1", "2-2", "2-3"],
-["3-1", "3-2"],
-["4-1", "4-2", "4-3"]
-]
+  "info":{
+    "name":"infoname",
+    "value":"infovalue"
+  },
+  "showtable":true,
+  "table":[
+    [
+      "1-1",
+      "1-2",
+      "1-3"
+    ],
+    [
+      null,
+      "2-2",
+      "2-3"
+    ],
+    [
+      "3-1",
+      "3-2"
+    ],
+    [
+      "4-1",
+      "4-2",
+      "4-3"
+    ]
+  ]
 }

@@ -32,7 +32,7 @@
         <Orientation Value="poPortrait"/>
         <UseMargins Value="True"/>
         <PrintToPrevPage Value="False"/>
-        <ColCount Value="0"/>
+        <ColCount Value="1"/>
         <ColGap Value="0"/>
         <LayoutOrder Value="loColumns"/>
         <ObjectCount Value="9"/>
@@ -74,7 +74,7 @@
           </Data>
           <BandType Value="btMasterData"/>
           <Condition Value=""/>
-          <DatasetStr Value="[None]"/>
+          <DatasetStr Value="MainFormTfrJSONDataset0"/>
         </Object2>
         <Object3>
           <Name Value="ItemsData"/>
@@ -94,7 +94,7 @@
           </Data>
           <BandType Value="btMasterData"/>
           <Condition Value=""/>
-          <DatasetStr Value="[None]"/>
+          <DatasetStr Value="MainFormTfrJSONDataset1"/>
         </Object3>
         <Object4>
           <Name Value="TableData"/>
@@ -110,11 +110,11 @@
           </Size>
           <Flags Value="48"/>
           <Data>
-            <Script Value=""/>
+            <Script Value="if not showtable then&#xD;&#xA;  Visible := False;&#xD;&#xA;"/>
           </Data>
           <BandType Value="btMasterData"/>
           <Condition Value=""/>
-          <DatasetStr Value="[None]"/>
+          <DatasetStr Value="MainFormTfrJSONDataset2"/>
         </Object4>
         <Object5>
           <Name Value="CrossData"/>
@@ -134,7 +134,7 @@
           </Data>
           <BandType Value="btCrossData"/>
           <Condition Value=""/>
-          <DatasetStr Value="InfoData=[None];ItemsData=;TableData=[None];"/>
+          <DatasetStr Value="MainFormTfrJSONCrossDataset2"/>
         </Object5>
         <Object6>
           <Name Value="Memo1"/>
