@@ -245,13 +245,7 @@ begin
   begin
     PropData := GetJSONProp(FNullValues, ParName);
     if PropData <> nil then
-      ParValue := PropData.Value
-    else
-    begin
-      //cheat to allow call of userfunction
-      if Pos('IFNULL', ParName) <> 1 then
-        ParValue := Null;
-    end;
+      ParValue := PropData.Value;
   end;
 end;
 
