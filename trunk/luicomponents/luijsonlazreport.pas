@@ -60,6 +60,7 @@ type
   private
     FConfigProperty: String;
     FDataProperty: String;
+    FBaseConfigData: TJSONObject;
     FReportData: TJSONObject;
     FConfigData: TJSONObject;
     FData: TJSONObject;
@@ -67,11 +68,13 @@ type
     FNullValues: TJSONObject;
     FOwnsConfigData: Boolean;
     FOwnsReportData: Boolean;
+    procedure BaseConfigDataNeeded;
     function CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
     procedure FreeOwnedData;
     procedure GetValue(const ParName: String; var ParValue: Variant);
     procedure BeginDoc;
-    procedure ParseConfigData;
+    procedure LoadConfigData;
+    procedure ParseConfigData(Data: TJSONObject);
     procedure UserFunction(const AName: String; p1, p2, p3: Variant; var Val: Variant);
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -81,11 +84,10 @@ type
     procedure LoadData(ReportData: TJSONObject; OwnsReportData: Boolean = False);
     procedure LoadData(ReportData, ConfigData: TJSONObject; OwnsReportData: Boolean = False;
       OwnsConfigData: Boolean = False);
-    procedure RegisterCrossDataLink(const BandName, CrossBandName, PropertyName: String);
-    procedure RegisterDataLink(const BandName, PropertyName: String);
+    procedure RegisterDataLink(const BandName, PropertyName: String; CrossBandName: String = '');
+    procedure RegisterNullValue(const PropertyName: String; Value: Variant);
     property ConfigProperty: String read FConfigProperty write FConfigProperty;
     property DataProperty: String read FDataProperty write FDataProperty;
-    property NullValues: TJSONObject read FNullValues;
   end;
 
 implementation
@@ -173,6 +175,16 @@ begin
 end;
 
 { TfrJSONReport }
+
+procedure TfrJSONReport.BaseConfigDataNeeded;
+begin
+  if FBaseConfigData = nil then
+  begin
+    FBaseConfigData := TJSONObject.Create;
+    FBaseConfigData.Add('datalinks', TJSONObject.Create);
+    FBaseConfigData.Add('nullvalues', TJSONObject.Create);
+  end;
+end;
 
 function TfrJSONReport.CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
 begin
@@ -266,25 +278,33 @@ begin
   end;
 end;
 
-procedure TfrJSONReport.ParseConfigData;
+procedure TfrJSONReport.LoadConfigData;
+begin
+  FNullValues.Clear;
+  FDataLinks.Clear;
+  ParseConfigData(FBaseConfigData);
+  ParseConfigData(FConfigData);
+end;
+
+procedure TfrJSONReport.ParseConfigData(Data: TJSONObject);
 var
   ItemData: TJSONData;
   ItemObject: TJSONObject absolute ItemData;
   DataLinksData: TJSONData;
   NullValuesData: TJSONData;
+  PropertyName: String;
   i: Integer;
 begin
-  if FConfigData = nil then
+  if Data = nil then
   begin
     DataLinksData := nil;
     NullValuesData := nil;
   end
   else
   begin
-    DataLinksData := GetJSONProp(FConfigData, 'datalinks');
-    NullValuesData := GetJSONProp(FConfigData, 'nullvalues');
+    DataLinksData := GetJSONProp(Data, 'datalinks');
+    NullValuesData := GetJSONProp(Data, 'nullvalues');
   end;
-  FNullValues.Clear;
   if NullValuesData <> nil then
   begin
     case NullValuesData.JSONType of
@@ -306,7 +326,6 @@ begin
     end;
   end;
 
-  FDataLinks.Clear;
   if DataLinksData <> nil then
   begin
     for i := 0 to DataLinksData.Count - 1 do
@@ -314,8 +333,9 @@ begin
       ItemData := DataLinksData.Items[i];
       if ItemData.JSONType = jtObject then
       begin
-        RegisterCrossDataLink(GetJSONProp(ItemObject, 'band', ''),
-          GetJSONProp(ItemObject, 'crossband', ''), GetJSONProp(ItemObject, 'property', ''));
+        PropertyName := ItemObject.Strings['property'];
+        FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(ItemObject.Strings['band'],
+          PropertyName, GetJSONProp(ItemObject, 'crossband', '')));
       end;
     end;
   end;
@@ -394,6 +414,7 @@ begin
   FreeOwnedData;
   FDataLinks.Destroy;
   FNullValues.Destroy;
+  FBaseConfigData.Free;
   inherited Destroy;
 end;
 
@@ -414,11 +435,11 @@ begin
   else
     FConfigData := nil;
   FOwnsConfigData := False;
-  ParseConfigData;
+  LoadConfigData;
 end;
 
 procedure TfrJSONReport.LoadData(ReportData, ConfigData: TJSONObject;
-  OwnsReportData, OwnsConfigData: Boolean);
+  OwnsReportData: Boolean; OwnsConfigData: Boolean);
 begin
   if ReportData = nil then
     raise Exception.Create('TfrJSONReport.LoadData ReportData = nil');
@@ -431,18 +452,30 @@ begin
     FData := ReportData;
   FConfigData := ConfigData;
   FOwnsConfigData := OwnsConfigData;
-  ParseConfigData;
+  LoadConfigData;
 end;
 
-procedure TfrJSONReport.RegisterCrossDataLink(const BandName, CrossBandName,
-  PropertyName: String);
+procedure TfrJSONReport.RegisterDataLink(const BandName, PropertyName: String;
+  CrossBandName: String);
+var
+  DataLinksData: TJSONObject;
+  DataLink: TJSONObject;
 begin
-  FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(BandName, PropertyName, CrossBandName));
+  BaseConfigDataNeeded;
+  DataLinksData := FBaseConfigData.Objects['datalinks'];
+  DataLink := TJSONObject.Create(['band', BandName, 'property', PropertyName]);
+  if CrossBandName <> '' then
+    DataLink.Add('crossband', CrossBandName);
+  DataLinksData.Objects[PropertyName] := DataLink;
 end;
 
-procedure TfrJSONReport.RegisterDataLink(const BandName, PropertyName: String);
+procedure TfrJSONReport.RegisterNullValue(const PropertyName: String; Value: Variant);
+var
+  NullValuesData: TJSONObject;
 begin
-  FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(BandName, PropertyName, ''));
+  BaseConfigDataNeeded;
+  NullValuesData := FBaseConfigData.Objects['nullvalues'];
+  SetJSONPropValue(NullValuesData, PropertyName, Value);
 end;
 
 end.
