@@ -18,7 +18,9 @@ type
   protected
     procedure DoCheckEOF(var IsEof: Boolean); override;
   public
+    function GetBookMark: Pointer; override;
     procedure GetValue(const ParName: String; var ParValue: Variant);
+    procedure GotoBookMark(BM: Pointer); override;
     property Data: TJSONData read FData write FData;
   end;
 
@@ -141,6 +143,11 @@ begin
   end;
 end;
 
+function TfrJSONDataset.GetBookMark: Pointer;
+begin
+  Result := Pointer(PtrInt(FRecNo));
+end;
+
 procedure TfrJSONDataset.GetValue(const ParName: String; var ParValue: Variant);
 var
   ArrayItem: TJSONData;
@@ -173,6 +180,15 @@ begin
           ParValue := PropData.Value;
       end;
   end;
+end;
+
+procedure TfrJSONDataset.GotoBookMark(BM: Pointer);
+var
+  ARecNo: PtrInt absolute BM;
+begin
+  if (ARecNo < 0) or (ARecNo > FData.Count) then
+    raise Exception.Create('TfrJSONDataset.GotoBookMark - RecNo Out Of Bounds');
+  FRecNo := ARecNo;
 end;
 
 { TfrJSONReport }
