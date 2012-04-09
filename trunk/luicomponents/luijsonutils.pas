@@ -50,6 +50,8 @@ procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
 procedure SortJSONArray(JSONArray: TJSONArray);
 
+procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare);
+
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
 
 function FileToJSONData(const FileName: String): TJSONData;
@@ -69,29 +71,67 @@ function CompareJSONData(Data1, Data2: TJSONData): Integer;
 const
   RelationshipIntegerMap: array[TVariantRelationship] of Integer = (0, -1, 1, 0);
 var
-  JSONType1, JSONType2: TJSONtype;
+  Data1Type, Data2Type: TJSONtype;
 begin
-  JSONType1 := Data1.JSONType;
-  JSONType2 := Data2.JSONType;
-  if JSONType1 = JSONType2 then
+  if Data1 <> nil then
   begin
-    case JSONType1 of
-    jtNumber:
-      Result := CompareValue(Data1.AsInt64, Data2.AsInt64);
-    jtString:
-      Result := CompareText(Data1.AsString, Data2.AsString);
-    jtBoolean:
-      Result := CompareValue(Ord(Data1.AsBoolean), Ord(Data2.AsBoolean));
-    jtNull, jtObject, jtArray:
-      Result := 0;
+    if Data2 <> nil then
+    begin
+      //data1 <> nil, data2 <> nil
+      Data1Type := Data1.JSONType;
+      Data2Type := Data2.JSONType;
+      if Data1Type = Data2Type then
+      begin
+        case Data1Type of
+        jtNumber:
+          Result := CompareValue(Data1.AsInt64, Data2.AsInt64);
+        jtString:
+          Result := CompareText(Data1.AsString, Data2.AsString);
+        jtBoolean:
+          Result := CompareValue(Ord(Data1.AsBoolean), Ord(Data2.AsBoolean));
+        else
+          Result := 0;
+        end;
+      end
+      else
+      begin
+        if (Data1Type in [jtObject, jtArray]) or (Data2Type in [jtObject, jtArray]) then
+          Result := 0
+        else
+        begin
+          if Data1Type = jtNull then
+            Result := -1
+          else if Data2Type = jtNull then
+            Result := 1
+          else
+            Result := RelationshipIntegerMap[VarCompareValue(Data1.Value, Data2.Value)];
+        end;
+      end;
+    end
+    else
+    begin
+      //data1 <> nil, data2 = nil
+      if Data1.JSONType <> jtNull then
+        Result := 1
+      else
+        Result := 0;
     end;
   end
   else
   begin
-    if (JSONType1 in [jtObject, jtArray]) or (JSONType2 in [jtObject, jtArray]) then
+    if Data2 = nil then
+    begin
+      //data1 = nil, data2 = nil
       Result := 0
+    end
     else
-      Result := RelationshipIntegerMap[VarCompareValue(Data1.Value, Data2.Value)];
+    begin
+      //data1 = nil, data2 <> nil
+      if Data2.JSONType <> jtNull then
+        Result := -1
+      else
+        Result := 0;
+    end;
   end;
 end;
 
@@ -245,6 +285,11 @@ end;
 procedure SortJSONArray(JSONArray: TJSONArray);
 begin
   JSONArrayQuickSort(JSONArray, 0, JSONArray.Count - 1, @JSONArraySimpleCompare);
+end;
+
+procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare);
+begin
+  JSONArrayQuickSort(JSONArray, 0, JSONArray.Count - 1, CompareFn);
 end;
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
