@@ -1,7 +1,7 @@
 unit LuiJSONLazReport;
 
 {$mode objfpc}{$H+}
-{$define LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
+{.$define LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
 
 interface
 
