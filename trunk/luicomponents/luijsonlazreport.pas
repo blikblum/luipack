@@ -357,8 +357,16 @@ begin
     if DotPos = 0 then
     begin
       PropData := GetJSONProp(FData, ParName);
-      if (PropData <> nil) and (PropData.JSONType <> jtNull) then
-        ParValue := PropData.Value;
+      if (PropData <> nil) then
+      begin
+        case PropData.JSONType of
+          jtObject: ParValue := '(object)';
+          jtArray: ParValue := '(array)';
+          jtNull: ;
+          else
+            ParValue := PropData.Value;
+        end;
+      end;
     end
     else
     begin
