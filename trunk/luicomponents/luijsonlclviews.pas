@@ -5,7 +5,7 @@ unit LuiJSONLCLViews;
 interface
 
 uses
-  Classes, SysUtils, fpjson, Controls, StdCtrls;
+  Classes, SysUtils, fpjson, Controls, StdCtrls, ExtCtrls;
 
 type
 
@@ -42,6 +42,24 @@ type
   { TJSONSpinEditMediator }
 
   TJSONSpinEditMediator = class(TCustomJSONGUIMediator)
+    class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
+      Control: TControl; Options: TJSONData); override;
+    class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
+      const PropName: String; Options: TJSONData); override;
+  end;
+
+  { TJSONRadioGroupMediator }
+
+  TJSONRadioGroupMediator = class(TCustomJSONGUIMediator)
+    class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
+      Control: TControl; Options: TJSONData); override;
+    class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
+      const PropName: String; Options: TJSONData); override;
+  end;
+
+  { TJSONCheckBoxMediator }
+
+  TJSONCheckBoxMediator = class(TCustomJSONGUIMediator)
     class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
       Control: TControl; Options: TJSONData); override;
     class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
@@ -140,6 +158,64 @@ begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
 end;
 
+{ TJSONCheckBoxMediator }
+
+class procedure TJSONCheckBoxMediator.DoJSONToGUI(JSONObject: TJSONObject;
+  const PropName: String; Control: TControl; Options: TJSONData);
+var
+  CheckBox: TCheckBox;
+  PropData: TJSONData;
+begin
+  CheckBox := Control as TCheckBox;
+  PropData := GetJSONProp(JSONObject, PropName);
+  CheckBox.Checked := (PropData <> nil) and (PropData.JSONType = jtBoolean) and PropData.AsBoolean;
+end;
+
+class procedure TJSONCheckBoxMediator.DoGUIToJSON(Control: TControl;
+  JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
+var
+  CheckBox: TCheckBox;
+begin
+  CheckBox := Control as TCheckBox;
+  if CheckBox.Checked then
+    JSONObject.Booleans[PropName] := True
+  else
+    RemoveJSONProp(JSONObject, PropName);
+end;
+
+{ TJSONRadioGroupMediator }
+
+class procedure TJSONRadioGroupMediator.DoJSONToGUI(JSONObject: TJSONObject;
+  const PropName: String; Control: TControl; Options: TJSONData);
+var
+  RadioGroup: TRadioGroup;
+  PropData: TJSONData;
+begin
+  RadioGroup := Control as TRadioGroup;
+  PropData := GetJSONProp(JSONObject, PropName);
+  if (PropData <> nil) and (PropData.JSONType <> jtNull) then
+  begin
+    //todo: handle jtInteger?
+    if PropData.JSONType = jtString then
+      RadioGroup.ItemIndex := RadioGroup.Items.IndexOf(PropData.AsString);
+  end
+  else
+    RadioGroup.ItemIndex := -1;
+end;
+
+class procedure TJSONRadioGroupMediator.DoGUIToJSON(Control: TControl;
+  JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
+var
+  RadioGroup: TRadioGroup;
+  PropData: TJSONData;
+begin
+  RadioGroup := Control as TRadioGroup;
+  if RadioGroup.ItemIndex <> -1 then
+    JSONObject.Strings[PropName] := RadioGroup.Items[RadioGroup.ItemIndex]
+  else
+    RemoveJSONProp(JSONObject, PropName);
+end;
+
 { TJSONSpinEditMediator }
 
 class procedure TJSONSpinEditMediator.DoJSONToGUI(JSONObject: TJSONObject;
@@ -163,7 +239,6 @@ class procedure TJSONSpinEditMediator.DoGUIToJSON(Control: TControl;
   JSONObject: TJSONObject; const PropName: String; Options: TJSONData);
 var
   SpinEdit: TCustomFloatSpinEdit;
-  i: Integer;
 begin
   SpinEdit := Control as TCustomFloatSpinEdit;
   if not SpinEdit.ValueEmpty then
@@ -176,9 +251,7 @@ begin
   else
   begin
     //todo add option to configure undefined/null
-    i := JSONObject.IndexOfName(PropName);
-    if i <> -1 then
-      JSONObject.Delete(i);
+    RemoveJSONProp(JSONObject, PropName);
     //JSONObject.Nulls[PropName] := True;
   end;
 end;
@@ -438,6 +511,8 @@ initialization
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
   RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
   RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
+  RegisterJSONMediator(TRadioGroup, TJSONRadioGroupMediator);
+  RegisterJSONMediator(TCheckBox, TJSONCheckBoxMediator);
 
 finalization
   MediatorManager.Destroy;
