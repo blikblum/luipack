@@ -1,4 +1,33 @@
 
+function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
+var
+  i: Integer;
+  XOffset, YOffset: SmallInt;
+  FromRect, ToRect: TRect;
+begin
+  if hWndFrom <> 0 then
+    GetWindowRect(hWndFrom, FromRect)
+  else
+  begin
+    FromRect.Left := 0;
+    FromRect.Top := 0;
+  end;
+  if hWndTo <> 0 then
+    GetWindowRect(hWndTo, ToRect)
+  else
+  begin
+    ToRect.Left := 0;
+    ToRect.Top := 0;
+  end;
+  XOffset := (FromRect.Left - ToRect.Left);
+  YOffset := (FromRect.Top - ToRect.Top);
+  for i := 0 to cPoints - 1 do
+  begin
+    PPoint(@lpPoints)[i].x := XOffset + PPoint(@lpPoints)[i].x;
+    PPoint(@lpPoints)[i].y := YOffset + PPoint(@lpPoints)[i].y;
+  end;
+  Result := MakeLong(XOffset, YOffset);
+end;
 
 {$ifndef HAS_GETDOUBLECLICKTIME}
 function GetDoubleClickTime: UINT;
