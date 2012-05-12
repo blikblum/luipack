@@ -308,7 +308,7 @@ var
   TimerInfo: PTimerRecord;
 begin
   TimerInfo := FTimerList.GetTimerInfoPtr(hWnd,nIDEvent);
-  if TimerInfo <> nil then
+  if (TimerInfo <> nil) and (TimerInfo^.TimerHandle <> 0) then
   begin
     //DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
     g_source_remove(TimerInfo^.TimerHandle);
