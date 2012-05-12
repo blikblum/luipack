@@ -290,7 +290,15 @@ begin
     Control := TControl(GetLCLObject(PGtkWidget(hWnd)))
   else
     Control := nil;
-  TimerInfo := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
+  TimerInfo := FTimerList.GetTimerInfoPtr(hWnd,nIDEvent);
+  if TimerInfo = nil then
+    TimerInfo := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control)
+  else
+  begin
+    if TimerInfo^.TimerHandle <> 0 then
+      g_source_remove(TimerInfo^.TimerHandle);
+    TimerInfo^.Notify := lpTimerFunc;
+  end;
   TimerInfo^.TimerHandle := g_timeout_add(uElapse, @gtkTimerCB, TimerInfo);
   //DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
 end;
