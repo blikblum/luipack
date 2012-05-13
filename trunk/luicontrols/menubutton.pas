@@ -123,8 +123,8 @@ type
     procedure UpdateStyle;
   protected
     procedure DoButtonDown; override;
-    function GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
-    function GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
+    function GetGlyphSize(Drawing: Boolean; PaintRect: TRect): TSize; override;
+    function GetTextSize(Drawing: Boolean; PaintRect: TRect): TSize; override;
     procedure Loaded; override;
     procedure MouseEnter; override;
     procedure MouseLeave; override;
@@ -269,9 +269,9 @@ begin
       ShowMenu;
 end;
 
-function TMenuButton.GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+function TMenuButton.GetGlyphSize(Drawing: Boolean; PaintRect: TRect): TSize;
 begin
-  Result := inherited GetGlyphSize({$if lcl_release >= 31}Drawing, {$endif} PaintRect);
+  Result := inherited GetGlyphSize(Drawing, PaintRect);
   if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
   begin
     FClientWidth := PaintRect.Right - PaintRect.Left;
@@ -282,9 +282,9 @@ begin
   end;
 end;
 
-function TMenuButton.GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+function TMenuButton.GetTextSize(Drawing: Boolean; PaintRect: TRect): TSize;
 begin
-  Result := inherited GetTextSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
+  Result := inherited GetTextSize(Drawing, PaintRect);
   if (FStyle = mbsSingle) and (mboShowIndicator in FOptions) then
   begin
     Inc(FContentWidth, Result.Cx);
