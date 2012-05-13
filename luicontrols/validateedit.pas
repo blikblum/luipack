@@ -216,6 +216,7 @@ begin
   FDataLink.OnUpdateData := @UpdateData;
   //FRecoverMode := rmNone;
   FInvalidValueColor := clWindow;
+  CustomEditMask := True;
 end;
 
 { TDBValidateEdit }
