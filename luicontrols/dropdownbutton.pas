@@ -6,7 +6,7 @@ interface
 
 uses
   Types, Classes, SysUtils, DropDownManager, Controls, LCLType, Buttons, Forms,
-  Graphics, LCLVersion;
+  Graphics;
 
 type
 
@@ -30,8 +30,8 @@ type
     procedure SetDroppedDown(const Value: Boolean);
     procedure SetOptions(Value: TDropDownButtonOptions);
   protected
-    function GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
-    function GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize; override;
+    function GetGlyphSize(Drawing: Boolean; PaintRect: TRect): TSize; override;
+    function GetTextSize(Drawing: Boolean; PaintRect: TRect): TSize; override;
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -39,6 +39,7 @@ type
     procedure Click; override;
     procedure Paint; override;
     property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
+    property Manager: TDropDownManager read FManager;
   published
     property DropDownControl: TWinControl read GetDropDownControl write SetDropDownControl;
     property Options: TDropDownButtonOptions read FOptions write SetOptions default [dboShowIndicator];
@@ -158,9 +159,9 @@ begin
   FOptions := Value;
 end;
 
-function TDropDownButton.GetGlyphSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+function TDropDownButton.GetGlyphSize(Drawing: Boolean; PaintRect: TRect): TSize;
 begin
-  Result := inherited GetGlyphSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
+  Result := inherited GetGlyphSize(Drawing, PaintRect);
   if (dboShowIndicator in FOptions) then
   begin
     Inc(FContentWidth, Result.Cx);
@@ -175,9 +176,9 @@ begin
   end;
 end;
 
-function TDropDownButton.GetTextSize({$if lcl_release >= 31}Drawing: Boolean;{$endif} PaintRect: TRect): TSize;
+function TDropDownButton.GetTextSize(Drawing: Boolean; PaintRect: TRect): TSize;
 begin
-  Result := inherited GetTextSize({$if lcl_release >= 31}Drawing, {$endif}PaintRect);
+  Result := inherited GetTextSize(Drawing, PaintRect);
   if (dboShowIndicator in FOptions) then
   begin
     FClientWidth := PaintRect.Right - PaintRect.Left;
