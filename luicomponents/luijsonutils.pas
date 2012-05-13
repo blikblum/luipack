@@ -60,6 +60,8 @@ function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
 
+procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
+
 function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
 
 implementation
@@ -362,11 +364,10 @@ end;
 
 //todo implement array of arrays
 //todo implement null as undefined
-function DatasetToJSONArray(Dataset: TDataset): TJSONArray;
+procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
 var
   OldRecNo: Integer;
 begin
-  Result := TJSONArray.Create;
   if Dataset.IsEmpty then
     Exit;
   Dataset.DisableControls;
@@ -375,7 +376,7 @@ begin
     Dataset.First;
     while not Dataset.EOF do
     begin
-      Result.Add(DatasetRecToJSONObject(Dataset));
+      JSONArray.Add(DatasetRecToJSONObject(Dataset));
       Dataset.Next;
     end;
   finally
@@ -391,7 +392,10 @@ begin
   OptionsData := StringToJSONData(Options);
   try
     if OptionsData = nil then
-      Result := DatasetToJSONArray(Dataset)
+    begin
+      Result := TJSONArray.Create;
+      DatasetToJSONArray(TJSONArray(Result), Dataset);
+    end
     else
     begin
       case OptionsData.JSONType of
@@ -400,7 +404,10 @@ begin
           if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
             Result := DatasetRecToJSONObject(Dataset)
           else
-            Result := DatasetToJSONArray(Dataset);
+          begin
+            Result := TJSONArray.Create;
+            DatasetToJSONArray(TJSONArray(Result), Dataset);
+          end;
         end;
         jtArray:
           ;
