@@ -3,24 +3,16 @@ function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): I
 var
   i: Integer;
   XOffset, YOffset: SmallInt;
-  FromRect, ToRect: TRect;
+  FromPoint, ToPoint: TPoint;
 begin
+  FromPoint := Point(0, 0);
+  ToPoint := Point(0, 0);
   if hWndFrom <> 0 then
-    GetWindowRect(hWndFrom, FromRect)
-  else
-  begin
-    FromRect.Left := 0;
-    FromRect.Top := 0;
-  end;
+    ClientToScreen(hWndFrom, FromPoint);
   if hWndTo <> 0 then
-    GetWindowRect(hWndTo, ToRect)
-  else
-  begin
-    ToRect.Left := 0;
-    ToRect.Top := 0;
-  end;
-  XOffset := (FromRect.Left - ToRect.Left);
-  YOffset := (FromRect.Top - ToRect.Top);
+    ClientToScreen(hWndTo, ToPoint);
+  XOffset := (FromPoint.X - ToPoint.X);
+  YOffset := (FromPoint.Y - ToPoint.Y);
   for i := 0 to cPoints - 1 do
   begin
     PPoint(@lpPoints)[i].x := XOffset + PPoint(@lpPoints)[i].x;
