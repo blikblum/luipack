@@ -78,6 +78,7 @@ type
     FPropertyName: String;
     procedure MediatorClassNeeded;
     procedure OptionsDataNeeded;
+    procedure SetControl(Value: TControl);
   public
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
@@ -85,7 +86,7 @@ type
     procedure Load(JSONObject: TJSONObject);
     procedure Save(JSONObject: TJSONObject);
   published
-    property Control: TControl read FControl write FControl;
+    property Control: TControl read FControl write SetControl;
     property MediatorId: String read FMediatorId write FMediatorId;
     property Options: String read FOptions write FOptions;
     property PropertyName: String read FPropertyName write FPropertyName;
@@ -110,6 +111,8 @@ type
     FPropertyViews: TJSONObjectPropertyViews;
     procedure SetJSONObject(const Value: TJSONObject);
     procedure SetPropertyViews(const Value: TJSONObjectPropertyViews);
+  protected
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -287,6 +290,24 @@ begin
   FPropertyViews.Assign(Value);
 end;
 
+procedure TJSONObjectViewManager.Notification(AComponent: TComponent;
+  Operation: TOperation);
+var
+  i: Integer;
+  View: TJSONObjectPropertyView;
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    for i := 0 to FPropertyViews.Count -1 do
+    begin
+      View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
+      if AComponent = View.Control then
+        View.Control := nil;
+    end;
+  end;
+end;
+
 procedure TJSONObjectViewManager.SetJSONObject(const Value: TJSONObject);
 begin
   if FJSONObject = Value then exit;
@@ -373,6 +394,22 @@ procedure TJSONObjectPropertyView.OptionsDataNeeded;
 begin
   if (FOptions <> '') and (FOptionsData = nil) then
     FOptionsData := StringToJSONData(FOptions);
+end;
+
+procedure TJSONObjectPropertyView.SetControl(Value: TControl);
+var
+  TheOwner: TComponent;
+begin
+  if FControl = Value then Exit;
+  TheOwner := Collection.Owner as TComponent;
+  if (TheOwner <> nil) then
+  begin
+    if FControl <> nil then
+      FControl.RemoveFreeNotification(TheOwner);
+    if Value <> nil then
+      Value.FreeNotification(TheOwner);
+  end;
+  FControl := Value;
 end;
 
 destructor TJSONObjectPropertyView.Destroy;
