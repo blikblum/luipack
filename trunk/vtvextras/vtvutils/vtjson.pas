@@ -11,8 +11,8 @@ type
 
   TVirtualJSONInspector = class;
 
-  TVTJSONInspectorFormatValue = procedure (Sender: TVirtualJSONInspector; const PropertyName: String;
-    Data: TJSONData; var DisplayText: String) of object;
+  TVTJSONInspectorFormatValue = procedure (Sender: TVirtualJSONInspector; const PropName: String;
+    PropData: TJSONData; var DisplayText: String) of object;
 
   TVTJSONInspectorFormatName = procedure (Sender: TVirtualJSONInspector;
     ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String) of object;
@@ -288,7 +288,7 @@ type
   TVTJSONListViewFormatValue = procedure (Sender: TVirtualJSONListView; Column: TColumnIndex;
     Data: TJSONData; var DisplayText: String) of object;
 
-  TVTJSONViewGetText = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: TJSONData; Column: TColumnIndex;
+  TVTJSONViewGetText = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; NodeData: TJSONData; Column: TColumnIndex;
     TextType: TVSTTextType; var CellText: String) of object;
 
   { TVirtualJSONListViewColumn }
