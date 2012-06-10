@@ -8,7 +8,7 @@ object frmMain: TfrmMain
   ClientHeight = 300
   ClientWidth = 400
   Position = poDesktopCenter
-  LCLVersion = '0.9.31'
+  LCLVersion = '1.1'
   object MainPageControl: TPageControl
     Left = 0
     Height = 300
@@ -93,7 +93,7 @@ object frmMain: TfrmMain
         Left = 243
         Height = 17
         Top = 95
-        Width = 114
+        Width = 112
         Caption = 'Underline On Hover'
         OnChange = CheckUnderlineChange
         TabOrder = 1
@@ -102,7 +102,7 @@ object frmMain: TfrmMain
         Left = 244
         Height = 17
         Top = 122
-        Width = 89
+        Width = 87
         Caption = 'Bold On Hover'
         OnChange = CheckBoldChange
         TabOrder = 2
@@ -471,6 +471,51 @@ object frmMain: TfrmMain
         Caption = 'Set Text'
         OnClick = SetSearchEditTextButtonClick
         TabOrder = 4
+      end
+    end
+    object AdvancedLabelSheet: TTabSheet
+      Caption = 'TAdvancedLabel'
+      ClientHeight = 274
+      ClientWidth = 392
+      object AutoLinkAdvancedLabel: TAdvancedLabel
+        Left = 12
+        Height = 14
+        Top = 26
+        Width = 273
+        Link = True
+        OnClick = AutoLinkAdvancedLabelClick
+        Caption = 'AutoLink = True (Try setting OnClick to nil in design time)'
+        Font.Color = clBlue
+        Font.Style = [fsUnderline]
+        ParentColor = False
+        ParentFont = False
+      end
+      object ToggleLinkCheckBox: TCheckBox
+        Left = 164
+        Height = 17
+        Top = 68
+        Width = 71
+        Caption = 'Toggle Link'
+        OnChange = ToggleLinkCheckBoxChange
+        TabOrder = 0
+      end
+      object ExampleAdvancedLabel: TAdvancedLabel
+        Left = 12
+        Height = 14
+        Top = 69
+        Width = 117
+        HotTrackColor = clRed
+        Caption = 'AdvancedLabel Example'
+        ParentColor = False
+      end
+      object ToggleAdvancedLabelHotTrackCheckBox: TCheckBox
+        Left = 164
+        Height = 17
+        Top = 93
+        Width = 96
+        Caption = 'Toggle HotTrack'
+        OnChange = ToggleAdvancedLabelHotTrackCheckBoxChange
+        TabOrder = 1
       end
     end
   end
