@@ -6,13 +6,18 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, ComCtrls, Spin;
+  ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, AdvancedLabel,
+  ComCtrls, Spin;
 
 type
 
   { TfrmMain }
 
   TfrmMain = class(TForm)
+    ToggleAdvancedLabelHotTrackCheckBox: TCheckBox;
+    ExampleAdvancedLabel: TAdvancedLabel;
+    AutoLinkAdvancedLabel: TAdvancedLabel;
+    ToggleLinkCheckBox: TCheckBox;
     Label4: TLabel;
     SetSearchEditTextButton: TButton;
     CheckUnderline: TCheckBox;
@@ -64,6 +69,7 @@ type
     SearchEditTab: TTabSheet;
     MenuButtonTab: TTabSheet;
     MenuButtonMarginEdit: TSpinEdit;
+    AdvancedLabelSheet: TTabSheet;
     ToggleLabelTab: TTabSheet;
     Panel1: TPanel;
     PopupMenu1: TPopupMenu;
@@ -76,6 +82,7 @@ type
     SearchEdit1: TSearchEdit;
     ToggleLabel1: TToggleLabel;
     ToggleLabel2: TToggleLabel;
+    procedure AutoLinkAdvancedLabelClick(Sender: TObject);
     procedure ButtonArrowColorColorChanged(Sender: TObject);
     procedure ButtonHighlightColorColorChanged(Sender: TObject);
     procedure ButtonLabelColorColorChanged(Sender: TObject);
@@ -89,6 +96,8 @@ type
     procedure MenuItem15Click(Sender: TObject);
     procedure SearchEdit1Execute(Sender: TObject);
     procedure SetSearchEditTextButtonClick(Sender: TObject);
+    procedure ToggleAdvancedLabelHotTrackCheckBoxChange(Sender: TObject);
+    procedure ToggleLinkCheckBoxChange(Sender: TObject);
     procedure ToggleLabel2Change(Sender: TObject);
   private
     { private declarations }
@@ -156,6 +165,11 @@ begin
   ToggleLabel2.ArrowColor := ButtonArrowColor.ButtonColor;
 end;
 
+procedure TfrmMain.AutoLinkAdvancedLabelClick(Sender: TObject);
+begin
+  ShowMessage('AutoLink');
+end;
+
 procedure TfrmMain.ButtonHighlightColorColorChanged(Sender: TObject);
 begin
   ToggleLabel1.HighlightColor := ButtonHighlightColor.ButtonColor;
@@ -216,6 +230,16 @@ end;
 procedure TfrmMain.SetSearchEditTextButtonClick(Sender: TObject);
 begin
   SearchEdit1.Text := 'Text Set Through Code';
+end;
+
+procedure TfrmMain.ToggleAdvancedLabelHotTrackCheckBoxChange(Sender: TObject);
+begin
+  ExampleAdvancedLabel.HotTrack := not ExampleAdvancedLabel.HotTrack;
+end;
+
+procedure TfrmMain.ToggleLinkCheckBoxChange(Sender: TObject);
+begin
+  ExampleAdvancedLabel.Link := not ExampleAdvancedLabel.Link;
 end;
 
 end.

@@ -6,7 +6,7 @@
     <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="10"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
@@ -28,7 +28,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="9">
+    <Files Count="10">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -66,6 +66,10 @@ TSearchEdit
         <Filename Value="dropdownbutton.pas"/>
         <UnitName Value="dropdownbutton"/>
       </Item9>
+      <Item10>
+        <Filename Value="advancedlabel.pas"/>
+        <UnitName Value="advancedlabel"/>
+      </Item10>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">

@@ -2,22 +2,22 @@
   This source is only used to compile and install the package.
  }
 
-unit luicontrols; 
+unit luicontrols;
 
 interface
 
 uses
   ToggleLabel, MenuButton, register_luicontrols, SearchEdit, ValidateEdit, 
-  WizardTypes, WizardControls, DropDownManager, DropDownButton, 
+  WizardTypes, WizardControls, DropDownManager, DropDownButton, AdvancedLabel, 
   LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('register_luicontrols', @register_luicontrols.Register); 
-end; 
+  RegisterUnit('register_luicontrols', @register_luicontrols.Register);
+end;
 
 initialization
-  RegisterPackage('luicontrols', @Register); 
+  RegisterPackage('luicontrols', @Register);
 end.
