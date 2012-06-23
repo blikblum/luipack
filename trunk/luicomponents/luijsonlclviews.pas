@@ -119,6 +119,7 @@ type
     procedure Load;
     procedure Load(const Properties: array of String);
     procedure Save;
+    procedure Save(const Properties: array of String);
     property JSONObject: TJSONObject read FJSONObject write SetJSONObject;
   published
     property PropertyViews: TJSONObjectPropertyViews read FPropertyViews write SetPropertyViews;
@@ -362,6 +363,20 @@ begin
     View.Save(FJSONObject);
   end;
 end;
+
+procedure TJSONObjectViewManager.Save(const Properties: array of String);
+var
+  i: Integer;
+  View: TJSONObjectPropertyView;
+begin
+  for i := 0 to FPropertyViews.Count -1 do
+  begin
+    View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
+    if AnsiMatchText(View.PropertyName, Properties) then
+      View.Save(FJSONObject);
+  end;
+end;
+
 { TJSONObjectPropertyViews }
 
 function TJSONObjectPropertyViews.GetOwner: TPersistent;
