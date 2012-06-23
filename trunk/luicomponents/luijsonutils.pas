@@ -64,6 +64,8 @@ procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
 
 function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
 
+procedure DatasetToJSONObject(JSONObject: TJSONObject; Dataset: TDataset);
+
 implementation
 
 uses
@@ -347,26 +349,12 @@ begin
   end;
 end;
 
-function DatasetRecToJSONObject(Dataset: TDataset): TJSONObject;
-var
-  i: Integer;
-  Field: TField;
-begin
-  Result := TJSONObject.Create;
-  for i := 0 to Dataset.Fields.Count - 1 do
-  begin
-    Field := Dataset.Fields[i];
-    //todo: add option to preserve case
-    //todo: add option to map fields
-    SetJSONPropValue(Result, LowerCase(Field.FieldName), Field.AsVariant);
-  end;
-end;
-
 //todo implement array of arrays
 //todo implement null as undefined
 procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
 var
   OldRecNo: Integer;
+  RecordData: TJSONObject;
 begin
   if Dataset.IsEmpty then
     Exit;
@@ -376,7 +364,9 @@ begin
     Dataset.First;
     while not Dataset.EOF do
     begin
-      JSONArray.Add(DatasetRecToJSONObject(Dataset));
+      RecordData := TJSONObject.Create;
+      DatasetToJSONObject(RecordData, Dataset);
+      JSONArray.Add(RecordData);
       Dataset.Next;
     end;
   finally
@@ -402,7 +392,10 @@ begin
         jtObject:
         begin
           if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
-            Result := DatasetRecToJSONObject(Dataset)
+          begin
+            Result := TJSONObject.Create;
+            DatasetToJSONObject(TJSONObject(Result), Dataset);
+          end
           else
           begin
             Result := TJSONArray.Create;
@@ -415,6 +408,20 @@ begin
     end;
   finally
     OptionsData.Free;
+  end;
+end;
+
+procedure DatasetToJSONObject(JSONObject: TJSONObject; Dataset: TDataset);
+var
+  i: Integer;
+  Field: TField;
+begin
+  for i := 0 to Dataset.Fields.Count - 1 do
+  begin
+    Field := Dataset.Fields[i];
+    //todo: add option to preserve case
+    //todo: add option to map fields
+    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant);
   end;
 end;
 
