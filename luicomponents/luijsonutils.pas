@@ -46,7 +46,13 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
 
 function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
 
+function JSONArrayIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
+
+function JSONArrayIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+
 procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
+
+function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
 procedure SortJSONArray(JSONArray: TJSONArray);
 
@@ -233,6 +239,48 @@ begin
     Result := Data.Value;
 end;
 
+function JSONArrayIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
+begin
+  for Result := 0 to JSONArray.Count - 1 do
+  begin
+    if SameValue(JSONArray.Items[Result], ItemValue) then
+      Exit;
+  end;
+  Result := -1;
+end;
+
+function JSONArrayIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+var
+  PropCount, i: Integer;
+  ItemData, PropData: TJSONData;
+  ItemObj: TJSONObject absolute ItemData;
+  ObjMatches: Boolean;
+begin
+  PropCount := Length(Properties);
+  Result := -1;
+  if odd(PropCount) then
+    raise Exception.Create('JSONArrayIndexOf - Properties must have even length');
+  PropCount := PropCount div 2;
+  for Result := 0 to JSONArray.Count - 1 do
+  begin
+    ItemData := JSONArray.Items[Result];
+    ObjMatches := False;
+    if ItemData.JSONType = jtObject then
+    begin
+      for i := 0 to PropCount - 1 do
+      begin
+        PropData := GetJSONProp(ItemObj, Properties[i * 2]);
+        ObjMatches := (PropData <> nil) and SameValue(PropData, Properties[(i * 2) + 1]);
+        if not ObjMatches then
+          break;
+      end;
+    end;
+    if ObjMatches then
+      Exit;
+  end;
+  Result := -1;
+end;
+
 procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 var
   i: Integer;
@@ -284,6 +332,19 @@ end;
 function JSONArraySimpleCompare(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
 begin
   Result := CompareJSONData(JSONArray.Items[Index1], JSONArray.Items[Index2]);
+end;
+
+function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
+begin
+  Result := False;
+  case VarType(Value) of
+    varnull:  Result := JSONData.JSONType = jtNull;
+    varstring: Result := (JSONData.JSONType = jtString) and (JSONData.AsString = Value);
+    vardouble, vardate: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsFloat = Value);
+    varinteger, varlongword: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInteger = Value);
+    varint64, varqword: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInt64 = Value);
+    varboolean: Result := (JSONData.JSONType = jtBoolean) and (JSONData.AsBoolean = Value);
+  end;
 end;
 
 procedure SortJSONArray(JSONArray: TJSONArray);
