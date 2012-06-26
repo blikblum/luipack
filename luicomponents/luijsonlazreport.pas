@@ -419,6 +419,29 @@ begin
     V1 := frParser.Calc(P1);
     Val := VarIsNull(V1);
   end
+  else if AName = 'IFTHEN' then
+  begin
+    V1 := frParser.Calc(P1);
+    if (VarType(V1) = varshortint) then
+    begin
+      if V1 = 1 then
+      begin
+        S2 := P2;
+        if S2 <> '' then
+          Val := frParser.Calc(S2)
+        else
+          Val := Null;
+      end
+      else
+      begin
+        S3 := P3;
+        if S3 = '' then
+          Val := Null
+        else
+          Val := frParser.Calc(S3);
+      end;
+    end;
+  end
   else
     inherited;
 end;
