@@ -58,7 +58,7 @@ procedure SortJSONArray(JSONArray: TJSONArray);
 
 procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare);
 
-procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
+procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant; SetNull: Boolean = False);
 
 function FileToJSONData(const FileName: String): TJSONData;
 
@@ -357,13 +357,17 @@ begin
   JSONArrayQuickSort(JSONArray, 0, JSONArray.Count - 1, CompareFn);
 end;
 
-procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant);
+procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant; SetNull: Boolean = False);
 var
   VariantType: tvartype;
 begin
   VariantType := VarType(Value);
   case VariantType of
-    varnull: JSONObj.Elements[PropName] := TJSONNull.Create;
+    varnull:
+    begin
+      if SetNull then
+        JSONObj.Elements[PropName] := TJSONNull.Create;
+    end;
     varstring: JSONObj.Elements[PropName] := TJSONString.Create(Value);
     vardouble, vardate: JSONObj.Elements[PropName] := TJSONFloatNumber.Create(Value);
     varinteger, varlongword: JSONObj.Elements[PropName] := TJSONIntegerNumber.Create(Value);
