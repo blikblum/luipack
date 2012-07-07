@@ -26,7 +26,7 @@ type
 
   TJSONArraySortCompare = function(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
 
-  TDatasetToJSONOption = (djoSetNull, djoCurrentRecord);
+  TDatasetToJSONOption = (djoSetNull, djoCurrentRecord, djoPreserveCase);
 
   TDatasetToJSONOptions = set of TDatasetToJSONOption;
 
@@ -69,16 +69,32 @@ function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
 
-function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const OptionsStr: String): TJSONData;
+function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 
 procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 
 procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
 
+procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray;
+  Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
+
+procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject;
+  Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
+
+
 implementation
 
 uses
   jsonparser, Variants, math;
+
+type
+
+  TFieldMap = record
+    Field: TField;
+    Name: String;
+  end;
+
+  TFieldMaps = array of TFieldMap;
 
 function CompareJSONData(Data1, Data2: TJSONData): Integer;
 const
@@ -417,6 +433,14 @@ begin
   end;
 end;
 
+procedure CopyFieldsToJSONObject(Fields: TFieldMaps; JSONObject: TJSONObject; SetNull: Boolean);
+var
+  i: Integer;
+begin
+  for i := 0 to Length(Fields) - 1 do
+    SetJSONPropValue(JSONObject, Fields[i].Name, Fields[i].Field.AsVariant, SetNull);
+end;
+
 //todo implement array of arrays
 procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 var
@@ -451,24 +475,23 @@ begin
   end;
 end;
 
-function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const OptionsStr: String): TJSONData;
-var
-  OptionsData: TJSONData;
+function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 begin
-  OptionsData := StringToJSONData(OptionsStr);
-  try
-    if not (djoCurrentRecord in Options) then
-    begin
-      Result := TJSONArray.Create;
-      DatasetToJSONData(Dataset, TJSONArray(Result), Options);
-    end
+  if not (djoCurrentRecord in Options) then
+  begin
+    Result := TJSONArray.Create;
+    if ExtOptions = '' then
+      DatasetToJSONData(Dataset, TJSONArray(Result), Options)
     else
-    begin
-      Result := TJSONObject.Create;
-      DatasetToJSONData(Dataset, TJSONObject(Result), Options);
-    end;
-  finally
-    OptionsData.Free;
+      DatasetToJSONData(Dataset, TJSONArray(Result), Options, ExtOptions);
+  end
+  else
+  begin
+    Result := TJSONObject.Create;
+    if ExtOptions = '' then
+      DatasetToJSONData(Dataset, TJSONObject(Result), Options)
+    else
+      DatasetToJSONData(Dataset, TJSONObject(Result), Options, ExtOptions);
   end;
 end;
 
@@ -476,15 +499,130 @@ procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options:
 var
   i: Integer;
   Field: TField;
-  SetNull: Boolean;
+  SetNull, PreserveCase: Boolean;
 begin
   SetNull := djoSetNull in Options;
+  PreserveCase := djoPreserveCase in Options;
   for i := 0 to Dataset.Fields.Count - 1 do
   begin
     Field := Dataset.Fields[i];
-    //todo: add option to preserve case
-    //todo: add option to map fields
-    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant, SetNull);
+    if not PreserveCase then
+      SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant, SetNull)
+    else
+      SetJSONPropValue(JSONObject, Field.FieldName, Field.AsVariant, SetNull);
+  end;
+end;
+
+procedure OptionsToFieldMaps(Dataset: TDataset; FieldsData: TJSONArray; Result: TFieldMaps);
+var
+  i: Integer;
+  FieldData: TJSONData;
+  FieldObj: TJSONObject absolute FieldData;
+  Field: TField;
+  FieldName: String;
+begin
+  SetLength(Result, FieldsData.Count);
+  for i := 0 to FieldsData.Count - 1 do
+  begin
+    FieldData := FieldsData.Items[i];
+    case FieldData.JSONType of
+      jtString:
+      begin
+        FieldName := FieldData.AsString;
+        Field := Dataset.FieldByName(FieldName);
+      end;
+      jtObject:
+      begin
+        Field := nil;
+        FieldName := GetJSONProp(FieldObj, 'mapping', '');
+        if FieldName <> '' then
+          Field := Dataset.FieldByName(FieldName);
+        FieldName := GetJSONProp(FieldObj, 'name', FieldName);
+        if Field = nil then
+        begin
+          //mapping not found
+          Field := Dataset.FieldByName(FieldName);
+        end;
+      end;
+      else
+        raise Exception.Create('DatasetToJSONData - Error parsing fields property');
+    end;
+    Result[i].Field := Field;
+    Result[i].Name := FieldName;
+  end;
+end;
+
+procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray;
+  Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
+var
+  ExtOptionsData, RecordData: TJSONObject;
+  FieldsData: TJSONArray;
+  FieldMaps: TFieldMaps;
+  OldRecNo: Integer;
+begin
+  if Dataset.IsEmpty then
+    Exit;
+  ExtOptionsData := StringToJSONData(ExtOptions) as TJSONObject;
+  try
+    FieldsData := nil;
+    if ExtOptionsData <> nil then
+      FieldsData := GetJSONProp(ExtOptionsData, 'fields') as TJSONArray;
+    if FieldsData = nil then
+      DatasetToJSONData(Dataset, JSONArray, Options)
+    else
+    begin
+      OptionsToFieldMaps(Dataset, FieldsData, FieldMaps);
+      if djoCurrentRecord in Options then
+      begin
+        RecordData := TJSONObject.Create;
+        CopyFieldsToJSONObject(FieldMaps, RecordData, djoSetNull in Options);
+        JSONArray.Add(RecordData);
+      end
+      else
+      begin
+        Dataset.DisableControls;
+        OldRecNo := Dataset.RecNo;
+        try
+          Dataset.First;
+          while not Dataset.EOF do
+          begin
+            RecordData := TJSONObject.Create;
+            CopyFieldsToJSONObject(FieldMaps, RecordData, djoSetNull in Options);
+            JSONArray.Add(RecordData);
+            Dataset.Next;
+          end;
+        finally
+          Dataset.RecNo := OldRecNo;
+          Dataset.EnableControls;
+        end;
+      end;
+    end;
+  finally
+    ExtOptionsData.Free;
+  end;
+end;
+
+procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject;
+  Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
+var
+  ExtOptionsData: TJSONObject;
+  FieldsData: TJSONArray;
+  FieldMaps: TFieldMaps;
+begin
+  ExtOptionsData := StringToJSONData(ExtOptions) as TJSONObject;
+  try
+    FieldsData := nil;
+    if ExtOptionsData <> nil then
+      FieldsData := GetJSONProp(ExtOptionsData, 'fields') as TJSONArray;
+    if FieldsData = nil then
+      DatasetToJSONData(Dataset, JSONObject, Options)
+    else
+    begin
+      OptionsToFieldMaps(Dataset, FieldsData, {%H-}FieldMaps);
+      CopyFieldsToJSONObject(FieldMaps, JSONObject, djoSetNull in Options);
+    end;
+  finally
+    ExtOptionsData.Free;
   end;
 end;
 
