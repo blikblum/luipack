@@ -26,7 +26,7 @@ type
 
   TJSONArraySortCompare = function(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
 
-  TDatasetToJSONOption = (djoSetNull);
+  TDatasetToJSONOption = (djoSetNull, djoCurrentRecord);
 
   TDatasetToJSONOptions = set of TDatasetToJSONOption;
 
@@ -425,20 +425,29 @@ var
 begin
   if Dataset.IsEmpty then
     Exit;
-  Dataset.DisableControls;
-  OldRecNo := Dataset.RecNo;
-  try
-    Dataset.First;
-    while not Dataset.EOF do
-    begin
-      RecordData := TJSONObject.Create;
-      DatasetToJSONData(Dataset, RecordData, Options);
-      JSONArray.Add(RecordData);
-      Dataset.Next;
+  if djoCurrentRecord in Options then
+  begin
+    RecordData := TJSONObject.Create;
+    DatasetToJSONData(Dataset, RecordData, Options);
+    JSONArray.Add(RecordData);
+  end
+  else
+  begin
+    Dataset.DisableControls;
+    OldRecNo := Dataset.RecNo;
+    try
+      Dataset.First;
+      while not Dataset.EOF do
+      begin
+        RecordData := TJSONObject.Create;
+        DatasetToJSONData(Dataset, RecordData, Options);
+        JSONArray.Add(RecordData);
+        Dataset.Next;
+      end;
+    finally
+      Dataset.RecNo := OldRecNo;
+      Dataset.EnableControls;
     end;
-  finally
-    Dataset.RecNo := OldRecNo;
-    Dataset.EnableControls;
   end;
 end;
 
@@ -448,30 +457,15 @@ var
 begin
   OptionsData := StringToJSONData(OptionsStr);
   try
-    if OptionsData = nil then
+    if not (djoCurrentRecord in Options) then
     begin
       Result := TJSONArray.Create;
       DatasetToJSONData(Dataset, TJSONArray(Result), Options);
     end
     else
     begin
-      case OptionsData.JSONType of
-        jtObject:
-        begin
-          if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
-          begin
-            Result := TJSONObject.Create;
-            DatasetToJSONData(Dataset, TJSONObject(Result), Options);
-          end
-          else
-          begin
-            Result := TJSONArray.Create;
-            DatasetToJSONData(Dataset, TJSONArray(Result), Options);
-          end;
-        end;
-        jtArray:
-          ;
-      end;
+      Result := TJSONObject.Create;
+      DatasetToJSONData(Dataset, TJSONObject(Result), Options);
     end;
   finally
     OptionsData.Free;
