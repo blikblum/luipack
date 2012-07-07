@@ -486,7 +486,7 @@ begin
     Field := Dataset.Fields[i];
     //todo: add option to preserve case
     //todo: add option to map fields
-    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant);
+    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant, True);
   end;
 end;
 
