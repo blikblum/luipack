@@ -26,6 +26,9 @@ type
 
   TJSONArraySortCompare = function(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
 
+  TDatasetToJSONOption = (djoSetNull);
+
+  TDatasetToJSONOptions = set of TDatasetToJSONOption;
 
 function CompareJSONData(Data1, Data2: TJSONData): Integer;
 
@@ -66,11 +69,11 @@ function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
 
-procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
+function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const OptionsStr: String): TJSONData;
 
-function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
+procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 
-procedure DatasetToJSONObject(JSONObject: TJSONObject; Dataset: TDataset);
+procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
 
 implementation
 
@@ -415,8 +418,7 @@ begin
 end;
 
 //todo implement array of arrays
-//todo implement null as undefined
-procedure DatasetToJSONArray(JSONArray: TJSONArray; Dataset: TDataset);
+procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 var
   OldRecNo: Integer;
   RecordData: TJSONObject;
@@ -430,7 +432,7 @@ begin
     while not Dataset.EOF do
     begin
       RecordData := TJSONObject.Create;
-      DatasetToJSONObject(RecordData, Dataset);
+      DatasetToJSONData(Dataset, RecordData, Options);
       JSONArray.Add(RecordData);
       Dataset.Next;
     end;
@@ -440,16 +442,16 @@ begin
   end;
 end;
 
-function DatasetToJSONData(Dataset: TDataset; const Options: String): TJSONData;
+function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const OptionsStr: String): TJSONData;
 var
   OptionsData: TJSONData;
 begin
-  OptionsData := StringToJSONData(Options);
+  OptionsData := StringToJSONData(OptionsStr);
   try
     if OptionsData = nil then
     begin
       Result := TJSONArray.Create;
-      DatasetToJSONArray(TJSONArray(Result), Dataset);
+      DatasetToJSONData(Dataset, TJSONArray(Result), Options);
     end
     else
     begin
@@ -459,12 +461,12 @@ begin
           if GetJSONProp(TJSONObject(OptionsData), 'copyrecord', False) then
           begin
             Result := TJSONObject.Create;
-            DatasetToJSONObject(TJSONObject(Result), Dataset);
+            DatasetToJSONData(Dataset, TJSONObject(Result), Options);
           end
           else
           begin
             Result := TJSONArray.Create;
-            DatasetToJSONArray(TJSONArray(Result), Dataset);
+            DatasetToJSONData(Dataset, TJSONArray(Result), Options);
           end;
         end;
         jtArray:
@@ -476,17 +478,19 @@ begin
   end;
 end;
 
-procedure DatasetToJSONObject(JSONObject: TJSONObject; Dataset: TDataset);
+procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
 var
   i: Integer;
   Field: TField;
+  SetNull: Boolean;
 begin
+  SetNull := djoSetNull in Options;
   for i := 0 to Dataset.Fields.Count - 1 do
   begin
     Field := Dataset.Fields[i];
     //todo: add option to preserve case
     //todo: add option to map fields
-    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant, True);
+    SetJSONPropValue(JSONObject, LowerCase(Field.FieldName), Field.AsVariant, SetNull);
   end;
 end;
 
