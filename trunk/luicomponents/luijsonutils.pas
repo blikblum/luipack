@@ -30,10 +30,14 @@ type
 
   TDatasetToJSONOptions = set of TDatasetToJSONOption;
 
+  TCopyJSONObjectOption = (cjoSetUndefined, cjoSetNull, cjoOverwrite);
+
+  TCopyJSONObjectOptions = set of TCopyJSONObjectOption;
+
 function CompareJSONData(Data1, Data2: TJSONData): Integer;
 
-//todo: implement Overwrite, RemoveNull, SetUndefinedAsNull
-procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String; SetUndefined: Boolean = False);
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String;
+  Options: TCopyJSONObjectOptions = [cjoOverwrite, cjoSetNull]);
 
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
 
@@ -165,21 +169,76 @@ begin
 end;
 
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array of String;
-  SetUndefined: Boolean);
+  Options: TCopyJSONObjectOptions);
 var
   PropertyName: String;
-  i, j: Integer;
+  PropIndex, SrcIndex, DestIndex: Integer;
 begin
-  for i := 0 to Length(Properties) - 1 do
+  for PropIndex := Low(Properties) to High(Properties) do
   begin
-    PropertyName := Properties[i];
-    j := SrcObj.IndexOfName(PropertyName);
-    if j <> -1 then
-      DestObj.Elements[PropertyName] := SrcObj.Items[j].Clone
-    else
+    PropertyName := Properties[PropIndex];
+    SrcIndex := SrcObj.IndexOfName(PropertyName);
+    if SrcIndex <> -1 then
     begin
-      if SetUndefined then
-        DestObj.Nulls[PropertyName] := True;
+      DestIndex := DestObj.IndexOfName(PropertyName);
+      if SrcObj.Items[SrcIndex].JSONType = jtNull then
+      begin
+        if cjoOverwrite in Options then
+        begin
+          if DestIndex <> - 1 then
+          begin
+            if (cjoSetNull in Options) then
+              DestObj.Items[DestIndex] := TJSONNull.Create
+            else
+              DestObj.Delete(DestIndex);
+          end else
+          begin
+            if (cjoSetNull in Options) then
+              DestObj.Nulls[PropertyName] := True;
+          end;
+        end else
+        begin
+          if (DestIndex = -1) and (cjoSetNull in Options) then
+            DestObj.Nulls[PropertyName] := True;
+        end;
+      end else
+      begin
+        if cjoOverwrite in Options then
+        begin
+          if DestIndex = -1 then
+            DestObj.Elements[PropertyName] := SrcObj.Items[SrcIndex].Clone
+          else
+            DestObj.Items[DestIndex] := SrcObj.Items[SrcIndex].Clone;
+        end else
+        begin
+          if DestIndex = -1 then
+            DestObj.Elements[PropertyName] := SrcObj.Items[SrcIndex].Clone;
+        end;
+      end;
+    end else
+    begin
+      DestIndex := DestObj.IndexOfName(PropertyName);
+      if cjoOverwrite in Options then
+      begin
+        if cjoSetUndefined in Options then
+        begin
+          if DestIndex <> -1 then
+            DestObj.Items[DestIndex] := TJSONNull.Create
+          else
+            DestObj.Nulls[PropertyName] := True;
+        end else
+        begin
+          if DestIndex <> -1 then
+            DestObj.Delete(DestIndex);
+        end;
+      end else
+      begin
+        if DestIndex = -1 then
+        begin
+          if cjoSetUndefined in Options then
+            DestObj.Nulls[PropertyName] := True
+        end;
+      end;
     end;
   end;
 end;
@@ -571,7 +630,7 @@ begin
       DatasetToJSONData(Dataset, JSONArray, Options)
     else
     begin
-      OptionsToFieldMaps(Dataset, FieldsData, FieldMaps);
+      OptionsToFieldMaps(Dataset, FieldsData, {%H-}FieldMaps);
       if djoCurrentRecord in Options then
       begin
         RecordData := TJSONObject.Create;
