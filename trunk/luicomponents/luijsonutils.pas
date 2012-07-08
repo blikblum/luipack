@@ -12,16 +12,9 @@ type
   { TJSONFile }
 
   TJSONFile = class
-  private
-    FData: TJSONData;
-    FFileName: String;
   public
-    destructor Destroy; override;
-    procedure Load;
-    class function Load(const AFileName: String): TJSONData;
-    class procedure Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
-    property Data: TJSONData read FData ;
-    property FileName: String read FFileName write FFileName;
+    class function Load(const AFileName: String): TJSONData; static;
+    class procedure Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions); static;
   end;
 
   TJSONArraySortCompare = function(JSONArray: TJSONArray; Index1, Index2: Integer): Integer;
@@ -686,43 +679,6 @@ begin
 end;
 
 { TJSONFile }
-
-destructor TJSONFile.Destroy;
-begin
-  FData.Free;
-  inherited Destroy;
-end;
-
-procedure TJSONFile.Load;
-var
-  Parser: TJSONParser;
-  Stream: TFileStream;
-begin
-  //todo: handle UTF-8
-  if not FileExists(FFileName) then
-    raise Exception.CreateFmt('TJSONFile - File "%s" does not exist', [FFileName]);
-  FreeAndNil(FData);
-  Stream := nil;
-  Parser := nil;
-  try
-    try
-      Stream := TFileStream.Create(FFileName, fmOpenRead);
-      Parser := TJSONParser.Create(Stream);
-      FData := Parser.Parse;
-    finally
-      Parser.Free;
-      Stream.Free;
-    end;
-  except
-    on E: EFOpenError do
-      raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [FFileName, E.Message]);
-    on E: EParserError do
-    begin
-       FData.Free;
-       raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [FFileName, E.Message]);
-    end;
-  end;
-end;
 
 class function TJSONFile.Load(const AFileName: String): TJSONData;
 var
