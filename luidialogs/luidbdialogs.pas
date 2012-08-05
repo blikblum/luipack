@@ -88,6 +88,7 @@ var
           FieldData := GetJSONProp(DialogObject, 'fields');
           EditForm.Caption := GetJSONProp(DialogObject, 'title', EditForm.Caption);
           EditForm.EditorClassName := GetJSONProp(DialogObject, 'editor', '');
+          EditForm.AppendEditorClassName := GetJSONProp(DialogObject, 'appendeditor', '');
         end;
       jtArray, jtString:
         FieldData := DialogData;
