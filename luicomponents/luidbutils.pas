@@ -7,11 +7,54 @@ interface
 uses
   Classes, SysUtils, db;
 
-procedure DeleteCurrentRecord(Dataset: TDataSet);
-
 procedure CopyDatasetData(SourceDataset, DestDataset: TDataset);
 
+procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings; const FieldNames: string; Clear: Boolean = False);
+
+procedure DeleteCurrentRecord(Dataset: TDataSet);
+
 implementation
+
+uses
+  LuiStrUtils;
+
+procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings; const FieldNames: string; Clear: Boolean);
+var
+  MainFieldName, ObjFieldName: string;
+  MainField, ObjField: TField;
+  ABookmark: TBookmark;
+begin
+  ExtractNameValue(FieldNames, MainFieldName, ObjFieldName);
+  MainField := Dataset.FieldByName(MainFieldName);
+  ObjField := Dataset.FindField(ObjFieldName);
+  Strings.BeginUpdate;
+  try
+    if Clear then
+      Strings.Clear;
+    if not Dataset.IsEmpty then
+    begin
+      Dataset.DisableControls;
+      ABookmark := Dataset.GetBookmark;
+      try
+        Dataset.First;
+        while not Dataset.EOF do
+        begin
+          if ObjField = nil then
+            Strings.Add(MainField.AsString)
+          else
+            Strings.AddObject(MainField.AsString, TObject(ObjField.AsInteger));
+          Dataset.Next;
+        end;
+      finally
+        Dataset.GotoBookmark(ABookmark);
+        Dataset.FreeBookmark(ABookmark);
+        Dataset.EnableControls;
+      end;
+    end;
+  finally
+    Strings.EndUpdate;
+  end;
+end;
 
 procedure DeleteCurrentRecord(Dataset: TDataSet);
 begin
