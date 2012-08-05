@@ -28,12 +28,16 @@ type
     procedure GridEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
   private
+    FAppendEditorClass: TFormClass;
+    FAppendEditorForm: TForm;
     FModifications: TDataModifications;
     FEditorClass: TFormClass;
     FEditorForm: TForm;
+    procedure SetAppendEditorClassName(const Value: String);
     procedure SetDataSet(const Value: TDataSet);
     procedure SetEditorClassName(const Value: String);
   public
+    property AppendEditorClassName: String write SetAppendEditorClassName;
     property DataSet: TDataSet write SetDataSet;
     property EditorClassName: String write SetEditorClassName;
     property Modifications: TDataModifications read FModifications;
@@ -64,16 +68,29 @@ end;
 { TEditDataSourceForm }
 
 procedure TEditDataSourceForm.AddButtonClick(Sender: TObject);
+var
+  LastNode: PVirtualNode;
 begin
   with DataSource1.DataSet do
   begin
-    FModifications := FModifications + [dmAdd];
     Append;
     Post;
-    with Grid do
+    if (FAppendEditorForm = nil) and (FAppendEditorClass <> nil) then
     begin
-      if GetLast <> nil then
-        EditNode(GetLast, 0);
+      FAppendEditorForm := FAppendEditorClass.Create(Self);
+      SetObjectProperties(FAppendEditorForm, ['DataSource', DataSource1, 'Dataset', DataSource1.DataSet]);
+    end;
+    if FAppendEditorForm <> nil then
+    begin
+      if FAppendEditorForm.ShowModal <> mrCancel then
+        FModifications := FModifications + [dmAdd];
+    end
+    else
+    begin
+      FModifications := FModifications + [dmAdd];
+      LastNode := Grid.GetLast;
+      if LastNode <> nil then
+        Grid.EditNode(LastNode, 0);
     end;
   end;
 end;
@@ -95,9 +112,8 @@ begin
   if FEditorForm = nil then
   begin
     FEditorForm := FEditorClass.Create(Self);
-    SetObjectProperties(FEditorForm, ['DataSource', DataSource1]);
+    SetObjectProperties(FEditorForm, ['DataSource', DataSource1, 'Dataset', DataSource1.DataSet]);
   end;
-  FEditorForm.Position := poOwnerFormCenter;
   FEditorForm.ShowModal;
 end;
 
@@ -118,6 +134,20 @@ end;
 procedure TEditDataSourceForm.SetDataSet(const Value: TDataSet);
 begin
   DataSource1.DataSet := Value;
+end;
+
+procedure TEditDataSourceForm.SetAppendEditorClassName(const Value: String);
+var
+  AClass: TClass;
+begin
+  if Value <> '' then
+  begin
+    AClass := FindClass(Value);
+    if AClass.InheritsFrom(TForm) then
+    begin
+      FAppendEditorClass := TFormClass(AClass);
+    end;
+  end;
 end;
 
 procedure TEditDataSourceForm.SetEditorClassName(const Value: String);
