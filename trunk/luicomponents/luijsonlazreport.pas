@@ -377,6 +377,17 @@ begin
         Assert(DataLink.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
         PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
         DataLink.Dataset.GetValue(PropertyName, ParValue);
+      end
+      else
+      begin
+        PropData := GetJSONProp(FData, PropertyName);
+        if (PropData <> nil) and (PropData.JSONType = jtObject) then
+        begin
+          PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
+          PropData := GetJSONProp(TJSONObject(PropData), PropertyName);
+          if PropData <> nil then
+            ParValue := PropData.Value;
+        end;
       end;
     end;
     if VarIsEmpty(ParValue) then
