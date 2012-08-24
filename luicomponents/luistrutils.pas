@@ -36,7 +36,16 @@ unit LuiStrUtils;
 interface
 
 uses
-  Classes, SysUtils; 
+  Classes, SysUtils;
+
+type
+
+  { TFile }
+
+  TFile = class
+  public
+     class procedure WriteAllText(const Path, Contents: string); overload; static;
+  end;
 
 function Capitalize(const U: UnicodeString; const ExcludeWords: array of UnicodeString): UnicodeString;
 
@@ -230,6 +239,20 @@ begin
       // KeyInc may be larger than SrcOrd
       Result[i] := Char(CryptOrd);
     end;
+  end;
+end;
+
+{ TFile }
+
+class procedure TFile.WriteAllText(const Path, Contents: string);
+var
+  Stream: TFileStream;
+begin
+  Stream := TFileStream.Create(Path, fmCreate);
+  try
+    Stream.WriteBuffer(Contents[1], Length(Contents));
+  finally
+    Stream.Free;
   end;
 end;
 
