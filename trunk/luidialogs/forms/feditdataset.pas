@@ -82,8 +82,12 @@ begin
     end;
     if FAppendEditorForm <> nil then
     begin
-      if FAppendEditorForm.ShowModal <> mrCancel then
-        FModifications := FModifications + [dmAdd];
+      if (FAppendEditorForm.ShowModal in [mrOK, mrYes]) then
+        FModifications := FModifications + [dmAdd]
+      else
+      begin
+        Delete;
+      end;
     end
     else
     begin
