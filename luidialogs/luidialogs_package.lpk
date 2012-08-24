@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="luidialogs_package"/>
+    <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
-      <Version Value="10"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="forms;units"/>
@@ -47,26 +48,23 @@
       </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="6">
+    <RequiredPkgs Count="5">
       <Item1>
-        <PackageName Value="LuiLCLComponents"/>
+        <PackageName Value="luicairo_extras"/>
       </Item1>
       <Item2>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="LuiLCLComponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item3>
       <Item4>
-        <PackageName Value="luicairo_extras"/>
+        <PackageName Value="LCL"/>
       </Item4>
       <Item5>
-        <PackageName Value="virtualdbgrid_package"/>
-      </Item5>
-      <Item6>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item6>
+      </Item5>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
