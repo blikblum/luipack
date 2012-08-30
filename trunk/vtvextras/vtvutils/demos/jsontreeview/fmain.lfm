@@ -8,12 +8,13 @@ object MainForm: TMainForm
   ClientWidth = 432
   OnDestroy = FormDestroy
   Position = poScreenCenter
-  LCLVersion = '0.9.31'
+  LCLVersion = '1.1'
   object JSONTreeView: TVirtualJSONTreeView
     Left = 2
     Height = 279
     Top = 42
     Width = 428
+    TextProperty = 'text'
     Align = alClient
     BorderSpacing.Top = 40
     BorderSpacing.Bottom = 30
@@ -35,7 +36,7 @@ object MainForm: TMainForm
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23
-    NumGlyphs = 0
+    NumGlyphs = 1
     Anchors = [akTop, akLeft, akRight]
     MaxLength = 0
     TabOrder = 1
