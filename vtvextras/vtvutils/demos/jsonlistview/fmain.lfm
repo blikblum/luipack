@@ -7,7 +7,7 @@ object MainForm: TMainForm
   ClientHeight = 510
   ClientWidth = 676
   OnDestroy = FormDestroy
-  LCLVersion = '0.9.31'
+  LCLVersion = '1.1'
   object JSONListView: TVirtualJSONListView
     Left = 8
     Height = 288
@@ -33,7 +33,7 @@ object MainForm: TMainForm
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23
-    NumGlyphs = 0
+    NumGlyphs = 1
     MaxLength = 0
     TabOrder = 1
   end
@@ -41,7 +41,7 @@ object MainForm: TMainForm
     Left = 488
     Height = 17
     Top = 32
-    Width = 110
+    Width = 108
     Caption = 'Enable check items'
     OnChange = EnableCheckItemsCheckBoxChange
     TabOrder = 2
@@ -84,7 +84,7 @@ object MainForm: TMainForm
     Left = 488
     Height = 17
     Top = 56
-    Width = 81
+    Width = 79
     Caption = 'Use Columns'
     OnChange = UseColumnsCheckBoxChange
     TabOrder = 6

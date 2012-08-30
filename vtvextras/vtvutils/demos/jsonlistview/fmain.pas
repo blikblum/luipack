@@ -73,11 +73,7 @@ begin
   except
     on E: EFOpenError do
       ShowMessageFmt('Error opening "%s" : %s', [Value, E.Message]);
-    on E: EJSONScanner do
-    begin
-      ShowMessageFmt('Error parsing "%s" : %s', [Value, E.Message]);
-    end;
-    on E: EScannerError do
+    on E: EParserError do
     begin
       ShowMessageFmt('Error parsing "%s" : %s', [Value, E.Message]);
     end;
