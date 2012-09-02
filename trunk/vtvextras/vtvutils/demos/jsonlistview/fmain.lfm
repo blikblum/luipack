@@ -1,32 +1,20 @@
 object MainForm: TMainForm
-  Left = 580
+  Left = 404
   Height = 510
-  Top = 187
-  Width = 676
-  Caption = 'JSONListView Demo'
+  Top = 185
+  Width = 681
+  Caption = 'JSONList/TreeView Demo'
   ClientHeight = 510
-  ClientWidth = 676
+  ClientWidth = 681
   OnDestroy = FormDestroy
+  Position = poScreenCenter
   LCLVersion = '1.1'
-  object JSONListView: TVirtualJSONListView
-    Left = 8
-    Height = 288
-    Top = 32
-    Width = 478
-    Header.AutoSizeIndex = 0
-    Header.Columns = <>
-    Header.DefaultHeight = 17
-    Header.MainColumn = -1
-    TabOrder = 0
-    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
-    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
-    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
-  end
   object FileNameEdit: TFileNameEdit
-    Left = 8
+    AnchorSideRight.Side = asrBottom
+    Left = 2
     Height = 21
-    Top = 3
-    Width = 456
+    Top = 4
+    Width = 448
     OnAcceptFileName = FileNameEditAcceptFileName
     DialogOptions = []
     Filter = 'JSON Files|*.json;*.js|Text Files|*.txt|All Files|*.*'
@@ -34,66 +22,80 @@ object MainForm: TMainForm
     HideDirectories = False
     ButtonWidth = 23
     NumGlyphs = 1
+    Anchors = [akTop, akLeft, akRight]
     MaxLength = 0
-    TabOrder = 1
+    TabOrder = 0
   end
   object EnableCheckItemsCheckBox: TCheckBox
-    Left = 488
+    Left = 482
     Height = 17
-    Top = 32
+    Top = 4
     Width = 108
+    Anchors = [akTop, akRight]
     Caption = 'Enable check items'
     OnChange = EnableCheckItemsCheckBoxChange
-    TabOrder = 2
+    TabOrder = 1
   end
   object ShowCheckedButton: TButton
-    Left = 8
+    AnchorSideBottom.Control = LogMemo
+    Left = 2
     Height = 25
-    Top = 328
+    Top = 331
     Width = 168
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Bottom = 8
     Caption = 'Show Checked Items'
     OnClick = ShowCheckedButtonClick
-    TabOrder = 3
+    TabOrder = 2
   end
   object LogMemo: TMemo
-    Left = 8
+    Left = 2
     Height = 144
-    Top = 360
-    Width = 478
+    Top = 364
+    Width = 677
+    Align = alBottom
+    BorderSpacing.Around = 2
     ScrollBars = ssAutoBoth
-    TabOrder = 4
+    TabOrder = 3
   end
   object PropertiesComboBox: TComboBox
-    Left = 488
+    Left = 480
     Height = 21
-    Top = 96
-    Width = 188
+    Top = 65
+    Width = 196
+    Anchors = [akTop, akRight]
     ItemHeight = 13
     OnEditingDone = TextPropertyEditEditingDone
-    TabOrder = 5
+    TabOrder = 4
   end
   object TextPropertyLabel: TLabel
-    Left = 488
+    Left = 480
     Height = 14
-    Top = 80
+    Top = 50
     Width = 68
+    Anchors = [akTop, akRight]
     Caption = 'Text Property'
     ParentColor = False
   end
   object UseColumnsCheckBox: TCheckBox
-    Left = 488
+    Left = 482
     Height = 17
-    Top = 56
-    Width = 79
-    Caption = 'Use Columns'
+    Top = 28
+    Width = 77
+    Anchors = [akTop, akRight]
+    Caption = 'Use columns'
     OnChange = UseColumnsCheckBoxChange
-    TabOrder = 6
+    TabOrder = 5
   end
   object PropertiesGrid: TStringGrid
-    Left = 488
-    Height = 176
-    Top = 80
-    Width = 188
+    AnchorSideBottom.Control = ViewsPageControl
+    AnchorSideBottom.Side = asrBottom
+    Left = 480
+    Height = 275
+    Top = 52
+    Width = 196
+    Anchors = [akTop, akRight, akBottom]
+    BorderSpacing.Bottom = 2
     ColCount = 3
     Columns = <    
       item
@@ -104,18 +106,102 @@ object MainForm: TMainForm
       item
         ReadOnly = True
         Title.Caption = 'Property'
-        Width = 70
+        Width = 80
       end    
       item
         Title.Caption = 'Display Text'
-        Width = 70
+        Width = 80
       end>
     FixedCols = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goEditing, goSmoothScroll]
     RowCount = 1
-    TabOrder = 7
+    TabOrder = 6
     Visible = False
     OnCheckboxToggled = PropertiesGridCheckboxToggled
     OnEditingDone = PropertiesGridEditingDone
+  end
+  object ViewsPageControl: TPageControl
+    Left = 2
+    Height = 297
+    Top = 32
+    Width = 471
+    ActivePage = ListViewTabSheet
+    Align = alClient
+    BorderSpacing.Top = 30
+    BorderSpacing.Right = 206
+    BorderSpacing.Bottom = 26
+    BorderSpacing.Around = 2
+    TabIndex = 0
+    TabOrder = 7
+    object ListViewTabSheet: TTabSheet
+      Caption = 'ListView'
+      ClientHeight = 271
+      ClientWidth = 463
+      object JSONListView: TVirtualJSONListView
+        Left = 2
+        Height = 267
+        Top = 2
+        Width = 459
+        Align = alClient
+        BorderSpacing.Around = 2
+        Header.AutoSizeIndex = 0
+        Header.Columns = <>
+        Header.DefaultHeight = 17
+        Header.MainColumn = -1
+        TabOrder = 0
+        TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+        TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+        TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+      end
+    end
+    object TreeViewTabSheet: TTabSheet
+      Caption = 'TreeView'
+      ClientHeight = 271
+      ClientWidth = 463
+      object JSONTreeView: TVirtualJSONTreeView
+        Left = 2
+        Height = 237
+        Top = 2
+        Width = 459
+        TextProperty = 'text'
+        Align = alClient
+        BorderSpacing.Bottom = 30
+        BorderSpacing.Around = 2
+        Header.AutoSizeIndex = 0
+        Header.Columns = <>
+        Header.DefaultHeight = 17
+        Header.MainColumn = -1
+        TabOrder = 0
+      end
+      object CollapseButton: TButton
+        Left = 2
+        Height = 25
+        Top = 242
+        Width = 90
+        Anchors = [akLeft, akBottom]
+        Caption = 'Collapse All'
+        OnClick = CollapseButtonClick
+        TabOrder = 1
+      end
+      object ExpandButton: TButton
+        Left = 100
+        Height = 25
+        Top = 242
+        Width = 90
+        Anchors = [akLeft, akBottom]
+        Caption = 'Expand All'
+        OnClick = ExpandButtonClick
+        TabOrder = 2
+      end
+    end
+  end
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 5
+    Top = 357
+    Width = 681
+    Align = alBottom
+    ResizeAnchor = akBottom
   end
 end
