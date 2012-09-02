@@ -748,14 +748,19 @@ begin
     //todo: cache PropIndex ??
     //todo: add option to ignore case
     if Header.UseColumns then
-      PropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+    begin
+      if Column <> NoColumn then
+        PropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+      else
+        PropIndex := -1;
+    end
     else
       PropIndex := JSONObject.IndexOfName(FTextProperty);
     if PropIndex <> -1 then
     begin
       PropJSONData := JSONObject.Items[PropIndex];
       //todo: add display options for null value
-      if PropJSONData.JSONType <> jtNull then
+      if PropJSONData.JSONType in [jtString, jtNumber, jtBoolean] then
         CellText := JSONObject.Items[PropIndex].AsString;
     end;
   end;
@@ -823,7 +828,12 @@ begin
     if not Header.UseColumns then
       TextPropIndex := JSONObject.IndexOfName(FTextProperty)
     else
-      TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName);
+    begin
+      if Column <> NoColumn then
+        TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+      else
+        TextPropIndex := -1;
+    end;
 
     if TextPropIndex <> -1 then
     begin
