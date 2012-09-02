@@ -316,12 +316,13 @@ type
     procedure LoadCheckedData;
     procedure SetData(const Value: TJSONData);
     procedure SetOptions(const Value: TStringTreeOptions);
+    procedure SetTextProperty(const Value: String);
   protected
     procedure DoChecked(Node: PVirtualNode); override;
     function GetColumnClass: TVirtualTreeColumnClass; override;
     function GetOptionsClass: TTreeOptionsClass; override;
     property OnGetText: TVTJSONDataViewGetText read FOnGetText write FOnGetText;
-    property TextProperty: String read FTextProperty write FTextProperty;
+    property TextProperty: String read FTextProperty write SetTextProperty;
     property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
   public
     destructor Destroy; override;
@@ -974,6 +975,18 @@ end;
 procedure TCustomVirtualJSONDataView.SetOptions(const Value: TStringTreeOptions);
 begin
   TreeOptions.Assign(Value);
+end;
+
+procedure TCustomVirtualJSONDataView.SetTextProperty(const Value: String);
+begin
+  if FTextProperty = Value then Exit;
+  FTextProperty := Value;
+  if not (csLoading in ComponentState) and HandleAllocated then
+  begin
+    //todo: check for UseColumns?
+    MainColumnChanged;
+    Invalidate;
+  end;
 end;
 
 procedure TCustomVirtualJSONDataView.DoChecked(Node: PVirtualNode);
