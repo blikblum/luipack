@@ -812,17 +812,25 @@ procedure TVirtualJSONTreeView.DoGetText(Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
 var
   ItemData: PTVItemData;
-  JSONData: TJSONData;
+  JSONData, TextPropData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
-  TextIndex: Integer;
+  TextPropIndex: Integer;
 begin
   ItemData := GetItemData(Node);
   JSONData := ItemData^.JSONData;
   if JSONData.JSONType = jtObject then
   begin
-    TextIndex := JSONObject.IndexOfName(FTextProperty);
-    if TextIndex <> -1 then
-      CellText := JSONObject.Items[TextIndex].AsString;
+    if not Header.UseColumns then
+      TextPropIndex := JSONObject.IndexOfName(FTextProperty)
+    else
+      TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName);
+
+    if TextPropIndex <> -1 then
+    begin
+      TextPropData := JSONObject.Items[TextPropIndex];
+      if TextPropData.JSONType in [jtString, jtNumber, jtBoolean] then
+        CellText := TextPropData.AsString;
+    end;
   end;
   if Assigned(FOnGetText) then
     FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
