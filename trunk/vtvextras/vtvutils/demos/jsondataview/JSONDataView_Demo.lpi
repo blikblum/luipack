@@ -6,6 +6,7 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <Title Value="JSONDataView_Demo"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
     </General>
@@ -43,9 +44,9 @@
     </RequiredPackages>
     <Units Count="2">
       <Unit0>
-        <Filename Value="JSONListView_Demo.lpr"/>
+        <Filename Value="JSONDataView_Demo.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="JSONListView_Demo"/>
+        <UnitName Value="JSONDataView_Demo"/>
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
@@ -61,7 +62,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="JSONListView_Demo"/>
+      <Filename Value="jsondataview"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

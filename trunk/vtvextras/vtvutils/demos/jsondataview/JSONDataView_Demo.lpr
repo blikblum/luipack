@@ -1,4 +1,4 @@
-program JSONListView_Demo;
+program JSONDataView_Demo;
 
 {$mode objfpc}{$H+}
 
