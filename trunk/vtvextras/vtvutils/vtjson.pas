@@ -283,17 +283,17 @@ type
     property OnUpdating;
   end;
 
-  TVirtualJSONListView = class;
+  TCustomVirtualJSONDataView = class;
 
-  TVTJSONListViewFormatValue = procedure (Sender: TVirtualJSONListView; Column: TColumnIndex;
+  TVTJSONDataViewFormatValue = procedure (Sender: TCustomVirtualJSONDataView; Column: TColumnIndex;
     Data: TJSONData; var DisplayText: String) of object;
 
-  TVTJSONViewGetText = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; NodeData: TJSONData; Column: TColumnIndex;
-    TextType: TVSTTextType; var CellText: String) of object;
+  TVTJSONDataViewGetText = procedure(Sender: TCustomVirtualJSONDataView; Node: PVirtualNode; NodeData: TJSONData;
+    Column: TColumnIndex; TextType: TVSTTextType; var CellText: String) of object;
 
-  { TVirtualJSONListViewColumn }
+  { TVirtualJSONDataViewColumn }
 
-  TVirtualJSONListViewColumn = class(TVirtualTreeColumn)
+  TVirtualJSONDataViewColumn = class(TVirtualTreeColumn)
   private
     FPropertyName: String;
     procedure SetPropertyName(const Value: String);
@@ -301,13 +301,13 @@ type
     property PropertyName: String read FPropertyName write SetPropertyName;
   end;
 
-  { TVirtualJSONListView }
+  { TCustomVirtualJSONDataView }
 
-  TVirtualJSONListView = class(TCustomVirtualStringTree)
+  TCustomVirtualJSONDataView = class(TCustomVirtualStringTree)
   private
     FCheckedData: TJSONArray;
     FData: TJSONData;
-    FOnGetText: TVTJSONViewGetText;
+    FOnGetText: TVTJSONDataViewGetText;
     FTextProperty: String;
     FItemDataOffset: Integer;
     function GetCheckedData: TJSONArray;
@@ -317,22 +317,31 @@ type
     procedure SetData(const Value: TJSONData);
     procedure SetOptions(const Value: TStringTreeOptions);
   protected
-    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: String); override;
-    procedure DoInitNode(ParentNode, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     procedure DoChecked(Node: PVirtualNode); override;
     function GetColumnClass: TVirtualTreeColumnClass; override;
     function GetOptionsClass: TTreeOptionsClass; override;
+    property OnGetText: TVTJSONDataViewGetText read FOnGetText write FOnGetText;
+    property TextProperty: String read FTextProperty write FTextProperty;
+    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
   public
-    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetData(Node: PVirtualNode): TJSONData;
     procedure LoadData;
     property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
+  end;
+
+  TVirtualJSONListView = class(TCustomVirtualJSONDataView)
+  private
+  protected
+    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: String); override;
+    procedure DoInitNode(ParentNode, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
+  public
+    constructor Create(AOwner: TComponent); override;
   published
-    property OnGetText: TVTJSONViewGetText read FOnGetText write FOnGetText;
-    property TextProperty: String read FTextProperty write FTextProperty;
+    property OnGetText;
+    property TextProperty;
     //inherited properties
     property Action;
     property Align;
@@ -401,7 +410,7 @@ type
     property TabOrder;
     property TabStop default True;
     property TextMargin;
-    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property TreeOptions;
     property Visible;
     property WantTabs;
 
@@ -509,39 +518,20 @@ type
 
   { TVirtualJSONTreeView }
 
-  TVirtualJSONTreeView = class(TCustomVirtualStringTree)
+  TVirtualJSONTreeView = class(TCustomVirtualJSONDataView)
   private
-    FCheckedData: TJSONArray;
-    FData: TJSONData;
-    FItemDataOffset: Integer;
-    FOnGetText: TVTJSONViewGetText;
-    FRootData: TJSONArray;
-    FTextProperty: String;
-    function GetCheckedData: TJSONArray;
-    function GetItemData(Node: PVirtualNode): Pointer;
     function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
-    function GetOptions: TStringTreeOptions;
-    procedure LoadCheckedData;
-    procedure SetData(const Value: TJSONData);
-    procedure SetOptions(const Value: TStringTreeOptions);
   protected
-    procedure DoChecked(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String); override;
     procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
-    function GetOptionsClass: TTreeOptionsClass; override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    function GetData(Node: PVirtualNode): TJSONData;
-    procedure LoadData;
-    property CheckedData: TJSONArray read GetCheckedData;
-    property Data: TJSONData read FData write SetData;
   published
-    property OnGetText: TVTJSONViewGetText read FOnGetText write FOnGetText;
-    property TextProperty: String read FTextProperty write FTextProperty;
+    property OnGetText;
+    property TextProperty;
    //inherited properties
     property Action;
     property Align;
@@ -610,7 +600,7 @@ type
     property TabOrder;
     property TabStop default True;
     property TextMargin;
-    property TreeOptions: TStringTreeOptions read GetOptions write SetOptions;
+    property TreeOptions;
     property Visible;
     property WantTabs;
 
@@ -727,6 +717,8 @@ type
   end;
   PItemData = ^TItemData;
 
+  //warning: keep JSONData as first field in TLVItemData and TTVItemData since it's
+  // retrieved in TCustomVirtualJSONDataView.GetData both for the list and the tree
   TLVItemData = record
     JSONData: TJSONData;
   end;
@@ -738,23 +730,67 @@ type
   end;
   PTVItemData = ^TTVItemData;
 
+{ TVirtualJSONListView }
+
+procedure TVirtualJSONListView.DoGetText(Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+var
+  ItemData: PLVItemData;
+  JSONData: TJSONData;
+  JSONObject: TJSONObject absolute JSONData;
+  PropJSONData: TJSONData;
+  PropIndex: Integer;
+begin
+  ItemData := GetItemData(Node);
+  JSONData := ItemData^.JSONData;
+  if JSONData.JSONType = jtObject then
+  begin
+    //todo: cache PropIndex ??
+    //todo: add option to ignore case
+    if Header.UseColumns then
+      PropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+    else
+      PropIndex := JSONObject.IndexOfName(FTextProperty);
+    if PropIndex <> -1 then
+    begin
+      PropJSONData := JSONObject.Items[PropIndex];
+      //todo: add display options for null value
+      if PropJSONData.JSONType <> jtNull then
+        CellText := JSONObject.Items[PropIndex].AsString;
+    end;
+  end;
+  if Assigned(FOnGetText) then
+    FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
+end;
+
+procedure TVirtualJSONListView.DoInitNode(ParentNode, Node: PVirtualNode;
+  var InitStates: TVirtualNodeInitStates);
+var
+  ItemData: PLVItemData;
+begin
+  ItemData := GetItemData(Node);
+  ItemData^.JSONData := FData.Items[Node^.Index];
+  Node^.CheckType := ctCheckBox;
+  inherited DoInitNode(ParentNode, Node, InitStates);
+end;
+
+constructor TVirtualJSONListView.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  DefaultText := '';
+  FTextProperty := 'text';
+  FItemDataOffset := AllocateInternalDataArea(SizeOf(TLVItemData));
+  with TreeOptions do
+  begin
+    PaintOptions := PaintOptions - [toShowRoot] +
+      [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
+    SelectionOptions := SelectionOptions + [toExtendedFocus, toFullRowSelect];
+    MiscOptions := MiscOptions + [toEditable, toGridExtensions];
+  end;
+end;
+
 
 { TVirtualJSONTreeView }
-
-function TVirtualJSONTreeView.GetItemData(Node: PVirtualNode): Pointer;
-begin
-  if Node = nil then
-    Result := nil
-  else
-    Result := PByte(Node) + FItemDataOffset;
-end;
-
-function TVirtualJSONTreeView.GetCheckedData: TJSONArray;
-begin
-  if FCheckedData = nil then
-    LoadCheckedData;
-  Result := FCheckedData;
-end;
 
 function TVirtualJSONTreeView.GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
 var
@@ -762,56 +798,14 @@ var
   ParentChildrenData: TJSONArray;
 begin
   if ParentNode = nil then
-    ParentChildrenData := FRootData
+    //todo: don't assign FData directly when add support for FData = object
+    ParentChildrenData := FData as TJSONArray
   else
   begin
     ParentItemData := GetItemData(ParentNode);
     ParentChildrenData := ParentItemData^.ChildrenData;
   end;
   Result := ParentChildrenData.Items[Node^.Index];
-end;
-
-function TVirtualJSONTreeView.GetOptions: TStringTreeOptions;
-begin
-  Result := TStringTreeOptions(inherited TreeOptions)
-end;
-
-procedure TVirtualJSONTreeView.LoadCheckedData;
-var
-  Node: PVirtualNode;
-  ItemData: PTVItemData;
-begin
-  FCheckedData := TJSONArray.Create;
-  Node := GetFirstChecked;
-  while Node <> nil do
-  begin
-    ItemData := GetItemData(Node);
-    FCheckedData.Add(ItemData^.JSONData.Clone);
-    Node := GetNextChecked(Node);
-  end;
-end;
-
-procedure TVirtualJSONTreeView.SetData(const Value: TJSONData);
-begin
-  if FData = Value then exit;
-  FData := Value;
-  //todo handle object values
-  if FData.JSONType = jtArray then
-    FRootData := TJSONArray(FData)
-  else
-    raise Exception.Create('JSON Array expected');
-  LoadData;
-end;
-
-procedure TVirtualJSONTreeView.SetOptions(const Value: TStringTreeOptions);
-begin
-  TreeOptions.Assign(Value);
-end;
-
-procedure TVirtualJSONTreeView.DoChecked(Node: PVirtualNode);
-begin
-  FreeAndNil(FCheckedData);
-  inherited DoChecked(Node);
 end;
 
 procedure TVirtualJSONTreeView.DoGetText(Node: PVirtualNode;
@@ -873,11 +867,6 @@ begin
   inherited DoInitNode(ParentNode, Node, InitStates);
 end;
 
-function TVirtualJSONTreeView.GetOptionsClass: TTreeOptionsClass;
-begin
-  Result := TStringTreeOptions;
-end;
-
 constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -894,41 +883,9 @@ begin
 
 end;
 
-destructor TVirtualJSONTreeView.Destroy;
-begin
-  FCheckedData.Free;
-  inherited Destroy;
-end;
+{ TVirtualJSONDataViewColumn }
 
-function TVirtualJSONTreeView.GetData(Node: PVirtualNode): TJSONData;
-var
-  ItemData: PTVItemData;
-begin
-  if Node <> nil then
-  begin
-    ItemData := GetItemData(Node);
-    Result := ItemData^.JSONData;
-  end
-  else
-    Result := nil;
-end;
-
-procedure TVirtualJSONTreeView.LoadData;
-begin
-  if FRootData = nil then
-    Clear
-  else
-  begin
-    BeginUpdate;
-    Clear;
-    RootNodeCount := FRootData.Count;
-    EndUpdate;
-  end;
-end;
-
-{ TVirtualJSONListViewColumn }
-
-procedure TVirtualJSONListViewColumn.SetPropertyName(const Value: String);
+procedure TVirtualJSONDataViewColumn.SetPropertyName(const Value: String);
 begin
   if FPropertyName = Value then exit;
   if (Text = '') or (Text = FPropertyName) then
@@ -937,9 +894,9 @@ begin
 end;
 
 
-{ TVirtualJSONListView }
+{ TCustomVirtualJSONDataView }
 
-function TVirtualJSONListView.GetItemData(Node: PVirtualNode): Pointer;
+function TCustomVirtualJSONDataView.GetItemData(Node: PVirtualNode): Pointer;
 begin
   if Node = nil then
     Result := nil
@@ -947,12 +904,12 @@ begin
     Result := PByte(Node) + FItemDataOffset;
 end;
 
-function TVirtualJSONListView.GetOptions: TStringTreeOptions;
+function TCustomVirtualJSONDataView.GetOptions: TStringTreeOptions;
 begin
   Result := TStringTreeOptions(inherited TreeOptions);
 end;
 
-procedure TVirtualJSONListView.LoadCheckedData;
+procedure TCustomVirtualJSONDataView.LoadCheckedData;
 var
   Node: PVirtualNode;
   ItemData: PLVItemData;
@@ -967,7 +924,7 @@ begin
   end;
 end;
 
-procedure TVirtualJSONListView.LoadData;
+procedure TCustomVirtualJSONDataView.LoadData;
 begin
   if FData = nil then
     Clear
@@ -984,103 +941,47 @@ begin
   end;
 end;
 
-function TVirtualJSONListView.GetCheckedData: TJSONArray;
+function TCustomVirtualJSONDataView.GetCheckedData: TJSONArray;
 begin
   if FCheckedData = nil then
     LoadCheckedData;
   Result := FCheckedData;
 end;
 
-procedure TVirtualJSONListView.SetData(const Value: TJSONData);
+procedure TCustomVirtualJSONDataView.SetData(const Value: TJSONData);
 begin
   if FData = Value then exit;
   FData := Value;
 end;
 
-procedure TVirtualJSONListView.SetOptions(const Value: TStringTreeOptions);
+procedure TCustomVirtualJSONDataView.SetOptions(const Value: TStringTreeOptions);
 begin
   TreeOptions.Assign(Value);
 end;
 
-procedure TVirtualJSONListView.DoGetText(Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
-var
-  ItemData: PLVItemData;
-  JSONData: TJSONData;
-  JSONObject: TJSONObject absolute JSONData;
-  PropJSONData: TJSONData;
-  PropIndex: Integer;
-begin
-  ItemData := GetItemData(Node);
-  JSONData := ItemData^.JSONData;
-  if JSONData.JSONType = jtObject then
-  begin
-    //todo: cache PropIndex ??
-    //todo: add option to ignore case
-    if Header.UseColumns then
-      PropIndex := JSONObject.IndexOfName(TVirtualJSONListViewColumn(Header.Columns.Items[Column]).PropertyName)
-    else
-      PropIndex := JSONObject.IndexOfName(FTextProperty);
-    if PropIndex <> -1 then
-    begin
-      PropJSONData := JSONObject.Items[PropIndex];
-      //todo: add display options for null value
-      if PropJSONData.JSONType <> jtNull then
-        CellText := JSONObject.Items[PropIndex].AsString;
-    end;
-  end;
-  if Assigned(FOnGetText) then
-    FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
-end;
-
-procedure TVirtualJSONListView.DoInitNode(ParentNode, Node: PVirtualNode;
-  var InitStates: TVirtualNodeInitStates);
-var
-  ItemData: PLVItemData;
-begin
-  ItemData := GetItemData(Node);
-  ItemData^.JSONData := FData.Items[Node^.Index];
-  Node^.CheckType := ctCheckBox;
-  inherited DoInitNode(ParentNode, Node, InitStates);
-end;
-
-procedure TVirtualJSONListView.DoChecked(Node: PVirtualNode);
+procedure TCustomVirtualJSONDataView.DoChecked(Node: PVirtualNode);
 begin
   FreeAndNil(FCheckedData);
   inherited DoChecked(Node);
 end;
 
-function TVirtualJSONListView.GetColumnClass: TVirtualTreeColumnClass;
+function TCustomVirtualJSONDataView.GetColumnClass: TVirtualTreeColumnClass;
 begin
-  Result := TVirtualJSONListViewColumn;
+  Result := TVirtualJSONDataViewColumn;
 end;
 
-function TVirtualJSONListView.GetOptionsClass: TTreeOptionsClass;
+function TCustomVirtualJSONDataView.GetOptionsClass: TTreeOptionsClass;
 begin
   Result := TStringTreeOptions;
 end;
 
-constructor TVirtualJSONListView.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  DefaultText := '';
-  FItemDataOffset := AllocateInternalDataArea(SizeOf(TLVItemData));
-  with TreeOptions do
-  begin
-    PaintOptions := PaintOptions - [toShowRoot] +
-      [toShowHorzGridLines, toShowVertGridLines, toPopupMode, toHideFocusRect];
-    SelectionOptions := SelectionOptions + [toExtendedFocus, toFullRowSelect];
-    MiscOptions := MiscOptions + [toEditable, toGridExtensions];
-  end;
-end;
-
-destructor TVirtualJSONListView.Destroy;
+destructor TCustomVirtualJSONDataView.Destroy;
 begin
   FCheckedData.Free;
   inherited Destroy;
 end;
 
-function TVirtualJSONListView.GetData(Node: PVirtualNode): TJSONData;
+function TCustomVirtualJSONDataView.GetData(Node: PVirtualNode): TJSONData;
 var
   ItemData: PLVItemData;
 begin
