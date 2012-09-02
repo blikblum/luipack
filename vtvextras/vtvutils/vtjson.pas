@@ -736,32 +736,31 @@ procedure TVirtualJSONListView.DoGetText(Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
 var
   ItemData: PLVItemData;
-  JSONData: TJSONData;
+  JSONData, TextPropData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
-  PropJSONData: TJSONData;
-  PropIndex: Integer;
+  TextPropIndex: Integer;
 begin
   ItemData := GetItemData(Node);
   JSONData := ItemData^.JSONData;
   if JSONData.JSONType = jtObject then
   begin
-    //todo: cache PropIndex ??
+    //todo: cache TextPropIndex ??
     //todo: add option to ignore case
     if Header.UseColumns then
     begin
       if Column <> NoColumn then
-        PropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+        TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
       else
-        PropIndex := -1;
+        TextPropIndex := -1;
     end
     else
-      PropIndex := JSONObject.IndexOfName(FTextProperty);
-    if PropIndex <> -1 then
+      TextPropIndex := JSONObject.IndexOfName(FTextProperty);
+    if TextPropIndex <> -1 then
     begin
-      PropJSONData := JSONObject.Items[PropIndex];
+      TextPropData := JSONObject.Items[TextPropIndex];
       //todo: add display options for null value
-      if PropJSONData.JSONType in [jtString, jtNumber, jtBoolean] then
-        CellText := JSONObject.Items[PropIndex].AsString;
+      if TextPropData.JSONType in [jtString, jtNumber, jtBoolean] then
+        CellText := JSONObject.Items[TextPropIndex].AsString;
     end;
   end;
   if Assigned(FOnGetText) then
