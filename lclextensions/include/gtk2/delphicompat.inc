@@ -87,7 +87,11 @@ function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
 begin
   Result := 0;
   if GTK2WidgetSet.IsValidDC(hdc) then
+  {$ifdef LAZARUS_1_0}
   with TGtk2DeviceContext(hdc) do
+  {$else}
+  with TGtkDeviceContext(hdc) do
+  {$endif}
   begin
     case uObjectType of
       OBJ_BITMAP: Result := HGDIOBJ(CurrentBitmap);
@@ -109,7 +113,11 @@ var
 begin
   Result := GTK2WidgetSet.IsValidDC(DC);
   if Result then
+  {$ifdef LAZARUS_1_0}
   with TGtk2DeviceContext(DC) do
+  {$else}
+  with TGtkDeviceContext(DC) do
+  {$endif}
   begin
     if (CurrentFont = nil) or (CurrentFont^.GDIFontObject = nil) then
       layout := GTK2WidgetSet.GetDefaultGtkFont(false)
@@ -148,7 +156,11 @@ begin
     and (lprc.Right > lprc.Left);
   if Result then
   begin
+    {$ifdef LAZARUS_1_0}
     with TGtk2DeviceContext(DC) do
+    {$else}
+    with TGtkDeviceContext(DC) do
+    {$endif}
     begin
       DCOrigin := Offset;
       //todo: see if is necessary store old function
@@ -307,6 +319,8 @@ function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
 var
   TimerInfo: PTimerRecord;
 begin
+  //todo: properly handle Result
+  Result := True;
   TimerInfo := FTimerList.GetTimerInfoPtr(hWnd,nIDEvent);
   if (TimerInfo <> nil) and (TimerInfo^.TimerHandle <> 0) then
   begin
