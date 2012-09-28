@@ -160,20 +160,22 @@ type
   TQtTimerEx = class(TQtObject)
   private
     FTimerHook: QTimer_hookH;
+    FWidgetHook: QObject_hookH;
     FCallbackFunc: TTimerNotify;
     FUserId: LongWord;
     FControl: TControl;
     FAppObject: QObjectH;
   public
-    constructor Create(TimerFunc: TTimerNotify;
-      UserId: LongWord; Control: TControl); virtual;
+    constructor Create(hWnd: THandle; TimerFunc: TTimerNotify;
+      UserId: LongWord);
     destructor Destroy; override;
     procedure AttachEvents; override;
     procedure DetachEvents; override;
+    procedure signalWidgetDestroyed; cdecl;
     procedure signalTimeout; cdecl;
   public
     function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
-    procedure Reset(TimerFunc: TTimerNotify; UserId: LongWord; Control: TControl);
+    procedure Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: LongWord);
     procedure Start(Interval: Integer);
     procedure Stop;
   end;
@@ -187,8 +189,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify;
-      WinControl: TControl): TQtTimerEx;
+    function Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: LongWord): TQtTimerEx;
     function GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
   end;
 
@@ -199,8 +200,8 @@ type
 
 { TQtTimerEx }
 
-constructor TQtTimerEx.Create(TimerFunc: TTimerNotify;
-  UserId: LongWord; Control: TControl);
+constructor TQtTimerEx.Create(hWnd: THandle; TimerFunc: TTimerNotify;
+  UserId: LongWord);
 var
   AName: WideString;
 begin
@@ -209,8 +210,13 @@ begin
   FAppObject := TQtWidgetSetHack(QtWidgetSet).App;
   FCallbackFunc := TimerFunc;
   FUserId := UserId;
-  FControl := Control;
-  
+  FControl := FindControl(hWnd);
+  //todo: see if hwnd <> 0 check can be removed
+  if (hWnd <> 0) then
+  begin
+    FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
+    QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
+  end;
   //very big ultra extreme hack to get the app from QtWidgetset
   TheObject := QTimer_create(FAppObject);
   AName := 'tqttimerex';
@@ -221,8 +227,8 @@ end;
 
 destructor TQtTimerEx.Destroy;
 begin
-  FCallbackFunc := nil;
-  FControl := nil;
+  if FWidgetHook <> nil then
+    QObject_hook_destroy(FWidgetHook);
   inherited Destroy;
 end;
 
@@ -239,6 +245,13 @@ begin
   if FTimerHook <> nil then
     QTimer_hook_destroy(FTimerHook);
   inherited DetachEvents;
+end;
+
+procedure TQtTimerEx.signalWidgetDestroyed; cdecl;
+begin
+  Stop;
+  //FCallbackFunc := nil;
+  //FControl := nil;
 end;
 
 procedure TQtTimerEx.signalTimeout; cdecl;
@@ -262,10 +275,16 @@ begin
   QEvent_accept(Event);
 end;
 
-procedure TQtTimerEx.Reset(TimerFunc: TTimerNotify;
-  UserId: LongWord; Control: TControl);
+procedure TQtTimerEx.Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: LongWord);
 begin
-  FControl := Control;
+  if FWidgetHook <> nil then
+    QObject_hook_destroy(FWidgetHook);
+  if hWnd <> 0 then
+  begin
+    FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
+    QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
+  end;
+  FControl := FindControl(hWnd);
   FCallbackFunc := TimerFunc;
   FUserId := UserId;
 end;
@@ -303,11 +322,9 @@ end;
 
 function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
 var
-  Control: TControl;
   TimerObject: TQtTimerEx;
 begin
-  Control := FindControl(hWnd);
-  TimerObject := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
+  TimerObject := FTimerList.Add(hWnd, lpTimerFunc, nIDEvent);
   try
     TimerObject.Start(uElapse);
     if hWnd = 0 then
@@ -320,7 +337,7 @@ begin
   //DebugLn('SetTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
 end;
 
-function TTimerList.Add(hWnd: THandle; ID: LongWord; NotifyFunc: TTimerNotify; WinControl: TControl): TQtTimerEx;
+function TTimerList.Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: LongWord): TQtTimerEx;
 var
   AID: QWord;
 begin
@@ -331,12 +348,12 @@ begin
     begin
       // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       GetData(AID, Result);
-      Result.Reset(NotifyFunc, ID, WinControl);
+      Result.Reset(hWnd, NotifyFunc, ID);
     end
     else
     begin
       // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
-      Result := TQtTimerEx.Create(NotifyFunc, ID, WinControl);
+      Result := TQtTimerEx.Create(hWnd, NotifyFunc, ID);
       Add(AID, Result);
     end;
   end;
