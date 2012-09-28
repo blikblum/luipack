@@ -242,19 +242,15 @@ begin
 end;
 
 procedure TQtTimerEx.signalTimeout; cdecl;
-var
-  FCheckHandle: Boolean;
 begin
   if Assigned(FCallbackFunc) then
     FCallbackFunc(FUserID)
   else
   if Assigned(FControl) then
   begin
-    if not (csLoading in FControl.ComponentState) then
-    if not (csDestroying in FControl.ComponentState) or not
-    (csDestroyingHandle in FControl.ControlState) then
+    if ([csLoading, csDestroying] * FControl.ComponentState = []) and not
+      (csDestroyingHandle in FControl.ControlState) then
     begin
-      FCheckHandle := True;
       LCLSendTimerMsg(FControl, FUserId, 0);
     end;
   end;
@@ -310,10 +306,7 @@ var
   Control: TControl;
   TimerObject: TQtTimerEx;
 begin
-  if hWnd <> 0 then
-    Control := FindControl(hWnd)
-  else
-    Control := nil;
+  Control := FindControl(hWnd);
   TimerObject := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control);
   try
     TimerObject.Start(uElapse);
