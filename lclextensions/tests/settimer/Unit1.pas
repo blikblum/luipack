@@ -14,6 +14,8 @@ type
 
   TMainForm = class(TForm)
     Button1: TButton;
+    KillGlobalTimerButton1: TButton;
+    SetGlobalTimerButton: TButton;
     SetTimerDestroyButton: TButton;
     SetTimer1Button: TButton;
     SetTimer2Button: TButton;
@@ -24,6 +26,8 @@ type
     SetTimer3bButton: TButton;
     ListBox1: TListBox;
     procedure Button1Click(Sender: TObject);
+    procedure KillGlobalTimerButton1Click(Sender: TObject);
+    procedure SetGlobalTimerButtonClick(Sender: TObject);
     procedure SetTimer1ButtonClick(Sender: TObject);
     procedure SetTimer2ButtonClick(Sender: TObject);
     procedure SetTimer3ButtonClick(Sender: TObject);
@@ -35,8 +39,9 @@ type
   protected
     procedure WMTimer(var Message: TLMTimer); message LM_TIMER;
   private
+    FGlobalTimer: PtrUInt;
     procedure TimerCallback(AId: LongWord);
-    procedure TimerCallbackNew(AId: LongWord);
+    procedure TimerCallbackGlobal(AId: LongWord);
     procedure TimerCallbackOther(AId: LongWord);
     { private declarations }
   public
@@ -60,6 +65,20 @@ begin
   ListBox1.Clear;
 end;
 
+procedure TMainForm.KillGlobalTimerButton1Click(Sender: TObject);
+begin
+  if FGlobalTimer <> 0 then
+  begin
+    KillTimer(0, FGlobalTimer);
+    FGlobalTimer := 0;
+  end;
+end;
+
+procedure TMainForm.SetGlobalTimerButtonClick(Sender: TObject);
+begin
+  FGlobalTimer := SetTimer(0,FGlobalTimer,2000,@TimerCallbackGlobal);
+end;
+
 procedure TMainForm.SetTimer1ButtonClick(Sender: TObject);
 begin
   SetTimer(Handle,Timer1,1000,nil);
@@ -72,7 +91,7 @@ end;
 
 procedure TMainForm.SetTimer3ButtonClick(Sender: TObject);
 begin
-  SetTimer(Handle,Timer3,3000,@TimerCallbackNew);
+  SetTimer(Handle,Timer3,3000,@TimerCallback);
 end;
 
 procedure TMainForm.KillTimer1ButtonClick(Sender: TObject);
@@ -108,7 +127,7 @@ type
 
 procedure TMyButton.WMTimer(var Message: TLMTimer);
 begin
-  MainForm.ListBox1.Items.Add('WMTimer - Released Button');
+  MainForm.ListBox1.Items.Add('WMTimer - Released Button (Should Not Be Fired)');
 end;
 
 procedure TMainForm.SetTimerDestroyButtonClick(Sender: TObject);
@@ -134,40 +153,24 @@ begin
     Timer2: AStr:='Timer2 called';
     Timer3: AStr:='Timer3 called';
   else
-    AStr:='Not Identified Timer: '+IntToStr(Message.TimerID);
+    AStr:='TimerID not identified: '+IntToStr(Message.TimerID);
   end;
   ListBox1.Items.Add('WMTimer - '+AStr);
 end;
 
 procedure TMainForm.TimerCallback(AId: LongWord);
-var
-  AStr: String;
 begin
-  case AId of
-    Timer1: AStr:='Timer1 called';
-    Timer2: AStr:='Timer2 called';
-    Timer3: AStr:='Timer3 called';
-  else
-    AStr:='Not Identified Timer: '+IntToStr(AId);
-  end;
-  ListBox1.Items.Add('TimerCallback - '+AStr);
+  ListBox1.Items.Add('TimerCallback called');
 end;
 
-
-procedure TMainForm.TimerCallbackNew(AId: LongWord);
-var
-  AStr: String;
+procedure TMainForm.TimerCallbackGlobal(AId: LongWord);
 begin
-  AStr:='TimerCallbackNew called';
-  ListBox1.Items.Add(AStr);
+  ListBox1.Items.Add('TimerCallbackGlobal called');
 end;
 
 procedure TMainForm.TimerCallbackOther(AId: LongWord);
-var
-  AStr: String;
 begin
-  AStr:='TimerCallbackOther called';
-  ListBox1.Items.Add(AStr);
+  ListBox1.Items.Add('TimerCallbackOther called');
 end;
 
 initialization

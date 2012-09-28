@@ -13,9 +13,6 @@
     <VersionInfo>
       <StringTable ProductVersion=""/>
     </VersionInfo>
-    <MacroValues Count="1">
-      <Macro1 Name="LCLWidgetType" Value="qt"/>
-    </MacroValues>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
     </BuildModes>
@@ -76,7 +73,6 @@
     <Other>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
-    <LCLWidgetType Value="qt"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="2">
