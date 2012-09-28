@@ -14,6 +14,7 @@ type
 
   TMainForm = class(TForm)
     Button1: TButton;
+    SetTimerDestroyButton: TButton;
     SetTimer1Button: TButton;
     SetTimer2Button: TButton;
     SetTimer3Button: TButton;
@@ -30,6 +31,7 @@ type
     procedure KillTimer2ButtonClick(Sender: TObject);
     procedure KillTimer3ButtonClick(Sender: TObject);
     procedure SetTimer3bButtonClick(Sender: TObject);
+    procedure SetTimerDestroyButtonClick(Sender: TObject);
   protected
     procedure WMTimer(var Message: TLMTimer); message LM_TIMER;
   private
@@ -91,6 +93,36 @@ end;
 procedure TMainForm.SetTimer3bButtonClick(Sender: TObject);
 begin
   SetTimer(Handle,Timer3,3000,@TimerCallbackOther);
+end;
+
+type
+
+  { TMyButton }
+
+  TMyButton = class(TButton)
+  protected
+    procedure WMTimer(var Message: TLMTimer); message LM_TIMER;
+  end;
+
+{ TMyButton }
+
+procedure TMyButton.WMTimer(var Message: TLMTimer);
+begin
+  MainForm.ListBox1.Items.Add('WMTimer - Released Button');
+end;
+
+procedure TMainForm.SetTimerDestroyButtonClick(Sender: TObject);
+var
+  Button: TButton;
+begin
+  Button := TButton.Create(nil);
+  try
+    Button.Parent := Self;
+    Button.Visible := True;
+    SetTimer(Button.Handle, Timer3, 1000, nil);
+  finally
+    Button.Destroy;
+  end;
 end;
 
 procedure TMainForm.WMTimer(var Message: TLMTimer);

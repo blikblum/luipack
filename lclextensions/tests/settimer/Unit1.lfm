@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 369
+  Left = 409
   Height = 448
-  Top = 220
+  Top = 218
   Width = 560
   HorzScrollBar.Page = 559
   VertScrollBar.Page = 447
@@ -18,8 +18,9 @@ object MainForm: TMainForm
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
     ItemHeight = 0
-    ScrollWidth = 302
+    ScrollWidth = 318
     TabOrder = 0
+    TopIndex = -1
   end
   object Button1: TButton
     Left = 240
@@ -101,5 +102,14 @@ object MainForm: TMainForm
     Caption = 'Set Timer 3b'
     OnClick = SetTimer3bButtonClick
     TabOrder = 8
+  end
+  object SetTimerDestroyButton: TButton
+    Left = 352
+    Height = 25
+    Top = 195
+    Width = 195
+    Caption = 'Set Timer and Destroy'
+    OnClick = SetTimerDestroyButtonClick
+    TabOrder = 9
   end
 end
