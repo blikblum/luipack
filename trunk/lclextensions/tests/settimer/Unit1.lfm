@@ -20,7 +20,6 @@ object MainForm: TMainForm
     ItemHeight = 0
     ScrollWidth = 318
     TabOrder = 0
-    TopIndex = -1
   end
   object Button1: TButton
     Left = 240
@@ -67,7 +66,7 @@ object MainForm: TMainForm
     Left = 472
     Height = 25
     Top = 8
-    Width = 75
+    Width = 83
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer1ButtonClick
@@ -76,8 +75,8 @@ object MainForm: TMainForm
   object KillTimer2Button: TButton
     Left = 472
     Height = 25
-    Top = 46
-    Width = 75
+    Top = 48
+    Width = 83
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer2ButtonClick
@@ -85,9 +84,9 @@ object MainForm: TMainForm
   end
   object KillTimer3Button: TButton
     Left = 472
-    Height = 25
+    Height = 57
     Top = 88
-    Width = 75
+    Width = 83
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer3ButtonClick
@@ -96,7 +95,7 @@ object MainForm: TMainForm
   object SetTimer3bButton: TButton
     Left = 352
     Height = 25
-    Top = 128
+    Top = 120
     Width = 99
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Timer 3b'
@@ -106,10 +105,30 @@ object MainForm: TMainForm
   object SetTimerDestroyButton: TButton
     Left = 352
     Height = 25
-    Top = 195
-    Width = 195
+    Top = 248
+    Width = 203
     Caption = 'Set Timer and Destroy'
     OnClick = SetTimerDestroyButtonClick
     TabOrder = 9
+  end
+  object SetGlobalTimerButton: TButton
+    Left = 352
+    Height = 25
+    Top = 160
+    Width = 99
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Set Global Timer'
+    OnClick = SetGlobalTimerButtonClick
+    TabOrder = 10
+  end
+  object KillGlobalTimerButton1: TButton
+    Left = 472
+    Height = 25
+    Top = 160
+    Width = 83
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Kill'
+    OnClick = KillGlobalTimerButton1Click
+    TabOrder = 11
   end
 end
