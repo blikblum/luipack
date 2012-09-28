@@ -320,14 +320,13 @@ begin
   end;
 end;
 
-function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord; out
-  TimerInfo: TTimerRecord): Boolean;
+function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: LongWord;
+  out TimerInfo: TTimerRecord): Boolean;
 begin
   Result := FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
 end;
 
-function TTimerList.GetTimerInfoPtr(Handle: hWnd; idEvent: LongWord
-  ): PTimerRecord;
+function TTimerList.GetTimerInfoPtr(Handle: hWnd; idEvent: LongWord): PTimerRecord;
 begin
   Result := FList.GetDataPtr(MakeQWord(Handle,idEvent));
 end;
@@ -357,10 +356,23 @@ function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc
 var
   WinInfo: PWin32WindowInfo;
 begin
-  WinInfo := GetWin32WindowInfo(hWnd);
-  FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
-  //todo: see the best way to set result when handle is 0
-  Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+  if hWnd <> 0 then
+  begin
+    WinInfo := GetWin32WindowInfo(hWnd);
+    FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
+    Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+  end
+  else
+  begin
+    //if handle is 0, the callback is mandatory otherwise we get a zombie timer
+    if lpTimerFunc <> nil then
+    begin
+      Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+      FTimerList.Add(hWnd,Result,lpTimerFunc,nil);
+    end
+    else
+      Result := 0;
+  end;
   //DebugLn('SetTimer - Handle %d - ID: %d - Result: %d',[hWnd,nIDEvent,Result]);
 end;
 
