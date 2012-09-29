@@ -157,7 +157,7 @@ type
 
   TTimerID = record
     hWnd: THandle;
-    idEvent: UINT_PTR;
+    nIDEvent: UINT_PTR;
   end;
 
   { TQtTimerEx }
@@ -167,12 +167,11 @@ type
     FTimerHook: QTimer_hookH;
     FWidgetHook: QObject_hookH;
     FCallbackFunc: TTimerNotify;
-    FUserId: LongWord;
+    FID: UINT_PTR;
     FControl: TControl;
     FAppObject: QObjectH;
   public
-    constructor Create(hWnd: THandle; TimerFunc: TTimerNotify;
-      UserId: UINT_PTR);
+    constructor Create(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
     destructor Destroy; override;
     procedure AttachEvents; override;
     procedure DetachEvents; override;
@@ -180,7 +179,7 @@ type
     procedure signalTimeout; cdecl;
   public
     function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
-    procedure Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: UINT_PTR);
+    procedure Reset(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
     procedure Start(Interval: Integer);
     procedure Stop;
   end;
@@ -194,8 +193,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: UINT_PTR): TQtTimerEx;
-    function GetTimerObject(hWnd: THandle; ID: UINT_PTR): TQtTimerEx;
+    function Get(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify): TQtTimerEx;
+    function Find(hWnd: THandle; nIDEvent: UINT_PTR): TQtTimerEx;
   end;
 
   TQtWidgetSetHack = Class(TWidgetSet)
@@ -205,24 +204,22 @@ type
 
 { TQtTimerEx }
 
-constructor TQtTimerEx.Create(hWnd: THandle; TimerFunc: TTimerNotify;
-  UserId: UINT_PTR);
+constructor TQtTimerEx.Create(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
 var
   AName: WideString;
 begin
   inherited Create;
   FDeleteLater := True;
+  //very big ultra extreme hack to get the app from QtWidgetset
   FAppObject := TQtWidgetSetHack(QtWidgetSet).App;
   FCallbackFunc := TimerFunc;
-  FUserId := UserId;
+  FID := nIDEvent;
   FControl := FindControl(hWnd);
-  //todo: see if hwnd <> 0 check can be removed
   if (hWnd <> 0) then
   begin
     FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
     QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
   end;
-  //very big ultra extreme hack to get the app from QtWidgetset
   TheObject := QTimer_create(FAppObject);
   AName := 'tqttimerex';
   QObject_setObjectName(TheObject, @AName);
@@ -255,21 +252,19 @@ end;
 procedure TQtTimerEx.signalWidgetDestroyed; cdecl;
 begin
   Stop;
-  //FCallbackFunc := nil;
-  //FControl := nil;
 end;
 
 procedure TQtTimerEx.signalTimeout; cdecl;
 begin
   if Assigned(FCallbackFunc) then
-    FCallbackFunc(FUserID)
+    FCallbackFunc(FID)
   else
   if Assigned(FControl) then
   begin
     if ([csLoading, csDestroying] * FControl.ComponentState = []) and not
       (csDestroyingHandle in FControl.ControlState) then
     begin
-      LCLSendTimerMsg(FControl, FUserId, 0);
+      LCLSendTimerMsg(FControl, FID, 0);
     end;
   end;
 end;
@@ -280,7 +275,7 @@ begin
   QEvent_accept(Event);
 end;
 
-procedure TQtTimerEx.Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: UINT_PTR);
+procedure TQtTimerEx.Reset(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
 begin
   if FWidgetHook <> nil then
     QObject_hook_destroy(FWidgetHook);
@@ -291,7 +286,7 @@ begin
   end;
   FControl := FindControl(hWnd);
   FCallbackFunc := TimerFunc;
-  FUserId := UserId;
+  FID := nIDEvent;
 end;
 
 procedure TQtTimerEx.Start(Interval: Integer);
@@ -307,11 +302,11 @@ end;
 var
   FTimerList: TTimerList;
   
-function KillTimer(hWnd: THandle; nIDEvent:UINT_PTR):Boolean;
+function KillTimer(hWnd: THandle; nIDEvent: UINT_PTR): Boolean;
 var
   TimerObject: TQtTimerEx;
 begin
-  TimerObject := FTimerList.GetTimerObject(hWnd, nIDEvent);
+  TimerObject := FTimerList.Find(hWnd, nIDEvent);
   if TimerObject <> nil then
   begin
     // DebugLn('KillTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
@@ -319,11 +314,11 @@ begin
   end;
 end;
 
-function SetTimer(hWnd:THandle; nIDEvent:UINT_PTR; uElapse:LongWord; lpTimerFunc:TTimerNotify):UINT_PTR;
+function SetTimer(hWnd: THandle; nIDEvent: UINT_PTR; uElapse: LongWord; lpTimerFunc: TTimerNotify): UINT_PTR;
 var
   TimerObject: TQtTimerEx;
 begin
-  TimerObject := FTimerList.Add(hWnd, lpTimerFunc, nIDEvent);
+  TimerObject := FTimerList.Get(hWnd, nIDEvent, lpTimerFunc);
   try
     TimerObject.Start(uElapse);
     if hWnd = 0 then
@@ -336,24 +331,24 @@ begin
   //DebugLn('SetTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
 end;
 
-function TTimerList.Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: UINT_PTR): TQtTimerEx;
+function TTimerList.Get(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify): TQtTimerEx;
 var
   AID: TTimerID;
 begin
   AID.hWnd := hWnd;
-  AID.idEvent := ID;
+  AID.nIDEvent := nIDEvent;
   with FMap do
   begin
     if HasId(AID) then
     begin
       // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       GetData(AID, Result);
-      Result.Reset(hWnd, NotifyFunc, ID);
+      Result.Reset(hWnd, nIDEvent, NotifyFunc);
     end
     else
     begin
       // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
-      Result := TQtTimerEx.Create(hWnd, NotifyFunc, ID);
+      Result := TQtTimerEx.Create(hWnd, nIDEvent, NotifyFunc);
       Add(AID, Result);
     end;
   end;
@@ -383,15 +378,15 @@ begin
   FMap.Destroy;
 end;
 
-function TTimerList.GetTimerObject(hWnd: THandle; ID: UINT_PTR): TQtTimerEx;
+function TTimerList.Find(hWnd: THandle; nIDEvent: UINT_PTR): TQtTimerEx;
 var
   DataPtr: ^TQtTimerEx;
   AID: TTimerID;
 begin
   Result := nil;
   AID.hWnd := hWnd;
-  AID.idEvent := ID;
-  // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
+  AID.nIDEvent := nIDEvent;
+  // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, nIDEvent, AID]);
   DataPtr := FMap.GetDataPtr(AID);
   if DataPtr <> nil then
     Result := DataPtr^;
