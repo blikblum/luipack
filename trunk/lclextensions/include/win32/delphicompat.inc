@@ -331,6 +331,13 @@ begin
   Result := FList.GetDataPtr(MakeQWord(Handle,idEvent));
 end;
 
+//workaround to buggy fpc header
+type
+  TIMERPROC64 = procedure (hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
+
+function SetTimer64(hWnd: HWND; nIDEvent: UINT_PTR; uElapse: UINT; lpTimerFunc: TIMERPROC64): UINT_PTR; external 'user32' name 'SetTimer';
+function KillTimer64(hWnd: HWND; uIDEvent: UINT_PTR):WINBOOL; external 'user32' name 'KillTimer';
+
 procedure TimerCallBack(Handle: hWnd; Msg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
 var
   TimerInfo: PTimerRecord;
@@ -352,7 +359,7 @@ begin
     DebugLn('Warning - No TimerInfo found for Hwnd: %d Id: %d',[Handle,idEvent]);
 end;
 
-function SetTimer(hWnd:THandle; nIDEvent:UINT_PTR; uElapse:LongWord; lpTimerFunc:TTimerNotify):UINT_PTR;
+function SetTimer(hWnd:THandle; nIDEvent: UINT_PTR; uElapse:LongWord; lpTimerFunc: TTimerNotify):UINT_PTR;
 var
   WinInfo: PWin32WindowInfo;
 begin
@@ -360,14 +367,14 @@ begin
   begin
     WinInfo := GetWin32WindowInfo(hWnd);
     FTimerList.Add(hWnd,nIDEvent,lpTimerFunc,WinInfo^.WinControl);
-    Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+    Result := SetTimer64(hWnd,nIDEvent,uElapse,@TimerCallBack);
   end
   else
   begin
     //if handle is 0, the callback is mandatory otherwise we get a zombie timer
     if lpTimerFunc <> nil then
     begin
-      Result := Windows.SetTimer(hWnd,nIDEvent,uElapse,@TimerCallBack);
+      Result := SetTimer64(hWnd,nIDEvent,uElapse,@TimerCallBack);
       FTimerList.Add(hWnd,Result,lpTimerFunc,nil);
     end
     else
@@ -378,6 +385,6 @@ end;
 
 function KillTimer(hWnd:THandle; nIDEvent: UINT_PTR):Boolean;
 begin
-  Result := Windows.KillTimer(hWnd,nIDEvent);
+  Result := KillTimer64(hWnd,nIDEvent);
   //DebugLn('KillTimer - Handle %d - ID: %d',[hWnd,nIDEvent]);
 end;
