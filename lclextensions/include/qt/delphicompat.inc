@@ -167,7 +167,7 @@ type
     FAppObject: QObjectH;
   public
     constructor Create(hWnd: THandle; TimerFunc: TTimerNotify;
-      UserId: LongWord);
+      UserId: UINT_PTR);
     destructor Destroy; override;
     procedure AttachEvents; override;
     procedure DetachEvents; override;
@@ -175,7 +175,7 @@ type
     procedure signalTimeout; cdecl;
   public
     function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
-    procedure Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: LongWord);
+    procedure Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: UINT_PTR);
     procedure Start(Interval: Integer);
     procedure Stop;
   end;
@@ -189,8 +189,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: LongWord): TQtTimerEx;
-    function GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
+    function Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: UINT_PTR): TQtTimerEx;
+    function GetTimerObject(hWnd: THandle; ID: UINT_PTR): TQtTimerEx;
   end;
 
   TQtWidgetSetHack = Class(TWidgetSet)
@@ -201,7 +201,7 @@ type
 { TQtTimerEx }
 
 constructor TQtTimerEx.Create(hWnd: THandle; TimerFunc: TTimerNotify;
-  UserId: LongWord);
+  UserId: UINT_PTR);
 var
   AName: WideString;
 begin
@@ -275,7 +275,7 @@ begin
   QEvent_accept(Event);
 end;
 
-procedure TQtTimerEx.Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: LongWord);
+procedure TQtTimerEx.Reset(hWnd: THandle; TimerFunc: TTimerNotify; UserId: UINT_PTR);
 begin
   if FWidgetHook <> nil then
     QObject_hook_destroy(FWidgetHook);
@@ -308,7 +308,7 @@ begin
 end;
 
   
-function KillTimer(hWnd: THandle; nIDEvent: LongWord):Boolean;
+function KillTimer(hWnd: THandle; nIDEvent:UINT_PTR):Boolean;
 var
   TimerObject: TQtTimerEx;
 begin
@@ -320,7 +320,7 @@ begin
   end;
 end;
 
-function SetTimer(hWnd: THandle; nIDEvent: LongWord; uElapse: LongWord; lpTimerFunc: TTimerNotify): LongWord;
+function SetTimer(hWnd:THandle; nIDEvent:UINT_PTR; uElapse:LongWord; lpTimerFunc:TTimerNotify):UINT_PTR;
 var
   TimerObject: TQtTimerEx;
 begin
@@ -337,7 +337,7 @@ begin
   //DebugLn('SetTimer HWnd: %d ID: %d TimerObject: %d',[hWnd, nIDEvent, PtrInt(TimerObject)]);
 end;
 
-function TTimerList.Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: LongWord): TQtTimerEx;
+function TTimerList.Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: UINT_PTR): TQtTimerEx;
 var
   AID: QWord;
 begin
@@ -384,7 +384,7 @@ begin
   FMap.Destroy;
 end;
 
-function TTimerList.GetTimerObject(hWnd: THandle; ID: LongWord): TQtTimerEx;
+function TTimerList.GetTimerObject(hWnd: THandle; ID: UINT_PTR): TQtTimerEx;
 var
   DataPtr: ^TQtTimerEx;
   AID: QWord;

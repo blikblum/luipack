@@ -69,7 +69,7 @@ type
   TWMDrawItem = TLMDrawItems;
   
   //timer
-  TTimerNotify = procedure (TimerId: LongWord) of object;
+  TTimerNotify = procedure (TimerId: PtrUInt) of object;
 
 function BeginDeferWindowPos(nNumWindows: LongInt):THandle;
 function BitBlt(DestDC: HDC; X, Y, Width, Height: Integer; SrcDC: HDC; XSrc, YSrc: Integer; Rop: DWORD): Boolean;
@@ -107,7 +107,7 @@ function GetWindowDC(hWnd:THandle):HDC;
 function ImageList_DragShowNolock(fShow: Boolean): Boolean;
 function InvertRect(DC: HDC; const lprc: TRECT): Boolean;
 
-function KillTimer(hWnd:THandle; nIDEvent: LongWord):Boolean;
+function KillTimer(hWnd:THandle; nIDEvent:UINT_PTR):Boolean;
 
 function MapWindowPoints(hWndFrom, hWndTo: HWND; var lpPoints; cPoints: UINT): Integer;
 function MultiByteToWideChar(CodePage, dwFlags:DWORD; lpMultiByteStr:PChar; cchMultiByte:longint; lpWideCharStr:PWideChar;cchWideChar:longint):longint;
@@ -119,7 +119,7 @@ function RedrawWindow(hWnd:THandle; lprcUpdate:PRECT; hrgnUpdate:HRGN; flags:Lon
 function ScrollDC(DC:HDC; dx:longint; dy:longint; var lprcScroll:TRECT; var lprcClip:TRECT;hrgnUpdate:HRGN; lprcUpdate:PRECT):Boolean;
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT):Boolean;
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
-function SetTimer(hWnd:THandle; nIDEvent:LongWord; uElapse:LongWord; lpTimerFunc:TTimerNotify): LongWord;
+function SetTimer(hWnd:THandle; nIDEvent:UINT_PTR; uElapse:LongWord; lpTimerFunc:TTimerNotify):UINT_PTR;
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): Boolean;
 
 function TextOutW(DC: HDC; X,Y : Integer; Str : PWideChar; Count: Integer) : Boolean;
