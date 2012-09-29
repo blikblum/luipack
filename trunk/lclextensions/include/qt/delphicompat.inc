@@ -263,14 +263,19 @@ procedure TQtTimerEx.signalTimeout; cdecl;
 begin
   if Assigned(FCallbackFunc) then
     FCallbackFunc(FID)
-  else
-  if Assigned(FControl) then
+  else if Assigned(FControl) then
   begin
     if ([csLoading, csDestroying] * FControl.ComponentState = []) and not
       (csDestroyingHandle in FControl.ControlState) then
     begin
       LCLSendTimerMsg(FControl, FID, 0);
     end;
+  end
+  else
+  begin
+    //orphan timer. Stop.
+    //todo: better to remove from the list?
+    Stop;
   end;
 end;
 
