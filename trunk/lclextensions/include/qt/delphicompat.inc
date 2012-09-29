@@ -349,6 +349,11 @@ begin
     begin
       // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       Result := TQtTimerEx.Create(hWnd, nIDEvent, NotifyFunc);
+      if hWnd = 0 then
+      begin
+        AID.nIDEvent := PtrUInt(Result);
+        Result.FID := PtrUInt(Result);
+      end;
       Add(AID, Result);
     end;
   end;
