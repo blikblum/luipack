@@ -53,6 +53,9 @@ var
 
 implementation
 
+uses
+  strutils;
+
 const
   Timer1 = 1;
   Timer2 = 2;
@@ -165,7 +168,7 @@ end;
 
 procedure TMainForm.TimerCallbackGlobal(AId: PtrUInt);
 begin
-  ListBox1.Items.Add('TimerCallbackGlobal called');
+  ListBox1.Items.Add('TimerCallbackGlobal called' + IfThen(AId <> FGlobalTimer, ' ERROR: ID <> GlobalTimer'));
 end;
 
 procedure TMainForm.TimerCallbackOther(AId: PtrUInt);

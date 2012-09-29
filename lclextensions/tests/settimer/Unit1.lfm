@@ -2,13 +2,13 @@ object MainForm: TMainForm
   Left = 409
   Height = 448
   Top = 218
-  Width = 560
+  Width = 613
   HorzScrollBar.Page = 559
   VertScrollBar.Page = 447
   ActiveControl = ListBox1
   Caption = 'Test SetTimer'
   ClientHeight = 448
-  ClientWidth = 560
+  ClientWidth = 613
   Position = poScreenCenter
   LCLVersion = '1.1'
   object ListBox1: TListBox
@@ -20,6 +20,7 @@ object MainForm: TMainForm
     ItemHeight = 0
     ScrollWidth = 318
     TabOrder = 0
+    TopIndex = -1
   end
   object Button1: TButton
     Left = 240
@@ -33,99 +34,99 @@ object MainForm: TMainForm
     TabOrder = 1
   end
   object SetTimer1Button: TButton
-    Left = 352
-    Height = 25
+    Left = 345
+    Height = 28
     Top = 8
-    Width = 99
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Timer 1'
     OnClick = SetTimer1ButtonClick
     TabOrder = 2
   end
   object SetTimer2Button: TButton
-    Left = 352
-    Height = 25
+    Left = 345
+    Height = 28
     Top = 48
-    Width = 99
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Timer 2'
     OnClick = SetTimer2ButtonClick
     TabOrder = 3
   end
   object SetTimer3Button: TButton
-    Left = 352
-    Height = 25
+    Left = 345
+    Height = 28
     Top = 88
-    Width = 99
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Timer 3'
     OnClick = SetTimer3ButtonClick
     TabOrder = 4
   end
   object KillTimer1Button: TButton
-    Left = 472
-    Height = 25
+    Left = 481
+    Height = 28
     Top = 8
-    Width = 83
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer1ButtonClick
     TabOrder = 5
   end
   object KillTimer2Button: TButton
-    Left = 472
-    Height = 25
+    Left = 481
+    Height = 28
     Top = 48
-    Width = 83
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer2ButtonClick
     TabOrder = 6
   end
   object KillTimer3Button: TButton
-    Left = 472
-    Height = 57
+    Left = 481
+    Height = 60
     Top = 88
-    Width = 83
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillTimer3ButtonClick
     TabOrder = 7
   end
   object SetTimer3bButton: TButton
-    Left = 352
-    Height = 25
+    Left = 345
+    Height = 28
     Top = 120
-    Width = 99
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Timer 3b'
     OnClick = SetTimer3bButtonClick
     TabOrder = 8
   end
   object SetTimerDestroyButton: TButton
-    Left = 352
-    Height = 25
-    Top = 248
-    Width = 203
+    Left = 345
+    Height = 28
+    Top = 224
+    Width = 256
     Caption = 'Set Timer and Destroy'
     OnClick = SetTimerDestroyButtonClick
     TabOrder = 9
   end
   object SetGlobalTimerButton: TButton
-    Left = 352
-    Height = 25
+    Left = 345
+    Height = 28
     Top = 160
-    Width = 99
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Set Global Timer'
     OnClick = SetGlobalTimerButtonClick
     TabOrder = 10
   end
   object KillGlobalTimerButton1: TButton
-    Left = 472
-    Height = 25
+    Left = 481
+    Height = 28
     Top = 160
-    Width = 83
+    Width = 120
     BorderSpacing.InnerBorder = 4
     Caption = 'Kill'
     OnClick = KillGlobalTimerButton1Click
