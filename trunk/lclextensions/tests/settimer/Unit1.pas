@@ -40,9 +40,9 @@ type
     procedure WMTimer(var Message: TLMTimer); message LM_TIMER;
   private
     FGlobalTimer: PtrUInt;
-    procedure TimerCallback(AId: LongWord);
-    procedure TimerCallbackGlobal(AId: LongWord);
-    procedure TimerCallbackOther(AId: LongWord);
+    procedure TimerCallback(AId: PtrUInt);
+    procedure TimerCallbackGlobal(AId: PtrUInt);
+    procedure TimerCallbackOther(AId: PtrUInt);
     { private declarations }
   public
     { public declarations }
@@ -158,17 +158,17 @@ begin
   ListBox1.Items.Add('WMTimer - '+AStr);
 end;
 
-procedure TMainForm.TimerCallback(AId: LongWord);
+procedure TMainForm.TimerCallback(AId: PtrUInt);
 begin
   ListBox1.Items.Add('TimerCallback called');
 end;
 
-procedure TMainForm.TimerCallbackGlobal(AId: LongWord);
+procedure TMainForm.TimerCallbackGlobal(AId: PtrUInt);
 begin
   ListBox1.Items.Add('TimerCallbackGlobal called');
 end;
 
-procedure TMainForm.TimerCallbackOther(AId: LongWord);
+procedure TMainForm.TimerCallbackOther(AId: PtrUInt);
 begin
   ListBox1.Items.Add('TimerCallbackOther called');
 end;
