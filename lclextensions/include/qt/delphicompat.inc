@@ -168,6 +168,7 @@ type
     FWidgetHook: QObject_hookH;
     FCallbackFunc: TTimerNotify;
     FID: UINT_PTR;
+    FHandle: THandle;
     FControl: TWinControl;
     FAppObject: QObjectH;
   public
@@ -192,14 +193,18 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Get(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify): TQtTimerEx;
+    procedure Delete(hWnd: THandle; nIDEvent: UINT_PTR);
     function Find(hWnd: THandle; nIDEvent: UINT_PTR): TQtTimerEx;
+    function Get(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify): TQtTimerEx;
   end;
 
   TQtWidgetSetHack = Class(TWidgetSet)
   private
     App: QApplicationH;
   end;
+
+var
+  FTimerList: TTimerList;
 
 { TQtTimerEx }
 
@@ -214,6 +219,7 @@ begin
   FCallbackFunc := TimerFunc;
   FID := nIDEvent;
   FControl := FindControl(hWnd);
+  FHandle := hWnd;
   if hWnd <> 0 then
   begin
     FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
@@ -251,6 +257,8 @@ end;
 procedure TQtTimerEx.signalWidgetDestroyed; cdecl;
 begin
   Stop;
+  FTimerList.Delete(FHandle, FID);
+  Destroy;
 end;
 
 procedure TQtTimerEx.signalTimeout; cdecl;
@@ -283,9 +291,6 @@ procedure TQtTimerEx.Stop;
 begin
   QTimer_stop(QTimerH(TheObject));
 end;
-
-var
-  FTimerList: TTimerList;
   
 function KillTimer(hWnd: THandle; nIDEvent: UINT_PTR): Boolean;
 var
@@ -368,16 +373,25 @@ begin
   FMap.Destroy;
 end;
 
+procedure TTimerList.Delete(hWnd: THandle; nIDEvent: UINT_PTR);
+var
+  TimerID: TTimerID;
+begin
+  TimerID.hWnd := hWnd;
+  TimerID.nIDEvent := nIDEvent;
+  FMap.Delete(TimerID);
+end;
+
 function TTimerList.Find(hWnd: THandle; nIDEvent: UINT_PTR): TQtTimerEx;
 var
   DataPtr: ^TQtTimerEx;
-  AID: TTimerID;
+  TimerID: TTimerID;
 begin
   Result := nil;
-  AID.hWnd := hWnd;
-  AID.nIDEvent := nIDEvent;
-  // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, nIDEvent, AID]);
-  DataPtr := FMap.GetDataPtr(AID);
+  TimerID.hWnd := hWnd;
+  TimerID.nIDEvent := nIDEvent;
+  // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, nIDEvent, TimerID]);
+  DataPtr := FMap.GetDataPtr(TimerID);
   if DataPtr <> nil then
     Result := DataPtr^;
 end;
