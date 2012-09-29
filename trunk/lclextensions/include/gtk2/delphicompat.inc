@@ -193,6 +193,11 @@ end;
 
 type
 
+  TTimerID = record
+    hWnd: THandle;
+    idEvent: UINT_PTR;
+  end;
+
   { TGtk2TimerInfo }
 
   TGtk2TimerInfo = class
@@ -220,11 +225,6 @@ type
 
 var
   FTimerList: TTimerList;
-
-function MakeQWord(d1, d2: dword): QWord; inline;
-begin
-  Result:=(QWord(d2) shl 32) or d1;
-end;
 
 { TGtk2TimerInfo }
 
@@ -258,8 +258,7 @@ end;
 
 constructor TTimerList.Create;
 begin
-  //todo: see 64bit (itu16??)
-  FMap:=TMap.Create(itu8,SizeOf(TGtk2TimerInfo));
+  FMap := TMap.Create({$ifdef CPU64}itu16{$else}itu8{$endif}, SizeOf(TGtk2TimerInfo));
 end;
 
 destructor TTimerList.Destroy;
@@ -283,24 +282,25 @@ end;
 
 function TTimerList.Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
 var
-  AID: QWord;
+  TimerID: TTimerID;
 begin
-  AID := MakeQWord(hWnd, idEvent);
+  TimerID.hWnd := hWnd;
+  TimerID.idEvent := idEvent;
   with FMap do
   begin
-    if HasId(AID) then
+    if HasId(TimerID) then
     begin
-      // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
-      GetData(AID, Result);
+      // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, TimerID]);
+      GetData(TimerID, Result);
       Result.Reset(hWnd, idEvent, NotifyFunc);
     end
     else
     begin
-      // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
+      // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, TimerID]);
       Result := TGtk2TimerInfo.Create(hWnd, idEvent, NotifyFunc);
       if hWnd = 0 then
-        AID := MakeQWord(hWnd, PtrUInt(Result));
-      Add(AID, Result);
+        TimerID.idEvent := PtrUInt(Result);
+      Add(TimerID, Result);
     end;
   end;
 end;
@@ -308,12 +308,13 @@ end;
 function TTimerList.Find(hWnd: THandle; idEvent: UINT_PTR): TGtk2TimerInfo;
 var
   DataPtr: ^TGtk2TimerInfo;
-  AID: QWord;
+  TimerID: TTimerID;
 begin
   Result := nil;
-  AID := MakeQWord(hWnd, idEvent);
-  // DebugLn('GetTimerInfo for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
-  DataPtr := FMap.GetDataPtr(AID);
+  TimerID.hWnd := hWnd;
+  TimerID.idEvent := idEvent;
+  // DebugLn('GetTimerInfo for HWnd: %d ID: %d AID: %d', [hWnd, ID, TimerID]);
+  DataPtr := FMap.GetDataPtr(TimerID);
   if DataPtr <> nil then
     Result := DataPtr^;
 end;
