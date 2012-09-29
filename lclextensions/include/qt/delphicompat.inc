@@ -168,7 +168,7 @@ type
     FWidgetHook: QObject_hookH;
     FCallbackFunc: TTimerNotify;
     FID: UINT_PTR;
-    FControl: TControl;
+    FControl: TWinControl;
     FAppObject: QObjectH;
   public
     constructor Create(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
@@ -179,7 +179,6 @@ type
     procedure signalTimeout; cdecl;
   public
     function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; cdecl; override;
-    procedure Reset(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
     procedure Start(Interval: Integer);
     procedure Stop;
   end;
@@ -215,7 +214,7 @@ begin
   FCallbackFunc := TimerFunc;
   FID := nIDEvent;
   FControl := FindControl(hWnd);
-  if (hWnd <> 0) then
+  if hWnd <> 0 then
   begin
     FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
     QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
@@ -275,20 +274,6 @@ begin
   QEvent_accept(Event);
 end;
 
-procedure TQtTimerEx.Reset(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
-begin
-  if FWidgetHook <> nil then
-    QObject_hook_destroy(FWidgetHook);
-  if hWnd <> 0 then
-  begin
-    FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
-    QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
-  end;
-  FControl := FindControl(hWnd);
-  FCallbackFunc := TimerFunc;
-  FID := nIDEvent;
-end;
-
 procedure TQtTimerEx.Start(Interval: Integer);
 begin
   QTimer_start(QTimerH(TheObject), Interval);
@@ -343,7 +328,7 @@ begin
     begin
       // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       GetData(AID, Result);
-      Result.Reset(hWnd, nIDEvent, NotifyFunc);
+      Result.FCallbackFunc := NotifyFunc;
     end
     else
     begin
