@@ -155,6 +155,11 @@ end;
 
 type
 
+  TTimerID = record
+    hWnd: THandle;
+    idEvent: UINT_PTR;
+  end;
+
   { TQtTimerEx }
 
   TQtTimerEx = class(TQtObject)
@@ -301,12 +306,6 @@ end;
 
 var
   FTimerList: TTimerList;
-
-function MakeQWord(d1, d2: dword): QWord; inline;
-begin
-  Result := (QWord(d2) shl 32) or d1;
-end;
-
   
 function KillTimer(hWnd: THandle; nIDEvent:UINT_PTR):Boolean;
 var
@@ -339,9 +338,10 @@ end;
 
 function TTimerList.Add(hWnd: THandle; NotifyFunc: TTimerNotify; ID: UINT_PTR): TQtTimerEx;
 var
-  AID: QWord;
+  AID: TTimerID;
 begin
-  AID := MakeQWord(hWnd, ID);
+  AID.hWnd := hWnd;
+  AID.idEvent := ID;
   with FMap do
   begin
     if HasId(AID) then
@@ -361,8 +361,7 @@ end;
 
 constructor TTimerList.Create;
 begin
-  //todo: handle 64bit
-  FMap := TMap.Create(itu8, SizeOf(TQtTimerEx));
+  FMap := TMap.Create({$ifdef CPU64}itu16{$else}itu8{$endif}, SizeOf(TQtTimerEx));
 end;
 
 destructor TTimerList.Destroy;
@@ -387,10 +386,11 @@ end;
 function TTimerList.GetTimerObject(hWnd: THandle; ID: UINT_PTR): TQtTimerEx;
 var
   DataPtr: ^TQtTimerEx;
-  AID: QWord;
+  AID: TTimerID;
 begin
   Result := nil;
-  AID := MakeQWord(hWnd, ID);
+  AID.hWnd := hWnd;
+  AID.idEvent := ID;
   // DebugLn('GetTimerObject for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
   DataPtr := FMap.GetDataPtr(AID);
   if DataPtr <> nil then
