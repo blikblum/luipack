@@ -170,7 +170,6 @@ type
     FID: UINT_PTR;
     FHandle: THandle;
     FControl: TWinControl;
-    FAppObject: QObjectH;
   public
     constructor Create(hWnd: THandle; nIDEvent: UINT_PTR; TimerFunc: TTimerNotify);
     destructor Destroy; override;
@@ -214,8 +213,6 @@ var
 begin
   inherited Create;
   FDeleteLater := True;
-  //very big ultra extreme hack to get the app from QtWidgetset
-  FAppObject := TQtWidgetSetHack(QtWidgetSet).App;
   FCallbackFunc := TimerFunc;
   FID := nIDEvent;
   FControl := FindControl(hWnd);
@@ -225,7 +222,8 @@ begin
     FWidgetHook := QObject_hook_create(TQtWidget(hWnd).TheObject);
     QObject_hook_hook_destroyed(FWidgetHook, @signalWidgetDestroyed);
   end;
-  TheObject := QTimer_create(FAppObject);
+  //very big ultra extreme hack to get the app from QtWidgetset
+  TheObject := QTimer_create(TQtWidgetSetHack(QtWidgetSet).App);
   AName := 'tqttimerex';
   QObject_setObjectName(TheObject, @AName);
 
