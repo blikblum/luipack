@@ -202,8 +202,8 @@ type
     FId: UINT_PTR;
     FTimerHandle: guint;
   public
-    constructor Create(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify; Control: TControl);
-    procedure Reset(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify; Control: TControl);
+    constructor Create(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify);
+    procedure Reset(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify);
   end;
 
   { TTimerList }
@@ -214,8 +214,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Add(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify; WinControl: TControl): TGtk2TimerInfo;
-    function GetTimerInfo(Handle: hWnd; idEvent: UINT_PTR): TGtk2TimerInfo;
+    function Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
+    function Find(hWnd: THandle; idEvent: UINT_PTR): TGtk2TimerInfo;
   end;
 
 var
@@ -229,18 +229,28 @@ end;
 { TGtk2TimerInfo }
 
 constructor TGtk2TimerInfo.Create(hWnd: THandle; idEvent: UINT_PTR;
-  NotifyFunc: TTimerNotify; Control: TControl);
+  NotifyFunc: TTimerNotify);
 begin
+  //todo: make a custom GetLCLObject
+  if hWnd <> 0 then
+    FControl := TControl(GetLCLObject(PGtkWidget(hWnd)))
+  else
+    FControl := nil;
   FId := idEvent;
-  FControl := Control;
   FNotify := NotifyFunc;
 end;
 
 procedure TGtk2TimerInfo.Reset(hWnd: THandle; idEvent: UINT_PTR;
-  NotifyFunc: TTimerNotify; Control: TControl);
+  NotifyFunc: TTimerNotify);
 begin
+  //todo: make a custom GetLCLObject
+  if hWnd <> 0 then
+    FControl := TControl(GetLCLObject(PGtkWidget(hWnd)))
+  else
+    FControl := nil;
+  if FTimerHandle <> 0 then
+    g_source_remove(FTimerHandle);
   FId := idEvent;
-  FControl := Control;
   FNotify := NotifyFunc;
 end;
 
@@ -271,7 +281,7 @@ begin
   FMap.Destroy;
 end;
 
-function TTimerList.Add(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify; WinControl: TControl): TGtk2TimerInfo;
+function TTimerList.Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
 var
   AID: QWord;
 begin
@@ -282,24 +292,26 @@ begin
     begin
       // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
       GetData(AID, Result);
-      Result.Reset(hWnd, idEvent, NotifyFunc, WinControl);
+      Result.Reset(hWnd, idEvent, NotifyFunc);
     end
     else
     begin
       // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
-      Result := TGtk2TimerInfo.Create(hWnd, idEvent, NotifyFunc, WinControl);
+      Result := TGtk2TimerInfo.Create(hWnd, idEvent, NotifyFunc);
+      if hWnd = 0 then
+        AID := MakeQWord(hWnd, PtrUInt(Result));
       Add(AID, Result);
     end;
   end;
 end;
 
-function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: UINT_PTR): TGtk2TimerInfo;
+function TTimerList.Find(hWnd: THandle; idEvent: UINT_PTR): TGtk2TimerInfo;
 var
   DataPtr: ^TGtk2TimerInfo;
   AID: QWord;
 begin
   Result := nil;
-  AID := MakeQWord(Handle, idEvent);
+  AID := MakeQWord(hWnd, idEvent);
   // DebugLn('GetTimerInfo for HWnd: %d ID: %d AID: %d', [hWnd, ID, AID]);
   DataPtr := FMap.GetDataPtr(AID);
   if DataPtr <> nil then
@@ -334,25 +346,18 @@ end;
 function SetTimer(hWnd:THandle; nIDEvent:UINT_PTR; uElapse:LongWord; lpTimerFunc:TTimerNotify):UINT_PTR;
 var
   TimerInfo: TGtk2TimerInfo;
-  Control: TControl;
 begin
-  //todo: properly set Result
-  //todo: make a custom GetLCLObject
-  if hWnd <> 0 then
-    Control := TControl(GetLCLObject(PGtkWidget(hWnd)))
-  else
-    Control := nil;
-  TimerInfo := FTimerList.GetTimerInfo(hWnd,nIDEvent);
-  if TimerInfo = nil then
-    TimerInfo := FTimerList.Add(hWnd, nIDEvent, lpTimerFunc, Control)
-  else
-  begin
-    if TimerInfo.FTimerHandle <> 0 then
-      g_source_remove(TimerInfo.FTimerHandle);
-    TimerInfo.FNotify := lpTimerFunc;
+  TimerInfo := FTimerList.Get(hWnd, nIDEvent, lpTimerFunc);
+  try
+    TimerInfo.FTimerHandle := g_timeout_add(uElapse, @gtkTimerCB, TimerInfo);
+    if hWnd = 0 then
+      Result := PtrUInt(TimerInfo)
+    else
+      Result := nIdEvent;
+  except
+    Result := 0;
   end;
-  TimerInfo.FTimerHandle := g_timeout_add(uElapse, @gtkTimerCB, TimerInfo);
-  //DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
+  //DebugLn('SetTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo.FTimerHandle]);
 end;
 
 function KillTimer(hWnd:THandle; nIDEvent:UINT_PTR):Boolean;
@@ -361,7 +366,7 @@ var
 begin
   //todo: properly handle Result
   Result := True;
-  TimerInfo := FTimerList.GetTimerInfo(hWnd,nIDEvent);
+  TimerInfo := FTimerList.Find(hWnd,nIDEvent);
   if (TimerInfo <> nil) and (TimerInfo.FTimerHandle <> 0) then
   begin
     //DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,TimerInfo^.TimerHandle]);
