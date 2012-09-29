@@ -205,10 +205,11 @@ type
     FControl: TControl;
     FNotify: TTimerNotify;
     FId: UINT_PTR;
+    FHandle: THandle;
     FTimerHandle: guint;
   public
     constructor Create(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify);
-    procedure Reset(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify);
+    procedure Stop;
   end;
 
   { TTimerList }
@@ -219,12 +220,20 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
+    procedure Delete(hWnd: THandle; nIDEvent: UINT_PTR);
     function Find(hWnd: THandle; idEvent: UINT_PTR): TGtk2TimerInfo;
+    function Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
   end;
 
 var
   FTimerList: TTimerList;
+
+function gtkWidgetDestroyCB(Widget: PGtkWidget; Timer: TGtk2TimerInfo): GBoolean; cdecl;
+begin
+  Timer.Stop;
+  FTimerList.Delete(Timer.FHandle, Timer.FId);
+  Timer.Destroy;
+end;
 
 { TGtk2TimerInfo }
 
@@ -233,25 +242,24 @@ constructor TGtk2TimerInfo.Create(hWnd: THandle; idEvent: UINT_PTR;
 begin
   //todo: make a custom GetLCLObject
   if hWnd <> 0 then
-    FControl := TControl(GetLCLObject(PGtkWidget(hWnd)))
+  begin
+    FControl := TControl(GetLCLObject(PGtkWidget(hWnd)));
+    g_signal_connect(PGObject(hWnd), 'destroy', gtk_Signal_Func(@gtkWidgetDestroyCB), Self);
+  end
   else
     FControl := nil;
+  FHandle := hWnd;
   FId := idEvent;
   FNotify := NotifyFunc;
 end;
 
-procedure TGtk2TimerInfo.Reset(hWnd: THandle; idEvent: UINT_PTR;
-  NotifyFunc: TTimerNotify);
+procedure TGtk2TimerInfo.Stop;
 begin
-  //todo: make a custom GetLCLObject
-  if hWnd <> 0 then
-    FControl := TControl(GetLCLObject(PGtkWidget(hWnd)))
-  else
-    FControl := nil;
   if FTimerHandle <> 0 then
+  begin
     g_source_remove(FTimerHandle);
-  FId := idEvent;
-  FNotify := NotifyFunc;
+    FTimerHandle := 0;
+  end;
 end;
 
 { TTimerList }
@@ -280,6 +288,15 @@ begin
   FMap.Destroy;
 end;
 
+procedure TTimerList.Delete(hWnd: THandle; nIDEvent: UINT_PTR);
+var
+  TimerID: TTimerID;
+begin
+  TimerID.hWnd := hWnd;
+  TimerID.idEvent := nIDEvent;
+  FMap.Delete(TimerID);
+end;
+
 function TTimerList.Get(hWnd: THandle; idEvent: UINT_PTR; NotifyFunc: TTimerNotify): TGtk2TimerInfo;
 var
   TimerID: TTimerID;
@@ -292,7 +309,7 @@ begin
     begin
       // DebugLn('Reset timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, TimerID]);
       GetData(TimerID, Result);
-      Result.Reset(hWnd, idEvent, NotifyFunc);
+      Result.FNotify := NotifyFunc;
     end
     else
     begin
