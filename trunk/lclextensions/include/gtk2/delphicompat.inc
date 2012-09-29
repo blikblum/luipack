@@ -299,7 +299,10 @@ begin
       // DebugLn('Create timer for HWnd: %d ID: %d AID: %d', [hWnd, ID, TimerID]);
       Result := TGtk2TimerInfo.Create(hWnd, idEvent, NotifyFunc);
       if hWnd = 0 then
+      begin
         TimerID.idEvent := PtrUInt(Result);
+        Result.FId := PtrUInt(Result);
+      end;
       Add(TimerID, Result);
     end;
   end;
