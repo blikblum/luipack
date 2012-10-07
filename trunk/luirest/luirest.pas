@@ -69,6 +69,7 @@ type
     FBaseResources: TRESTResourceStore;
     FOnCreateResource: TCreateRESTResourceEvent;
     FRootPath: String;
+    procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
     procedure SetRootPath(const Value: String);
   public
     constructor Create(AOwner: TComponent); override;
@@ -84,6 +85,13 @@ type
 implementation
 
 { TRESTServiceModule }
+
+procedure TRESTServiceModule.SetResponseStatus(AResponse: TResponse;
+  StatusCode: Integer; const Message: String; Args: array of const);
+begin
+  AResponse.Code := StatusCode;
+  AResponse.Contents.Text := Format(Message, Args);
+end;
 
 procedure TRESTServiceModule.SetRootPath(const Value: String);
 begin
@@ -146,10 +154,16 @@ begin
       URIPart := GetURIPart(URIPath, PartOffset);
       //the first part is by convention a collection
       if URIPart = '' then
-        raise Exception.CreateFmt('REST resource path not found. PartOffset %d, URIPath: %s', [PartOffset, URIPath]);
+      begin
+        SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, URIPath]);
+        Exit;
+      end;
       ResourceDef := FBaseResources.Find(URIPart);
       if ResourceDef = nil then
-        raise Exception.CreateFmt('REST resource "%s" not registered', [URIPart]);
+      begin
+        SetResponseStatus(AResponse, 404, 'Resource "%s" not registered', [URIPart]);
+        Exit;
+      end;
 
       //todo: handle OnCreate
       if ResourceDef.Resource = nil then
@@ -167,9 +181,10 @@ begin
 
         if NextResourceDef = nil then
         begin
-          MethodStr := BoolToStr(Boolean(ResourceDef.Resource.FSubPathResources = nil), True);
-          raise Exception.CreateFmt('REST resource "%s" not registered. Resource: %s, SubPathRes: %s',
-            [NextURIPart, ResourceDef.Resource.ClassName, MethodStr]);
+          SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
+            [NextURIPart, ResourceDef.Resource.ClassName,
+            BoolToStr(Boolean(ResourceDef.Resource.FSubPathResources = nil), True)]);
+          Exit;
         end;
 
         ResourceDef := NextResourceDef;
@@ -198,7 +213,7 @@ begin
     end;
   end
   else
-    raise Exception.CreateFmt('REST root path not found. URIPath: %s RootPath: "%s"', [URIPath, FRootPath]);
+    SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
 end;
 
 procedure TRESTServiceModule.RegisterResource(const ResourceName: ShortString; ResourceClass: TCustomRESTResourceClass);
