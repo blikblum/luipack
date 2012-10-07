@@ -261,6 +261,11 @@ begin
 end;
 
 type
+  TTimerID = record
+    hWnd: THandle;
+    nIDEvent: UINT_PTR;
+  end;
+
   TTimerRecord = record
     Control: TControl;
     Notify: TTimerNotify;
@@ -272,63 +277,66 @@ type
 
   TTimerList = class
   private
-    FList: TMap;
+    FMap: TMap;
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Add(hWnd: THandle; ID: UINT_PTR; NotifyFunc: TTimerNotify; WinControl: TControl);
-    function GetTimerInfo(Handle: hWnd; idEvent:UINT_PTR; out TimerInfo: TTimerRecord):Boolean;
-    function GetTimerInfoPtr(Handle: hWnd; idEvent:UINT_PTR): PTimerRecord;
+    procedure Add(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify; Control: TControl);
+    function GetTimerInfo(hWnd: THandle; nIDEvent: UINT_PTR; out TimerInfo: TTimerRecord):Boolean;
+    function GetTimerInfoPtr(hWnd: THandle; nIDEvent: UINT_PTR): PTimerRecord;
   end;
 
 var
   FTimerList: TTimerList;
   
-function MakeQWord(d1, d2: dword): QWord; inline;
-begin
-  Result := (QWord(d2) shl 32) or d1;
-end;
-  
 { TTimerList }
 
 constructor TTimerList.Create;
 begin
-  //todo: see 64bit (itu16??)
-  FList:=TMap.Create(itu8,SizeOf(TTimerRecord));
+  FMap := TMap.Create({$ifdef CPU64}itu16{$else}itu8{$endif}, SizeOf(TTimerRecord));
 end;
 
 destructor TTimerList.Destroy;
 begin
-  FList.Destroy;
+  FMap.Destroy;
   inherited Destroy;
 end;
 
-procedure TTimerList.Add(hWnd: THandle; ID: UINT_PTR; NotifyFunc: TTimerNotify; WinControl: TControl);
+procedure TTimerList.Add(hWnd: THandle; nIDEvent: UINT_PTR; NotifyFunc: TTimerNotify; Control: TControl);
 var
-  AID: QWord;
-  ATimerRec: TTimerRecord;
+  TimerID: TTimerID;
+  TimerRec: TTimerRecord;
 begin
-  ATimerRec.Notify := NotifyFunc;
-  ATimerRec.Control := WinControl;
-  AId := MakeQWord(hWnd,ID);
-  with FList do
+  TimerRec.Notify := NotifyFunc;
+  TimerRec.Control := Control;
+  TimerID.hWnd := hWnd;
+  TimerID.nIDEvent := nIDEvent;
+  with FMap do
   begin
-    if HasId(AID) then
-      SetData(AID, ATimerRec)
+    if HasId(TimerID) then
+      SetData(TimerID, TimerRec)
     else
-      Add(AID, ATimerRec);
+      Add(TimerID, TimerRec);
   end;
 end;
 
-function TTimerList.GetTimerInfo(Handle: hWnd; idEvent: UINT_PTR;
+function TTimerList.GetTimerInfo(hWnd: THandle; nIDEvent: UINT_PTR;
   out TimerInfo: TTimerRecord): Boolean;
+var
+  TimerID: TTimerID;
 begin
-  Result := FList.GetData(MakeQWord(Handle,idEvent),TimerInfo);
+  TimerID.hWnd := hWnd;
+  TimerID.nIDEvent := nIDEvent;
+  Result := FMap.GetData(TimerID, TimerInfo);
 end;
 
-function TTimerList.GetTimerInfoPtr(Handle: hWnd; idEvent: UINT_PTR): PTimerRecord;
+function TTimerList.GetTimerInfoPtr(hWnd: THandle; nIDEvent: UINT_PTR): PTimerRecord;
+var
+  TimerID: TTimerID;
 begin
-  Result := FList.GetDataPtr(MakeQWord(Handle,idEvent));
+  TimerID.hWnd := hWnd;
+  TimerID.nIDEvent := nIDEvent;
+  Result := FMap.GetDataPtr(TimerID);
 end;
 
 //workaround to buggy fpc header
@@ -343,7 +351,7 @@ var
   TimerInfo: PTimerRecord;
 begin
   //DebugLn('Executing Timer to Handle %d - ID: %d',[Handle, idEvent]);
-  TimerInfo := FTimerList.GetTimerInfoPtr(Handle,idEvent);
+  TimerInfo := FTimerList.GetTimerInfoPtr(Handle, idEvent);
   if TimerInfo <> nil then
   with TimerInfo^ do
   begin
@@ -359,7 +367,7 @@ begin
     DebugLn('Warning - No TimerInfo found for Hwnd: %d Id: %d',[Handle,idEvent]);
 end;
 
-function SetTimer(hWnd:THandle; nIDEvent: UINT_PTR; uElapse:LongWord; lpTimerFunc: TTimerNotify):UINT_PTR;
+function SetTimer(hWnd: THandle; nIDEvent: UINT_PTR; uElapse:LongWord; lpTimerFunc: TTimerNotify):UINT_PTR;
 var
   WinInfo: PWin32WindowInfo;
 begin
@@ -383,7 +391,7 @@ begin
   //DebugLn('SetTimer - Handle %d - ID: %d - Result: %d',[hWnd,nIDEvent,Result]);
 end;
 
-function KillTimer(hWnd:THandle; nIDEvent: UINT_PTR):Boolean;
+function KillTimer(hWnd: THandle; nIDEvent: UINT_PTR):Boolean;
 begin
   Result := KillTimer64(hWnd,nIDEvent);
   //DebugLn('KillTimer - Handle %d - ID: %d',[hWnd,nIDEvent]);
