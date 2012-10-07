@@ -67,6 +67,7 @@ type
   TRESTServiceModule = class(TCustomHTTPModule)
   private
     FBaseResources: TRESTResourceStore;
+    FContentType: String;
     FOnCreateResource: TCreateRESTResourceEvent;
     FRootPath: String;
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
@@ -77,6 +78,7 @@ type
     procedure HandleRequest(ARequest: TRequest; AResponse: TResponse); override;
     procedure RegisterResource(const ResourceName: ShortString; ResourceClass: TCustomRESTResourceClass);
   published
+    property ContentType: String read FContentType write FContentType;
     property RootPath: String read FRootPath write SetRootPath;
     //events
     property OnCreateResource: TCreateRESTResourceEvent read FOnCreateResource write FOnCreateResource;
@@ -112,6 +114,7 @@ constructor TRESTServiceModule.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FBaseResources := TRESTResourceStore.Create;
+  FContentType := 'application/json; charset=UTF-8';
 end;
 
 destructor TRESTServiceModule.Destroy;
@@ -143,6 +146,7 @@ var
   ResourceDef, NextResourceDef: TRESTResourceDef;
   URIParams: TJSONObject;
 begin
+  AResponse.ContentType := FContentType;
   MethodStr := UpperCase(ARequest.Method);
   URIPath := ARequest.PathInfo;
   i := Pos(FRootPath, URIPath);
