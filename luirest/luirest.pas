@@ -135,44 +135,23 @@ var
   ResourceDef, NextResourceDef: TRESTResourceDef;
   URIParams: TJSONObject;
 begin
-  URIParams := TJSONObject.Create;
   MethodStr := UpperCase(ARequest.Method);
   URIPath := ARequest.PathInfo;
   i := Pos(FRootPath, URIPath);
   if i <> 0 then
   begin
-    PartOffset := i + Length(FRootPath);
-    URIPart := GetURIPart(URIPath, PartOffset);
-    //the first part is by convention a collection
-    if URIPart = '' then
-      raise Exception.CreateFmt('REST resource path not found. PartOffset %d, URIPath: %s', [PartOffset, URIPath]);
-    ResourceDef := FBaseResources.Find(URIPart);
-    if ResourceDef = nil then
-      raise Exception.CreateFmt('REST resource "%s" not registered', [URIPart]);
+    URIParams := TJSONObject.Create;
+    try
+      PartOffset := i + Length(FRootPath);
+      URIPart := GetURIPart(URIPath, PartOffset);
+      //the first part is by convention a collection
+      if URIPart = '' then
+        raise Exception.CreateFmt('REST resource path not found. PartOffset %d, URIPath: %s', [PartOffset, URIPath]);
+      ResourceDef := FBaseResources.Find(URIPart);
+      if ResourceDef = nil then
+        raise Exception.CreateFmt('REST resource "%s" not registered', [URIPart]);
 
-    //todo: handle OnCreate
-    if ResourceDef.Resource = nil then
-    begin
-      ResourceDef.Resource := ResourceDef.ResourceClass.Create;
-      if Assigned(FOnCreateResource) then
-        FOnCreateResource(ResourceDef.Resource);
-    end;
-
-    NextURIPart := GetURIPart(URIPath, PartOffset);
-    while NextURIPart <> '' do
-    begin
-      NextResourceDef := nil;
-      ResourceDef.Resource.HandleSubPath(NextURIPart, URIParams, NextResourceDef);
-
-      if NextResourceDef = nil then
-      begin
-        MethodStr := BoolToStr(Boolean(ResourceDef.Resource.FSubPathResources = nil), True);
-        raise Exception.CreateFmt('REST resource "%s" not registered. Resource: %s, SubPathRes: %s',
-          [NextURIPart, ResourceDef.Resource.ClassName, MethodStr]);
-      end;
-
-      ResourceDef := NextResourceDef;
-
+      //todo: handle OnCreate
       if ResourceDef.Resource = nil then
       begin
         ResourceDef.Resource := ResourceDef.ResourceClass.Create;
@@ -181,21 +160,45 @@ begin
       end;
 
       NextURIPart := GetURIPart(URIPath, PartOffset);
-    end;
+      while NextURIPart <> '' do
+      begin
+        NextResourceDef := nil;
+        ResourceDef.Resource.HandleSubPath(NextURIPart, URIParams, NextResourceDef);
 
-    //todo: move get to top
-    if MethodStr = 'PUT' then
-      ResourceDef.Resource.HandlePut(URIParams, ARequest, AResponse)
-    else if MethodStr = 'POST' then
-      ResourceDef.Resource.HandlePost(URIParams, ARequest, AResponse)
-    else if MethodStr = 'DELETE' then
-      ResourceDef.Resource.HandleDelete(URIParams, ARequest, AResponse)
-    else
-      ResourceDef.Resource.HandleGet(URIParams, ARequest, AResponse);
+        if NextResourceDef = nil then
+        begin
+          MethodStr := BoolToStr(Boolean(ResourceDef.Resource.FSubPathResources = nil), True);
+          raise Exception.CreateFmt('REST resource "%s" not registered. Resource: %s, SubPathRes: %s',
+            [NextURIPart, ResourceDef.Resource.ClassName, MethodStr]);
+        end;
+
+        ResourceDef := NextResourceDef;
+
+        if ResourceDef.Resource = nil then
+        begin
+          ResourceDef.Resource := ResourceDef.ResourceClass.Create;
+          if Assigned(FOnCreateResource) then
+            FOnCreateResource(ResourceDef.Resource);
+        end;
+
+        NextURIPart := GetURIPart(URIPath, PartOffset);
+      end;
+
+      //todo: move get to top
+      if MethodStr = 'PUT' then
+        ResourceDef.Resource.HandlePut(URIParams, ARequest, AResponse)
+      else if MethodStr = 'POST' then
+        ResourceDef.Resource.HandlePost(URIParams, ARequest, AResponse)
+      else if MethodStr = 'DELETE' then
+        ResourceDef.Resource.HandleDelete(URIParams, ARequest, AResponse)
+      else
+        ResourceDef.Resource.HandleGet(URIParams, ARequest, AResponse);
+    finally
+      URIParams.Destroy;
+    end;
   end
   else
     raise Exception.CreateFmt('REST root path not found. URIPath: %s RootPath: "%s"', [URIPath, FRootPath]);
-  URIParams.Destroy;
 end;
 
 procedure TRESTServiceModule.RegisterResource(const ResourceName: ShortString; ResourceClass: TCustomRESTResourceClass);
