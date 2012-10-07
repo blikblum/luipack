@@ -1,0 +1,9 @@
+object MainRESTModule: TMainRESTModule
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  RootPath = '/data/'
+  Height = 150
+  HorizontalOffset = 265
+  VerticalOffset = 145
+  Width = 150
+end
