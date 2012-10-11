@@ -16,7 +16,7 @@ type
     class var ContentStr: String;
   public
     procedure AfterConstruction; override;
-    procedure HandleGet(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
   { TPersonDetails }
@@ -32,7 +32,7 @@ type
   protected
   public
     procedure AfterConstruction; override;
-    procedure HandleGet(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
 
@@ -60,7 +60,7 @@ begin
   ContentStr := PersonStr;
 end;
 
-procedure TPerson.HandleGet(URIParams: TJSONObject; ARequest: TRequest;
+procedure TPerson.HandleGet(ARequest: TRequest;
   AResponse: TResponse);
 var
   i: Integer;
@@ -80,8 +80,7 @@ begin
   SetDefaultSubResource('id', nil, TPerson);
 end;
 
-procedure TPeople.HandleGet(URIParams: TJSONObject; ARequest: TRequest;
-  AResponse: TResponse);
+procedure TPeople.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
   AResponse.Contents.Add(PeopleStr);
 end;

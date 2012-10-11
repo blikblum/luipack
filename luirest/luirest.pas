@@ -19,16 +19,18 @@ type
   private
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
+    FURIParams: TJSONObject;
   protected
     procedure RegisterSubPathResource(const ResourceId: ShortString; Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
     procedure SetDefaultSubResource(const ParamName: String; Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
   public
     destructor Destroy; override;
-    procedure HandleDelete(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); virtual;
-    procedure HandleGet(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); virtual;
-    procedure HandlePost(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); virtual;
-    procedure HandlePut(URIParams: TJSONObject; ARequest: TRequest; AResponse: TResponse); virtual;
-    procedure HandleSubPath(const SubPath: String; URIParams: TJSONObject; var SubPathResourceDef: TRESTResourceDef); virtual;
+    procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); virtual;
+    procedure HandlePost(ARequest: TRequest; AResponse: TResponse); virtual;
+    procedure HandlePut(ARequest: TRequest; AResponse: TResponse); virtual;
+    procedure HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef); virtual;
+    property URIParams: TJSONObject read FURIParams;
   end;
 
   { TRESTResourceDef }
@@ -176,12 +178,13 @@ begin
         if Assigned(FOnCreateResource) then
           FOnCreateResource(ResourceDef.Resource);
       end;
+      ResourceDef.Resource.FURIParams := URIParams;
 
       NextURIPart := GetURIPart(URIPath, PartOffset);
       while NextURIPart <> '' do
       begin
         NextResourceDef := nil;
-        ResourceDef.Resource.HandleSubPath(NextURIPart, URIParams, NextResourceDef);
+        ResourceDef.Resource.HandleSubPath(NextURIPart, NextResourceDef);
 
         if NextResourceDef = nil then
         begin
@@ -199,19 +202,20 @@ begin
           if Assigned(FOnCreateResource) then
             FOnCreateResource(ResourceDef.Resource);
         end;
+        ResourceDef.Resource.FURIParams := URIParams;
 
         NextURIPart := GetURIPart(URIPath, PartOffset);
       end;
 
       //todo: move get to top
       if MethodStr = 'PUT' then
-        ResourceDef.Resource.HandlePut(URIParams, ARequest, AResponse)
+        ResourceDef.Resource.HandlePut(ARequest, AResponse)
       else if MethodStr = 'POST' then
-        ResourceDef.Resource.HandlePost(URIParams, ARequest, AResponse)
+        ResourceDef.Resource.HandlePost(ARequest, AResponse)
       else if MethodStr = 'DELETE' then
-        ResourceDef.Resource.HandleDelete(URIParams, ARequest, AResponse)
+        ResourceDef.Resource.HandleDelete(ARequest, AResponse)
       else
-        ResourceDef.Resource.HandleGet(URIParams, ARequest, AResponse);
+        ResourceDef.Resource.HandleGet(ARequest, AResponse);
     finally
       URIParams.Destroy;
     end;
@@ -253,7 +257,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TCustomRESTResource.HandleSubPath(const SubPath: String; URIParams: TJSONObject; var SubPathResourceDef: TRESTResourceDef);
+procedure TCustomRESTResource.HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef);
 begin
   if FSubPathResources <> nil then
   begin
@@ -266,26 +270,22 @@ begin
   end;
 end;
 
-procedure TCustomRESTResource.HandleDelete(URIParams: TJSONObject;
-  ARequest: TRequest; AResponse: TResponse);
+procedure TCustomRESTResource.HandleDelete(ARequest: TRequest; AResponse: TResponse);
 begin
   //
 end;
 
-procedure TCustomRESTResource.HandleGet(URIParams: TJSONObject; ARequest: TRequest;
-  AResponse: TResponse);
+procedure TCustomRESTResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
   //
 end;
 
-procedure TCustomRESTResource.HandlePost(URIParams: TJSONObject; ARequest: TRequest;
-  AResponse: TResponse);
+procedure TCustomRESTResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
 begin
   //
 end;
 
-procedure TCustomRESTResource.HandlePut(URIParams: TJSONObject; ARequest: TRequest;
-  AResponse: TResponse);
+procedure TCustomRESTResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 begin
   //
 end;

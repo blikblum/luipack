@@ -5,7 +5,7 @@ unit MainREST;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, fpjson, fphttp, HTTPDefs, LuiREST;
+  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiREST;
 
 type
 
