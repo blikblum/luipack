@@ -277,22 +277,22 @@ end;
 
 procedure TCustomRESTResource.HandleDelete(ARequest: TRequest; AResponse: TResponse);
 begin
-  SetResponseStatus(AResponse, 501, '%s method not implemented', ['DELETE']);
+  SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['DELETE']);
 end;
 
 procedure TCustomRESTResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
-  SetResponseStatus(AResponse, 501, '%s method not implemented', ['GET']);
+  SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['GET']);
 end;
 
 procedure TCustomRESTResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
 begin
-  SetResponseStatus(AResponse, 501, '%s method not implemented', ['POST']);
+  SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['POST']);
 end;
 
 procedure TCustomRESTResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 begin
-  SetResponseStatus(AResponse, 501, '%s method not implemented', ['PUT']);
+  SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['PUT']);
 end;
 
 { TRESTResourceStore }
