@@ -72,7 +72,6 @@ type
     FContentType: String;
     FOnCreateResource: TCreateRESTResourceEvent;
     FRootPath: String;
-    procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
     procedure SetRootPath(const Value: String);
   public
     constructor Create(AOwner: TComponent); override;
@@ -86,11 +85,13 @@ type
     property OnCreateResource: TCreateRESTResourceEvent read FOnCreateResource write FOnCreateResource;
   end;
 
+  procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
+
 implementation
 
 { TRESTServiceModule }
 
-procedure TRESTServiceModule.SetResponseStatus(AResponse: TResponse;
+procedure SetResponseStatus(AResponse: TResponse;
   StatusCode: Integer; const Message: String; Args: array of const);
 begin
   AResponse.Code := StatusCode;
@@ -212,7 +213,10 @@ begin
       else if MethodStr = 'PUT' then
         ResourceDef.Resource.HandlePut(ARequest, AResponse)
       else if MethodStr = 'POST' then
+      begin
+        AResponse.Code := 201;
         ResourceDef.Resource.HandlePost(ARequest, AResponse)
+      end
       else if MethodStr = 'DELETE' then
         ResourceDef.Resource.HandleDelete(ARequest, AResponse)
       else
@@ -273,22 +277,22 @@ end;
 
 procedure TCustomRESTResource.HandleDelete(ARequest: TRequest; AResponse: TResponse);
 begin
-  //
+  SetResponseStatus(AResponse, 501, '%s method not implemented', ['DELETE']);
 end;
 
 procedure TCustomRESTResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
-  //
+  SetResponseStatus(AResponse, 501, '%s method not implemented', ['GET']);
 end;
 
 procedure TCustomRESTResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
 begin
-  //
+  SetResponseStatus(AResponse, 501, '%s method not implemented', ['POST']);
 end;
 
 procedure TCustomRESTResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 begin
-  //
+  SetResponseStatus(AResponse, 501, '%s method not implemented', ['PUT']);
 end;
 
 { TRESTResourceStore }
