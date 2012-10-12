@@ -207,15 +207,16 @@ begin
         NextURIPart := GetURIPart(URIPath, PartOffset);
       end;
 
-      //todo: move get to top
-      if MethodStr = 'PUT' then
+      if MethodStr = 'GET' then
+        ResourceDef.Resource.HandleGet(ARequest, AResponse)
+      else if MethodStr = 'PUT' then
         ResourceDef.Resource.HandlePut(ARequest, AResponse)
       else if MethodStr = 'POST' then
         ResourceDef.Resource.HandlePost(ARequest, AResponse)
       else if MethodStr = 'DELETE' then
         ResourceDef.Resource.HandleDelete(ARequest, AResponse)
       else
-        ResourceDef.Resource.HandleGet(ARequest, AResponse);
+        SetResponseStatus(AResponse, 501, 'Method "%s" not implemented', [MethodStr]);
     finally
       URIParams.Destroy;
     end;
