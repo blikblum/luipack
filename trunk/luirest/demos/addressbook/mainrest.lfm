@@ -1,0 +1,16 @@
+object MainRESTModule: TMainRESTModule
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  OnCreateResource = DataModuleCreateResource
+  Height = 356
+  HorizontalOffset = 641
+  VerticalOffset = 155
+  Width = 698
+  object AddressBookDataset: TSqlite3Dataset
+    FileName = 'addressbookdata.db'
+    left = 149
+    top = 46
+  end
+end
