@@ -2,20 +2,20 @@
   This source is only used to compile and install the package.
  }
 
-unit luirest_package; 
+unit luirest_package;
 
 interface
 
 uses
-  LuiREST, register_luirest, LuiRESTSQL, LazarusPackageIntf;
+  LuiREST, register_luirest, LuiRESTSQL, LuiRESTFastCGI, LuiRESTCGI, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('register_luirest', @register_luirest.Register); 
-end; 
+  RegisterUnit('register_luirest', @register_luirest.Register);
+end;
 
 initialization
-  RegisterPackage('luirest_package', @Register); 
+  RegisterPackage('luirest_package', @Register);
 end.
