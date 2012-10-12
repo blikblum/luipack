@@ -118,6 +118,7 @@ begin
   inherited Create(AOwner);
   FBaseResources := TRESTResourceStore.Create;
   FContentType := 'application/json; charset=UTF-8';
+  FRootPath := '/';
 end;
 
 destructor TRESTServiceModule.Destroy;
