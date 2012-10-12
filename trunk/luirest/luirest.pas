@@ -250,7 +250,7 @@ begin
   if FSubPathResources = nil then
     FSubPathResources := TRESTResourceStore.Create;
   //the class or the instance must be <> nil
-  if (PtrInt(Resource) + PtrInt(ResourceClass)) = 0 then
+  if (PtrUInt(Resource) + PtrUInt(ResourceClass)) = 0 then
     raise Exception.CreateFmt('SetDefaultResource (%s): Class or Instance must be <> nil', [ParamName]);
   FSubPathParamName := ParamName;
   FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(Resource, ResourceClass);
