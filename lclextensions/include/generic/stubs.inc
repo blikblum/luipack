@@ -75,13 +75,6 @@ begin
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 
-{$if lcl_release < 29}
-function GetMapMode(DC: HDC): LongInt;
-begin
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-{$endif}
-
 function GetRandomRgn(DC: HDC; Rgn: HRGN; iNum: Integer): Integer; stdcall;
 begin
   Result := 0;
@@ -160,14 +153,6 @@ end;
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
 begin
   Result := False;
-  {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
-end;
-{$endif}
-
-{$if lcl_release < 29}
-function SetMapMode(DC: HDC; fnMapMode: LongInt): LongInt;
-begin
-  Result := 0;
   {$ifdef DEBUG_DELPHICOMPAT} Logger.SendCallStack('Dummy WinAPI Implementation'); {$endif}
 end;
 {$endif}
