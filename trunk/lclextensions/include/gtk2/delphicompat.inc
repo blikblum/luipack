@@ -30,6 +30,11 @@
 
 }
 
+{$MACRO ON}
+{$if (lcl_major <> 1) or (lcl_minor <> 0)}
+{$define TGtk2DeviceContext:=TGtkDeviceContext}
+{$endif}
+
 {$define HAS_INVERTRECT}
 {$define HAS_DRAWTEXTW}
 {$define HAS_GETCURRENTOBJECT}
@@ -87,11 +92,7 @@ function GetCurrentObject(hdc: HDC; uObjectType: UINT): HGDIOBJ;
 begin
   Result := 0;
   if GTK2WidgetSet.IsValidDC(hdc) then
-  {$ifdef LAZARUS_1_0}
   with TGtk2DeviceContext(hdc) do
-  {$else}
-  with TGtkDeviceContext(hdc) do
-  {$endif}
   begin
     case uObjectType of
       OBJ_BITMAP: Result := HGDIOBJ(CurrentBitmap);
@@ -113,11 +114,7 @@ var
 begin
   Result := GTK2WidgetSet.IsValidDC(DC);
   if Result then
-  {$ifdef LAZARUS_1_0}
   with TGtk2DeviceContext(DC) do
-  {$else}
-  with TGtkDeviceContext(DC) do
-  {$endif}
   begin
     if (CurrentFont = nil) or (CurrentFont^.GDIFontObject = nil) then
       layout := GTK2WidgetSet.GetDefaultGtkFont(false)
@@ -156,11 +153,7 @@ begin
     and (lprc.Right > lprc.Left);
   if Result then
   begin
-    {$ifdef LAZARUS_1_0}
     with TGtk2DeviceContext(DC) do
-    {$else}
-    with TGtkDeviceContext(DC) do
-    {$endif}
     begin
       DCOrigin := Offset;
       //todo: see if is necessary store old function
@@ -388,8 +381,6 @@ function KillTimer(hWnd:THandle; nIDEvent: UINT_PTR): Boolean;
 var
   Timer: TGtk2Timer;
 begin
-  //todo: properly handle Result
-  Result := True;
   Timer := FTimerList.Find(hWnd, nIDEvent);
   //DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,Timer^.TimerHandle]);
   if Timer <> nil then
