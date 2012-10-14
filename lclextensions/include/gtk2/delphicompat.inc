@@ -224,6 +224,7 @@ var
 
 function gtkWidgetDestroyCB(Widget: PGtkWidget; Timer: TGtk2Timer): GBoolean; cdecl;
 begin
+  Result := GdkFalse;
   Timer.Stop;
   FTimerList.Delete(Timer.FHandle, Timer.FId);
   Timer.Destroy;
@@ -381,6 +382,8 @@ function KillTimer(hWnd:THandle; nIDEvent: UINT_PTR): Boolean;
 var
   Timer: TGtk2Timer;
 begin
+  //todo: investigate how to set result
+  Result := True;
   Timer := FTimerList.Find(hWnd, nIDEvent);
   //DebugLn('KillTimer HWnd: %d ID: %d TimerHandle: %d',[hWnd,nIDEvent,Timer^.TimerHandle]);
   if Timer <> nil then
