@@ -133,9 +133,11 @@ end;
 
 function ScrollWindow(hWnd:THandle; XAmount, YAmount:longint;lpRect:PRECT; lpClipRect:PRECT): Boolean;
 begin
+  Result := False;
   if hWnd = 0 then
     Exit;
   QWidget_scroll(TQtWidget(hWnd).Widget, XAmount, YAmount, lpRect);
+  Result := True;
 end;
 
 function SetBrushOrgEx(DC:HDC; nXOrg, nYOrg:longint; lppt:PPOINT):Boolean;
@@ -299,6 +301,7 @@ function KillTimer(hWnd: THandle; nIDEvent: UINT_PTR): Boolean;
 var
   TimerObject: TQtTimerEx;
 begin
+  Result := True;
   TimerObject := FTimerList.Find(hWnd, nIDEvent);
   if TimerObject <> nil then
   begin
