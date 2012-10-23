@@ -31,7 +31,7 @@
 }
 
 {$MACRO ON}
-{$if (lcl_major <> 1) or (lcl_minor <> 0)}
+{$if lcl_fullversion > 1000000}
 {$define TGtk2DeviceContext:=TGtkDeviceContext}
 {$endif}
 
