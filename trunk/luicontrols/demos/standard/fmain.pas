@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ToggleLabel, MenuButton, StdCtrls, Menus, Buttons, SearchEdit, AdvancedLabel,
-  ComCtrls, Spin;
+  ComCtrls, Spin, DropDownBaseButtons;
 
 type
 
@@ -195,9 +195,9 @@ begin
     if AControl is TMenuButton then
     begin
       if CheckPopupOnMouseUp.Checked then
-        TMenuButton(AControl).Options := TMenuButton(AControl).Options + [mboPopupOnMouseUp]
+        TMenuButton(AControl).Options := TMenuButton(AControl).Options + [dboPopupOnMouseUp]
       else
-        TMenuButton(AControl).Options := TMenuButton(AControl).Options - [mboPopupOnMouseUp];
+        TMenuButton(AControl).Options := TMenuButton(AControl).Options - [dboPopupOnMouseUp];
     end;
   end;
 end;

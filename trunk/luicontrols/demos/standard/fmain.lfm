@@ -20,13 +20,13 @@ object frmMain: TfrmMain
     TabOrder = 0
     object ToggleLabelTab: TTabSheet
       Caption = 'TToggleLabel'
-      ClientHeight = 274
+      ClientHeight = 272
       ClientWidth = 392
       object ToggleLabel1: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 15
         Top = 10
-        Width = 102
+        Width = 107
         ExpandedCaption = 'State2 (Expanded)'
         Expanded = False
         Caption = 'State1 (Collapsed)'
@@ -35,9 +35,9 @@ object frmMain: TfrmMain
       end
       object ToggleLabel2: TToggleLabel
         Left = 12
-        Height = 14
+        Height = 15
         Top = 66
-        Width = 68
+        Width = 73
         ExpandedCaption = 'Hide Panel'
         Expanded = False
         OnChange = ToggleLabel2Change
@@ -91,18 +91,18 @@ object frmMain: TfrmMain
       end
       object CheckUnderline: TCheckBox
         Left = 243
-        Height = 17
+        Height = 19
         Top = 95
-        Width = 112
+        Width = 125
         Caption = 'Underline On Hover'
         OnChange = CheckUnderlineChange
         TabOrder = 1
       end
       object CheckBold: TCheckBox
         Left = 244
-        Height = 17
+        Height = 19
         Top = 122
-        Width = 87
+        Width = 98
         Caption = 'Bold On Hover'
         OnChange = CheckBoldChange
         TabOrder = 2
@@ -117,8 +117,7 @@ object frmMain: TfrmMain
         Height = 22
         Top = 34
         Width = 23
-        Menu = PopupMenu1
-        Style = mbsCombo
+        Style = dbsCombo
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
@@ -147,16 +146,15 @@ object frmMain: TfrmMain
           20874A20FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF874A20874A20874A2087
           4A20874A20874A20874A20874A20FFFFFFFFFFFFFFFFFFFFFFFF
         }
-        NumGlyphs = 0
         OnClick = MenuButton1Click
+        Menu = PopupMenu1
       end
       object MenuButton2: TMenuButton
         Left = 108
         Height = 22
         Top = 34
         Width = 23
-        Menu = PopupMenu2
-        Style = mbsSingle
+        Style = dbsSingle
         Glyph.Data = {
           36050000424D3605000000000000360400002800000010000000100000000100
           080000000000000100000000000000000000000100000000000000000000C6C6
@@ -201,16 +199,15 @@ object frmMain: TfrmMain
           0D0D0D0D0D0D0D0D0D0D0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B080808080808
           0808080808080808080803040404040404040404040404040405
         }
-        NumGlyphs = 0
         OnClick = MenuButton1Click
+        Menu = PopupMenu2
       end
       object MenuButton3: TMenuButton
         Left = 26
         Height = 22
         Top = 111
         Width = 23
-        Menu = PopupMenu3
-        Style = mbsCombo
+        Style = dbsCombo
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -240,16 +237,15 @@ object frmMain: TfrmMain
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFF04733A04763CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
-        NumGlyphs = 0
         OnClick = MenuButton1Click
+        Menu = PopupMenu3
       end
       object MenuButton4: TMenuButton
         Left = 108
         Height = 22
         Top = 111
         Width = 23
-        Menu = PopupMenu4
-        Style = mbsSingle
+        Style = dbsSingle
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -279,8 +275,8 @@ object frmMain: TfrmMain
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF04763C04
           733AFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
-        NumGlyphs = 0
         OnClick = MenuButton1Click
+        Menu = PopupMenu4
       end
       object Label1: TLabel
         Left = 27
@@ -303,12 +299,11 @@ object frmMain: TfrmMain
         Height = 22
         Top = 191
         Width = 133
-        Menu = PopupMenu5
-        Options = [mboShowIndicator]
-        Style = mbsSingle
+        Options = [dboShowIndicator]
+        Style = dbsSingle
         Caption = 'Only Text'
         Flat = True
-        NumGlyphs = 0
+        Menu = PopupMenu5
       end
       object Label3: TLabel
         Left = 26
@@ -323,9 +318,8 @@ object frmMain: TfrmMain
         Height = 22
         Top = 191
         Width = 160
-        Menu = PopupMenu6
-        Options = [mboShowIndicator]
-        Style = mbsSingle
+        Options = [dboShowIndicator]
+        Style = dbsSingle
         Caption = 'Text and Glyph'
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -355,16 +349,15 @@ object frmMain: TfrmMain
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00005100
           0057000057000051FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
-        NumGlyphs = 0
+        Menu = PopupMenu6
       end
       object MenuButton7: TMenuButton
         Left = 334
         Height = 22
         Top = 191
         Width = 48
-        Menu = PopupMenu7
-        Options = [mboShowIndicator]
-        Style = mbsSingle
+        Options = [dboShowIndicator]
+        Style = dbsSingle
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
           1800000000000003000000000000000000000000000000000000FFFFFF8A8F8D
@@ -393,7 +386,7 @@ object frmMain: TfrmMain
           FFFFFFFF888D8BFFFFFFFFFFFF8A8F8D858A88858A88858A88858A88858A8885
           8A88858A88858A88858A88858A88858A88858A888A8F8DFFFFFF
         }
-        NumGlyphs = 0
+        Menu = PopupMenu7
       end
       object CheckPopupOnMouseUp: TCheckBox
         Left = 166
