@@ -54,6 +54,8 @@ procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
 function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
+function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
+
 procedure SortJSONArray(JSONArray: TJSONArray);
 
 procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare);
@@ -63,6 +65,10 @@ procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: 
 function FileToJSONData(const FileName: String): TJSONData;
 
 function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
+
+function StringToJSONData(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
+
+function StringToJSONData(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
 
@@ -418,6 +424,31 @@ begin
   end;
 end;
 
+function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
+var
+  PropIndex1, PropIndex2: Integer;
+  PropName: String;
+begin
+  if (JSONObj1 = nil) or (JSONObj2 = nil) then
+    Exit(False);
+  Result := JSONObj1.Count = JSONObj2.Count;
+  PropIndex1 := 0;
+  while Result and (PropIndex1 < JSONObj1.Count) do
+  begin
+    PropName := JSONObj1.Names[PropIndex1];
+    PropIndex2 := JSONObj2.IndexOfName(PropName);
+    if PropIndex2 >= 0 then
+    begin
+      Result := CompareJSONData(JSONObj1.Items[PropIndex1], JSONObj2.Items[PropIndex2]) = 0;
+    end
+    else
+    begin
+      Result := False;
+    end;
+    Inc(PropIndex1);
+  end;
+end;
+
 procedure SortJSONArray(JSONArray: TJSONArray);
 begin
   JSONArrayQuickSort(JSONArray, 0, JSONArray.Count - 1, @JSONArraySimpleCompare);
@@ -471,6 +502,56 @@ begin
   finally
     Parser.Destroy;
   end;
+end;
+
+function StringToJSONData(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
+var
+  Parser: TJSONParser;
+  JSONData: TJSONData;
+begin
+  Result := True;
+  JSONArray := nil;
+  JSONData := nil;
+  Parser := TJSONParser.Create(JSONStr);
+  try
+    try
+      JSONData := Parser.Parse;
+    except
+      Result := False;
+    end;
+  finally
+    Parser.Destroy;
+  end;
+  Result := Result and (JSONData <> nil) and (JSONData.JSONType = jtArray);
+  if Result then
+    JSONArray := TJSONArray(JSONData)
+  else
+    JSONData.Free;
+end;
+
+function StringToJSONData(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
+var
+  Parser: TJSONParser;
+  JSONData: TJSONData;
+begin
+  Result := True;
+  JSONObject := nil;
+  JSONData := nil;
+  Parser := TJSONParser.Create(JSONStr);
+  try
+    try
+      JSONData := Parser.Parse;
+    except
+      Result := False;
+    end;
+  finally
+    Parser.Destroy;
+  end;
+  Result := Result and (JSONData <> nil) and (JSONData.JSONType = jtObject);
+  if Result then
+    JSONObject := TJSONObject(JSONData)
+  else
+    JSONData.Free;
 end;
 
 function StreamToJSONData(Stream: TStream): TJSONData;
