@@ -10,21 +10,32 @@ uses
 
 type
 
-  TDropDownButtonOption = (dboShowIndicator);
+  TDropDownButton = class;
 
-  TDropDownButtonOptions = set of TDropDownButtonOption;
+  { TOwnedDropDownManager }
+
+  TOwnedDropDownManager = class(TCustomDropDownManager)
+  private
+    FButton: TDropDownButton;
+  protected
+    procedure DoHide; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+  published
+    property Control;
+    property Options;
+    property OnCreateControl;
+    property OnHide;
+    property OnShow;
+  end;
 
   { TDropDownButton }
-  //todo add TDropDownBaseButton or TCustomDropDownButton to merge functions of TMenuButton
+
   TDropDownButton = class(TCustomDropDownButton)
   private
-    FManager: TDropDownManager;
-    procedure DropDownHide(Sender: TObject);
+    FDropDown: TOwnedDropDownManager;
     procedure FormVisibleChange(Sender: TObject; Form: TCustomForm);
-    function GetDropDownControl: TWinControl;
-    function GetDroppedDown: Boolean;
-    procedure SetDropDownControl(const Value: TWinControl);
-    procedure SetDroppedDown(const Value: Boolean);
+    procedure SetDropDown(AValue: TOwnedDropDownManager);
   protected
     procedure DoShowDropDown; override;
     procedure DoHideDropDown; override;
@@ -32,11 +43,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
-    property Manager: TDropDownManager read FManager;
   published
-    property DropDownControl: TWinControl read GetDropDownControl write SetDropDownControl;
+    property DropDown: TOwnedDropDownManager read FDropDown write SetDropDown;
     property Options;
+    property Style;
     //
     property Action;
     property Align;
@@ -46,7 +56,6 @@ type
     property Constraints;
     property Caption;
     property Color;
-    property Down;
     property Enabled;
     property Flat;
     property Font;
@@ -76,52 +85,48 @@ type
 
 implementation
 
-{ TDropDownButton }
+{ TOwnedDropDownManager }
 
-procedure TDropDownButton.DropDownHide(Sender: TObject);
+procedure TOwnedDropDownManager.DoHide;
 begin
-  DropDownClosed;
+  FButton.DropDownClosed;
+  inherited DoHide;
 end;
+
+constructor TOwnedDropDownManager.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  SetSubComponent(True);
+  Name := 'OwnedDropDown';
+  FButton := AOwner as TDropDownButton;
+  MasterControl := FButton;
+end;
+
+{ TDropDownButton }
 
 procedure TDropDownButton.FormVisibleChange(Sender: TObject; Form: TCustomForm);
 begin
   if Form.Visible then
   begin
-    FManager.UpdateState;
-    Down := FManager.DroppedDown;
+    FDropDown.UpdateState;
+    Down := FDropDown.Visible;
   end;
   Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChange);
 end;
 
-function TDropDownButton.GetDropDownControl: TWinControl;
+procedure TDropDownButton.SetDropDown(AValue: TOwnedDropDownManager);
 begin
-  Result := FManager.Control;
-end;
-
-function TDropDownButton.GetDroppedDown: Boolean;
-begin
-  Result := FManager.DroppedDown;
-end;
-
-procedure TDropDownButton.SetDropDownControl(const Value: TWinControl);
-begin
-  FManager.Control := Value;
-end;
-
-procedure TDropDownButton.SetDroppedDown(const Value: Boolean);
-begin
-  Down := Value;
-  FManager.DroppedDown := Value;
+  FDropDown.Assign(AValue);
 end;
 
 procedure TDropDownButton.DoShowDropDown;
 begin
-  FManager.DroppedDown := True;
+  FDropDown.Visible := True;
 end;
 
 procedure TDropDownButton.DoHideDropDown;
 begin
-  FManager.DroppedDown := False;
+  FDropDown.Visible := False;
 end;
 
 procedure TDropDownButton.Loaded;
@@ -133,9 +138,7 @@ end;
 constructor TDropDownButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FManager := TDropDownManager.Create(Self);
-  FManager.MasterControl := Self;
-  FManager.OnHide := @DropDownHide;
+  FDropDown := TOwnedDropDownManager.Create(Self);
 end;
 
 destructor TDropDownButton.Destroy;

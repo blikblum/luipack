@@ -12,9 +12,9 @@ object MainForm: TMainForm
     Height = 240
     Top = 0
     Width = 320
-    ActivePage = StandaloneTab
+    ActivePage = SpecializedTab
     Align = alClient
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     object StandaloneTab: TTabSheet
       Caption = 'Standalone'
@@ -75,9 +75,9 @@ object MainForm: TMainForm
         Top = 10
         Width = 144
         Options = [dboShowIndicator]
-        Style = dbsSingle
         Caption = '<Choose an option>'
-        DropDownControl = RadioGroup1
+        DropDown.Control = RadioGroup1
+        DropDown.Options = []
       end
       object RadioGroup1: TRadioGroup
         Left = 12
@@ -113,7 +113,7 @@ object MainForm: TMainForm
     MasterControl = ToggleBox1
     Options = []
     OnHide = DropDownWindow1Hide
-    left = 248
-    top = 24
+    left = 218
+    top = 45
   end
 end
