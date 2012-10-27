@@ -9,7 +9,7 @@ uses
 
 type
 
-  { TDropDownManager }
+  { TCustomDropDownManager }
 
   //todo:
   // make use of window shadow
@@ -20,7 +20,7 @@ type
 
   TDropDownCreateControl = procedure(Sender: TObject; Control: TControl) of object;
 
-  TDropDownManager = class(TComponent)
+  TCustomDropDownManager = class(TComponent)
   private
     FControl: TWinControl;
     FControlClass: TWinControlClass;
@@ -33,38 +33,50 @@ type
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure ControlNeeded;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
-    function GetDroppedDown: Boolean;
+    function GetVisible: Boolean;
     procedure RemoveHandlers;
     procedure SetState(DoEvents: Boolean);
-    procedure SetDroppedDown(const Value: Boolean);
+    procedure SetVisible(const Value: Boolean);
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
   protected
+    procedure DoHide; virtual;
+    procedure DoShow; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-  public
-    destructor Destroy; override;
-    procedure UpdateState;
-    property ControlClass: TWinControlClass read FControlClass write FControlClass;
-    property DroppedDown: Boolean read GetDroppedDown write SetDroppedDown;
-  published
     property Control: TWinControl read FControl write FControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
     property Options: TDropDownOptions read FOptions write FOptions;
     property OnCreateControl: TDropDownCreateControl read FOnCreateControl write FOnCreateControl;
     property OnHide: TNotifyEvent read FOnHide write FOnHide;
     property OnShow: TNotifyEvent read FOnShow write FOnShow;
+  public
+    destructor Destroy; override;
+    procedure Assign(Source: TPersistent); override;
+    procedure UpdateState;
+    property ControlClass: TWinControlClass read FControlClass write FControlClass;
+    property Visible: Boolean read GetVisible write SetVisible;
+  end;
+
+  TDropDownManager = class (TCustomDropDownManager)
+  published
+    property Control;
+    property MasterControl;
+    property Options;
+    property OnCreateControl;
+    property OnHide;
+    property OnShow;
   end;
 
 implementation
 
-{ TDropDownManager }
+{ TCustomDropDownManager }
 
-function TDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
+function TCustomDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
   Result := (AControl <> nil) and (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and ((ddoUsePopupForm in FOptions) or (GetParentForm(FControl) = GetParentForm(AControl)));
 end;
 
-procedure TDropDownManager.ControlNeeded;
+procedure TCustomDropDownManager.ControlNeeded;
 begin
   if FControl = nil then
   begin
@@ -100,13 +112,13 @@ begin
   end;
 end;
 
-procedure TDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
+procedure TCustomDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
   if ControlGrabsFocus(Application.MouseControl) then
-    DroppedDown := False;
+    Visible := False;
 end;
 
-function TDropDownManager.GetDroppedDown: Boolean;
+function TCustomDropDownManager.GetVisible: Boolean;
 begin
   if FControl <> nil then
     Result := FControl.Visible
@@ -114,38 +126,38 @@ begin
     Result := False;
 end;
 
-procedure TDropDownManager.RemoveHandlers;
+procedure TCustomDropDownManager.RemoveHandlers;
 begin
   Application.RemoveOnUserInputHandler(@UserInputHandler);
   Screen.RemoveHandlerActiveControlChanged(@FocusChangeHandler);
 end;
 
-procedure TDropDownManager.SetState(DoEvents: Boolean);
+procedure TCustomDropDownManager.SetState(DoEvents: Boolean);
 var
-  ControlIsVisible: Boolean;
+  IsControlVisible: Boolean;
 begin
   if (ddoUsePopupForm in FOptions) and (FPopupForm <> nil) then
-    ControlIsVisible := FPopupForm.Visible
+    IsControlVisible := FPopupForm.Visible
   else
-    ControlIsVisible := FControl.Visible;
-  if ControlIsVisible then
+    IsControlVisible := FControl.Visible;
+  if IsControlVisible then
   begin
     if FControl.CanFocus then
       FControl.SetFocus;
-    if Assigned(FOnShow) and DoEvents then
-      FOnShow(Self);
+    if DoEvents then
+      DoShow;
     Application.AddOnUserInputHandler(@UserInputHandler);
     Screen.AddHandlerActiveControlChanged(@FocusChangeHandler);
   end
   else
   begin
     RemoveHandlers;
-    if Assigned(FOnHide) and DoEvents then
-      FOnHide(Self);
+    if DoEvents then
+      DoHide;
   end;
 end;
 
-procedure TDropDownManager.SetDroppedDown(const Value: Boolean);
+procedure TCustomDropDownManager.SetVisible(const Value: Boolean);
 var
   P: TPoint;
 begin
@@ -178,19 +190,31 @@ begin
   SetState(True);
 end;
 
-procedure TDropDownManager.UserInputHandler(Sender: TObject; Msg: Cardinal);
+procedure TCustomDropDownManager.UserInputHandler(Sender: TObject; Msg: Cardinal);
 begin
   case Msg of
     LM_LBUTTONDOWN, LM_LBUTTONDBLCLK, LM_RBUTTONDOWN, LM_RBUTTONDBLCLK,
     LM_MBUTTONDOWN, LM_MBUTTONDBLCLK, LM_XBUTTONDOWN, LM_XBUTTONDBLCLK:
     begin
       if ControlGrabsFocus(Application.MouseControl) then
-        DroppedDown := False;
+        Visible := False;
     end;
   end;
 end;
 
-procedure TDropDownManager.Notification(AComponent: TComponent;
+procedure TCustomDropDownManager.DoHide;
+begin
+  if Assigned(FOnHide) then
+    FOnHide(Self);
+end;
+
+procedure TCustomDropDownManager.DoShow;
+begin
+  if Assigned(FOnShow) then
+    FOnShow(Self);
+end;
+
+procedure TCustomDropDownManager.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
@@ -203,14 +227,30 @@ begin
   end;
 end;
 
-destructor TDropDownManager.Destroy;
+destructor TCustomDropDownManager.Destroy;
 begin
   RemoveHandlers;
   FPopupForm.Free;
   inherited Destroy;
 end;
 
-procedure TDropDownManager.UpdateState;
+procedure TCustomDropDownManager.Assign(Source: TPersistent);
+begin
+  if Source is TCustomDropDownManager then
+  begin
+    FControl := TCustomDropDownManager(Source).FControl;
+    FControlClass := TCustomDropDownManager(Source).FControlClass;
+    FMasterControl := TCustomDropDownManager(Source).FMasterControl;
+    FOptions := TCustomDropDownManager(Source).FOptions;
+    FOnCreateControl := TCustomDropDownManager(Source).FOnCreateControl;
+    FOnHide := TCustomDropDownManager(Source).FOnHide;
+    FOnShow := TCustomDropDownManager(Source).FOnShow;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+procedure TCustomDropDownManager.UpdateState;
 begin
   if FControl <> nil then
     SetState(False);

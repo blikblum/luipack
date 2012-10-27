@@ -50,17 +50,17 @@ end;
 procedure TMainForm.RadioGroup1Click(Sender: TObject);
 begin
   DropDownButton1.Caption := RadioGroup1.Items[RadioGroup1.ItemIndex];
-  DropDownButton1.DroppedDown := False;
+  DropDownButton1.DropDown.Visible := False;
 end;
 
 procedure TMainForm.Button1Click(Sender: TObject);
 begin
-  DropDownWindow1.DroppedDown := False;
+  DropDownWindow1.Visible := False;
 end;
 
 procedure TMainForm.ToggleBox1Change(Sender: TObject);
 begin
-  DropDownWindow1.DroppedDown := ToggleBox1.Checked;
+  DropDownWindow1.Visible := ToggleBox1.Checked;
 end;
 
 end.
