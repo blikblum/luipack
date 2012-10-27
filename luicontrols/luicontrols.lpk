@@ -28,48 +28,52 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="10">
+    <Files Count="11">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
       </Item1>
       <Item2>
-        <Filename Value="menubutton.pas"/>
-        <UnitName Value="MenuButton"/>
-      </Item2>
-      <Item3>
         <Filename Value="register_luicontrols.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_luicontrols"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="searchedit.pas"/>
         <UnitName Value="SearchEdit"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="validateedit.pas"/>
         <UnitName Value="ValidateEdit"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="wizardtypes.pas"/>
         <UnitName Value="WizardTypes"/>
-      </Item6>
-      <Item7>
+      </Item5>
+      <Item6>
         <Filename Value="wizardcontrols.pas"/>
         <UnitName Value="WizardControls"/>
+      </Item6>
+      <Item7>
+        <Filename Value="dropdownmanager.pas"/>
+        <UnitName Value="DropDownManager"/>
       </Item7>
       <Item8>
-        <Filename Value="dropdownmanager.pas"/>
-        <UnitName Value="dropdownmanager"/>
+        <Filename Value="dropdownbutton.pas"/>
+        <UnitName Value="DropDownButton"/>
       </Item8>
       <Item9>
-        <Filename Value="dropdownbutton.pas"/>
-        <UnitName Value="dropdownbutton"/>
+        <Filename Value="advancedlabel.pas"/>
+        <UnitName Value="AdvancedLabel"/>
       </Item9>
       <Item10>
-        <Filename Value="advancedlabel.pas"/>
-        <UnitName Value="advancedlabel"/>
+        <Filename Value="dropdownbasebuttons.pas"/>
+        <UnitName Value="dropdownbasebuttons"/>
       </Item10>
+      <Item11>
+        <Filename Value="menubutton.pas"/>
+        <UnitName Value="MenuButton"/>
+      </Item11>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
