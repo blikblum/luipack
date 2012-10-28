@@ -78,6 +78,7 @@ type
     procedure MouseEnter; override;
     procedure MouseLeave; override;
     procedure ResetState;
+    procedure UpdateDown(Value: Boolean);
     procedure UpdateState(InvalidateOnChange: Boolean); override;
     procedure DoButtonDown; virtual; abstract;
   public
@@ -545,6 +546,12 @@ procedure TToggleSpeedButton.ResetState;
 begin
   FInternalDown := False;
   UpdateState(True);
+end;
+
+procedure TToggleSpeedButton.UpdateDown(Value: Boolean);
+begin
+  Down := Value;
+  FInternalDown := Value;
 end;
 
 const

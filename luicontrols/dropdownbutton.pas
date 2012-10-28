@@ -109,7 +109,7 @@ begin
   if Form.Visible then
   begin
     FDropDown.UpdateState;
-    Down := FDropDown.Visible;
+    UpdateDown(FDropDown.Visible);
   end;
   Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChange);
 end;
@@ -139,6 +139,9 @@ constructor TDropDownButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FDropDown := TOwnedDropDownManager.Create(Self);
+  //necessary to the button toggle
+  AllowAllUp := True;
+  GroupIndex := 1;
 end;
 
 destructor TDropDownButton.Destroy;
