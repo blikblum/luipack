@@ -1,0 +1,19 @@
+object TestView1Frame: TTestView1Frame
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  TabOrder = 0
+  DesignLeft = 391
+  DesignTop = 239
+  object Label1: TLabel
+    Left = 82
+    Height = 15
+    Top = 68
+    Width = 34
+    Caption = 'Label1'
+    ParentColor = False
+  end
+end

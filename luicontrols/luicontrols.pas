@@ -8,7 +8,7 @@ interface
 
 uses
   ToggleLabel, register_luicontrols, SearchEdit, ValidateEdit, WizardTypes, WizardControls, 
-  DropDownManager, DropDownButton, AdvancedLabel, DropDownBaseButtons, MenuButton, 
+  DropDownManager, DropDownButton, AdvancedLabel, DropDownBaseButtons, MenuButton, VirtualPages, 
   LazarusPackageIntf;
 
 implementation
