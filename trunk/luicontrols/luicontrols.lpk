@@ -28,7 +28,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="11">
+    <Files Count="12">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -68,12 +68,16 @@ TSearchEdit
       </Item9>
       <Item10>
         <Filename Value="dropdownbasebuttons.pas"/>
-        <UnitName Value="dropdownbasebuttons"/>
+        <UnitName Value="DropDownBaseButtons"/>
       </Item10>
       <Item11>
         <Filename Value="menubutton.pas"/>
         <UnitName Value="MenuButton"/>
       </Item11>
+      <Item12>
+        <Filename Value="virtualpages.pas"/>
+        <UnitName Value="virtualpages"/>
+      </Item12>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">

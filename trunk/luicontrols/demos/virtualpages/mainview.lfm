@@ -1,0 +1,32 @@
+object MainViewForm: TMainViewForm
+  Left = 428
+  Height = 397
+  Top = 270
+  Width = 523
+  Caption = 'Virtual Pages Demo'
+  ClientHeight = 397
+  ClientWidth = 523
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.1'
+  object PageListBox: TListBox
+    Left = 2
+    Height = 393
+    Top = 2
+    Width = 164
+    Align = alLeft
+    BorderSpacing.Around = 2
+    ItemHeight = 0
+    OnSelectionChange = PageListBoxSelectionChange
+    TabOrder = 0
+  end
+  object Panel1: TPanel
+    Left = 242
+    Height = 191
+    Top = 49
+    Width = 170
+    Caption = 'Panel1'
+    TabOrder = 1
+    Visible = False
+  end
+end
