@@ -9,7 +9,6 @@
       <Title Value="VirtualPagesDemo"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -64,6 +63,7 @@
         <Filename Value="testview2.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="TestView2Frame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="TestView2"/>
       </Unit3>
