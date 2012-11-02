@@ -120,6 +120,7 @@ type
     procedure DoPageHide(Page: TVirtualPage);
     procedure DoPageLoad(Page: TVirtualPage);
     procedure DoPageShow(Page: TVirtualPage);
+    procedure Loaded;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -127,7 +128,7 @@ type
     property OnPageHide: TVirtualPageEvent read FOnPageHide write FOnPageHide;
     property OnPageLoad: TVirtualPageEvent read FOnPageLoad write FOnPageLoad;
     property OnPageShow: TVirtualPageEvent read FOnPageShow write FOnPageShow;
-    property PageIndex: Integer read FPageIndex write SetPageIndex;
+    property PageIndex: Integer read FPageIndex write SetPageIndex default -1;
     property Pages: TVirtualPages read FPages write SetPages;
   end;
 
@@ -238,9 +239,17 @@ begin
     FOnPageShow(Self, Page);
 end;
 
+procedure TVirtualPageManager.Loaded;
+begin
+  if FPageIndex > -1 then
+    FPages.UpdateActivePage(-1, FPageIndex);
+end;
+
 procedure TVirtualPageManager.SetPageIndex(AValue: Integer);
 begin
-  if FPageIndex = AValue then Exit;
+  if (FPageIndex = AValue) or (AValue >= FPages.Count)
+    or (csLoading in ComponentState) then
+    Exit;
   FPages.UpdateActivePage(FPageIndex, AValue);
   FPageIndex := AValue;
 end;
@@ -249,6 +258,7 @@ constructor TVirtualPageManager.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FPages := TManagedPages.Create(Self);
+  FPageIndex := -1;
 end;
 
 destructor TVirtualPageManager.Destroy;
