@@ -114,6 +114,8 @@ type
     FOnPageShow: TVirtualPageEvent;
     FPageIndex: Integer;
     FPages: TVirtualPages;
+    function GetDisplayOptions: TControlDisplayOptions;
+    procedure SetDisplayOptions(AValue: TControlDisplayOptions);
     procedure SetPageIndex(AValue: Integer);
     procedure SetPages(AValue: TVirtualPages);
   protected
@@ -125,6 +127,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   published
+    property DisplayOptions: TControlDisplayOptions read GetDisplayOptions write SetDisplayOptions;
     property OnPageHide: TVirtualPageEvent read FOnPageHide write FOnPageHide;
     property OnPageLoad: TVirtualPageEvent read FOnPageLoad write FOnPageLoad;
     property OnPageShow: TVirtualPageEvent read FOnPageShow write FOnPageShow;
@@ -252,6 +255,16 @@ begin
     Exit;
   FPages.UpdateActivePage(FPageIndex, AValue);
   FPageIndex := AValue;
+end;
+
+procedure TVirtualPageManager.SetDisplayOptions(AValue: TControlDisplayOptions);
+begin
+  FPages.DisplayOptions := AValue;
+end;
+
+function TVirtualPageManager.GetDisplayOptions: TControlDisplayOptions;
+begin
+  Result := FPages.DisplayOptions;
 end;
 
 constructor TVirtualPageManager.Create(AOwner: TComponent);
