@@ -8,7 +8,7 @@ interface
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
   ToggleLabel, MenuButton, SearchEdit, ValidateEdit, WizardControls,
-  DropDownManager, DropDownButton, AdvancedLabel;
+  DropDownManager, DropDownButton, AdvancedLabel, VirtualPages;
   
 procedure Register;
 
@@ -57,6 +57,11 @@ begin
   RegisterComponents(ComponentPage, [TAdvancedLabel]);
 end;
 
+procedure RegisterUnitVirtualPages;
+begin
+  RegisterComponents(ComponentPage, [TPageManager]);
+end;
+
 
 procedure Register;
 
@@ -69,6 +74,7 @@ begin
   RegisterUnit('DropDownManager',@RegisterUnitDropDownManager);
   RegisterUnit('DropDownButton',@RegisterUnitDropDownButton);
   RegisterUnit('AdvancedLabel',@RegisterUnitAdvancedLabel);
+  RegisterUnit('VirtualPages',@RegisterUnitVirtualPages);
 end; 
 
 initialization

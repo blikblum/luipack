@@ -80,16 +80,49 @@ type
     procedure Add(const Caption: String; Control: TControl);
     procedure Add(const Caption: String; ControlClass: TControlClass; const Properties: array of const);
     procedure Add(const Caption, ControlClassName: String; const Properties: array of const);
-    property DisplayOptions: TControlDisplayOptions read FDisplayOptions write SetDisplayOptions;
     property Items[Index: Integer]: TVirtualPage read GetItems; default;
-    property OnLoadControl: TLoadControlEvent read FOnLoadControl write FOnLoadControl;
     property PageIndex: Integer read FPageIndex write SetPageIndex;
+  published
+    property DisplayOptions: TControlDisplayOptions read FDisplayOptions write SetDisplayOptions;
+    property OnLoadControl: TLoadControlEvent read FOnLoadControl write FOnLoadControl;
+  end;
+
+  { TPageManager }
+
+  TPageManager = class(TComponent)
+  private
+    FPages: TVirtualPages;
+    procedure SetPages(AValue: TVirtualPages);
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  published
+    property Pages: TVirtualPages read FPages write SetPages;
   end;
 
 implementation
 
 uses
   RtlConsts, LuiRTTIUtils, LuiMiscUtils, Math;
+
+{ TPageManager }
+
+procedure TPageManager.SetPages(AValue: TVirtualPages);
+begin
+  FPages.Assign(AValue);
+end;
+
+constructor TPageManager.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FPages := TVirtualPages.Create;
+end;
+
+destructor TPageManager.Destroy;
+begin
+  FPages.Destroy;
+  inherited Destroy;
+end;
 
 { TControlDisplayOptions }
 
