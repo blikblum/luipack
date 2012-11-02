@@ -59,7 +59,7 @@ end;
 
 procedure RegisterUnitVirtualPages;
 begin
-  RegisterComponents(ComponentPage, [TPageManager]);
+  RegisterComponents(ComponentPage, [TVirtualPageManager]);
 end;
 
 
