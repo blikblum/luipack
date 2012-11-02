@@ -47,6 +47,7 @@ type
     FControl: TControl;
     FControlClass: TControlClass;
     FControlClassName: String;
+    FName: String;
     FProperties: TConstArray;
     procedure SetControl(Value: TControl);
   protected
@@ -60,6 +61,7 @@ type
     property Caption: String read FCaption write FCaption;
     property Control: TControl read FControl write SetControl;
     property ControlClassName: String read FControlClassName write FControlClassName;
+    property Name: String read FName write FName;
   end;
 
   { TVirtualPages }
@@ -77,9 +79,11 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Add(const Caption: String; Control: TControl);
-    procedure Add(const Caption: String; ControlClass: TControlClass; const Properties: array of const);
-    procedure Add(const Caption, ControlClassName: String; const Properties: array of const);
+    procedure Add(const Name, Caption: String; Control: TControl);
+    procedure Add(const Name, Caption: String; ControlClass: TControlClass; const Properties: array of const);
+    procedure Add(const Name, Caption, ControlClassName: String; const Properties: array of const);
+    function FindPage(const PageName: String): TVirtualPage;
+    function PageByName(const PageName: String): TVirtualPage;
     property DisplayOptions: TControlDisplayOptions read FDisplayOptions write SetDisplayOptions;
     property Items[Index: Integer]: TVirtualPage read GetItems; default;
   end;
@@ -447,16 +451,17 @@ begin
   inherited Destroy;
 end;
 
-procedure TVirtualPages.Add(const Caption: String; Control: TControl);
+procedure TVirtualPages.Add(const Name, Caption: String; Control: TControl);
 var
   Page: TVirtualPage;
 begin
   Page := TVirtualPage(inherited Add);
   Page.Caption := Caption;
   Page.Control := Control;
+  Page.Name := Name;
 end;
 
-procedure TVirtualPages.Add(const Caption: String; ControlClass: TControlClass;
+procedure TVirtualPages.Add(const Name, Caption: String; ControlClass: TControlClass;
   const Properties: array of const);
 var
   Page: TVirtualPage;
@@ -464,10 +469,11 @@ begin
   Page := TVirtualPage(inherited Add);
   Page.Caption := Caption;
   Page.ControlClass := ControlClass;
+  Page.Name := Name;
   Page.SetProperties(Properties);
 end;
 
-procedure TVirtualPages.Add(const Caption, ControlClassName: String;
+procedure TVirtualPages.Add(const Name, Caption, ControlClassName: String;
   const Properties: array of const);
 var
   Page: TVirtualPage;
@@ -475,7 +481,28 @@ begin
   Page := TVirtualPage(inherited Add);
   Page.Caption := Caption;
   Page.ControlClassName := ControlClassName;
+  Page.Name := Name;
   Page.SetProperties(Properties);
+end;
+
+function TVirtualPages.FindPage(const PageName: String): TVirtualPage;
+var
+  i: Integer;
+begin
+  for i := 0 to Count -1 do
+  begin
+    Result := Items[i];
+    if SameText(PageName, Result.Name) then
+      Exit;
+  end;
+  Result := nil;
+end;
+
+function TVirtualPages.PageByName(const PageName: String): TVirtualPage;
+begin
+  Result := FindPage(PageName);
+  if Result = nil then
+    raise Exception.CreateFmt('Page "%s" not found', [PageName]);
 end;
 
 end.
