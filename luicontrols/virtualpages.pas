@@ -79,6 +79,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    procedure AssignTo(Dest: TPersistent); override;
     procedure Add(const Name, Caption: String; Control: TControl);
     procedure Add(const Name, Caption: String; ControlClass: TControlClass; const Properties: array of const);
     procedure Add(const Name, Caption, ControlClassName: String; const Properties: array of const);
@@ -449,6 +450,20 @@ destructor TVirtualPages.Destroy;
 begin
   FDisplayOptions.Destroy;
   inherited Destroy;
+end;
+
+procedure TVirtualPages.AssignTo(Dest: TPersistent);
+var
+  i: Integer;
+begin
+  if Dest is TStrings then
+  begin
+    TStrings(Dest).Clear;
+    for i := 0 to Count - 1 do
+      TStrings(Dest).Add(Items[i].Caption);
+  end
+  else
+    inherited AssignTo(Dest);
 end;
 
 procedure TVirtualPages.Add(const Name, Caption: String; Control: TControl);
