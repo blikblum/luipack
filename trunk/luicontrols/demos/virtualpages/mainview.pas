@@ -15,14 +15,12 @@ type
   TMainViewForm = class(TForm)
     PageListBox: TListBox;
     Panel1: TPanel;
+    VirtualPageManager1: TVirtualPageManager;
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
+    procedure LoadPage(Sender: TObject; Page: TVirtualPage);
     procedure PageListBoxSelectionChange(Sender: TObject; User: boolean);
   private
-    FPages: TVirtualPages;
-    procedure LoadPageControl(Sender: TObject; Page: TVirtualPage);
   public
-    { public declarations }
   end;
 
 var
@@ -39,34 +37,29 @@ uses
 
 procedure TMainViewForm.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  Page: TVirtualPage;
 begin
-  FPages := TVirtualPages.Create;
-  FPages.OnLoadControl := @LoadPageControl;
-  FPages.DisplayOptions.Parent := Self;
-  FPages.DisplayOptions.BorderSpacing.Around := 2;
-  FPages.Add('Control', Panel1);
-  FPages.Add('ControlClass', TTestView1Frame, ['Caption', 'Loaded from Class type']);
-  FPages.Add('ControlClassName', 'TTestView2Frame', ['Caption', 'Loaded from ClassName']);
-  FPages.Add('CustomSize', TTestView1Frame, ['Caption', 'Loaded with a custom size']);
-  PageListBox.Clear;
-  for i := 0 to FPages.Count - 1 do
-    PageListBox.AddItem(FPages[i].Caption, nil);
-end;
-
-procedure TMainViewForm.FormDestroy(Sender: TObject);
-begin
-  FPages.Destroy;
+  VirtualPageManager1.DisplayOptions.Parent := Self;
+  //set dynamic values (only possible in runtime)
+  Page := VirtualPageManager1.Pages.PageByName('class');
+  Page.ControlClass := TTestView1Frame;
+  Page.SetProperties(['Caption', 'Loaded using TControlClass']);
+  Page := VirtualPageManager1.Pages.PageByName('customsize');
+  Page.ControlClass := TTestView1Frame;
+  Page.SetProperties(['Caption', 'Loaded with a custom size']);
+  Page := VirtualPageManager1.Pages.PageByName('classname');
+  Page.SetProperties(['Caption', 'Loaded using class name']);
+  PageListBox.Items.Assign(VirtualPageManager1.Pages);
 end;
 
 procedure TMainViewForm.PageListBoxSelectionChange(Sender: TObject; User: boolean);
 begin
-  FPages.PageIndex := PageListBox.ItemIndex;
+  VirtualPageManager1.PageIndex := PageListBox.ItemIndex;
 end;
 
-procedure TMainViewForm.LoadPageControl(Sender: TObject; Page: TVirtualPage);
+procedure TMainViewForm.LoadPage(Sender: TObject; Page: TVirtualPage);
 begin
-  if Page.Caption = 'CustomSize' then
+  if Page.Name = 'customsize' then
     Page.Control.BorderSpacing.Around := 40;
 end;
 

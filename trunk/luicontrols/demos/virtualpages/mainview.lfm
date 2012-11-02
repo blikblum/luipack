@@ -1,13 +1,13 @@
 object MainViewForm: TMainViewForm
-  Left = 428
+  Left = 471
   Height = 397
-  Top = 270
+  Top = 227
   Width = 523
   Caption = 'Virtual Pages Demo'
   ClientHeight = 397
   ClientWidth = 523
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
+  Position = poScreenCenter
   LCLVersion = '1.1'
   object PageListBox: TListBox
     Left = 2
@@ -28,5 +28,30 @@ object MainViewForm: TMainViewForm
     Caption = 'Panel1'
     TabOrder = 1
     Visible = False
+  end
+  object VirtualPageManager1: TVirtualPageManager
+    DisplayOptions.BorderSpacing.Around = 2
+    OnPageLoad = LoadPage
+    Pages = <    
+      item
+        Caption = 'Static control'
+        Control = Panel1
+        Name = 'control'
+      end    
+      item
+        Caption = 'Load using TControlClass'
+        Name = 'class'
+      end    
+      item
+        Caption = 'Load using ClassName'
+        ControlClassName = 'TTestView2Frame'
+        Name = 'classname'
+      end    
+      item
+        Caption = 'Set custom size'
+        Name = 'customsize'
+      end>
+    left = 191
+    top = 34
   end
 end
