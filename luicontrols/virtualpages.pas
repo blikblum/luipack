@@ -11,7 +11,7 @@ type
 
   TVirtualPage = class;
 
-  TLoadControlEvent = procedure(Sender: TObject; Page: TVirtualPage) of object;
+  TVirtualPageEvent = procedure(Sender: TObject; Page: TVirtualPage) of object;
 
   { TControlDisplayOptions }
 
@@ -67,36 +67,67 @@ type
   TVirtualPages = class(TCollection)
   private
     FDisplayOptions: TControlDisplayOptions;
-    FOnLoadControl: TLoadControlEvent;
-    FPageIndex: Integer;
     function GetItems(Index: Integer): TVirtualPage;
     procedure SetDisplayOptions(AValue: TControlDisplayOptions);
-    procedure SetPageIndex(NewPageIndex: Integer);
   protected
-    procedure DoLoadControl(Page: TVirtualPage); virtual;
+    procedure DoPageHide(Page: TVirtualPage); virtual;
+    procedure DoPageLoad(Page: TVirtualPage); virtual;
+    procedure DoPageShow(Page: TVirtualPage); virtual;
+    procedure UpdateActivePage(OldPageIndex, NewPageIndex: Integer);
   public
     constructor Create;
     destructor Destroy; override;
     procedure Add(const Caption: String; Control: TControl);
     procedure Add(const Caption: String; ControlClass: TControlClass; const Properties: array of const);
     procedure Add(const Caption, ControlClassName: String; const Properties: array of const);
-    property Items[Index: Integer]: TVirtualPage read GetItems; default;
-    property PageIndex: Integer read FPageIndex write SetPageIndex;
-  published
     property DisplayOptions: TControlDisplayOptions read FDisplayOptions write SetDisplayOptions;
-    property OnLoadControl: TLoadControlEvent read FOnLoadControl write FOnLoadControl;
+    property Items[Index: Integer]: TVirtualPage read GetItems; default;
+  end;
+
+  { TVirtualPageList }
+
+  TVirtualPageList = class(TVirtualPages)
+  private
+    FOnPageHide: TVirtualPageEvent;
+    FOnPageLoad: TVirtualPageEvent;
+    FOnPageShow: TVirtualPageEvent;
+    FPageIndex: Integer;
+    procedure SetPageIndex(AValue: Integer);
+  protected
+    procedure DoPageHide(Page: TVirtualPage); override;
+    procedure DoPageLoad(Page: TVirtualPage); override;
+    procedure DoPageShow(Page: TVirtualPage); override;
+  public
+    constructor Create;
+    property OnPageHide: TVirtualPageEvent read FOnPageHide write FOnPageHide;
+    property OnPageLoad: TVirtualPageEvent read FOnPageLoad write FOnPageLoad;
+    property OnPageShow: TVirtualPageEvent read FOnPageShow write FOnPageShow;
+    property PageIndex: Integer read FPageIndex write SetPageIndex;
   end;
 
   { TVirtualPageManager }
 
   TVirtualPageManager = class(TComponent)
   private
+    FOnPageHide: TVirtualPageEvent;
+    FOnPageLoad: TVirtualPageEvent;
+    FOnPageShow: TVirtualPageEvent;
+    FPageIndex: Integer;
     FPages: TVirtualPages;
+    procedure SetPageIndex(AValue: Integer);
     procedure SetPages(AValue: TVirtualPages);
+  protected
+    procedure DoPageHide(Page: TVirtualPage);
+    procedure DoPageLoad(Page: TVirtualPage);
+    procedure DoPageShow(Page: TVirtualPage);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   published
+    property OnPageHide: TVirtualPageEvent read FOnPageHide write FOnPageHide;
+    property OnPageLoad: TVirtualPageEvent read FOnPageLoad write FOnPageLoad;
+    property OnPageShow: TVirtualPageEvent read FOnPageShow write FOnPageShow;
+    property PageIndex: Integer read FPageIndex write SetPageIndex;
     property Pages: TVirtualPages read FPages write SetPages;
   end;
 
@@ -113,12 +144,63 @@ type
   private
     FManager: TVirtualPageManager;
   protected
+    procedure DoPageHide(Page: TVirtualPage); override;
+    procedure DoPageLoad(Page: TVirtualPage); override;
+    procedure DoPageShow(Page: TVirtualPage); override;
     function GetOwner: TPersistent; override;
   public
     constructor Create(AManager: TVirtualPageManager);
   end;
 
+{ TVirtualPageList }
+
+procedure TVirtualPageList.SetPageIndex(AValue: Integer);
+begin
+  if FPageIndex = AValue then Exit;
+  UpdateActivePage(FPageIndex, AValue);
+  FPageIndex := AValue;
+end;
+
+procedure TVirtualPageList.DoPageHide(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageHide) then
+    FOnPageHide(Self, Page);
+end;
+
+procedure TVirtualPageList.DoPageLoad(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageLoad) then
+    FOnPageLoad(Self, Page);
+end;
+
+procedure TVirtualPageList.DoPageShow(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageShow) then
+    FOnPageShow(Self, Page);
+end;
+
+constructor TVirtualPageList.Create;
+begin
+  inherited Create;
+  FPageIndex := -1;
+end;
+
 { TManagedPages }
+
+procedure TManagedPages.DoPageHide(Page: TVirtualPage);
+begin
+  FManager.DoPageHide(Page);
+end;
+
+procedure TManagedPages.DoPageLoad(Page: TVirtualPage);
+begin
+  FManager.DoPageLoad(Page);
+end;
+
+procedure TManagedPages.DoPageShow(Page: TVirtualPage);
+begin
+  FManager.DoPageShow(Page);
+end;
 
 function TManagedPages.GetOwner: TPersistent;
 begin
@@ -136,6 +218,31 @@ end;
 procedure TVirtualPageManager.SetPages(AValue: TVirtualPages);
 begin
   FPages.Assign(AValue);
+end;
+
+procedure TVirtualPageManager.DoPageHide(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageHide) then
+    FOnPageHide(Self, Page);
+end;
+
+procedure TVirtualPageManager.DoPageLoad(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageLoad) then
+    FOnPageLoad(Self, Page);
+end;
+
+procedure TVirtualPageManager.DoPageShow(Page: TVirtualPage);
+begin
+  if Assigned(FOnPageShow) then
+    FOnPageShow(Self, Page);
+end;
+
+procedure TVirtualPageManager.SetPageIndex(AValue: Integer);
+begin
+  if FPageIndex = AValue then Exit;
+  FPages.UpdateActivePage(FPageIndex, AValue);
+  FPageIndex := AValue;
 end;
 
 constructor TVirtualPageManager.Create(AOwner: TComponent);
@@ -229,26 +336,32 @@ begin
   FDisplayOptions.Assign(AValue);
 end;
 
-procedure TVirtualPages.SetPageIndex(NewPageIndex: Integer);
+procedure TVirtualPages.DoPageHide(Page: TVirtualPage);
+begin
+  //
+end;
+
+procedure TVirtualPages.UpdateActivePage(OldPageIndex, NewPageIndex: Integer);
 var
-  NewPage: TVirtualPage;
+  Page: TVirtualPage;
   PageControl: TControl;
   PageControlClass: TControlClass;
   FoundClass: TPersistentClass;
 begin
-  if FPageIndex = NewPageIndex then Exit;
   if NewPageIndex >= Count then
     raise Exception.CreateFmt(SListIndexError, [NewPageIndex]);
+  if OldPageIndex >= Count then
+    raise Exception.CreateFmt(SListIndexError, [OldPageIndex]);
   if (NewPageIndex > -1) then
   begin
-    NewPage := Items[NewPageIndex];
-    PageControl := NewPage.Control;
+    Page := Items[NewPageIndex];
+    PageControl := Page.Control;
     if (PageControl = nil) then
     begin
-      PageControlClass := NewPage.ControlClass;
+      PageControlClass := Page.ControlClass;
       if PageControlClass = nil then
       begin
-        FoundClass := FindClass(NewPage.ControlClassName);
+        FoundClass := FindClass(Page.ControlClassName);
         if FoundClass.InheritsFrom(TControl) then
           PageControlClass := TControlClass(FoundClass);
       end;
@@ -263,41 +376,46 @@ begin
         PageControl.BorderSpacing := FDisplayOptions.BorderSpacing;
         PageControl.Align := FDisplayOptions.Align;
         PageControl.Parent := FDisplayOptions.Parent;
-        NewPage.FControl := PageControl;
-        SetObjectProperties(PageControl, NewPage.Properties);
-        DoLoadControl(NewPage);
+        Page.FControl := PageControl;
+        SetObjectProperties(PageControl, Page.Properties);
+        DoPageLoad(Page);
         CallMethod(PageControl, 'PageLoad');
       end;
     end;
     if PageControl <> nil then
     begin
       PageControl.Visible := True;
+      DoPageShow(Page);
       CallMethod(PageControl, 'PageShow');
     end;
   end;
-  if (FPageIndex <> -1) then
+  if (OldPageIndex > -1) then
   begin
-   PageControl := Items[FPageIndex].Control;
+   Page := Items[OldPageIndex];
+   PageControl := Page.Control;
    if PageControl <> nil then
    begin
+     DoPageHide(Page);
      CallMethod(PageControl, 'PageHide');
      PageControl.Visible := False;
    end;
   end;
-  FPageIndex := NewPageIndex;
 end;
 
-procedure TVirtualPages.DoLoadControl(Page: TVirtualPage);
+procedure TVirtualPages.DoPageLoad(Page: TVirtualPage);
 begin
-  if Assigned(FOnLoadControl) then
-    FOnLoadControl(Self, Page);
+  //
+end;
+
+procedure TVirtualPages.DoPageShow(Page: TVirtualPage);
+begin
+  //
 end;
 
 constructor TVirtualPages.Create;
 begin
   inherited Create(TVirtualPage);
   FDisplayOptions := TControlDisplayOptions.Create;
-  FPageIndex := -1;
 end;
 
 destructor TVirtualPages.Destroy;
