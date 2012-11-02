@@ -87,9 +87,9 @@ type
     property OnLoadControl: TLoadControlEvent read FOnLoadControl write FOnLoadControl;
   end;
 
-  { TPageManager }
+  { TVirtualPageManager }
 
-  TPageManager = class(TComponent)
+  TVirtualPageManager = class(TComponent)
   private
     FPages: TVirtualPages;
     procedure SetPages(AValue: TVirtualPages);
@@ -105,20 +105,46 @@ implementation
 uses
   RtlConsts, LuiRTTIUtils, LuiMiscUtils, Math;
 
-{ TPageManager }
+type
 
-procedure TPageManager.SetPages(AValue: TVirtualPages);
+  { TManagedPages }
+
+  TManagedPages = class(TVirtualPages)
+  private
+    FManager: TVirtualPageManager;
+  protected
+    function GetOwner: TPersistent; override;
+  public
+    constructor Create(AManager: TVirtualPageManager);
+  end;
+
+{ TManagedPages }
+
+function TManagedPages.GetOwner: TPersistent;
+begin
+  Result := FManager;
+end;
+
+constructor TManagedPages.Create(AManager: TVirtualPageManager);
+begin
+  inherited Create;
+  FManager := AManager;
+end;
+
+{ TVirtualPageManager }
+
+procedure TVirtualPageManager.SetPages(AValue: TVirtualPages);
 begin
   FPages.Assign(AValue);
 end;
 
-constructor TPageManager.Create(AOwner: TComponent);
+constructor TVirtualPageManager.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FPages := TVirtualPages.Create;
+  FPages := TManagedPages.Create(Self);
 end;
 
-destructor TPageManager.Destroy;
+destructor TVirtualPageManager.Destroy;
 begin
   FPages.Destroy;
   inherited Destroy;
