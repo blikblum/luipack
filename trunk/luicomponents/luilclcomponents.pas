@@ -2,22 +2,23 @@
   This source is only used to compile and install the package.
  }
 
-unit LuiLCLComponents; 
+unit LuiLCLComponents;
 
 interface
 
 uses
-    LuiLCLMessages, LuiJSONLCLViews, register_luilclcomponents, 
-  LuiLCLInterfaces, LazarusPackageIntf;
+  LuiLCLMessages, LuiJSONLCLViews, register_luilclcomponents, 
+  LuiLCLInterfaces, JSONBooleanGroupView, JSONBooleanRadioButtonView, 
+  LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
   RegisterUnit('register_luilclcomponents', @register_luilclcomponents.Register
-    ); 
-end; 
+    );
+end;
 
 initialization
-  RegisterPackage('LuiLCLComponents', @Register); 
+  RegisterPackage('LuiLCLComponents', @Register);
 end.

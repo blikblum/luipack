@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="LuiLCLComponents"/>
+    <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
-      <Version Value="9"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
+        <OtherUnitFiles Value="frames"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="4">
+    <Files Count="6">
       <Item1>
         <Filename Value="luilclmessages.pas"/>
         <UnitName Value="LuiLCLMessages"/>
@@ -31,6 +33,14 @@
         <Filename Value="luilclinterfaces.pas"/>
         <UnitName Value="luilclinterfaces"/>
       </Item4>
+      <Item5>
+        <Filename Value="jsonbooleangroupview.pas"/>
+        <UnitName Value="jsonbooleangroupview"/>
+      </Item5>
+      <Item6>
+        <Filename Value="frames\jsonbooleanradiobuttonview.pas"/>
+        <UnitName Value="jsonbooleanradiobuttonview"/>
+      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
