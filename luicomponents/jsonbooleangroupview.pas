@@ -5,11 +5,11 @@ unit JSONBooleanGroupView;
 interface
 
 uses
-  Classes, SysUtils, fpjson, Controls;
+  Classes, SysUtils, fpjson, Controls, Forms;
 
 type
 
-  TBooleanValue = (bvTrue, bvFalse, bvUndefined, bvNone);
+  TBooleanValue = (bvTrue, bvFalse, bvIndeterminate, bvNone);
 
   { TJSONBooleanProperty }
 
@@ -17,6 +17,7 @@ type
   private
     FCaption: String;
     FName: String;
+    FView: TCustomFrame; //todo: add IJSONBooleanView intf
   public
     procedure Assign(Source: TPersistent); override;
   published
@@ -28,31 +29,33 @@ type
   public
   end;
 
-  { TJSONBooleanGroupManager }
+  { TJSONBooleanMediator }
 
-  TJSONBooleanGroupManager = class(TComponent)
+  TJSONBooleanMediator = class(TComponent)
   private
     FControl: TWinControl;
-    FFalseText: String;
+    FFalseCaption: String;
+    FNullValue: TBooleanValue;
     FProperties: TJSONBooleanProperties;
-    FTrueText: String;
-    FUndefinedText: String;
-    FViews: TFPList;
-    FDefaultValue: TBooleanValue;
-    procedure CreateViews;
+    FTrueCaption: String;
+    FIndeterminateCaption: String;
+    FUndefinedValue: TBooleanValue;
+    procedure CreateViews(Data: TJSONObject);
     procedure SetControl(AValue: TWinControl);
     procedure SetProperties(AValue: TJSONBooleanProperties);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function CheckValues: Boolean;
+    procedure LoadData(Data: TJSONObject);
   published
     property Control: TWinControl read FControl write SetControl;
-    property DefaultValue: TBooleanValue read FDefaultValue write FDefaultValue;
-    property FalseText: String read FFalseText write FFalseText;
+    property FalseCaption: String read FFalseCaption write FFalseCaption;
+    property IndeterminateCaption: String read FIndeterminateCaption write FIndeterminateCaption;
+    property NullValue: TBooleanValue read FNullValue write FNullValue default bvIndeterminate;
     property Properties: TJSONBooleanProperties read FProperties write SetProperties;
-    property TrueText: String read FTrueText write FTrueText;
-    property UndefinedText: String read FUndefinedText write FUndefinedText;
+    property TrueCaption: String read FTrueCaption write FTrueCaption;
+    property UndefinedValue: TBooleanValue read FUndefinedValue write FUndefinedValue default bvNone;
   end;
 
 implementation
@@ -73,65 +76,94 @@ begin
     inherited Assign(Source);
 end;
 
-{ TJSONBooleanGroupManager }
+{ TJSONBooleanMediator }
 
-procedure TJSONBooleanGroupManager.CreateViews;
+procedure TJSONBooleanMediator.CreateViews(Data: TJSONObject);
 var
   View: TJSONBooleanRadioButtonViewFrame;
   JSONProperty: TJSONBooleanProperty;
-  i: Integer;
+  i, PropIndex: Integer;
+  PropData: TJSONData;
+  InitialValue: TBooleanValue;
 begin
-  if FControl = nil then
+  if (FControl = nil) or (Data = nil) then
     Exit;
-  FViews.Clear;
   for i := 0 to FProperties.Count - 1 do
   begin
     JSONProperty := TJSONBooleanProperty(FProperties.Items[i]);
     //todo: use self as owner
     View := TJSONBooleanRadioButtonViewFrame.Create(FControl);
-    View.PropertyName := JSONProperty.Name;
     View.PropertyCaption := JSONProperty.Caption;
-    View.TrueText := FTrueText;
-    View.FalseText := FFalseText;
-    View.UndefinedText := FUndefinedText;
-    //todo
-    View.InitialValue := FDefaultValue;
+    View.TrueCaption := FTrueCaption;
+    View.FalseCaption := FFalseCaption;
+    View.IndeterminateCaption := FIndeterminateCaption;
+    PropIndex := Data.IndexOfName(JSONProperty.Name);
+    if PropIndex = -1 then
+      InitialValue := FUndefinedValue
+    else
+    begin
+      PropData := Data.Items[PropIndex];
+      case PropData.JSONType of
+        jtBoolean:
+        begin
+          if PropData.AsBoolean then
+            InitialValue := bvTrue
+          else
+            InitialValue := bvFalse;
+        end;
+        jtNull:
+          InitialValue := FNullValue;
+        else
+        begin
+          InitialValue := bvIndeterminate;  //??
+        end;
+      end;
+    end;
+    View.InitialValue := InitialValue;
     View.Parent := FControl;
     View.Visible := True;
-    FViews.Add(View);
+    JSONProperty.FView := View;
   end;
 end;
 
-procedure TJSONBooleanGroupManager.SetControl(AValue: TWinControl);
+procedure TJSONBooleanMediator.SetControl(AValue: TWinControl);
 begin
   if FControl = AValue then Exit;
   FControl := AValue;
 end;
 
-procedure TJSONBooleanGroupManager.SetProperties(AValue: TJSONBooleanProperties);
+procedure TJSONBooleanMediator.SetProperties(AValue: TJSONBooleanProperties);
 begin
   FProperties.Assign(AValue);
 end;
 
-constructor TJSONBooleanGroupManager.Create(AOwner: TComponent);
+constructor TJSONBooleanMediator.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FProperties := TJSONBooleanProperties.Create(Self, TJSONBooleanProperty);
-  FViews := TFPList.Create;
-  FFalseText := 'No';
-  FTrueText := 'Yes';
+  FFalseCaption := 'No';
+  FTrueCaption := 'Yes';
+  FIndeterminateCaption := 'Indeterminate';
+  FNullValue := bvIndeterminate;
+  FUndefinedValue := bvNone;
 end;
 
-destructor TJSONBooleanGroupManager.Destroy;
+destructor TJSONBooleanMediator.Destroy;
 begin
   FProperties.Destroy;
-  FViews.Destroy;
   inherited Destroy;
 end;
 
-function TJSONBooleanGroupManager.CheckValues: Boolean;
+function TJSONBooleanMediator.CheckValues: Boolean;
 begin
   //todo
+end;
+
+procedure TJSONBooleanMediator.LoadData(Data: TJSONObject);
+var
+  i: Integer;
+begin
+ // for i := 0 to FViews.Count - 1;
 end;
 
 end.
