@@ -43,16 +43,19 @@
       </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="3">
+    <RequiredPkgs Count="4">
       <Item1>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luicontrols"/>
       </Item1>
       <Item2>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="IDEIntf"/>
       </Item3>
+      <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

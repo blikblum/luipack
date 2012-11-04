@@ -5,7 +5,7 @@ unit JSONBooleanRadioButtonView;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, JSONBooleanGroupView;
+  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, JSONBooleanGroupView, DropDownManager;
 
 type
 
@@ -14,22 +14,19 @@ type
   TJSONBooleanRadioButtonViewFrame = class(TFrame)
     CaptionLabel: TLabel;
     FalseRadioButton: TRadioButton;
-    UndefinedRadioButton: TRadioButton;
+    IndeterminateRadioButton: TRadioButton;
     TrueRadioButton: TRadioButton;
   private
-    FPropertyName: String;
     procedure SetPropertyCaption(const AValue: String);
-    procedure SetPropertyName(const AValue: String);
-    procedure SetTrueText(const Value: String);
-    procedure SetFalseText(const Value: String);
-    procedure SetUndefinedText(const Value: String);
+    procedure SetTrueCaption(const Value: String);
+    procedure SetFalseCaption(const Value: String);
+    procedure SetIndeterminateCaption(const Value: String);
     procedure SetInitialValue(Value: TBooleanValue);
   public
-    property PropertyName: String read FPropertyName write SetPropertyName;
     property PropertyCaption: String write SetPropertyCaption;
-    property TrueText: String write SetTrueText;
-    property FalseText: String write SetFalseText;
-    property UndefinedText: String write SetUndefinedText;
+    property TrueCaption: String write SetTrueCaption;
+    property FalseCaption: String write SetFalseCaption;
+    property IndeterminateCaption: String write SetIndeterminateCaption;
     property InitialValue: TBooleanValue write SetInitialValue;
   end;
 
@@ -39,27 +36,22 @@ implementation
 
 { TJSONBooleanRadioButtonViewFrame }
 
-procedure TJSONBooleanRadioButtonViewFrame.SetPropertyName(const AValue: String);
-begin
-  FPropertyName := AValue;
-end;
-
-procedure TJSONBooleanRadioButtonViewFrame.SetTrueText(const Value: String);
+procedure TJSONBooleanRadioButtonViewFrame.SetTrueCaption(const Value: String);
 begin
   TrueRadioButton.Caption := Value;
 end;
 
-procedure TJSONBooleanRadioButtonViewFrame.SetFalseText(const Value: String);
+procedure TJSONBooleanRadioButtonViewFrame.SetFalseCaption(const Value: String);
 begin
   FalseRadioButton.Caption := Value;
 end;
 
-procedure TJSONBooleanRadioButtonViewFrame.SetUndefinedText(const Value: String);
+procedure TJSONBooleanRadioButtonViewFrame.SetIndeterminateCaption(const Value: String);
 begin
   if Value = '' then
-    UndefinedRadioButton.Visible := False
+    IndeterminateRadioButton.Visible := False
   else
-    UndefinedRadioButton.Caption := Value;
+    IndeterminateRadioButton.Caption := Value;
 end;
 
 procedure TJSONBooleanRadioButtonViewFrame.SetInitialValue(Value: TBooleanValue);
@@ -67,7 +59,7 @@ begin
   case Value of
     bvTrue: TrueRadioButton.Checked := True;
     bvFalse: FalseRadioButton.Checked := True;
-    bvUndefined: UndefinedRadioButton.Checked := True;
+    bvIndeterminate: IndeterminateRadioButton.Checked := True;
   end;
 end;
 
