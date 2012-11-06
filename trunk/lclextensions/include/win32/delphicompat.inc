@@ -343,8 +343,8 @@ end;
 type
   TIMERPROC64 = procedure (hWnd: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
 
-function SetTimer64(hWnd: HWND; nIDEvent: UINT_PTR; uElapse: UINT; lpTimerFunc: TIMERPROC64): UINT_PTR; external 'user32' name 'SetTimer';
-function KillTimer64(hWnd: HWND; uIDEvent: UINT_PTR):WINBOOL; external 'user32' name 'KillTimer';
+function SetTimer64(hWnd: HWND; nIDEvent: UINT_PTR; uElapse: UINT; lpTimerFunc: TIMERPROC64): UINT_PTR; stdcall external 'user32' name 'SetTimer';
+function KillTimer64(hWnd: HWND; uIDEvent: UINT_PTR):WINBOOL;  stdcall external 'user32' name 'KillTimer';
 
 procedure TimerCallBack(Handle: hWnd; Msg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
 var
