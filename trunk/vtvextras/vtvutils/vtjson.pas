@@ -450,7 +450,7 @@ type
     property OnDrawText;
     property OnEditCancelled;
     property OnEdited;
-    //property OnEditing;
+    property OnEditing;
     property OnEndDock;
     property OnEndDrag;
     property OnEnter;
@@ -640,7 +640,7 @@ type
     property OnDrawText;
     property OnEditCancelled;
     property OnEdited;
-    //property OnEditing;
+    property OnEditing;
     property OnEndDock;
     property OnEndDrag;
     property OnEnter;
