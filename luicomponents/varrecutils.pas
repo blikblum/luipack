@@ -22,6 +22,9 @@ function CopyVarRec(const Item: TVarRec): TVarRec;
 // to make copies of the original elements.
 function CreateConstArray(const Elements: array of const): TConstArray;
 
+//Append elements to a const array
+procedure AppendConstArray(var Arr: TConstArray; const Elements: array of const);
+
 // TVarRecs created by CopyVarRec must be finalized with this function.
 // You should not use it on other TVarRecs.
 procedure FinalizeVarRec(var Item: TVarRec);
@@ -113,6 +116,20 @@ begin
   SetLength(Result, Length(Elements));
   for I := Low(Elements) to High(Elements) do
     Result[I] := CopyVarRec(Elements[I]);
+end;
+
+procedure AppendConstArray(var Arr: TConstArray; const Elements: array of const);
+var
+  I, ArrayLen, ElementsLen: Integer;
+begin
+  ElementsLen := Length(Elements);
+  if ElementsLen > 0 then
+  begin
+    ArrayLen := Length(Arr);
+    SetLength(Arr, ArrayLen + ElementsLen);
+    for I := Low(Elements) to High(Elements) do
+      Arr[ArrayLen + I] := CopyVarRec(Elements[I]);
+  end;
 end;
 
 // use this function on copied TVarRecs only!
