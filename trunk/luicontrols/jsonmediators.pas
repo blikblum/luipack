@@ -20,6 +20,7 @@ type
     FView: TCustomFrame; //todo: add IJSONBooleanView intf
   public
     procedure Assign(Source: TPersistent); override;
+    function GetDisplayName: string; override;
   published
     property Caption: String read FCaption write FCaption;
     property Name: String read FName write FName;
@@ -74,6 +75,14 @@ begin
   end
   else
     inherited Assign(Source);
+end;
+
+function TJSONBooleanProperty.GetDisplayName: string;
+begin
+  if FCaption <> '' then
+    Result := FCaption
+  else
+    Result := FName;
 end;
 
 { TJSONBooleanGroupMediator }
