@@ -1,4 +1,4 @@
-unit JSONBooleanGroupView;
+unit JSONMediators;
 
 {$mode objfpc}{$H+}
 
@@ -29,9 +29,9 @@ type
   public
   end;
 
-  { TJSONBooleanMediator }
+  { TJSONBooleanGroupMediator }
 
-  TJSONBooleanMediator = class(TComponent)
+  TJSONBooleanGroupMediator = class(TComponent)
   private
     FControl: TWinControl;
     FFalseCaption: String;
@@ -76,9 +76,9 @@ begin
     inherited Assign(Source);
 end;
 
-{ TJSONBooleanMediator }
+{ TJSONBooleanGroupMediator }
 
-procedure TJSONBooleanMediator.CreateViews(Data: TJSONObject);
+procedure TJSONBooleanGroupMediator.CreateViews(Data: TJSONObject);
 var
   View: TJSONBooleanRadioButtonViewFrame;
   JSONProperty: TJSONBooleanProperty;
@@ -126,18 +126,18 @@ begin
   end;
 end;
 
-procedure TJSONBooleanMediator.SetControl(AValue: TWinControl);
+procedure TJSONBooleanGroupMediator.SetControl(AValue: TWinControl);
 begin
   if FControl = AValue then Exit;
   FControl := AValue;
 end;
 
-procedure TJSONBooleanMediator.SetProperties(AValue: TJSONBooleanProperties);
+procedure TJSONBooleanGroupMediator.SetProperties(AValue: TJSONBooleanProperties);
 begin
   FProperties.Assign(AValue);
 end;
 
-constructor TJSONBooleanMediator.Create(AOwner: TComponent);
+constructor TJSONBooleanGroupMediator.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FProperties := TJSONBooleanProperties.Create(Self, TJSONBooleanProperty);
@@ -148,18 +148,18 @@ begin
   FUndefinedValue := bvNone;
 end;
 
-destructor TJSONBooleanMediator.Destroy;
+destructor TJSONBooleanGroupMediator.Destroy;
 begin
   FProperties.Destroy;
   inherited Destroy;
 end;
 
-function TJSONBooleanMediator.CheckValues: Boolean;
+function TJSONBooleanGroupMediator.CheckValues: Boolean;
 begin
   //todo
 end;
 
-procedure TJSONBooleanMediator.LoadData(Data: TJSONObject);
+procedure TJSONBooleanGroupMediator.LoadData(Data: TJSONObject);
 var
   i: Integer;
 begin
@@ -167,4 +167,3 @@ begin
 end;
 
 end.
-

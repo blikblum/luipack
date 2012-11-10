@@ -15,7 +15,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="6">
+    <Files Count="4">
       <Item1>
         <Filename Value="luilclmessages.pas"/>
         <UnitName Value="LuiLCLMessages"/>
@@ -31,16 +31,8 @@
       </Item3>
       <Item4>
         <Filename Value="luilclinterfaces.pas"/>
-        <UnitName Value="luilclinterfaces"/>
+        <UnitName Value="LuiLCLInterfaces"/>
       </Item4>
-      <Item5>
-        <Filename Value="jsonbooleangroupview.pas"/>
-        <UnitName Value="jsonbooleangroupview"/>
-      </Item5>
-      <Item6>
-        <Filename Value="frames\jsonbooleanradiobuttonview.pas"/>
-        <UnitName Value="jsonbooleanradiobuttonview"/>
-      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="4">
