@@ -9,6 +9,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
+        <OtherUnitFiles Value="frames"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
       <Parsing>
@@ -28,7 +29,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="12">
+    <Files Count="15">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -76,8 +77,20 @@ TSearchEdit
       </Item11>
       <Item12>
         <Filename Value="virtualpages.pas"/>
-        <UnitName Value="virtualpages"/>
+        <UnitName Value="VirtualPages"/>
       </Item12>
+      <Item13>
+        <Filename Value="jsonmediators.pas"/>
+        <UnitName Value="jsonmediators"/>
+      </Item13>
+      <Item14>
+        <Filename Value="frames\jsonbooleanradiobuttonview.lfm"/>
+        <Type Value="LFM"/>
+      </Item14>
+      <Item15>
+        <Filename Value="frames\jsonbooleanradiobuttonview.pas"/>
+        <UnitName Value="JSONBooleanRadioButtonView"/>
+      </Item15>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
