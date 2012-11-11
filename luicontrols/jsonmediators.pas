@@ -49,6 +49,7 @@ type
     procedure InitializeViews(Data: TJSONObject);
   protected
     procedure Loaded; override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -123,6 +124,10 @@ end;
 procedure TJSONBooleanGroupMediator.SetControl(AValue: TWinControl);
 begin
   if FControl = AValue then Exit;
+  if AValue <> nil then
+    AValue.FreeNotification(Self);
+  if FControl <> nil then
+    FControl.RemoveFreeNotification(Self);
   FControl := AValue;
 end;
 
@@ -172,6 +177,13 @@ begin
   inherited Loaded;
   if (FControl <> nil) and not (csLoading in FControl.ComponentState) then
     CreateViews;
+end;
+
+procedure TJSONBooleanGroupMediator.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (AComponent = FControl) then
+    FControl := nil;
 end;
 
 constructor TJSONBooleanGroupMediator.Create(AOwner: TComponent);
