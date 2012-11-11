@@ -1,0 +1,73 @@
+object MainViewForm: TMainViewForm
+  Left = 412
+  Height = 401
+  Top = 180
+  Width = 507
+  Caption = 'JSONBoolean Group Demo'
+  ClientHeight = 401
+  ClientWidth = 507
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.1'
+  object Panel1: TPanel
+    Left = 49
+    Height = 304
+    Top = 40
+    Width = 394
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.ControlsPerLine = 1
+    TabOrder = 0
+  end
+  object ChildSizingCheckBox: TCheckBox
+    Left = 49
+    Height = 19
+    Top = 10
+    Width = 101
+    Caption = 'Use ChildSizing'
+    OnChange = ChildSizingCheckBoxChange
+    TabOrder = 1
+  end
+  object SaveDataButton: TButton
+    Left = 368
+    Height = 25
+    Top = 363
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Save Data'
+    OnClick = SaveDataButtonClick
+    TabOrder = 2
+  end
+  object BooleanGroupMediator: TJSONBooleanGroupMediator
+    Control = Panel1
+    FalseCaption = 'No'
+    IndeterminateCaption = 'Indeterminate'
+    Properties = <    
+      item
+        Caption = 'Property 1'
+        Name = 'prop1'
+      end    
+      item
+        Caption = 'Bigger Property Name'
+        Name = 'prop2'
+      end    
+      item
+        Caption = 'Property 3'
+        Name = 'prop3'
+      end    
+      item
+        Caption = 'Property 4'
+        Name = 'prop4'
+      end    
+      item
+        Caption = 'Property 5'
+        Name = 'prop5'
+      end>
+    TrueCaption = 'Yes'
+    left = 8
+    top = 192
+  end
+end
