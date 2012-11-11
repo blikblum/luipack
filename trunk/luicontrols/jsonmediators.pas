@@ -243,12 +243,19 @@ begin
       bvTrue:
         Data.Booleans[JSONProperty.Name] := True;
       bvFalse:
-        Data.Booleans[JSONProperty.Name] := False;
+      begin
+        if FUndefinedValue = bvFalse then
+          RemoveJSONProp(Data, JSONProperty.Name)
+        else if FNullValue = bvFalse then
+          Data.Nulls[JSONProperty.Name] := True
+        else
+          Data.Booleans[JSONProperty.Name] := False;
+      end;
       bvIndeterminate:
       begin
         if FUndefinedValue = bvIndeterminate then
           RemoveJSONProp(Data, JSONProperty.Name)
-        else if FNullValue = bvIndeterminate then
+        else
           Data.Nulls[JSONProperty.Name] := True;
       end;
       bvNone:
