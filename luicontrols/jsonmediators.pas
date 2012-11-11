@@ -35,15 +35,19 @@ type
   TJSONBooleanGroupMediator = class(TComponent)
   private
     FControl: TWinControl;
+    FData: TJSONObject;
     FFalseCaption: String;
     FNullValue: TBooleanValue;
     FProperties: TJSONBooleanProperties;
     FTrueCaption: String;
     FIndeterminateCaption: String;
     FUndefinedValue: TBooleanValue;
-    procedure CreateViews(Data: TJSONObject);
+    procedure CreateViews;
     procedure SetControl(AValue: TWinControl);
     procedure SetProperties(AValue: TJSONBooleanProperties);
+    procedure InitializeViews(Data: TJSONObject);
+  protected
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -87,25 +91,51 @@ end;
 
 { TJSONBooleanGroupMediator }
 
-procedure TJSONBooleanGroupMediator.CreateViews(Data: TJSONObject);
+procedure TJSONBooleanGroupMediator.CreateViews;
 var
   View: TJSONBooleanRadioButtonViewFrame;
   JSONProperty: TJSONBooleanProperty;
-  i, PropIndex: Integer;
-  PropData: TJSONData;
-  InitialValue: TBooleanValue;
+  i: Integer;
 begin
-  if (FControl = nil) or (Data = nil) then
+  if (FControl = nil) then
     Exit;
   for i := 0 to FProperties.Count - 1 do
   begin
     JSONProperty := TJSONBooleanProperty(FProperties.Items[i]);
     //todo: use self as owner
     View := TJSONBooleanRadioButtonViewFrame.Create(FControl);
+    View.Name := Name + 'BooleanView' + IntToStr(i);
     View.PropertyCaption := JSONProperty.Caption;
     View.TrueCaption := FTrueCaption;
     View.FalseCaption := FFalseCaption;
     View.IndeterminateCaption := FIndeterminateCaption;
+    View.Parent := FControl;
+    View.Visible := True;
+    JSONProperty.FView := View;
+  end;
+end;
+
+procedure TJSONBooleanGroupMediator.SetControl(AValue: TWinControl);
+begin
+  if FControl = AValue then Exit;
+  FControl := AValue;
+end;
+
+procedure TJSONBooleanGroupMediator.SetProperties(AValue: TJSONBooleanProperties);
+begin
+  FProperties.Assign(AValue);
+end;
+
+procedure TJSONBooleanGroupMediator.InitializeViews(Data: TJSONObject);
+var
+  i, PropIndex: Integer;
+  JSONProperty: TJSONBooleanProperty;
+  InitialValue: TBooleanValue;
+  PropData: TJSONData;
+begin
+  for i := 0 to FProperties.Count -1 do
+  begin
+    JSONProperty := TJSONBooleanProperty(FProperties.Items[i]);
     PropIndex := Data.IndexOfName(JSONProperty.Name);
     if PropIndex = -1 then
       InitialValue := FUndefinedValue
@@ -123,27 +153,18 @@ begin
         jtNull:
           InitialValue := FNullValue;
         else
-        begin
           InitialValue := bvIndeterminate;  //??
-        end;
       end;
     end;
-    View.InitialValue := InitialValue;
-    View.Parent := FControl;
-    View.Visible := True;
-    JSONProperty.FView := View;
+    TJSONBooleanRadioButtonViewFrame(JSONProperty.FView).InitialValue := InitialValue;
   end;
 end;
 
-procedure TJSONBooleanGroupMediator.SetControl(AValue: TWinControl);
+procedure TJSONBooleanGroupMediator.Loaded;
 begin
-  if FControl = AValue then Exit;
-  FControl := AValue;
-end;
-
-procedure TJSONBooleanGroupMediator.SetProperties(AValue: TJSONBooleanProperties);
-begin
-  FProperties.Assign(AValue);
+  inherited Loaded;
+  if (FControl <> nil) and not (csLoading in FControl.ComponentState) then
+    CreateViews;
 end;
 
 constructor TJSONBooleanGroupMediator.Create(AOwner: TComponent);
@@ -169,10 +190,8 @@ begin
 end;
 
 procedure TJSONBooleanGroupMediator.LoadData(Data: TJSONObject);
-var
-  i: Integer;
 begin
- // for i := 0 to FViews.Count - 1;
+  InitializeViews(Data);
 end;
 
 end.
