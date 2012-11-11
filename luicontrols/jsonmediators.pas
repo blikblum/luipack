@@ -95,16 +95,18 @@ procedure TJSONBooleanGroupMediator.CreateViews;
 var
   View: TJSONBooleanRadioButtonViewFrame;
   JSONProperty: TJSONBooleanProperty;
-  i: Integer;
+  i, ViewTop: Integer;
 begin
   if (FControl = nil) then
     Exit;
+  ViewTop := 0;
   for i := 0 to FProperties.Count - 1 do
   begin
     JSONProperty := TJSONBooleanProperty(FProperties.Items[i]);
     //todo: use self as owner
     View := TJSONBooleanRadioButtonViewFrame.Create(FControl);
     View.Name := Name + 'BooleanView' + IntToStr(i);
+    View.Top := ViewTop;
     View.PropertyCaption := JSONProperty.Caption;
     View.TrueCaption := FTrueCaption;
     View.FalseCaption := FFalseCaption;
@@ -112,6 +114,7 @@ begin
     View.Parent := FControl;
     View.Visible := True;
     JSONProperty.FView := View;
+    Inc(ViewTop, View.Height);
   end;
 end;
 
