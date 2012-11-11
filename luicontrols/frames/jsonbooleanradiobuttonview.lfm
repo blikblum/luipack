@@ -1,10 +1,10 @@
 object JSONBooleanRadioButtonViewFrame: TJSONBooleanRadioButtonViewFrame
   Left = 0
-  Height = 29
+  Height = 27
   Top = 0
-  Width = 407
-  ClientHeight = 29
-  ClientWidth = 407
+  Width = 340
+  ClientHeight = 27
+  ClientWidth = 340
   TabOrder = 0
   DesignLeft = 376
   DesignTop = 230
@@ -14,7 +14,7 @@ object JSONBooleanRadioButtonViewFrame: TJSONBooleanRadioButtonViewFrame
     AnchorSideTop.Side = asrCenter
     Left = 2
     Height = 15
-    Top = 7
+    Top = 6
     Width = 70
     BorderSpacing.Left = 2
     BorderSpacing.Top = 2
@@ -23,47 +23,52 @@ object JSONBooleanRadioButtonViewFrame: TJSONBooleanRadioButtonViewFrame
     ParentColor = False
   end
   object TrueRadioButton: TRadioButton
-    AnchorSideLeft.Control = CaptionLabel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideTop.Side = asrCenter
-    Left = 76
+    AnchorSideRight.Control = FalseRadioButton
+    Left = 142
     Height = 19
-    Top = 5
-    Width = 110
-    BorderSpacing.Left = 4
+    Top = 4
+    Width = 44
+    Anchors = [akTop, akRight]
     BorderSpacing.Top = 2
+    BorderSpacing.Right = 6
     BorderSpacing.Bottom = 2
-    Caption = 'TrueRadioButton'
+    Caption = 'True'
     TabOrder = 0
   end
   object FalseRadioButton: TRadioButton
-    AnchorSideLeft.Control = TrueRadioButton
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideTop.Side = asrCenter
-    Left = 190
+    AnchorSideRight.Control = IndeterminateRadioButton
+    Left = 192
     Height = 19
-    Top = 5
-    Width = 112
-    BorderSpacing.Left = 4
+    Top = 4
+    Width = 46
+    Anchors = [akTop, akRight]
     BorderSpacing.Top = 2
+    BorderSpacing.Right = 6
     BorderSpacing.Bottom = 2
-    Caption = 'FalseRadioButton'
+    Caption = 'False'
     TabOrder = 1
   end
   object IndeterminateRadioButton: TRadioButton
-    AnchorSideLeft.Control = FalseRadioButton
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideTop.Side = asrCenter
-    Left = 302
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 244
     Height = 19
-    Top = 5
-    Width = 160
+    Top = 4
+    Width = 94
+    Anchors = [akTop, akRight]
     BorderSpacing.Top = 2
+    BorderSpacing.Right = 2
     BorderSpacing.Bottom = 2
-    Caption = 'IndeterminateRadioButton'
+    Caption = 'Indeterminate'
     TabOrder = 2
   end
 end
