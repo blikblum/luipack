@@ -26,8 +26,13 @@ type
     property Name: String read FName write FName;
   end;
 
+  { TJSONBooleanProperties }
+
   TJSONBooleanProperties = class(TOwnedCollection)
+  private
+    function GetItems(Index: Integer): TJSONBooleanProperty;
   public
+    property Items[Index: Integer]: TJSONBooleanProperty read GetItems; default;
   end;
 
   { TJSONBooleanGroupMediator }
@@ -35,7 +40,6 @@ type
   TJSONBooleanGroupMediator = class(TComponent)
   private
     FControl: TWinControl;
-    FData: TJSONObject;
     FFalseCaption: String;
     FNullValue: TBooleanValue;
     FProperties: TJSONBooleanProperties;
@@ -55,6 +59,7 @@ type
     destructor Destroy; override;
     function CheckValues: Boolean;
     procedure LoadData(Data: TJSONObject);
+    procedure SaveData(Data: TJSONObject);
   published
     property Control: TWinControl read FControl write SetControl;
     property FalseCaption: String read FFalseCaption write FFalseCaption;
@@ -68,7 +73,14 @@ type
 implementation
 
 uses
-  JSONBooleanRadioButtonView;
+  JSONBooleanRadioButtonView, LuiJSONUtils;
+
+{ TJSONBooleanProperties }
+
+function TJSONBooleanProperties.GetItems(Index: Integer): TJSONBooleanProperty;
+begin
+  Result := TJSONBooleanProperty(inherited Items[Index]);
+end;
 
 { TJSONBooleanProperty }
 
@@ -168,7 +180,7 @@ begin
           InitialValue := bvIndeterminate;  //??
       end;
     end;
-    TJSONBooleanRadioButtonViewFrame(JSONProperty.FView).InitialValue := InitialValue;
+    TJSONBooleanRadioButtonViewFrame(JSONProperty.FView).Value := InitialValue;
   end;
 end;
 
@@ -211,6 +223,43 @@ end;
 procedure TJSONBooleanGroupMediator.LoadData(Data: TJSONObject);
 begin
   InitializeViews(Data);
+end;
+
+procedure TJSONBooleanGroupMediator.SaveData(Data: TJSONObject);
+var
+  i: Integer;
+  JSONProperty: TJSONBooleanProperty;
+  ViewValue: TBooleanValue;
+  View: TJSONBooleanRadioButtonViewFrame;
+begin
+  if not FViewsLoaded or (Data = nil) then
+    Exit;
+  for i := 0 to FProperties.Count -1 do
+  begin
+    JSONProperty := FProperties[i];
+    View := TJSONBooleanRadioButtonViewFrame(JSONProperty.FView);
+    ViewValue := View.Value;
+    case ViewValue of
+      bvTrue:
+        Data.Booleans[JSONProperty.Name] := True;
+      bvFalse:
+        Data.Booleans[JSONProperty.Name] := False;
+      bvIndeterminate:
+      begin
+        if FUndefinedValue = bvIndeterminate then
+          RemoveJSONProp(Data, JSONProperty.Name)
+        else if FNullValue = bvIndeterminate then
+          Data.Nulls[JSONProperty.Name] := True;
+      end;
+      bvNone:
+      begin
+        if FNullValue = bvNone then
+          Data.Nulls[JSONProperty.Name] := True
+        else
+          RemoveJSONProp(Data, JSONProperty.Name);
+      end;
+    end;
+  end;
 end;
 
 end.
