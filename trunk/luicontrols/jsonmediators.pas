@@ -42,6 +42,7 @@ type
     FTrueCaption: String;
     FIndeterminateCaption: String;
     FUndefinedValue: TBooleanValue;
+    FViewsLoaded: Boolean;
     procedure CreateViews;
     procedure SetControl(AValue: TWinControl);
     procedure SetProperties(AValue: TJSONBooleanProperties);
@@ -116,6 +117,7 @@ begin
     JSONProperty.FView := View;
     Inc(ViewTop, View.Height);
   end;
+  FViewsLoaded := True;
 end;
 
 procedure TJSONBooleanGroupMediator.SetControl(AValue: TWinControl);
@@ -136,6 +138,8 @@ var
   InitialValue: TBooleanValue;
   PropData: TJSONData;
 begin
+  if not FViewsLoaded then
+    Exit;
   for i := 0 to FProperties.Count -1 do
   begin
     JSONProperty := TJSONBooleanProperty(FProperties.Items[i]);
