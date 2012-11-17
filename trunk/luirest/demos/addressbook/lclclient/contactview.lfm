@@ -1,0 +1,50 @@
+object ContactViewForm: TContactViewForm
+  Left = 415
+  Height = 116
+  Top = 205
+  Width = 321
+  Caption = 'Edit Contact'
+  ClientHeight = 116
+  ClientWidth = 321
+  Position = poOwnerFormCenter
+  LCLVersion = '1.1'
+  object NameEdit: TLabeledEdit
+    Left = 8
+    Height = 23
+    Top = 32
+    Width = 256
+    EditLabel.AnchorSideLeft.Control = NameEdit
+    EditLabel.AnchorSideRight.Control = NameEdit
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = NameEdit
+    EditLabel.Left = 8
+    EditLabel.Height = 15
+    EditLabel.Top = 14
+    EditLabel.Width = 256
+    EditLabel.Caption = 'Name'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object BitBtn1: TBitBtn
+    Left = 80
+    Height = 30
+    Top = 80
+    Width = 107
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = BitBtn1Click
+    TabOrder = 1
+  end
+  object BitBtn2: TBitBtn
+    Left = 200
+    Height = 30
+    Top = 80
+    Width = 107
+    DefaultCaption = True
+    Kind = bkClose
+    ModalResult = 11
+    TabOrder = 2
+  end
+end
