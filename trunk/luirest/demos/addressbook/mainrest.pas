@@ -35,6 +35,7 @@ uses
 
 procedure TMainRESTModule.DataModuleCreate(Sender: TObject);
 begin
+  AddressBookDataset.ExecSQL('PRAGMA foreign_keys = ON');
   RegisterResource('contacts', TContacts);
 end;
 
