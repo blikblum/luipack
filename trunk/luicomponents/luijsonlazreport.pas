@@ -75,6 +75,7 @@ type
     procedure FreeDataLinks;
     function CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
     procedure FreeOwnedData;
+    function GetDataLoaded: Boolean;
     procedure LoadConfigData;
     procedure ParseConfigData(Data: TJSONObject);
   protected
@@ -91,6 +92,7 @@ type
     procedure RegisterDataLink(const BandName, PropertyName: String; CrossBandName: String = '');
     procedure RegisterNullValue(const PropertyName: String; Value: Variant);
     property ConfigProperty: String read FConfigProperty write FConfigProperty;
+    property DataLoaded: Boolean read GetDataLoaded;
     property DataProperty: String read FDataProperty write FDataProperty;
   end;
 
@@ -231,6 +233,11 @@ begin
     FreeAndNil(FConfigData);
 end;
 
+function TfrJSONReport.GetDataLoaded: Boolean;
+begin
+  Result := FData <> nil;
+end;
+
 procedure TfrJSONReport.LoadConfigData;
 begin
   FreeDataLinks;
@@ -362,7 +369,7 @@ begin
         case PropData.JSONType of
           jtObject: ParValue := '(object)';
           jtArray: ParValue := '(array)';
-          jtNull: ;
+          jtNull: ParValue := Null;
           else
             ParValue := PropData.Value;
         end;
@@ -404,6 +411,7 @@ procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
 var
   V1: Variant;
   S2, S3: String;
+  VType: tvartype;
 begin
   if AName = 'IFNULL' then
   begin
@@ -430,12 +438,27 @@ begin
     V1 := frParser.Calc(P1);
     Val := VarIsNull(V1);
   end
+  //due to lazreport design V1 is never varempty
+  {
+  else if AName = 'ISUNDEFINED' then
+  begin
+    V1 := frParser.Calc(P1);
+    Val := VarIsEmpty(V1);
+  end
+  }
+  else if AName = 'ISEMPTY' then
+  begin
+    V1 := frParser.Calc(P1);
+    VType := VarType(V1);
+    Val := (VType in [varempty, varnull]) or
+      ((VType in [varstring, varustring]) and (V1 = ''));
+  end
   else if AName = 'IFTHEN' then
   begin
     V1 := frParser.Calc(P1);
-    if (VarType(V1) = varshortint) then
+    if (VarType(V1) in [varshortint, varboolean, varnull, varempty]) then
     begin
-      if V1 = 1 then
+      if (V1 = 1) or (V1 = True) then
       begin
         S2 := P2;
         if S2 <> '' then
