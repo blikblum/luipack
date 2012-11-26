@@ -34,6 +34,9 @@ var
 
 implementation
 
+uses
+  LR_Class;
+
 {$R *.lfm}
 
 { TMainForm }
@@ -75,6 +78,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   JSONDataMemo.Lines.LoadFromFile('test.json');
   FReport := TfrJSONReport.Create(Self);
+  FReport.Options := [roIgnoreSymbolNotFound];
   FReport.LoadFromFile('design.lrf');
 end;
 
