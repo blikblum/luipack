@@ -41,6 +41,7 @@ type
   private
     FControl: TWinControl;
     FFalseCaption: String;
+    FFalseValue: TBooleanValue;
     FNullValue: TBooleanValue;
     FProperties: TJSONBooleanProperties;
     FTrueCaption: String;
@@ -63,6 +64,7 @@ type
   published
     property Control: TWinControl read FControl write SetControl;
     property FalseCaption: String read FFalseCaption write FFalseCaption;
+    property FalseValue: TBooleanValue read FFalseValue write FFalseValue default bvFalse;
     property IndeterminateCaption: String read FIndeterminateCaption write FIndeterminateCaption;
     property NullValue: TBooleanValue read FNullValue write FNullValue default bvIndeterminate;
     property Properties: TJSONBooleanProperties read FProperties write SetProperties;
@@ -172,7 +174,7 @@ begin
           if PropData.AsBoolean then
             InitialValue := bvTrue
           else
-            InitialValue := bvFalse;
+            InitialValue := FFalseValue;
         end;
         jtNull:
           InitialValue := FNullValue;
@@ -187,7 +189,7 @@ end;
 procedure TJSONBooleanGroupMediator.Loaded;
 begin
   inherited Loaded;
-  if (FControl <> nil) and not (csLoading in FControl.ComponentState) then
+  if (FControl <> nil) and (FControl.ComponentState * [csLoading, csDesigning] = []) then
     CreateViews;
 end;
 
@@ -207,6 +209,7 @@ begin
   FIndeterminateCaption := 'Indeterminate';
   FNullValue := bvIndeterminate;
   FUndefinedValue := bvNone;
+  FFalseValue := bvFalse;
 end;
 
 destructor TJSONBooleanGroupMediator.Destroy;
@@ -255,6 +258,8 @@ begin
       begin
         if FUndefinedValue = bvIndeterminate then
           RemoveJSONProp(Data, JSONProperty.Name)
+        else if FFalseValue = bvIndeterminate then
+          Data.Booleans[JSONProperty.Name] := False
         else
           Data.Nulls[JSONProperty.Name] := True;
       end;
@@ -262,6 +267,8 @@ begin
       begin
         if FNullValue = bvNone then
           Data.Nulls[JSONProperty.Name] := True
+        else if FFalseValue = bvNone then
+          Data.Booleans[JSONProperty.Name] := False
         else
           RemoveJSONProp(Data, JSONProperty.Name);
       end;
