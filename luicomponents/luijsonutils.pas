@@ -688,18 +688,28 @@ end;
 procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 var
-  ExtOptionsData, RecordData: TJSONObject;
+  RecordData: TJSONObject;
+  ExtOptionsData: TJSONData;
   FieldsData: TJSONArray;
   FieldMaps: TFieldMaps;
   OldRecNo: Integer;
 begin
   if Dataset.IsEmpty then
     Exit;
-  ExtOptionsData := StringToJSONData(ExtOptions) as TJSONObject;
+  ExtOptionsData := StringToJSONData(ExtOptions);
   try
     FieldsData := nil;
     if ExtOptionsData <> nil then
-      FieldsData := GetJSONProp(ExtOptionsData, 'fields') as TJSONArray;
+    begin
+      case ExtOptionsData.JSONType of
+        jtArray:
+          FieldsData := TJSONArray(ExtOptionsData);
+        jtObject:
+          FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
+      else
+        raise Exception.Create('ExtOptions is in invalid format');
+      end;
+    end;
     if FieldsData = nil then
       DatasetToJSONData(Dataset, JSONArray, Options)
     else
@@ -738,15 +748,24 @@ end;
 procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 var
-  ExtOptionsData: TJSONObject;
+  ExtOptionsData: TJSONData;
   FieldsData: TJSONArray;
   FieldMaps: TFieldMaps;
 begin
-  ExtOptionsData := StringToJSONData(ExtOptions) as TJSONObject;
+  ExtOptionsData := StringToJSONData(ExtOptions);
   try
     FieldsData := nil;
     if ExtOptionsData <> nil then
-      FieldsData := GetJSONProp(ExtOptionsData, 'fields') as TJSONArray;
+    begin
+      case ExtOptionsData.JSONType of
+        jtArray:
+          FieldsData := TJSONArray(ExtOptionsData);
+        jtObject:
+          FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
+      else
+        raise Exception.Create('ExtOptions is in invalid format');
+      end;
+    end;
     if FieldsData = nil then
       DatasetToJSONData(Dataset, JSONObject, Options)
     else
