@@ -646,7 +646,7 @@ begin
   end;
 end;
 
-procedure OptionsToFieldMaps(Dataset: TDataset; FieldsData: TJSONArray; Result: TFieldMaps);
+procedure OptionsToFieldMaps(Dataset: TDataset; FieldsData: TJSONArray; var Result: TFieldMaps);
 var
   i: Integer;
   FieldData: TJSONData;
