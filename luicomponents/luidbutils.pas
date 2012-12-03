@@ -9,24 +9,23 @@ uses
 
 procedure CopyDatasetData(SourceDataset, DestDataset: TDataset);
 
-procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings; const FieldNames: string; Clear: Boolean = False);
+procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings;
+  const TextFieldName, ObjectFieldName: string; Clear: Boolean = False);
 
 procedure DeleteCurrentRecord(Dataset: TDataSet);
 
 implementation
 
-uses
-  LuiStrUtils;
-
-procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings; const FieldNames: string; Clear: Boolean);
+procedure DatasetToStrings(Dataset: TDataset; Strings: TStrings;
+  const TextFieldName, ObjectFieldName: string; Clear: Boolean);
 var
-  MainFieldName, ObjFieldName: string;
-  MainField, ObjField: TField;
+  TextField, ObjectField: TField;
   ABookmark: TBookmark;
 begin
-  ExtractNameValue(FieldNames, MainFieldName, ObjFieldName);
-  MainField := Dataset.FieldByName(MainFieldName);
-  ObjField := Dataset.FindField(ObjFieldName);
+  TextField := Dataset.FieldByName(TextFieldName);
+  ObjectField := Dataset.FindField(ObjectFieldName);
+  if (ObjectField <> nil) and not (ObjectField.DataType in [ftInteger, ftSmallint, ftWord, ftAutoInc]) then
+    raise Exception.CreateFmt('Field "%s" cannot be stored as a TObject', [ObjectFieldName]);
   Strings.BeginUpdate;
   try
     if Clear then
@@ -39,10 +38,10 @@ begin
         Dataset.First;
         while not Dataset.EOF do
         begin
-          if ObjField = nil then
-            Strings.Add(MainField.AsString)
+          if ObjectField = nil then
+            Strings.Add(TextField.AsString)
           else
-            Strings.AddObject(MainField.AsString, TObject(ObjField.AsInteger));
+            Strings.AddObject(TextField.AsString, TObject(PtrInt(ObjectField.AsInteger)));
           Dataset.Next;
         end;
       finally
