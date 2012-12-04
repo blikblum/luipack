@@ -127,7 +127,7 @@ type
     procedure DoPageHide(Page: TVirtualPage);
     procedure DoPageLoad(Page: TVirtualPage);
     procedure DoPageShow(Page: TVirtualPage);
-    procedure Loaded;
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -143,7 +143,7 @@ type
 implementation
 
 uses
-  RtlConsts, LuiRTTIUtils, LuiMiscUtils, Math;
+  RtlConsts, LuiRTTIUtils, LuiMiscUtils, Math, Forms;
 
 type
 
@@ -249,6 +249,9 @@ end;
 
 procedure TVirtualPageManager.Loaded;
 begin
+  inherited Loaded;
+  if (DisplayOptions.Parent = nil) and (Owner is TWinControl) then
+    DisplayOptions.Parent := TWinControl(Owner);
   if FPageIndex > -1 then
     FPages.UpdateActivePage(-1, FPageIndex);
 end;
