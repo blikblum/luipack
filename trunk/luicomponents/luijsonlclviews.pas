@@ -455,18 +455,24 @@ end;
 
 procedure TJSONObjectPropertyView.Load(JSONObject: TJSONObject);
 begin
-  //todo handle mediator and options loading once
-  MediatorClassNeeded;
-  OptionsDataNeeded;
-  FMediatorClass.DoJSONToGUI(JSONObject, FPropertyName, FControl, FOptionsData);
+  if FControl <> nil then
+  begin
+    //todo handle mediator and options loading once
+    MediatorClassNeeded;
+    OptionsDataNeeded;
+    FMediatorClass.DoJSONToGUI(JSONObject, FPropertyName, FControl, FOptionsData);
+  end;
 end;
 
 procedure TJSONObjectPropertyView.Save(JSONObject: TJSONObject);
 begin
-  //todo handle mediator and options loading once
-  MediatorClassNeeded;
-  OptionsDataNeeded;
-  FMediatorClass.DoGUIToJSON(FControl, JSONObject, FPropertyName, FOptionsData);
+  if FControl <> nil then
+  begin
+    //todo handle mediator and options loading once
+    MediatorClassNeeded;
+    OptionsDataNeeded;
+    FMediatorClass.DoGUIToJSON(FControl, JSONObject, FPropertyName, FOptionsData);
+  end;
 end;
 
 { TCustomJSONGUIMediator }
