@@ -247,7 +247,7 @@ var
   i: Integer;
 begin
   for i := 0 to SrcObj.Count - 1 do
-    DestObj.Add(SrcObj.Names[i], SrcObj.Items[i].Clone);
+    DestObj.Elements[SrcObj.Names[i]] := SrcObj.Items[i].Clone;
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
