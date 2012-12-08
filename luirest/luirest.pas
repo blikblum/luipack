@@ -87,7 +87,7 @@ type
   private
     FResources: TRESTResourceStore;
     FContentType: String;
-    FOnCreateResource: TRESTResourceLoadEvent;
+    FOnResourceLoad: TRESTResourceLoadEvent;
     FRootPath: String;
     procedure SetRootPath(const Value: String);
   public
@@ -99,7 +99,7 @@ type
     property ContentType: String read FContentType write FContentType;
     property RootPath: String read FRootPath write SetRootPath;
     //events
-    property OnCreateResource: TRESTResourceLoadEvent read FOnCreateResource write FOnCreateResource;
+    property OnResourceLoad: TRESTResourceLoadEvent read FOnResourceLoad write FOnResourceLoad;
   end;
 
   procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
@@ -195,7 +195,7 @@ begin
         Exit;
       end;
 
-      Resource := ResourceDef.GetResource(URIParams, OnCreateResource);
+      Resource := ResourceDef.GetResource(URIParams, OnResourceLoad);
       if Resource = nil then
       begin
         SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
@@ -217,7 +217,7 @@ begin
         end;
 
         ResourceDef := NextResourceDef;
-        Resource := ResourceDef.GetResource(URIParams, OnCreateResource);
+        Resource := ResourceDef.GetResource(URIParams, OnResourceLoad);
         if Resource = nil then
         begin
           SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
