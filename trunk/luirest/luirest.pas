@@ -13,6 +13,11 @@ type
   TRESTResourceStore = class;
   TCustomRESTResourceClass = class of TCustomRESTResource;
 
+  TRESTResourceCreateEvent = procedure(out Resource: TCustomRESTResource;
+    ResourceTag: PtrInt) of object;
+  TRESTResourceLoadEvent = procedure(Resource: TCustomRESTResource;
+    ResourceTag: PtrInt) of object;
+
   { TCustomRESTResource }
 
   TCustomRESTResource = class(TPersistent)
@@ -20,9 +25,15 @@ type
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
     FURIParams: TJSONObject;
+    procedure SubPathResourcesNeeded;
   protected
-    procedure RegisterSubPathResource(const ResourceId: ShortString; Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
-    procedure SetDefaultSubResource(const ParamName: String; Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
+    procedure Loaded; virtual;
+    procedure RegisterSubPath(const ResourceId: ShortString; Resource: TCustomRESTResource);
+    procedure RegisterSubPath(const ResourceId: ShortString; ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+    procedure RegisterSubPath(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+    procedure SetDefaultSubPath(const ParamName: String; Resource: TCustomRESTResource);
+    procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+    procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
   public
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
@@ -37,13 +48,20 @@ type
 
   TRESTResourceDef = class
   private
+    FOnResourceCreate: TRESTResourceCreateEvent;
     FResource: TCustomRESTResource;
     FResourceClass: TCustomRESTResourceClass;
+    FTag: PtrInt;
   public
-    constructor Create(AResource: TCustomRESTResource; AResourceClass: TCustomRESTResourceClass);
+    constructor Create(AResource: TCustomRESTResource);
+    constructor Create(AResourceClass: TCustomRESTResourceClass; ATag: PtrInt);
+    constructor Create(CreateCallback: TRESTResourceCreateEvent; ATag: PtrInt);
     destructor Destroy; override;
-    property ResourceClass: TCustomRESTResourceClass read FResourceClass write FResourceClass;
+    function GetResource(URIParams: TJSONObject; OnResourceLoad: TRESTResourceLoadEvent): TCustomRESTResource;
+    property OnResourceCreate: TRESTResourceCreateEvent read FOnResourceCreate write FOnResourceCreate;
     property Resource: TCustomRESTResource read FResource write FResource;
+    property ResourceClass: TCustomRESTResourceClass read FResourceClass write FResourceClass;
+    property Tag: PtrInt read FTag write FTag;
   end;
 
   { TRESTResourceStore }
@@ -59,35 +77,39 @@ type
     destructor Destroy; override;
     function Find(const ResourceId: ShortString): TRESTResourceDef;
     function Get(const ResourceId: ShortString): TCustomRESTResource;
-    procedure RegisterResource(const ResourceId: ShortString; Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
+    procedure Register(const ResourceId: ShortString; Resource: TCustomRESTResource);
+    procedure Register(const ResourceId: ShortString; ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+    procedure Register(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
   end;
-
-  TCreateRESTResourceEvent = procedure(Resource: TCustomRESTResource) of object;
 
   { TRESTServiceModule }
 
   TRESTServiceModule = class(TCustomHTTPModule)
   private
-    FBaseResources: TRESTResourceStore;
+    FResources: TRESTResourceStore;
     FContentType: String;
-    FOnCreateResource: TCreateRESTResourceEvent;
+    FOnCreateResource: TRESTResourceLoadEvent;
     FRootPath: String;
     procedure SetRootPath(const Value: String);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure HandleRequest(ARequest: TRequest; AResponse: TResponse); override;
-    procedure RegisterResource(const ResourceName: ShortString; ResourceClass: TCustomRESTResourceClass);
+    property Resources: TRESTResourceStore read FResources;
   published
     property ContentType: String read FContentType write FContentType;
     property RootPath: String read FRootPath write SetRootPath;
     //events
-    property OnCreateResource: TCreateRESTResourceEvent read FOnCreateResource write FOnCreateResource;
+    property OnCreateResource: TRESTResourceLoadEvent read FOnCreateResource write FOnCreateResource;
   end;
 
   procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
 
 implementation
+
+const
+  SRegisterError = 'RegisterResource (%s): %s must be <> nil';
+  SDefaultSubPathError = 'SetDefaultSubPath (%s): %s must be <> nil';
 
 { TRESTServiceModule }
 
@@ -116,14 +138,14 @@ end;
 constructor TRESTServiceModule.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FBaseResources := TRESTResourceStore.Create;
+  FResources := TRESTResourceStore.Create;
   FContentType := 'application/json; charset=UTF-8';
   FRootPath := '/';
 end;
 
 destructor TRESTServiceModule.Destroy;
 begin
-  FBaseResources.Destroy;
+  FResources.Destroy;
   inherited Destroy;
 end;
 
@@ -148,6 +170,7 @@ var
   URIPath, URIPart, NextURIPart, MethodStr: String;
   i, PartOffset: Integer;
   ResourceDef, NextResourceDef: TRESTResourceDef;
+  Resource: TCustomRESTResource;
   URIParams: TJSONObject;
 begin
   AResponse.ContentType := FContentType;
@@ -166,60 +189,56 @@ begin
         SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, URIPath]);
         Exit;
       end;
-      ResourceDef := FBaseResources.Find(URIPart);
+      ResourceDef := FResources.Find(URIPart);
       if ResourceDef = nil then
       begin
         SetResponseStatus(AResponse, 404, 'Resource "%s" not registered', [URIPart]);
         Exit;
       end;
 
-      //todo: handle OnCreate
-      if ResourceDef.Resource = nil then
+      Resource := ResourceDef.GetResource(URIParams, OnCreateResource);
+      if Resource = nil then
       begin
-        ResourceDef.Resource := ResourceDef.ResourceClass.Create;
-        if Assigned(FOnCreateResource) then
-          FOnCreateResource(ResourceDef.Resource);
+        SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
+        Exit;
       end;
-      ResourceDef.Resource.FURIParams := URIParams;
 
       NextURIPart := GetURIPart(URIPath, PartOffset);
       while NextURIPart <> '' do
       begin
         NextResourceDef := nil;
-        ResourceDef.Resource.HandleSubPath(NextURIPart, NextResourceDef);
+        Resource.HandleSubPath(NextURIPart, NextResourceDef);
 
         if NextResourceDef = nil then
         begin
           SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
-            [NextURIPart, ResourceDef.Resource.ClassName,
-            BoolToStr(Boolean(ResourceDef.Resource.FSubPathResources = nil), True)]);
+            [NextURIPart, Resource.ClassName,
+            BoolToStr(Boolean(Resource.FSubPathResources = nil), True)]);
           Exit;
         end;
 
         ResourceDef := NextResourceDef;
-
-        if ResourceDef.Resource = nil then
+        Resource := ResourceDef.GetResource(URIParams, OnCreateResource);
+        if Resource = nil then
         begin
-          ResourceDef.Resource := ResourceDef.ResourceClass.Create;
-          if Assigned(FOnCreateResource) then
-            FOnCreateResource(ResourceDef.Resource);
+          SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
+          Exit;
         end;
-        ResourceDef.Resource.FURIParams := URIParams;
 
         NextURIPart := GetURIPart(URIPath, PartOffset);
       end;
 
       if MethodStr = 'GET' then
-        ResourceDef.Resource.HandleGet(ARequest, AResponse)
+        Resource.HandleGet(ARequest, AResponse)
       else if MethodStr = 'PUT' then
-        ResourceDef.Resource.HandlePut(ARequest, AResponse)
+        Resource.HandlePut(ARequest, AResponse)
       else if MethodStr = 'POST' then
       begin
         AResponse.Code := 201;
-        ResourceDef.Resource.HandlePost(ARequest, AResponse)
+        Resource.HandlePost(ARequest, AResponse)
       end
       else if MethodStr = 'DELETE' then
-        ResourceDef.Resource.HandleDelete(ARequest, AResponse)
+        Resource.HandleDelete(ARequest, AResponse)
       else
         SetResponseStatus(AResponse, 501, 'Method "%s" not implemented', [MethodStr]);
     finally
@@ -230,31 +249,68 @@ begin
     SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
 end;
 
-procedure TRESTServiceModule.RegisterResource(const ResourceName: ShortString; ResourceClass: TCustomRESTResourceClass);
-begin
-  FBaseResources.RegisterResource(ResourceName, nil, ResourceClass);
-end;
-
 { TCustomRESTResource }
 
-procedure TCustomRESTResource.RegisterSubPathResource(const ResourceId: ShortString;
-  Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
+procedure TCustomRESTResource.SubPathResourcesNeeded;
 begin
   if FSubPathResources = nil then
     FSubPathResources := TRESTResourceStore.Create;
-  FSubPathResources.RegisterResource(ResourceId, Resource, ResourceClass);
 end;
 
-procedure TCustomRESTResource.SetDefaultSubResource(const ParamName: String;
-  Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
+procedure TCustomRESTResource.Loaded;
 begin
-  if FSubPathResources = nil then
-    FSubPathResources := TRESTResourceStore.Create;
-  //the class or the instance must be <> nil
-  if (PtrUInt(Resource) + PtrUInt(ResourceClass)) = 0 then
-    raise Exception.CreateFmt('SetDefaultResource (%s): Class or Instance must be <> nil', [ParamName]);
+  //
+end;
+
+procedure TCustomRESTResource.RegisterSubPath(const ResourceId: ShortString;
+  Resource: TCustomRESTResource);
+begin
+  SubPathResourcesNeeded;
+  FSubPathResources.Register(ResourceId, Resource);
+end;
+
+procedure TCustomRESTResource.RegisterSubPath(const ResourceId: ShortString;
+  ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+begin
+  SubPathResourcesNeeded;
+  FSubPathResources.Register(ResourceId, ResourceClass, Tag);
+end;
+
+procedure TCustomRESTResource.RegisterSubPath(const ResourceId: ShortString;
+  CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+begin
+  SubPathResourcesNeeded;
+  FSubPathResources.Register(ResourceId, CreateCallback, Tag);
+end;
+
+procedure TCustomRESTResource.SetDefaultSubPath(const ParamName: String;
+  Resource: TCustomRESTResource);
+begin
+  if Resource = nil then
+    raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Instance']);
+  SubPathResourcesNeeded;
   FSubPathParamName := ParamName;
-  FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(Resource, ResourceClass);
+  FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(Resource);
+end;
+
+procedure TCustomRESTResource.SetDefaultSubPath(const ParamName: String;
+  ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+begin
+  if ResourceClass = nil then
+    raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Class']);
+  SubPathResourcesNeeded;
+  FSubPathParamName := ParamName;
+  FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(ResourceClass, Tag);
+end;
+
+procedure TCustomRESTResource.SetDefaultSubPath(const ParamName: String;
+  CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+begin
+  if CreateCallback = nil then
+    raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Event']);
+  SubPathResourcesNeeded;
+  FSubPathParamName := ParamName;
+  FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(CreateCallback, Tag);
 end;
 
 destructor TCustomRESTResource.Destroy;
@@ -333,36 +389,101 @@ begin
     Def := DefaultResourceDef;
   Result := Def.Resource;
   //todo: notify about creation
-  if (Result = nil) and (Def.ResourceClass <> nil) then
-    Result := Def.ResourceClass.Create;
+  if Result = nil then
+  begin
+    if Def.OnResourceCreate <> nil then
+       Def.OnResourceCreate(Result, Def.Tag)
+    else if (Def.ResourceClass <> nil) then
+      Result := Def.ResourceClass.Create;
+  end;
 end;
 
-procedure TRESTResourceStore.RegisterResource(const ResourceId: ShortString;
-  Resource: TCustomRESTResource; ResourceClass: TCustomRESTResourceClass);
+procedure TRESTResourceStore.Register(const ResourceId: ShortString;
+  Resource: TCustomRESTResource);
 var
   Def: TRESTResourceDef;
 begin
-  //the class or the instance must be <> nil
-  if (PtrUInt(Resource) + PtrUInt(ResourceClass)) = 0 then
-    raise Exception.CreateFmt('RegisterResource (%s): Class or Instance must be <> nil', [ResourceId]);
-  Def := TRESTResourceDef.Create(Resource, ResourceClass);
+  if Resource = nil then
+    raise Exception.CreateFmt(SRegisterError, [ResourceId, 'Instance']);
+  Def := TRESTResourceDef.Create(Resource);
+  FList.Add(ResourceId, Def);
+end;
+
+procedure TRESTResourceStore.Register(const ResourceId: ShortString;
+  ResourceClass: TCustomRESTResourceClass; Tag: PtrInt);
+var
+  Def: TRESTResourceDef;
+begin
+  if ResourceClass = nil then
+    raise Exception.CreateFmt(SRegisterError, [ResourceId, 'Class']);
+  Def := TRESTResourceDef.Create(ResourceClass, Tag);
+  FList.Add(ResourceId, Def);
+end;
+
+procedure TRESTResourceStore.Register(const ResourceId: ShortString;
+  CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+var
+  Def: TRESTResourceDef;
+begin
+  if CreateCallback = nil then
+    raise Exception.CreateFmt(SRegisterError, [ResourceId, 'Event']);
+  Def := TRESTResourceDef.Create(CreateCallback, Tag);
   FList.Add(ResourceId, Def);
 end;
 
 { TRESTResourceDef }
 
-constructor TRESTResourceDef.Create(AResource: TCustomRESTResource;
-  AResourceClass: TCustomRESTResourceClass);
+constructor TRESTResourceDef.Create(AResource: TCustomRESTResource);
 begin
   inherited Create;
   FResource := AResource;
+end;
+
+constructor TRESTResourceDef.Create(AResourceClass: TCustomRESTResourceClass;
+  ATag: PtrInt);
+begin
+  inherited Create;
   FResourceClass := AResourceClass;
+  FTag := ATag;
+end;
+
+constructor TRESTResourceDef.Create(CreateCallback: TRESTResourceCreateEvent;
+  ATag: PtrInt);
+begin
+  inherited Create;
+  FOnResourceCreate := CreateCallback;
+  FTag := ATag;
 end;
 
 destructor TRESTResourceDef.Destroy;
 begin
   FResource.Free;
   inherited Destroy;
+end;
+
+function TRESTResourceDef.GetResource(URIParams: TJSONObject; OnResourceLoad: TRESTResourceLoadEvent): TCustomRESTResource;
+var
+  DoLoad: Boolean;
+begin
+  DoLoad := FResource = nil;
+  if DoLoad then
+  begin
+    if Assigned(FOnResourceCreate) then
+      FOnResourceCreate(FResource, FTag);
+    if (FResource = nil) and Assigned(FResourceClass) then
+      FResource := FResourceClass.Create;
+  end;
+  Result := FResource;
+  if Result <> nil then
+  begin
+    Result.FURIParams := URIParams;
+    if DoLoad then
+    begin
+      if Assigned(OnResourceLoad) then
+        OnResourceLoad(Result, FTag);
+      Result.Loaded;
+    end;
+  end;
 end;
 
 end.
