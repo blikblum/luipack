@@ -28,12 +28,6 @@ type
     procedure SubPathResourcesNeeded;
   protected
     procedure Loaded; virtual;
-    procedure RegisterSubPath(const ResourceId: ShortString; Resource: TRESTResource);
-    procedure RegisterSubPath(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
-    procedure RegisterSubPath(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
-    procedure SetDefaultSubPath(const ParamName: String; Resource: TRESTResource);
-    procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TRESTResourceClass; Tag: PtrInt);
-    procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
   public
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
@@ -41,6 +35,12 @@ type
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandlePut(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef); virtual;
+    procedure RegisterSubPath(const ResourceId: ShortString; Resource: TRESTResource);
+    procedure RegisterSubPath(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
+    procedure RegisterSubPath(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+    procedure SetDefaultSubPath(const ParamName: String; Resource: TRESTResource);
+    procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TRESTResourceClass; Tag: PtrInt);
+    procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
     property URIParams: TJSONObject read FURIParams;
   end;
 
