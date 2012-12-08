@@ -76,7 +76,6 @@ type
     constructor Create;
     destructor Destroy; override;
     function Find(const ResourceId: ShortString): TRESTResourceDef;
-    function Get(const ResourceId: ShortString): TRESTResource;
     procedure Register(const ResourceId: ShortString; Resource: TRESTResource);
     procedure Register(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure Register(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
@@ -378,24 +377,6 @@ end;
 function TRESTResourceStore.Find(const ResourceId: ShortString): TRESTResourceDef;
 begin
   Result := TRESTResourceDef(FList.Find(ResourceId));
-end;
-
-function TRESTResourceStore.Get(const ResourceId: ShortString): TRESTResource;
-var
-  Def: TRESTResourceDef;
-begin
-  Def := TRESTResourceDef(FList.Find(ResourceId));
-  if Def = nil then
-    Def := DefaultResourceDef;
-  Result := Def.Resource;
-  //todo: notify about creation
-  if Result = nil then
-  begin
-    if Def.OnResourceCreate <> nil then
-       Def.OnResourceCreate(Result, Def.Tag)
-    else if (Def.ResourceClass <> nil) then
-      Result := Def.ResourceClass.Create;
-  end;
 end;
 
 procedure TRESTResourceStore.Register(const ResourceId: ShortString;
