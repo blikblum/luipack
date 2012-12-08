@@ -30,15 +30,15 @@
       </Item3>
       <Item4>
         <Filename Value="luirestfastcgi.pas"/>
-        <UnitName Value="luirestfastcgi"/>
+        <UnitName Value="LuiRESTFastCGI"/>
       </Item4>
       <Item5>
         <Filename Value="luirestcgi.pas"/>
-        <UnitName Value="luirestcgi"/>
+        <UnitName Value="LuiRESTCGI"/>
       </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="4">
+    <RequiredPkgs Count="3">
       <Item1>
         <PackageName Value="IDEIntf"/>
       </Item1>
@@ -46,12 +46,9 @@
         <PackageName Value="weblaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="luicomponents"/>
-      </Item3>
-      <Item4>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item4>
+      </Item3>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>
