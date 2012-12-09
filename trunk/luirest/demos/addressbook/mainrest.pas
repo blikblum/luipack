@@ -5,7 +5,7 @@ unit MainREST;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, fpjson, fphttp, HTTPDefs, LuiREST, Sqlite3DS;
+  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiRESTServer, Sqlite3DS;
 
 type
 
@@ -14,7 +14,7 @@ type
   TMainRESTModule = class(TRESTServiceModule)
     AddressBookDataset: TSqlite3Dataset;
     procedure DataModuleCreate(Sender: TObject);
-    procedure DataModuleCreateResource(Resource: TCustomRESTResource);
+    procedure DataModuleResourceLoad(Resource: TRESTResource; ResourceTag: PtrInt);
   private
     { private declarations }
   public
@@ -36,10 +36,10 @@ uses
 procedure TMainRESTModule.DataModuleCreate(Sender: TObject);
 begin
   AddressBookDataset.ExecSQL('PRAGMA foreign_keys = ON');
-  RegisterResource('contacts', TContacts);
+  Resources.Register('contacts', TContacts, 0);
 end;
 
-procedure TMainRESTModule.DataModuleCreateResource(Resource: TCustomRESTResource);
+procedure TMainRESTModule.DataModuleResourceLoad(Resource: TRESTResource; ResourceTag: PtrInt);
 begin
   SetObjectProperties(Resource, ['Dataset', AddressBookDataset]);
 end;

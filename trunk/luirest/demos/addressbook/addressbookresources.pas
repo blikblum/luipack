@@ -5,13 +5,13 @@ unit AddressBookResources;
 interface
 
 uses
-  Classes, SysUtils, LuiREST, Sqlite3DS, HTTPDefs, fphttp, sqlite3;
+  Classes, SysUtils, LuiRESTServer, Sqlite3DS, HTTPDefs, fphttp, sqlite3;
 
 type
 
   { TSqlite3DatasetResource }
 
-  TSqlite3DatasetResource = class(TCustomRESTResource)
+  TSqlite3DatasetResource = class(TRESTResource)
   private
     FDataset: TSqlite3Dataset;
   published
@@ -137,7 +137,7 @@ end;
 procedure TContactPhones.AfterConstruction;
 begin
   inherited AfterConstruction;
-  SetDefaultSubResource('phoneid', nil, TContactPhone);
+  SetDefaultSubPath('phoneid', TContactPhone, 0);
 end;
 
 procedure TContactPhones.HandleGet(ARequest: TRequest; AResponse: TResponse);
@@ -194,7 +194,7 @@ end;
 procedure TContacts.AfterConstruction;
 begin
   inherited AfterConstruction;
-  SetDefaultSubResource('contactid', nil, TContact);
+  SetDefaultSubPath('contactid', TContact, 0);
 end;
 
 procedure TContacts.HandleGet(ARequest: TRequest; AResponse: TResponse);
@@ -250,7 +250,7 @@ end;
 procedure TContact.AfterConstruction;
 begin
   inherited AfterConstruction;
-  RegisterSubPathResource('phones', nil, TContactPhones);
+  RegisterSubPath('phones', TContactPhones, 0);
 end;
 
 procedure TContact.HandleDelete(ARequest: TRequest; AResponse: TResponse);

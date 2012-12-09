@@ -3,7 +3,7 @@ program addressbookservice;
 {$mode objfpc}{$H+}
 
 uses
-  LuiRESTCGI, MainREST, HTTPDefs, fphttp, AddressBookResources;
+  LuiRESTCGI, luicomponents, MainREST, HTTPDefs, fphttp, AddressBookResources;
 
 type
 

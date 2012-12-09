@@ -5,13 +5,13 @@ unit RESTResources;
 interface
 
 uses
-  Classes, SysUtils, LuiREST, HTTPDefs, fpjson;
+  Classes, SysUtils, LuiRESTServer, HTTPDefs, fpjson;
 
 type
 
   { TPerson }
 
-  TPerson = class(TCustomRESTResource)
+  TPerson = class(TRESTResource)
   private
     class var ContentStr: String;
   public
@@ -28,7 +28,7 @@ type
 
   { TPeople }
 
-  TPeople = class(TCustomRESTResource)
+  TPeople = class(TRESTResource)
   protected
   public
     procedure AfterConstruction; override;
@@ -56,7 +56,7 @@ end;
 procedure TPerson.AfterConstruction;
 begin
   inherited AfterConstruction;
-  RegisterSubPathResource('details', nil, TPersonDetails);
+  RegisterSubPath('details', TPersonDetails, 0);
   ContentStr := PersonStr;
 end;
 
@@ -77,7 +77,7 @@ end;
 procedure TPeople.AfterConstruction;
 begin
   inherited AfterConstruction;
-  SetDefaultSubResource('id', nil, TPerson);
+  SetDefaultSubPath('id', TPerson, 0);
 end;
 
 procedure TPeople.HandleGet(ARequest: TRequest; AResponse: TResponse);
