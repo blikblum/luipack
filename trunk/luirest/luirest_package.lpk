@@ -16,8 +16,8 @@
     </CompilerOptions>
     <Files Count="5">
       <Item1>
-        <Filename Value="luirest.pas"/>
-        <UnitName Value="LuiREST"/>
+        <Filename Value="luirestserver.pas"/>
+        <UnitName Value="luirestserver"/>
       </Item1>
       <Item2>
         <Filename Value="register_luirest.pas"/>

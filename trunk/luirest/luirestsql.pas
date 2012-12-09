@@ -5,7 +5,7 @@ unit LuiRESTSQL;
 interface
 
 uses
-  Classes, SysUtils, LuiREST, HTTPDefs;
+  Classes, SysUtils, LuiRESTServer, HTTPDefs;
 
 type
 
@@ -18,7 +18,7 @@ type
 
   { TCustomSqlRESTResource }
 
-  TCustomSqlRESTResource = class(TCustomRESTResource)
+  TCustomSqlRESTResource = class(TRESTResource)
   private
     FResponseBuilder: ISQLResponseBuilder;
   published

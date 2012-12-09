@@ -7,7 +7,7 @@ unit luirest_package;
 interface
 
 uses
-  LuiREST, register_luirest, LuiRESTSQL, LuiRESTFastCGI, LuiRESTCGI, LazarusPackageIntf;
+  LuiRESTServer, register_luirest, LuiRESTSQL, LuiRESTFastCGI, LuiRESTCGI, LazarusPackageIntf;
 
 implementation
 
