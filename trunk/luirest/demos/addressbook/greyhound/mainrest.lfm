@@ -1,0 +1,10 @@
+object MainRESTModule: TMainRESTModule
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  Height = 356
+  HorizontalOffset = 618
+  VerticalOffset = 155
+  Width = 698
+end
