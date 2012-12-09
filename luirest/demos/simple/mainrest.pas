@@ -5,7 +5,7 @@ unit MainREST;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiREST;
+  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiRESTServer;
 
 type
 
@@ -31,7 +31,7 @@ uses
 
 procedure TMainRESTModule.DataModuleCreate(Sender: TObject);
 begin
-  RegisterResource('people', TPeople);
+  Resources.Register('people', TPeople, 0);
 end;
 
 {$R *.lfm}

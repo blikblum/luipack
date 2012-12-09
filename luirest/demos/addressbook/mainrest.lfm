@@ -3,9 +3,9 @@ object MainRESTModule: TMainRESTModule
   OldCreateOrder = False
   ContentType = 'application/json; charset=UTF-8'
   RootPath = '/'
-  OnCreateResource = DataModuleCreateResource
+  OnResourceLoad = DataModuleResourceLoad
   Height = 356
-  HorizontalOffset = 641
+  HorizontalOffset = 618
   VerticalOffset = 155
   Width = 698
   object AddressBookDataset: TSqlite3Dataset
