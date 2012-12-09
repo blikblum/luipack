@@ -5,7 +5,7 @@ unit register_luirest;
 interface
 
 uses
-  Classes, SysUtils, LazIDEIntf, ProjectIntf, FormEditingIntf, LuiREST;
+  Classes, SysUtils, LazIDEIntf, ProjectIntf, FormEditingIntf, LuiRESTServer;
 
 type
 
