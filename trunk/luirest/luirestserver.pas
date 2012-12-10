@@ -166,7 +166,7 @@ procedure TRESTServiceModule.HandleRequest(ARequest: TRequest;
 var
   URIPath, URIPart, NextURIPart, MethodStr: String;
   i, PartOffset: Integer;
-  ResourceDef, NextResourceDef: TRESTResourceDef;
+  ResourceDef: TRESTResourceDef;
   Resource: TRESTResource;
   URIParams: TJSONObject;
 begin
@@ -203,10 +203,10 @@ begin
       NextURIPart := GetURIPart(URIPath, PartOffset);
       while NextURIPart <> '' do
       begin
-        NextResourceDef := nil;
-        Resource.HandleSubPath(NextURIPart, NextResourceDef);
+        ResourceDef := nil;
+        Resource.HandleSubPath(NextURIPart, ResourceDef);
 
-        if NextResourceDef = nil then
+        if ResourceDef = nil then
         begin
           SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
             [NextURIPart, Resource.ClassName,
@@ -214,7 +214,6 @@ begin
           Exit;
         end;
 
-        ResourceDef := NextResourceDef;
         Resource := ResourceDef.GetResource(URIParams, OnResourceLoad);
         if Resource = nil then
         begin
