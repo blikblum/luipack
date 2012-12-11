@@ -277,8 +277,7 @@ begin
   end
   else
   begin
-    AResponse.Code := 404;
-    AResponse.Contents.Add(Format('Contact "%s" not found', [URIParams.Strings['contactid']]));
+    SetResponseStatus(AResponse, 404, 'Contact "%s" not found', [URIParams.Strings['contactid']]);
   end;
 end;
 

@@ -18,6 +18,23 @@ type
   TRESTResourceLoadEvent = procedure(Resource: TRESTResource;
     ResourceTag: PtrInt) of object;
 
+  { TRESTResponseFormatter }
+
+  TRESTResponseFormatter = class
+  public
+    class procedure SetStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const); virtual;
+  end;
+
+  TRESTResponseFormatterClass = class of TRESTResponseFormatter;
+
+  { TJSONRESTResponseFormatter }
+
+  TJSONRESTResponseFormatter = class(TRESTResponseFormatter)
+  public
+    class procedure SetStatus(AResponse: TResponse; StatusCode: Integer; const Message: String;
+      const Args: array of const); override;
+  end;
+
   { TRESTResource }
 
   TRESTResource = class(TPersistent)
@@ -25,9 +42,11 @@ type
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
     FURIParams: TJSONObject;
+    class var FResponseFormatter: TRESTResponseFormatterClass;
     procedure SubPathResourcesNeeded;
   protected
     procedure Loaded; virtual;
+    procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
   public
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
@@ -88,13 +107,16 @@ type
     FResources: TRESTResourceStore;
     FContentType: String;
     FOnResourceLoad: TRESTResourceLoadEvent;
+    FResponseFormatter: TRESTResponseFormatterClass;
     FRootPath: String;
     procedure SetRootPath(const Value: String);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure HandleRequest(ARequest: TRequest; AResponse: TResponse); override;
+    procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
     property Resources: TRESTResourceStore read FResources;
+    property ResponseFormatter: TRESTResponseFormatterClass read FResponseFormatter write FResponseFormatter;
   published
     property ContentType: String read FContentType write FContentType;
     property RootPath: String read FRootPath write SetRootPath;
@@ -102,22 +124,31 @@ type
     property OnResourceLoad: TRESTResourceLoadEvent read FOnResourceLoad write FOnResourceLoad;
   end;
 
-  procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; Args: array of const);
-
 implementation
 
 const
   SRegisterError = 'RegisterResource (%s): %s must be <> nil';
   SDefaultSubPathError = 'SetDefaultSubPath (%s): %s must be <> nil';
 
-{ TRESTServiceModule }
+{ TRESTResponseFormatter }
 
-procedure SetResponseStatus(AResponse: TResponse;
-  StatusCode: Integer; const Message: String; Args: array of const);
+class procedure TRESTResponseFormatter.SetStatus(AResponse: TResponse; StatusCode: Integer;
+  const Message: String; const Args: array of const);
 begin
   AResponse.Code := StatusCode;
-  AResponse.Contents.Text := Format(Message, Args);
+  AResponse.Contents.Add(Format(Message, Args));
 end;
+
+{ TJSONRESTResponseFormatter }
+
+class procedure TJSONRESTResponseFormatter.SetStatus(AResponse: TResponse; StatusCode: Integer;
+  const Message: String; const Args: array of const);
+begin
+  AResponse.Code := StatusCode;
+  AResponse.Contents.Add(Format('{"message":"%s"}', [StringToJSONString(Format(Message, Args))]));
+end;
+
+{ TRESTServiceModule }
 
 procedure TRESTServiceModule.SetRootPath(const Value: String);
 begin
@@ -139,6 +170,7 @@ begin
   inherited Create(AOwner);
   FResources := TRESTResourceStore.Create;
   FContentType := 'application/json; charset=UTF-8';
+  FResponseFormatter := TJSONRESTResponseFormatter;
   FRootPath := '/';
 end;
 
@@ -171,6 +203,7 @@ var
   URIParams: TJSONObject;
 begin
   AResponse.ContentType := FContentType;
+  TRESTResource.FResponseFormatter := FResponseFormatter;
   MethodStr := UpperCase(ARequest.Method);
   URIPath := ARequest.PathInfo;
   i := Pos(FRootPath, URIPath);
@@ -245,6 +278,12 @@ begin
     SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
 end;
 
+procedure TRESTServiceModule.SetResponseStatus(AResponse: TResponse; StatusCode: Integer;
+  const Message: String; const Args: array of const);
+begin
+  FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
+end;
+
 { TRESTResource }
 
 procedure TRESTResource.SubPathResourcesNeeded;
@@ -256,6 +295,13 @@ end;
 procedure TRESTResource.Loaded;
 begin
   //
+end;
+
+procedure TRESTResource.SetResponseStatus(AResponse: TResponse; StatusCode: Integer;
+  const Message: String; const Args: array of const);
+begin
+  FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
+  //AResponse.Contents.Add(FResponseFormatter.ClassName);
 end;
 
 procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;

@@ -222,8 +222,7 @@ begin
     end
     else
     begin
-      AResponse.Code := 404;
-      AResponse.Contents.Add(Format('Resource "%s" not found', [ARequest.PathInfo]));
+      SetResponseStatus(AResponse, 404, 'Resource "%s" not found', [ARequest.PathInfo]);
     end;
   end;
   Table.Close;
@@ -263,8 +262,7 @@ begin
       Table.Commit;
       if Table.HasErrors then
       begin
-        AResponse.Code := 400;
-        AResponse.Contents.Add(Format('Error posting to %s', [FTableName]));
+        SetResponseStatus(AResponse, 400, 'Error posting to %s', [FTableName]);
       end
       else
       begin
@@ -307,8 +305,7 @@ begin
       Table.Commit;
       if Table.HasErrors then
       begin
-        AResponse.Code := 500;
-        AResponse.Contents.Add(Format('Error updating %s', [ARequest.PathInfo]));
+        SetResponseStatus(AResponse, 500, 'Error updating %s', [ARequest.PathInfo]);
       end
       else
       begin
