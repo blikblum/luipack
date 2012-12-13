@@ -54,10 +54,8 @@ type
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandlePut(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef); virtual;
-    procedure RegisterSubPath(const ResourceId: ShortString; Resource: TRESTResource);
     procedure RegisterSubPath(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure RegisterSubPath(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
-    procedure SetDefaultSubPath(const ParamName: String; Resource: TRESTResource);
     procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
     property URIParams: TJSONObject read FURIParams;
@@ -73,13 +71,11 @@ type
     FResourceClass: TRESTResourceClass;
     FTag: PtrInt;
   public
-    constructor Create(AResource: TRESTResource);
     constructor Create(AResourceClass: TRESTResourceClass; ATag: PtrInt);
     constructor Create(CreateCallback: TRESTResourceCreateEvent; ATag: PtrInt);
     destructor Destroy; override;
     function GetResource(URIParams: TJSONObject; OnResourceLoad: TRESTResourceLoadEvent): TRESTResource;
     property OnResourceCreate: TRESTResourceCreateEvent read FOnResourceCreate write FOnResourceCreate;
-    property Resource: TRESTResource read FResource write FResource;
     property ResourceClass: TRESTResourceClass read FResourceClass write FResourceClass;
     property Tag: PtrInt read FTag write FTag;
   end;
@@ -96,7 +92,6 @@ type
     constructor Create;
     destructor Destroy; override;
     function Find(const ResourceId: ShortString): TRESTResourceDef;
-    procedure Register(const ResourceId: ShortString; Resource: TRESTResource);
     procedure Register(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure Register(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
   end;
@@ -302,14 +297,6 @@ procedure TRESTResource.SetResponseStatus(AResponse: TResponse; StatusCode: Inte
   const Message: String; const Args: array of const);
 begin
   FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
-  //AResponse.Contents.Add(FResponseFormatter.ClassName);
-end;
-
-procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
-  Resource: TRESTResource);
-begin
-  SubPathResourcesNeeded;
-  FSubPathResources.Register(ResourceId, Resource);
 end;
 
 procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
@@ -324,16 +311,6 @@ procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
 begin
   SubPathResourcesNeeded;
   FSubPathResources.Register(ResourceId, CreateCallback, Tag);
-end;
-
-procedure TRESTResource.SetDefaultSubPath(const ParamName: String;
-  Resource: TRESTResource);
-begin
-  if Resource = nil then
-    raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Instance']);
-  SubPathResourcesNeeded;
-  FSubPathParamName := ParamName;
-  FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(Resource);
 end;
 
 procedure TRESTResource.SetDefaultSubPath(const ParamName: String;
@@ -424,17 +401,6 @@ begin
 end;
 
 procedure TRESTResourceStore.Register(const ResourceId: ShortString;
-  Resource: TRESTResource);
-var
-  Def: TRESTResourceDef;
-begin
-  if Resource = nil then
-    raise Exception.CreateFmt(SRegisterError, [ResourceId, 'Instance']);
-  Def := TRESTResourceDef.Create(Resource);
-  FList.Add(ResourceId, Def);
-end;
-
-procedure TRESTResourceStore.Register(const ResourceId: ShortString;
   ResourceClass: TRESTResourceClass; Tag: PtrInt);
 var
   Def: TRESTResourceDef;
@@ -457,12 +423,6 @@ begin
 end;
 
 { TRESTResourceDef }
-
-constructor TRESTResourceDef.Create(AResource: TRESTResource);
-begin
-  inherited Create;
-  FResource := AResource;
-end;
 
 constructor TRESTResourceDef.Create(AResourceClass: TRESTResourceClass;
   ATag: PtrInt);
