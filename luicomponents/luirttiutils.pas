@@ -39,44 +39,12 @@ interface
 uses
   Classes, SysUtils;
 
-procedure SetObjectProperties(Instance: TObject; Properties: array of const);
+procedure SetObjectProperties(Instance: TObject; const Properties: array of const);
 
 implementation
 
 uses
   typinfo;
-
-//local fix to bug 17003
-procedure SetInterfacePropFixed(Instance: TObject; PropInfo: PPropInfo; const Value: Pointer);
-type
-  TSetIntfStrProcIndex=procedure(index:longint;const i:Pointer) of object;
-  TSetIntfStrProc=procedure(i:Pointer) of object;
-var
-  AMethod : TMethod;
-begin
-  case Propinfo^.PropType^.Kind of
-    tkInterface, tkInterfaceRaw:
-      begin
-        case (PropInfo^.PropProcs shr 2) and 3 of
-          ptField:
-            PPointer(Pointer(Instance)+PtrUInt(PropInfo^.SetProc))^:=Value;
-          ptstatic,
-          ptvirtual :
-            begin
-              if ((PropInfo^.PropProcs shr 2) and 3)=ptStatic then
-                AMethod.Code:=PropInfo^.SetProc
-              else
-                AMethod.Code:=PPointer(Pointer(Instance.ClassType)+PtrUInt(PropInfo^.SetProc))^;
-              AMethod.Data:=Instance;
-              if ((PropInfo^.PropProcs shr 6) and 1)<>0 then
-                TSetIntfStrProcIndex(AMethod)(PropInfo^.Index,Value)
-              else
-                TSetIntfStrProc(AMethod)(Value);
-            end;
-        end;
-      end;
-  end;
-end;
 
 function VarRecToString(const VarRec: TVarRec): String;
 begin
@@ -147,7 +115,7 @@ begin
   end;
 end;
 
-procedure SetObjectProperties(Instance: TObject; Properties: array of const);
+procedure SetObjectProperties(Instance: TObject; const Properties: array of const);
 var
   i, PropCount: Integer;
   PropInfo: PPropInfo;
@@ -184,8 +152,10 @@ begin
           SetFloatProp(Instance, PropInfo, VarRecToFloat(PropertyValue));
         tkClass:
           SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
-        tkInterface, tkInterfaceRaw:
-          SetInterfacePropFixed(Instance, PropInfo, VarRecToInterface(PropertyValue));
+        tkInterface:
+          SetInterfaceProp(Instance, PropInfo, IInterface(VarRecToInterface(PropertyValue)));
+        tkInterfaceRaw:
+          SetRawInterfaceProp(Instance, PropInfo, VarRecToInterface(PropertyValue));
         tkBool:
           SetOrdProp(Instance, PropInfo, VarRecToBoolean(PropertyValue));
       else
