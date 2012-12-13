@@ -36,8 +36,8 @@ type
   end;
 
   { TRESTResource }
-
-  TRESTResource = class(TPersistent)
+  {$M+}
+  TRESTResource = class
   private
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
@@ -62,6 +62,7 @@ type
     procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
     property URIParams: TJSONObject read FURIParams;
   end;
+  {$M-}
 
   { TRESTResourceDef }
 
