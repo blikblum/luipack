@@ -9,7 +9,6 @@
       <Title Value="AddressBookLCLClient"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -41,7 +40,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="AddressBookLCLClient.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -66,9 +65,15 @@
         <Filename Value="phoneview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="PhoneViewForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="PhoneView"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="addressbookclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AddressBookClient"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

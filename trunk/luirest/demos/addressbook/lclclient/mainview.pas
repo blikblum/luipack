@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, Grids, fpjson, httpsend;
+  StdCtrls, Grids, fpjson, AddressBookClient;
 
 type
 
@@ -37,10 +37,8 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
   private
-    function DeleteData(const ResourcePath: String): Boolean;
-    function GetData(var Data: TJSONArray; const ResourcePath: String): Boolean;
-    function SaveData(Data: TJSONObject; const Method, ResourcePath: String): Boolean;
-    function GetBaseURL: String;
+    procedure ResponseSuccess(ResourceId: Integer; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
+    procedure ResponseError(ResourceId: Integer; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
     function GetSelectedContact: TJSONObject;
     function GetSelectedPhone: TJSONObject;
     procedure UpdateContactsView;
@@ -50,8 +48,7 @@ type
     { private declarations }
     FContacts: TJSONArray;
     FContactPhones: TJSONArray;
-    FHttpClient: THTTPSend;
-    property BaseURL: String read GetBaseURL;
+    FRESTClient: TAddressBookRESTClient;
     property SelectedContact: TJSONObject read GetSelectedContact;
     property SelectedPhone: TJSONObject read GetSelectedPhone;
   public
@@ -72,14 +69,15 @@ uses
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  FHttpClient.Destroy;
   FContactPhones.Free;
   FContacts.Free;
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  FHttpClient := THTTPSend.Create;
+  FRESTClient := TAddressBookRESTClient.Create(Self);
+  FRESTClient.OnSuccess := @ResponseSuccess;
+  FRESTClient.OnError := @ResponseError;
 end;
 
 procedure TMainForm.ContactsGridSelectCell(Sender: TObject; aCol, aRow: Integer;
@@ -101,8 +99,9 @@ begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
-  if DeleteData(Format('contacts/%d', [ContactData.Integers['id']])) then
+  if FRESTClient.Delete(RES_CONTACT, [ContactData.Strings['id']]) then
   begin
+    //todo: properly delete (in callback)
     FContacts.Remove(ContactData);
     UpdateContactsView;
   end;
@@ -116,9 +115,9 @@ begin
   PhoneData := SelectedPhone;
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
-  if DeleteData(Format('contacts/%d/phones/%d',
-    [ContactData.Integers['id'], PhoneData.Integers['id']])) then
+  if FRESTClient.Delete(RES_CONTACTPHONE, [ContactData.Strings['id'], PhoneData.Strings['id']]) then
   begin
+    //todo: properly delete (in callback)
     FContactPhones.Remove(PhoneData);
     UpdatePhonesView;
   end;
@@ -132,14 +131,7 @@ begin
   if ContactData = nil then
     Exit;
   if TContactViewForm.EditData(Self, ContactData) then
-  begin
-    if SaveData(ContactData, 'PUT', Format('contacts/%d',
-      [ContactData.Integers['id']])) then
-    begin
-      PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
-      UpdateContactsView;
-    end;
-  end;
+    FRESTClient.Put(RES_CONTACT, [ContactData.Strings['id']], ContactData.AsJSON);
 end;
 
 procedure TMainForm.EditPhoneButtonClick(Sender: TObject);
@@ -151,125 +143,113 @@ begin
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
   if TPhoneViewForm.EditData(Self, PhoneData) then
-  begin
-    if SaveData(PhoneData, 'PUT', Format('contacts/%d/phones/%d',
-      [ContactData.Integers['id'], PhoneData.Integers['id']])) then
-    begin
-      UpdatePhonesView;
-    end;
-  end;
+    FRESTClient.Put(RES_CONTACTPHONE,
+      [ContactData.Strings['id'], PhoneData.Strings['id']], PhoneData.AsJSON);
 end;
 
 procedure TMainForm.AddContactButtonClick(Sender: TObject);
 var
   ContactData: TJSONObject;
-  OwnsData: Boolean;
 begin
   ContactData := TJSONObject.Create(['name', 'New Contact']);
-  OwnsData := True;
   if TContactViewForm.EditData(Self, ContactData) then
-  begin
-    if SaveData(ContactData, 'POST', 'contacts') then
-    begin
-      OwnsData := False;
-      FContacts.Add(ContactData);
-      UpdateContactsView;
-    end;
-  end;
-  if OwnsData then
-    ContactData.Destroy;
+    FRESTClient.Post(RES_CONTACTS, [], ContactData.AsJSON);
+  ContactData.Destroy;
 end;
 
 procedure TMainForm.AddPhoneButtonClick(Sender: TObject);
 var
   PhoneData, ContactData: TJSONObject;
-  OwnsData: Boolean;
 begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
   PhoneData := TJSONObject.Create(['number', 'New Number']);
-  OwnsData := True;
   if TPhoneViewForm.EditData(Self, PhoneData) then
-  begin
-    if SaveData(PhoneData, 'POST', Format('contacts/%d/phones', [ContactData.Integers['id']])) then
-    begin
-      OwnsData := False;
-      FContactPhones.Add(PhoneData);
-      UpdatePhonesView;
-    end;
-  end;
-  if OwnsData then
-    PhoneData.Destroy;
+    FRESTClient.Post(RES_CONTACTPHONES, [ContactData.Strings['id']], PhoneData.AsJSON);
+  PhoneData.Destroy;
 end;
 
 procedure TMainForm.LoadDataButtonClick(Sender: TObject);
 begin
-  if GetData(FContacts, 'contacts') then
-  begin
-    UpdateContactsView;
-    BaseURLEdit.Enabled := False;
-    LoadDataButton.Enabled := False;
-  end;
+  FRESTClient.BaseURL := BaseURLEdit.Text;
+  FRESTClient.Get(RES_CONTACTS, []);
 end;
 
-function TMainForm.DeleteData(const ResourcePath: String): Boolean;
-begin
-  Result := False;
-  FHttpClient.Clear;
-  if FHttpClient.HTTPMethod('DELETE', BaseURL + ResourcePath) then
-  begin
-    Result := FHttpClient.ResultCode < 300;
-  end;
-  if not Result then
-    ShowMessageFmt('Error deleting %s', [ResourcePath]);
-end;
-
-function TMainForm.GetData(var Data: TJSONArray; const ResourcePath: String): Boolean;
-begin
-  Result := False;
-  FHttpClient.Clear;
-  if FHttpClient.HTTPMethod('GET', BaseURL + ResourcePath) then
-  begin
-    FreeAndNil(Data);
-    Data := StreamToJSONData(FHttpClient.Document) as TJSONArray;
-    Result := True;
-  end
-  else
-    ShowMessageFmt('Error loading %s', [ResourcePath ]);
-end;
-
-function TMainForm.SaveData(Data: TJSONObject; const Method, ResourcePath: String): Boolean;
+procedure TMainForm.ResponseSuccess(ResourceId: Integer; Method: THTTPMethodType;
+  ResponseCode: Integer; ResponseStream: TStream);
 var
-  JSONStr: String;
-  TempData: TJSONData;
+  ResponseData: TJSONData;
 begin
-  Result := False;
-  JSONStr := Data.AsJSON;
-  FHttpClient.Clear;
-  FHttpClient.Document.Write(JSONStr[1], Length(JSONStr));
-  if FHttpClient.HTTPMethod(Method, BaseURL + ResourcePath) then
-  begin
-    if FHttpClient.ResultCode < 300 then
-    begin
-      TempData := StreamToJSONData(FHttpClient.Document);
-      Data.Clear;
-      CopyJSONObject(TempData as TJSONObject, Data);
-      TempData.Destroy;
-      Result := True;
-    end
-    else
-      ShowMessageFmt('Error saving (%s) resource %s: %s', [Method, ResourcePath, FHttpClient.ResultString]);
-  end
-  else
-    ShowMessageFmt('Error saving (%s) to %s', [Method, ResourcePath]);
+  ResponseData := StreamToJSONData(ResponseStream);
+  case ResourceId of
+    RES_CONTACTS:
+      begin
+        case Method of
+          hmtGet:
+          begin
+            if (ResponseData <> nil) and (ResponseData.JSONType = jtArray) then
+            begin
+              FContacts.Free;
+              FContacts := TJSONArray(ResponseData);
+              UpdateContactsView;
+            end;
+          end;
+          hmtPost:
+          begin
+            FContacts.Add(ResponseData);
+            UpdateContactsView;
+          end;
+        end;
+      end;
+    RES_CONTACT:
+      begin
+        case Method of
+          hmtPut:
+          begin
+            if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
+            begin
+              PhonesLabel.Caption := TJSONObject(ResponseData).Strings['name'] + ' Phones';
+              UpdateContactsView;
+            end;
+          end;
+        end;
+      end;
+    RES_CONTACTPHONES:
+      begin
+        case Method of
+          hmtGet:
+          begin
+            if (ResponseData <> nil) and (ResponseData.JSONType = jtArray) then
+            begin
+              FContactPhones.Free;
+              FContactPhones := TJSONArray(ResponseData);
+              UpdatePhonesView;
+            end;
+          end;
+          hmtPost:
+          begin
+            FContactPhones.Add(ResponseData);
+            UpdatePhonesView;
+          end;
+        end;
+      end;
+    RES_CONTACTPHONE:
+      begin
+        case Method of
+          hmtPut:
+          begin
+            UpdatePhonesView;
+          end;
+        end;
+      end;
+  end;
 end;
 
-function TMainForm.GetBaseURL: String;
+procedure TMainForm.ResponseError(ResourceId: Integer; Method: THTTPMethodType;
+  ResponseCode: Integer; ResponseStream: TStream);
 begin
-  Result := BaseURLEdit.Text;
-  if Result[Length(Result)] <> '/' then
-    Result := Result + '/';
+  //
 end;
 
 function TMainForm.GetSelectedContact: TJSONObject;
@@ -307,8 +287,7 @@ begin
   if ContactData = nil then
     Exit;
   PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
-  if GetData(FContactPhones, Format('contacts/%d/phones', [ContactData.Integers['id']])) then
-    UpdatePhonesView;
+  FRESTClient.Get(RES_CONTACTPHONES, [ContactData.Strings['id']]);
 end;
 
 procedure TMainForm.UpdatePhonesView;
