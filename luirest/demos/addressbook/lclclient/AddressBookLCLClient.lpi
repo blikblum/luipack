@@ -58,6 +58,7 @@
         <Filename Value="contactview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ContactViewForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ContactView"/>
       </Unit2>
