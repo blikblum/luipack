@@ -17,6 +17,8 @@ type
     ResourceTag: PtrInt) of object;
   TRESTResourceLoadEvent = procedure(Resource: TRESTResource;
     ResourceTag: PtrInt) of object;
+  TRESTRequestEvent = procedure(Sender: TObject; ARequest: TRequest;
+    AResponse: TResponse) of object;
 
   { TRESTResponseFormatter }
 
@@ -100,11 +102,13 @@ type
 
   TRESTServiceModule = class(TCustomHTTPModule)
   private
+    FOnRequest: TRESTRequestEvent;
     FResources: TRESTResourceStore;
     FContentType: String;
     FOnResourceLoad: TRESTResourceLoadEvent;
     FResponseFormatter: TRESTResponseFormatterClass;
     FRootPath: String;
+    procedure DoRequest(ARequest: TRequest; AResponse: TResponse);
     procedure SetRootPath(const Value: String);
   public
     constructor Create(AOwner: TComponent); override;
@@ -117,6 +121,7 @@ type
     property ContentType: String read FContentType write FContentType;
     property RootPath: String read FRootPath write SetRootPath;
     //events
+    property OnRequest: TRESTRequestEvent read FOnRequest write FOnRequest;
     property OnResourceLoad: TRESTResourceLoadEvent read FOnResourceLoad write FOnResourceLoad;
   end;
 
@@ -145,6 +150,12 @@ begin
 end;
 
 { TRESTServiceModule }
+
+procedure TRESTServiceModule.DoRequest(ARequest: TRequest; AResponse: TResponse);
+begin
+  if Assigned(FOnRequest) then
+    FOnRequest(Self, ARequest, AResponse);
+end;
 
 procedure TRESTServiceModule.SetRootPath(const Value: String);
 begin
@@ -198,6 +209,7 @@ var
   Resource: TRESTResource;
   URIParams: TJSONObject;
 begin
+  DoRequest(ARequest, AResponse);
   AResponse.ContentType := FContentType;
   TRESTResource.FResponseFormatter := FResponseFormatter;
   MethodStr := UpperCase(ARequest.Method);
