@@ -5,15 +5,48 @@ unit AddressBookResources;
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, Sqlite3DS, HTTPDefs, fphttp, sqlite3;
+  Classes, SysUtils, LuiRESTServer, Sqlite3DS, HTTPDefs, fphttp, sqlite3, db;
 
 type
+
+  { TXMLRESTResponseFormatter }
+
+  TXMLRESTResponseFormatter = class(TRESTResponseFormatter)
+  public
+    class procedure SetStatus(AResponse: TResponse; StatusCode: Integer; const Message: String;
+      const Args: array of const); override;
+  end;
+
+  { TDatasetResourceFormatter }
+
+  TDatasetResourceFormatter = class
+  public
+    class procedure SetContent(AResponse: TResponse; Dataset: TDataset; IsCollection: Boolean); virtual;
+  end;
+
+  TDatasetResourceFormatterClass = class of TDatasetResourceFormatter;
+
+  { TJSONDatasetResourceFormatter }
+
+  TJSONDatasetResourceFormatter = class(TDatasetResourceFormatter)
+  public
+    class procedure SetContent(AResponse: TResponse; Dataset: TDataset; IsCollection: Boolean); override;
+  end;
+
+  { TXMLDatasetResourceFormatter }
+
+  TXMLDatasetResourceFormatter = class(TDatasetResourceFormatter)
+  public
+    class procedure SetContent(AResponse: TResponse; Dataset: TDataset; IsCollection: Boolean); override;
+  end;
 
   { TSqlite3DatasetResource }
 
   TSqlite3DatasetResource = class(TRESTResource)
   private
     FDataset: TSqlite3Dataset;
+  public
+    class var DatasetFormatter: TDatasetResourceFormatterClass;
   published
     property Dataset: TSqlite3Dataset read FDataset write FDataset;
   end;
@@ -59,7 +92,92 @@ type
 implementation
 
 uses
-  LuiJSONUtils, fpjson;
+  LuiJSONUtils, fpjson, XMLWrite, DOM;
+
+{ TXMLDatasetResourceFormatter }
+
+class procedure TXMLDatasetResourceFormatter.SetContent(AResponse: TResponse;
+  Dataset: TDataset; IsCollection: Boolean);
+var
+  XMLDoc: TXMLDocument;
+  RootNode, RecordNode, FieldNode: TDOMNode;
+  i: Integer;
+  Field: TField;
+  Stream: TMemoryStream;
+begin
+  XMLDoc := TXMLDocument.Create;
+  RootNode := XMLDoc.CreateElement('response');
+  Dataset.First;
+  while not Dataset.EOF do
+  begin
+    RecordNode := XMLDoc.CreateElement('record');
+    for i := 0 to Dataset.Fields.Count -1 do
+    begin
+      Field := Dataset.Fields[i];
+      FieldNode := XMLDoc.CreateElement(Field.FieldName);
+      FieldNode.AppendChild(XMLDoc.CreateTextNode(Field.AsString));
+      RecordNode.AppendChild(FieldNode);
+    end;
+    RootNode.AppendChild(RecordNode);
+    Dataset.Next;
+  end;
+  XMLDoc.AppendChild(RootNode);
+  Stream := TMemoryStream.Create;
+  WriteXMLFile(XMLDoc, Stream);
+  //todo: fix the leak of stream
+  AResponse.ContentStream := Stream;
+  XMLDoc.Destroy;
+end;
+{ TJSONDatasetResourceFormatter }
+
+class procedure TJSONDatasetResourceFormatter.SetContent(AResponse: TResponse;
+  Dataset: TDataset; IsCollection: Boolean);
+var
+  ResponseData: TJSONData;
+  Options: TDatasetToJSONOptions;
+begin
+  if IsCollection then
+    Options := [djoSetNull]
+  else
+    Options := [djoCurrentRecord, djoSetNull];
+  ResponseData := DatasetToJSONData(Dataset, Options, '');
+  try
+    AResponse.Contents.Add(ResponseData.AsJSON);
+  finally
+    ResponseData.Free;
+  end;
+end;
+
+{ TDatasetResourceFormatter }
+
+class procedure TDatasetResourceFormatter.SetContent(AResponse: TResponse;
+  Dataset: TDataset; IsCollection: Boolean);
+begin
+  //
+end;
+
+{ TXMLRESTResponseFormatter }
+
+class procedure TXMLRESTResponseFormatter.SetStatus(AResponse: TResponse;
+  StatusCode: Integer; const Message: String; const Args: array of const);
+var
+  XMLDoc: TXMLDocument;
+  RootNode, MessageNode: TDOMNode;
+  Stream: TMemoryStream;
+begin
+  AResponse.Code := StatusCode;
+  XMLDoc := TXMLDocument.Create;
+  RootNode := XMLDoc.CreateElement('response');
+  MessageNode := XMLDoc.CreateElement('message');
+  MessageNode.AppendChild(XMLDoc.CreateTextNode(Format(Message, Args)));
+  RootNode.AppendChild(MessageNode);
+  XMLDoc.AppendChild(RootNode);
+  //todo fix leak of stream
+  Stream := TMemoryStream.Create;
+  WriteXMLFile(XMLDoc, Stream);
+  AResponse.ContentStream := Stream;
+  XMLDoc.Destroy;
+end;
 
 { TContactPhone }
 
@@ -69,8 +187,6 @@ begin
 end;
 
 procedure TContactPhone.HandleGet(ARequest: TRequest; AResponse: TResponse);
-var
-  ResponseData: TJSONData;
 begin
   Dataset.SQL := Format('Select Id, Number From Phones Where Id = %s',
     [URIParams.Strings['phoneid']]);
@@ -78,12 +194,7 @@ begin
   Dataset.Open;
   if Dataset.RecordCount > 0 then
   begin
-    ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord, djoSetNull], '');
-    try
-      AResponse.Contents.Add(ResponseData.AsJSON);
-    finally
-      ResponseData.Free;
-    end;
+    DatasetFormatter.SetContent(AResponse, Dataset, False);
   end
   else
   begin
@@ -97,7 +208,6 @@ const
   UpdateSQL = 'Update Phones Set Number = ''%s'' where Id = %s';
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONData;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
@@ -111,12 +221,7 @@ begin
         Dataset.SQL := Format('Select Id, Number From Phones where Id = %s',
           [URIParams.Strings['phoneid']]);
         Dataset.Open;
-        ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord], '');
-        try
-          AResponse.Contents.Add(ResponseData.AsJSON);
-        finally
-          ResponseData.Destroy;
-        end;
+        DatasetFormatter.SetContent(AResponse, Dataset, False);
       end
       else
       begin
@@ -141,18 +246,11 @@ begin
 end;
 
 procedure TContactPhones.HandleGet(ARequest: TRequest; AResponse: TResponse);
-var
-  ResponseData: TJSONData;
 begin
   Dataset.SQL := Format('Select Id, Number From Phones where ContactId = %s', [URIParams.Strings['contactid']]);
   Dataset.Close;
   Dataset.Open;
-  ResponseData := DatasetToJSONData(Dataset, [djoSetNull], '');
-  try
-    AResponse.Contents.Add(ResponseData.AsJSON);
-  finally
-    ResponseData.Free;
-  end;
+  DatasetFormatter.SetContent(AResponse, Dataset, True);
 end;
 
 procedure TContactPhones.HandlePost(ARequest: TRequest; AResponse: TResponse);
@@ -160,7 +258,6 @@ const
   InsertSQL = 'Insert Into Phones (ContactId, Number) Values (%s, ''%s'')';
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONData;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
@@ -172,12 +269,7 @@ begin
       Dataset.SQL := Format('Select Id, Number From Phones where Id = %d',
         [Dataset.LastInsertRowId]);
       Dataset.Open;
-      ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord], '');
-      try
-        AResponse.Contents.Add(ResponseData.AsJSON);
-      finally
-        ResponseData.Destroy;
-      end;
+      DatasetFormatter.SetContent(AResponse, Dataset, True);
     end
     else
     begin
@@ -198,18 +290,11 @@ begin
 end;
 
 procedure TContacts.HandleGet(ARequest: TRequest; AResponse: TResponse);
-var
-  ResponseData: TJSONData;
 begin
   Dataset.SQL := 'Select Id, Name From Contacts';
   Dataset.Close;
   Dataset.Open;
-  ResponseData := DatasetToJSONData(Dataset, [djoSetNull], '');
-  try
-    AResponse.Contents.Add(ResponseData.AsJSON);
-  finally
-    ResponseData.Free;
-  end;
+  DatasetFormatter.SetContent(AResponse, Dataset, True);
 end;
 
 procedure TContacts.HandlePost(ARequest: TRequest; AResponse: TResponse);
@@ -217,7 +302,6 @@ const
   InsertSQL = 'Insert Into Contacts (Name) Values (''%s'')';
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONData;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
@@ -228,12 +312,7 @@ begin
       Dataset.SQL := Format('Select Id, Name From Contacts where Id = %d',
         [Dataset.LastInsertRowId]);
       Dataset.Open;
-      ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord], '');
-      try
-        AResponse.Contents.Add(ResponseData.AsJSON);
-      finally
-        ResponseData.Destroy;
-      end;
+      DatasetFormatter.SetContent(AResponse, Dataset, False);
     end
     else
     begin
@@ -259,8 +338,6 @@ begin
 end;
 
 procedure TContact.HandleGet(ARequest: TRequest; AResponse: TResponse);
-var
-  ResponseData: TJSONData;
 begin
   Dataset.SQL := Format('Select Id, Name From Contacts where Id = %s',
     [URIParams.Strings['contactid']]);
@@ -268,12 +345,7 @@ begin
   Dataset.Open;
   if Dataset.RecordCount > 0 then
   begin
-    ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord, djoSetNull], '');
-    try
-      AResponse.Contents.Add(ResponseData.AsJSON);
-    finally
-      ResponseData.Free;
-    end;
+    DatasetFormatter.SetContent(AResponse, Dataset, False);
   end
   else
   begin
@@ -286,7 +358,6 @@ const
   UpdateSQL = 'Update Contacts Set Name = ''%s'' where Id = %s';
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONData;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
@@ -300,12 +371,7 @@ begin
         Dataset.SQL := Format('Select Id, Name From Contacts where Id = %s',
           [URIParams.Strings['contactid']]);
         Dataset.Open;
-        ResponseData := DatasetToJSONData(Dataset, [djoCurrentRecord], '');
-        try
-          AResponse.Contents.Add(ResponseData.AsJSON);
-        finally
-          ResponseData.Destroy;
-        end;
+        DatasetFormatter.SetContent(AResponse, Dataset, False);
       end
       else
       begin

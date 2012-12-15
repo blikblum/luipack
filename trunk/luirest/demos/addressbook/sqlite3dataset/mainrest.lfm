@@ -3,6 +3,7 @@ object MainRESTModule: TMainRESTModule
   OldCreateOrder = False
   ContentType = 'application/json; charset=UTF-8'
   RootPath = '/'
+  OnRequest = DataModuleRequest
   OnResourceLoad = DataModuleResourceLoad
   Height = 356
   HorizontalOffset = 618
