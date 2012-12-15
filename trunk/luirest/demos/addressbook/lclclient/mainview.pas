@@ -37,10 +37,11 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
   private
-    procedure ResponseSuccess(ResourceId: Integer; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
-    procedure ResponseError(ResourceId: Integer; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
     function GetSelectedContact: TJSONObject;
     function GetSelectedPhone: TJSONObject;
+    procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
+    procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
+    procedure SocketError(Sender: TObject; ErrorCode: Integer; const ErrorDescription: String);
     procedure UpdateContactsView;
     procedure UpdateContactPhones(ContactData: TJSONObject);
     procedure UpdatePhonesView;
@@ -76,8 +77,9 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   FRESTClient := TAddressBookRESTClient.Create(Self);
-  FRESTClient.OnSuccess := @ResponseSuccess;
-  FRESTClient.OnError := @ResponseError;
+  FRESTClient.OnResponseSuccess := @ResponseSuccess;
+  FRESTClient.OnResponseError := @ResponseError;
+  FRESTClient.OnSocketError := @SocketError;
 end;
 
 procedure TMainForm.ContactsGridSelectCell(Sender: TObject; aCol, aRow: Integer;
@@ -95,13 +97,14 @@ end;
 procedure TMainForm.DeleteContactButtonClick(Sender: TObject);
 var
   ContactData: TJSONObject;
+  ResourcePath: String;
 begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
-  if FRESTClient.Delete(RES_CONTACT, [ContactData.Strings['id']]) then
+  ResourcePath := Format('contacts/%d', [ContactData.Integers['id']]);
+  if FRESTClient.Delete(ResourcePath, RES_CONTACT) then
   begin
-    //todo: properly delete (in callback)
     FContacts.Remove(ContactData);
     UpdateContactsView;
   end;
@@ -110,14 +113,15 @@ end;
 procedure TMainForm.DeletePhoneButtonClick(Sender: TObject);
 var
   PhoneData, ContactData: TJSONObject;
+  ResourcePath: String;
 begin
   ContactData := SelectedContact;
   PhoneData := SelectedPhone;
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
-  if FRESTClient.Delete(RES_CONTACTPHONE, [ContactData.Strings['id'], PhoneData.Strings['id']]) then
+  ResourcePath := Format('contacts/%d/phones/%d', [ContactData.Integers['id'], PhoneData.Integers['id']]);
+  if FRESTClient.Delete(ResourcePath, RES_CONTACTPHONE) then
   begin
-    //todo: properly delete (in callback)
     FContactPhones.Remove(PhoneData);
     UpdatePhonesView;
   end;
@@ -126,25 +130,32 @@ end;
 procedure TMainForm.EditContactButtonClick(Sender: TObject);
 var
   ContactData: TJSONObject;
+  ResourcePath: String;
 begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
   if TContactViewForm.EditData(Self, ContactData) then
-    FRESTClient.Put(RES_CONTACT, [ContactData.Strings['id']], ContactData.AsJSON);
+  begin
+    ResourcePath := Format('contacts/%d', [ContactData.Integers['id']]);
+    FRESTClient.Put(ResourcePath, RES_CONTACT, ContactData.AsJSON);
+  end;
 end;
 
 procedure TMainForm.EditPhoneButtonClick(Sender: TObject);
 var
   PhoneData, ContactData: TJSONObject;
+  ResourcePath: String;
 begin
   ContactData := SelectedContact;
   PhoneData := SelectedPhone;
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
   if TPhoneViewForm.EditData(Self, PhoneData) then
-    FRESTClient.Put(RES_CONTACTPHONE,
-      [ContactData.Strings['id'], PhoneData.Strings['id']], PhoneData.AsJSON);
+  begin
+    ResourcePath := Format('contacts/%d/phones/%d', [ContactData.Integers['id'], PhoneData.Integers['id']]);
+    FRESTClient.Put(ResourcePath, RES_CONTACTPHONE, PhoneData.AsJSON);
+  end;
 end;
 
 procedure TMainForm.AddContactButtonClick(Sender: TObject);
@@ -153,36 +164,40 @@ var
 begin
   ContactData := TJSONObject.Create(['name', 'New Contact']);
   if TContactViewForm.EditData(Self, ContactData) then
-    FRESTClient.Post(RES_CONTACTS, [], ContactData.AsJSON);
+    FRESTClient.Post('contacts', RES_CONTACTS, ContactData.AsJSON);
   ContactData.Destroy;
 end;
 
 procedure TMainForm.AddPhoneButtonClick(Sender: TObject);
 var
   PhoneData, ContactData: TJSONObject;
+  ResourcePath: String;
 begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
   PhoneData := TJSONObject.Create(['number', 'New Number']);
   if TPhoneViewForm.EditData(Self, PhoneData) then
-    FRESTClient.Post(RES_CONTACTPHONES, [ContactData.Strings['id']], PhoneData.AsJSON);
+  begin
+    ResourcePath := Format('contacts/%d/phones', [ContactData.Integers['id']]);
+    FRESTClient.Post(ResourcePath, RES_CONTACTPHONES, PhoneData.AsJSON);
+  end;
   PhoneData.Destroy;
 end;
 
 procedure TMainForm.LoadDataButtonClick(Sender: TObject);
 begin
   FRESTClient.BaseURL := BaseURLEdit.Text;
-  FRESTClient.Get(RES_CONTACTS, []);
+  FRESTClient.Get('contacts', RES_CONTACTS);
 end;
 
-procedure TMainForm.ResponseSuccess(ResourceId: Integer; Method: THTTPMethodType;
+procedure TMainForm.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
   ResponseCode: Integer; ResponseStream: TStream);
 var
   ResponseData: TJSONData;
 begin
   ResponseData := StreamToJSONData(ResponseStream);
-  case ResourceId of
+  case ResourceTag of
     RES_CONTACTS:
       begin
         case Method of
@@ -246,10 +261,27 @@ begin
   end;
 end;
 
-procedure TMainForm.ResponseError(ResourceId: Integer; Method: THTTPMethodType;
+procedure TMainForm.ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
   ResponseCode: Integer; ResponseStream: TStream);
+var
+  ResponseData: TJSONData;
+  Message: String;
 begin
-  //
+  Message := '';
+  ResponseData := StreamToJSONData(ResponseStream);
+  if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
+  begin
+    Message := GetJSONProp(TJSONObject(ResponseData), 'message', '');
+    if Message <> '' then
+      Message := LineEnding + Message;
+  end;
+  ShowMessageFmt('Server response error%s', [Message]);
+end;
+
+procedure TMainForm.SocketError(Sender: TObject; ErrorCode: Integer;
+  const ErrorDescription: String);
+begin
+  ShowMessageFmt('Socket Error: "%s"', [ErrorDescription]);
 end;
 
 function TMainForm.GetSelectedContact: TJSONObject;
@@ -283,11 +315,14 @@ begin
 end;
 
 procedure TMainForm.UpdateContactPhones(ContactData: TJSONObject);
+var
+  ResourcePath: String;
 begin
   if ContactData = nil then
     Exit;
   PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
-  FRESTClient.Get(RES_CONTACTPHONES, [ContactData.Strings['id']]);
+  ResourcePath := Format('contacts/%d/phones', [ContactData.Integers['id']]);
+  FRESTClient.Get(ResourcePath, RES_CONTACTPHONES);
 end;
 
 procedure TMainForm.UpdatePhonesView;
