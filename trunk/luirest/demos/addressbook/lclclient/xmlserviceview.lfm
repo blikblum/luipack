@@ -1,0 +1,157 @@
+object XMLServiceViewFrame: TXMLServiceViewFrame
+  Left = 0
+  Height = 437
+  Top = 0
+  Width = 615
+  ClientHeight = 437
+  ClientWidth = 615
+  TabOrder = 0
+  DesignLeft = 410
+  DesignTop = 146
+  object BaseURLEdit: TLabeledEdit
+    Left = 8
+    Height = 23
+    Top = 24
+    Width = 464
+    EditLabel.AnchorSideLeft.Control = BaseURLEdit
+    EditLabel.AnchorSideRight.Control = BaseURLEdit
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = BaseURLEdit
+    EditLabel.Left = 8
+    EditLabel.Height = 15
+    EditLabel.Top = 6
+    EditLabel.Width = 464
+    EditLabel.Caption = 'BaseURL'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+    Text = 'http://localhost/luirest/addressbook.exe/'
+  end
+  object LoadDataButton: TButton
+    Left = 482
+    Height = 25
+    Top = 23
+    Width = 75
+    Caption = 'Load Data'
+    OnClick = LoadDataButtonClick
+    TabOrder = 1
+  end
+  object ContactsGrid: TStringGrid
+    Left = 8
+    Height = 313
+    Top = 80
+    Width = 344
+    ColCount = 2
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
+    RowCount = 1
+    TabOrder = 2
+    OnSelectCell = ContactsGridSelectCell
+    ColWidths = (
+      64
+      252
+    )
+    Cells = (
+      2
+      0
+      0
+      'Id'
+      1
+      0
+      'Name'
+    )
+  end
+  object PhonesGrid: TStringGrid
+    Left = 360
+    Height = 100
+    Top = 80
+    Width = 243
+    ColCount = 2
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
+    RowCount = 1
+    TabOrder = 3
+    ColWidths = (
+      51
+      150
+    )
+    Cells = (
+      2
+      0
+      0
+      'Id'
+      1
+      0
+      'Number'
+    )
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 63
+    Width = 47
+    Caption = 'Contacts'
+    ParentColor = False
+  end
+  object PhonesLabel: TLabel
+    Left = 360
+    Height = 15
+    Top = 63
+    Width = 84
+    Caption = 'Contact Phones'
+    ParentColor = False
+  end
+  object AddContactButton: TButton
+    Left = 8
+    Height = 25
+    Top = 398
+    Width = 75
+    Caption = 'Add'
+    OnClick = AddContactButtonClick
+    TabOrder = 4
+  end
+  object EditContactButton: TButton
+    Left = 96
+    Height = 25
+    Top = 398
+    Width = 75
+    Caption = 'Edit'
+    OnClick = EditContactButtonClick
+    TabOrder = 5
+  end
+  object DeleteContactButton: TButton
+    Left = 184
+    Height = 25
+    Top = 398
+    Width = 75
+    Caption = 'Delete'
+    OnClick = DeleteContactButtonClick
+    TabOrder = 6
+  end
+  object AddPhoneButton: TButton
+    Left = 360
+    Height = 25
+    Top = 187
+    Width = 75
+    Caption = 'Add'
+    OnClick = AddPhoneButtonClick
+    TabOrder = 7
+  end
+  object EditPhoneButton: TButton
+    Left = 444
+    Height = 25
+    Top = 187
+    Width = 75
+    Caption = 'Edit'
+    OnClick = EditPhoneButtonClick
+    TabOrder = 8
+  end
+  object DeletePhoneButton: TButton
+    Left = 528
+    Height = 25
+    Top = 187
+    Width = 75
+    Caption = 'Delete'
+    OnClick = DeletePhoneButtonClick
+    TabOrder = 9
+  end
+end
