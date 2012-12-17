@@ -1,9 +1,9 @@
 object JSONServiceViewFrame: TJSONServiceViewFrame
   Left = 0
-  Height = 406
+  Height = 393
   Top = 0
   Width = 615
-  ClientHeight = 406
+  ClientHeight = 393
   ClientWidth = 615
   TabOrder = 0
   DesignLeft = 410
@@ -37,7 +37,7 @@ object JSONServiceViewFrame: TJSONServiceViewFrame
   end
   object ContactsGrid: TStringGrid
     Left = 8
-    Height = 289
+    Height = 280
     Top = 80
     Width = 344
     ColCount = 2
@@ -103,7 +103,7 @@ object JSONServiceViewFrame: TJSONServiceViewFrame
   object AddContactButton: TButton
     Left = 8
     Height = 25
-    Top = 374
+    Top = 364
     Width = 75
     Caption = 'Add'
     OnClick = AddContactButtonClick
@@ -112,7 +112,7 @@ object JSONServiceViewFrame: TJSONServiceViewFrame
   object EditContactButton: TButton
     Left = 96
     Height = 25
-    Top = 374
+    Top = 364
     Width = 75
     Caption = 'Edit'
     OnClick = EditContactButtonClick
@@ -121,7 +121,7 @@ object JSONServiceViewFrame: TJSONServiceViewFrame
   object DeleteContactButton: TButton
     Left = 184
     Height = 25
-    Top = 374
+    Top = 364
     Width = 75
     Caption = 'Delete'
     OnClick = DeleteContactButtonClick
