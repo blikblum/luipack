@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, StdCtrls, Grids,
-  fpjson, AddressBookClient, Dialogs, XMLRead, XMLWrite, DOM;
+  AddressBookClient, Dialogs, XMLRead, DOM;
 
 type
 
@@ -54,10 +54,6 @@ type
   end;
 
 implementation
-
-uses
-  LuiJSONUtils,
-  ContactView, PhoneView;
 
 {$R *.lfm}
 
@@ -184,7 +180,6 @@ var
   ResponseNode, MessageNode: TDOMNode;
   Message: String;
 begin
-  Message := '';
   ReadXMLFile(ResponseDoc, ResponseStream);
   if ResponseDoc <> nil then
   begin
@@ -215,22 +210,18 @@ end;
 
 procedure TXMLServiceViewFrame.UpdateContactsView;
 var
-  ContactNode, ResponseNode: TDOMNode;
+  ContactNode: TDOMNode;
   i: Integer;
 begin
-  ResponseNode := FContacts.FindNode('response');
-  if ResponseNode <> nil then
+  ContactsGrid.RowCount := FContacts.DocumentElement.ChildNodes.Count + 1;
+  ContactNode := FContacts.DocumentElement.FirstChild;
+  i := 1;
+  while ContactNode <> nil do
   begin
-    ContactsGrid.RowCount := ResponseNode.ChildNodes.Count + 1;
-    ContactNode := ResponseNode.FirstChild;
-    i := 1;
-    while ContactNode <> nil do
-    begin
-      ContactsGrid.Cells[0, i] := ContactNode.FindNode('Id').FirstChild.NodeValue;
-      ContactsGrid.Cells[1, i] := ContactNode.FindNode('Name').FirstChild.NodeValue;
-      Inc(i);
-      ContactNode := ContactNode.NextSibling;
-    end;
+    ContactsGrid.Cells[0, i] := ContactNode.FindNode('Id').FirstChild.NodeValue;
+    ContactsGrid.Cells[1, i] := ContactNode.FindNode('Name').FirstChild.NodeValue;
+    Inc(i);
+    ContactNode := ContactNode.NextSibling;
   end;
 end;
 
@@ -247,7 +238,7 @@ begin
   IdNode := ContactNode.FindNode('Id');
   if IdNode <> nil then
   begin
-    ResourcePath := Format('contacts/%s/phonesformat=xml', [IdNode.FirstChild.NodeValue]);
+    ResourcePath := Format('contacts/%s/phones?format=xml', [IdNode.FirstChild.NodeValue]);
     FRESTClient.Get(ResourcePath, RES_CONTACTPHONES);
   end;
 end;
