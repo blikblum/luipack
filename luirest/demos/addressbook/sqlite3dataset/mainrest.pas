@@ -63,7 +63,5 @@ begin
   SetObjectProperties(Resource, ['Dataset', AddressBookDataset]);
 end;
 
-initialization
-  RegisterHTTPModule('TMainRESTModule', TMainRESTModule);
 end.
 
