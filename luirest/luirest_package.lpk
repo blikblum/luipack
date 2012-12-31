@@ -14,10 +14,10 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="5">
+    <Files Count="6">
       <Item1>
         <Filename Value="luirestserver.pas"/>
-        <UnitName Value="luirestserver"/>
+        <UnitName Value="LuiRESTServer"/>
       </Item1>
       <Item2>
         <Filename Value="register_luirest.pas"/>
@@ -36,19 +36,26 @@
         <Filename Value="luirestcgi.pas"/>
         <UnitName Value="LuiRESTCGI"/>
       </Item5>
+      <Item6>
+        <Filename Value="luirestsqldb.pas"/>
+        <UnitName Value="luirestsqldb"/>
+      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="3">
+    <RequiredPkgs Count="4">
       <Item1>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="luicomponents"/>
       </Item1>
       <Item2>
-        <PackageName Value="weblaz"/>
+        <PackageName Value="IDEIntf"/>
       </Item2>
       <Item3>
+        <PackageName Value="weblaz"/>
+      </Item3>
+      <Item4>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item3>
+      </Item4>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>

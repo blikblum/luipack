@@ -1,0 +1,9 @@
+object MainServiceModule: TMainServiceModule
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  Height = 150
+  HorizontalOffset = 403
+  VerticalOffset = 155
+  Width = 150
+end
