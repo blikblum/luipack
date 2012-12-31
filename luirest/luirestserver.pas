@@ -11,7 +11,9 @@ type
   TRESTResource = class;
   TRESTResourceDef = class;
   TRESTResourceStore = class;
+  TRESTServiceModule = class;
   TRESTResourceClass = class of TRESTResource;
+
 
   TRESTResourceCreateEvent = procedure(out Resource: TRESTResource;
     ResourceTag: PtrInt) of object;
@@ -44,10 +46,12 @@ type
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
     FURIParams: TJSONObject;
-    class var FResponseFormatter: TRESTResponseFormatterClass;
+    class var FServiceModule: TRESTServiceModule;
     procedure SubPathResourcesNeeded;
   protected
     procedure Loaded; virtual;
+    procedure RedirectRequest(ARequest: TRequest; AResponse: TResponse;
+      const Method, ResourcePath: String; Relative: Boolean = True);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
   public
     destructor Destroy; override;
@@ -114,6 +118,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure HandleRequest(ARequest: TRequest; AResponse: TResponse); override;
+    procedure ResolveRequest(ARequest: TRequest; AResponse: TResponse;
+      const Method, Path: String; PathOffset: Integer);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
     property Resources: TRESTResourceStore read FResources;
     property ResponseFormatter: TRESTResponseFormatterClass read FResponseFormatter write FResponseFormatter;
@@ -203,34 +209,63 @@ end;
 procedure TRESTServiceModule.HandleRequest(ARequest: TRequest;
   AResponse: TResponse);
 var
-  URIPath, URIPart, NextURIPart, MethodStr: String;
-  i, PartOffset: Integer;
+  URIPath: String;
+  RootPathPos: Integer;
+begin
+  DoRequest(ARequest, AResponse);
+  AResponse.ContentType := FContentType;
+  TRESTResource.FServiceModule := Self;
+  URIPath := ARequest.PathInfo;
+  RootPathPos := Pos(FRootPath, URIPath);
+  if RootPathPos <> 0 then
+    ResolveRequest(ARequest, AResponse, UpperCase(ARequest.Method), URIPath, RootPathPos + Length(FRootPath))
+  else
+    SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
+end;
+
+procedure TRESTServiceModule.ResolveRequest(ARequest: TRequest; AResponse: TResponse;
+  const Method, Path: String; PathOffset: Integer);
+var
+  URIPart, NextURIPart: String;
+  PartOffset: Integer;
   ResourceDef: TRESTResourceDef;
   Resource: TRESTResource;
   URIParams: TJSONObject;
 begin
-  DoRequest(ARequest, AResponse);
-  AResponse.ContentType := FContentType;
-  TRESTResource.FResponseFormatter := FResponseFormatter;
-  MethodStr := UpperCase(ARequest.Method);
-  URIPath := ARequest.PathInfo;
-  i := Pos(FRootPath, URIPath);
-  if i <> 0 then
-  begin
-    URIParams := TJSONObject.Create;
-    try
-      PartOffset := i + Length(FRootPath);
-      URIPart := GetURIPart(URIPath, PartOffset);
-      //the first part is by convention a collection
-      if URIPart = '' then
-      begin
-        SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, URIPath]);
-        Exit;
-      end;
-      ResourceDef := FResources.Find(URIPart);
+  URIParams := TJSONObject.Create;
+  try
+    PartOffset := PathOffset;
+    URIPart := GetURIPart(Path, PartOffset);
+    if URIPart = '' then
+    begin
+      SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, Path]);
+      Exit;
+    end;
+    ResourceDef := FResources.Find(URIPart);
+    if ResourceDef = nil then
+    begin
+      SetResponseStatus(AResponse, 404, 'Resource "%s" not registered', [URIPart]);
+      Exit;
+    end;
+
+    Resource := ResourceDef.GetResource(URIParams, OnResourceLoad);
+    if Resource = nil then
+    begin
+      SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
+      Exit;
+    end;
+
+    NextURIPart := GetURIPart(Path, PartOffset);
+    while NextURIPart <> '' do
+    begin
+      ResourceDef := nil;
+      Resource.HandleSubPath(NextURIPart, ResourceDef);
+
       if ResourceDef = nil then
       begin
-        SetResponseStatus(AResponse, 404, 'Resource "%s" not registered', [URIPart]);
+        SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
+          [NextURIPart, Resource.ClassName,
+          BoolToStr(Boolean(Resource.FSubPathResources = nil), True)]);
         Exit;
       end;
 
@@ -241,49 +276,25 @@ begin
         Exit;
       end;
 
-      NextURIPart := GetURIPart(URIPath, PartOffset);
-      while NextURIPart <> '' do
-      begin
-        ResourceDef := nil;
-        Resource.HandleSubPath(NextURIPart, ResourceDef);
-
-        if ResourceDef = nil then
-        begin
-          SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
-            [NextURIPart, Resource.ClassName,
-            BoolToStr(Boolean(Resource.FSubPathResources = nil), True)]);
-          Exit;
-        end;
-
-        Resource := ResourceDef.GetResource(URIParams, OnResourceLoad);
-        if Resource = nil then
-        begin
-          SetResponseStatus(AResponse, 404, 'Unable to load resource "%s"', [URIPart]);
-          Exit;
-        end;
-
-        NextURIPart := GetURIPart(URIPath, PartOffset);
-      end;
-
-      if MethodStr = 'GET' then
-        Resource.HandleGet(ARequest, AResponse)
-      else if MethodStr = 'PUT' then
-        Resource.HandlePut(ARequest, AResponse)
-      else if MethodStr = 'POST' then
-      begin
-        AResponse.Code := 201;
-        Resource.HandlePost(ARequest, AResponse)
-      end
-      else if MethodStr = 'DELETE' then
-        Resource.HandleDelete(ARequest, AResponse)
-      else
-        SetResponseStatus(AResponse, 501, 'Method "%s" not implemented', [MethodStr]);
-    finally
-      URIParams.Destroy;
+      NextURIPart := GetURIPart(Path, PartOffset);
     end;
-  end
-  else
-    SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
+
+    if Method = 'GET' then
+      Resource.HandleGet(ARequest, AResponse)
+    else if Method = 'PUT' then
+      Resource.HandlePut(ARequest, AResponse)
+    else if Method = 'POST' then
+    begin
+      AResponse.Code := 201;
+      Resource.HandlePost(ARequest, AResponse)
+    end
+    else if Method = 'DELETE' then
+      Resource.HandleDelete(ARequest, AResponse)
+    else
+      SetResponseStatus(AResponse, 501, 'Method "%s" not implemented', [Method]);
+  finally
+    URIParams.Destroy;
+  end;
 end;
 
 procedure TRESTServiceModule.SetResponseStatus(AResponse: TResponse; StatusCode: Integer;
@@ -305,10 +316,22 @@ begin
   //
 end;
 
+procedure TRESTResource.RedirectRequest(ARequest: TRequest; AResponse: TResponse;
+  const Method, ResourcePath: String; Relative: Boolean = True);
+var
+  Offset: Integer;
+begin
+  if Relative then
+    Offset := 1
+  else
+    Offset := Pos(FServiceModule.RootPath, ResourcePath) + Length(FServiceModule.RootPath);
+  FServiceModule.ResolveRequest(ARequest, AResponse, Method, ResourcePath, Offset);
+end;
+
 procedure TRESTResource.SetResponseStatus(AResponse: TResponse; StatusCode: Integer;
   const Message: String; const Args: array of const);
 begin
-  FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
+  FServiceModule.FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
 end;
 
 procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
