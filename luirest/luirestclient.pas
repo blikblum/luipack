@@ -186,8 +186,17 @@ begin
   case Method of
     hmtGet, hmtPost, hmtPut:
       begin
-        if (ResponseData = nil) or (ResponseData.JSONType <> jtObject) then
-          FResourceClient.DoError(reResponse, 0, Format('Invalid data from "%s"', [FModelDef.Name]));
+        if ResponseData = nil then
+        begin
+          FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
+          Exit;
+        end;
+        if ResponseData.JSONType <> jtObject then
+        begin
+          FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtObject got %s',
+            [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
+          Exit;
+        end;
         if FData = nil then
           FData := TJSONObject(ResponseData)
         else
@@ -350,8 +359,17 @@ begin
   case Method of
     hmtGet:
       begin
-        if (ResponseData = nil) or (ResponseData.JSONType <> jtArray) then
-          FResourceClient.DoError(reResponse, 0, Format('Invalid data from "%s"', [FModelDef.Name]));
+        if ResponseData = nil then
+        begin
+          FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
+          Exit;
+        end;
+        if ResponseData.JSONType <> jtArray then
+        begin
+          FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtArray got %s',
+            [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
+          Exit;
+        end;
         FData.Free;
         FData := TJSONArray(ResponseData);
       end;
