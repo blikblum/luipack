@@ -154,4 +154,11 @@ object XMLServiceViewFrame: TXMLServiceViewFrame
     OnClick = DeletePhoneButtonClick
     TabOrder = 9
   end
+  object RESTClient: TRESTClient
+    OnResponseSuccess = ResponseSuccess
+    OnResponseError = ResponseError
+    OnSocketError = SocketError
+    left = 440
+    top = 259
+  end
 end

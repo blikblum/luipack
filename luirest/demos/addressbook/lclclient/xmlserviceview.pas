@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, StdCtrls, Grids,
-  AddressBookClient, Dialogs, XMLRead, DOM;
+  AddressBookResources, LuiRESTClient, Dialogs, XMLRead, DOM;
 
 type
 
@@ -25,6 +25,7 @@ type
     LoadDataButton: TButton;
     PhonesGrid: TStringGrid;
     PhonesLabel: TLabel;
+    RESTClient: TRESTClient;
     procedure AddContactButtonClick(Sender: TObject);
     procedure AddPhoneButtonClick(Sender: TObject);
     procedure ContactsGridSelectCell(Sender: TObject; aCol, aRow: Integer;
@@ -34,22 +35,20 @@ type
     procedure EditContactButtonClick(Sender: TObject);
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
-  private
-    FContacts: TXMLDocument;
-    FContactPhones: TXMLDocument;
-    FRESTClient: TAddressBookRESTClient;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
+  private
+    FContacts: TXMLDocument;
+    FContactPhones: TXMLDocument;
     procedure ShowNotImplemented;
     procedure UpdateContactPhones(ContactNode: TDOMNode);
     procedure UpdateContactsView;
     procedure UpdatePhonesView;
   public
-    constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
@@ -104,8 +103,8 @@ end;
 
 procedure TXMLServiceViewFrame.LoadDataButtonClick(Sender: TObject);
 begin
-  FRESTClient.BaseURL := BaseURLEdit.Text;
-  FRESTClient.Get('contacts?format=xml', RES_CONTACTS);
+  RESTClient.BaseURL := BaseURLEdit.Text;
+  RESTClient.Get('contacts?format=xml', RES_CONTACTS);
 end;
 
 procedure TXMLServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -239,7 +238,7 @@ begin
   if IdNode <> nil then
   begin
     ResourcePath := Format('contacts/%s/phones?format=xml', [IdNode.FirstChild.NodeValue]);
-    FRESTClient.Get(ResourcePath, RES_CONTACTPHONES);
+    RESTClient.Get(ResourcePath, RES_CONTACTPHONES);
   end;
 end;
 
@@ -262,15 +261,6 @@ begin
       PhoneNode := PhoneNode.NextSibling;
     end;
   end;
-end;
-
-constructor TXMLServiceViewFrame.Create(TheOwner: TComponent);
-begin
-  inherited Create(TheOwner);
-  FRESTClient := TAddressBookRESTClient.Create(Self);
-  FRESTClient.OnResponseSuccess := @ResponseSuccess;
-  FRESTClient.OnResponseError := @ResponseError;
-  FRESTClient.OnSocketError := @SocketError;
 end;
 
 destructor TXMLServiceViewFrame.Destroy;
