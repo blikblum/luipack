@@ -41,6 +41,7 @@ type
     function Get(const ResourcePath: String; ResourceTag: PtrInt): Boolean;
     function Post(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
     function Put(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
+  published
     property BaseURL: String read FBaseURL write SetBaseURL;
     property OnResponseSuccess: TRESTResponseEvent read FOnResponseSuccess write FOnResponseSuccess;
     property OnResponseError: TRESTResponseEvent read FOnResponseError write FOnResponseError;
@@ -107,9 +108,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property BaseURL: String read GetBaseURL write SetBaseURL;
     property Models[const ModelName: String]: TRESTResourceModel read GetModels; default;
   published
+    property BaseURL: String read GetBaseURL write SetBaseURL;
     property ModelDefs: TRESTResourceModelDefs read FModelDefs write SetModelDefs;
     property OnError: TRESTErrorEvent read FOnError write FOnError;
   end;
