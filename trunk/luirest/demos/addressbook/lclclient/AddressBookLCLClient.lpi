@@ -29,16 +29,19 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="4">
       <Item1>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luirest_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="laz_synapse"/>
       </Item3>
+      <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
     </RequiredPackages>
     <Units Count="7">
       <Unit0>
@@ -71,9 +74,9 @@
         <UnitName Value="PhoneView"/>
       </Unit3>
       <Unit4>
-        <Filename Value="addressbookclient.pas"/>
+        <Filename Value="addressbookresources.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="AddressBookClient"/>
+        <UnitName Value="AddressBookResources"/>
       </Unit4>
       <Unit5>
         <Filename Value="xmlserviceview.pas"/>

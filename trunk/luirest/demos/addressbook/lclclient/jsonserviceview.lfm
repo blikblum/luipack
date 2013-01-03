@@ -154,4 +154,11 @@ object JSONServiceViewFrame: TJSONServiceViewFrame
     OnClick = DeletePhoneButtonClick
     TabOrder = 9
   end
+  object RESTClient: TRESTClient
+    OnResponseSuccess = ResponseSuccess
+    OnResponseError = ResponseError
+    OnSocketError = SocketError
+    left = 398
+    top = 254
+  end
 end

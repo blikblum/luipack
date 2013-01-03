@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, ExtCtrls, StdCtrls, Grids,
-  fpjson, AddressBookClient, Dialogs;
+  fpjson, AddressBookResources, LuiRESTClient, Dialogs;
 
 type
 
@@ -25,6 +25,7 @@ type
     LoadDataButton: TButton;
     PhonesGrid: TStringGrid;
     PhonesLabel: TLabel;
+    RESTClient: TRESTClient;
     procedure AddContactButtonClick(Sender: TObject);
     procedure AddPhoneButtonClick(Sender: TObject);
     procedure ContactsGridSelectCell(Sender: TObject; aCol, aRow: Integer;
@@ -34,25 +35,23 @@ type
     procedure EditContactButtonClick(Sender: TObject);
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
-  private
-    FContacts: TJSONArray;
-    FContactPhones: TJSONArray;
-    FRESTClient: TAddressBookRESTClient;
-    function GetSelectedContact: TJSONObject;
-    function GetSelectedPhone: TJSONObject;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
+  private
+    FContacts: TJSONArray;
+    FContactPhones: TJSONArray;
+    function GetSelectedContact: TJSONObject;
+    function GetSelectedPhone: TJSONObject;
     procedure UpdateContactPhones(ContactData: TJSONObject);
     procedure UpdateContactsView;
     procedure UpdatePhonesView;
     property SelectedContact: TJSONObject read GetSelectedContact;
     property SelectedPhone: TJSONObject read GetSelectedPhone;
   public
-    constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
   end;
 
@@ -87,7 +86,7 @@ begin
   if ContactData = nil then
     Exit;
   ResourcePath := Format('contacts/%d', [ContactData.Integers['id']]);
-  if FRESTClient.Delete(ResourcePath, RES_CONTACT) then
+  if RESTClient.Delete(ResourcePath, RES_CONTACT) then
   begin
     FContacts.Remove(ContactData);
     UpdateContactsView;
@@ -104,7 +103,7 @@ begin
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
   ResourcePath := Format('contacts/%d/phones/%d', [ContactData.Integers['id'], PhoneData.Integers['id']]);
-  if FRESTClient.Delete(ResourcePath, RES_CONTACTPHONE) then
+  if RESTClient.Delete(ResourcePath, RES_CONTACTPHONE) then
   begin
     FContactPhones.Remove(PhoneData);
     UpdatePhonesView;
@@ -122,7 +121,7 @@ begin
   if TContactViewForm.EditData(GetParentForm(Self), ContactData) then
   begin
     ResourcePath := Format('contacts/%d', [ContactData.Integers['id']]);
-    FRESTClient.Put(ResourcePath, RES_CONTACT, ContactData.AsJSON);
+    RESTClient.Put(ResourcePath, RES_CONTACT, ContactData.AsJSON);
   end;
 end;
 
@@ -138,7 +137,7 @@ begin
   if TPhoneViewForm.EditData(GetParentForm(Self), PhoneData) then
   begin
     ResourcePath := Format('contacts/%d/phones/%d', [ContactData.Integers['id'], PhoneData.Integers['id']]);
-    FRESTClient.Put(ResourcePath, RES_CONTACTPHONE, PhoneData.AsJSON);
+    RESTClient.Put(ResourcePath, RES_CONTACTPHONE, PhoneData.AsJSON);
   end;
 end;
 
@@ -148,7 +147,7 @@ var
 begin
   ContactData := TJSONObject.Create(['name', 'New Contact']);
   if TContactViewForm.EditData(GetParentForm(Self), ContactData) then
-    FRESTClient.Post('contacts', RES_CONTACTS, ContactData.AsJSON);
+    RESTClient.Post('contacts', RES_CONTACTS, ContactData.AsJSON);
   ContactData.Destroy;
 end;
 
@@ -164,15 +163,15 @@ begin
   if TPhoneViewForm.EditData(GetParentForm(Self), PhoneData) then
   begin
     ResourcePath := Format('contacts/%d/phones', [ContactData.Integers['id']]);
-    FRESTClient.Post(ResourcePath, RES_CONTACTPHONES, PhoneData.AsJSON);
+    RESTClient.Post(ResourcePath, RES_CONTACTPHONES, PhoneData.AsJSON);
   end;
   PhoneData.Destroy;
 end;
 
 procedure TJSONServiceViewFrame.LoadDataButtonClick(Sender: TObject);
 begin
-  FRESTClient.BaseURL := BaseURLEdit.Text;
-  FRESTClient.Get('contacts', RES_CONTACTS);
+  RESTClient.BaseURL := BaseURLEdit.Text;
+  RESTClient.Get('contacts', RES_CONTACTS);
 end;
 
 procedure TJSONServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -306,7 +305,7 @@ begin
     Exit;
   PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
   ResourcePath := Format('contacts/%d/phones', [ContactData.Integers['id']]);
-  FRESTClient.Get(ResourcePath, RES_CONTACTPHONES);
+  RESTClient.Get(ResourcePath, RES_CONTACTPHONES);
 end;
 
 procedure TJSONServiceViewFrame.UpdatePhonesView;
@@ -321,15 +320,6 @@ begin
     PhonesGrid.Cells[0, i + 1] := PhoneData.Strings['id'];
     PhonesGrid.Cells[1, i + 1] := PhoneData.Strings['number'];
   end;
-end;
-
-constructor TJSONServiceViewFrame.Create(TheOwner: TComponent);
-begin
-  inherited Create(TheOwner);
-  FRESTClient := TAddressBookRESTClient.Create(Self);
-  FRESTClient.OnResponseSuccess := @ResponseSuccess;
-  FRESTClient.OnResponseError := @ResponseError;
-  FRESTClient.OnSocketError := @SocketError;
 end;
 
 destructor TJSONServiceViewFrame.Destroy;
