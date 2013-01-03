@@ -8,7 +8,7 @@ interface
 
 uses
   LuiRESTServer, register_luirest, LuiRESTSQL, LuiRESTFastCGI, LuiRESTCGI, LuiRESTSqldb, 
-  LazarusPackageIntf;
+  LuiRESTClient, LazarusPackageIntf;
 
 implementation
 
