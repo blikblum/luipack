@@ -269,7 +269,7 @@ begin
       Dataset.SQL := Format('Select Id, Number From Phones where Id = %d',
         [Dataset.LastInsertRowId]);
       Dataset.Open;
-      DatasetFormatter.SetContent(AResponse, Dataset, True);
+      DatasetFormatter.SetContent(AResponse, Dataset, False);
     end
     else
     begin
