@@ -5,7 +5,8 @@ unit register_luirest;
 interface
 
 uses
-  Classes, SysUtils, LazIDEIntf, ProjectIntf, FormEditingIntf, LuiRESTServer, Forms, Controls;
+  Classes, SysUtils, LazIDEIntf, ProjectIntf, FormEditingIntf, LuiRESTServer, Forms, Controls,
+  LuiRESTClient;
 
 type
 
@@ -36,12 +37,18 @@ implementation
 var
   RESTServiceModuleDescriptor: TRESTServiceModuleDescriptor;
 
+procedure RegisterUnitLuiRESTClient;
+begin
+  RegisterComponents('Data Access', [TRESTClient, TRESTResourceClient]);
+end;
+
 procedure Register;
 begin
   RESTServiceModuleDescriptor := TRESTServiceModuleDescriptor.Create;
   RegisterProjectFileDescriptor(RESTServiceModuleDescriptor);
   RegisterProjectDescriptor(TRESTServiceApplicationDescriptor.Create);
   FormEditingHook.RegisterDesignerBaseClass(TRESTServiceModule);
+  RegisterUnitLuiRESTClient;
 end;
 
 { TRESTServiceApplicationDescriptor }
