@@ -168,6 +168,7 @@ type
     procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); override;
   public
     destructor Destroy; override;
+    function Delete: Boolean;
     function Fetch: Boolean;
     function GetData: TJSONObject;
     function Save: Boolean;
@@ -187,8 +188,6 @@ begin
       begin
         if (ResponseData = nil) or (ResponseData.JSONType <> jtObject) then
           FResourceClient.DoError(reResponse, 0, Format('Invalid data from "%s"', [FModelDef.Name]));
-        if FOwnsData then
-          FreeAndNil(FData);
         if FData = nil then
           FData := TJSONObject(ResponseData)
         else
@@ -208,6 +207,27 @@ begin
   if FOwnsData then
     FData.Free;
   inherited Destroy;
+end;
+
+function TRESTJSONObjectResource.Delete: Boolean;
+var
+  ResourcePath: String;
+  IdData: TJSONData;
+begin
+  if FData = nil then
+  begin
+    Result := False;
+    Exit;
+  end;
+  IdData := FData.Find(FModelDef.IdField);
+  if (IdData = nil) or not (IdData.JSONType in [jtString, jtNumber]) then
+  begin
+    //todo error handling
+    Result := False;
+    Exit;
+  end;
+  ResourcePath := GetResourcePath + '/' + IdData.AsString;
+  Result := FResourceClient.FRESTClient.Delete(ResourcePath, PtrInt(Self));
 end;
 
 function TRESTJSONObjectResource.Fetch: Boolean;
@@ -241,7 +261,6 @@ var
   ResourcePath: String;
   IdData: TJSONData;
 begin
-  //todo: delete if FData = nil?
   if FData = nil then
   begin
     Result := True;
