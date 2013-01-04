@@ -2,23 +2,22 @@
   This source is only used to compile and install the package.
  }
 
-unit luicomponents; 
+unit luicomponents;
 
 interface
 
 uses
-  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
-  LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
-  LuiJSONUtils, LuiDBExport, LuiObjectUtils, VarRecUtils, LuiDBUtils, 
-  LazarusPackageIntf;
+  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, LuiRecordBuffer, 
+  LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, LuiJSONUtils, LuiDBExport, 
+  LuiObjectUtils, VarRecUtils, LuiDBUtils, LuiDataClasses, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('register_luicomponents', @register_luicomponents.Register); 
-end; 
+  RegisterUnit('register_luicomponents', @register_luicomponents.Register);
+end;
 
 initialization
-  RegisterPackage('luicomponents', @Register); 
+  RegisterPackage('luicomponents', @Register);
 end.
