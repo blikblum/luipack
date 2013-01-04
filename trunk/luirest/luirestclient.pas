@@ -54,14 +54,19 @@ type
   private
     FIdField: String;
     FName: String;
+    FParams: TParams;
     FPath: String;
+    procedure SetParams(AValue: TParams);
   protected
     function GetDisplayName: string; override;
   public
+    constructor Create(ACollection: TCollection); override;
+    destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
   published
     property IdField: String read FIdField write FIdField;
     property Name: String read FName write FName;
+    property Params: TParams read FParams write SetParams;
     property Path: String read FPath write FPath;
   end;
 
@@ -316,6 +321,7 @@ end;
 constructor TRESTDataResource.Create(ModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient);
 begin
   FParams := TParams.Create(TParam);
+  FParams.Assign(ModelDef.Params);
   FModelDef := ModelDef;
   FResourceClient := ResourceClient;
 end;
@@ -404,9 +410,26 @@ end;
 
 { TRESTResourceModelDef }
 
+procedure TRESTResourceModelDef.SetParams(AValue: TParams);
+begin
+  FParams.Assign(AValue);
+end;
+
 function TRESTResourceModelDef.GetDisplayName: string;
 begin
   Result := FName;
+end;
+
+constructor TRESTResourceModelDef.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  FParams := TParams.Create(TParam);
+end;
+
+destructor TRESTResourceModelDef.Destroy;
+begin
+  FParams.Destroy;
+  inherited Destroy;
 end;
 
 procedure TRESTResourceModelDef.Assign(Source: TPersistent);
@@ -415,6 +438,7 @@ begin
   begin
      FIdField := TRESTResourceModelDef(Source).FIdField;
      FName := TRESTResourceModelDef(Source).FName;
+     Params := TRESTResourceModelDef(Source).Params;
      FPath := TRESTResourceModelDef(Source).FPath;
   end
   else
