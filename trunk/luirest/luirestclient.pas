@@ -142,6 +142,7 @@ type
     constructor Create(ModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); virtual;
     destructor Destroy; override;
     function GetParams: TParams;
+    function ParamByName(const ParamName: String): TParam;
     property Params: TParams read GetParams;
   end;
 
@@ -349,6 +350,11 @@ end;
 function TRESTDataResource.GetParams: TParams;
 begin
   Result := FParams;
+end;
+
+function TRESTDataResource.ParamByName(const ParamName: String): TParam;
+begin
+  Result := FParams.ParamByName(ParamName);
 end;
 
 { TRESTJSONArrayResource }
