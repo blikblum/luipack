@@ -72,7 +72,7 @@ type
 
   { TRESTResourceModelDefs }
 
-  TRESTResourceModelDefs = class(TCollection)
+  TRESTResourceModelDefs = class(TOwnedCollection)
   protected
     procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
   end;
@@ -653,7 +653,7 @@ end;
 constructor TRESTResourceClient.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FModelDefs := TRESTResourceModelDefs.Create(TRESTResourceModelDef);
+  FModelDefs := TRESTResourceModelDefs.Create(Self, TRESTResourceModelDef);
   FModels := TFPHashObjectList.Create(True);
   FRESTClient := TRESTClient.Create(Self);
   FRESTClient.OnResponseError := @ResponseError;
