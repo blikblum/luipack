@@ -72,34 +72,27 @@ type
 
   { TRESTResourceModelDefs }
 
-  TRESTResourceModelDefs = class(TOwnedCollection)
-  protected
-    procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
-  end;
-
-
-  { TRESTResourceModel }
-
-  TRESTResourceModel = class
+  TRESTResourceModelDefs = class(TCollection)
   private
-    FModelDef: TRESTResourceModelDef;
-    FResourceClient: TRESTResourceClient;
+    FOwner: TRESTResourceClient;
+  protected
+    function GetOwner: TPersistent; override;
+    procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
   public
-    function GetJSONArray: IJSONArrayResource;
-    function GetJSONObject: IJSONObjectResource;
+    constructor Create(AOwner: TRESTResourceClient);
   end;
-
 
   { TRESTResourceClient }
 
   TRESTResourceClient = class(TComponent)
   private
     FModelDefs: TRESTResourceModelDefs;
-    FModels: TFPHashObjectList;
+    FModelDefLookup: TFPHashObjectList;
     FOnError: TRESTErrorEvent;
     FRESTClient: TRESTClient;
+    procedure BuildModelDefLookup;
+    function FindModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
-    function GetModels(const ModelName: String): TRESTResourceModel;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -110,10 +103,12 @@ type
       const ErrorMessage: String);
   protected
     procedure DoError(ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
+    procedure ModelDefsChanged;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    property Models[const ModelName: String]: TRESTResourceModel read GetModels; default;
+    function GetJSONArray(const ModelName: String): IJSONArrayResource;
+    function GetJSONObject(const ModelName: String): IJSONObjectResource;
   published
     property BaseURL: String read GetBaseURL write SetBaseURL;
     property ModelDefs: TRESTResourceModelDefs read FModelDefs write SetModelDefs;
@@ -310,11 +305,24 @@ end;
 
 { TRESTResourceModelDefs }
 
+function TRESTResourceModelDefs.GetOwner: TPersistent;
+begin
+  Result := FOwner;
+end;
+
 procedure TRESTResourceModelDefs.Notify(Item: TCollectionItem; Action: TCollectionNotification);
 begin
   inherited Notify(Item, Action);
   if Action = cnAdded then
     TRESTResourceModelDef(Item).FIdField := 'id';
+  if not (csDestroying in FOwner.ComponentState) then
+    FOwner.ModelDefsChanged;
+end;
+
+constructor TRESTResourceModelDefs.Create(AOwner: TRESTResourceClient);
+begin
+  inherited Create(TRESTResourceModelDef);
+  FOwner := AOwner;
 end;
 
 { TRESTDataResource }
@@ -556,43 +564,32 @@ begin
   end;
 end;
 
-{ TRESTResourceModel }
-
-function TRESTResourceModel.GetJSONArray: IJSONArrayResource;
-begin
-  Result := TRESTJSONArrayResource.Create(FModelDef, FResourceClient);
-end;
-
-function TRESTResourceModel.GetJSONObject: IJSONObjectResource;
-begin
-  Result := TRESTJSONObjectResource.Create(FModelDef, FResourceClient);
-end;
-
 { TRESTResourceClient }
 
-function TRESTResourceClient.GetModels(const ModelName: String): TRESTResourceModel;
+procedure TRESTResourceClient.BuildModelDefLookup;
 var
   i: Integer;
   ModelDef: TRESTResourceModelDef;
 begin
-  Result := TRESTResourceModel(FModels.Find(Name));
-  if Result = nil then
+  for i := 0 to FModelDefs.Count - 1 do
   begin
-    //try to find a ModelDef
-    for i := 0 to FModelDefs.Count - 1 do
-    begin
-      ModelDef := TRESTResourceModelDef(FModelDefs.Items[i]);
-      if ModelDef.Name = ModelName then
-      begin
-        Result := TRESTResourceModel.Create;
-        Result.FModelDef := ModelDef;
-        Result.FResourceClient := Self;
-        FModels.Add(ModelName, Result);
-        Exit;
-      end;
-    end;
-    raise Exception.CreateFmt('Unable to find resource model "%s"', [ModelName]);
+    ModelDef := TRESTResourceModelDef(FModelDefs.Items[i]);
+    FModelDefLookup.Add(ModelDef.Name, ModelDef);
   end;
+end;
+
+function TRESTResourceClient.FindModelDef(const ModelName: String): TRESTResourceModelDef;
+var
+  i: Integer;
+begin
+  if FModelDefLookup = nil then
+  begin
+    FModelDefLookup := TFPHashObjectList.Create(False);
+    BuildModelDefLookup;
+  end;
+  Result := TRESTResourceModelDef(FModelDefLookup.Find(ModelName));
+  if Result = nil then
+    raise Exception.CreateFmt('Unable to find resource model "%s"', [ModelName]);
 end;
 
 function TRESTResourceClient.GetBaseURL: String;
@@ -656,11 +653,16 @@ begin
     raise Exception.Create(ErrorMessage);
 end;
 
+procedure TRESTResourceClient.ModelDefsChanged;
+begin
+  FreeAndNil(FModelDefLookup);
+end;
+
 constructor TRESTResourceClient.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FModelDefs := TRESTResourceModelDefs.Create(Self, TRESTResourceModelDef);
-  FModels := TFPHashObjectList.Create(True);
+  FModelDefs := TRESTResourceModelDefs.Create(Self);
+  FModelDefLookup := TFPHashObjectList.Create(True);
   FRESTClient := TRESTClient.Create(Self);
   FRESTClient.OnResponseError := @ResponseError;
   FRESTClient.OnResponseSuccess := @ResponseSuccess;
@@ -669,9 +671,25 @@ end;
 
 destructor TRESTResourceClient.Destroy;
 begin
-  FModels.Destroy;
+  FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
+end;
+
+function TRESTResourceClient.GetJSONArray(const ModelName: String): IJSONArrayResource;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := FindModelDef(ModelName);
+  Result := TRESTJSONArrayResource.Create(ModelDef, Self);
+end;
+
+function TRESTResourceClient.GetJSONObject(const ModelName: String): IJSONObjectResource;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := FindModelDef(ModelName);
+  Result := TRESTJSONObjectResource.Create(ModelDef, Self);
 end;
 
 end.
