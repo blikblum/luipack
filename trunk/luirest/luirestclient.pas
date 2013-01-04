@@ -662,7 +662,6 @@ constructor TRESTResourceClient.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FModelDefs := TRESTResourceModelDefs.Create(Self);
-  FModelDefLookup := TFPHashObjectList.Create(True);
   FRESTClient := TRESTClient.Create(Self);
   FRESTClient.OnResponseError := @ResponseError;
   FRESTClient.OnResponseSuccess := @ResponseSuccess;
