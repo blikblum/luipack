@@ -160,11 +160,18 @@ object JSONResourceViewFrame: TJSONResourceViewFrame
       item
         IdField = 'id'
         Name = 'contact'
+        Params = <>
         Path = 'contacts'
       end    
       item
         IdField = 'id'
         Name = 'contactphone'
+        Params = <        
+          item
+            DataType = ftString
+            Name = 'contactid'
+            ParamType = ptInput
+          end>
         Path = 'contacts/{contactid}/phones'
       end>
     OnError = ResourcesError

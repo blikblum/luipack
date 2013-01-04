@@ -53,7 +53,7 @@ type
 implementation
 
 uses
-  db, JSONPhoneView, JSONContactView;
+  JSONPhoneView, JSONContactView;
 
 {$R *.lfm}
 
@@ -79,10 +79,8 @@ end;
 constructor TJSONResourceViewFrame.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
-  FContacts := Resources['contact'].GetJSONArray;
-  FContactPhones := Resources['contactphone'].GetJSONArray;
-  //todo: add params automatically
-  FContactPhones.Params.CreateParam(ftString, 'contactid', ptInput);
+  FContacts := Resources.GetJSONArray('contact');
+  FContactPhones := Resources.GetJSONArray('contactphone');
 end;
 
 procedure TJSONResourceViewFrame.ContactsGridSelectCell(Sender: TObject; aCol, aRow: Integer;
@@ -107,7 +105,7 @@ begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
-  ContactResource := Resources['contact'].GetJSONObject;
+  ContactResource := Resources.GetJSONObject('contact');
   ContactResource.SetData(ContactData, False);
   if ContactResource.Delete then
   begin
@@ -125,11 +123,9 @@ begin
   PhoneData := SelectedPhone;
   if (ContactData = nil) or (PhoneData = nil) then
     Exit;
-  PhoneResource := Resources['contactphone'].GetJSONObject;
+  PhoneResource := Resources.GetJSONObject('contactphone');
   PhoneResource.SetData(PhoneData, False);
-  //todo: add params automatically
-  PhoneResource.Params.CreateParam(ftString, 'contactid', ptInput);
-  PhoneResource.Params.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
+  PhoneResource.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
   if PhoneResource.Delete then
   begin
     FContactPhones.Data.Remove(PhoneData);
@@ -147,7 +143,7 @@ begin
     Exit;
   if TJSONContactViewForm.EditData(GetParentForm(Self), ContactData) then
   begin
-    ContactResource := Resources['contact'].GetJSONObject;
+    ContactResource := Resources.GetJSONObject('contact');
     ContactResource.SetData(ContactData, False);
     if ContactResource.Save then
       UpdateContactsView;
@@ -165,10 +161,8 @@ begin
     Exit;
   if TJSONPhoneViewForm.EditData(GetParentForm(Self), PhoneData) then
   begin
-    PhoneResource := Resources['contactphone'].GetJSONObject;
-    //todo: add params automatically
-    PhoneResource.Params.CreateParam(ftString, 'contactid', ptInput);
-    PhoneResource.Params.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
+    PhoneResource := Resources.GetJSONObject('contactphone');
+    PhoneResource.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
     PhoneResource.SetData(PhoneData, False);
     if PhoneResource.Save then
       UpdatePhonesView;
@@ -183,7 +177,7 @@ begin
   ContactData := TJSONObject.Create(['name', 'New Contact']);
   if TJSONContactViewForm.EditData(GetParentForm(Self), ContactData) then
   begin
-    ContactResource := Resources['contact'].GetJSONObject;
+    ContactResource := Resources.GetJSONObject('contact');
     ContactResource.SetData(ContactData, True);
     if ContactResource.Save then
     begin
@@ -204,10 +198,8 @@ begin
   PhoneData := TJSONObject.Create(['number', 'New Number']);
   if TJSONPhoneViewForm.EditData(GetParentForm(Self), PhoneData) then
   begin
-    PhoneResource := Resources['contactphone'].GetJSONObject;
-    //todo: add params automatically
-    PhoneResource.Params.CreateParam(ftString, 'contactid', ptInput);
-    PhoneResource.Params.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
+    PhoneResource := Resources.GetJSONObject('contactphone');
+    PhoneResource.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
     PhoneResource.SetData(PhoneData, True);
     if PhoneResource.Save then
     begin
@@ -252,7 +244,7 @@ begin
   if ContactData = nil then
     Exit;
   PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
-  FContactPhones.Params.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
+  FContactPhones.ParamByName('contactid').AsInteger := ContactData.Integers['id'];
   if FContactPhones.Fetch then
     UpdatePhonesView;
 end;
