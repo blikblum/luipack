@@ -21,6 +21,7 @@ type
     FPrimaryKeyParam: String;
     FSelectSQL: String;
     FUpdateColumns: TStringList;
+    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
     procedure SetUpdateColumns(const AValue: String);
   public
     destructor Destroy; override;
@@ -64,20 +65,40 @@ begin
   end;
 end;
 
-procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
+procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
 var
   i: Integer;
   FieldName: String;
   PropData: TJSONData;
+  Field: TField;
 begin
-  for i := 0 to Columns.Count -1 do
+  if Columns.Count > 0 then
   begin
-    FieldName := Columns[i];
-    PropData := Obj1.Find(FieldName);
-    if PropData = nil then
-      PropData := Obj2.Find(FieldName);
-    if PropData <> nil then
-      Query.FieldByName(FieldName).Value := PropData.Value;
+    for i := 0 to Columns.Count -1 do
+    begin
+      FieldName := Columns[i];
+      PropData := Obj1.Find(FieldName);
+      if PropData = nil then
+        PropData := Obj2.Find(FieldName);
+      if PropData <> nil then
+        Query.FieldByName(FieldName).Value := PropData.Value;
+    end;
+  end
+  else
+  begin
+    // no specific columns set
+    for i := 0 to Query.Fields.Count -1 do
+    begin
+      Field := Query.Fields[i];
+      FieldName := LowerCase(Field.FieldName);
+      if SameText(FieldName, FPrimaryKey) then
+        continue;
+      PropData := Obj1.Find(FieldName);
+      if PropData = nil then
+        PropData := Obj2.Find(FieldName);
+      if PropData <> nil then
+        Field.Value := PropData.Value;
+    end;
   end;
 end;
 
@@ -99,6 +120,7 @@ begin
   inherited AfterConstruction;
   FUpdateColumns := TStringList.Create;
   FUpdateColumns.Delimiter := ';';
+  FPrimaryKey := 'Id';
 end;
 
 procedure TSqldbJSONResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
