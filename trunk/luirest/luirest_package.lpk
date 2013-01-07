@@ -14,7 +14,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="6">
       <Item1>
         <Filename Value="luirestserver.pas"/>
         <UnitName Value="LuiRESTServer"/>
@@ -25,25 +25,21 @@
         <UnitName Value="register_luirest"/>
       </Item2>
       <Item3>
-        <Filename Value="luirestsql.pas"/>
-        <UnitName Value="LuiRESTSQL"/>
-      </Item3>
-      <Item4>
         <Filename Value="luirestfastcgi.pas"/>
         <UnitName Value="LuiRESTFastCGI"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="luirestcgi.pas"/>
         <UnitName Value="LuiRESTCGI"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="luirestsqldb.pas"/>
         <UnitName Value="LuiRESTSqldb"/>
-      </Item6>
-      <Item7>
+      </Item5>
+      <Item6>
         <Filename Value="luirestclient.pas"/>
         <UnitName Value="LuiRESTClient"/>
-      </Item7>
+      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="5">
