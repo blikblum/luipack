@@ -49,6 +49,10 @@ procedure SetFrameActionState(Controller: IFrameController; const ActionId: Stri
 
 function ShowExportDatasetDlg(AOwner: TWinControl; Dataset: TDataSet): Boolean;
 
+function ShowForm(FormClass: TFormClass): TModalResult;
+
+function ShowForm(FormClass: TFormClass; FormProperties: array of const): TModalResult;
+
 function ShowForm(FormClass: TFormClass; Owner: TWinControl): TModalResult;
 
 function ShowForm(FormClass: TFormClass; Owner: TWinControl; FormProperties: array of const): TModalResult;
@@ -80,6 +84,16 @@ begin
   if Dataset = nil then
     Exception.Create('ShowExportDatasetDlg: Dataset can not be nil');
   Result := TExportDatasetForm.Execute(AOwner, Dataset);
+end;
+
+function ShowForm(FormClass: TFormClass): TModalResult;
+begin
+  Result := ShowForm(FormClass, Screen.ActiveForm);
+end;
+
+function ShowForm(FormClass: TFormClass; FormProperties: array of const): TModalResult;
+begin
+  Result := ShowForm(FormClass, Screen.ActiveForm, FormProperties);
 end;
 
 function ShowForm(FormClass: TFormClass; Owner: TWinControl): TModalResult;
