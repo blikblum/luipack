@@ -39,7 +39,7 @@ end;
 
 procedure RegisterUnitWizardControls;
 begin
-  RegisterComponents(ComponentPage, [TWizardController, TWizardButtonPanel]);
+  RegisterComponents(ComponentPage, [TWizardManager, TWizardButtonPanel]);
 end;
 
 procedure RegisterUnitDropDownManager;
