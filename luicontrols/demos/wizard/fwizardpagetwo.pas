@@ -5,7 +5,7 @@ unit fWizardPageTwo;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, WizardTypes;
+  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, WizardControls;
 
 type
 
@@ -19,12 +19,12 @@ type
     procedure AcceptRadioButtonChange(Sender: TObject);
   private
     { private declarations }
-    FWizard: IWizardController;
+    FWizardManager: IWizardManager;
   public
     { public declarations }
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
   published
-    property WizardController: IWizardController read FWizard write FWizard;
+    property WizardManager: IWizardManager read FWizardManager write FWizardManager;
   end; 
 
 implementation
@@ -35,8 +35,8 @@ implementation
 
 procedure TPageTwoFrame.AcceptRadioButtonChange(Sender: TObject);
 begin
-  if FWizard <> nil then
-    FWizard.PageStateChanged;
+  if FWizardManager <> nil then
+    FWizardManager.PageStateChanged;
 end;
 
 procedure TPageTwoFrame.GetPageInfo(var PageInfo: TWizardPageInfo);

@@ -2,29 +2,30 @@ object MainForm: TMainForm
   Left = 338
   Height = 432
   Top = 192
-  Width = 581
+  Width = 590
   Caption = 'Wizard Demo'
   ClientHeight = 432
-  ClientWidth = 581
+  ClientWidth = 590
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '0.9.29'
+  Position = poScreenCenter
+  LCLVersion = '1.1'
   object TopPanel: TPanel
     Left = 0
     Height = 50
     Top = 0
-    Width = 581
+    Width = 590
     Align = alTop
     ClientHeight = 50
-    ClientWidth = 581
+    ClientWidth = 590
     Color = clWhite
     ParentColor = False
     TabOrder = 0
     object TitleLabel: TLabel
       Left = 8
-      Height = 20
+      Height = 21
       Top = 1
-      Width = 83
+      Width = 75
       Caption = 'TitleLabel'
       Font.Height = -16
       Font.Style = [fsBold]
@@ -33,75 +34,93 @@ object MainForm: TMainForm
     end
     object DescriptionLabel: TLabel
       Left = 16
-      Height = 14
+      Height = 15
       Top = 28
-      Width = 79
+      Width = 88
       Caption = 'DescriptionLabel'
       ParentColor = False
     end
   end
-  object WizardButtonPanel1: TWizardButtonPanel
+  object WizardButtons: TWizardButtonPanel
     Left = 0
     Height = 50
     Top = 382
-    Width = 581
-    Controller = WizardController
+    Width = 590
+    Manager = WizardManager
     CancelButton.Name = 'CancelButton'
-    CancelButton.AnchorSideTop.Control = WizardButtonPanel1
+    CancelButton.AnchorSideTop.Control = WizardButtons
     CancelButton.AnchorSideTop.Side = asrCenter
-    CancelButton.AnchorSideRight.Control = WizardButtonPanel1
+    CancelButton.AnchorSideRight.Control = WizardButtons
     CancelButton.AnchorSideRight.Side = asrBottom
-    CancelButton.Caption = 'Cancel'
+    CancelButton.Height = 30
+    CancelButton.Width = 75
+    CancelButton.Kind = bkCancel
+    CancelButton.ModalResult = 2
     FinishButton.Name = 'FinishButton'
-    FinishButton.AnchorSideTop.Control = WizardButtonPanel1
+    FinishButton.AnchorSideTop.Control = WizardButtons
     FinishButton.AnchorSideTop.Side = asrCenter
+    FinishButton.Height = 30
+    FinishButton.Width = 75
     FinishButton.Caption = 'Finish'
+    FinishButton.Kind = bkOK
+    FinishButton.ModalResult = 1
     NextButton.Name = 'NextButton'
-    NextButton.AnchorSideTop.Control = WizardButtonPanel1
+    NextButton.AnchorSideTop.Control = WizardButtons
     NextButton.AnchorSideTop.Side = asrCenter
+    NextButton.Height = 30
+    NextButton.Width = 75
     NextButton.Caption = 'Next'
     PreviousButton.Name = 'PreviousButton'
-    PreviousButton.AnchorSideTop.Control = WizardButtonPanel1
+    PreviousButton.AnchorSideTop.Control = WizardButtons
     PreviousButton.AnchorSideTop.Side = asrCenter
+    PreviousButton.Height = 30
+    PreviousButton.Width = 75
     PreviousButton.Caption = 'Previous'
     ShowBevel = True
+    OnButtonClick = WizardButtonsButtonClick
     Align = alBottom
     ClientHeight = 50
-    ClientWidth = 581
+    ClientWidth = 590
     TabOrder = 1
   end
-  object WizardController: TWizardController
+  object WizardManager: TWizardManager
+    DisplayOptions.Parent = Owner
+    OnPageLoad = WizardManagerPageLoad
+    OnPageShow = WizardManagerPageShow
     Pages = <    
       item
+        Caption = 'Introduction'
         ControlClassName = 'TPageOneFrame'
+        Name = 'intro'
         Description = 'First Step'
         EnabledButtons = [wbPrevious, wbNext, wbFinish, wbCancel]
-        Title = 'Introduction'
         VisibleButtons = [wbNext, wbCancel]
       end    
       item
+        Caption = 'Agreement'
         ControlClassName = 'TPageTwoFrame'
+        Name = 'agreement'
         Description = 'The software terms'
         EnabledButtons = [wbPrevious, wbCancel]
-        Title = 'Agreement'
       end    
       item
+        Caption = 'Configuration'
         ControlClassName = 'TPageThreeFrame'
+        Name = 'config1'
         Description = 'Choose a default or customized configuration'
-        Title = 'Configuration'
       end    
       item
+        Caption = 'Configuration'
+        Name = 'config2'
         Description = 'Set the configuration'
-        Title = 'Configuration'
       end    
       item
+        Caption = 'Finish'
+        Name = 'finish'
         Description = 'It''s done'
         EnabledButtons = [wbPrevious, wbNext, wbFinish, wbCancel]
-        Title = 'Finish'
         VisibleButtons = [wbPrevious, wbFinish, wbCancel]
       end>
-    OnCreatePageControl = WizardControllerCreatePageControl
-    OnShowPage = WizardControllerShowPage
     left = 44
     top = 88
   end

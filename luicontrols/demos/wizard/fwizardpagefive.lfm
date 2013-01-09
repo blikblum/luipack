@@ -10,25 +10,26 @@ object PageFiveFrame: TPageFiveFrame
   DesignTop = 280
   object Label1: TLabel
     Left = 40
-    Height = 14
+    Height = 15
     Top = 67
-    Width = 45
+    Width = 44
     Caption = 'It''s over!'
     ParentColor = False
   end
   object ReadMeCheckBox: TCheckBox
     Left = 40
-    Height = 17
+    Height = 19
     Top = 117
-    Width = 110
+    Width = 118
     Caption = 'Show the Read Me'
+    OnChange = ReadMeCheckBoxChange
     TabOrder = 0
   end
   object LabelConfigData: TLabel
     Left = 40
-    Height = 14
+    Height = 15
     Top = 91
-    Width = 80
+    Width = 88
     Caption = 'LabelConfigData'
     ParentColor = False
   end
