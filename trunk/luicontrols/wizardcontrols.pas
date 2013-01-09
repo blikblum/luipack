@@ -447,8 +447,13 @@ end;
 procedure TWizardPage.ControlChanged;
 begin
   inherited ControlChanged;
-  if (Control <> nil) and Control.GetInterface(WizardPageIntfID, FPageIntf) then
-    SetObjectProperties(Control, ['WizardManager', ((Collection as TWizardPages).FOwner) as IWizardManager]);
+  if Control <> nil then
+  begin
+    Control.GetInterface(WizardPageIntfID, FPageIntf);
+    SetObjectProperties(Control, ['WizardManager', Collection.Owner as IWizardManager]);
+  end
+  else
+    FPageIntf := nil;
 end;
 
 constructor TWizardPage.Create(ACollection: TCollection);
