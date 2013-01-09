@@ -5,7 +5,7 @@ unit fWizardPageThree;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, WizardTypes;
+  Classes, SysUtils, FileUtil, Forms, Controls, StdCtrls, WizardControls;
 
 type
 
@@ -17,12 +17,12 @@ type
     procedure DefaultRadioButtonChange(Sender: TObject);
   private
     { private declarations }
-    FWizard: IWizardController;
+    FWizardManager: IWizardManager;
   public
     { public declarations }
     procedure GetPageInfo(var PageInfo: TWizardPageInfo);
   published
-    property WizardController: IWizardController read FWizard write FWizard;
+    property WizardManager: IWizardManager read FWizardManager write FWizardManager;
   end; 
 
 implementation
@@ -33,8 +33,8 @@ implementation
 
 procedure TPageThreeFrame.DefaultRadioButtonChange(Sender: TObject);
 begin
-  if FWizard <> nil then
-    FWizard.PageStateChanged;
+  if FWizardManager <> nil then
+    FWizardManager.PageStateChanged;
 end;
 
 procedure TPageThreeFrame.GetPageInfo(var PageInfo: TWizardPageInfo);

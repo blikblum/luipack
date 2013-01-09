@@ -21,7 +21,7 @@ type
   public
     { public declarations }
   published
-    procedure ShowPage;
+    procedure PageShow;
     property ConfigData: TJSONObject write FConfigData;
   end; 
 
@@ -36,7 +36,7 @@ begin
   FConfigData.Strings['name'] := ConfigEdit.Text;
 end;
 
-procedure TPageFourFrame.ShowPage;
+procedure TPageFourFrame.PageShow;
 begin
   if FConfigData <> nil then
     ConfigEdit.Text := FConfigData.Strings['name'];

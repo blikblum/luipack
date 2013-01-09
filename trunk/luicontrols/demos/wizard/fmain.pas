@@ -16,13 +16,14 @@ type
     TitleLabel: TLabel;
     DescriptionLabel: TLabel;
     TopPanel: TPanel;
-    WizardButtonPanel1: TWizardButtonPanel;
-    WizardController: TWizardController;
+    WizardButtons: TWizardButtonPanel;
+    WizardManager: TWizardManager;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure WizardControllerCreatePageControl(Sender: TWizardController;
+    procedure WizardButtonsButtonClick(Sender: TObject; ButtonType: TWizardButton);
+    procedure WizardManagerPageLoad(Sender: TObject;
       Page: TWizardPage);
-    procedure WizardControllerShowPage(Sender: TWizardController;
+    procedure WizardManagerPageShow(Sender: TObject;
       Page: TWizardPage);
   private
     FConfigData: TJSONObject;
@@ -47,9 +48,9 @@ begin
   //data that will be shared between pages
   FConfigData := TJSONObject.Create(['name', 'Luiz Américo']);
   //you can add the class dinamically
-  WizardController.Pages[3].ControlClass := TPageFourFrame;
-  WizardController.Pages[4].ControlClass := TPageFiveFrame;
-  WizardController.Start;
+  WizardManager.PageByName('config2').ControlClass := TPageFourFrame;
+  WizardManager.PageByName('finish').ControlClass := TPageFiveFrame;
+  WizardManager.PageIndex := 0;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -57,16 +58,22 @@ begin
   FConfigData.Destroy;
 end;
 
-procedure TMainForm.WizardControllerCreatePageControl(
-  Sender: TWizardController; Page: TWizardPage);
+procedure TMainForm.WizardButtonsButtonClick(Sender: TObject; ButtonType: TWizardButton);
+begin
+  case ButtonType of
+    wbCancel: Close;
+    wbFinish: ShowMessage(FConfigData.AsJSON);
+  end;
+end;
+
+procedure TMainForm.WizardManagerPageLoad(Sender: TObject; Page: TWizardPage);
 begin
   SetObjectProperties(Page.Control, ['ConfigData', FConfigData]);
 end;
 
-procedure TMainForm.WizardControllerShowPage(Sender: TWizardController;
-  Page: TWizardPage);
+procedure TMainForm.WizardManagerPageShow(Sender: TObject; Page: TWizardPage);
 begin
-  TitleLabel.Caption := Page.Title;
+  TitleLabel.Caption := Page.Caption;
   DescriptionLabel.Caption := Page.Description;
 end;
 
