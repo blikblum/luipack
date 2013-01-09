@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils;
+  LuiJSONUtils, variants;
 
 type
 
@@ -165,13 +165,16 @@ type
     //todo: implement save through dirty checking
     //FSnapshot/FReference: TJSONObject;
     FData: TJSONObject;
+    FIdValue: Variant;
     FOwnsData: Boolean;
+    function DoFetch(const Id: String): Boolean;
   protected
     procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); override;
   public
     destructor Destroy; override;
     function Delete: Boolean;
     function Fetch: Boolean;
+    function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
     function Save: Boolean;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
@@ -179,6 +182,11 @@ type
   end;
 
 { TRESTJSONObjectResource }
+
+function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
+begin
+  Result := FResourceClient.FRESTClient.Get(GetResourcePath + '/' + Id, PtrInt(Self));
+end;
 
 procedure TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType; ResponseStream: TStream);
 var
@@ -243,23 +251,28 @@ end;
 
 function TRESTJSONObjectResource.Fetch: Boolean;
 var
-  ResourcePath: String;
-  IdData: TJSONData;
+  IdFieldData: TJSONData;
 begin
   if (FData = nil) then
   begin
     Result := False;
     Exit;
   end;
-  IdData := FData.Find(FModelDef.IdField);
-  if (IdData = nil) or not (IdData.JSONType in [jtString, jtNumber]) then
+  IdFieldData := FData.Find(FModelDef.IdField);
+  if (IdFieldData = nil) or not (IdFieldData.JSONType in [jtString, jtNumber]) then
   begin
     //todo error handling
     Result := False;
     Exit;
   end;
-  ResourcePath := GetResourcePath + '/' + IdData.AsString;
-  Result := FResourceClient.FRESTClient.Get(ResourcePath, PtrInt(Self));
+  FIdValue := Unassigned;
+  Result := DoFetch(IdFieldData.AsString);
+end;
+
+function TRESTJSONObjectResource.Fetch(IdValue: Variant): Boolean;
+begin
+  FIdValue := IdValue;
+  Result := DoFetch(VarToStr(IdValue));
 end;
 
 function TRESTJSONObjectResource.GetData: TJSONObject;
@@ -270,27 +283,43 @@ end;
 function TRESTJSONObjectResource.Save: Boolean;
 var
   ResourcePath: String;
-  IdData: TJSONData;
+  IdFieldData: TJSONData;
+  Id: String;
 begin
-  if FData = nil then
+  if VarIsEmpty(FIdValue) then
   begin
-    Result := True;
-    Exit;
-  end;
+    if FData = nil then
+    begin
+      Result := True;
+      Exit;
+    end
+    else
+    begin
+      IdFieldData := FData.Find(FModelDef.IdField);
+      if (IdFieldData <> nil) then
+      begin
+        if (IdFieldData.JSONType in [jtString, jtNumber]) then
+          Id := IdFieldData.AsString
+        else
+        begin
+          FResourceClient.DoError(reRequest, 0, 'Id property must be string or number');
+          Exit;
+        end
+      end
+      else
+        Id := '';
+    end;
+  end
+  else
+    Id := VarToStr(FIdValue);
   ResourcePath := GetResourcePath;
-  IdData := FData.Find(FModelDef.IdField);
-  if IdData = nil then
+  if Id = '' then
   begin
     Result := FResourceClient.FRESTClient.Post(ResourcePath, PtrInt(Self), FData.AsJSON);
   end
   else
   begin
-    if not(IdData.JSONType in [jtString, jtNumber]) then
-    begin
-      Result := False;
-      Exit;
-    end;
-    ResourcePath := ResourcePath + '/' + IdData.AsString;
+    ResourcePath := ResourcePath + '/' + Id;
     Result := FResourceClient.FRESTClient.Put(ResourcePath, PtrInt(Self), FData.AsJSON);
   end;
 end;
