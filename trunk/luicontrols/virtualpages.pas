@@ -350,7 +350,10 @@ end;
 
 function TVirtualPage.GetDisplayName: String;
 begin
-  Result := FCaption;
+  if FCaption <> '' then
+    Result := FCaption
+  else
+    Result := FName;
 end;
 
 destructor TVirtualPage.Destroy;
