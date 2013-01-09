@@ -51,10 +51,12 @@ type
     FProperties: TConstArray;
     procedure SetControl(Value: TControl);
   protected
+    procedure ControlChanged; virtual;
     function GetDisplayName: String; override;
   public
     destructor Destroy; override;
-    procedure SetProperties(Elements: array of const);
+    procedure Assign(Source: TPersistent); override;
+    procedure SetProperties(const Elements: array of const);
     property ControlClass: TControlClass read FControlClass write FControlClass;
     property Properties: TConstArray read FProperties;
   published
@@ -77,7 +79,7 @@ type
     procedure DoPageShow(Page: TVirtualPage); virtual;
     procedure UpdateActivePage(OldPageIndex, NewPageIndex: Integer);
   public
-    constructor Create;
+    constructor Create(AItemClass: TCollectionItemClass);
     destructor Destroy; override;
     procedure AssignTo(Dest: TPersistent); override;
     procedure Add(const Name, Caption: String; Control: TControl);
@@ -190,7 +192,7 @@ end;
 
 constructor TVirtualPageList.Create;
 begin
-  inherited Create;
+  inherited Create(TVirtualPage);
   FPageIndex := -1;
 end;
 
@@ -218,7 +220,7 @@ end;
 
 constructor TManagedPages.Create(AManager: TVirtualPageManager);
 begin
-  inherited Create;
+  inherited Create(TVirtualPage);
   FManager := AManager;
 end;
 
@@ -335,7 +337,15 @@ end;
 
 procedure TVirtualPage.SetControl(Value: TControl);
 begin
+  if FControl = Value then
+    Exit;
   FControl := Value;
+  ControlChanged;
+end;
+
+procedure TVirtualPage.ControlChanged;
+begin
+  //
 end;
 
 function TVirtualPage.GetDisplayName: String;
@@ -349,7 +359,22 @@ begin
   inherited Destroy;
 end;
 
-procedure TVirtualPage.SetProperties(Elements: array of const);
+procedure TVirtualPage.Assign(Source: TPersistent);
+begin
+  if Source is TVirtualPage then
+  begin
+    Control := TVirtualPage(Source).FControl;
+    FCaption := TVirtualPage(Source).FCaption;
+    FControlClass := TVirtualPage(Source).FControlClass;
+    FControlClassName := TVirtualPage(Source).FControlClassName;
+    FName := TVirtualPage(Source).FName;
+    FProperties := TVirtualPage(Source).FProperties;
+  end
+  else
+    inherited Assign(Source);
+end;
+
+procedure TVirtualPage.SetProperties(const Elements: array of const);
 begin
   FinalizeConstArray(FProperties);
   FProperties := CreateConstArray(Elements);
@@ -407,7 +432,7 @@ begin
         PageControl.BorderSpacing := FDisplayOptions.BorderSpacing;
         PageControl.Align := FDisplayOptions.Align;
         PageControl.Parent := FDisplayOptions.Parent;
-        Page.FControl := PageControl;
+        Page.Control := PageControl;
         SetObjectProperties(PageControl, Page.Properties);
         DoPageLoad(Page);
         CallMethod(PageControl, 'PageLoad');
@@ -443,9 +468,9 @@ begin
   //
 end;
 
-constructor TVirtualPages.Create;
+constructor TVirtualPages.Create(AItemClass: TCollectionItemClass);
 begin
-  inherited Create(TVirtualPage);
+  inherited Create(AItemClass);
   FDisplayOptions := TControlDisplayOptions.Create;
 end;
 
