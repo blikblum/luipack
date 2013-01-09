@@ -11,7 +11,7 @@ type
 
   IDataResource = interface(IInterface)
     ['{ADACF400-8E33-4F0B-A10A-6A739DCA4CB5}']
-    function Fetch: Boolean;
+    function Fetch: Boolean; overload;
     function GetParams: TParams;
     function ParamByName(const ParamName: String): TParam;
     function Save: Boolean;
@@ -23,6 +23,7 @@ type
   IJSONObjectResource = interface(IDataResource)
     ['{25B16F6D-DCEB-4D36-A4D6-260E23271B7B}']
     function Delete: Boolean;
+    function Fetch(IdValue: Variant): Boolean; overload;
     function GetData: TJSONObject;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
