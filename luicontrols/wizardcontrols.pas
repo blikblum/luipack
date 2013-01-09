@@ -137,6 +137,7 @@ type
     function MoveBy(Offset: Integer): Boolean;
     procedure PageStateChanged;
     procedure DoAction(Action: TWizardAction);
+    function PageByName(const PageName: String): TWizardPage;
     procedure RegisterObserver(Value: IWizardObserver);
   published
     property DisplayOptions: TControlDisplayOptions read GetDisplayOptions write SetDisplayOptions;
@@ -404,6 +405,11 @@ begin
       waPrevious: MoveBy(-ActivePage.PreviousOffset);
     end;
   end;
+end;
+
+function TWizardManager.PageByName(const PageName: String): TWizardPage;
+begin
+  Result := TWizardPage(FPages.PageByName(PageName));
 end;
 
 procedure TWizardManager.RegisterObserver(Value: IWizardObserver);
