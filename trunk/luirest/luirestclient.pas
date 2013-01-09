@@ -478,7 +478,7 @@ end;
 
 procedure TRESTClient.SetBaseURL(const AValue: String);
 begin
-  if AValue[Length(AValue)] <> '/' then
+  if (AValue = '') or (AValue[Length(AValue)] <> '/') then
     FBaseURL := AValue + '/'
   else
     FBaseURL := AValue;
