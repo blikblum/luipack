@@ -7,9 +7,9 @@ unit luicontrols;
 interface
 
 uses
-  ToggleLabel, register_luicontrols, SearchEdit, ValidateEdit, WizardTypes, WizardControls, 
-  DropDownManager, DropDownButton, AdvancedLabel, DropDownBaseButtons, MenuButton, VirtualPages, 
-  JSONMediators, JSONBooleanRadioButtonView, LazarusPackageIntf;
+  ToggleLabel, register_luicontrols, SearchEdit, ValidateEdit, WizardControls, DropDownManager, 
+  DropDownButton, AdvancedLabel, DropDownBaseButtons, MenuButton, VirtualPages, JSONMediators, 
+  JSONBooleanRadioButtonView, LazarusPackageIntf;
 
 implementation
 
