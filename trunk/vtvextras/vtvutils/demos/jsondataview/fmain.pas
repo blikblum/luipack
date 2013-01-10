@@ -211,8 +211,6 @@ procedure TMainForm.TextPropertyEditEditingDone(Sender: TObject);
 begin
   JSONListView.TextProperty := PropertiesComboBox.Text;
   JSONTreeView.TextProperty := PropertiesComboBox.Text;
-  JSONListView.Invalidate;
-  JSONTreeView.Invalidate;
 end;
 
 procedure TMainForm.PropertiesGridCheckboxToggled(sender: TObject; aCol,
