@@ -13,6 +13,8 @@ type
 
   THTTPMethodType = (hmtGet, hmtPost, hmtPut, hmtDelete);
 
+  TRESTCacheMode = (cmNone, cmSession, cmLocal);
+
   TRESTErrorType = (reService, reResponse, reRequest, reSocket);
 
   TRESTResponseEvent = procedure(ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream) of object;
@@ -52,6 +54,7 @@ type
 
   TRESTResourceModelDef = class(TCollectionItem)
   private
+    FCacheMode: TRESTCacheMode;
     FIdField: String;
     FName: String;
     FParams: TParams;
@@ -64,6 +67,7 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
   published
+    property CacheMode: TRESTCacheMode read FCacheMode write FCacheMode default cmNone;
     property IdField: String read FIdField write FIdField;
     property Name: String read FName write FName;
     property Params: TParams read FParams write SetParams;
@@ -82,15 +86,50 @@ type
     constructor Create(AOwner: TRESTResourceClient);
   end;
 
+  { TRESTDataResource }
+
+  TRESTDataResource = class(TInterfacedObject)
+  private
+    FModelDef: TRESTResourceModelDef;
+    FResourceClient: TRESTResourceClient;
+    FParams: TParams;
+  protected
+    function GetResourcePath: String;
+    procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); virtual; abstract;
+    property ModelDef: TRESTResourceModelDef read FModelDef;
+  public
+    constructor Create(AModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); virtual;
+    destructor Destroy; override;
+    function GetParams: TParams;
+    function ParamByName(const ParamName: String): TParam;
+    property Params: TParams read GetParams;
+  end;
+
+  //todo: abstract cache handler so it can be plugged another implementation
+
+  { TRESTCacheHandler }
+
+  TRESTCacheHandler = class
+  private
+    FModelCacheList: TFPHashObjectList;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
+    procedure Invalidate(const ModelName: String);
+  end;
+
   { TRESTResourceClient }
 
   TRESTResourceClient = class(TComponent)
   private
+    FCacheHandler: TRESTCacheHandler;
     FModelDefs: TRESTResourceModelDefs;
     FModelDefLookup: TFPHashObjectList;
     FOnError: TRESTErrorEvent;
     FRESTClient: TRESTClient;
     procedure BuildModelDefLookup;
+    procedure CacheHandlerNeeded;
     function FindModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -101,8 +140,10 @@ type
     procedure SetModelDefs(AValue: TRESTResourceModelDefs);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorMessage: String);
+    procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
   protected
     procedure DoError(ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
+    function Get(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
     procedure ModelDefsChanged;
   public
     constructor Create(AOwner: TComponent); override;
@@ -122,25 +163,6 @@ uses
   LuiJSONUtils, variants;
 
 type
-
-  { TRESTDataResource }
-
-  TRESTDataResource = class(TInterfacedObject)
-  private
-    FModelDef: TRESTResourceModelDef;
-    FResourceClient: TRESTResourceClient;
-    FParams: TParams;
-  protected
-    function GetResourcePath: String;
-    procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); virtual; abstract;
-  public
-    constructor Create(ModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); virtual;
-    destructor Destroy; override;
-    function GetParams: TParams;
-    function ParamByName(const ParamName: String): TParam;
-    property Params: TParams read GetParams;
-  end;
-
   { TRESTJSONArrayResource }
 
   TRESTJSONArrayResource = class(TRESTDataResource, IJSONArrayResource)
@@ -180,6 +202,58 @@ type
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
+
+{ TRESTCacheHandler }
+
+constructor TRESTCacheHandler.Create;
+begin
+  FModelCacheList := TFPHashObjectList.Create(True);
+end;
+
+destructor TRESTCacheHandler.Destroy;
+begin
+  FModelCacheList.Destroy;
+  inherited Destroy;
+end;
+
+procedure TRESTCacheHandler.UpdateCache(const ModelName, Path: String;
+  Stream: TStream);
+var
+  ModelCache: TFPHashObjectList;
+  CacheData: TMemoryStream;
+begin
+  //todo: convert path to a hash to avoid the 255 size limit
+  ModelCache := TFPHashObjectList(FModelCacheList.Find(ModelName));
+  if ModelCache = nil then
+  begin
+    ModelCache := TFPHashObjectList.Create(True);
+    FModelCacheList.Add(ModelName, ModelCache);
+    CacheData := nil;
+  end
+  else
+  begin
+    CacheData := TMemoryStream(ModelCache.Find(Path));
+  end;
+  if CacheData = nil then
+  begin
+    CacheData := TMemoryStream.Create;
+    ModelCache.Add(Path, CacheData);
+  end
+  else
+    CacheData.Clear;
+  Stream.Position := 0;
+  CacheData.CopyFrom(Stream, Stream.Size);
+  Stream.Position := 0;
+end;
+
+procedure TRESTCacheHandler.Invalidate(const ModelName: String);
+var
+  ModelCache: TObject;
+begin
+  ModelCache := FModelCacheList.Find(ModelName);
+  if ModelCache <> nil then
+    FModelCacheList.Remove(ModelCache);
+end;
 
 { TRESTJSONObjectResource }
 
@@ -356,11 +430,12 @@ end;
 
 { TRESTDataResource }
 
-constructor TRESTDataResource.Create(ModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient);
+constructor TRESTDataResource.Create(AModelDef: TRESTResourceModelDef;
+  ResourceClient: TRESTResourceClient);
 begin
   FParams := TParams.Create(TParam);
-  FParams.Assign(ModelDef.Params);
-  FModelDef := ModelDef;
+  FParams.Assign(AModelDef.Params);
+  FModelDef := AModelDef;
   FResourceClient := ResourceClient;
 end;
 
@@ -467,6 +542,7 @@ constructor TRESTResourceModelDef.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
   FParams := TParams.Create(TParam);
+  FCacheMode := cmNone;
 end;
 
 destructor TRESTResourceModelDef.Destroy;
@@ -607,6 +683,12 @@ begin
   end;
 end;
 
+procedure TRESTResourceClient.CacheHandlerNeeded;
+begin
+  if FCacheHandler = nil then
+    FCacheHandler := TRESTCacheHandler.Create;
+end;
+
 function TRESTResourceClient.FindModelDef(const ModelName: String): TRESTResourceModelDef;
 var
   i: Integer;
@@ -670,6 +752,13 @@ begin
   DoError(reSocket, ErrorCode, ErrorMessage);
 end;
 
+procedure TRESTResourceClient.UpdateCache(const ModelName, Path: String;
+  Stream: TStream);
+begin
+  CacheHandlerNeeded;
+  FCacheHandler.UpdateCache(ModelName, Path, Stream);
+end;
+
 procedure TRESTResourceClient.DoError(ErrorType: TRESTErrorType; ErrorCode: Integer;
   const ErrorMessage: String);
 var
@@ -680,6 +769,26 @@ begin
     FOnError(Self, ErrorType, ErrorCode, ErrorMessage, Handled);
   if not Handled then
     raise Exception.Create(ErrorMessage);
+end;
+
+function TRESTResourceClient.Get(const ResourcePath: String;
+  Resource: TRESTDataResource): Boolean;
+var
+  ModelDef: TRESTResourceModelDef;
+  CanCache: Boolean;
+begin
+  ModelDef := Resource.ModelDef;
+  CanCache := ModelDef.CacheMode <> cmNone;
+  if CanCache then
+  begin
+    //todo: get the cached data
+  end;
+  Result := FRESTClient.Get(ResourcePath, PtrInt(Resource));
+  if Result and CanCache then
+  begin
+    //todo: add local mode
+    UpdateCache(ModelDef.Name, ResourcePath, FRESTClient.FHttpClient.Document);
+  end;
 end;
 
 procedure TRESTResourceClient.ModelDefsChanged;
@@ -699,6 +808,7 @@ end;
 
 destructor TRESTResourceClient.Destroy;
 begin
+  FCacheHandler.Free;
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
