@@ -36,9 +36,9 @@ type
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
   private
@@ -107,8 +107,9 @@ begin
   RESTClient.Get('contacts?format=xml', RES_CONTACTS);
 end;
 
-procedure TXMLServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+procedure TXMLServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
 var
   ResponseDoc: TXMLDocument;
 begin
@@ -172,8 +173,9 @@ begin
   end;
 end;
 
-procedure TXMLServiceViewFrame.ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+procedure TXMLServiceViewFrame.ResponseError(ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
 var
   ResponseDoc: TXMLDocument;
   ResponseNode, MessageNode: TDOMNode;
