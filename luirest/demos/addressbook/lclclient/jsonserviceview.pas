@@ -36,9 +36,9 @@ type
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
   private
@@ -175,18 +175,34 @@ begin
 end;
 
 procedure TJSONServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+  ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
 var
   ResponseData: TJSONData;
 begin
   ResponseData := StreamToJSONData(ResponseStream);
+  case Method of
+    hmtGet: ValidData := ResponseData <> nil;
+    hmtPost, hmtPut:
+    begin
+      ValidData := ResponseData <> nil;
+      if ValidData then
+      begin
+        ValidData := ResponseData.JSONType = jtObject;
+        if not ValidData then
+          ShowMessageFmt('Wrong data format. Expected jtObject got %s',
+            [JSONTypeName(ResponseData.JSONType)]);
+      end;
+    end;
+  end;
+  if not ValidData then
+    Exit;
   case ResourceTag of
     RES_CONTACTS:
       begin
         case Method of
           hmtGet:
           begin
-            if (ResponseData <> nil) and (ResponseData.JSONType = jtArray) then
+            if ResponseData.JSONType = jtArray then
             begin
               FContacts.Free;
               FContacts := TJSONArray(ResponseData);
@@ -205,11 +221,8 @@ begin
         case Method of
           hmtPut:
           begin
-            if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
-            begin
-              PhonesLabel.Caption := TJSONObject(ResponseData).Strings['name'] + ' Phones';
-              UpdateContactsView;
-            end;
+            PhonesLabel.Caption := TJSONObject(ResponseData).Strings['name'] + ' Phones';
+            UpdateContactsView;
           end;
         end;
       end;
@@ -218,7 +231,7 @@ begin
         case Method of
           hmtGet:
           begin
-            if (ResponseData <> nil) and (ResponseData.JSONType = jtArray) then
+            if ResponseData.JSONType = jtArray then
             begin
               FContactPhones.Free;
               FContactPhones := TJSONArray(ResponseData);
@@ -245,7 +258,7 @@ begin
 end;
 
 procedure TJSONServiceViewFrame.ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+  ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
 var
   ResponseData: TJSONData;
   Message: String;

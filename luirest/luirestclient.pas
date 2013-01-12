@@ -17,7 +17,8 @@ type
 
   TRESTErrorType = (reService, reResponse, reRequest, reSocket);
 
-  TRESTResponseEvent = procedure(ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream) of object;
+  TRESTResponseEvent = procedure(ResourceTag: PtrInt; Method: THTTPMethodType;
+    ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean) of object;
 
   TSocketError = procedure(Sender: TObject; ErrorCode: Integer; const ErrorMessage: String) of object;
 
@@ -34,7 +35,8 @@ type
     FOnResponseError: TRESTResponseEvent;
     FOnResponseSuccess: TRESTResponseEvent;
     FOnSocketError: TSocketError;
-    procedure DoResponseCallback(ResourcePath: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream);
+    function DoResponseCallback(ResourcePath: PtrInt; Method: THTTPMethodType;
+      ResponseCode: Integer; ResponseStream: TStream): Boolean;
     procedure SetBaseURL(const AValue: String);
   public
     constructor Create(AOwner: TComponent); override;
@@ -95,7 +97,7 @@ type
     FParams: TParams;
   protected
     function GetResourcePath: String;
-    procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); virtual; abstract;
+    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; virtual; abstract;
     property ModelDef: TRESTResourceModelDef read FModelDef;
   public
     constructor Create(AModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); virtual;
@@ -133,9 +135,9 @@ type
     function FindModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream);
+      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure SetBaseURL(const AValue: String);
     procedure SetModelDefs(AValue: TRESTResourceModelDefs);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
@@ -171,7 +173,7 @@ type
     //FSnapshot/FReference: TJSONArray;
     FData: TJSONArray;
   protected
-    procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); override;
+    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
     destructor Destroy; override;
     function Fetch: Boolean;
@@ -191,7 +193,7 @@ type
     FOwnsData: Boolean;
     function DoFetch(const Id: String): Boolean;
   protected
-    procedure ParseResponse(Method: THTTPMethodType; ResponseStream: TStream); override;
+    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
     destructor Destroy; override;
     function Delete: Boolean;
@@ -262,21 +264,25 @@ begin
   Result := FResourceClient.FRESTClient.Get(GetResourcePath + '/' + Id, PtrInt(Self));
 end;
 
-procedure TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType; ResponseStream: TStream);
+function TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType;
+  ResponseStream: TStream): Boolean;
 var
   ResponseData: TJSONData;
 begin
+  Result := True;
   ResponseData := StreamToJSONData(ResponseStream);
   case Method of
     hmtGet, hmtPost, hmtPut:
       begin
         if ResponseData = nil then
         begin
+          Result := False;
           FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
           Exit;
         end;
         if ResponseData.JSONType <> jtObject then
         begin
+          Result := False;
           FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtObject got %s',
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
           Exit;
@@ -476,21 +482,25 @@ begin
   Result := FData;
 end;
 
-procedure TRESTJSONArrayResource.ParseResponse(Method: THTTPMethodType; ResponseStream: TStream);
+function TRESTJSONArrayResource.ParseResponse(Method: THTTPMethodType;
+  ResponseStream: TStream): Boolean;
 var
   ResponseData: TJSONData;
 begin
+  Result := True;
   ResponseData := StreamToJSONData(ResponseStream);
   case Method of
     hmtGet:
       begin
         if ResponseData = nil then
         begin
+          Result := False;
           FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
           Exit;
         end;
         if ResponseData.JSONType <> jtArray then
         begin
+          Result := False;
           FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtArray got %s',
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
           Exit;
@@ -566,18 +576,19 @@ end;
 
 { TRESTClient }
 
-procedure TRESTClient.DoResponseCallback(ResourcePath: PtrInt; Method: THTTPMethodType;
-   ResponseCode: Integer; ResponseStream: TStream);
+function TRESTClient.DoResponseCallback(ResourcePath: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream): Boolean;
 begin
+  Result := True;
   if ResponseCode < 300 then
   begin
     if Assigned(FOnResponseSuccess) then
-      FOnResponseSuccess(ResourcePath, Method, ResponseCode, ResponseStream);
+      FOnResponseSuccess(ResourcePath, Method, ResponseCode, ResponseStream, Result);
   end
   else
   begin
     if Assigned(FOnResponseError) then
-      FOnResponseError(ResourcePath, Method, ResponseCode, ResponseStream);
+      FOnResponseError(ResourcePath, Method, ResponseCode, ResponseStream, Result);
   end;
 end;
 
@@ -607,8 +618,8 @@ begin
   Result := FHttpClient.HTTPMethod('DELETE', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := FHttpClient.ResultCode < 300;
-    DoResponseCallback(ResourceTag, hmtDelete, FHttpClient.ResultCode, FHttpClient.Document);
+    Result := DoResponseCallback(ResourceTag, hmtDelete, FHttpClient.ResultCode, FHttpClient.Document) and
+      (FHttpClient.ResultCode < 300);
   end
   else
   begin
@@ -623,8 +634,8 @@ begin
   Result := FHttpClient.HTTPMethod('GET', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := FHttpClient.ResultCode < 300;
-    DoResponseCallback(ResourceTag, hmtGet, FHttpClient.ResultCode, FHttpClient.Document);
+    Result := DoResponseCallback(ResourceTag, hmtGet, FHttpClient.ResultCode, FHttpClient.Document) and
+      (FHttpClient.ResultCode < 300);
   end
   else
   begin
@@ -641,8 +652,8 @@ begin
   Result := FHttpClient.HTTPMethod('POST', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := FHttpClient.ResultCode < 300;
-    DoResponseCallback(ResourceTag, hmtPost, FHttpClient.ResultCode, FHttpClient.Document);
+    Result := DoResponseCallback(ResourceTag, hmtPost, FHttpClient.ResultCode, FHttpClient.Document) and
+      (FHttpClient.ResultCode < 300);
   end
   else
   begin
@@ -659,8 +670,8 @@ begin
   Result := FHttpClient.HTTPMethod('PUT', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := FHttpClient.ResultCode < 300;
-    DoResponseCallback(ResourceTag, hmtPut, FHttpClient.ResultCode, FHttpClient.Document);
+    Result := DoResponseCallback(ResourceTag, hmtPut, FHttpClient.ResultCode, FHttpClient.Document) and
+      (FHttpClient.ResultCode < 300);
   end
   else
   begin
@@ -708,8 +719,9 @@ begin
   Result := FRESTClient.BaseURL;
 end;
 
-procedure TRESTResourceClient.ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+procedure TRESTResourceClient.ResponseError(ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
 var
   ResponseData: TJSONData;
   Message: String;
@@ -728,12 +740,13 @@ begin
   DoError(reService, ResponseCode, Message);
 end;
 
-procedure TRESTResourceClient.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream);
+procedure TRESTResourceClient.ResponseSuccess(ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
 var
   DataResource: TRESTDataResource absolute ResourceTag;
 begin
-  DataResource.ParseResponse(Method, ResponseStream);
+  ValidData := DataResource.ParseResponse(Method, ResponseStream);
 end;
 
 procedure TRESTResourceClient.SetBaseURL(const AValue: String);
