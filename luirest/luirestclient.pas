@@ -117,6 +117,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    function GetCacheData(const ModelName, Path: String): TStream;
     procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
     procedure Invalidate(const ModelName: String);
   end;
@@ -134,6 +135,8 @@ type
     procedure CacheHandlerNeeded;
     function FindModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
+    function GetCacheData(const ModelName, Path: String;
+      DataResource: TRESTDataResource): Boolean;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -145,13 +148,17 @@ type
     procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
   protected
     procedure DoError(ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
+    function Delete(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
     function Get(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
+    function Post(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
+    function Put(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
     procedure ModelDefsChanged;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
+    procedure InvalidateCache(const ModelName: String);
   published
     property BaseURL: String read GetBaseURL write SetBaseURL;
     property ModelDefs: TRESTResourceModelDefs read FModelDefs write SetModelDefs;
@@ -218,6 +225,18 @@ begin
   inherited Destroy;
 end;
 
+function TRESTCacheHandler.GetCacheData(const ModelName, Path: String): TStream;
+var
+  ModelCache: TFPHashObjectList;
+begin
+  //todo: convert path to a hash to avoid the 255 size limit
+  ModelCache := TFPHashObjectList(FModelCacheList.Find(ModelName));
+  if ModelCache <> nil then
+    Result := TMemoryStream(ModelCache.Find(Path))
+  else
+    Result := nil;
+end;
+
 procedure TRESTCacheHandler.UpdateCache(const ModelName, Path: String;
   Stream: TStream);
 var
@@ -261,7 +280,7 @@ end;
 
 function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
 begin
-  Result := FResourceClient.FRESTClient.Get(GetResourcePath + '/' + Id, PtrInt(Self));
+  Result := FResourceClient.Get(GetResourcePath + '/' + Id, Self);
 end;
 
 function TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType;
@@ -326,7 +345,7 @@ begin
     Exit;
   end;
   ResourcePath := GetResourcePath + '/' + IdData.AsString;
-  Result := FResourceClient.FRESTClient.Delete(ResourcePath, PtrInt(Self));
+  Result := FResourceClient.Delete(ResourcePath, Self);
 end;
 
 function TRESTJSONObjectResource.Fetch: Boolean;
@@ -395,12 +414,12 @@ begin
   ResourcePath := GetResourcePath;
   if Id = '' then
   begin
-    Result := FResourceClient.FRESTClient.Post(ResourcePath, PtrInt(Self), FData.AsJSON);
+    Result := FResourceClient.Post(ResourcePath, Self, FData.AsJSON);
   end
   else
   begin
     ResourcePath := ResourcePath + '/' + Id;
-    Result := FResourceClient.FRESTClient.Put(ResourcePath, PtrInt(Self), FData.AsJSON);
+    Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
   end;
 end;
 
@@ -533,7 +552,7 @@ var
   ResourcePath: String;
 begin
   ResourcePath := GetResourcePath;
-  Result := FResourceClient.FRESTClient.Get(ResourcePath, PtrInt(Self));
+  Result := FResourceClient.Get(ResourcePath, Self);
 end;
 
 { TRESTResourceModelDef }
@@ -701,8 +720,6 @@ begin
 end;
 
 function TRESTResourceClient.FindModelDef(const ModelName: String): TRESTResourceModelDef;
-var
-  i: Integer;
 begin
   if FModelDefLookup = nil then
   begin
@@ -717,6 +734,21 @@ end;
 function TRESTResourceClient.GetBaseURL: String;
 begin
   Result := FRESTClient.BaseURL;
+end;
+
+function TRESTResourceClient.GetCacheData(const ModelName, Path: String;
+  DataResource: TRESTDataResource): Boolean;
+var
+  CacheData: TStream;
+begin
+  CacheHandlerNeeded;
+  CacheData := FCacheHandler.GetCacheData(ModelName, Path);
+  Result := CacheData <> nil;
+  if Result then
+  begin
+    CacheData.Position := 0;
+    Result := DataResource.ParseResponse(hmtGet, CacheData);
+  end;
 end;
 
 procedure TRESTResourceClient.ResponseError(ResourceTag: PtrInt;
@@ -784,6 +816,16 @@ begin
     raise Exception.Create(ErrorMessage);
 end;
 
+function TRESTResourceClient.Delete(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := Resource.ModelDef;
+  if ModelDef.CacheMode <> cmNone then
+    InvalidateCache(ModelDef.Name);
+  Result := FRESTClient.Delete(ResourcePath, PtrInt(Resource));
+end;
+
 function TRESTResourceClient.Get(const ResourcePath: String;
   Resource: TRESTDataResource): Boolean;
 var
@@ -794,7 +836,9 @@ begin
   CanCache := ModelDef.CacheMode <> cmNone;
   if CanCache then
   begin
-    //todo: get the cached data
+    Result := GetCacheData(ModelDef.Name, ResourcePath, Resource);
+    if Result then
+      Exit;
   end;
   Result := FRESTClient.Get(ResourcePath, PtrInt(Resource));
   if Result and CanCache then
@@ -802,6 +846,28 @@ begin
     //todo: add local mode
     UpdateCache(ModelDef.Name, ResourcePath, FRESTClient.FHttpClient.Document);
   end;
+end;
+
+function TRESTResourceClient.Post(const ResourcePath: String; Resource: TRESTDataResource;
+  const Data: String): Boolean;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := Resource.ModelDef;
+  if ModelDef.CacheMode <> cmNone then
+    InvalidateCache(ModelDef.Name);
+  Result := FRESTClient.Post(ResourcePath, PtrInt(Resource), Data);
+end;
+
+function TRESTResourceClient.Put(const ResourcePath: String; Resource: TRESTDataResource;
+  const Data: String): Boolean;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := Resource.ModelDef;
+  if ModelDef.CacheMode <> cmNone then
+    InvalidateCache(ModelDef.Name);
+  Result := FRESTClient.Put(ResourcePath, PtrInt(Resource), Data);
 end;
 
 procedure TRESTResourceClient.ModelDefsChanged;
@@ -841,6 +907,12 @@ var
 begin
   ModelDef := FindModelDef(ModelName);
   Result := TRESTJSONObjectResource.Create(ModelDef, Self);
+end;
+
+procedure TRESTResourceClient.InvalidateCache(const ModelName: String);
+begin
+  CacheHandlerNeeded;
+  FCacheHandler.Invalidate(ModelName);
 end;
 
 end.
