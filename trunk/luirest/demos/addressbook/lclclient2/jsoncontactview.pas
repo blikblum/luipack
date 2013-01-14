@@ -6,25 +6,29 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Buttons, fpjson;
+  Buttons, StdCtrls, fpjson, LuiRESTClient, LuiDataClasses;
 
 type
 
   { TJSONContactViewForm }
 
   TJSONContactViewForm = class(TForm)
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
+    SaveButton: TBitBtn;
+    CancelButton: TBitBtn;
+    CategoryComboBox: TComboBox;
+    Label1: TLabel;
     NameEdit: TLabeledEdit;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
   private
+    FCategoriesData: TJSONArray;
     FData: TJSONObject;
+    procedure SetCategoriesData(AValue: TJSONArray);
     procedure SetData(AValue: TJSONObject);
-    { private declarations }
   public
-    { public declarations }
+    property CategoriesData: TJSONArray read FCategoriesData write SetCategoriesData;
     property Data: TJSONObject read FData write SetData;
-    class function EditData(AOwner: TCustomForm; ContactData: TJSONObject): Boolean;
+    class function EditData(AOwner: TCustomForm; Resources: TRESTResourceClient; ContactData: TJSONObject): Boolean;
   end;
 
 var
@@ -32,13 +36,27 @@ var
 
 implementation
 
+uses
+  LuiJSONUtils;
+
 {$R *.lfm}
 
 { TJSONContactViewForm }
 
-procedure TJSONContactViewForm.BitBtn1Click(Sender: TObject);
+procedure TJSONContactViewForm.SaveButtonClick(Sender: TObject);
 begin
   FData.Strings['name'] := NameEdit.Text;
+  if CategoryComboBox.ItemIndex = -1 then
+    FData.Nulls['categoryid'] := True
+  else
+  begin
+    FData.Integers['categoryid'] := FCategoriesData.Objects[CategoryComboBox.ItemIndex].Integers['id'];
+  end;
+end;
+
+procedure TJSONContactViewForm.FormShow(Sender: TObject);
+begin
+  CategoryComboBox.ItemIndex := JSONArrayIndexOf(FCategoriesData, ['id', FData.Get('categoryid', -1)]);
 end;
 
 procedure TJSONContactViewForm.SetData(AValue: TJSONObject);
@@ -47,12 +65,28 @@ begin
   NameEdit.Text := AValue.Strings['name'];
 end;
 
-class function TJSONContactViewForm.EditData(AOwner: TCustomForm;
+procedure TJSONContactViewForm.SetCategoriesData(AValue: TJSONArray);
+var
+  i: Integer;
+begin
+  FCategoriesData := AValue;
+  CategoryComboBox.Items.BeginUpdate;
+  for i := 0 to FCategoriesData.Count - 1 do
+    CategoryComboBox.AddItem(FCategoriesData.Objects[i].Strings['name'], nil);
+  CategoryComboBox.Items.EndUpdate;
+end;
+
+class function TJSONContactViewForm.EditData(AOwner: TCustomForm; Resources: TRESTResourceClient;
   ContactData: TJSONObject): Boolean;
+var
+  Categories: IJSONArrayResource;
 begin
   with TJSONContactViewForm.Create(AOwner) do
    try
      Data := ContactData;
+     Categories := Resources.GetJSONArray('category');
+     Categories.Fetch;
+     CategoriesData := Categories.Data;
      Result := ShowModal = mrOK;
    finally
      Destroy;

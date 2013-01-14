@@ -40,25 +40,29 @@ object JSONResourceViewFrame: TJSONResourceViewFrame
     Left = 8
     Height = 280
     Top = 80
-    Width = 344
-    ColCount = 2
+    Width = 346
+    ColCount = 3
     FixedCols = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
     RowCount = 1
     TabOrder = 2
     OnSelectCell = ContactsGridSelectCell
     ColWidths = (
-      64
-      252
+      47
+      189
+      84
     )
     Cells = (
-      2
+      3
       0
       0
       'Id'
       1
       0
       'Name'
+      2
+      0
+      'Category'
     )
   end
   object PhonesGrid: TStringGrid
@@ -173,6 +177,13 @@ object JSONResourceViewFrame: TJSONResourceViewFrame
             ParamType = ptInput
           end>
         Path = 'contacts/{contactid}/phones'
+      end    
+      item
+        CacheMode = cmSession
+        IdField = 'id'
+        Name = 'category'
+        Params = <>
+        Path = 'categories'
       end>
     OnError = ResourcesError
     left = 413

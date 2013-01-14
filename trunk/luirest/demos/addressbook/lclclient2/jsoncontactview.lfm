@@ -1,11 +1,12 @@
 object JSONContactViewForm: TJSONContactViewForm
-  Left = 415
-  Height = 116
-  Top = 205
-  Width = 321
+  Left = 611
+  Height = 166
+  Top = 368
+  Width = 314
   Caption = 'Edit Contact'
-  ClientHeight = 116
-  ClientWidth = 321
+  ClientHeight = 166
+  ClientWidth = 314
+  OnShow = FormShow
   Position = poOwnerFormCenter
   LCLVersion = '1.1'
   object NameEdit: TLabeledEdit
@@ -25,26 +26,44 @@ object JSONContactViewForm: TJSONContactViewForm
     EditLabel.ParentColor = False
     TabOrder = 0
   end
-  object BitBtn1: TBitBtn
-    Left = 80
+  object SaveButton: TBitBtn
+    Left = 69
     Height = 30
-    Top = 80
+    Top = 128
     Width = 107
+    Caption = 'Save'
     Default = True
-    DefaultCaption = True
     Kind = bkOK
     ModalResult = 1
-    OnClick = BitBtn1Click
+    OnClick = SaveButtonClick
     TabOrder = 1
   end
-  object BitBtn2: TBitBtn
+  object CancelButton: TBitBtn
     Left = 200
     Height = 30
-    Top = 80
+    Top = 128
     Width = 107
+    Cancel = True
     DefaultCaption = True
-    Kind = bkClose
-    ModalResult = 11
+    Kind = bkCancel
+    ModalResult = 2
     TabOrder = 2
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 65
+    Width = 48
+    Caption = 'Category'
+    ParentColor = False
+  end
+  object CategoryComboBox: TComboBox
+    Left = 8
+    Height = 23
+    Top = 82
+    Width = 260
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 3
   end
 end

@@ -13,10 +13,10 @@ type
   { TJSONPhoneViewForm }
 
   TJSONPhoneViewForm = class(TForm)
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
+    SaveButton: TBitBtn;
+    CancelButton: TBitBtn;
     NameEdit: TLabeledEdit;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
   private
     FData: TJSONObject;
     procedure SetData(AValue: TJSONObject);
@@ -36,7 +36,7 @@ implementation
 
 { TJSONPhoneViewForm }
 
-procedure TJSONPhoneViewForm.BitBtn1Click(Sender: TObject);
+procedure TJSONPhoneViewForm.SaveButtonClick(Sender: TObject);
 begin
   FData.Strings['number'] := NameEdit.Text;
 end;
