@@ -39,6 +39,7 @@ procedure TMainRESTModule.DataModuleCreate(Sender: TObject);
 begin
   AddressBookDataset.ExecSQL('PRAGMA foreign_keys = ON');
   Resources.Register('contacts', TContacts, 0);
+  Resources.Register('categories', TCategories, 0);
 end;
 
 procedure TMainRESTModule.DataModuleRequest(Sender: TObject;
