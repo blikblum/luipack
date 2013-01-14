@@ -6,7 +6,7 @@ object JSONPhoneViewForm: TJSONPhoneViewForm
   Caption = 'Edit Phone'
   ClientHeight = 123
   ClientWidth = 320
-  Position = poScreenCenter
+  Position = poOwnerFormCenter
   LCLVersion = '1.1'
   object NameEdit: TLabeledEdit
     Left = 8
@@ -25,26 +25,27 @@ object JSONPhoneViewForm: TJSONPhoneViewForm
     EditLabel.ParentColor = False
     TabOrder = 0
   end
-  object BitBtn1: TBitBtn
+  object SaveButton: TBitBtn
     Left = 80
     Height = 30
     Top = 80
     Width = 107
+    Caption = 'Save'
     Default = True
-    DefaultCaption = True
     Kind = bkOK
     ModalResult = 1
-    OnClick = BitBtn1Click
+    OnClick = SaveButtonClick
     TabOrder = 1
   end
-  object BitBtn2: TBitBtn
+  object CancelButton: TBitBtn
     Left = 200
     Height = 30
     Top = 80
     Width = 107
+    Cancel = True
     DefaultCaption = True
-    Kind = bkClose
-    ModalResult = 11
+    Kind = bkCancel
+    ModalResult = 2
     TabOrder = 2
   end
 end

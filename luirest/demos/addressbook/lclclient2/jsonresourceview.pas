@@ -53,7 +53,8 @@ type
 implementation
 
 uses
-  JSONPhoneView, JSONContactView;
+  JSONPhoneView, JSONContactView,
+  LuiJSONUtils;
 
 {$R *.lfm}
 
@@ -141,7 +142,7 @@ begin
   ContactData := SelectedContact;
   if ContactData = nil then
     Exit;
-  if TJSONContactViewForm.EditData(GetParentForm(Self), ContactData) then
+  if TJSONContactViewForm.EditData(GetParentForm(Self), Resources, ContactData) then
   begin
     ContactResource := Resources.GetJSONObject('contact');
     ContactResource.SetData(ContactData, False);
@@ -175,7 +176,7 @@ var
   ContactResource: IJSONObjectResource;
 begin
   ContactData := TJSONObject.Create(['name', 'New Contact']);
-  if TJSONContactViewForm.EditData(GetParentForm(Self), ContactData) then
+  if TJSONContactViewForm.EditData(GetParentForm(Self), Resources, ContactData) then
   begin
     ContactResource := Resources.GetJSONObject('contact');
     ContactResource.SetData(ContactData, True);
@@ -227,15 +228,28 @@ end;
 
 procedure TJSONResourceViewFrame.UpdateContactsView;
 var
-  i: Integer;
+  i, CategoryId, CategoryIndex: Integer;
   ContactData: TJSONObject;
+  Categories: IJSONArrayResource;
+  CategoryName: String;
 begin
+  Categories := Resources.GetJSONArray('category');
+  Categories.Fetch;
   ContactsGrid.RowCount := FContacts.Data.Count + 1;
-  for i := 0 to FContacts.Data.Count -1 do
+  for i := 0 to FContacts.Data.Count - 1 do
   begin
     ContactData := FContacts.Data.Objects[i];
     ContactsGrid.Cells[0, i + 1] := ContactData.Strings['id'];
     ContactsGrid.Cells[1, i + 1] := ContactData.Strings['name'];
+    CategoryName := '';
+    CategoryId := ContactData.Get('categoryid', -1);
+    if CategoryId <> -1 then
+    begin;
+      CategoryIndex := JSONArrayIndexOf(Categories.Data, ['id', CategoryId]);
+      if CategoryIndex <> -1 then
+        CategoryName := Categories.Data.Objects[CategoryIndex].Strings['name'];
+    end;
+    ContactsGrid.Cells[2, i + 1] := CategoryName;
   end;
 end;
 
