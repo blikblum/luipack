@@ -89,10 +89,130 @@ type
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
+  { TCategory }
+
+  TCategory = class(TSqlite3DatasetResource)
+  public
+    procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePut(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
+
+  { TCategories }
+
+  TCategories = class(TSqlite3DatasetResource)
+  public
+    procedure AfterConstruction; override;
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePost(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
 implementation
 
 uses
   LuiJSONUtils, fpjson, XMLWrite, DOM;
+
+{ TCategory }
+
+procedure TCategory.HandleDelete(ARequest: TRequest; AResponse: TResponse);
+begin
+  Dataset.ExecSQL(Format('Delete from Categories where Id = %s', [URIParams.Strings['categoryid']]));
+end;
+
+procedure TCategory.HandleGet(ARequest: TRequest; AResponse: TResponse);
+begin
+  Dataset.SQL := Format('Select Id, Name From Categories where Id = %s',
+    [URIParams.Strings['categoryid']]);
+  Dataset.Close;
+  Dataset.Open;
+  if Dataset.RecordCount > 0 then
+  begin
+    DatasetFormatter.SetContent(AResponse, Dataset, False);
+  end
+  else
+  begin
+    SetResponseStatus(AResponse, 404, 'Category "%s" not found', [URIParams.Strings['categoryid']]);
+  end;
+
+end;
+
+procedure TCategory.HandlePut(ARequest: TRequest; AResponse: TResponse);
+const
+  UpdateSQL = 'Update Categories Set Name = ''%s'' where Id = %s';
+var
+  RequestData: TJSONObject;
+begin
+  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  try
+    Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Strings['name'],
+      URIParams.Strings['categoryid']]));
+    if Dataset.ReturnCode = SQLITE_DONE then
+    begin
+      if Dataset.RowsAffected > 0 then
+      begin
+        Dataset.Close;
+        Dataset.SQL := Format('Select Id, Name From Categories where Id = %s',
+          [URIParams.Strings['categoryid']]);
+        Dataset.Open;
+        DatasetFormatter.SetContent(AResponse, Dataset, False);
+      end
+      else
+      begin
+        SetResponseStatus(AResponse, 404, 'Category "%s" not found', [URIParams.Strings['categoryid']]);
+      end;
+    end
+    else
+    begin
+      SetResponseStatus(AResponse, 500, 'Error updating resource', []);
+    end;
+  finally
+    RequestData.Destroy;
+  end;
+end;
+
+{ TCategories }
+
+procedure TCategories.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  SetDefaultSubPath('categoryid', TCategory, 0);
+end;
+
+procedure TCategories.HandleGet(ARequest: TRequest; AResponse: TResponse);
+begin
+  Dataset.SQL := 'Select Id, Name From Categories';
+  Dataset.Close;
+  Dataset.Open;
+  DatasetFormatter.SetContent(AResponse, Dataset, True);
+end;
+
+procedure TCategories.HandlePost(ARequest: TRequest; AResponse: TResponse);
+const
+  InsertSQL = 'Insert Into Categories (Name) Values (''%s'')';
+var
+  RequestData: TJSONObject;
+begin
+  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  try
+    Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name']]));
+    if Dataset.ReturnCode = SQLITE_DONE then
+    begin
+      Dataset.Close;
+      Dataset.SQL := Format('Select Id, Name From Categories where Id = %d',
+        [Dataset.LastInsertRowId]);
+      Dataset.Open;
+      DatasetFormatter.SetContent(AResponse, Dataset, False);
+    end
+    else
+    begin
+      AResponse.Code := 400;
+      AResponse.Contents.Add('Unable too add category ' + Dataset.ReturnString);
+    end;
+  finally
+    RequestData.Destroy;
+  end;
+end;
 
 { TXMLDatasetResourceFormatter }
 
@@ -291,7 +411,7 @@ end;
 
 procedure TContacts.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
-  Dataset.SQL := 'Select Id, Name From Contacts';
+  Dataset.SQL := 'Select Id, Name, CategoryId From Contacts';
   Dataset.Close;
   Dataset.Open;
   DatasetFormatter.SetContent(AResponse, Dataset, True);
@@ -299,17 +419,18 @@ end;
 
 procedure TContacts.HandlePost(ARequest: TRequest; AResponse: TResponse);
 const
-  InsertSQL = 'Insert Into Contacts (Name) Values (''%s'')';
+  InsertSQL = 'Insert Into Contacts (Name, CategoryId) Values (''%s'', %s)';
 var
   RequestData: TJSONObject;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
-    Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name']]));
+    Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name'],
+      RequestData.Elements['categoryid'].AsJSON]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       Dataset.Close;
-      Dataset.SQL := Format('Select Id, Name From Contacts where Id = %d',
+      Dataset.SQL := Format('Select Id, Name, CategoryId From Contacts where Id = %d',
         [Dataset.LastInsertRowId]);
       Dataset.Open;
       DatasetFormatter.SetContent(AResponse, Dataset, False);
@@ -339,7 +460,7 @@ end;
 
 procedure TContact.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
-  Dataset.SQL := Format('Select Id, Name From Contacts where Id = %s',
+  Dataset.SQL := Format('Select Id, Name, CategoryId From Contacts where Id = %s',
     [URIParams.Strings['contactid']]);
   Dataset.Close;
   Dataset.Open;
@@ -355,20 +476,20 @@ end;
 
 procedure TContact.HandlePut(ARequest: TRequest; AResponse: TResponse);
 const
-  UpdateSQL = 'Update Contacts Set Name = ''%s'' where Id = %s';
+  UpdateSQL = 'Update Contacts Set Name = ''%s'', CategoryId = %s where Id = %s';
 var
   RequestData: TJSONObject;
 begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Strings['name'],
-      URIParams.Strings['contactid']]));
+      RequestData.Elements['categoryid'].AsJSON, URIParams.Strings['contactid']]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       if Dataset.RowsAffected > 0 then
       begin
         Dataset.Close;
-        Dataset.SQL := Format('Select Id, Name From Contacts where Id = %s',
+        Dataset.SQL := Format('Select Id, Name, CategoryId From Contacts where Id = %s',
           [URIParams.Strings['contactid']]);
         Dataset.Open;
         DatasetFormatter.SetContent(AResponse, Dataset, False);
