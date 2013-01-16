@@ -133,6 +133,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure CallMethod(const AMethodName: String; AllPages: Boolean);
     function PageByName(const PageName: String): TVirtualPage;
   published
     property DisplayOptions: TControlDisplayOptions read GetDisplayOptions write SetDisplayOptions;
@@ -289,6 +290,31 @@ destructor TVirtualPageManager.Destroy;
 begin
   FPages.Destroy;
   inherited Destroy;
+end;
+
+procedure TVirtualPageManager.CallMethod(const AMethodName: String; AllPages: Boolean);
+var
+  Page: TVirtualPage;
+  i: Integer;
+begin
+  if AllPages then
+  begin
+    for i := 0 to FPages.Count -1 do
+    begin
+      Page := FPages[i];
+      if Page.Control <> nil then
+        LuiMiscUtils.CallMethod(Page.Control, AMethodName);
+    end;
+  end
+  else
+  begin
+    if (FPageIndex > -1) and (FPageIndex < FPages.Count) then
+    begin
+     Page := FPages[FPageIndex];
+     if Page.Control <> nil then
+       LuiMiscUtils.CallMethod(Page.Control, AMethodName);
+    end;
+  end;
 end;
 
 function TVirtualPageManager.PageByName(const PageName: String): TVirtualPage;
