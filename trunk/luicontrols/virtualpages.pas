@@ -133,6 +133,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function PageByName(const PageName: String): TVirtualPage;
   published
     property DisplayOptions: TControlDisplayOptions read GetDisplayOptions write SetDisplayOptions;
     property OnPageHide: TVirtualPageEvent read FOnPageHide write FOnPageHide;
@@ -288,6 +289,11 @@ destructor TVirtualPageManager.Destroy;
 begin
   FPages.Destroy;
   inherited Destroy;
+end;
+
+function TVirtualPageManager.PageByName(const PageName: String): TVirtualPage;
+begin
+  Result := FPages.PageByName(PageName);
 end;
 
 { TControlDisplayOptions }
