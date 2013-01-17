@@ -46,9 +46,9 @@ function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
 
 function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
 
-function JSONArrayIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 
-function JSONArrayIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
 
 procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
@@ -316,7 +316,7 @@ begin
     Result := Data.Value;
 end;
 
-function JSONArrayIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 begin
   for Result := 0 to JSONArray.Count - 1 do
   begin
@@ -326,7 +326,7 @@ begin
   Result := -1;
 end;
 
-function JSONArrayIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
 var
   PropCount, i: Integer;
   ItemData, PropData: TJSONData;
