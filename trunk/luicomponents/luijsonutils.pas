@@ -336,7 +336,7 @@ begin
   PropCount := Length(Properties);
   Result := -1;
   if odd(PropCount) then
-    raise Exception.Create('JSONArrayIndexOf - Properties must have even length');
+    raise Exception.Create('GetJSONIndexOf - Properties must have even length');
   PropCount := PropCount div 2;
   for Result := 0 to JSONArray.Count - 1 do
   begin
