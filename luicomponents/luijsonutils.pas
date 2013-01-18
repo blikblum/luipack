@@ -34,6 +34,8 @@ procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array o
 
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
 
+function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
@@ -48,7 +50,7 @@ function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 
-function GetJSONIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
 
 procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
 
@@ -250,6 +252,17 @@ begin
     DestObj.Elements[SrcObj.Names[i]] := SrcObj.Items[i].Clone;
 end;
 
+function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
+var
+  i: Integer;
+begin
+  i := GetJSONIndexOf(JSONArray, ObjProps);
+  if i > -1 then
+    Result := TJSONObject(JSONArray.Items[i])
+  else
+    Result := nil;
+end;
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 var
   Data: TJSONData;
@@ -326,14 +339,14 @@ begin
   Result := -1;
 end;
 
-function GetJSONIndexOf(JSONArray: TJSONArray; const Properties: array of Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
 var
   PropCount, i: Integer;
   ItemData, PropData: TJSONData;
   ItemObj: TJSONObject absolute ItemData;
   ObjMatches: Boolean;
 begin
-  PropCount := Length(Properties);
+  PropCount := Length(ObjProps);
   Result := -1;
   if odd(PropCount) then
     raise Exception.Create('GetJSONIndexOf - Properties must have even length');
@@ -346,8 +359,8 @@ begin
     begin
       for i := 0 to PropCount - 1 do
       begin
-        PropData := GetJSONProp(ItemObj, Properties[i * 2]);
-        ObjMatches := (PropData <> nil) and SameValue(PropData, Properties[(i * 2) + 1]);
+        PropData := GetJSONProp(ItemObj, ObjProps[i * 2]);
+        ObjMatches := (PropData <> nil) and SameValue(PropData, ObjProps[(i * 2) + 1]);
         if not ObjMatches then
           break;
       end;
