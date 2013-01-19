@@ -199,6 +199,7 @@ type
     FIdValue: Variant;
     FOwnsData: Boolean;
     function DoFetch(const Id: String): Boolean;
+    function DoSave(const Id: String): Boolean;
   protected
     function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
@@ -208,6 +209,7 @@ type
     function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
     function Save: Boolean;
+    function Save(IdValue: Variant): Boolean;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
@@ -281,6 +283,22 @@ end;
 function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
 begin
   Result := FResourceClient.Get(GetResourcePath + '/' + Id, Self);
+end;
+
+function TRESTJSONObjectResource.DoSave(const Id: String): Boolean;
+var
+  ResourcePath: String;
+begin
+  ResourcePath := GetResourcePath;
+  if Id = '' then
+  begin
+    Result := FResourceClient.Post(ResourcePath, Self, FData.AsJSON);
+  end
+  else
+  begin
+    ResourcePath := ResourcePath + '/' + Id;
+    Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
+  end;
 end;
 
 function TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType;
@@ -385,7 +403,7 @@ var
   IdFieldData: TJSONData;
   Id: String;
 begin
-  if VarIsEmpty(FIdValue) then
+  if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
   begin
     if FData = nil then
     begin
@@ -411,16 +429,13 @@ begin
   end
   else
     Id := VarToStr(FIdValue);
-  ResourcePath := GetResourcePath;
-  if Id = '' then
-  begin
-    Result := FResourceClient.Post(ResourcePath, Self, FData.AsJSON);
-  end
-  else
-  begin
-    ResourcePath := ResourcePath + '/' + Id;
-    Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
-  end;
+  Result := DoSave(Id);
+end;
+
+function TRESTJSONObjectResource.Save(IdValue: Variant): Boolean;
+begin
+  FIdValue := IdValue;
+  Result := DoSave(VarToStr(IdValue));
 end;
 
 procedure TRESTJSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
