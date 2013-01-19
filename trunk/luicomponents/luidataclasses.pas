@@ -14,7 +14,7 @@ type
     function Fetch: Boolean; overload;
     function GetParams: TParams;
     function ParamByName(const ParamName: String): TParam;
-    function Save: Boolean;
+    function Save: Boolean; overload;
     property Params: TParams read GetParams;
   end;
 
@@ -25,6 +25,7 @@ type
     function Delete: Boolean;
     function Fetch(IdValue: Variant): Boolean; overload;
     function GetData: TJSONObject;
+    function Save(IdValue: Variant): Boolean; overload;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
