@@ -348,21 +348,37 @@ end;
 function TRESTJSONObjectResource.Delete: Boolean;
 var
   ResourcePath: String;
-  IdData: TJSONData;
+  IdFieldData: TJSONData;
+  Id: String;
 begin
-  if FData = nil then
+  Result := False;
+  if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
   begin
-    Result := False;
-    Exit;
-  end;
-  IdData := FData.Find(FModelDef.IdField);
-  if (IdData = nil) or not (IdData.JSONType in [jtString, jtNumber]) then
-  begin
-    //todo error handling
-    Result := False;
-    Exit;
-  end;
-  ResourcePath := GetResourcePath + '/' + IdData.AsString;
+    if FData = nil then
+    begin
+      FResourceClient.DoError(reRequest, 0, 'Delete: Data not set');
+      Exit;
+    end;
+    IdFieldData := FData.Find(FModelDef.IdField);
+    if IdFieldData <> nil then
+    begin
+      if (IdFieldData.JSONType in [jtString, jtNumber]) then
+        Id := IdFieldData.AsString
+      else
+      begin
+        FResourceClient.DoError(reRequest, 0, 'Delete: Id field must be string or number');
+        Exit;
+      end
+    end
+    else
+    begin
+      FResourceClient.DoError(reRequest, 0, 'Delete: Id field not set');
+      Exit;
+    end;
+  end
+  else
+    Id := VarToStr(FIdValue);
+  ResourcePath := GetResourcePath + '/' + Id;
   Result := FResourceClient.Delete(ResourcePath, Self);
 end;
 
@@ -399,14 +415,15 @@ end;
 
 function TRESTJSONObjectResource.Save: Boolean;
 var
-  ResourcePath: String;
   IdFieldData: TJSONData;
   Id: String;
 begin
+  Result := False;
   if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
   begin
     if FData = nil then
     begin
+      //true or false??
       Result := True;
       Exit;
     end
@@ -419,7 +436,7 @@ begin
           Id := IdFieldData.AsString
         else
         begin
-          FResourceClient.DoError(reRequest, 0, 'Id property must be string or number');
+          FResourceClient.DoError(reRequest, 0, 'Save: Id field must be string or number');
           Exit;
         end
       end
