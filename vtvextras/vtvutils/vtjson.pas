@@ -327,6 +327,7 @@ type
   public
     destructor Destroy; override;
     function GetData(Node: PVirtualNode): TJSONData;
+    function GetNode(Data: TJSONData): PVirtualNode;
     procedure LoadData;
     property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
@@ -1009,6 +1010,18 @@ destructor TCustomVirtualJSONDataView.Destroy;
 begin
   FCheckedData.Free;
   inherited Destroy;
+end;
+
+function TCustomVirtualJSONDataView.GetNode(Data: TJSONData): PVirtualNode;
+begin
+  Result := GetFirst;
+  while Result <> nil do
+  begin
+    if GetData(Result) = Data then
+      Exit;
+    Result := GetNext(Result);
+  end;
+  Result := nil;
 end;
 
 function TCustomVirtualJSONDataView.GetData(Node: PVirtualNode): TJSONData;
