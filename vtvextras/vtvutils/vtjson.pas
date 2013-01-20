@@ -474,6 +474,7 @@ type
     property OnGetNodeDataSize;
     property OnGetPopupMenu;
     property OnGetUserClipboardFormats;
+    property OnHeaderCheckBoxClick;
     property OnHeaderClick;
     property OnHeaderDblClick;
     property OnHeaderDragged;
@@ -664,6 +665,7 @@ type
     property OnGetNodeDataSize;
     property OnGetPopupMenu;
     property OnGetUserClipboardFormats;
+    property OnHeaderCheckBoxClick;
     property OnHeaderClick;
     property OnHeaderDblClick;
     property OnHeaderDragged;
