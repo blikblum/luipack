@@ -38,6 +38,19 @@ type
     property Data: TJSONArray read GetData;
   end;
 
+  { TJSONResourceLookup }
+
+  TJSONResourceLookup = class(TComponent)
+  private
+    FKeyProperty: String;
+    FResource: IJSONArrayResource;
+    FValueProperty: String;
+  public
+    property KeyProperty: String read FKeyProperty write FKeyProperty;
+    property Resource: IJSONArrayResource read FResource write FResource;
+    property ValueProperty: String read FValueProperty write FValueProperty;
+  end;
+
 
 implementation
 
