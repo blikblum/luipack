@@ -43,17 +43,19 @@ type
 
   TfrJSONDataLink = class
   private
+    FHideBand: Boolean;
     FBandName: String;
     FCrossBandName: String;
     FCrossDataset: TfrJSONDataset;
     FDataset: TfrJSONDataset;
     FPropertyName: String;
   public
-    constructor Create(const ABandName, APropertyName, ACrossBandName: String);
+    constructor Create(const ABandName, APropertyName, ACrossBandName: String; AHideBand: Boolean);
     property BandName: String read FBandName;
     property CrossBandName: String read FCrossBandName;
     property CrossDataset: TfrJSONDataset read FCrossDataset write FCrossDataset;
     property Dataset: TfrJSONDataset read FDataset write FDataset;
+    property HideBand: Boolean read FHideBand;
     property PropertyName: String read FPropertyName;
   end;
 
@@ -124,11 +126,13 @@ end;
 
 { TfrJSONDataLink }
 
-constructor TfrJSONDataLink.Create(const ABandName, APropertyName, ACrossBandName: String);
+constructor TfrJSONDataLink.Create(const ABandName, APropertyName, ACrossBandName: String;
+  AHideBand: Boolean);
 begin
   FBandName := ABandName;
   FPropertyName := APropertyName;
   FCrossBandName := ACrossBandName;
+  FHideBand := AHideBand;
 end;
 
 { TfrJSONDataset }
@@ -306,7 +310,8 @@ begin
       begin
         PropertyName := ItemObject.Strings['property'];
         FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(ItemObject.Strings['band'],
-          PropertyName, GetJSONProp(ItemObject, 'crossband', '')));
+          PropertyName, GetJSONProp(ItemObject, 'crossband', ''),
+          GetJSONProp(ItemObject, 'hideband', False)));
       end;
     end;
   end;
@@ -324,12 +329,18 @@ begin
   for i := 0 to FDataLinks.Count - 1 do
   begin
     DataLink := TfrJSONDataLink(FDataLinks[i]);
-    PropertyData := FData.Elements[DataLink.PropertyName];
-    if DataLink.Dataset = nil then
-      DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
     Band := FindObject(DataLink.BandName) as TfrBandView;
     if Band = nil then
       raise Exception.CreateFmt('Band "%s" not found', [DataLink.BandName]);
+    PropertyData := FData.Find(DataLink.PropertyName);
+    if PropertyData = nil then
+    begin
+      if DataLink.HideBand then
+        Band.Visible := False;
+      Continue;
+    end;
+    if DataLink.Dataset = nil then
+      DataLink.Dataset := CreateJSONDataset(TfrJSONDataset, i);
     Band.DataSet := DataLink.Dataset.Name;
     DataLink.Dataset.Data := PropertyData;
     if DataLink.CrossBandName <> '' then
@@ -379,9 +390,8 @@ begin
     begin
       PropertyName := Copy(ParName, 1, DotPos - 1);
       DataLink := TfrJSONDataLink(FDataLinks.Find(PropertyName));
-      if DataLink <> nil then
+      if (DataLink <> nil) and (DataLink.Dataset <> nil) then
       begin
-        Assert(DataLink.Dataset <> nil, 'Dataset not created for property ' + PropertyName);
         PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
         DataLink.Dataset.GetValue(PropertyName, ParValue);
       end
