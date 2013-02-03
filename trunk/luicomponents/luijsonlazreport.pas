@@ -538,6 +538,7 @@ end;
 procedure TfrJSONReport.LoadData(ReportData, ConfigData: TJSONObject;
   OwnsReportData: Boolean; OwnsConfigData: Boolean);
 begin
+  //todo: unify LoadData
   if ReportData = nil then
     raise Exception.Create('TfrJSONReport.LoadData ReportData = nil');
   FreeOwnedData;
@@ -547,8 +548,16 @@ begin
     FData := ReportData.Objects[FDataProperty]
   else
     FData := ReportData;
-  FConfigData := ConfigData;
-  FOwnsConfigData := OwnsConfigData;
+  if ConfigData <> nil then
+  begin
+    FConfigData := ConfigData;
+    FOwnsConfigData := OwnsConfigData;
+  end
+  else
+  begin
+    FConfigData := GetJSONProp(ReportData, FConfigProperty) as TJSONObject;
+    FOwnsConfigData := False;
+  end;
   LoadConfigData;
 end;
 
