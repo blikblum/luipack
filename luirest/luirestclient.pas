@@ -169,7 +169,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants;
+  LuiJSONUtils, variants, StrUtils;
 
 type
   { TRESTJSONArrayResource }
@@ -282,21 +282,22 @@ end;
 
 function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
 begin
-  Result := FResourceClient.Get(GetResourcePath + '/' + Id, Self);
+  Result := FResourceClient.Get(GetResourcePath + IfThen(Id <> '', '/' + Id), Self);
 end;
 
 function TRESTJSONObjectResource.DoSave(const Id: String): Boolean;
 var
-  ResourcePath: String;
+  ResourcePath, IdField: String;
 begin
+  IdField := FModelDef.IdField;
   ResourcePath := GetResourcePath;
-  if Id = '' then
+  if (Id = '') and (IdField <> '') then
   begin
     Result := FResourceClient.Post(ResourcePath, Self, FData.AsJSON);
   end
   else
   begin
-    ResourcePath := ResourcePath + '/' + Id;
+    ResourcePath := ResourcePath + IfThen(Id <> '', '/' + Id);
     Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
   end;
 end;
@@ -385,21 +386,29 @@ end;
 function TRESTJSONObjectResource.Fetch: Boolean;
 var
   IdFieldData: TJSONData;
+  IdField, Id: String;
 begin
-  if (FData = nil) then
+  IdField := FModelDef.IdField;
+  if IdField <> '' then
   begin
-    Result := False;
-    Exit;
-  end;
-  IdFieldData := FData.Find(FModelDef.IdField);
-  if (IdFieldData = nil) or not (IdFieldData.JSONType in [jtString, jtNumber]) then
-  begin
-    //todo error handling
-    Result := False;
-    Exit;
-  end;
+    if (FData = nil) then
+    begin
+      Result := False;
+      Exit;
+    end;
+    IdFieldData := FData.Find(IdField);
+    if (IdFieldData = nil) or not (IdFieldData.JSONType in [jtString, jtNumber]) then
+    begin
+      //todo error handling
+      Result := False;
+      Exit;
+    end;
+    Id := IdFieldData.AsString;
+  end
+  else
+    Id := '';
   FIdValue := Unassigned;
-  Result := DoFetch(IdFieldData.AsString);
+  Result := DoFetch(Id);
 end;
 
 function TRESTJSONObjectResource.Fetch(IdValue: Variant): Boolean;
