@@ -16,11 +16,12 @@ type
     FConditionsSQL: String;
     FConnection: TSQLConnection;
     FResultColumns: String;
-    FIsCollection: Boolean;
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
     FSelectSQL: String;
     FUpdateColumns: TStringList;
+    FReadOnly: Boolean;
+    FIsCollection: Boolean;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
     procedure SetUpdateColumns(const AValue: String);
   public
@@ -36,6 +37,7 @@ type
     property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
     property PrimaryKeyParam: String read FPrimaryKeyParam write FPrimaryKeyParam;
     property ResultColumns: String read FResultColumns write FResultColumns;
+    property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
     property UpdateColumns: String write SetUpdateColumns;
   end;
@@ -97,7 +99,9 @@ begin
       if PropData = nil then
         PropData := Obj2.Find(FieldName);
       if PropData <> nil then
-        Field.Value := PropData.Value;
+        Field.Value := PropData.Value
+      else
+        Field.Value := Null;
     end;
   end;
 end;
@@ -177,7 +181,7 @@ procedure TSqldbJSONResource.HandleDelete(ARequest: TRequest; AResponse: TRespon
 var
   Query: TSQLQuery;
 begin
-  if not FIsCollection then
+  if not FIsCollection and not FReadOnly then
   begin
     Query := TSQLQuery.Create(nil);
     try
@@ -214,7 +218,7 @@ var
   Query: TSQLQuery;
   NewResourcePath: String;
 begin
-  if FIsCollection then
+  if FIsCollection and not FReadOnly then
   begin
     Query := TSQLQuery.Create(nil);
     try
@@ -264,7 +268,7 @@ var
   ResponseData: TJSONData;
   Query: TSQLQuery;
 begin
-  if not FIsCollection then
+  if not FIsCollection and not FReadOnly then
   begin
     Query := TSQLQuery.Create(nil);
     try
