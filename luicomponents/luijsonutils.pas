@@ -431,7 +431,7 @@ begin
     varnull:  Result := JSONData.JSONType = jtNull;
     varstring: Result := (JSONData.JSONType = jtString) and (JSONData.AsString = Value);
     vardouble, vardate: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsFloat = Value);
-    varinteger, varlongword: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInteger = Value);
+    varinteger, varlongword, varshortint: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInteger = Value);
     varint64, varqword: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInt64 = Value);
     varboolean: Result := (JSONData.JSONType = jtBoolean) and (JSONData.AsBoolean = Value);
   end;
