@@ -809,7 +809,12 @@ begin
   if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
     Message := TJSONObject(ResponseData).Get('message', '');
   if Message = '' then
-    Message := 'Unknow error message';
+  begin
+    //todo: check if message is a valid string
+    SetLength(Message, ResponseStream.Size);
+    ResponseStream.Position := 0;
+    ResponseStream.Write(Message[1], ResponseStream.Size);
+  end;
   DoError(reService, ResponseCode, Message);
 end;
 
