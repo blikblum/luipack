@@ -22,8 +22,9 @@ type
     FUpdateColumns: TStringList;
     FReadOnly: Boolean;
     FIsCollection: Boolean;
-    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
     procedure SetUpdateColumns(const AValue: String);
+  protected
+    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject);
   public
     destructor Destroy; override;
     procedure AfterConstruction; override;
@@ -39,8 +40,11 @@ type
     property ResultColumns: String read FResultColumns write FResultColumns;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
+    //todo: rename to InputFields
     property UpdateColumns: String write SetUpdateColumns;
   end;
+
+procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 
 implementation
 
@@ -67,18 +71,18 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; Columns: TStrings);
+procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject);
 var
   i: Integer;
   FieldName: String;
   PropData: TJSONData;
   Field: TField;
 begin
-  if Columns.Count > 0 then
+  if FUpdateColumns.Count > 0 then
   begin
-    for i := 0 to Columns.Count -1 do
+    for i := 0 to FUpdateColumns.Count -1 do
     begin
-      FieldName := Columns[i];
+      FieldName := FUpdateColumns[i];
       PropData := Obj1.Find(FieldName);
       if PropData = nil then
         PropData := Obj2.Find(FieldName);
@@ -231,7 +235,7 @@ begin
         try
           Query.Open;
           Query.Append;
-          SetQueryData(Query, RequestData, URIParams, FUpdateColumns);
+          SetQueryData(Query, RequestData, URIParams);
           Query.Post;
           Query.ApplyUpdates;
           FConnection.Transaction.Commit;
@@ -280,7 +284,7 @@ begin
       RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
       try
         Query.Edit;
-        SetQueryData(Query, RequestData, URIParams, FUpdateColumns);
+        SetQueryData(Query, RequestData, URIParams);
         Query.Post;
         Query.ApplyUpdates;
         FConnection.Transaction.CommitRetaining;
