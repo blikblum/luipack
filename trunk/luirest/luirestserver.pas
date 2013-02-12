@@ -375,6 +375,9 @@ begin
 end;
 
 procedure TRESTResource.HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef);
+var
+  AInt64: Int64;
+  ADouble: Double;
 begin
   if FSubPathResources <> nil then
   begin
@@ -382,7 +385,12 @@ begin
     if SubPathResourceDef = nil then
     begin
       SubPathResourceDef := FSubPathResources.DefaultResourceDef;
-      URIParams.Strings[FSubPathParamName] := SubPath;
+      if TryStrToInt64(SubPath, AInt64) then
+        URIParams.Int64s[FSubPathParamName] := AInt64
+      else if TryStrToFloat(SubPath, ADouble) then
+        URIParams.Floats[FSubPathParamName] := ADouble
+      else
+        URIParams.Strings[FSubPathParamName] := SubPath;
     end;
   end;
 end;
