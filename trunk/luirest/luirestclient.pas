@@ -37,6 +37,7 @@ type
     FOnSocketError: TSocketError;
     function DoResponseCallback(ResourcePath: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream): Boolean;
+    function GetHttp: THTTPSend;
     procedure SetBaseURL(const AValue: String);
   public
     constructor Create(AOwner: TComponent); override;
@@ -47,6 +48,7 @@ type
     function Put(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
   published
     property BaseURL: String read FBaseURL write SetBaseURL;
+    property Http: THTTPSend read GetHttp;
     property OnResponseSuccess: TRESTResponseEvent read FOnResponseSuccess write FOnResponseSuccess;
     property OnResponseError: TRESTResponseEvent read FOnResponseError write FOnResponseError;
     property OnSocketError: TSocketError read FOnSocketError write FOnSocketError;
@@ -137,6 +139,7 @@ type
     function GetBaseURL: String;
     function GetCacheData(const ModelName, Path: String;
       DataResource: TRESTDataResource): Boolean;
+    function GetHttp: THTTPSend;
     procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -161,6 +164,7 @@ type
     procedure InvalidateCache(const ModelName: String);
   published
     property BaseURL: String read GetBaseURL write SetBaseURL;
+    property Http: THTTPSend read GetHttp;
     property ModelDefs: TRESTResourceModelDefs read FModelDefs write SetModelDefs;
     property OnError: TRESTErrorEvent read FOnError write FOnError;
   end;
@@ -652,6 +656,11 @@ begin
   end;
 end;
 
+function TRESTClient.GetHttp: THTTPSend;
+begin
+  Result := FHttpClient;
+end;
+
 procedure TRESTClient.SetBaseURL(const AValue: String);
 begin
   if (AValue = '') or (AValue[Length(AValue)] <> '/') then
@@ -790,6 +799,11 @@ begin
     CacheData.Position := 0;
     Result := DataResource.ParseResponse(hmtGet, CacheData);
   end;
+end;
+
+function TRESTResourceClient.GetHttp: THTTPSend;
+begin
+  Result := FRESTClient.FHttpClient;
 end;
 
 procedure TRESTResourceClient.ResponseError(ResourceTag: PtrInt;
