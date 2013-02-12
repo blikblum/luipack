@@ -293,12 +293,15 @@ begin
 end;
 
 procedure TWizardManager.SetPageIndex(AValue: Integer);
+var
+  OldPageIndex: Integer;
 begin
   if (FPageIndex = AValue) or (AValue >= FPages.Count)
     or (csLoading in ComponentState) then
     Exit;
-  FPages.UpdateActivePage(FPageIndex, AValue);
+  OldPageIndex := FPageIndex;
   FPageIndex := AValue;
+  FPages.UpdateActivePage(OldPageIndex, AValue);
 end;
 
 procedure TWizardManager.SetPages(const Value: TWizardPages);
