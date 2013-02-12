@@ -22,9 +22,10 @@ type
     FUpdateColumns: TStringList;
     FReadOnly: Boolean;
     FIsCollection: Boolean;
+    FPutAsPatch: Boolean;
     procedure SetUpdateColumns(const AValue: String);
   protected
-    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject);
+    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
     procedure AfterConstruction; override;
@@ -38,6 +39,8 @@ type
     property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
     property PrimaryKeyParam: String read FPrimaryKeyParam write FPrimaryKeyParam;
     property ResultColumns: String read FResultColumns write FResultColumns;
+    //todo: remove when Patch support is added
+    property PutAsPatch: Boolean read FPutAsPatch write FPutAsPatch;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
     //todo: rename to InputFields
@@ -71,7 +74,8 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject);
+procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject;
+  DoPatch: Boolean);
 var
   i: Integer;
   FieldName: String;
@@ -105,7 +109,10 @@ begin
       if PropData <> nil then
         Field.Value := PropData.Value
       else
-        Field.Value := Null;
+      begin
+        if not DoPatch then
+          Field.Value := Null;
+      end;
     end;
   end;
 end;
@@ -284,7 +291,7 @@ begin
       RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
       try
         Query.Edit;
-        SetQueryData(Query, RequestData, URIParams);
+        SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
         Query.Post;
         Query.ApplyUpdates;
         FConnection.Transaction.CommitRetaining;
