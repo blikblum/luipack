@@ -7,7 +7,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
         <CompilerMessages>
@@ -19,17 +19,20 @@
     <Files Count="1">
       <Item1>
         <Filename Value="zvdatetimejsonmediators.pas"/>
-        <UnitName Value="zvdatetimejsonmediators"/>
+        <UnitName Value="ZVDateTimeJSONMediators"/>
       </Item1>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="2">
+    <RequiredPkgs Count="3">
       <Item1>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="LuiLCLComponents"/>
       </Item1>
       <Item2>
-        <PackageName Value="ZVDateTimeCtrls"/>
+        <PackageName Value="luicontrols"/>
       </Item2>
+      <Item3>
+        <PackageName Value="ZVDateTimeCtrls"/>
+      </Item3>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
