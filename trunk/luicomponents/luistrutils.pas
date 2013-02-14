@@ -51,6 +51,8 @@ function Capitalize(const U: UnicodeString; const ExcludeWords: array of Unicode
 
 function Capitalize(const S: AnsiString; const ExcludeWords: array of UnicodeString): AnsiString;
 
+function CompareNatural(s1, s2: string): Integer;
+
 procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String; Delimiter: Char = ';');
 
 function ExtractInitials(const S: AnsiString; const ExcludeWords: array of String): AnsiString;
@@ -58,7 +60,7 @@ function ExtractInitials(const S: AnsiString; const ExcludeWords: array of Strin
 implementation
 
 uses
-  strutils;
+  strutils, math;
 
 function MatchWords(const U: UnicodeString; const A: array of UnicodeString): Boolean;
 var
@@ -153,6 +155,51 @@ function Capitalize(const S: AnsiString; const ExcludeWords: array of UnicodeStr
 begin
   Result := UTF8Encode(Capitalize(UTF8Decode(S), ExcludeWords));
 end;
+
+//todo: optimize
+//https://groups.google.com/forum/?fromgroups=#!topic/borland.public.delphi.language.delphi.general/bNmsT6fZLNI
+function CompareNatural(s1, s2: string): integer; // by Roy M Klever
+
+  function ExtractNr(n: integer; var txt: string): int64;
+  begin
+    while (n <= Length(txt)) and (txt[n] in ['0'..'9']) do
+      n := n + 1;
+    Result := StrToInt64Def(Copy(txt, 1, (n - 1)), 0);
+    Delete(txt, 1, (n - 1));
+  end;
+
+var
+  b: boolean;
+begin
+  Result := 0;
+  s1 := LowerCase(s1);
+  s2 := LowerCase(s2);
+  if (s1 <> s2) and (s1 <> '') and (s2 <> '') then
+  begin
+    b := False;
+    while (not b) do
+    begin
+      if ((s1[1] in ['0'..'9']) and (s2[1] in ['0'..'9'])) then
+        Result := Sign(ExtractNr(1, s1) - ExtractNr(1, s2))
+      else
+        Result := Sign(integer(s1[1]) - integer(s2[1]));
+      b := (Result <> 0) or (Min(Length(s1), Length(s2)) < 2);
+      if not b then
+      begin
+        Delete(s1, 1, 1);
+        Delete(s2, 1, 1);
+      end;
+    end;
+  end;
+  if Result = 0 then
+  begin
+    if (Length(s1) = 1) and (Length(s2) = 1) then
+      Result := Sign(integer(s1[1]) - integer(s2[1]))
+    else
+      Result := Sign(Length(s1) - Length(s2));
+  end;
+end;
+
 
 procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String; Delimiter: Char);
 var
