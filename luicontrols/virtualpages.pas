@@ -27,6 +27,7 @@ type
     procedure SetBorderSpacing(AValue: TControlBorderSpacing);
   public
     constructor Create;
+    destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure SetControlBounds(Control: TControl);
   published
@@ -337,6 +338,12 @@ begin
   FTop := -1;
   FWidth := -1;
   FHeight := -1;
+end;
+
+destructor TControlDisplayOptions.Destroy;
+begin
+  FBorderSpacing.Destroy;
+  inherited Destroy;
 end;
 
 procedure TControlDisplayOptions.Assign(Source: TPersistent);
