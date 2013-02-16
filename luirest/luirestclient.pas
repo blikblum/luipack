@@ -331,7 +331,10 @@ begin
           Exit;
         end;
         if FData = nil then
-          FData := TJSONObject(ResponseData)
+        begin
+          FData := TJSONObject(ResponseData);
+          FOwnsData := True;
+        end
         else
         begin
           FData.Clear;
