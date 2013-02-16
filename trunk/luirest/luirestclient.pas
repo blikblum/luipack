@@ -327,6 +327,7 @@ begin
           Result := False;
           FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtObject got %s',
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
+          ResponseData.Destroy;
           Exit;
         end;
         if FData = nil then

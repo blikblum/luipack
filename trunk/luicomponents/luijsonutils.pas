@@ -818,7 +818,7 @@ begin
       raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [AFileName, E.Message]);
     on E: EParserError do
     begin
-       Result.Free;
+       FreeAndNil(Result);
        raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [AFileName, E.Message]);
     end;
   end;
