@@ -959,7 +959,7 @@ end;
 
 class function TSQLite3ConnectionDef.TypeName: string;
 begin
-  Result := 'SQLite3';
+  Result := 'SQLite3Slim';
 end;
 
 class function TSQLite3ConnectionDef.ConnectionClass: TSQLConnectionClass;
