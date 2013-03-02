@@ -94,7 +94,7 @@ type
     constructor Create(AOwner : TComponent); override;
     function GetInsertID: int64;
     procedure GetFieldNames(const TableName : string; List :  TStrings); override;
-    procedure LoadExtension(LibraryFile: string);
+    procedure LoadExtension(const LibraryFile: string);
   published
     property Options: TSqliteOptions read FOptions write SetOptions;
   end;
@@ -531,7 +531,7 @@ begin
         end;
 end;
 
-Function ParseSQLiteDateTime(S : String) : TDateTime;
+Function ParseSQLiteDateTime(const S : String) : TDateTime;
 
 var
   P : Integer;
@@ -908,7 +908,7 @@ begin
   GetDBInfo(stColumns,TableName,'name',List);
 end;
 
-procedure Tsqlite3connection.LoadExtension(Libraryfile: String);
+procedure Tsqlite3connection.LoadExtension(const Libraryfile: String);
 var
   LoadResult: integer;
 begin
