@@ -1,15 +1,21 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="sqliteextensions_package"/>
+    <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
@@ -17,7 +23,7 @@
     <Description Value="SqliteExtensions provides classes to manipulate sqlite databases"/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="5">
+    <Files Count="6">
       <Item1>
         <Filename Value="sqlitetrees.pas"/>
         <UnitName Value="SqliteTrees"/>
@@ -39,6 +45,10 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="register_sqliteextensions"/>
       </Item5>
+      <Item6>
+        <Filename Value="sqlite3slimconn.pp"/>
+        <UnitName Value="sqlite3slimconn"/>
+      </Item6>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
