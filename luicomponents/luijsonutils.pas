@@ -36,6 +36,10 @@ procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
 
 function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
 
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONObject): Boolean;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONArray): Boolean;
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
@@ -261,6 +265,22 @@ begin
     Result := TJSONObject(JSONArray.Items[i])
   else
     Result := nil;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONObject): Boolean;
+var
+  Data: TJSONData absolute PropData;
+begin
+  Data := JSONObj.Find(PropName, jtObject);
+  Result := PropData <> nil;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONArray): Boolean;
+var
+  Data: TJSONData absolute PropData;
+begin
+  Data := JSONObj.Find(PropName, jtArray);
+  Result := PropData <> nil;
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
