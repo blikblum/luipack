@@ -25,6 +25,7 @@ type
     FPutAsPatch: Boolean;
     procedure SetUpdateColumns(const AValue: String);
   protected
+    function GetQuery(AOwner: TComponent): TSQLQuery;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
@@ -122,6 +123,12 @@ end;
 procedure TSqldbJSONResource.SetUpdateColumns(const AValue: String);
 begin
   FUpdateColumns.DelimitedText := AValue;
+end;
+
+function TSqldbJSONResource.GetQuery(AOwner: TComponent): TSQLQuery;
+begin
+  Result := TSQLQuery.Create(AOwner);
+  Result.DataBase := FConnection;
 end;
 
 destructor TSqldbJSONResource.Destroy;
