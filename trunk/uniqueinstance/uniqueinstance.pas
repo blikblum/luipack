@@ -52,6 +52,7 @@ type
     FOnOtherInstance: TOnOtherInstance;
     FUpdateInterval: Cardinal;
     FEnabled: Boolean;
+    FPriorInstanceRunning: Boolean;
     procedure ReceiveMessage(Sender: TObject);
     procedure TerminateApp(Sender: TObject; var Done: Boolean);
     {$ifdef unix}
@@ -61,6 +62,7 @@ type
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
+    property PriorInstanceRunning: Boolean read FPriorInstanceRunning;
   published
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
@@ -135,6 +137,8 @@ begin
     IPCClient.ServerId := GetServerId(FIdentifier);
     if IsServerRunning(IPCClient) then
     begin
+      //A older instance is running.
+      FPriorInstanceRunning := True;
       //A instance is already running
       //Send a message and then exit
       if Assigned(FOnOtherInstance) then
