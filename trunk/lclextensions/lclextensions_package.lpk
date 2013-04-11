@@ -23,7 +23,7 @@
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="5"/>
+    <Version Minor="5" Release="1"/>
     <Files Count="3">
       <Item1>
         <Filename Value="delphicompat.pas"/>
