@@ -35,7 +35,7 @@ type
     FOnResponseError: TRESTResponseEvent;
     FOnResponseSuccess: TRESTResponseEvent;
     FOnSocketError: TSocketError;
-    function DoResponseCallback(ResourcePath: PtrInt; Method: THTTPMethodType;
+    function DoResponseCallback(ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream): Boolean;
     function GetHttp: THTTPSend;
     procedure SetBaseURL(const AValue: String);
@@ -644,19 +644,19 @@ end;
 
 { TRESTClient }
 
-function TRESTClient.DoResponseCallback(ResourcePath: PtrInt;
+function TRESTClient.DoResponseCallback(ResourceTag: PtrInt;
   Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream): Boolean;
 begin
   Result := True;
   if ResponseCode < 300 then
   begin
     if Assigned(FOnResponseSuccess) then
-      FOnResponseSuccess(ResourcePath, Method, ResponseCode, ResponseStream, Result);
+      FOnResponseSuccess(ResourceTag, Method, ResponseCode, ResponseStream, Result);
   end
   else
   begin
     if Assigned(FOnResponseError) then
-      FOnResponseError(ResourcePath, Method, ResponseCode, ResponseStream, Result);
+      FOnResponseError(ResourceTag, Method, ResponseCode, ResponseStream, Result);
   end;
 end;
 
