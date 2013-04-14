@@ -212,15 +212,23 @@ var
   URIPath: String;
   RootPathPos: Integer;
 begin
-  DoRequest(ARequest, AResponse);
-  AResponse.ContentType := FContentType;
-  TRESTResource.FServiceModule := Self;
-  URIPath := ARequest.PathInfo;
-  RootPathPos := Pos(FRootPath, URIPath);
-  if RootPathPos <> 0 then
-    ResolveRequest(ARequest, AResponse, UpperCase(ARequest.Method), URIPath, RootPathPos + Length(FRootPath))
-  else
-    SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
+  try
+    DoRequest(ARequest, AResponse);
+    AResponse.ContentType := FContentType;
+    TRESTResource.FServiceModule := Self;
+    URIPath := ARequest.PathInfo;
+    RootPathPos := Pos(FRootPath, URIPath);
+    if RootPathPos <> 0 then
+      ResolveRequest(ARequest, AResponse, UpperCase(ARequest.Method), URIPath, RootPathPos + Length(FRootPath))
+    else
+      SetResponseStatus(AResponse, 404, 'Root path not found. URIPath: "%s" RootPath: "%s"', [URIPath, FRootPath]);
+  except
+    on E:Exception do
+    begin
+      //todo: send stack backtrace
+      SetResponseStatus(AResponse, 500, E.Message, []);
+    end;
+  end;
 end;
 
 procedure TRESTServiceModule.ResolveRequest(ARequest: TRequest; AResponse: TResponse;
