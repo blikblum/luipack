@@ -1,11 +1,17 @@
 unit AddressBookResources;
 
 {$mode objfpc}{$H+}
+{$define USE_SQLITE3_SLIM}
 
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb, sqlite3conn;
+  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb,
+  {$ifdef USE_SQLITE3_SLIM}
+  sqlite3slimconn
+  {$else}
+  sqlite3conn
+  {$endif};
 
 const
   RES_CONTACTS = 1;
@@ -62,7 +68,6 @@ begin
       SqldbResource.IsCollection := True;
       SqldbResource.SelectSQL := 'Select Id, Name from contacts';
       SqldbResource.PrimaryKey := 'Id';
-      SqldbResource.UpdateColumns := 'name';
       SqldbResource.SetDefaultSubPath('contactid', @CreateResource, RES_CONTACT);
     end;
     RES_CONTACT:
@@ -71,7 +76,6 @@ begin
       SqldbResource.ConditionsSQL := 'where Id = :contactid';
       SqldbResource.PrimaryKey := 'Id';
       SqldbResource.PrimaryKeyParam := 'contactid';
-      SqldbResource.UpdateColumns := 'name';
       SqldbResource.RegisterSubPath('phones', @CreateResource, RES_CONTACTPHONES);
     end;
     RES_CONTACTPHONES:

@@ -44,7 +44,7 @@ end;
 procedure TContactViewForm.SetData(AValue: TJSONObject);
 begin
   FData := AValue;
-  NameEdit.Text := AValue.Strings['name'];
+  NameEdit.Text := AValue.Get('name', '');
 end;
 
 class function TContactViewForm.EditData(AOwner: TCustomForm;

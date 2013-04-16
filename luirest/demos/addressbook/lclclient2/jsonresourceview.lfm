@@ -25,7 +25,7 @@ object JSONResourceViewFrame: TJSONResourceViewFrame
     EditLabel.Caption = 'BaseURL'
     EditLabel.ParentColor = False
     TabOrder = 0
-    Text = 'http://localhost/luirest/addressbook.exe/'
+    Text = 'http://localhost/luirest/addressbook.cgi/'
   end
   object LoadDataButton: TButton
     Left = 482
@@ -185,7 +185,6 @@ object JSONResourceViewFrame: TJSONResourceViewFrame
         Params = <>
         Path = 'categories'
       end>
-    OnError = ResourcesError
     left = 413
     top = 234
   end

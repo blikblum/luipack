@@ -24,7 +24,7 @@ object XMLServiceViewFrame: TXMLServiceViewFrame
     EditLabel.Caption = 'BaseURL'
     EditLabel.ParentColor = False
     TabOrder = 0
-    Text = 'http://localhost/luirest/addressbook.exe/'
+    Text = 'http://localhost/luirest/addressbook.cgi/'
   end
   object LoadDataButton: TButton
     Left = 482
@@ -155,8 +155,8 @@ object XMLServiceViewFrame: TXMLServiceViewFrame
     TabOrder = 9
   end
   object RESTClient: TRESTClient
-    OnResponseSuccess = ResponseSuccess
-    OnResponseError = ResponseError
+    OnResponseSuccess = RESTClientResponseSuccess
+    OnResponseError = RESTClientResponseError
     OnSocketError = SocketError
     left = 440
     top = 259

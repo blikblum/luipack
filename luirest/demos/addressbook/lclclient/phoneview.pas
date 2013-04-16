@@ -43,9 +43,8 @@ end;
 
 procedure TPhoneViewForm.SetData(AValue: TJSONObject);
 begin
-  if FData = AValue then Exit;
   FData := AValue;
-  NameEdit.Text := AValue.Strings['number'];
+  NameEdit.Text := AValue.Get('number', '');
 end;
 
 class function TPhoneViewForm.EditData(AOwner: TCustomForm;

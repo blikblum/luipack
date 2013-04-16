@@ -5,7 +5,7 @@ unit RESTResources;
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, HTTPDefs, fpjson;
+  Classes, SysUtils, LuiRESTServer, HTTPDefs;
 
 type
 

@@ -43,9 +43,8 @@ end;
 
 procedure TJSONPhoneViewForm.SetData(AValue: TJSONObject);
 begin
-  if FData = AValue then Exit;
   FData := AValue;
-  NameEdit.Text := AValue.Strings['number'];
+  NameEdit.Text := AValue.Get('number', '');
 end;
 
 class function TJSONPhoneViewForm.EditData(AOwner: TCustomForm;

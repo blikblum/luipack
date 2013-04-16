@@ -111,7 +111,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, fpjson, XMLWrite, DOM;
+  LuiJSONUtils, fpjson, XMLWrite, DOM, variants;
 
 { TCategory }
 
@@ -382,7 +382,7 @@ begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(InsertSQL, [URIParams.Strings['contactid'],
-      RequestData.Strings['number']]));
+      RequestData.Get('number', '')]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       Dataset.Close;
@@ -426,7 +426,7 @@ begin
   RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name'],
-      RequestData.Elements['categoryid'].AsJSON]));
+      VarToStrDef(RequestData.Get('categoryid'), 'NULL')]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       Dataset.Close;

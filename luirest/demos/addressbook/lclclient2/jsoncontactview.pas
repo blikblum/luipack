@@ -56,7 +56,7 @@ end;
 
 procedure TJSONContactViewForm.FormShow(Sender: TObject);
 begin
-  CategoryComboBox.ItemIndex := JSONArrayIndexOf(FCategoriesData, ['id', FData.Get('categoryid', -1)]);
+  CategoryComboBox.ItemIndex := GetJSONIndexOf(FCategoriesData, ['id', FData.Get('categoryid', -1)]);
 end;
 
 procedure TJSONContactViewForm.SetData(AValue: TJSONObject);
