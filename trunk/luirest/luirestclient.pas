@@ -17,12 +17,12 @@ type
 
   TRESTErrorType = (reService, reResponse, reRequest, reSocket);
 
-  TRESTResponseEvent = procedure(ResourceTag: PtrInt; Method: THTTPMethodType;
+  TRESTResponseEvent = procedure(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
     ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean) of object;
 
   TSocketError = procedure(Sender: TObject; ErrorCode: Integer; const ErrorMessage: String) of object;
 
-  TRESTErrorEvent = procedure(Sender: TObject; ErrorType: TRESTErrorType;
+  TRESTErrorEvent = procedure(Sender: TObject; const ResourcePath: String; ErrorType: TRESTErrorType;
     ErrorCode: Integer; const ErrorMessage: String; var Handled: Boolean) of object;
 
   { TRESTClient }
@@ -35,7 +35,7 @@ type
     FOnResponseError: TRESTResponseEvent;
     FOnResponseSuccess: TRESTResponseEvent;
     FOnSocketError: TSocketError;
-    function DoResponseCallback(ResourceTag: PtrInt; Method: THTTPMethodType;
+    function DoResponseCallback(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream): Boolean;
     function GetHttp: THTTPSend;
     procedure SetBaseURL(const AValue: String);
@@ -99,7 +99,7 @@ type
     FParams: TParams;
   protected
     function GetResourcePath: String;
-    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; virtual; abstract;
+    function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; virtual; abstract;
     property ModelDef: TRESTResourceModelDef read FModelDef;
   public
     constructor Create(AModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); virtual;
@@ -137,12 +137,12 @@ type
     procedure CacheHandlerNeeded;
     function FindModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
-    function GetCacheData(const ModelName, Path: String;
+    function GetCacheData(const ModelName, ResourcePath: String;
       DataResource: TRESTDataResource): Boolean;
     function GetHttp: THTTPSend;
-    procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
+    procedure ResponseError(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
-    procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
+    procedure ResponseSuccess(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure SetBaseURL(const AValue: String);
     procedure SetModelDefs(AValue: TRESTResourceModelDefs);
@@ -150,7 +150,7 @@ type
       const ErrorMessage: String);
     procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
   protected
-    procedure DoError(ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
+    procedure DoError(const ResourcePath: String; ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
     function Delete(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
     function Get(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
     function Post(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
@@ -184,7 +184,7 @@ type
     //FSnapshot/FReference: TJSONArray;
     FData: TJSONArray;
   protected
-    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
+    function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
     destructor Destroy; override;
     function Fetch: Boolean;
@@ -205,7 +205,7 @@ type
     function DoFetch(const Id: String): Boolean;
     function DoSave(const Id: String): Boolean;
   protected
-    function ParseResponse(Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
+    function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
     destructor Destroy; override;
     function Delete: Boolean;
@@ -306,7 +306,7 @@ begin
   end;
 end;
 
-function TRESTJSONObjectResource.ParseResponse(Method: THTTPMethodType;
+function TRESTJSONObjectResource.ParseResponse(const ResourcePath: String; Method: THTTPMethodType;
   ResponseStream: TStream): Boolean;
 var
   ResponseData: TJSONData;
@@ -319,13 +319,13 @@ begin
         if ResponseData = nil then
         begin
           Result := False;
-          FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
+          FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
           Exit;
         end;
         if ResponseData.JSONType <> jtObject then
         begin
           Result := False;
-          FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtObject got %s',
+          FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Expected jtObject got %s',
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
           ResponseData.Destroy;
           Exit;
@@ -361,11 +361,12 @@ var
   Id: String;
 begin
   Result := False;
+  ResourcePath := GetResourcePath;
   if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
   begin
     if FData = nil then
     begin
-      FResourceClient.DoError(reRequest, 0, 'Delete: Data not set');
+      FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Data not set');
       Exit;
     end;
     IdFieldData := FData.Find(FModelDef.IdField);
@@ -375,19 +376,19 @@ begin
         Id := IdFieldData.AsString
       else
       begin
-        FResourceClient.DoError(reRequest, 0, 'Delete: Id field must be string or number');
+        FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Id field must be string or number');
         Exit;
       end
     end
     else
     begin
-      FResourceClient.DoError(reRequest, 0, 'Delete: Id field not set');
+      FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Id field not set');
       Exit;
     end;
   end
   else
     Id := VarToStr(FIdValue);
-  ResourcePath := GetResourcePath + '/' + Id;
+  ResourcePath := ResourcePath + '/' + Id;
   Result := FResourceClient.Delete(ResourcePath, Self);
 end;
 
@@ -453,7 +454,7 @@ begin
           Id := IdFieldData.AsString
         else
         begin
-          FResourceClient.DoError(reRequest, 0, 'Save: Id field must be string or number');
+          FResourceClient.DoError(GetResourcePath, reRequest, 0, 'Save: Id field must be string or number');
           Exit;
         end
       end
@@ -550,7 +551,7 @@ begin
   Result := FData;
 end;
 
-function TRESTJSONArrayResource.ParseResponse(Method: THTTPMethodType;
+function TRESTJSONArrayResource.ParseResponse(const ResourcePath: String; Method: THTTPMethodType;
   ResponseStream: TStream): Boolean;
 var
   ResponseData: TJSONData;
@@ -563,13 +564,13 @@ begin
         if ResponseData = nil then
         begin
           Result := False;
-          FResourceClient.DoError(reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
+          FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: No response data', [FModelDef.Name]));
           Exit;
         end;
         if ResponseData.JSONType <> jtArray then
         begin
           Result := False;
-          FResourceClient.DoError(reResponse, 0, Format('%s: Invalid response format. Expected jtArray got %s',
+          FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Expected jtArray got %s',
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
           Exit;
         end;
@@ -644,19 +645,19 @@ end;
 
 { TRESTClient }
 
-function TRESTClient.DoResponseCallback(ResourceTag: PtrInt;
+function TRESTClient.DoResponseCallback(const ResourcePath: String; ResourceTag: PtrInt;
   Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream): Boolean;
 begin
   Result := True;
   if ResponseCode < 300 then
   begin
     if Assigned(FOnResponseSuccess) then
-      FOnResponseSuccess(ResourceTag, Method, ResponseCode, ResponseStream, Result);
+      FOnResponseSuccess(ResourcePath, ResourceTag, Method, ResponseCode, ResponseStream, Result);
   end
   else
   begin
     if Assigned(FOnResponseError) then
-      FOnResponseError(ResourceTag, Method, ResponseCode, ResponseStream, Result);
+      FOnResponseError(ResourcePath, ResourceTag, Method, ResponseCode, ResponseStream, Result);
   end;
 end;
 
@@ -691,7 +692,7 @@ begin
   Result := FHttpClient.HTTPMethod('DELETE', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := DoResponseCallback(ResourceTag, hmtDelete, FHttpClient.ResultCode, FHttpClient.Document) and
+    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtDelete, FHttpClient.ResultCode, FHttpClient.Document) and
       (FHttpClient.ResultCode < 300);
   end
   else
@@ -707,7 +708,7 @@ begin
   Result := FHttpClient.HTTPMethod('GET', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := DoResponseCallback(ResourceTag, hmtGet, FHttpClient.ResultCode, FHttpClient.Document) and
+    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtGet, FHttpClient.ResultCode, FHttpClient.Document) and
       (FHttpClient.ResultCode < 300);
   end
   else
@@ -725,7 +726,7 @@ begin
   Result := FHttpClient.HTTPMethod('POST', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := DoResponseCallback(ResourceTag, hmtPost, FHttpClient.ResultCode, FHttpClient.Document) and
+    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtPost, FHttpClient.ResultCode, FHttpClient.Document) and
       (FHttpClient.ResultCode < 300);
   end
   else
@@ -743,7 +744,7 @@ begin
   Result := FHttpClient.HTTPMethod('PUT', BaseURL + ResourcePath);
   if Result then
   begin
-    Result := DoResponseCallback(ResourceTag, hmtPut, FHttpClient.ResultCode, FHttpClient.Document) and
+    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtPut, FHttpClient.ResultCode, FHttpClient.Document) and
       (FHttpClient.ResultCode < 300);
   end
   else
@@ -790,18 +791,18 @@ begin
   Result := FRESTClient.BaseURL;
 end;
 
-function TRESTResourceClient.GetCacheData(const ModelName, Path: String;
+function TRESTResourceClient.GetCacheData(const ModelName, ResourcePath: String;
   DataResource: TRESTDataResource): Boolean;
 var
   CacheData: TStream;
 begin
   CacheHandlerNeeded;
-  CacheData := FCacheHandler.GetCacheData(ModelName, Path);
+  CacheData := FCacheHandler.GetCacheData(ModelName, ResourcePath);
   Result := CacheData <> nil;
   if Result then
   begin
     CacheData.Position := 0;
-    Result := DataResource.ParseResponse(hmtGet, CacheData);
+    Result := DataResource.ParseResponse(ResourcePath, hmtGet, CacheData);
   end;
 end;
 
@@ -810,9 +811,8 @@ begin
   Result := FRESTClient.FHttpClient;
 end;
 
-procedure TRESTResourceClient.ResponseError(ResourceTag: PtrInt;
-  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
-  var ValidData: Boolean);
+procedure TRESTResourceClient.ResponseError(const ResourcePath: String; ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
 var
   ResponseData: TJSONData;
   Message: String;
@@ -833,16 +833,15 @@ begin
     ResponseStream.Position := 0;
     ResponseStream.Write(Message[1], ResponseStream.Size);
   end;
-  DoError(reService, ResponseCode, Message);
+  DoError(ResourcePath, reService, ResponseCode, Message);
 end;
 
-procedure TRESTResourceClient.ResponseSuccess(ResourceTag: PtrInt;
-  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
-  var ValidData: Boolean);
+procedure TRESTResourceClient.ResponseSuccess(const ResourcePath: String; ResourceTag: PtrInt;
+  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
 var
   DataResource: TRESTDataResource absolute ResourceTag;
 begin
-  ValidData := DataResource.ParseResponse(Method, ResponseStream);
+  ValidData := DataResource.ParseResponse(ResourcePath, Method, ResponseStream);
 end;
 
 procedure TRESTResourceClient.SetBaseURL(const AValue: String);
@@ -858,7 +857,7 @@ end;
 procedure TRESTResourceClient.SocketError(Sender: TObject; ErrorCode: Integer;
   const ErrorMessage: String);
 begin
-  DoError(reSocket, ErrorCode, ErrorMessage);
+  DoError('', reSocket, ErrorCode, ErrorMessage);
 end;
 
 procedure TRESTResourceClient.UpdateCache(const ModelName, Path: String;
@@ -868,14 +867,14 @@ begin
   FCacheHandler.UpdateCache(ModelName, Path, Stream);
 end;
 
-procedure TRESTResourceClient.DoError(ErrorType: TRESTErrorType; ErrorCode: Integer;
-  const ErrorMessage: String);
+procedure TRESTResourceClient.DoError(const ResourcePath: String; ErrorType: TRESTErrorType;
+  ErrorCode: Integer; const ErrorMessage: String);
 var
   Handled: Boolean;
 begin
   Handled := False;
   if Assigned(FOnError) then
-    FOnError(Self, ErrorType, ErrorCode, ErrorMessage, Handled);
+    FOnError(Self, ResourcePath, ErrorType, ErrorCode, ErrorMessage, Handled);
   if not Handled then
     raise Exception.Create(ErrorMessage);
 end;
