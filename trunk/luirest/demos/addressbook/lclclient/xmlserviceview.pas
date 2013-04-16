@@ -35,10 +35,12 @@ type
     procedure EditContactButtonClick(Sender: TObject);
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
-    procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
-    procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
+    procedure RESTClientResponseError(const ResourcePath: String; ResourceTag: PtrInt;
+      Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+      var ValidData: Boolean);
+    procedure RESTClientResponseSuccess(const ResourcePath: String; ResourceTag: PtrInt;
+      Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+      var ValidData: Boolean);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
   private
@@ -107,8 +109,33 @@ begin
   RESTClient.Get('contacts?format=xml', RES_CONTACTS);
 end;
 
-procedure TXMLServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt;
-  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+procedure TXMLServiceViewFrame.RESTClientResponseError(const ResourcePath: String;
+  ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
+var
+  ResponseDoc: TXMLDocument;
+  ResponseNode, MessageNode: TDOMNode;
+  Message: String;
+begin
+  ReadXMLFile(ResponseDoc, ResponseStream);
+  if ResponseDoc <> nil then
+  begin
+    ResponseNode := ResponseDoc.FindNode('response');
+    if ResponseNode <> nil then
+    begin
+      MessageNode := ResponseNode.FindNode('message');
+      if MessageNode <> nil then
+        Message := MessageNode.FirstChild.NodeValue;
+    end;
+    if Message <> '' then
+      Message := LineEnding + Message;
+  end;
+  ShowMessageFmt('Server response error%s', [Message]);
+  ResponseDoc.Free;
+end;
+
+procedure TXMLServiceViewFrame.RESTClientResponseSuccess(const ResourcePath: String;
+  ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
   var ValidData: Boolean);
 var
   ResponseDoc: TXMLDocument;
@@ -173,31 +200,6 @@ begin
   end;
 end;
 
-procedure TXMLServiceViewFrame.ResponseError(ResourceTag: PtrInt;
-  Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
-  var ValidData: Boolean);
-var
-  ResponseDoc: TXMLDocument;
-  ResponseNode, MessageNode: TDOMNode;
-  Message: String;
-begin
-  ReadXMLFile(ResponseDoc, ResponseStream);
-  if ResponseDoc <> nil then
-  begin
-    ResponseNode := ResponseDoc.FindNode('response');
-    if ResponseNode <> nil then
-    begin
-      MessageNode := ResponseNode.FindNode('message');
-      if MessageNode <> nil then
-        Message := MessageNode.FirstChild.NodeValue;
-    end;
-    if Message <> '' then
-      Message := LineEnding + Message;
-  end;
-  ShowMessageFmt('Server response error%s', [Message]);
-  ResponseDoc.Free;
-end;
-
 procedure TXMLServiceViewFrame.SocketError(Sender: TObject; ErrorCode: Integer;
   const ErrorDescription: String);
 begin
@@ -211,7 +213,7 @@ end;
 
 procedure TXMLServiceViewFrame.UpdateContactsView;
 var
-  ContactNode: TDOMNode;
+  ContactNode, NameNode: TDOMNode;
   i: Integer;
 begin
   ContactsGrid.RowCount := FContacts.DocumentElement.ChildNodes.Count + 1;
@@ -220,7 +222,11 @@ begin
   while ContactNode <> nil do
   begin
     ContactsGrid.Cells[0, i] := ContactNode.FindNode('Id').FirstChild.NodeValue;
-    ContactsGrid.Cells[1, i] := ContactNode.FindNode('Name').FirstChild.NodeValue;
+    NameNode := ContactNode.FindNode('Name').FirstChild;
+    if NameNode <> nil then
+      ContactsGrid.Cells[1, i] := NameNode.NodeValue
+    else
+      ContactsGrid.Cells[1, i] := '';
     Inc(i);
     ContactNode := ContactNode.NextSibling;
   end;
@@ -233,9 +239,9 @@ var
 begin
   if ContactNode = nil then
     Exit;
-  NameNode := ContactNode.FindNode('Name');
+  NameNode := ContactNode.FindNode('Name').FirstChild;
   if NameNode <> nil then
-    PhonesLabel.Caption := NameNode.FirstChild.NodeValue + ' Phones';
+    PhonesLabel.Caption := '"' + NameNode.NodeValue + '" Phones';
   IdNode := ContactNode.FindNode('Id');
   if IdNode <> nil then
   begin
@@ -246,7 +252,7 @@ end;
 
 procedure TXMLServiceViewFrame.UpdatePhonesView;
 var
-  PhoneNode, ResponseNode: TDOMNode;
+  PhoneNode, ResponseNode, NumberNode: TDOMNode;
   i: Integer;
 begin
   ResponseNode := FContactPhones.FindNode('response');
@@ -258,7 +264,11 @@ begin
     while PhoneNode <> nil do
     begin
       PhonesGrid.Cells[0, i] := PhoneNode.FindNode('Id').FirstChild.NodeValue;
-      PhonesGrid.Cells[1, i] := PhoneNode.FindNode('Number').FirstChild.NodeValue;
+      NumberNode := PhoneNode.FindNode('Number').FirstChild;
+      if NumberNode <> nil then
+        PhonesGrid.Cells[1, i] := NumberNode.NodeValue
+      else
+        PhonesGrid.Cells[1, i] := '';
       Inc(i);
       PhoneNode := PhoneNode.NextSibling;
     end;

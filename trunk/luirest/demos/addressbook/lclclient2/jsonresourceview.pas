@@ -34,8 +34,9 @@ type
     procedure EditContactButtonClick(Sender: TObject);
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
-    procedure ResourcesError(Sender: TObject; ErrorType: TRESTErrorType; ErrorCode: Integer;
-      const ErrorMessage: String; var Handled: Boolean);
+    procedure ResourcesError(Sender: TObject; const ResourcePath: String;
+      ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String;
+      var Handled: Boolean);
   private
     FContacts: IJSONArrayResource;
     FContactPhones: IJSONArrayResource;
@@ -67,8 +68,8 @@ begin
     UpdateContactsView;
 end;
 
-procedure TJSONResourceViewFrame.ResourcesError(Sender: TObject; ErrorType: TRESTErrorType;
-  ErrorCode: Integer; const ErrorMessage: String; var Handled: Boolean);
+procedure TJSONResourceViewFrame.ResourcesError(Sender: TObject; const ResourcePath: String;
+  ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String; var Handled: Boolean);
 var
   ErrorTypeStr: String;
 begin
@@ -76,7 +77,6 @@ begin
   Handled := True;
   ShowMessageFmt('%s - %d - %s',[ErrorTypeStr, ErrorCode, ErrorMessage]);
 end;
-
 constructor TJSONResourceViewFrame.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
@@ -240,12 +240,12 @@ begin
   begin
     ContactData := FContacts.Data.Objects[i];
     ContactsGrid.Cells[0, i + 1] := ContactData.Strings['id'];
-    ContactsGrid.Cells[1, i + 1] := ContactData.Strings['name'];
+    ContactsGrid.Cells[1, i + 1] := ContactData.Get('name', '');
     CategoryName := '';
     CategoryId := ContactData.Get('categoryid', -1);
     if CategoryId <> -1 then
     begin;
-      CategoryIndex := JSONArrayIndexOf(Categories.Data, ['id', CategoryId]);
+      CategoryIndex := GetJSONIndexOf(Categories.Data, ['id', CategoryId]);
       if CategoryIndex <> -1 then
         CategoryName := Categories.Data.Objects[CategoryIndex].Strings['name'];
     end;
@@ -273,7 +273,7 @@ begin
   begin
     PhoneData := FContactPhones.Data.Objects[i];
     PhonesGrid.Cells[0, i + 1] := PhoneData.Strings['id'];
-    PhonesGrid.Cells[1, i + 1] := PhoneData.Strings['number'];
+    PhonesGrid.Cells[1, i + 1] := PhoneData.Get('number', '');
   end;
 end;
 

@@ -63,7 +63,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\addressbooksqldb"/>
+      <Filename Value="..\..\bin\addressbooksqldb.cgi" ApplyConventions="False"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>

@@ -35,10 +35,12 @@ type
     procedure EditContactButtonClick(Sender: TObject);
     procedure EditPhoneButtonClick(Sender: TObject);
     procedure LoadDataButtonClick(Sender: TObject);
-    procedure ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
-    procedure ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-      ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
+    procedure RESTClientResponseError(const ResourcePath: String; ResourceTag: PtrInt;
+      Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+      var ValidData: Boolean);
+    procedure RESTClientResponseSuccess(const ResourcePath: String; ResourceTag: PtrInt;
+      Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+      var ValidData: Boolean);
     procedure SocketError(Sender: TObject; ErrorCode: Integer;
       const ErrorDescription: String);
   private
@@ -174,8 +176,33 @@ begin
   RESTClient.Get('contacts', RES_CONTACTS);
 end;
 
-procedure TJSONServiceViewFrame.ResponseSuccess(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
+procedure TJSONServiceViewFrame.RESTClientResponseError(const ResourcePath: String;
+  ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
+var
+  ResponseData: TJSONData;
+  Message: String;
+begin
+  Message := '';
+  ResponseData := nil;
+  try
+    ResponseData := StreamToJSONData(ResponseStream);
+  except
+    SetLength(Message, ResponseStream.Size);
+    ResponseStream.Write(Message[1], ResponseStream.Size);
+  end;
+  if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
+  begin
+    Message := GetJSONProp(TJSONObject(ResponseData), 'message', '');
+    if Message <> '' then
+      Message := LineEnding + Message;
+  end;
+  ShowMessageFmt('Server response error%s', [Message]);
+end;
+
+procedure TJSONServiceViewFrame.RESTClientResponseSuccess(const ResourcePath: String;
+  ResourceTag: PtrInt; Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream;
+  var ValidData: Boolean);
 var
   ResponseData: TJSONData;
 begin
@@ -221,7 +248,7 @@ begin
         case Method of
           hmtPut:
           begin
-            PhonesLabel.Caption := TJSONObject(ResponseData).Strings['name'] + ' Phones';
+            PhonesLabel.Caption := '"' + TJSONObject(ResponseData).Get('name', '') + '" Phones';
             UpdateContactsView;
           end;
         end;
@@ -257,22 +284,6 @@ begin
   end;
 end;
 
-procedure TJSONServiceViewFrame.ResponseError(ResourceTag: PtrInt; Method: THTTPMethodType;
-  ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
-var
-  ResponseData: TJSONData;
-  Message: String;
-begin
-  Message := '';
-  ResponseData := StreamToJSONData(ResponseStream);
-  if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
-  begin
-    Message := GetJSONProp(TJSONObject(ResponseData), 'message', '');
-    if Message <> '' then
-      Message := LineEnding + Message;
-  end;
-  ShowMessageFmt('Server response error%s', [Message]);
-end;
 
 procedure TJSONServiceViewFrame.SocketError(Sender: TObject; ErrorCode: Integer;
   const ErrorDescription: String);
@@ -306,7 +317,7 @@ begin
   begin
     ContactData := FContacts.Objects[i];
     ContactsGrid.Cells[0, i + 1] := ContactData.Strings['id'];
-    ContactsGrid.Cells[1, i + 1] := ContactData.Strings['name'];
+    ContactsGrid.Cells[1, i + 1] := ContactData.Get('name', '');
   end;
 end;
 
@@ -316,7 +327,7 @@ var
 begin
   if ContactData = nil then
     Exit;
-  PhonesLabel.Caption := ContactData.Strings['name'] + ' Phones';
+  PhonesLabel.Caption := '"' + ContactData.Get('name', '') + '" Phones';
   ResourcePath := Format('contacts/%d/phones', [ContactData.Integers['id']]);
   RESTClient.Get(ResourcePath, RES_CONTACTPHONES);
 end;
@@ -331,7 +342,7 @@ begin
   begin
     PhoneData := FContactPhones.Objects[i];
     PhonesGrid.Cells[0, i + 1] := PhoneData.Strings['id'];
-    PhonesGrid.Cells[1, i + 1] := PhoneData.Strings['number'];
+    PhonesGrid.Cells[1, i + 1] := PhoneData.Get('number', '');
   end;
 end;
 
