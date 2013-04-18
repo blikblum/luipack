@@ -33,6 +33,7 @@ type
     procedure SetUpdateColumns(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
+    function GetNewResourceId(Query: TSQLQuery): String; virtual;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
@@ -138,6 +139,15 @@ begin
   Result.DataBase := FConnection;
 end;
 
+function TSqldbJSONResource.GetNewResourceId(Query: TSQLQuery): String;
+begin
+  //found a way to retrieve LastInsertID only for sqlite3
+  if (FConnection is TSQLite3Connection) then
+    Result := IntToStr(TSQLite3Connection(FConnection).GetInsertID)
+  else
+    Result := '';
+end;
+
 destructor TSqldbJSONResource.Destroy;
 begin
   FUpdateColumns.Destroy;
@@ -241,7 +251,7 @@ procedure TSqldbJSONResource.HandlePost(ARequest: TRequest; AResponse: TResponse
 var
   RequestData: TJSONObject;
   Query: TSQLQuery;
-  NewResourcePath: String;
+  NewResourcePath, NewResourceId: String;
 begin
   if FIsCollection and not FReadOnly then
   begin
@@ -259,7 +269,7 @@ begin
           SetQueryData(Query, RequestData, URIParams);
           Query.Post;
           Query.ApplyUpdates;
-          FConnection.Transaction.Commit;
+          FConnection.Transaction.CommitRetaining;
         except
           on E: Exception do
           begin
@@ -270,15 +280,17 @@ begin
       finally
         RequestData.Free;
       end;
-      //found a way to retrieve LastInsertID only for sqlite3
-      if FConnection is TSQLite3Connection then
+      NewResourceId := GetNewResourceId(Query);
+      if NewResourceId <> '' then
       begin
         NewResourcePath := ARequest.PathInfo;
         if NewResourcePath[Length(NewResourcePath)] <> '/' then
           NewResourcePath := NewResourcePath + '/';
-        NewResourcePath := NewResourcePath + IntToStr(TSQLite3Connection(FConnection).GetInsertID);
+        NewResourcePath := NewResourcePath + NewResourceId;
         RedirectRequest(ARequest, AResponse, 'GET', NewResourcePath, False);
-      end;
+      end
+      else
+        SetResponseStatus(AResponse, 400, '"%s" - Unable to get resource id', [ARequest.PathInfo]);
     finally
       Query.Destroy;
     end;
