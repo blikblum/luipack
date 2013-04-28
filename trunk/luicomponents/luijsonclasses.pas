@@ -11,7 +11,7 @@ type
 
   { TJSONGroupTree }
 
-  TJSONGroupTree = class
+  TJSONGroupTree = class(TComponent)
   private
     FChildrenProperty: String;
     FItemKey: String;
@@ -21,7 +21,7 @@ type
     FGroupKey: String;
     FSortFunction: TJSONArraySortCompare;
   public
-    constructor Create;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Build;
     property Data: TJSONArray read FData;
@@ -43,8 +43,9 @@ type
 
 { TJSONGroupTree }
 
-constructor TJSONGroupTree.Create;
+constructor TJSONGroupTree.Create(AOwner: TComponent);
 begin
+  inherited Create(AOwner);
   FData := TJSONArray.Create;
   FGroupKey := 'id';
   FChildrenProperty := 'children';
@@ -65,6 +66,7 @@ var
 begin
   FData.Clear;
   GroupMap := TJSONObjectMap.Create;
+  GroupMap.Sorted := True;
   try
     //build map
     for i := 0 to FGroupData.Count -1 do
