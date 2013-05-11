@@ -66,7 +66,8 @@ var
 begin
   FData.Clear;
   GroupMap := TJSONObjectMap.Create;
-  GroupMap.Sorted := True;
+  //todo: add option to sort the resulting array after build.
+  //In this case sort the groupmap can be sorted
   try
     //build map
     for i := 0 to FGroupData.Count -1 do
@@ -79,7 +80,8 @@ begin
     begin
       ItemObjData := FItemData.Objects[i];
       //todo: see what todo with orphan items
-      if GroupMap.Find(ItemObjData.Get(FItemKey, -1), KeyIndex) then
+      KeyIndex := GroupMap.IndexOf(ItemObjData.Get(FItemKey, -1));
+      if KeyIndex > -1 then
       begin
         GroupObjData := GroupMap.Data[KeyIndex];
         ChildrenData := TJSONArray(GroupObjData.Find(FChildrenProperty));
