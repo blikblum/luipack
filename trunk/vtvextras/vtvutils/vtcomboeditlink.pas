@@ -37,7 +37,7 @@ type
     procedure ComboKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure NotifyEndEdit;
   protected
-    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+    procedure DoPrepareCombo(ANode: PVirtualNode; Column: TColumnIndex;
       const NodeText: String); virtual;
     procedure DoEditingDone; virtual;
     procedure DoSelect; virtual;
@@ -51,10 +51,10 @@ type
     function CancelEdit: Boolean; virtual; stdcall;
     function EndEdit: Boolean; virtual; stdcall;
     function GetBounds: TRect; virtual; stdcall;
-    function PrepareEdit(ATree: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex): Boolean; virtual; stdcall;
+    function PrepareEdit(ATree: TBaseVirtualTree; ANode: PVirtualNode; Column: TColumnIndex): Boolean; virtual; stdcall;
     procedure ProcessMessage(var Message: TLMessage); virtual; stdcall;
     procedure SetBounds(R: TRect); virtual; stdcall;
-
+    property Node: PVirtualNode read FNode;
     property Combo: TCustomComboBox read FCombo;
     property OnPrepareCombo: TVTPrepareComboEvent read FOnPrepareCombo write FOnPrepareCombo;
     property OnComboSelect: TVTComboEditLinkEvent read FOnComboSelect write FOnComboSelect;
@@ -65,7 +65,7 @@ type
   //todo: add OnKeyPress based on column field type
   TVTComboEditLink = class (TVTCustomComboEditLink)
   protected
-    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+    procedure DoPrepareCombo(ANode: PVirtualNode; Column: TColumnIndex;
       const NodeText: String); override;
     procedure DoEditingDone; override;
     class function GetComboClass: TCustomComboBoxClass; override;
@@ -101,7 +101,7 @@ type
     procedure SetListField(const AValue: String);
     procedure SetListSource(const AValue: TDataSource);
   protected
-    procedure DoPrepareCombo(Node: PVirtualNode; Column: TColumnIndex;
+    procedure DoPrepareCombo(ANode: PVirtualNode; Column: TColumnIndex;
       const NodeText: String); override;
     class function GetComboClass: TCustomComboBoxClass; override;
   public
@@ -155,11 +155,11 @@ begin
   end;
 end;
 
-procedure TVTCustomComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+procedure TVTCustomComboEditLink.DoPrepareCombo(ANode: PVirtualNode;
   Column: TColumnIndex; const NodeText: String);
 begin
   if Assigned(FOnPrepareCombo) then
-    FOnPrepareCombo(Self, Node, Column, NodeText);
+    FOnPrepareCombo(Self, ANode, Column, NodeText);
 end;
 
 procedure TVTCustomComboEditLink.DoEditingDone;
@@ -237,7 +237,7 @@ begin
 end;
 
 function TVTCustomComboEditLink.PrepareEdit(ATree: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
+  ANode: PVirtualNode; Column: TColumnIndex): Boolean; stdcall;
 var
   NodeText: String;
 begin
@@ -246,15 +246,15 @@ begin
   begin
     FStopping := False;
     FTree := TCustomVirtualStringTree(ATree);
-    FNode := Node;
+    FNode := ANode;
     FColumn := Column;
 
     FCombo.Font.Color := clWindowText;
     FCombo.Parent := ATree;
     FCombo.HandleNeeded;
-    // Initial size, font and text of the node.
-    FTree.GetTextInfo(Node, Column, FCombo.Font, FTextBounds, NodeText);
-    DoPrepareCombo(Node, Column, NodeText);
+    // Initial size, font and text of the ANode.
+    FTree.GetTextInfo(ANode, Column, FCombo.Font, FTextBounds, NodeText);
+    DoPrepareCombo(ANode, Column, NodeText);
     FOriginalIndex := FCombo.ItemIndex;
 
     if Column <= NoColumn then
@@ -322,11 +322,11 @@ end;
 
 { TVTComboEditLink }
 
-procedure TVTComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+procedure TVTComboEditLink.DoPrepareCombo(ANode: PVirtualNode;
   Column: TColumnIndex; const NodeText: String);
 begin
   Combo.Text := NodeText;
-  inherited DoPrepareCombo(Node, Column, NodeText);
+  inherited DoPrepareCombo(ANode, Column, NodeText);
 end;
 
 procedure TVTComboEditLink.DoEditingDone;
@@ -382,10 +382,10 @@ begin
   (Combo as TDBLookupComboBox).ListSource := AValue;
 end;
 
-procedure TVTDBLookupComboEditLink.DoPrepareCombo(Node: PVirtualNode;
+procedure TVTDBLookupComboEditLink.DoPrepareCombo(ANode: PVirtualNode;
   Column: TColumnIndex; const NodeText: String);
 begin
-  inherited DoPrepareCombo(Node, Column, NodeText);
+  inherited DoPrepareCombo(ANode, Column, NodeText);
   (Combo as TDBLookupComboBox).DataSource := FDataSource;
 end;
 
