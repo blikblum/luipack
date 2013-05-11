@@ -45,21 +45,22 @@ type
     FKeyProperty: String;
     FResource: IJSONArrayResource;
     FValueProperty: String;
-    function FindValueData(const KeyValue: Variant): TJSONData;
+    function FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
     function GetKeys(Index: Integer): Variant;
     function GetStrings(const KeyValue: Variant): String;
     function GetValues(const KeyValue: Variant): Variant;
   public
     constructor Create(AOwner: TComponent); override;
     procedure AssignTo(Dest: TPersistent); override;
+    function GetValue(const PropertyName: String; const KeyValue, Default: Variant): Variant;
     function IndexOf(const KeyValue: Variant): Integer;
     procedure Update;
     property KeyProperty: String read FKeyProperty write FKeyProperty;
     property Keys[Index: Integer]: Variant read GetKeys;
     property Resource: IJSONArrayResource read FResource write FResource;
+    property Strings[KeyValue: Variant]: String read GetStrings;
     property ValueProperty: String read FValueProperty write FValueProperty;
     property Values[KeyValue: Variant]: Variant read GetValues;
-    property Strings[KeyValue: Variant]: String read GetStrings;
   end;
 
 
@@ -74,7 +75,7 @@ function TJSONResourceLookup.GetValues(const KeyValue: Variant): Variant;
 var
   ValueData: TJSONData;
 begin
-  ValueData := FindValueData(KeyValue);
+  ValueData := FindValueData(FValueProperty, KeyValue);
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
     Result := ValueData.Value
   else
@@ -113,6 +114,17 @@ begin
     inherited AssignTo(Dest);
 end;
 
+function TJSONResourceLookup.GetValue(const PropertyName: String; const KeyValue, Default: Variant): Variant;
+var
+  ValueData: TJSONData;
+begin
+  ValueData := FindValueData(PropertyName, KeyValue);
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
+    Result := ValueData.Value
+  else
+    Result := Default;
+end;
+
 function TJSONResourceLookup.IndexOf(const KeyValue: Variant): Integer;
 begin
   Result := GetJSONIndexOf(FResource.Data, [FKeyProperty, KeyValue]);
@@ -123,13 +135,14 @@ begin
   FResource.Fetch;
 end;
 
-function TJSONResourceLookup.FindValueData(const KeyValue: Variant): TJSONData;
+function TJSONResourceLookup.FindValueData(const PropertyName: String; const KeyValue: Variant
+  ): TJSONData;
 var
   ItemData: TJSONObject;
 begin
   ItemData := FindJSONObject(FResource.Data, [FKeyProperty, KeyValue]);
   if ItemData <> nil then
-    Result := ItemData.Find(FValueProperty)
+    Result := ItemData.Find(PropertyName)
   else
     Result := nil;
 end;
@@ -153,7 +166,7 @@ function TJSONResourceLookup.GetStrings(const KeyValue: Variant): String;
 var
   ValueData: TJSONData;
 begin
-  ValueData := FindValueData(KeyValue);
+  ValueData := FindValueData(FValueProperty, KeyValue);
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
     Result := ValueData.AsString
   else
