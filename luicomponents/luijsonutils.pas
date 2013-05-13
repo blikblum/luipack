@@ -40,6 +40,16 @@ function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData
 
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONArray): Boolean;
 
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Integer): Boolean;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Int64): Boolean;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Double): Boolean;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Boolean): Boolean;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: String): Boolean;
+
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
@@ -281,6 +291,66 @@ var
 begin
   Data := JSONObj.Find(PropName, jtArray);
   Result := PropData <> nil;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Integer): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := JSONObj.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsInteger
+  else
+    PropValue := 0;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Int64): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := JSONObj.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsInt64
+  else
+    PropValue := 0;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Double): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := JSONObj.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsFloat
+  else
+    PropValue := 0;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: Boolean): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := JSONObj.Find(PropName, jtBoolean);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsBoolean
+  else
+    PropValue := False;
+end;
+
+function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: String): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := JSONObj.Find(PropName, jtString);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsString
+  else
+    PropValue := '';
 end;
 
 function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
