@@ -13,11 +13,15 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="1">
+    <Files Count="2">
       <Item1>
         <Filename Value="luidatacache.pas"/>
         <UnitName Value="luidatacache"/>
       </Item1>
+      <Item2>
+        <Filename Value="luisqlite3client.pas"/>
+        <UnitName Value="luisqlite3client"/>
+      </Item2>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">

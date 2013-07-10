@@ -2,19 +2,19 @@
   This source is only used to compile and install the package.
  }
 
-unit LuiSqliteComponents; 
+unit LuiSqliteComponents;
 
 interface
 
 uses
-  LuiDataCache, LazarusPackageIntf;
+  LuiDataCache, LuiSqlite3Client, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-end; 
+end;
 
 initialization
-  RegisterPackage('LuiSqliteComponents', @Register); 
+  RegisterPackage('LuiSqliteComponents', @Register);
 end.
