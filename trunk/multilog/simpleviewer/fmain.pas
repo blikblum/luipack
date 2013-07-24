@@ -81,8 +81,7 @@ begin
   UpdateStatusBar;
 end;
 
-procedure TfrmMain.ApplicationIdle(Sender: TObject; var Done: Boolean
-  );
+procedure TfrmMain.ApplicationIdle(Sender: TObject; var Done: Boolean);
 begin
   FIPCServer.PeekMessage(1,True);
 end;
@@ -143,9 +142,9 @@ end;
 procedure TfrmMain.tbutStayOnTopClick(Sender: TObject);
 begin
   if tbutStayOnTop.Down then
-    SetWindowPos(Handle,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE or SWP_NOMOVE)
+    FormStyle := fsSystemStayOnTop
   else
-    SetWindowPos(Handle,HWND_NOTOPMOST,0,0,0,0,SWP_NOSIZE or SWP_NOMOVE);
+    FormStyle := fsNormal;
 end;
 
 procedure TfrmMain.UpdateStatusBar;

@@ -9,10 +9,12 @@ object frmMain: TfrmMain
   ClientWidth = 532
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  ParentFont = False
-  LCLVersion = '0.9.25'
+  Position = poScreenCenter
+  LCLVersion = '1.1'
   object ToolBar1: TToolBar
+    Left = 0
     Height = 36
+    Top = 0
     Width = 532
     ButtonHeight = 36
     ButtonWidth = 36
@@ -24,13 +26,15 @@ object frmMain: TfrmMain
     TabOrder = 0
     object ToolButton2: TToolButton
       Left = 73
-      Width = 15
+      Top = 0
+      Width = 10
       Caption = 'ToolButton2'
       Style = tbsSeparator
     end
     object tbutExpand: TToolButton
       Left = 1
       Hint = 'Expand All'
+      Top = 0
       Caption = 'tbutExpand'
       ImageIndex = 0
       OnClick = tbutExpandClick
@@ -38,44 +42,50 @@ object frmMain: TfrmMain
     object tbutCollapse: TToolButton
       Left = 37
       Hint = 'Collapse All'
+      Top = 0
       Caption = 'tbutCollapse'
       ImageIndex = 1
       OnClick = tbutCollapseClick
     end
     object tbutClear: TToolButton
-      Left = 88
+      Left = 83
       Hint = 'Clear Log'
+      Top = 0
       Caption = 'tbutClear'
       ImageIndex = 2
       OnClick = tbutClearClick
     end
     object ToolButton1: TToolButton
-      Left = 124
-      Width = 16
+      Left = 119
+      Top = 0
+      Width = 10
       Caption = 'ToolButton1'
       Style = tbsSeparator
     end
     object tbutStayOnTop: TToolButton
-      Left = 140
+      Left = 129
       Hint = 'Stay On Top'
+      Top = 0
       Caption = 'tbutStayOnTop'
       ImageIndex = 3
-      Style = tbsCheck
       OnClick = tbutStayOnTopClick
+      Style = tbsCheck
     end
   end
   object LogTreeView1: TLogTreeView
-    Height = 389
+    Left = 0
+    Height = 386
     Top = 36
     Width = 532
     Align = alClient
-    DefaultItemHeight = 16
+    DefaultItemHeight = 18
     ScrollBars = ssAutoBoth
     TabOrder = 1
   end
   object StatusBarMain: TStatusBar
-    Height = 20
-    Top = 425
+    Left = 0
+    Height = 23
+    Top = 422
     Width = 532
     Panels = <>
   end

@@ -28,7 +28,10 @@ uses
   Forms
   { add your units here }, fmain;
 
+{$R *.res}
+
 begin
+  Application.Title := 'IPC Log Viewer';
   Application.Initialize;
   Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
