@@ -11,29 +11,34 @@ object Form1: TForm1
   ClientWidth = 807
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  LCLVersion = '1.1'
   object LogTreeView1: TLogTreeView
     Left = 464
     Height = 359
+    Top = 0
     Width = 343
     Align = alClient
-    DefaultItemHeight = 16
+    DefaultItemHeight = 18
     ScrollBars = ssAutoBoth
     TabOrder = 0
   end
-  object Notebook1: TNotebook
+  object Notebook1: TPageControl
+    Left = 0
     Height = 359
+    Top = 0
     Width = 459
+    ActivePage = pageGeneral
     Align = alLeft
-    PageIndex = 0
+    TabIndex = 0
     TabOrder = 1
-    object pageGeneral: TPage
+    object pageGeneral: TTabSheet
       Caption = 'General'
+      ClientHeight = 331
       ClientWidth = 451
-      ClientHeight = 333
       object butClear: TButton
         Left = 12
         Height = 27
-        Top = 294
+        Top = 292
         Width = 144
         Anchors = [akLeft, akBottom]
         BorderSpacing.InnerBorder = 4
@@ -44,7 +49,7 @@ object Form1: TForm1
       object butSubLog: TButton
         Left = 12
         Height = 27
-        Top = 226
+        Top = 224
         Width = 128
         Anchors = [akRight, akBottom]
         BorderSpacing.InnerBorder = 4
@@ -55,7 +60,7 @@ object Form1: TForm1
       object butTestLog: TButton
         Left = 12
         Height = 27
-        Top = 186
+        Top = 184
         Width = 75
         Anchors = [akRight, akBottom]
         BorderSpacing.InnerBorder = 4
@@ -118,10 +123,10 @@ object Form1: TForm1
         Text = 'A error example'
       end
     end
-    object pageVariables: TPage
+    object pageVariables: TTabSheet
       Caption = 'Variables'
-      ClientWidth = 451
       ClientHeight = 333
+      ClientWidth = 451
       object editString: TEdit
         Left = 100
         Height = 23
@@ -183,21 +188,21 @@ object Form1: TForm1
         Width = 50
         Increment = 1
         MaxValue = 100
+        MinValue = 0
         TabOrder = 6
+        Value = 0
       end
       object comboBoolean: TComboBox
         Left = 100
-        Height = 21
+        Height = 23
         Top = 190
         Width = 100
-        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-        ItemHeight = 13
+        ItemHeight = 15
         ItemIndex = 0
         Items.Strings = (
           'False'
           'True'
         )
-        MaxLength = 0
         Style = csDropDownList
         TabOrder = 7
         Text = 'False'
@@ -220,70 +225,10 @@ object Form1: TForm1
         TabOrder = 9
       end
     end
-    object pageMethods: TPage
-      Caption = 'Method Tracking'
-      ClientWidth = 451
-      ClientHeight = 333
-      object comboEnterMethod: TComboBox
-        Left = 116
-        Height = 21
-        Top = 34
-        Width = 164
-        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-        ItemHeight = 13
-        MaxLength = 0
-        TabOrder = 0
-      end
-      object butEnterMethod: TButton
-        Left = 20
-        Height = 25
-        Top = 34
-        Width = 75
-        BorderSpacing.InnerBorder = 4
-        Caption = 'EnterMethod'
-        OnClick = butEnterMethodClick
-        TabOrder = 1
-      end
-      object butExitMethod: TButton
-        Left = 20
-        Height = 25
-        Top = 94
-        Width = 75
-        BorderSpacing.InnerBorder = 4
-        Caption = 'ExitMethod'
-        OnClick = butExitMethodClick
-        TabOrder = 2
-      end
-      object editExitMethod: TEdit
-        Left = 116
-        Height = 23
-        Top = 94
-        Width = 164
-        ReadOnly = True
-        TabOrder = 3
-      end
-      object editCalledBy: TEdit
-        Left = 148
-        Height = 23
-        Top = 157
-        Width = 132
-        TabOrder = 4
-      end
-      object butCalledBy: TButton
-        Left = 20
-        Height = 25
-        Top = 157
-        Width = 107
-        BorderSpacing.InnerBorder = 4
-        Caption = 'Send If CalledBy'
-        OnClick = butCalledByClick
-        TabOrder = 5
-      end
-    end
-    object pageSpecialized: TPage
+    object pageSpecialized: TTabSheet
       Caption = 'Specialized Info'
-      ClientWidth = 451
       ClientHeight = 333
+      ClientWidth = 451
       object butCallStack: TButton
         Left = 35
         Height = 25
@@ -335,10 +280,10 @@ object Form1: TForm1
         TabOrder = 4
       end
     end
-    object pageWatches: TPage
+    object pageWatches: TTabSheet
       Caption = 'Watches/CheckPoints'
-      ClientWidth = 451
       ClientHeight = 333
+      ClientWidth = 451
       object butWatchInteger: TButton
         Left = 20
         Height = 25
@@ -401,17 +346,16 @@ object Form1: TForm1
         TabOrder = 6
       end
     end
-    object PageBitmap: TPage
+    object PageBitmap: TTabSheet
       Caption = 'Bitmap'
-      ClientWidth = 451
       ClientHeight = 333
+      ClientWidth = 451
       object Image1: TImage
         Left = 12
         Height = 100
         Top = 50
         Width = 100
         AutoSize = True
-        Transparent = False
       end
       object ButOpenImage: TButton
         Left = 12
@@ -438,6 +382,7 @@ object Form1: TForm1
   object Splitter1: TSplitter
     Left = 459
     Height = 359
+    Top = 0
     Width = 5
   end
   object OpenDialog1: TOpenDialog
