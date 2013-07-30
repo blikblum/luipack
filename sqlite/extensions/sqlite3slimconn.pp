@@ -183,8 +183,8 @@ begin
       checkerror(sqlite3_bind_null(fstatement,I))
     else 
       case P.datatype of
+        ftboolean: checkerror(sqlite3_bind_int(fstatement,I,Integer(p.AsBoolean)));
         ftinteger,
-        ftboolean,
         ftsmallint: checkerror(sqlite3_bind_int(fstatement,I,p.asinteger));
         ftword:     checkerror(sqlite3_bind_int(fstatement,I,P.asword));
         ftlargeint: checkerror(sqlite3_bind_int64(fstatement,I,P.aslargeint));
