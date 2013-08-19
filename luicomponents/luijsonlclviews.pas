@@ -11,6 +11,8 @@ type
 
   TJSONObjectViewManager = class;
 
+  TJSONMediatorState = set of (jmsLoading);
+
   { TCustomJSONGUIMediator }
 
   TCustomJSONGUIMediator = class
@@ -109,6 +111,7 @@ type
   private
     FJSONObject: TJSONObject;
     FPropertyViews: TJSONObjectPropertyViews;
+    FState: TJSONMediatorState;
     procedure SetJSONObject(const Value: TJSONObject);
     procedure SetPropertyViews(const Value: TJSONObjectPropertyViews);
   protected
@@ -121,6 +124,7 @@ type
     procedure Save;
     procedure Save(const Properties: array of String);
     property JSONObject: TJSONObject read FJSONObject write SetJSONObject;
+    property State: TJSONMediatorState read FState;
   published
     property PropertyViews: TJSONObjectPropertyViews read FPropertyViews write SetPropertyViews;
   end;
@@ -194,14 +198,29 @@ class procedure TJSONRadioGroupMediator.DoJSONToGUI(JSONObject: TJSONObject;
 var
   RadioGroup: TRadioGroup;
   PropData: TJSONData;
+  NewIndex: Integer;
 begin
   RadioGroup := Control as TRadioGroup;
   PropData := GetJSONProp(JSONObject, PropName);
   if (PropData <> nil) and (PropData.JSONType <> jtNull) then
   begin
-    //todo: handle jtInteger?
-    if PropData.JSONType = jtString then
-      RadioGroup.ItemIndex := RadioGroup.Items.IndexOf(PropData.AsString);
+    //todo make options TJSONObject
+    if (Options is TJSONObject) and TJSONObject(Options).Get('useindex', False) then
+    begin
+      if PropData.JSONType = jtNumber then
+      begin
+        NewIndex := PropData.AsInteger;
+        if (NewIndex >= 0) and (NewIndex < RadioGroup.Items.Count) then
+          RadioGroup.ItemIndex := NewIndex
+        else
+          RadioGroup.ItemIndex := -1;
+      end;
+    end
+    else
+    begin
+      if PropData.JSONType = jtString then
+        RadioGroup.ItemIndex := RadioGroup.Items.IndexOf(PropData.AsString);
+    end;
   end
   else
     RadioGroup.ItemIndex := -1;
@@ -215,7 +234,12 @@ var
 begin
   RadioGroup := Control as TRadioGroup;
   if RadioGroup.ItemIndex <> -1 then
-    JSONObject.Strings[PropName] := RadioGroup.Items[RadioGroup.ItemIndex]
+  begin
+    if (Options is TJSONObject) and TJSONObject(Options).Get('useindex', False) then
+      JSONObject.Integers[PropName] := RadioGroup.ItemIndex
+    else
+      JSONObject.Strings[PropName] := RadioGroup.Items[RadioGroup.ItemIndex]
+  end
   else
     RemoveJSONProp(JSONObject, PropName);
 end;
@@ -332,10 +356,15 @@ var
   i: Integer;
   View: TJSONObjectPropertyView;
 begin
-  for i := 0 to FPropertyViews.Count -1 do
-  begin
-    View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
-    View.Load(FJSONObject);
+  Include(FState, jmsLoading);
+  try
+    for i := 0 to FPropertyViews.Count - 1 do
+    begin
+      View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
+      View.Load(FJSONObject);
+    end;
+  finally
+    Exclude(FState, jmsLoading);
   end;
 end;
 
@@ -344,11 +373,16 @@ var
   i: Integer;
   View: TJSONObjectPropertyView;
 begin
-  for i := 0 to FPropertyViews.Count -1 do
-  begin
-    View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
-    if AnsiMatchText(View.PropertyName, Properties) then
-      View.Load(FJSONObject);
+  Include(FState, jmsLoading);
+  try
+    for i := 0 to FPropertyViews.Count - 1 do
+    begin
+      View := TJSONObjectPropertyView(FPropertyViews.Items[i]);
+      if AnsiMatchText(View.PropertyName, Properties) then
+        View.Load(FJSONObject);
+    end;
+  finally
+    Exclude(FState, jmsLoading);
   end;
 end;
 
