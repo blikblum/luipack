@@ -23,6 +23,7 @@ type
      FParams: TParams;
      FPrimaryKey: String;
      FSelectSQL: String;
+     FTableName: String;
      procedure SetParams(AValue: TParams);
    protected
      function GetDisplayName: string; override;
@@ -37,6 +38,7 @@ type
      property Params: TParams read FParams write SetParams;
      property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
      property SelectSQL: String read FSelectSQL write FSelectSQL;
+     property TableName: String read FTableName write FTableName;
    end;
 
    { TSqlite3ResourceModelDefs }
@@ -248,14 +250,31 @@ begin
 end;
 
 function TRESTJSONObjectResource.DoSave(const Id: String): Boolean;
+var
+  SQL: String;
 begin
   Result := True;
   try
-    SetSQL(Id);
+    SQL := FModelDef.SelectSQL;
+    if Id = '' then
+    begin
+      SQL := SQL + ' Where 1 = -1';
+    end
+    else
+    begin
+      //todo: fix when Id = string
+      SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, Id]);
+    end;
+    FDataset.SQL := PrepareSQL(SQL);
     FDataset.Open;
     try
+      if Id = '' then
+        FDataset.Append
+      else
+        FDataset.Edit;
       CopyJSONData(FData, False);
-      FDataset.ApplyUpdates;
+      FDataset.Post;
+      Result := FDataset.ApplyUpdates;
     finally
       FDataset.Close;
     end;
@@ -460,6 +479,7 @@ constructor TSqlite3DataResource.Create(AModelDef: TSqlite3ResourceModelDef;
 begin
   FDataset := TSqlite3Dataset.Create(nil);
   FDataset.PrimaryKey := AModelDef.PrimaryKey;
+  FDataset.TableName := AModelDef.TableName;
   FDataset.FileName := ResourceClient.Database;
   FParams := TParams.Create(TParam);
   FParams.Assign(AModelDef.Params);
