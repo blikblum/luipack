@@ -94,6 +94,7 @@ type
     procedure RegisterDataLink(const BandName, PropertyName: String; CrossBandName: String = '');
     procedure RegisterNullValue(const PropertyName: String; Value: Variant);
     property ConfigProperty: String read FConfigProperty write FConfigProperty;
+    property Data: TJSONObject read FData;
     property DataLoaded: Boolean read GetDataLoaded;
     property DataProperty: String read FDataProperty write FDataProperty;
   end;
