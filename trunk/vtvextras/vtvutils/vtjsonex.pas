@@ -15,7 +15,7 @@ type
   private
     FAnswerData: TJSONObject;
     FOwnsAnswerData: Boolean;
-    procedure DoLoadOptionData;
+    procedure DoLoadAnswerData;
   protected
     procedure DoBeforeItemErase(ACanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
       var AColor: TColor; var EraseAction: TItemEraseAction); override;
@@ -41,14 +41,14 @@ uses
 
 { TJSONQuestionTreeView }
 
-procedure TJSONQuestionTreeView.DoLoadOptionData;
+procedure TJSONQuestionTreeView.DoLoadAnswerData;
 var
-  ItemNode, ItemOptionNode: PVirtualNode;
-  ItemData, ItemOptionData: TJSONObject;
+  QuestionNode, OptionNode: PVirtualNode;
+  QuestionData, OptionData: TJSONObject;
+  OptionsData: TJSONArray;
+  PropData, OptionValueData: TJSONData;
   PropName: String;
   i, CheckedIndex: Integer;
-  PropData, ItemOptionValueData: TJSONData;
-  ChildrenData: TJSONArray;
 begin
   if FAnswerData = nil then
   begin
@@ -56,30 +56,30 @@ begin
   end
   else
   begin
-    ItemNode := GetFirst;
-    while ItemNode <> nil do
+    QuestionNode := GetFirst;
+    while QuestionNode <> nil do
     begin
-      ItemData := GetData(ItemNode) as TJSONObject;
-      PropName := ItemData.Get('prop', '');
+      QuestionData := GetData(QuestionNode) as TJSONObject;
+      PropName := QuestionData.Get('prop', '');
       PropData := FAnswerData.Find(PropName);
       if PropData <> nil then
       begin
-        if FindJSONProp(ItemData, 'children', ChildrenData) then
+        if FindJSONProp(QuestionData, 'children', OptionsData) then
         begin
           if PropData.JSONType = jtString then
           begin
-            CheckedIndex := GetJSONIndexOf(ChildrenData, ['custom', True]);
+            CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
           end
           else
           begin
             CheckedIndex := -1;
-            for i := 0 to ChildrenData.Count - 1 do
+            for i := 0 to OptionsData.Count - 1 do
             begin
-              ItemOptionData := ChildrenData.Objects[i];
-              ItemOptionValueData := ItemOptionData.Find('value');
-              if ItemOptionValueData <> nil then
+              OptionData := OptionsData.Objects[i];
+              OptionValueData := OptionData.Find('value');
+              if OptionValueData <> nil then
               begin
-                if CompareJSONData(ItemOptionValueData, PropData) = 0 then
+                if CompareJSONData(OptionValueData, PropData) = 0 then
                 begin
                   CheckedIndex := i;
                   Break;
@@ -95,21 +95,21 @@ begin
               end;
             end;
           end;
-          ItemOptionNode := GetFirstChild(ItemNode);
-          while ItemOptionNode <> nil do
+          OptionNode := GetFirstChild(QuestionNode);
+          while OptionNode <> nil do
           begin
-            if ItemOptionNode^.Index = CheckedIndex then
+            if OptionNode^.Index = CheckedIndex then
             begin
-              ItemOptionNode^.Dummy := 1;
-              CheckState[ItemOptionNode] := csCheckedNormal;
-              ItemOptionNode^.Dummy := 0;
+              OptionNode^.Dummy := 1;
+              CheckState[OptionNode] := csCheckedNormal;
+              OptionNode^.Dummy := 0;
               Break;
             end;
-            ItemOptionNode := GetNextSibling(ItemOptionNode);
+            OptionNode := GetNextSibling(OptionNode);
           end;
         end;
       end;
-      ItemNode := GetNextSibling(ItemNode);
+      QuestionNode := GetNextSibling(QuestionNode);
     end;
   end;
 end;
