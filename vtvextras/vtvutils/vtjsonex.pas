@@ -9,12 +9,12 @@ uses
 
 type
 
-  { TVirtualJSONOptionTree }
+  { TJSONQuestionTreeView }
 
-  TVirtualJSONOptionTree = class(TVirtualJSONTreeView)
+  TJSONQuestionTreeView = class(TVirtualJSONTreeView)
   private
-    FOptionData: TJSONObject;
-    FOwnsOptionData: Boolean;
+    FAnswerData: TJSONObject;
+    FOwnsAnswerData: Boolean;
     procedure DoLoadOptionData;
   protected
     procedure DoBeforeItemErase(ACanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
@@ -28,7 +28,7 @@ type
       TextType: TVSTTextType); override;
   public
     destructor Destroy; override;
-    procedure LoadOptionData(OptionData: TJSONObject; OwnsOptionData: Boolean = False);
+    procedure LoadAnswerData(AnswerData: TJSONObject; OwnsAnswerData: Boolean = False);
   published
 
   end;
@@ -39,9 +39,9 @@ implementation
 uses
   LuiJSONUtils;
 
-{ TVirtualJSONOptionTree }
+{ TJSONQuestionTreeView }
 
-procedure TVirtualJSONOptionTree.DoLoadOptionData;
+procedure TJSONQuestionTreeView.DoLoadOptionData;
 var
   ItemNode, ItemOptionNode: PVirtualNode;
   ItemData, ItemOptionData: TJSONObject;
@@ -50,7 +50,7 @@ var
   PropData, ItemOptionValueData: TJSONData;
   ChildrenData: TJSONArray;
 begin
-  if FOptionData = nil then
+  if FAnswerData = nil then
   begin
     //clear
   end
@@ -61,7 +61,7 @@ begin
     begin
       ItemData := GetData(ItemNode) as TJSONObject;
       PropName := ItemData.Get('prop', '');
-      PropData := FOptionData.Find(PropName);
+      PropData := FAnswerData.Find(PropName);
       if PropData <> nil then
       begin
         if FindJSONProp(ItemData, 'children', ChildrenData) then
@@ -114,7 +114,7 @@ begin
   end;
 end;
 
-procedure TVirtualJSONOptionTree.DoBeforeItemErase(ACanvas: TCanvas; Node: PVirtualNode;
+procedure TJSONQuestionTreeView.DoBeforeItemErase(ACanvas: TCanvas; Node: PVirtualNode;
   const ItemRect: TRect; var AColor: TColor; var EraseAction: TItemEraseAction);
 begin
   if GetNodeLevel(Node) = 0 then
@@ -125,7 +125,7 @@ begin
   inherited DoBeforeItemErase(ACanvas, Node, ItemRect, AColor, EraseAction);
 end;
 
-procedure TVirtualJSONOptionTree.DoCanEdit(Node: PVirtualNode; Column: TColumnIndex;
+procedure TJSONQuestionTreeView.DoCanEdit(Node: PVirtualNode; Column: TColumnIndex;
   var Allowed: Boolean);
 var
   NodeData: TJSONObject;
@@ -135,7 +135,7 @@ begin
   inherited DoCanEdit(Node, Column, Allowed);
 end;
 
-procedure TVirtualJSONOptionTree.DoChecked(Node: PVirtualNode);
+procedure TJSONQuestionTreeView.DoChecked(Node: PVirtualNode);
 var
   ParentData, NodeData: TJSONObject;
   PropName: String;
@@ -154,7 +154,7 @@ begin
       if Node^.CheckType = ctRadioButton then
       begin
         if not NodeData.Get('custom', False) then
-          FOptionData.Integers[PropName] := Node^.Index
+          FAnswerData.Integers[PropName] := Node^.Index
         else
         begin
           if Node^.CheckState = csCheckedNormal then
@@ -165,16 +165,16 @@ begin
       begin
         //todo set value instead of index
         if Node^.CheckState = csCheckedNormal then
-          FOptionData.Integers[PropName] := Node^.Index
+          FAnswerData.Integers[PropName] := Node^.Index
         else
-          FOptionData.Delete(PropName);
+          FAnswerData.Delete(PropName);
       end;
     end;
   end;
   inherited DoChecked(Node);
 end;
 
-procedure TVirtualJSONOptionTree.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
+procedure TJSONQuestionTreeView.DoGetText(Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType; var CellText: String);
 var
   NodeData: TJSONObject;
@@ -188,11 +188,11 @@ begin
     ParentData := GetData(Node^.Parent) as TJSONObject;
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
-    CellText := FOptionData.Get(PropName, CellText);
+    CellText := FAnswerData.Get(PropName, CellText);
   end;
 end;
 
-procedure TVirtualJSONOptionTree.DoInitNode(ParentNode, Node: PVirtualNode;
+procedure TJSONQuestionTreeView.DoInitNode(ParentNode, Node: PVirtualNode;
   var InitStates: TVirtualNodeInitStates);
 var
   NodeData: TJSONObject;
@@ -214,7 +214,7 @@ begin
   end;
 end;
 
-procedure TVirtualJSONOptionTree.DoNewText(Node: PVirtualNode; Column: TColumnIndex;
+procedure TJSONQuestionTreeView.DoNewText(Node: PVirtualNode; Column: TColumnIndex;
   const AText: String);
 var
   NodeData: TJSONObject;
@@ -227,12 +227,12 @@ begin
     NodeData := GetData(Node) as TJSONObject;
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
-    FOptionData.Strings[PropName] := AText;
+    FAnswerData.Strings[PropName] := AText;
   end;
   inherited DoNewText(Node, Column, AText);
 end;
 
-procedure TVirtualJSONOptionTree.DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
+procedure TJSONQuestionTreeView.DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas;
   Column: TColumnIndex; TextType: TVSTTextType);
 begin
   if GetNodeLevel(Node) = 0 then
@@ -240,19 +240,19 @@ begin
   inherited DoPaintText(Node, ACanvas, Column, TextType);
 end;
 
-destructor TVirtualJSONOptionTree.Destroy;
+destructor TJSONQuestionTreeView.Destroy;
 begin
-  if FOwnsOptionData then
-    FOptionData.Free;
+  if FOwnsAnswerData then
+    FAnswerData.Free;
   inherited Destroy;
 end;
 
-procedure TVirtualJSONOptionTree.LoadOptionData(OptionData: TJSONObject; OwnsOptionData: Boolean);
+procedure TJSONQuestionTreeView.LoadAnswerData(AnswerData: TJSONObject; OwnsAnswerData: Boolean);
 begin
-  if FOwnsOptionData then
-    FOptionData.Free;
-  FOptionData := OptionData;
-  FOwnsOptionData := OwnsOptionData;
+  if FOwnsAnswerData then
+    FAnswerData.Free;
+  FAnswerData := AnswerData;
+  FOwnsAnswerData := OwnsAnswerData;
 end;
 
 end.
