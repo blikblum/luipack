@@ -327,6 +327,7 @@ type
   public
     destructor Destroy; override;
     function GetData(Node: PVirtualNode): TJSONData;
+    function GetData(Node: PVirtualNode; out NodeData: TJSONObject): Boolean;
     function GetNode(Data: TJSONData): PVirtualNode;
     procedure LoadData;
     property CheckedData: TJSONArray read GetCheckedData;
@@ -1037,6 +1038,22 @@ begin
   end
   else
     Result := nil;
+end;
+
+function TCustomVirtualJSONDataView.GetData(Node: PVirtualNode; out NodeData: TJSONObject): Boolean;
+var
+  ItemData: PLVItemData;
+  ItemJSONData: TJSONData absolute NodeData;
+begin
+  Result := Node <> nil;
+  if Result then
+  begin
+    ItemData := GetItemData(Node);
+    ItemJSONData := ItemData^.JSONData;
+    Result := (ItemJSONData <> nil) and (ItemJSONData.JSONType = jtObject);
+  end;
+  if not Result then
+    NodeData := nil;
 end;
 
 { TVirtualJSONInspector }
