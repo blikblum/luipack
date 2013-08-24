@@ -59,53 +59,55 @@ begin
     QuestionNode := GetFirst;
     while QuestionNode <> nil do
     begin
-      QuestionData := GetData(QuestionNode) as TJSONObject;
-      PropName := QuestionData.Get('prop', '');
-      PropData := FAnswerData.Find(PropName);
-      if PropData <> nil then
+      if GetData(QuestionNode, QuestionData) then
       begin
-        if FindJSONProp(QuestionData, 'children', OptionsData) then
+        PropName := QuestionData.Get('prop', '');
+        PropData := FAnswerData.Find(PropName);
+        if PropData <> nil then
         begin
-          if PropData.JSONType = jtString then
+          if FindJSONProp(QuestionData, 'children', OptionsData) then
           begin
-            CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
-          end
-          else
-          begin
-            CheckedIndex := -1;
-            for i := 0 to OptionsData.Count - 1 do
+            if PropData.JSONType = jtString then
             begin
-              OptionData := OptionsData.Objects[i];
-              OptionValueData := OptionData.Find('value');
-              if OptionValueData <> nil then
+              CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
+            end
+            else
+            begin
+              CheckedIndex := -1;
+              for i := 0 to OptionsData.Count - 1 do
               begin
-                if CompareJSONData(OptionValueData, PropData) = 0 then
+                OptionData := OptionsData.Objects[i];
+                OptionValueData := OptionData.Find('value');
+                if OptionValueData <> nil then
                 begin
-                  CheckedIndex := i;
-                  Break;
-                end;
-              end
-              else
-              begin
-                if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
+                  if CompareJSONData(OptionValueData, PropData) = 0 then
+                  begin
+                    CheckedIndex := i;
+                    Break;
+                  end;
+                end
+                else
                 begin
-                  CheckedIndex := i;
-                  Break;
+                  if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
+                  begin
+                    CheckedIndex := i;
+                    Break;
+                  end;
                 end;
               end;
             end;
-          end;
-          OptionNode := GetFirstChild(QuestionNode);
-          while OptionNode <> nil do
-          begin
-            if OptionNode^.Index = CheckedIndex then
+            OptionNode := GetFirstChild(QuestionNode);
+            while OptionNode <> nil do
             begin
-              OptionNode^.Dummy := 1;
-              CheckState[OptionNode] := csCheckedNormal;
-              OptionNode^.Dummy := 0;
-              Break;
+              if OptionNode^.Index = CheckedIndex then
+              begin
+                OptionNode^.Dummy := 1;
+                CheckState[OptionNode] := csCheckedNormal;
+                OptionNode^.Dummy := 0;
+                Break;
+              end;
+              OptionNode := GetNextSibling(OptionNode);
             end;
-            OptionNode := GetNextSibling(OptionNode);
           end;
         end;
       end;
@@ -130,8 +132,8 @@ procedure TJSONQuestionTreeView.DoCanEdit(Node: PVirtualNode; Column: TColumnInd
 var
   NodeData: TJSONObject;
 begin
-  NodeData := GetData(Node) as TJSONObject;
-  Allowed := NodeData.Get('custom', False);
+  if GetData(Node, NodeData) then
+    Allowed := NodeData.Get('custom', False);
   inherited DoCanEdit(Node, Column, Allowed);
 end;
 
@@ -143,10 +145,9 @@ begin
   //hack to skip when check state is being programatically set
   if Node^.Dummy = 1 then
     Exit;
-  if GetNodeLevel(Node) = 1 then
+  if (GetNodeLevel(Node) = 1) and GetData(Node, NodeData)
+    and GetData(Node^.Parent, ParentData) then
   begin
-    NodeData := GetData(Node) as TJSONObject;
-    ParentData := GetData(NodeParent[Node]) as TJSONObject;
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
     if PropName <> '' then
@@ -182,10 +183,9 @@ var
   PropName: String;
 begin
   inherited DoGetText(Node, Column, TextType, CellText);
-  NodeData := GetData(Node) as TJSONObject;
-  if (GetNodeLevel(Node) > 0) and NodeData.Get('custom', False) then
+  if (GetNodeLevel(Node) > 0) and GetData(Node, NodeData)
+    and NodeData.Get('custom', False) and GetData(Node^.Parent, ParentData) then
   begin
-    ParentData := GetData(Node^.Parent) as TJSONObject;
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
     CellText := FAnswerData.Get(PropName, CellText);
@@ -205,11 +205,13 @@ begin
   end
   else
   begin
-    NodeData := GetData(Node) as TJSONObject;
-    if NodeData.Get('check', False) then
-      Node^.CheckType := ctCheckBox
-    else
-      Node^.CheckType := ctRadioButton;
+    if GetData(Node, NodeData) then
+    begin
+      if NodeData.Get('check', False) then
+        Node^.CheckType := ctCheckBox
+      else
+        Node^.CheckType := ctRadioButton;
+    end;
     Include(InitStates, ivsMultiline);
   end;
 end;
@@ -221,10 +223,9 @@ var
   PropName: String;
   ParentData: TJSONObject;
 begin
-  if GetNodeLevel(Node) > 0 then
+  if (GetNodeLevel(Node) > 0) and GetData(Node, NodeData)
+    and GetData(Node^.Parent, ParentData) then
   begin
-    ParentData := GetData(Node^.Parent) as TJSONObject;
-    NodeData := GetData(Node) as TJSONObject;
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
     FAnswerData.Strings[PropName] := AText;
