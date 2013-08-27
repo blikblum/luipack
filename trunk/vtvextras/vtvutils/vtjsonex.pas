@@ -27,6 +27,7 @@ type
     procedure DoPaintText(Node: PVirtualNode; const ACanvas: TCanvas; Column: TColumnIndex;
       TextType: TVSTTextType); override;
   public
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure LoadAnswerData(AnswerData: TJSONObject; OwnsAnswerData: Boolean = False);
   published
@@ -239,6 +240,19 @@ begin
   if GetNodeLevel(Node) = 0 then
     ACanvas.Font.Style := [fsBold];
   inherited DoPaintText(Node, ACanvas, Column, TextType);
+end;
+
+constructor TJSONQuestionTreeView.Create(AOwner: TComponent);
+var
+  Column: TVirtualJSONDataViewColumn;
+begin
+  inherited Create(AOwner);
+  TreeOptions.AutoOptions := DefaultAutoOptions + [toAutoSpanColumns];
+  TreeOptions.MiscOptions := DefaultMiscOptions + [toCheckSupport, toEditable, toEditOnDblClick] - [toToggleOnDblClick];
+  TreeOptions.PaintOptions := DefaultPaintOptions + [toAlwaysHideSelection, toHideFocusRect, toHideSelection] - [toShowTreeLines, toShowRoot];
+  Column := Header.Columns.Add as TVirtualJSONDataViewColumn;
+  Column.PropertyName := 'text';
+  Header.Options := Header.Options + [hoAutoResize];
 end;
 
 destructor TJSONQuestionTreeView.Destroy;
