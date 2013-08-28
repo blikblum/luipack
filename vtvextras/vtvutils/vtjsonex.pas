@@ -140,23 +140,30 @@ end;
 
 procedure TJSONQuestionTreeView.DoChecked(Node: PVirtualNode);
 var
-  ParentData, NodeData: TJSONObject;
+  QuestionData, OptionData: TJSONObject;
+  ValueData: TJSONData;
   PropName: String;
 begin
   //hack to skip when check state is being programatically set
   if Node^.Dummy = 1 then
     Exit;
-  if (GetNodeLevel(Node) = 1) and GetData(Node, NodeData)
-    and GetData(Node^.Parent, ParentData) then
+  if (GetNodeLevel(Node) = 1) and GetData(Node, OptionData)
+    and GetData(Node^.Parent, QuestionData) then
   begin
-    PropName := ParentData.Get('prop', '');
-    PropName := NodeData.Get('prop', PropName);
+    PropName := QuestionData.Get('prop', '');
+    PropName := OptionData.Get('prop', PropName);
     if PropName <> '' then
     begin
+      ValueData := OptionData.Find('value');
       if Node^.CheckType = ctRadioButton then
       begin
-        if not NodeData.Get('custom', False) then
-          FAnswerData.Integers[PropName] := Node^.Index
+        if not OptionData.Get('custom', False) then
+        begin
+          if ValueData <> nil then
+            FAnswerData.Elements[PropName] := ValueData.Clone
+          else
+            FAnswerData.Integers[PropName] := Node^.Index;
+        end
         else
         begin
           if Node^.CheckState = csCheckedNormal then
@@ -165,10 +172,15 @@ begin
       end
       else
       begin
-        //todo set value instead of index
         if Node^.CheckState = csCheckedNormal then
-          FAnswerData.Integers[PropName] := Node^.Index
+        begin
+          if ValueData <> nil then
+            FAnswerData.Elements[PropName] := ValueData.Clone
+          else
+            FAnswerData.Booleans[PropName] := True;
+        end
         else
+          //todo: add option to configure behavior (delete or false)
           FAnswerData.Delete(PropName);
       end;
     end;
@@ -268,6 +280,7 @@ begin
     FAnswerData.Free;
   FAnswerData := AnswerData;
   FOwnsAnswerData := OwnsAnswerData;
+  DoLoadAnswerData;
 end;
 
 end.
