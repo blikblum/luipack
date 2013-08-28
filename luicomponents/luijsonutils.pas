@@ -116,8 +116,6 @@ type
   TFieldMaps = array of TFieldMap;
 
 function CompareJSONData(Data1, Data2: TJSONData): Integer;
-const
-  RelationshipIntegerMap: array[TVariantRelationship] of Integer = (0, -1, 1, 0);
 var
   Data1Type, Data2Type: TJSONtype;
 begin
@@ -143,17 +141,12 @@ begin
       end
       else
       begin
-        if (Data1Type in [jtObject, jtArray]) or (Data2Type in [jtObject, jtArray]) then
-          Result := 0
+        if Data1Type = jtNull then
+          Result := -1
         else
-        begin
-          if Data1Type = jtNull then
-            Result := -1
-          else if Data2Type = jtNull then
-            Result := 1
-          else
-            Result := RelationshipIntegerMap[VarCompareValue(Data1.Value, Data2.Value)];
-        end;
+          //Data2type = jtNull or two values have different types and cannot be compared
+          //VarCompareValue raises an exception when trying to compare such values
+          Result := 1
       end;
     end
     else
