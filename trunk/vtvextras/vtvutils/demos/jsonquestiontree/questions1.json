@@ -1,0 +1,127 @@
+[
+	{
+		"text":"Select option (Index stored as the value)",
+		"prop":"optionbyindex",
+		"children":[
+			{
+				"text":"First"
+			},
+			{
+				"text":"Second"
+			},
+			{
+				"text":"Third"
+			}
+		]
+	},
+  {
+		"text":"Select other option (Explicit value)",
+		"prop":"optionbyvalue",
+		"children":[
+			{
+				"text":"First - 1",
+        "value": 10
+			},
+			{
+				"text":"Second - 2",
+        "value": 20
+			},
+			{
+				"text":"Third - 3",
+        "value": 30
+			}
+		]
+	},
+	{
+		"text":"Select a predefined option or a custom value",
+		"prop":"customoption",
+		"children":[
+			{
+				"text":"Option 1"
+			},
+			{
+				"text":"Option 2 - xxx",
+        "value":"xxx"
+			},
+			{
+				"text":"Custom option",
+        "custom": true
+			}
+		]
+	},
+	{
+		"text":"Select a option - mixed values",
+		"prop":"mixedoption",
+		"children":[
+			{
+				"text":"Option 1"
+			},
+			{
+				"text":"Option 2 - 0",
+        "value":0
+			},
+			{
+				"text":"Option 3 - yyy",
+        "value":"yyy"
+			}
+		]
+	},
+	{
+		"text":"Select more than one option (Checked = true)",		
+    "type":"checkgroup",
+		"children":[
+			{
+				"text":"First",
+        "prop":"firstcheck"
+			},
+			{
+				"text":"Second",
+        "prop":"secondcheck"
+			},
+      {
+				"text":"Third",
+        "prop":"thirdcheck"
+			}            
+		]
+	},
+  {
+		"text":"Select more than one option (Explicit value)",		
+    "type":"checkgroup",
+		"children":[
+			{
+				"text":"First",
+        "prop":"firstcheckvalue",
+        "value": 10
+			},
+			{
+				"text":"Second",
+        "prop":"secondcheckvalue",
+        "value":"Second is checked"
+			},
+      {
+				"text":"Third",
+        "prop":"thirdcheckvalue",
+        "value": 2.5
+			}            
+		]
+	},
+  {
+		"text":"Select more than one option (Store values in a child object)",		
+    "type":"checkgroup",
+    "prop":"check",
+		"children":[
+			{
+				"text":"First",
+        "prop":"first"
+			},
+			{
+				"text":"Second",
+        "prop":"second"
+			},
+      {
+				"text":"Third",
+        "prop":"third"
+			}            
+		]
+	}  
+ ] 

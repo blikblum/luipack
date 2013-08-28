@@ -1,0 +1,64 @@
+object MainForm: TMainForm
+  Left = 435
+  Height = 567
+  Top = 110
+  Width = 679
+  Caption = 'JSONQuestionTree Demo'
+  ClientHeight = 567
+  ClientWidth = 679
+  OnCreate = FormCreate
+  LCLVersion = '1.1'
+  object AnswerMemo: TMemo
+    Left = 449
+    Height = 539
+    Top = 26
+    Width = 228
+    Align = alRight
+    BorderSpacing.Top = 26
+    BorderSpacing.Right = 2
+    BorderSpacing.Bottom = 2
+    TabOrder = 0
+  end
+  object Splitter1: TSplitter
+    Left = 444
+    Height = 567
+    Top = 0
+    Width = 5
+    Align = alRight
+    ResizeAnchor = akRight
+  end
+  object QuestionTreeView: TJSONQuestionTreeView
+    Left = 2
+    Height = 539
+    Top = 26
+    Width = 442
+    TextProperty = 'text'
+    Align = alClient
+    BorderSpacing.Left = 2
+    BorderSpacing.Top = 26
+    BorderSpacing.Bottom = 2
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    TabOrder = 2
+    OnChecked = QuestionTreeViewChecked
+  end
+  object Label1: TLabel
+    Left = 2
+    Height = 15
+    Top = 9
+    Width = 53
+    Caption = 'Questions'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = AnswerMemo
+    Left = 449
+    Height = 15
+    Top = 9
+    Width = 44
+    Caption = 'Answers'
+    ParentColor = False
+  end
+end
