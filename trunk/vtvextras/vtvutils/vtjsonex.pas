@@ -49,7 +49,7 @@ var
   OptionsData: TJSONArray;
   PropData, OptionValueData: TJSONData;
   PropName: String;
-  i, CheckedIndex: Integer;
+  i, CheckedIndex, FallbackIndex: Integer;
 begin
   if FAnswerData = nil then
   begin
@@ -68,35 +68,31 @@ begin
         begin
           if FindJSONProp(QuestionData, 'children', OptionsData) then
           begin
-            if PropData.JSONType = jtString then
+            FallbackIndex := -1;
+            CheckedIndex := -1;
+            for i := 0 to OptionsData.Count - 1 do
             begin
-              CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
-            end
-            else
-            begin
-              CheckedIndex := -1;
-              for i := 0 to OptionsData.Count - 1 do
+              OptionData := OptionsData.Objects[i];
+              OptionValueData := OptionData.Find('value');
+              if OptionValueData <> nil then
               begin
-                OptionData := OptionsData.Objects[i];
-                OptionValueData := OptionData.Find('value');
-                if OptionValueData <> nil then
+                if CompareJSONData(OptionValueData, PropData) = 0 then
                 begin
-                  if CompareJSONData(OptionValueData, PropData) = 0 then
-                  begin
-                    CheckedIndex := i;
-                    Break;
-                  end;
-                end
-                else
-                begin
-                  if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
-                  begin
-                    CheckedIndex := i;
-                    Break;
-                  end;
+                  CheckedIndex := i;
+                  Break;
                 end;
+              end
+              else
+              begin
+                // store the matched index to be used in last case
+                if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
+                  FallbackIndex := i;
               end;
             end;
+            if (CheckedIndex = -1) and (PropData.JSONType = jtString) then
+              CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
+            if CheckedIndex = -1 then
+              CheckedIndex := FallbackIndex;
             OptionNode := GetFirstChild(QuestionNode);
             while OptionNode <> nil do
             begin
