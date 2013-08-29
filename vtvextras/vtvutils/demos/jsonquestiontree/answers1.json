@@ -2,5 +2,10 @@
   "optionbyindex" : 0,
   "optionbyvalue" : 20,
   "customoption" : "xxx",
-  "mixedoption" : "yyy"
+  "mixedoption" : "yyy",
+  "firstcheck" : true,
+  "secondcheckvalue" : "Second is checked",  
+  "check" : {
+    "third" : true
+  }  
 }
