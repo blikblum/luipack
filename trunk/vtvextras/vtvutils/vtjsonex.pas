@@ -136,9 +136,9 @@ end;
 
 procedure TJSONQuestionTreeView.DoChecked(Node: PVirtualNode);
 var
-  QuestionData, OptionData: TJSONObject;
+  QuestionData, OptionData, CheckData: TJSONObject;
   ValueData: TJSONData;
-  PropName: String;
+  OptionPropName, QuestionPropName: String;
 begin
   //hack to skip when check state is being programatically set
   if Node^.Dummy = 1 then
@@ -146,9 +146,9 @@ begin
   if (GetNodeLevel(Node) = 1) and GetData(Node, OptionData)
     and GetData(Node^.Parent, QuestionData) then
   begin
-    PropName := QuestionData.Get('prop', '');
-    PropName := OptionData.Get('prop', PropName);
-    if PropName <> '' then
+    QuestionPropName := QuestionData.Get('prop', '');
+    OptionPropName := OptionData.Get('prop', QuestionPropName);
+    if OptionPropName <> '' then
     begin
       ValueData := OptionData.Find('value');
       if Node^.CheckType = ctRadioButton then
@@ -156,9 +156,9 @@ begin
         if not OptionData.Get('custom', False) then
         begin
           if ValueData <> nil then
-            FAnswerData.Elements[PropName] := ValueData.Clone
+            FAnswerData.Elements[OptionPropName] := ValueData.Clone
           else
-            FAnswerData.Integers[PropName] := Node^.Index;
+            FAnswerData.Integers[OptionPropName] := Node^.Index;
         end
         else
         begin
@@ -168,16 +168,30 @@ begin
       end
       else
       begin
+        if (QuestionPropName <> '') and (QuestionPropName <> OptionPropName) then
+        begin
+          if not FindJSONProp(FAnswerData, QuestionPropName, CheckData) then
+          begin
+            CheckData := TJSONObject.Create;
+            FAnswerData.Add(QuestionPropName, CheckData);
+          end;
+        end
+        else
+          CheckData := FAnswerData;
         if Node^.CheckState = csCheckedNormal then
         begin
           if ValueData <> nil then
-            FAnswerData.Elements[PropName] := ValueData.Clone
+            CheckData.Elements[OptionPropName] := ValueData.Clone
           else
-            FAnswerData.Booleans[PropName] := True;
+            CheckData.Booleans[OptionPropName] := True;
         end
         else
+        begin
           //todo: add option to configure behavior (delete or false)
-          FAnswerData.Delete(PropName);
+          CheckData.Delete(OptionPropName);
+          if (CheckData <> FAnswerData) and (CheckData.Count = 0) then
+            FAnswerData.Remove(CheckData);
+        end;
       end;
     end;
   end;
@@ -204,7 +218,7 @@ end;
 procedure TJSONQuestionTreeView.DoInitNode(ParentNode, Node: PVirtualNode;
   var InitStates: TVirtualNodeInitStates);
 var
-  NodeData: TJSONObject;
+  QuestionData: TJSONObject;
 begin
   inherited DoInitNode(ParentNode, Node, InitStates);
   if ParentNode = nil then
@@ -214,9 +228,9 @@ begin
   end
   else
   begin
-    if GetData(Node, NodeData) then
+    if GetData(ParentNode, QuestionData) then
     begin
-      if NodeData.Get('check', False) then
+      if QuestionData.Get('type', '') = 'checkgroup' then
         Node^.CheckType := ctCheckBox
       else
         Node^.CheckType := ctRadioButton;
