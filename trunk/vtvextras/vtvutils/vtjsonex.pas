@@ -15,6 +15,7 @@ type
   private
     FAnswerData: TJSONObject;
     FOwnsAnswerData: Boolean;
+    procedure SetCheckedOption(QuestionNode: PVirtualNode; Index: Integer);
     procedure DoLoadAnswerData;
   protected
     procedure DoBeforeItemErase(ACanvas: TCanvas; Node: PVirtualNode; const ItemRect: TRect;
@@ -40,16 +41,73 @@ implementation
 uses
   LuiJSONUtils;
 
+function GetOptionIndex(OptionsData: TJSONArray; AnswerData: TJSONObject; const PropName: String): Integer;
+var
+  PropData: TJSONData;
+  FallbackIndex: Integer;
+  OptionData: TJSONObject;
+  OptionValueData: TJSONData;
+  i: Integer;
+begin
+  Result := -1;
+  PropData := AnswerData.Find(PropName);
+  if PropData <> nil then
+  begin
+    FallbackIndex := -1;
+    for i := 0 to OptionsData.Count - 1 do
+    begin
+      OptionData := OptionsData.Objects[i];
+      OptionValueData := OptionData.Find('value');
+      if OptionValueData <> nil then
+      begin
+        if CompareJSONData(OptionValueData, PropData) = 0 then
+        begin
+          Result := i;
+          Exit;
+        end;
+      end
+      else
+      begin
+        // store the matched index to be used in last case
+        if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
+          FallbackIndex := i;
+      end;
+    end;
+    if (Result = -1) and (PropData.JSONType = jtString) then
+      Result := GetJSONIndexOf(OptionsData, ['custom', True]);
+    if Result = -1 then
+      Result := FallbackIndex;
+  end;
+end;
+
 { TJSONQuestionTreeView }
+
+procedure TJSONQuestionTreeView.SetCheckedOption(QuestionNode: PVirtualNode; Index: Integer);
+var
+  OptionNode: PVirtualNode;
+begin
+  OptionNode := GetFirstChild(QuestionNode);
+  while OptionNode <> nil do
+  begin
+    if OptionNode^.Index = Index then
+    begin
+      OptionNode^.Dummy := 1;
+      CheckState[OptionNode] := csCheckedNormal;
+      OptionNode^.Dummy := 0;
+      Break;
+    end;
+    OptionNode := GetNextSibling(OptionNode);
+  end;
+end;
 
 procedure TJSONQuestionTreeView.DoLoadAnswerData;
 var
-  QuestionNode, OptionNode: PVirtualNode;
-  QuestionData, OptionData: TJSONObject;
+  QuestionNode: PVirtualNode;
+  QuestionData, OptionData, CheckData: TJSONObject;
   OptionsData: TJSONArray;
   PropData, OptionValueData: TJSONData;
   PropName: String;
-  i, CheckedIndex, FallbackIndex: Integer;
+  i, CheckedIndex: Integer;
 begin
   if FAnswerData = nil then
   begin
@@ -60,50 +118,43 @@ begin
     QuestionNode := GetFirst;
     while QuestionNode <> nil do
     begin
-      if GetData(QuestionNode, QuestionData) then
+      if GetData(QuestionNode, QuestionData) and FindJSONProp(QuestionData, 'children', OptionsData) then
       begin
         PropName := QuestionData.Get('prop', '');
-        PropData := FAnswerData.Find(PropName);
-        if PropData <> nil then
+        if QuestionData.Get('type', '') <> 'checkgroup' then
         begin
-          if FindJSONProp(QuestionData, 'children', OptionsData) then
+          CheckedIndex := GetOptionIndex(OptionsData, FAnswerData, PropName);
+          if CheckedIndex >= 0 then
+            SetCheckedOption(QuestionNode, CheckedIndex);
+        end
+        else
+        begin
+          PropData := FAnswerData.Find(PropName);
+          if (PropData <> nil) and (PropData.JSONType = jtObject) then
+            CheckData := TJSONObject(PropData)
+          else
+            CheckData := FAnswerData;
+          // handle check group
+          for i := 0 to OptionsData.Count - 1 do
           begin
-            FallbackIndex := -1;
             CheckedIndex := -1;
-            for i := 0 to OptionsData.Count - 1 do
+            OptionData := OptionsData.Objects[i];
+            PropName := OptionData.Get('prop', '');
+            if PropName <> '' then
             begin
-              OptionData := OptionsData.Objects[i];
               OptionValueData := OptionData.Find('value');
               if OptionValueData <> nil then
               begin
-                if CompareJSONData(OptionValueData, PropData) = 0 then
-                begin
+                if CompareJSONData(OptionValueData, CheckData.Find(PropName)) = 0 then
                   CheckedIndex := i;
-                  Break;
-                end;
               end
               else
               begin
-                // store the matched index to be used in last case
-                if (PropData.JSONType = jtNumber) and (PropData.AsInteger = i) then
-                  FallbackIndex := i;
+                if CheckData.Get(PropName, False) then
+                  CheckedIndex := i;
               end;
-            end;
-            if (CheckedIndex = -1) and (PropData.JSONType = jtString) then
-              CheckedIndex := GetJSONIndexOf(OptionsData, ['custom', True]);
-            if CheckedIndex = -1 then
-              CheckedIndex := FallbackIndex;
-            OptionNode := GetFirstChild(QuestionNode);
-            while OptionNode <> nil do
-            begin
-              if OptionNode^.Index = CheckedIndex then
-              begin
-                OptionNode^.Dummy := 1;
-                CheckState[OptionNode] := csCheckedNormal;
-                OptionNode^.Dummy := 0;
-                Break;
-              end;
-              OptionNode := GetNextSibling(OptionNode);
+              if CheckedIndex >= 0 then
+                SetCheckedOption(QuestionNode, CheckedIndex);
             end;
           end;
         end;
