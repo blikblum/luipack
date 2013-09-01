@@ -74,11 +74,11 @@ type
     constructor Create(AOwner: TLuiConfig);
     destructor Destroy; override;
     function Add: TLuiConfigItemDef;
-    function Find(const Key: String): TLuiConfigItemDef;
-    function GetDefaultString(const Key: String): String;
-    function GetDefaultInteger(const Key: String): Integer;
-    function GetDefaultBoolean(const Key: String): Boolean;
-    function GetDefaultFloat(const Key: String): Double;
+    function Find(const Section, Key: String): TLuiConfigItemDef;
+    function GetDefaultString(const Section, Key: String): String;
+    function GetDefaultInteger(const Section, Key: String): Integer;
+    function GetDefaultBoolean(const Section, Key: String): Boolean;
+    function GetDefaultFloat(const Section, Key: String): Double;
     property Items[Index: Integer]: TLuiConfigItemDef read GetItem; default;
   end;
 
@@ -318,7 +318,7 @@ function TLuiConfig.GetItemText(const ItemKey: String; const SectionTitle: Strin
 var
   Item: TLuiConfigItemDef;
 begin
-  Item := FItemDefs.Find(ItemKey);
+  Item := FItemDefs.Find(SectionTitle, ItemKey);
   if (Item <> nil) and (Item.Section = SectionTitle) then
     Result := Item.DisplayName
   else
@@ -342,7 +342,7 @@ var
 begin
   Result := FDataProvider.ReadInteger(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
-    Result := FItemDefs.GetDefaultInteger(ItemKey);
+    Result := FItemDefs.GetDefaultInteger(SectionTitle, ItemKey);
 end;
 
 function TLuiConfig.ReadString(const SectionTitle, ItemKey: String): String;
@@ -352,7 +352,7 @@ begin
   Result := FDataProvider.ReadString(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
   begin
-    Result := FItemDefs.GetDefaultString(ItemKey);
+    Result := FItemDefs.GetDefaultString(SectionTitle, ItemKey);
     if (Result <> '') and (lcoParseMacros in FOptions) then
       Result := ReplacePathMacrosUTF8(Result);
   end;
@@ -364,7 +364,7 @@ var
 begin
   Result := FDataProvider.ReadBoolean(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
-    Result := FItemDefs.GetDefaultBoolean(ItemKey);
+    Result := FItemDefs.GetDefaultBoolean(SectionTitle, ItemKey);
 end;
 
 function TLuiConfig.ReadFloat(const SectionTitle, ItemKey: String): Double;
@@ -373,7 +373,7 @@ var
 begin
   Result := FDataProvider.ReadFloat(SectionTitle, ItemKey, ValueExists);
   if not ValueExists then
-    Result := FItemDefs.GetDefaultFloat(ItemKey);
+    Result := FItemDefs.GetDefaultFloat(SectionTitle, ItemKey);
 end;
 
 function TLuiConfig.ReadValue(const SectionTitle, ItemKey: String): Variant;
@@ -382,7 +382,7 @@ var
   Item: TLuiConfigItemDef;
   S: String;
 begin
-  Item := FItemDefs.Find(ItemKey);
+  Item := FItemDefs.Find(SectionTitle, ItemKey);
   if (Item <> nil) and (Item.DataType in [ldtBoolean, ldtFloat, ldtInteger]) then
   begin
     case Item.DataType of
@@ -405,7 +405,7 @@ begin
       if Item <> nil then
         S := Item.DefaultValue
       else
-        S := FItemDefs.GetDefaultString(ItemKey);
+        S := FItemDefs.GetDefaultString(SectionTitle, ItemKey);
 
       if S = '' then
         Result := Null
@@ -502,7 +502,7 @@ begin
     FDataProvider.WriteString(SectionTitle, ItemKey, '')
   else
   begin
-    Item := FItemDefs.Find(ItemKey);
+    Item := FItemDefs.Find(SectionTitle, ItemKey);
     if (Item <> nil) and (Item.DataType in [ldtInteger, ldtBoolean, ldtFloat]) then
     begin
       case Item.DataType of
@@ -679,7 +679,7 @@ begin
   for i := 0 to Count - 1 do
   begin
     Item := TLuiConfigItemDef(Items[i]);
-    FHashList.Add(Item.Key, Item);
+    FHashList.Add(Item.FSection + '.' + Item.Key, Item);
   end;
   FValidHashList := True;
 end;
@@ -718,37 +718,37 @@ begin
   Result := TLuiConfigItemDef(inherited Add);
 end;
 
-function TLuiConfigItemDefs.Find(const Key: String): TLuiConfigItemDef;
+function TLuiConfigItemDefs.Find(const Section, Key: String): TLuiConfigItemDef;
 begin
   if not FValidHashList then
     BuildHashList;
-  Result := TLuiConfigItemDef(FHashList.Find(Key));
+  Result := TLuiConfigItemDef(FHashList.Find(Section + '.' + Key));
 end;
 
-function TLuiConfigItemDefs.GetDefaultString(const Key: String): String;
+function TLuiConfigItemDefs.GetDefaultString(const Section, Key: String): String;
 var
   Item: TLuiConfigItemDef;
 begin
-  Item := Find(Key);
+  Item := Find(Section, Key);
   if Item <> nil then
     Result := Item.DefaultValue
   else
     Result := '';
 end;
 
-function TLuiConfigItemDefs.GetDefaultInteger(const Key: String): Integer;
+function TLuiConfigItemDefs.GetDefaultInteger(const Section, Key: String): Integer;
 begin
-  Result := StrToIntDef(GetDefaultString(Key), 0);
+  Result := StrToIntDef(GetDefaultString(Section, Key), 0);
 end;
 
-function TLuiConfigItemDefs.GetDefaultBoolean(const Key: String): Boolean;
+function TLuiConfigItemDefs.GetDefaultBoolean(const Section, Key: String): Boolean;
 begin
-  Result := StrToBoolDef(GetDefaultString(Key), False);
+  Result := StrToBoolDef(GetDefaultString(Section, Key), False);
 end;
 
-function TLuiConfigItemDefs.GetDefaultFloat(const Key: String): Double;
+function TLuiConfigItemDefs.GetDefaultFloat(const Section, Key: String): Double;
 begin
-  Result := StrToFloatDef(GetDefaultString(Key), 0);
+  Result := StrToFloatDef(GetDefaultString(Section, Key), 0);
 end;
 
 { TLuiConfigProvider }
