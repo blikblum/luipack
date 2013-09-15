@@ -106,7 +106,10 @@ begin
   FFrame.Parent := Self;
   Caption := FFrame.Caption;
   SetObjectProperties(FFrame, ['FrameController', Self as IFrameController]);
+  //todo: remove InitControl. Keep FrameLoad that is consistent with other components
+  //todo: add parameter to choose what method to call
   CallMethod(FFrame, 'InitControl');
+  CallMethod(FFrame, 'FrameLoad');
   FFrame.Visible := True;
 end;
 
