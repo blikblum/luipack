@@ -19,11 +19,17 @@ type
    private
      FCacheMode: TSqlite3CacheMode;
      FConditionsSQL: String;
+     FInputFields: String;
+     FInputFieldsData: TJSONArray;
      FName: String;
      FParams: TParams;
      FPrimaryKey: String;
      FSelectSQL: String;
      FTableName: String;
+     procedure JSONDataToDataset(JSONObj: TJSONObject; Dataset: TDataset; DoPatch: Boolean);
+     function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
+     function GetUpdateSQL(const ResourceId: String): String;
+     procedure SetInputFields(const AValue: String);
      procedure SetParams(AValue: TParams);
    protected
      function GetDisplayName: string; override;
@@ -34,6 +40,7 @@ type
    published
      property CacheMode: TSqlite3CacheMode read FCacheMode write FCacheMode default cmNone;
      property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
+     property InputFields: String read FInputFields write SetInputFields;
      property Name: String read FName write FName;
      property Params: TParams read FParams write SetParams;
      property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
@@ -62,12 +69,11 @@ type
      FResourceClient: TSqlite3ResourceClient;
      FParams: TParams;
    protected
-     function PrepareSQL(const SQL: String): String;
+     function BindParams(const SQLTemplate: String): String;
      property ModelDef: TSqlite3ResourceModelDef read FModelDef;
    public
      constructor Create(AModelDef: TSqlite3ResourceModelDef; ResourceClient: TSqlite3ResourceClient); virtual;
      destructor Destroy; override;
-     procedure CopyJSONData(JSONObj: TJSONObject; DoPatch: Boolean);
      function GetParams: TParams;
      function ParamByName(const ParamName: String): TParam;
      property Params: TParams read GetParams;
@@ -255,24 +261,15 @@ var
 begin
   Result := True;
   try
-    SQL := FModelDef.SelectSQL;
-    if Id = '' then
-    begin
-      SQL := SQL + ' Where 1 = -1';
-    end
-    else
-    begin
-      //todo: fix when Id = string
-      SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, Id]);
-    end;
-    FDataset.SQL := PrepareSQL(SQL);
+    SQL := FModelDef.GetUpdateSQL(Id);
+    FDataset.SQL := BindParams(SQL);
     FDataset.Open;
     try
       if Id = '' then
         FDataset.Append
       else
         FDataset.Edit;
-      CopyJSONData(FData, False);
+      FModelDef.JSONDataToDataset(FData, FDataset, False);
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
     finally
@@ -293,7 +290,7 @@ begin
     //todo: fix when Id = string
     SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, Id]);
   end;
-  FDataset.SQL := PrepareSQL(SQL);
+  FDataset.SQL := BindParams(SQL);
 end;
 
 constructor TRESTJSONObjectResource.Create(AModelDef: TSqlite3ResourceModelDef;
@@ -494,59 +491,15 @@ begin
   inherited Destroy;
 end;
 
-procedure TSqlite3DataResource.CopyJSONData(JSONObj: TJSONObject; DoPatch: Boolean);
-var
-  i: Integer;
-  FieldName: String;
-  PropData: TJSONData;
-  Field: TField;
-  Fields: TFields;
-begin
-  //todo: implement InputFields
-  {
-  if FUpdateColumns.Count > 0 then
-  begin
-    for i := 0 to FUpdateColumns.Count -1 do
-    begin
-      FieldName := FUpdateColumns[i];
-      PropData := JSONObj.Find(FieldName);
-      if PropData = nil then
-        PropData := Obj2.Find(FieldName);
-      if PropData <> nil then
-        Query.FieldByName(FieldName).Value := PropData.Value;
-    end;
-  end
-  else
-  begin
-  }
-    // no input fields defined
-    Fields := FDataset.Fields;
-    for i := 0 to Fields.Count -1 do
-    begin
-      Field := Fields[i];
-      FieldName := LowerCase(Field.FieldName);
-      if SameText(FieldName, FModelDef.FPrimaryKey) then
-        continue;
-      PropData := JSONObj.Find(FieldName);
-      if PropData <> nil then
-        Field.Value := PropData.Value
-      else
-      begin
-        if not DoPatch then
-          Field.Value := Null;
-      end;
-    end;
-  //end;
-end;
-
-function TSqlite3DataResource.PrepareSQL(const SQL: String): String;
+function TSqlite3DataResource.BindParams(const SQLTemplate: String): String;
 var
   Param: TParam;
   i: Integer;
 begin
-  Result := SQL;
+  Result := SQLTemplate;
   for i := 0 to FParams.Count - 1 do
   begin
+    //todo: handle InputFields
     Param := FParams.Items[i];
     Result := StringReplace(Result, ':' + Param.Name, Param.AsString,
       [rfReplaceAll, rfIgnoreCase]);
@@ -597,7 +550,7 @@ begin
     SQL := FModelDef.SelectSQL;
     if FModelDef.ConditionsSQL <> '' then
       SQL := SQL + ' ' + FModelDef.ConditionsSQL;
-    FDataset.SQL := PrepareSQL(SQL);
+    FDataset.SQL := BindParams(SQL);
     FDataset.Open;
     try
       FData.Clear;
@@ -617,6 +570,112 @@ begin
   FParams.Assign(AValue);
 end;
 
+procedure TSqlite3ResourceModelDef.JSONDataToDataset(JSONObj: TJSONObject; Dataset: TDataset;
+  DoPatch: Boolean);
+var
+  i: Integer;
+  FieldName, DBFieldName: String;
+  PropData: TJSONData;
+  Field: TField;
+  Fields: TFields;
+begin
+  if FInputFieldsData <> nil then
+  begin
+    for i := 0 to FInputFieldsData.Count - 1 do
+    begin
+      FieldName := GetFieldName(i, DBFieldName);
+      Field := Dataset.FieldByName(DBFieldName);
+      PropData := JSONObj.Find(FieldName);
+      if PropData <> nil then
+        Field.Value := PropData.Value
+      else
+      begin
+        if not DoPatch then
+          Field.Value := Null;
+      end;
+    end;
+  end
+  else
+  begin
+    // no input fields defined
+    Fields := Dataset.Fields;
+    for i := 0 to Fields.Count -1 do
+    begin
+      Field := Fields[i];
+      FieldName := LowerCase(Field.FieldName);
+      if SameText(FieldName, FPrimaryKey) then
+        continue;
+      PropData := JSONObj.Find(FieldName);
+      if PropData <> nil then
+        Field.Value := PropData.Value
+      else
+      begin
+        if not DoPatch then
+          Field.Value := Null;
+      end;
+    end;
+  end;
+end;
+
+function TSqlite3ResourceModelDef.GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
+var
+  FieldData: TJSONData;
+begin
+  FieldData := FInputFieldsData.Items[FieldIndex];
+  if FieldData.JSONType = jtString then
+  begin
+    Result := FieldData.AsString;
+    DBFieldName := Result;
+  end
+  else if FieldData.JSONType = jtObject then
+  begin
+    Result := TJSONObject(FieldData).Get('name', '');
+    DBFieldName := TJSONObject(FieldData).Get('mapping', Result);
+  end
+  else
+    Result := '';
+  if Trim(Result) = '' then
+    raise Exception.CreateFmt('Invalid input field name - model "%s" index "%d"', [FName, FieldIndex]);
+end;
+
+function TSqlite3ResourceModelDef.GetUpdateSQL(const ResourceId: String): String;
+var
+  i: Integer;
+  DBFieldName: String;
+begin
+  if FInputFieldsData = nil then
+    Result := SelectSQL
+  else
+  begin
+    Result := 'Select';
+    for i := 0 to FInputFieldsData.Count - 1 do
+    begin
+      GetFieldName(i, DBFieldName);
+      Result := Result + ' ' + DBFieldName;
+      if i < (FInputFieldsData.Count - 1) then
+        Result := Result + ',';
+    end;
+    Result := Result + ' from ' + FTableName;
+  end;
+  if ResourceId = '' then
+  begin
+    Result := Result + ' Where 1 = -1';
+  end
+  else
+  begin
+    //todo: fix when ResourceId = string
+    Result := Result + Format(' Where %s = %s', [PrimaryKey, ResourceId]);
+  end;
+end;
+
+procedure TSqlite3ResourceModelDef.SetInputFields(const AValue: String);
+begin
+  if FInputFields = AValue then Exit;
+  FInputFields := AValue;
+  FreeAndNil(FInputFieldsData);
+  StringToJSONData(FInputFields, FInputFieldsData);
+end;
+
 function TSqlite3ResourceModelDef.GetDisplayName: string;
 begin
   Result := FName;
@@ -631,6 +690,7 @@ end;
 
 destructor TSqlite3ResourceModelDef.Destroy;
 begin
+  FInputFieldsData.Free;
   FParams.Destroy;
   inherited Destroy;
 end;
