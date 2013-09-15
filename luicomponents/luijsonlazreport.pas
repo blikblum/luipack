@@ -2,6 +2,7 @@ unit LuiJSONLazReport;
 
 {$mode objfpc}{$H+}
 {.$define LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
+{.$define DEBUG_JSONLAZREPORT}
 
 interface
 
@@ -102,7 +103,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, Variants;
+  LuiJSONUtils, Variants {$ifdef DEBUG_JSONLAZREPORT}, LCLProc{$endif};
 
 { TfrJSONCrossDataset }
 
@@ -225,6 +226,14 @@ end;
 
 function TfrJSONReport.CreateJSONDataset(DatasetClass: TfrJSONDatasetClass; Index: Integer): TfrJSONDataset;
 begin
+  {$ifdef DEBUG_JSONLAZREPORT}
+  if Owner <> nil then
+    DebugLn('CreateJSONDataset - Owner: %s Report: %s DatasetClass: %s Index: %d',
+      [Owner.Name, Name, DatasetClass.ClassName, Index])
+  else
+    DebugLn('CreateJSONDataset - Owner: nil Report: %s DatasetClass: %s Index: %d',
+      [Name, DatasetClass.ClassName, Index]);
+  {$endif}
   Result := DatasetClass.Create(Self.Owner);
   Result.Name := Name + DatasetClass.ClassName + IntToStr(Index);
   Result.FreeNotification(Self);
