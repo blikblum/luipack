@@ -5,7 +5,7 @@ unit LuiDataClasses;
 interface
 
 uses
-  Classes, fpjson, db;
+  Classes, fpjson, db, LuiJSONClasses;
 
 type
 
@@ -63,11 +63,29 @@ type
     property Values[KeyValue: Variant]: Variant read GetValues;
   end;
 
+  function SaveChanges(Resource: IJSONObjectResource; ChangeSet: TJSONChangeSet): Boolean;
 
 implementation
 
 uses
   LuiJSONUtils;
+
+procedure ApplyChange(JSONObj: TJSONObject; Data: PtrInt; ChangeType: TJSONChangeType; var Continue: Boolean);
+var
+  Resource: IJSONObjectResource absolute Data;
+begin
+  Resource.SetData(JSONObj, False);
+  if ChangeType <> jcDeleted then
+    Continue := Resource.Save
+  else
+    Continue := Resource.Delete;
+end;
+
+function SaveChanges(Resource: IJSONObjectResource; ChangeSet: TJSONChangeSet): Boolean;
+begin
+  Assert(Resource <> nil, 'SaveChanges - Resource must be <> nil');
+  Result := ChangeSet.ForEachCall(@ApplyChange, PtrInt(Resource));
+end;
 
 { TJSONResourceLookup }
 
