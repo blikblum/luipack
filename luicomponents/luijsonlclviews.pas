@@ -19,6 +19,7 @@ type
   public
     class procedure DoJSONToGUI(Data: TJSONObject; const PropName: String; Control: TControl; OptionsData: TJSONObject); virtual;
     class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject; const PropName: String; OptionsData: TJSONObject); virtual;
+    class procedure Initialize(Control: TControl; OptionsData: TJSONObject); virtual;
   end;
 
   TCustomJSONGUIMediatorClass = class of TCustomJSONGUIMediator;
@@ -50,9 +51,17 @@ type
       const PropName: String; OptionsData: TJSONObject); override;
   end;
 
+  { TJSONListMediator }
+
+  TJSONListMediator = class(TCustomJSONGUIMediator)
+    class function GetItemIndex(Data: TJSONObject; const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer; static;
+    class procedure SetItemIndex(Data: TJSONObject; const PropName: String; Items: TStrings; ItemIndex: Integer; OptionsData: TJSONObject); static;
+    class procedure Initialize(Control: TControl; OptionsData: TJSONObject); override;
+  end;
+
   { TJSONRadioGroupMediator }
 
-  TJSONRadioGroupMediator = class(TCustomJSONGUIMediator)
+  TJSONRadioGroupMediator = class(TJSONListMediator)
     class procedure DoJSONToGUI(Data: TJSONObject; const PropName: String;
       Control: TControl; OptionsData: TJSONObject); override;
     class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject;
@@ -78,6 +87,9 @@ type
     FOptions: String;
     FOptionsData: TJSONObject;
     FPropertyName: String;
+    FInitialized: Boolean;
+    function GetOptionsData: TJSONObject;
+    procedure Initialize;
     procedure MediatorClassNeeded;
     procedure OptionsDataNeeded;
     procedure SetControl(Value: TControl);
@@ -91,6 +103,7 @@ type
     property Control: TControl read FControl write SetControl;
     property MediatorId: String read FMediatorId write FMediatorId;
     property Options: String read FOptions write FOptions;
+    property OptionsData: TJSONObject read GetOptionsData;
     property PropertyName: String read FPropertyName write FPropertyName;
   end;
 
@@ -119,6 +132,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure Initialize;
     procedure Load;
     procedure Load(const Properties: array of String);
     procedure Save;
@@ -166,6 +180,89 @@ begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
 end;
 
+type
+  TJSONDataMapType = (jdmText, jdmIndex, jdmKey);
+
+{ TJSONListMediator }
+
+class function TJSONListMediator.GetItemIndex(Data: TJSONObject;
+  const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer;
+var
+  PropData, MapData: TJSONData;
+  MapType: TJSONDataMapType;
+begin
+  Result := -1;
+  PropData := Data.Find(PropName);
+  if (PropData <> nil) and (PropData.JSONType <> jtNull) then
+  begin
+    MapType := jdmText;
+    if OptionsData <> nil then
+    begin
+      MapData := OptionsData.Find('datamap');
+      if MapData <> nil then
+      begin
+        case MapData.JSONType of
+          jtString:
+            if MapData.AsString = 'index' then
+              MapType := jdmIndex;
+        end;
+      end;
+    end;
+    case MapType of
+      jdmText:
+        Result := Items.IndexOf(PropData.AsString);
+      jdmIndex:
+        begin
+          if PropData.JSONType = jtNumber then
+          begin
+            Result := PropData.AsInteger;
+            if (Result < 0) and (Result >= Items.Count) then
+              Result := -1;
+          end;
+        end;
+    end;
+  end;
+end;
+
+class procedure TJSONListMediator.SetItemIndex(Data: TJSONObject;
+  const PropName: String; Items: TStrings; ItemIndex: Integer;
+  OptionsData: TJSONObject);
+var
+  MapType: TJSONDataMapType;
+  MapData: TJSONData;
+begin
+  if ItemIndex <> -1 then
+  begin
+    MapType := jdmText;
+    if OptionsData <> nil then
+    begin
+      MapData := OptionsData.Find('datamap');
+      if MapData <> nil then
+      begin
+        case MapData.JSONType of
+          jtString:
+            if MapData.AsString = 'index' then
+              MapType := jdmIndex;
+        end;
+      end;
+    end;
+    case MapType of
+      jdmText:
+        Data.Strings[PropName] := Items[ItemIndex];
+      jdmIndex:
+        Data.Integers[PropName] := ItemIndex;
+    end;
+  end
+  else
+    Data.Delete(PropName);
+end;
+
+class procedure TJSONListMediator.Initialize(Control: TControl;
+  OptionsData: TJSONObject);
+begin
+  //
+end;
+
 { TJSONCheckBoxMediator }
 
 class procedure TJSONCheckBoxMediator.DoJSONToGUI(Data: TJSONObject;
@@ -197,51 +294,18 @@ class procedure TJSONRadioGroupMediator.DoJSONToGUI(Data: TJSONObject;
   const PropName: String; Control: TControl; OptionsData: TJSONObject);
 var
   RadioGroup: TRadioGroup;
-  PropData: TJSONData;
-  NewIndex: Integer;
 begin
   RadioGroup := Control as TRadioGroup;
-  PropData := Data.Find(PropName);
-  if (PropData <> nil) and (PropData.JSONType <> jtNull) then
-  begin
-    //todo make options TJSONObject
-    if (OptionsData <> nil) and OptionsData.Get('useindex', False) then
-    begin
-      if PropData.JSONType = jtNumber then
-      begin
-        NewIndex := PropData.AsInteger;
-        if (NewIndex >= 0) and (NewIndex < RadioGroup.Items.Count) then
-          RadioGroup.ItemIndex := NewIndex
-        else
-          RadioGroup.ItemIndex := -1;
-      end;
-    end
-    else
-    begin
-      if PropData.JSONType = jtString then
-        RadioGroup.ItemIndex := RadioGroup.Items.IndexOf(PropData.AsString);
-    end;
-  end
-  else
-    RadioGroup.ItemIndex := -1;
+  RadioGroup.ItemIndex := GetItemIndex(Data, PropName, RadioGroup.Items, OptionsData);
 end;
 
 class procedure TJSONRadioGroupMediator.DoGUIToJSON(Control: TControl;
   Data: TJSONObject; const PropName: String; OptionsData: TJSONObject);
 var
   RadioGroup: TRadioGroup;
-  PropData: TJSONData;
 begin
   RadioGroup := Control as TRadioGroup;
-  if RadioGroup.ItemIndex <> -1 then
-  begin
-    if (OptionsData <> nil) and OptionsData.Get('useindex', False) then
-      Data.Integers[PropName] := RadioGroup.ItemIndex
-    else
-      Data.Strings[PropName] := RadioGroup.Items[RadioGroup.ItemIndex]
-  end
-  else
-    Data.Delete(PropName);
+  SetItemIndex(Data, PropName, RadioGroup.Items, RadioGroup.ItemIndex, OptionsData);
 end;
 
 { TJSONSpinEditMediator }
@@ -351,6 +415,14 @@ begin
   inherited Destroy;
 end;
 
+procedure TJSONObjectViewManager.Initialize;
+var
+  i: Integer;
+begin
+  for i := 0 to FPropertyViews.Count - 1 do
+    TJSONObjectPropertyView(FPropertyViews.Items[i]).Initialize;
+end;
+
 procedure TJSONObjectViewManager.Load;
 var
   i: Integer;
@@ -426,6 +498,24 @@ end;
 
 { TJSONObjectPropertyView }
 
+procedure TJSONObjectPropertyView.Initialize;
+begin
+  if not FInitialized then
+  begin
+    OptionsDataNeeded;
+    MediatorClassNeeded;
+    if FControl <> nil then
+      FMediatorClass.Initialize(FControl, FOptionsData);
+    FInitialized := True;
+  end;
+end;
+
+function TJSONObjectPropertyView.GetOptionsData: TJSONObject;
+begin
+  OptionsDataNeeded;
+  Result := FOptionsData;
+end;
+
 procedure TJSONObjectPropertyView.MediatorClassNeeded;
 begin
   if FMediatorClass = nil then
@@ -441,8 +531,11 @@ end;
 
 procedure TJSONObjectPropertyView.OptionsDataNeeded;
 begin
-  if (FOptions <> '') and (FOptionsData = nil) then
-    StringToJSONData(FOptions, FOptionsData);
+  if FOptionsData = nil then
+  begin
+    if not StringToJSONData(FOptions, FOptionsData) then
+      FOptionsData := TJSONObject.Create;
+  end;
 end;
 
 procedure TJSONObjectPropertyView.SetControl(Value: TControl);
@@ -491,9 +584,7 @@ procedure TJSONObjectPropertyView.Load(JSONObject: TJSONObject);
 begin
   if FControl <> nil then
   begin
-    //todo handle mediator and options loading once
-    MediatorClassNeeded;
-    OptionsDataNeeded;
+    Initialize;
     FMediatorClass.DoJSONToGUI(JSONObject, FPropertyName, FControl, FOptionsData);
   end;
 end;
@@ -502,9 +593,7 @@ procedure TJSONObjectPropertyView.Save(JSONObject: TJSONObject);
 begin
   if FControl <> nil then
   begin
-    //todo handle mediator and options loading once
-    MediatorClassNeeded;
-    OptionsDataNeeded;
+    Initialize;
     FMediatorClass.DoGUIToJSON(FControl, JSONObject, FPropertyName, FOptionsData);
   end;
 end;
@@ -519,6 +608,12 @@ end;
 
 class procedure TCustomJSONGUIMediator.DoGUIToJSON(Control: TControl;
   Data: TJSONObject; const PropName: String; OptionsData: TJSONObject);
+begin
+  //
+end;
+
+class procedure TCustomJSONGUIMediator.Initialize(Control: TControl;
+  OptionsData: TJSONObject);
 begin
   //
 end;
