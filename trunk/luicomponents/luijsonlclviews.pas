@@ -234,16 +234,13 @@ begin
   if ItemIndex <> -1 then
   begin
     MapType := jdmText;
-    if OptionsData <> nil then
+    MapData := OptionsData.Find('datamap');
+    if MapData <> nil then
     begin
-      MapData := OptionsData.Find('datamap');
-      if MapData <> nil then
-      begin
-        case MapData.JSONType of
-          jtString:
-            if MapData.AsString = 'index' then
-              MapType := jdmIndex;
-        end;
+      case MapData.JSONType of
+        jtString:
+          if MapData.AsString = 'index' then
+            MapType := jdmIndex;
       end;
     end;
     case MapType of
@@ -653,24 +650,19 @@ var
 begin
   PropData := Data.Find(PropName);
   if PropData <> nil then
-    ValueStr := PropData.AsString
-  else
-    ValueStr := '';
-  if OptionsData <> nil then
   begin
-    if PropData <> nil then
-    begin
-      FormatStr := OptionsData.Get('format', '');
-      if FormatStr = 'date' then
-        ValueStr := DateToStr(PropData.AsFloat)
-      else if FormatStr = 'datetime' then
-        ValueStr := DateTimeToStr(PropData.AsFloat);
-    end;
+    //todo: check propdata type
+    ValueStr := PropData.AsString;
+    FormatStr := OptionsData.Get('format', '');
+    if FormatStr = 'date' then
+      ValueStr := DateToStr(PropData.AsFloat)
+    else if FormatStr = 'datetime' then
+      ValueStr := DateTimeToStr(PropData.AsFloat);
     TemplateStr := OptionsData.Get('template', '%s');
     Control.Caption := Format(TemplateStr, [ValueStr]);
   end
   else
-    Control.Caption := ValueStr;
+    Control.Caption := '';
 end;
 
 class procedure TJSONCaptionMediator.DoGUIToJSON(Control: TControl;
