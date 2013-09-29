@@ -22,7 +22,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, Math;
+  Math;
 
 { TZVDateTimerJSONMediator }
 
