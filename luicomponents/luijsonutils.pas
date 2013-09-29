@@ -259,6 +259,24 @@ begin
     DestObj.Elements[SrcObj.Names[i]] := SrcObj.Items[i].Clone;
 end;
 
+procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; Options: TCopyJSONObjectOptions);
+var
+  i: Integer;
+  PropName: String;
+begin
+  if cjoOverwrite in Options then
+    CopyJSONObject(SrcObj, DestObj)
+  else
+  begin
+    for i := 0 to SrcObj.Count - 1 do
+    begin
+      PropName := SrcObj.Names[i];
+      if DestObj.IndexOfName(PropName) = -1 then
+        DestObj.Elements[PropName] := SrcObj.Items[i].Clone;
+    end;
+  end;
+end;
+
 function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
 var
   i: Integer;
