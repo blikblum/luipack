@@ -59,6 +59,15 @@ type
     class procedure Initialize(Control: TControl; OptionsData: TJSONObject); override;
   end;
 
+  { TJSONComboBoxMediator }
+
+  TJSONComboBoxMediator = class(TJSONListMediator)
+    class procedure DoJSONToGUI(Data: TJSONObject; const PropName: String;
+      Control: TControl; OptionsData: TJSONObject); override;
+    class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject;
+      const PropName: String; OptionsData: TJSONObject); override;
+  end;
+
   { TJSONRadioGroupMediator }
 
   TJSONRadioGroupMediator = class(TJSONListMediator)
@@ -182,6 +191,36 @@ end;
 
 type
   TJSONDataMapType = (jdmText, jdmIndex, jdmKey);
+
+{ TJSONComboBoxMediator }
+
+class procedure TJSONComboBoxMediator.DoJSONToGUI(Data: TJSONObject;
+  const PropName: String; Control: TControl; OptionsData: TJSONObject);
+var
+  ComboBox: TComboBox;
+begin
+  ComboBox := Control as TComboBox;
+  ComboBox.ItemIndex := GetItemIndex(Data, PropName, ComboBox.Items, OptionsData);
+  if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) then
+  begin
+    if OptionsData.Get('datamap', 'text') = 'text' then
+      ComboBox.Text := Data.Get(PropName, '')
+    else
+      ComboBox.Text := '';
+  end;
+end;
+
+class procedure TJSONComboBoxMediator.DoGUIToJSON(Control: TControl;
+  Data: TJSONObject; const PropName: String; OptionsData: TJSONObject);
+var
+  ComboBox: TComboBox;
+begin
+  ComboBox := Control as TComboBox;
+  if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) and (OptionsData.Get('datamap', 'text') = 'text') then
+    Data.Strings[PropName] := ComboBox.Text
+  else
+    SetItemIndex(Data, PropName, ComboBox.Items, ComboBox.ItemIndex, OptionsData);
+end;
 
 { TJSONListMediator }
 
@@ -675,7 +714,7 @@ initialization
   MediatorManager := TJSONGUIMediatorManager.Create;
   RegisterJSONMediator(TEdit, TJSONGenericMediator);
   RegisterJSONMediator(TMemo, TJSONGenericMediator);
-  RegisterJSONMediator(TComboBox, TJSONGenericMediator);
+  RegisterJSONMediator(TComboBox, TJSONComboBoxMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
   RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
   RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
@@ -686,4 +725,5 @@ finalization
   MediatorManager.Destroy;
 
 end.
+
 
