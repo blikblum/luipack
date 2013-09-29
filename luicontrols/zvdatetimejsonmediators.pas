@@ -13,10 +13,10 @@ type
 
   TZVDateTimerJSONMediator = class(TCustomJSONGUIMediator)
   public
-    class procedure DoGUIToJSON(Control: TControl; JSONObject: TJSONObject; const PropName: String;
-      Options: TJSONData); override;
-    class procedure DoJSONToGUI(JSONObject: TJSONObject; const PropName: String; Control: TControl;
-      Options: TJSONData); override;
+    class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject; const PropName: String;
+      OptionsData: TJSONObject); override;
+    class procedure DoJSONToGUI(Data: TJSONObject; const PropName: String; Control: TControl;
+      OptionsData: TJSONObject); override;
   end;
 
 implementation
@@ -26,33 +26,33 @@ uses
 
 { TZVDateTimerJSONMediator }
 
-class procedure TZVDateTimerJSONMediator.DoGUIToJSON(Control: TControl; JSONObject: TJSONObject;
-  const PropName: String; Options: TJSONData);
+class procedure TZVDateTimerJSONMediator.DoGUIToJSON(Control: TControl;
+  Data: TJSONObject; const PropName: String; OptionsData: TJSONObject);
 var
   Timer: TZVDateTimePicker absolute Control;
 begin
   if Timer.DateIsNull then
-    RemoveJSONProp(JSONObject, PropName)
+    Data.Delete(PropName)
   else
   begin
     case Timer.Kind of
       dtkDate:
-        JSONObject.Integers[PropName] := Trunc(Timer.Date);
+        Data.Integers[PropName] := Trunc(Timer.Date);
       dtkDateTime:
-        JSONObject.Floats[PropName] := Timer.DateTime;
+        Data.Floats[PropName] := Timer.DateTime;
       dtkTime:
-        JSONObject.Floats[PropName] := Timer.Time;
+        Data.Floats[PropName] := Timer.Time;
     end;
   end;
 end;
 
-class procedure TZVDateTimerJSONMediator.DoJSONToGUI(JSONObject: TJSONObject; const PropName: String;
-  Control: TControl; Options: TJSONData);
+class procedure TZVDateTimerJSONMediator.DoJSONToGUI(Data: TJSONObject;
+  const PropName: String; Control: TControl; OptionsData: TJSONObject);
 var
   Timer: TZVDateTimePicker absolute Control;
   PropData: TJSONData;
 begin
-  PropData := GetJSONProp(JSONObject, PropName);
+  PropData := Data.Find(PropName);
   if (PropData = nil) or (PropData.JSONType = jtNull) then
     Timer.DateTime := NaN
   else
