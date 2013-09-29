@@ -64,6 +64,34 @@ type
     property SortFunction: TJSONArraySortCompare read FSortFunction write FSortFunction;
   end;
 
+  { TJSONLookup }
+
+  TJSONLookup = class(TComponent)
+  private
+    FData: TJSONArray;
+    FKeyProperty: String;
+    FValueProperty: String;
+    FOwnsData: Boolean;
+    function FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
+    function GetKeys(Index: Integer): Variant;
+    function GetStrings(const KeyValue: Variant): String;
+    function GetValues(const KeyValue: Variant): Variant;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure AssignTo(Dest: TPersistent); override;
+    function GetValue(const PropertyName: String; const KeyValue, Default: Variant): Variant;
+    function IndexOf(const KeyValue: Variant): Integer;
+    procedure LoadData(AData: TJSONArray; OwnsData: Boolean = False);
+    property Data: TJSONArray read FData;
+    property KeyProperty: String read FKeyProperty write FKeyProperty;
+    property Keys[Index: Integer]: Variant read GetKeys;
+    property Strings[KeyValue: Variant]: String read GetStrings;
+    property ValueProperty: String read FValueProperty write FValueProperty;
+    property Values[KeyValue: Variant]: Variant read GetValues;
+  end;
+
+
 implementation
 
 uses
@@ -288,6 +316,119 @@ begin
   finally
     GroupMap.Destroy;
   end;
+end;
+
+{ TJSONLookup }
+
+function TJSONLookup.GetValues(const KeyValue: Variant): Variant;
+var
+  ValueData: TJSONData;
+begin
+  ValueData := FindValueData(FValueProperty, KeyValue);
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
+    Result := ValueData.Value
+  else
+    Result := Null;
+end;
+
+constructor TJSONLookup.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FKeyProperty := 'id';
+  FValueProperty := 'name';
+  FData := TJSONArray.Create;
+  FOwnsData := True;
+end;
+
+destructor TJSONLookup.Destroy;
+begin
+  if FOwnsData then
+    FData.Free;
+  inherited Destroy;
+end;
+
+procedure TJSONLookup.AssignTo(Dest: TPersistent);
+var
+  i: Integer;
+  ItemData, ValueData: TJSONData;
+begin
+  if Dest is TStrings then
+  begin
+    TStrings(Dest).Clear;
+    for i := 0 to FData.Count - 1 do
+    begin
+      ItemData := FData.Items[i];
+      if ItemData.JSONType = jtObject then
+      begin
+        ValueData := TJSONObject(ItemData).Find(FValueProperty);
+        if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
+          TStrings(Dest).Add(ValueData.AsString);
+      end;
+    end;
+  end
+  else
+    inherited AssignTo(Dest);
+end;
+
+function TJSONLookup.GetValue(const PropertyName: String; const KeyValue, Default: Variant): Variant;
+var
+  ValueData: TJSONData;
+begin
+  ValueData := FindValueData(PropertyName, KeyValue);
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
+    Result := ValueData.Value
+  else
+    Result := Default;
+end;
+
+function TJSONLookup.IndexOf(const KeyValue: Variant): Integer;
+begin
+  Result := GetJSONIndexOf(FData, [FKeyProperty, KeyValue]);
+end;
+
+procedure TJSONLookup.LoadData(AData: TJSONArray; OwnsData: Boolean);
+begin
+  if FOwnsData then
+    FData.Free;
+  if AData = nil then
+    raise Exception.Create('TJONLookup - Data must be assigned');
+  FData := AData;
+  FOwnsData := OwnsData;
+end;
+
+function TJSONLookup.FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
+var
+  ItemData: TJSONObject;
+begin
+  ItemData := FindJSONObject(FData, [FKeyProperty, KeyValue]);
+  if ItemData <> nil then
+    Result := ItemData.Find(PropertyName)
+  else
+    Result := nil;
+end;
+
+function TJSONLookup.GetKeys(Index: Integer): Variant;
+var
+  ItemData: TJSONData;
+begin
+  Result := Null;
+  if (Index >= 0) and (Index < FData.Count) then
+  begin
+    ItemData := FData.Items[Index];
+    if ItemData.JSONType = jtObject then
+      Result := TJSONObject(ItemData).Get(FKeyProperty);
+  end;
+end;
+
+function TJSONLookup.GetStrings(const KeyValue: Variant): String;
+var
+  ValueData: TJSONData;
+begin
+  ValueData := FindValueData(FValueProperty, KeyValue);
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtArray, jtObject]) then
+    Result := ValueData.AsString
+  else
+    Result := '';
 end;
 
 end.
