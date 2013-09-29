@@ -123,10 +123,12 @@ type
   TJSONObjectPropertyViews = class(TCollection)
   private
     FOwner: TJSONObjectViewManager;
+    function GetItems(Index: Integer): TJSONObjectPropertyView;
   protected
     function GetOwner: TPersistent; override;
   public
     constructor Create(AOwner: TJSONObjectViewManager);
+    property Items[Index: Integer]: TJSONObjectPropertyView read GetItems; default;
   end;
 
   { TJSONObjectViewManager }
@@ -146,8 +148,10 @@ type
     procedure Initialize;
     procedure Load;
     procedure Load(const Properties: array of String);
+    function PropertyViewByName(const PropertyName: String): TJSONObjectPropertyView;
     procedure Save;
     procedure Save(const Properties: array of String);
+    procedure SetViewOption(const PropertyName, OptionPropName: String; Data: TJSONData);
     property JSONObject: TJSONObject read FJSONObject write SetJSONObject;
     property State: TJSONMediatorState read FState;
   published
@@ -575,6 +579,19 @@ begin
   end;
 end;
 
+function TJSONObjectViewManager.PropertyViewByName(const PropertyName: String): TJSONObjectPropertyView;
+var
+  i: Integer;
+begin
+  for i := 0 to FPropertyViews.Count - 1 do
+  begin
+    Result := FPropertyViews[i];
+    if Result.PropertyName = PropertyName then
+      Exit;
+  end;
+  raise Exception.CreateFmt('PropertyViewByName - View of property "%s" not found', [PropertyName]);
+end;
+
 procedure TJSONObjectViewManager.Save;
 var
   i: Integer;
@@ -600,7 +617,18 @@ begin
   end;
 end;
 
+procedure TJSONObjectViewManager.SetViewOption(const PropertyName,
+  OptionPropName: String; Data: TJSONData);
+begin
+  PropertyViewByName(PropertyName).OptionsData.Elements[OptionPropName] := Data;
+end;
+
 { TJSONObjectPropertyViews }
+
+function TJSONObjectPropertyViews.GetItems(Index: Integer): TJSONObjectPropertyView;
+begin
+  Result := TJSONObjectPropertyView(inherited Items[Index]);
+end;
 
 function TJSONObjectPropertyViews.GetOwner: TPersistent;
 begin
