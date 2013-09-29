@@ -56,7 +56,7 @@ type
   TJSONListMediator = class(TCustomJSONGUIMediator)
     class function GetItemIndex(Data: TJSONObject; const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer; static;
     class procedure SetItemIndex(Data: TJSONObject; const PropName: String; Items: TStrings; ItemIndex: Integer; OptionsData: TJSONObject); static;
-    class procedure Initialize(Control: TControl; OptionsData: TJSONObject); override;
+    class procedure LoadItems(Items: TStrings; OptionsData: TJSONObject); static;
   end;
 
   { TJSONComboBoxMediator }
@@ -66,6 +66,7 @@ type
       Control: TControl; OptionsData: TJSONObject); override;
     class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject;
       const PropName: String; OptionsData: TJSONObject); override;
+    class procedure Initialize(Control: TControl; OptionsData: TJSONObject); override;
   end;
 
   { TJSONRadioGroupMediator }
@@ -75,6 +76,7 @@ type
       Control: TControl; OptionsData: TJSONObject); override;
     class procedure DoGUIToJSON(Control: TControl; Data: TJSONObject;
       const PropName: String; OptionsData: TJSONObject); override;
+    class procedure Initialize(Control: TControl; OptionsData: TJSONObject); override;
   end;
 
   { TJSONCheckBoxMediator }
@@ -190,7 +192,7 @@ begin
 end;
 
 type
-  TJSONDataMapType = (jdmText, jdmIndex, jdmKey);
+  TJSONDataMapType = (jdmText, jdmIndex, jdmValue);
 
 { TJSONComboBoxMediator }
 
@@ -222,29 +224,45 @@ begin
     SetItemIndex(Data, PropName, ComboBox.Items, ComboBox.ItemIndex, OptionsData);
 end;
 
+class procedure TJSONComboBoxMediator.Initialize(Control: TControl;
+  OptionsData: TJSONObject);
+var
+  ComboBox: TComboBox;
+begin
+  ComboBox := Control as TComboBox;
+  LoadItems(ComboBox.Items, OptionsData);
+end;
+
 { TJSONListMediator }
 
 class function TJSONListMediator.GetItemIndex(Data: TJSONObject;
   const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer;
 var
   PropData, MapData: TJSONData;
+  SourceData: TJSONArray;
   MapType: TJSONDataMapType;
+  ValuePropName: String;
 begin
   Result := -1;
   PropData := Data.Find(PropName);
-  if (PropData <> nil) and (PropData.JSONType <> jtNull) then
+  if (PropData <> nil) and not (PropData.JSONType in [jtNull, jtArray, jtObject]) then
   begin
     MapType := jdmText;
-    if OptionsData <> nil then
+    ValuePropName := 'value';
+    MapData := OptionsData.Find('datamap');
+    if MapData <> nil then
     begin
-      MapData := OptionsData.Find('datamap');
-      if MapData <> nil then
-      begin
-        case MapData.JSONType of
-          jtString:
-            if MapData.AsString = 'index' then
-              MapType := jdmIndex;
-        end;
+      case MapData.JSONType of
+        jtString:
+          if MapData.AsString = 'index' then
+            MapType := jdmIndex
+          else if MapData.AsString = 'value' then
+            MapType := jdmValue;
+        jtObject:
+          begin
+            MapType := jdmValue;
+            ValuePropName := TJSONObject(MapData).Get('valueprop', 'value');
+          end;
       end;
     end;
     case MapType of
@@ -253,13 +271,17 @@ begin
       jdmIndex:
         begin
           if PropData.JSONType = jtNumber then
-          begin
             Result := PropData.AsInteger;
-            if (Result < 0) and (Result >= Items.Count) then
-              Result := -1;
-          end;
+        end;
+      jdmValue:
+        begin
+          if FindJSONProp(OptionsData, 'datasource', SourceData) then
+            Result := GetJSONIndexOf(SourceData, [ValuePropName, PropData.Value]);
         end;
     end;
+    //check for out of range result
+    if (Result < 0) and (Result >= Items.Count) then
+      Result := -1;
   end;
 end;
 
@@ -268,18 +290,29 @@ class procedure TJSONListMediator.SetItemIndex(Data: TJSONObject;
   OptionsData: TJSONObject);
 var
   MapType: TJSONDataMapType;
-  MapData: TJSONData;
+  MapData, ValueData: TJSONData;
+  SourceData: TJSONArray;
+  ValuePropName: String;
+  ItemData: TJSONData;
 begin
-  if ItemIndex <> -1 then
+  if ItemIndex > -1 then
   begin
     MapType := jdmText;
+    ValuePropName := 'value';
     MapData := OptionsData.Find('datamap');
     if MapData <> nil then
     begin
       case MapData.JSONType of
         jtString:
           if MapData.AsString = 'index' then
-            MapType := jdmIndex;
+            MapType := jdmIndex
+          else if MapData.AsString = 'value' then
+            MapType := jdmValue;
+        jtObject:
+          begin
+            ValuePropName := TJSONObject(MapData).Get('valueprop', 'value');
+            MapType := jdmValue;
+          end;
       end;
     end;
     case MapType of
@@ -287,16 +320,55 @@ begin
         Data.Strings[PropName] := Items[ItemIndex];
       jdmIndex:
         Data.Integers[PropName] := ItemIndex;
+      jdmValue:
+        begin
+          if FindJSONProp(OptionsData, 'datasource', SourceData) then
+          begin
+            if ItemIndex < SourceData.Count then
+            begin
+              ItemData := SourceData.Items[ItemIndex];
+              if ItemData.JSONType = jtObject then
+              begin
+                ValueData := TJSONObject(ItemData).Find(ValuePropName);
+                if ValueData <> nil then
+                  Data.Elements[PropName] := ValueData.Clone;
+              end;
+            end;
+          end;
+        end;
     end;
   end
   else
     Data.Delete(PropName);
 end;
 
-class procedure TJSONListMediator.Initialize(Control: TControl;
+class procedure TJSONListMediator.LoadItems(Items: TStrings;
   OptionsData: TJSONObject);
+var
+  SourceData: TJSONArray;
+  MapData, ItemData: TJSONData;
+  TextProp: String;
+  i: Integer;
 begin
-  //
+  if FindJSONProp(OptionsData, 'datasource', SourceData) then
+  begin
+    MapData := OptionsData.Find('datamap');
+    if (MapData <> nil) and (MapData.JSONType = jtObject) then
+      TextProp := TJSONObject(MapData).Get('textprop', 'text')
+    else
+      TextProp := 'text';
+    Items.Clear;
+    for i := 0 to SourceData.Count - 1 do
+    begin
+      ItemData := SourceData.Items[i];
+      case ItemData.JSONType of
+        jtString:
+          Items.Add(ItemData.AsString);
+        jtObject:
+          Items.Add(TJSONObject(ItemData).Get(TextProp, ''));
+      end;
+    end;
+  end;
 end;
 
 { TJSONCheckBoxMediator }
@@ -342,6 +414,15 @@ var
 begin
   RadioGroup := Control as TRadioGroup;
   SetItemIndex(Data, PropName, RadioGroup.Items, RadioGroup.ItemIndex, OptionsData);
+end;
+
+class procedure TJSONRadioGroupMediator.Initialize(Control: TControl;
+  OptionsData: TJSONObject);
+var
+  RadioGroup: TRadioGroup;
+begin
+  RadioGroup := Control as TRadioGroup;
+  LoadItems(RadioGroup.Items, OptionsData);
 end;
 
 { TJSONSpinEditMediator }
