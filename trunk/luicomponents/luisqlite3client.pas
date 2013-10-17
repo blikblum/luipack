@@ -297,6 +297,7 @@ constructor TRESTJSONObjectResource.Create(AModelDef: TSqlite3ResourceModelDef;
   ResourceClient: TSqlite3ResourceClient);
 begin
   inherited Create(AModelDef, ResourceClient);
+  FOwnsData := True;
   FData := TJSONObject.Create;
 end;
 
@@ -532,7 +533,7 @@ end;
 
 function TSqlite3JSONArrayResource.Save: Boolean;
 begin
-  //
+  Result := False;
 end;
 
 destructor TSqlite3JSONArrayResource.Destroy;
