@@ -50,23 +50,23 @@ function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValu
 
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: String): Boolean;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean; deprecated;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer; deprecated;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double;
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double; deprecated;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String;
+function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String; deprecated;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
+function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData; deprecated;
 
-function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
+function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant; deprecated;
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
 
-procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
+procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String); deprecated;
 
 function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
@@ -78,7 +78,7 @@ procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare)
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant; SetNull: Boolean = False);
 
-function FileToJSONData(const FileName: String): TJSONData;
+function FileToJSONData(const FileName: String): TJSONData; deprecated;
 
 function StrToJSON(const JSONStr: TJSONStringType): TJSONData;
 
