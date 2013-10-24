@@ -202,7 +202,7 @@ begin
   Table.Open;
   if FIsCollection then
   begin
-    ResponseData := DatasetToJSONData(Table.Dataset, [djoSetNull], '');
+    ResponseData := DatasetToJSON(Table.Dataset, [djoSetNull], '');
     try
       AResponse.Contents.Add(ResponseData.AsJSON);
     finally
@@ -213,7 +213,7 @@ begin
   begin
     if (Table.RecordCount > 0) then
     begin
-      ResponseData := DatasetToJSONData(Table.Dataset, [djoCurrentRecord, djoSetNull], '');
+      ResponseData := DatasetToJSON(Table.Dataset, [djoCurrentRecord, djoSetNull], '');
       try
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
@@ -269,7 +269,7 @@ begin
         Table.Close;
         Table.Select(FSelectColumns).Where(Format('%s = %d', [FPrimaryKey, FConnector.Lib.GetLastAutoIncValue]));
         Table.Open;
-        ResponseData := DatasetToJSONData(Table.Dataset, [djoCurrentRecord, djoSetNull], FResultColumns);
+        ResponseData := DatasetToJSON(Table.Dataset, [djoCurrentRecord, djoSetNull], FResultColumns);
         try
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
@@ -309,7 +309,7 @@ begin
       end
       else
       begin
-        ResponseData := DatasetToJSONData(Table.Dataset, [djoCurrentRecord, djoSetNull], FResultColumns);
+        ResponseData := DatasetToJSON(Table.Dataset, [djoCurrentRecord, djoSetNull], FResultColumns);
         try
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally

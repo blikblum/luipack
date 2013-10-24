@@ -184,7 +184,7 @@ begin
     end;
     if FIsCollection then
     begin
-      ResponseData := DatasetToJSONData(Query, [djoSetNull], '');
+      ResponseData := DatasetToJSON(Query, [djoSetNull], '');
       try
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
@@ -195,7 +195,7 @@ begin
     begin
       if (Query.RecordCount > 0) then
       begin
-        ResponseData := DatasetToJSONData(Query, [djoCurrentRecord, djoSetNull], '');
+        ResponseData := DatasetToJSON(Query, [djoCurrentRecord, djoSetNull], '');
         try
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
@@ -324,7 +324,7 @@ begin
       finally
         RequestData.Free;
       end;
-      ResponseData := DatasetToJSONData(Query, [djoCurrentRecord, djoSetNull], FResultColumns);
+      ResponseData := DatasetToJSON(Query, [djoCurrentRecord, djoSetNull], FResultColumns);
       try
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally

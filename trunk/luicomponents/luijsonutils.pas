@@ -96,16 +96,16 @@ function TryStrToJSON(const JSONStr: TJSONStringType; out JSONObject: TJSONObjec
 
 function StreamToJSONData(Stream: TStream): TJSONData;
 
-function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
+function DatasetToJSON(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
+procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
+procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray;
+procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject;
+procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 
 
@@ -740,7 +740,7 @@ begin
 end;
 
 //todo implement array of arrays
-procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
+procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
 var
   OldRecNo: Integer;
   RecordData: TJSONObject;
@@ -750,7 +750,7 @@ begin
   if djoCurrentRecord in Options then
   begin
     RecordData := TJSONObject.Create;
-    DatasetToJSONData(Dataset, RecordData, Options);
+    DatasetToJSON(Dataset, RecordData, Options);
     JSONArray.Add(RecordData);
   end
   else
@@ -762,7 +762,7 @@ begin
       while not Dataset.EOF do
       begin
         RecordData := TJSONObject.Create;
-        DatasetToJSONData(Dataset, RecordData, Options);
+        DatasetToJSON(Dataset, RecordData, Options);
         JSONArray.Add(RecordData);
         Dataset.Next;
       end;
@@ -773,27 +773,27 @@ begin
   end;
 end;
 
-function DatasetToJSONData(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
+function DatasetToJSON(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 begin
   if not (djoCurrentRecord in Options) then
   begin
     Result := TJSONArray.Create;
     if ExtOptions = '' then
-      DatasetToJSONData(Dataset, TJSONArray(Result), Options)
+      DatasetToJSON(Dataset, TJSONArray(Result), Options)
     else
-      DatasetToJSONData(Dataset, TJSONArray(Result), Options, ExtOptions);
+      DatasetToJSON(Dataset, TJSONArray(Result), Options, ExtOptions);
   end
   else
   begin
     Result := TJSONObject.Create;
     if ExtOptions = '' then
-      DatasetToJSONData(Dataset, TJSONObject(Result), Options)
+      DatasetToJSON(Dataset, TJSONObject(Result), Options)
     else
-      DatasetToJSONData(Dataset, TJSONObject(Result), Options, ExtOptions);
+      DatasetToJSON(Dataset, TJSONObject(Result), Options, ExtOptions);
   end;
 end;
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
+procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject; Options: TDatasetToJSONOptions);
 var
   i: Integer;
   Field: TField;
@@ -843,14 +843,14 @@ begin
         end;
       end;
       else
-        raise Exception.Create('DatasetToJSONData - Error parsing fields property');
+        raise Exception.Create('DatasetToJSON - Error parsing fields property');
     end;
     Result[i].Field := Field;
     Result[i].Name := FieldName;
   end;
 end;
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONArray: TJSONArray;
+procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 var
   RecordData: TJSONObject;
@@ -876,7 +876,7 @@ begin
       end;
     end;
     if FieldsData = nil then
-      DatasetToJSONData(Dataset, JSONArray, Options)
+      DatasetToJSON(Dataset, JSONArray, Options)
     else
     begin
       OptionsToFieldMaps(Dataset, FieldsData, {%H-}FieldMaps);
@@ -910,7 +910,7 @@ begin
   end;
 end;
 
-procedure DatasetToJSONData(Dataset: TDataset; JSONObject: TJSONObject;
+procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
 var
   ExtOptionsData: TJSONData;
@@ -932,7 +932,7 @@ begin
       end;
     end;
     if FieldsData = nil then
-      DatasetToJSONData(Dataset, JSONObject, Options)
+      DatasetToJSON(Dataset, JSONObject, Options)
     else
     begin
       OptionsToFieldMaps(Dataset, FieldsData, {%H-}FieldMaps);
