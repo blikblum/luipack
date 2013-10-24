@@ -674,7 +674,7 @@ begin
   if FInputFields = AValue then Exit;
   FInputFields := AValue;
   FreeAndNil(FInputFieldsData);
-  StringToJSONData(FInputFields, FInputFieldsData);
+  TryStrToJSON(FInputFields, FInputFieldsData);
 end;
 
 function TSqlite3ResourceModelDef.GetDisplayName: string;

@@ -101,7 +101,7 @@ var
 begin
   DialogData := nil;
   try
-    DialogData := StringToJSONData(DialogInfo);
+    DialogData := StrToJSON(DialogInfo);
     EditForm := TEditDataSourceForm.Create(AParent);
     with EditForm do
     try

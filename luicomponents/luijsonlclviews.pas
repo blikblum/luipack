@@ -678,7 +678,7 @@ procedure TJSONObjectPropertyView.OptionsDataNeeded;
 begin
   if FOptionsData = nil then
   begin
-    if not StringToJSONData(FOptions, FOptionsData) then
+    if not TryStrToJSON(FOptions, FOptionsData) then
       FOptionsData := TJSONObject.Create;
   end;
 end;
