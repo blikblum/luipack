@@ -246,7 +246,7 @@ begin
     FDataset.Open;
     try
       FData.Clear;
-      DatasetToJSONData(FDataset, FData, [djoSetNull], '');
+      DatasetToJSON(FDataset, FData, [djoSetNull], '');
     finally
       FDataset.Close;
     end;
@@ -555,7 +555,7 @@ begin
     FDataset.Open;
     try
       FData.Clear;
-      DatasetToJSONData(FDataset, FData, [djoSetNull], '');
+      DatasetToJSON(FDataset, FData, [djoSetNull], '');
     finally
       FDataset.Close;
     end;

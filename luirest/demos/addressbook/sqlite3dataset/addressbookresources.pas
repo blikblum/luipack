@@ -260,7 +260,7 @@ begin
     Options := [djoSetNull]
   else
     Options := [djoCurrentRecord, djoSetNull];
-  ResponseData := DatasetToJSONData(Dataset, Options, '');
+  ResponseData := DatasetToJSON(Dataset, Options, '');
   try
     AResponse.Contents.Add(ResponseData.AsJSON);
   finally
