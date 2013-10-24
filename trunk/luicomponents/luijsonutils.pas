@@ -78,15 +78,7 @@ procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare)
 
 procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: Variant; SetNull: Boolean = False);
 
-function FileToJSONData(const FileName: String): TJSONData; deprecated;
-
 function StrToJSON(const JSONStr: TJSONStringType): TJSONData;
-
-function StringToJSONData(const JSONStr: TJSONStringType): TJSONData; deprecated;
-
-function StringToJSONData(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean; deprecated;
-
-function StringToJSONData(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean; deprecated;
 
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
 
@@ -602,18 +594,6 @@ begin
   end
 end;
 
-function FileToJSONData(const FileName: String): TJSONData;
-var
-  Stream: TFileStream;
-begin
-  Stream := TFileStream.Create(FileName, fmOpenRead);
-  try
-    Result := StreamToJSONData(Stream);
-  finally
-    Stream.Destroy;
-  end;
-end;
-
 function StrToJSON(const JSONStr: TJSONStringType): TJSONData;
 var
   Parser: TJSONParser;
@@ -624,28 +604,6 @@ begin
   finally
     Parser.Destroy;
   end;
-end;
-
-function StringToJSONData(const JSONStr: TJSONStringType): TJSONData;
-var
-  Parser: TJSONParser;
-begin
-  Parser := TJSONParser.Create(JSONStr);
-  try
-    Result := Parser.Parse;
-  finally
-    Parser.Destroy;
-  end;
-end;
-
-function StringToJSONData(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
-begin
-  Result := TryStrToJSON(JSONStr, JSONArray);
-end;
-
-function StringToJSONData(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
-begin
-  Result := TryStrToJSON(JSONStr, JSONObject);
 end;
 
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
@@ -861,7 +819,9 @@ var
 begin
   if Dataset.IsEmpty then
     Exit;
-  ExtOptionsData := StringToJSONData(ExtOptions);
+  ExtOptionsData := nil;
+  if (ExtOptions <> '') and not TryStrToJSON(ExtOptions, ExtOptionsData) then
+    raise Exception.Create('Unable to convert ExtOptions to JSON');
   try
     FieldsData := nil;
     if ExtOptionsData <> nil then
@@ -872,7 +832,7 @@ begin
         jtObject:
           FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
       else
-        raise Exception.Create('ExtOptions is in invalid format');
+        raise Exception.Create('ExtOptions is an invalid JSON type');
       end;
     end;
     if FieldsData = nil then
@@ -917,7 +877,9 @@ var
   FieldsData: TJSONArray;
   FieldMaps: TFieldMaps;
 begin
-  ExtOptionsData := StringToJSONData(ExtOptions);
+  ExtOptionsData := nil;
+  if (ExtOptions <> '') and not TryStrToJSON(ExtOptions, ExtOptionsData) then
+    raise Exception.Create('Unable to convert ExtOptions to JSON');
   try
     FieldsData := nil;
     if ExtOptionsData <> nil then
@@ -928,7 +890,7 @@ begin
         jtObject:
           FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
       else
-        raise Exception.Create('ExtOptions is in invalid format');
+        raise Exception.Create('ExtOptions is an invalid JSON type');
       end;
     end;
     if FieldsData = nil then
