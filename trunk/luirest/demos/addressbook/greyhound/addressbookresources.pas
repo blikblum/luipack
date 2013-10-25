@@ -90,9 +90,9 @@ begin
   for i := 0 to Columns.Count -1 do
   begin
     FieldName := Columns[i];
-    PropData := GetJSONProp(Obj1, FieldName);
+    PropData := Obj1.Find(FieldName);
     if PropData = nil then
-      PropData := GetJSONProp(Obj2, FieldName);
+      PropData := Obj2.Find(FieldName);
     if PropData <> nil then
       Table.GetColumns.FieldByName(FieldName).Value := PropData.Value;
   end;

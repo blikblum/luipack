@@ -70,9 +70,9 @@ var
       //passed as an object
       jtObject:
         begin
-          AddField(ADataSet.FindField(GetJSONProp(FieldObject, 'name', '')),
-            GetJSONProp(FieldObject, 'title', ''),
-            GetJSONProp(FieldObject, 'width', -1));
+          AddField(ADataSet.FindField(FieldObject.Get('name', '')),
+            FieldObject.Get('title', ''),
+            FieldObject.Get('width', -1));
         end;
     end;
   end;
@@ -85,10 +85,10 @@ var
     case DialogData.JSONType of
       jtObject:
         begin
-          FieldData := GetJSONProp(DialogObject, 'fields');
-          EditForm.Caption := GetJSONProp(DialogObject, 'title', EditForm.Caption);
-          EditForm.EditorClassName := GetJSONProp(DialogObject, 'editor', '');
-          EditForm.AppendEditorClassName := GetJSONProp(DialogObject, 'appendeditor', '');
+          FieldData := DialogObject.Find('fields');
+          EditForm.Caption := DialogObject.Get('title', EditForm.Caption);
+          EditForm.EditorClassName := DialogObject.Get('editor', '');
+          EditForm.AppendEditorClassName := DialogObject.Get('appendeditor', '');
         end;
       jtArray, jtString:
         FieldData := DialogData;

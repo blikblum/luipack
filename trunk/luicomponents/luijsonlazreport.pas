@@ -170,7 +170,7 @@ begin
           case ArrayItem.JSONType of
           jtObject:
             begin
-              PropData := GetJSONProp(TJSONObject(ArrayItem), ParName);
+              PropData := TJSONObject(ArrayItem).Find(ParName);
               if PropData <> nil then
                 ParValue := PropData.Value;
             end;
@@ -183,7 +183,7 @@ begin
       end;
     jtObject:
       begin
-        PropData := GetJSONProp(TJSONObject(FData), ParName);
+        PropData := TJSONObject(FData).Find(ParName);
         if PropData <> nil then
           ParValue := PropData.Value;
       end;
@@ -277,10 +277,10 @@ begin
   end
   else
   begin
-    DataLinksData := GetJSONProp(Data, 'datalinks');
-    NullValuesData := GetJSONProp(Data, 'nullvalues');
+    DataLinksData := Data.Find('datalinks');
+    NullValuesData := Data.Find('nullvalues');
     {$ifdef LAZREPORT_HAS_IGNORENOTFOUNDSYMBOL}
-    ItemData := GetJSONProp(Data, 'ignorenotfoundsymbol');
+    ItemData := Data.Find('ignorenotfoundsymbol');
     if (ItemData <> nil) and (ItemData.JSONtype = jtBoolean) then
     begin
       if ItemData.AsBoolean then
@@ -319,9 +319,9 @@ begin
       if ItemData.JSONType = jtObject then
       begin
         PropertyName := ItemObject.Strings['property'];
-        FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(ItemObject.Strings['band'],
-          PropertyName, GetJSONProp(ItemObject, 'crossband', ''),
-          GetJSONProp(ItemObject, 'hideband', False)));
+        FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(ItemObject.Get('band', ''),
+          PropertyName, ItemObject.Get('crossband', ''),
+          ItemObject.Get('hideband', False)));
       end;
     end;
   end;
@@ -374,6 +374,7 @@ end;
 procedure TfrJSONReport.DoGetValue(const ParName: String; var ParValue: Variant);
 var
   PropData: TJSONData;
+  PropDataObj: TJSONObject absolute PropData;
   DataLink: TfrJSONDataLink;
   PropertyName: String;
   DotPos: Integer;
@@ -384,7 +385,7 @@ begin
     DotPos := Pos('.', ParName);
     if DotPos = 0 then
     begin
-      PropData := GetJSONProp(FData, ParName);
+      PropData := FData.Find(ParName);
       if (PropData <> nil) then
       begin
         case PropData.JSONType of
@@ -407,11 +408,10 @@ begin
       end
       else
       begin
-        PropData := GetJSONProp(FData, PropertyName);
-        if (PropData <> nil) and (PropData.JSONType = jtObject) then
+        if FindJSONProp(FData, PropertyName, PropDataObj) then
         begin
           PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
-          PropData := GetJSONProp(TJSONObject(PropData), PropertyName);
+          PropData := PropDataObj.Find(PropertyName);
           if PropData <> nil then
             ParValue := PropData.Value;
         end;
@@ -419,7 +419,7 @@ begin
     end;
     if VarIsEmpty(ParValue) then
     begin
-      PropData := GetJSONProp(FNullValues, ParName);
+      PropData := FNullValues.Find(ParName);
       if PropData <> nil then
         ParValue := PropData.Value;
     end;
@@ -550,7 +550,7 @@ begin
     FData := ReportData.Objects[FDataProperty]
   else
     FData := ReportData;
-  FConfigData := GetJSONProp(ReportData, FConfigProperty) as TJSONObject;
+  FindJSONProp(ReportData, FConfigProperty, FConfigData);
   FOwnsConfigData := False;
   LoadConfigData;
 end;
@@ -575,7 +575,7 @@ begin
   end
   else
   begin
-    FConfigData := GetJSONProp(ReportData, FConfigProperty) as TJSONObject;
+    FindJSONProp(ReportData, FConfigProperty, FConfigData);
     FOwnsConfigData := False;
   end;
   LoadConfigData;

@@ -193,7 +193,7 @@ begin
   end;
   if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
   begin
-    Message := GetJSONProp(TJSONObject(ResponseData), 'message', '');
+    Message := TJSONObject(ResponseData).Get('message', '');
     if Message <> '' then
       Message := LineEnding + Message;
   end;

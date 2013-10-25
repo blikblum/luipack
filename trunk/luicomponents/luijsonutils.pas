@@ -50,23 +50,9 @@ function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValu
 
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: String): Boolean;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean; deprecated;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer; deprecated;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double; deprecated;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String; deprecated;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData; deprecated;
-
-function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant; deprecated;
-
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
-
-procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String); deprecated;
 
 function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
@@ -364,72 +350,6 @@ begin
     PropValue := '';
 end;
 
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Boolean): Boolean;
-var
-  Data: TJSONData;
-begin
-  Data := GetJSONProp(JSONObj, PropName);
-  if (Data <> nil) and (Data.JSONType <> jtNull) then
-    Result := Data.AsBoolean
-  else
-    Result := Default;
-end;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Integer): Integer;
-var
-  Data: TJSONData;
-begin
-  Data := GetJSONProp(JSONObj, PropName);
-  if (Data <> nil) and (Data.JSONType <> jtNull) then
-    Result := Data.AsInteger
-  else
-    Result := Default;
-end;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String; Default: Double): Double;
-var
-  Data: TJSONData;
-begin
-  Data := GetJSONProp(JSONObj, PropName);
-  if (Data <> nil) and (Data.JSONType <> jtNull) then
-    Result := Data.AsFloat
-  else
-    Result := Default;
-end;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName, Default: String): String;
-var
-  Data: TJSONData;
-begin
-  Data := GetJSONProp(JSONObj, PropName);
-  if (Data <> nil) and (Data.JSONType <> jtNull) then
-    Result := Data.AsString
-  else
-    Result := Default;
-end;
-
-function GetJSONProp(JSONObj: TJSONObject; const PropName: String): TJSONData;
-var
-  i: Integer;
-begin
-  i := JSONObj.IndexOfName(PropName);
-  if i <> -1 then
-    Result := JSONObj.Items[i]
-  else
-    Result := nil;
-end;
-
-function GetJSONPropValue(JSONObj: TJSONObject; const PropName: String): Variant;
-var
-  Data: TJSONData;
-begin
-  Data := GetJSONProp(JSONObj, PropName);
-  if Data = nil then
-    Result := Null
-  else
-    Result := Data.Value;
-end;
-
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 begin
   for Result := 0 to JSONArray.Count - 1 do
@@ -460,7 +380,7 @@ begin
     begin
       for i := 0 to PropCount - 1 do
       begin
-        PropData := GetJSONProp(ItemObj, ObjProps[i * 2]);
+        PropData := ItemObj.Find(ObjProps[i * 2]);
         ObjMatches := (PropData <> nil) and SameValue(PropData, ObjProps[(i * 2) + 1]);
         if not ObjMatches then
           break;
@@ -790,10 +710,10 @@ begin
       jtObject:
       begin
         Field := nil;
-        FieldName := GetJSONProp(FieldObj, 'mapping', '');
+        FieldName := FieldObj.Get('mapping', '');
         if FieldName <> '' then
           Field := Dataset.FieldByName(FieldName);
-        FieldName := GetJSONProp(FieldObj, 'name', FieldName);
+        FieldName := FieldObj.Get('name', FieldName);
         if Field = nil then
         begin
           //mapping not found
@@ -830,7 +750,7 @@ begin
         jtArray:
           FieldsData := TJSONArray(ExtOptionsData);
         jtObject:
-          FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
+          FindJSONProp(TJSONObject(ExtOptionsData), 'fields', FieldsData);
       else
         raise Exception.Create('ExtOptions is an invalid JSON type');
       end;
@@ -888,7 +808,7 @@ begin
         jtArray:
           FieldsData := TJSONArray(ExtOptionsData);
         jtObject:
-          FieldsData := GetJSONProp(TJSONObject(ExtOptionsData), 'fields') as TJSONArray;
+          FindJSONProp(TJSONObject(ExtOptionsData), 'fields', FieldsData);
       else
         raise Exception.Create('ExtOptions is an invalid JSON type');
       end;

@@ -773,7 +773,7 @@ type
 class procedure TJSONGenericMediator.DoJSONToGUI(Data: TJSONObject;
   const PropName: String; Control: TControl; OptionsData: TJSONObject);
 begin
-  TControlAccess(Control).Text := GetJSONProp(Data, PropName, '');
+  TControlAccess(Control).Text := Data.Get(PropName, '');
 end;
 
 class procedure TJSONGenericMediator.DoGUIToJSON(Control: TControl;
