@@ -75,7 +75,7 @@ type
 implementation
 
 uses
-  JSONBooleanRadioButtonView, LuiJSONUtils;
+  JSONBooleanRadioButtonView;
 
 { TJSONBooleanProperties }
 
@@ -248,7 +248,7 @@ begin
       bvFalse:
       begin
         if FUndefinedValue = bvFalse then
-          RemoveJSONProp(Data, JSONProperty.Name)
+          Data.Delete(JSONProperty.Name)
         else if FNullValue = bvFalse then
           Data.Nulls[JSONProperty.Name] := True
         else
@@ -257,7 +257,7 @@ begin
       bvIndeterminate:
       begin
         if FUndefinedValue = bvIndeterminate then
-          RemoveJSONProp(Data, JSONProperty.Name)
+          Data.Delete(JSONProperty.Name)
         else if FFalseValue = bvIndeterminate then
           Data.Booleans[JSONProperty.Name] := False
         else
@@ -270,7 +270,7 @@ begin
         else if FFalseValue = bvNone then
           Data.Booleans[JSONProperty.Name] := False
         else
-          RemoveJSONProp(Data, JSONProperty.Name);
+          Data.Delete(JSONProperty.Name);
       end;
     end;
   end;
