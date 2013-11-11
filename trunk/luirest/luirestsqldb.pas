@@ -261,8 +261,8 @@ begin
       Query.SQL.Add(FSelectSQL);
       Query.SQL.Add('where 1 <> 1');
       JSONDataToParams(URIParams, Query.Params);
-      RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
-      try
+      if TryStrToJSON(ARequest.Content, RequestData) then
+      begin
         try
           Query.Open;
           Query.Append;
@@ -277,8 +277,13 @@ begin
             Exit;
           end;
         end;
-      finally
         RequestData.Free;
+      end
+      else
+      begin
+        //todo: improve error handling
+        SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
+        Exit;
       end;
       NewResourceId := GetNewResourceId(Query);
       if NewResourceId <> '' then
@@ -314,7 +319,7 @@ begin
       Query.SQL.Add(FConditionsSQL);
       JSONDataToParams(URIParams, Query.Params);
       Query.Open;
-      RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+      if TryStrToJSON(ARequest.Content, RequestData) then
       try
         Query.Edit;
         SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
