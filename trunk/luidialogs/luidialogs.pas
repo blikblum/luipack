@@ -60,7 +60,7 @@ function ShowForm(FormClass: TFormClass; Owner: TWinControl; FormProperties: arr
 function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl): TModalResult;
 
 function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl;
-  FrameProperties: array of const; ButtonCaptions: String = ''): TModalResult;
+  FrameProperties: array of const; const Options: String = ''): TModalResult;
 
 implementation
 
@@ -122,11 +122,11 @@ begin
 end;
 
 function ShowFrame(FrameClass: TCustomFrameClass; Owner: TWinControl;
-  FrameProperties: array of const; ButtonCaptions: String): TModalResult;
+  FrameProperties: array of const; const Options: String): TModalResult;
 var
   Form: TFrameEditorForm;
 begin
-  Form := TFrameEditorForm.Create(Owner, FrameClass, FrameProperties, ButtonCaptions);
+  Form := TFrameEditorForm.Create(Owner, FrameClass, FrameProperties, Options);
   try
     Result := Form.ShowModal;
   finally
