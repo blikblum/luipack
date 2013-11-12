@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  StrUtils, SimpleIPCWrapper, UniqueInstanceBase;
+  StrUtils, UniqueInstanceBase;
 
 { TUniqueInstance }
 
@@ -135,7 +135,7 @@ begin
   begin
     IPCClient := TSimpleIPCClient.Create(Self);
     IPCClient.ServerId := GetServerId(FIdentifier);
-    if IsServerRunning(IPCClient) then
+    if IPCClient.ServerRunning then
     begin
       //A older instance is running.
       FPriorInstanceRunning := True;
