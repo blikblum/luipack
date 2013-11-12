@@ -54,7 +54,6 @@ type
     FEnabled: Boolean;
     FPriorInstanceRunning: Boolean;
     procedure ReceiveMessage(Sender: TObject);
-    procedure TerminateApp(Sender: TObject; var Done: Boolean);
     {$ifdef unix}
     procedure CheckMessage(Sender: TObject);
     {$endif}
@@ -117,13 +116,6 @@ begin
 end;
 {$endif}
 
-procedure TUniqueInstance.TerminateApp(Sender: TObject; var Done: Boolean);
-begin
-  Application.Terminate;
-  //necessary to avoid being a zombie
-  Done := False;
-end;
-
 procedure TUniqueInstance.Loaded;
 var
   IPCClient: TSimpleIPCClient;
@@ -147,15 +139,7 @@ begin
         IPCClient.SendStringMessage(ParamCount, GetFormattedParams);
       end;
       Application.ShowMainForm := False;
-      //Calling Terminate directly here would cause a crash under gtk2 in LCL < 0.9.31
-      //todo: remove the workaround after a release with LCL > 0.9.31
-      //Application.Terminate;
-
-      //calling as an async call will not work also since it will lead to a zombie process
-      //Application.QueueAsyncCall(@TerminateApp, 0);
-
-      //New try:
-      Application.AddOnIdleHandler(@TerminateApp);
+      Application.Terminate;
     end
     else
     begin
