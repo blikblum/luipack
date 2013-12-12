@@ -17,6 +17,8 @@ type
     FChannel: TLogChannel;
     FLastNode: TTreeNode;
     FParentNode: TTreeNode;
+    FShowTime: Boolean;
+    FTimeFormat: String;
     function GetChannel: TLogChannel;
   public
     constructor Create(AnOwner: TComponent); override;
@@ -60,11 +62,13 @@ type
     property ShowHint;
     property ShowLines;
     property ShowRoot;
+    property ShowTime: Boolean read FShowTime write FShowTime;
     property SortType;
     property StateImages;
     property TabOrder;
     property TabStop default True;
     property Tag;
+    property TimeFormat: String read FTimeFormat write FTimeFormat;
     property ToolTips;
     property Visible;
     property OnAdvancedCustomDraw;
@@ -118,7 +122,6 @@ type
     FControl: TLogTreeView;
   public
     constructor Create (AControl: TLogTreeView);
-    destructor Destroy; override;
     procedure Clear; override;
     procedure Deliver(const AMsg: TLogMessage);override;
   end;
@@ -129,11 +132,6 @@ constructor TLogTreeViewChannel.Create(AControl: TLogTreeView);
 begin
   FControl:=AControl;
   Active:=True;
-end;
-
-destructor TLogTreeViewChannel.Destroy;
-begin
-  inherited Destroy;
 end;
 
 procedure TLogTreeViewChannel.Clear;
@@ -158,6 +156,7 @@ end;
 constructor TLogTreeView.Create(AnOwner: TComponent);
 begin
   inherited Create(AnOwner);
+  FTimeFormat := 'hh:nn:ss:zzz';
   FImgList:=TImageList.Create(nil);
   with FImgList do
   begin
@@ -206,26 +205,30 @@ procedure TLogTreeView.AddMessage(AMsg: TLogMessage);
   end;
 var
   TempStream:TStream;
+  AText: String;
 begin
+  AText := AMsg.MsgText;
+  if FShowTime then
+    AText := FormatDateTime(FTimeFormat, Time) + ' ' + AText;
   with Items, AMsg do
   begin
     case AMsg.MsgType of
       ltEnterMethod:
         begin
-          FLastNode:=AddChild(FParentNode,AMsg.MsgText);
+          FLastNode:=AddChild(FParentNode,AText);
           FParentNode:=FLastNode;
         end;
       ltExitMethod:
         begin
           if FParentNode <> nil then
-            FLastNode:=AddChild(FParentNode.Parent,AMsg.MsgText)
+            FLastNode:=AddChild(FParentNode.Parent,AText)
           else
-            FLastNode:=AddChild(nil,AMsg.MsgText);
+            FLastNode:=AddChild(nil,AText);
           FParentNode:=FLastNode.Parent;
         end;
        ltCallStack,ltStrings,ltHeapInfo,ltException:
          begin
-           FLastNode:=AddChild(FParentNode,MsgText);
+           FLastNode:=AddChild(FParentNode,AText);
            if Assigned(Data) and (Data.Size>0) then
              ParseStream(Data)
            else
@@ -233,7 +236,7 @@ begin
          end;
        ltObject:
          begin
-           FLastNode:=AddChild(FParentNode,MsgText);
+           FLastNode:=AddChild(FParentNode,AText);
            if Assigned(Data) and (Data.Size>0) then
            begin
             Data.Position:=0;
@@ -245,7 +248,7 @@ begin
          end;
        else
        begin
-         FLastNode:=AddChild(FParentNode,AMsg.MsgText);
+         FLastNode:=AddChild(FParentNode,AText);
        end;
     end;
   end;

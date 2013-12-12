@@ -24,7 +24,7 @@ interface
 
 uses
   Classes, MultiLog, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,simpleipc,
-  ComCtrls, Buttons,LCLIntf,LCLType,LCLProc, logtreeview;
+  ComCtrls, Buttons,LCLIntf,LCLType,LCLProc, StdCtrls, logtreeview;
 
 type
 
@@ -41,6 +41,7 @@ type
     tbutCollapse: TToolButton;
     tbutClear: TToolButton;
     tbutStayOnTop: TToolButton;
+    ShowTimeButton: TToolButton;
     procedure ApplicationIdle(Sender: TObject; var Done: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -49,6 +50,7 @@ type
     procedure tbutCollapseClick(Sender: TObject);
     procedure tbutExpandClick(Sender: TObject);
     procedure tbutStayOnTopClick(Sender: TObject);
+    procedure ShowTimeButtonClick(Sender: TObject);
   private
     FIPCServer: TSimpleIPCServer;
     FMessageCount: Integer;
@@ -145,6 +147,11 @@ begin
     FormStyle := fsSystemStayOnTop
   else
     FormStyle := fsNormal;
+end;
+
+procedure TfrmMain.ShowTimeButtonClick(Sender: TObject);
+begin
+  LogTreeView1.ShowTime := not LogTreeView1.ShowTime;
 end;
 
 procedure TfrmMain.UpdateStatusBar;

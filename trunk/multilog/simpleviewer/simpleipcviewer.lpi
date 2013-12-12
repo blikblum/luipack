@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -69,8 +69,8 @@
     <CodeGeneration>
       <TargetProcessor Value="pentium3"/>
       <Optimizations>
-        <VariablesInRegisters Value="True"/>
         <OptimizationLevel Value="2"/>
+        <VariablesInRegisters Value="True"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>

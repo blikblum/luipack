@@ -37,6 +37,8 @@ type
     butWatchInteger: TButton;
     butWarning: TButton;
     butError: TButton;
+    TimeFormatEdit: TEdit;
+    ShowTimeCheckBox: TCheckBox;
     EditNamedCheckPoint: TEdit;
     EditWatchString: TEdit;
     EditInfo: TEdit;
@@ -86,10 +88,12 @@ type
     procedure butWatchIntegerClick(Sender: TObject);
     procedure butWatchStringClick(Sender: TObject);
     procedure ObjectClick(Sender: TObject);
+    procedure ShowTimeCheckBoxChange(Sender: TObject);
     procedure SubLogClick(Sender: TObject);
     procedure TestLogClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure TimeFormatEditEditingDone(Sender: TObject);
   private
     { private declarations }
   public
@@ -105,6 +109,7 @@ implementation
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  TimeFormatEdit.Text := LogTreeView1.TimeFormat;
   with Logger do
   begin
     Channels.Add(LogTreeView1.Channel);
@@ -301,6 +306,11 @@ begin
   Logger.Send('An TObject Example',Sender)
 end;
 
+procedure TForm1.ShowTimeCheckBoxChange(Sender: TObject);
+begin
+  LogTreeView1.ShowTime := ShowTimeCheckBox.Checked;
+end;
+
 procedure TForm1.SubLogClick(Sender: TObject);
 var
   OldClasses: set of TDebugClass;
@@ -326,6 +336,11 @@ end;
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   Logger.Channels.Remove(LogTreeView1.Channel);
+end;
+
+procedure TForm1.TimeFormatEditEditingDone(Sender: TObject);
+begin
+  LogTreeView1.TimeFormat := TimeFormatEdit.Text;
 end;
 
 initialization
