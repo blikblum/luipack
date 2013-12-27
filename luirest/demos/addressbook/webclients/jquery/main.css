@@ -1,0 +1,14 @@
+
+
+.table tr td.table-actions{
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+.table tr td.table-actions *{
+    visibility: hidden;
+}
+
+.table tr:hover td.table-actions *{
+    visibility: visible;
+}
