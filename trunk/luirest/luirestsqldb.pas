@@ -22,7 +22,7 @@ type
   private
     FConditionsSQL: String;
     FConnection: TSQLConnection;
-    FResultColumns: String;
+    FOutputFields: String;
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
     FSelectSQL: String;
@@ -46,10 +46,10 @@ type
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
     property Connection: TSQLConnection read FConnection write FConnection;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
+    property OutputFields: String read FOutputFields write FOutputFields;
     property PreserveCase: Boolean read FPreserveCase write FPreserveCase;
     property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
     property PrimaryKeyParam: String read FPrimaryKeyParam write FPrimaryKeyParam;
-    property ResultColumns: String read FResultColumns write FResultColumns;
     //todo: remove when Patch support is added
     property PutAsPatch: Boolean read FPutAsPatch write FPutAsPatch;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
@@ -192,7 +192,7 @@ begin
         Include(ConvertOptions, djoPreserveCase);
       ResponseData := TJSONArray.Create;
       try
-        DatasetToJSON(Query, TJSONArray(ResponseData), ConvertOptions, '');
+        DatasetToJSON(Query, TJSONArray(ResponseData), ConvertOptions, FOutputFields);
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
@@ -207,7 +207,7 @@ begin
           Include(ConvertOptions, djoPreserveCase);
         ResponseData := TJSONObject.Create;
         try
-          DatasetToJSON(Query, TJSONObject(ResponseData), ConvertOptions, '');
+          DatasetToJSON(Query, TJSONObject(ResponseData), ConvertOptions, FOutputFields);
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
           ResponseData.Free;
@@ -346,7 +346,7 @@ begin
         Include(ConvertOptions, djoPreserveCase);
       ResponseData := TJSONObject.Create;
       try
-        DatasetToJSON(Query, ResponseData, ConvertOptions, FResultColumns);
+        DatasetToJSON(Query, ResponseData, ConvertOptions, FOutputFields);
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
