@@ -84,8 +84,8 @@ begin
       SqldbResource.SelectSQL := 'Select Id, ContactId, Number from Phones';
       SqldbResource.ConditionsSQL := 'where ContactId = :contactid';
       SqldbResource.PrimaryKey := 'Id';
-      SqldbResource.ResultColumns := '["id", "number"]';
-      SqldbResource.UpdateColumns := 'number;contactid';
+      SqldbResource.OutputFields := '["id", "number"]';
+      SqldbResource.InputFields := '["number", "contactid"]';
       SqldbResource.SetDefaultSubPath('phoneid', @CreateResource, RES_CONTACTPHONE);
     end;
     RES_CONTACTPHONE:
@@ -94,7 +94,7 @@ begin
       SqldbResource.ConditionsSQL := 'Where Id = :phoneid';
       SqldbResource.PrimaryKey := 'Id';
       SqldbResource.PrimaryKeyParam := 'phoneid';
-      SqldbResource.UpdateColumns := 'number';
+      SqldbResource.InputFields := '["number"]';
     end;
   end;
 end;
