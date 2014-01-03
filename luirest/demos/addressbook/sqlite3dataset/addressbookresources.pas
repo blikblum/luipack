@@ -143,7 +143,7 @@ const
 var
   RequestData: TJSONObject;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Strings['name'],
       URIParams.Strings['categoryid']]));
@@ -193,7 +193,7 @@ const
 var
   RequestData: TJSONObject;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name']]));
     if Dataset.ReturnCode = SQLITE_DONE then
@@ -299,6 +299,28 @@ begin
   XMLDoc.Destroy;
 end;
 
+function JSONToSQL(Data: TJSONObject; const PropName: String): String;
+var
+  PropData: TJSONData;
+begin
+  Result := 'NULL';
+  PropData := Data.Find(PropName);
+  if PropData <> nil then
+  begin
+    case PropData.JSONType of
+      jtNumber: Result := PropData.AsString;
+      jtString: Result := '''' + PropData.AsString + '''';
+      jtBoolean:
+        begin
+          if PropData.AsBoolean then
+            Result := '1'
+          else
+            Result := '0';
+        end;
+    end;
+  end;
+end;
+
 { TContactPhone }
 
 procedure TContactPhone.HandleDelete(ARequest: TRequest; AResponse: TResponse);
@@ -329,7 +351,7 @@ const
 var
   RequestData: TJSONObject;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Strings['number'],
       URIParams.Strings['phoneid']]));
@@ -379,7 +401,7 @@ const
 var
   RequestData: TJSONObject;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(InsertSQL, [URIParams.Strings['contactid'],
       RequestData.Get('number', '')]));
@@ -423,10 +445,10 @@ const
 var
   RequestData: TJSONObject;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
     Dataset.ExecSQL(Format(InsertSQL, [RequestData.Strings['name'],
-      VarToStrDef(RequestData.Get('categoryid'), 'NULL')]));
+      JSONToSQL(RequestData, 'categoryid')]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       Dataset.Close;
@@ -479,29 +501,31 @@ const
   UpdateSQL = 'Update Contacts Set Name = ''%s'', CategoryId = %s where Id = %s';
 var
   RequestData: TJSONObject;
+  ContactId: String;
 begin
-  RequestData := StringToJSONData(ARequest.Content) as TJSONObject;
+  RequestData := StrToJSON(ARequest.Content) as TJSONObject;
   try
-    Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Strings['name'],
-      RequestData.Elements['categoryid'].AsJSON, URIParams.Strings['contactid']]));
+    ContactId := URIParams.Strings['contactid'];
+    Dataset.ExecSQL(Format(UpdateSQL, [RequestData.Get('name', ''),
+      JSONToSQL(RequestData, 'categoryid'), ContactId]));
     if Dataset.ReturnCode = SQLITE_DONE then
     begin
       if Dataset.RowsAffected > 0 then
       begin
         Dataset.Close;
         Dataset.SQL := Format('Select Id, Name, CategoryId From Contacts where Id = %s',
-          [URIParams.Strings['contactid']]);
+          [ContactId]);
         Dataset.Open;
         DatasetFormatter.SetContent(AResponse, Dataset, False);
       end
       else
       begin
-        SetResponseStatus(AResponse, 404, 'Contact "%s" not found', [URIParams.Strings['contactid']]);
+        SetResponseStatus(AResponse, 404, 'Contact "%s" not found', [ContactId]);
       end;
     end
     else
     begin
-      SetResponseStatus(AResponse, 500, 'Error updating resource', []);
+      SetResponseStatus(AResponse, 500, 'Error updating resource: %s', [Dataset.ReturnString]);
     end;
   finally
     RequestData.Destroy;
