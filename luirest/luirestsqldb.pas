@@ -27,9 +27,10 @@ type
     FPrimaryKeyParam: String;
     FSelectSQL: String;
     FUpdateColumns: TStringList;
-    FReadOnly: Boolean;
     FIsCollection: Boolean;
+    FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
+    FReadOnly: Boolean;
     procedure SetUpdateColumns(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
@@ -45,6 +46,7 @@ type
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
     property Connection: TSQLConnection read FConnection write FConnection;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
+    property PreserveCase: Boolean read FPreserveCase write FPreserveCase;
     property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
     property PrimaryKeyParam: String read FPrimaryKeyParam write FPrimaryKeyParam;
     property ResultColumns: String read FResultColumns write FResultColumns;
@@ -166,6 +168,7 @@ procedure TSqldbJSONResource.HandleGet(ARequest: TRequest; AResponse: TResponse)
 var
   Query: TSQLQuery;
   ResponseData: TJSONData;
+  ConvertOptions: TDatasetToJSONOptions;
 begin
   Query := TSQLQuery.Create(nil);
   try
@@ -184,8 +187,12 @@ begin
     end;
     if FIsCollection then
     begin
-      ResponseData := DatasetToJSON(Query, [djoSetNull], '');
+      ConvertOptions := [djoSetNull];
+      if FPreserveCase then
+        Include(ConvertOptions, djoPreserveCase);
+      ResponseData := TJSONArray.Create;
       try
+        DatasetToJSON(Query, TJSONArray(ResponseData), ConvertOptions, '');
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
@@ -195,8 +202,12 @@ begin
     begin
       if (Query.RecordCount > 0) then
       begin
-        ResponseData := DatasetToJSON(Query, [djoCurrentRecord, djoSetNull], '');
+        ConvertOptions := [djoSetNull];
+        if FPreserveCase then
+          Include(ConvertOptions, djoPreserveCase);
+        ResponseData := TJSONObject.Create;
         try
+          DatasetToJSON(Query, TJSONObject(ResponseData), ConvertOptions, '');
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
           ResponseData.Free;
@@ -307,8 +318,9 @@ end;
 procedure TSqldbJSONResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONData;
+  ResponseData: TJSONObject;
   Query: TSQLQuery;
+  ConvertOptions: TDatasetToJSONOptions;
 begin
   if not FIsCollection and not FReadOnly then
   begin
@@ -329,8 +341,12 @@ begin
       finally
         RequestData.Free;
       end;
-      ResponseData := DatasetToJSON(Query, [djoCurrentRecord, djoSetNull], FResultColumns);
+      ConvertOptions := [djoSetNull];
+      if FPreserveCase then
+        Include(ConvertOptions, djoPreserveCase);
+      ResponseData := TJSONObject.Create;
       try
+        DatasetToJSON(Query, ResponseData, ConvertOptions, FResultColumns);
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
