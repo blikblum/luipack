@@ -26,12 +26,12 @@ type
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
     FSelectSQL: String;
-    FUpdateColumns: TStringList;
+    FInputFieldsData: TJSONArray;
     FIsCollection: Boolean;
     FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
     FReadOnly: Boolean;
-    procedure SetUpdateColumns(const AValue: String);
+    procedure SetInputFields(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetNewResourceId(Query: TSQLQuery): String; virtual;
@@ -54,8 +54,7 @@ type
     property PutAsPatch: Boolean read FPutAsPatch write FPutAsPatch;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
-    //todo: rename to InputFields
-    property UpdateColumns: String write SetUpdateColumns;
+    property InputFields: String write SetInputFields;
   end;
 
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
@@ -85,24 +84,50 @@ begin
   end;
 end;
 
+function GetFieldName(FieldsData: TJSONArray; FieldIndex: Integer; out DBFieldName: String): String;
+var
+  FieldData: TJSONData;
+begin
+  FieldData := FieldsData.Items[FieldIndex];
+  if FieldData.JSONType = jtString then
+  begin
+    Result := FieldData.AsString;
+    DBFieldName := Result;
+  end
+  else if FieldData.JSONType = jtObject then
+  begin
+    Result := TJSONObject(FieldData).Get('name', '');
+    DBFieldName := TJSONObject(FieldData).Get('mapping', Result);
+  end
+  else
+    Result := '';
+end;
+
+
 procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject;
   DoPatch: Boolean);
 var
   i: Integer;
-  FieldName: String;
+  FieldName, DBFieldName: String;
   PropData: TJSONData;
   Field: TField;
 begin
-  if FUpdateColumns.Count > 0 then
+  if FInputFieldsData <> nil then
   begin
-    for i := 0 to FUpdateColumns.Count -1 do
+    for i := 0 to FInputFieldsData.Count - 1 do
     begin
-      FieldName := FUpdateColumns[i];
+      FieldName := GetFieldName(FInputFieldsData, i, DBFieldName);
+      Field := Query.FieldByName(DBFieldName);
       PropData := Obj1.Find(FieldName);
       if PropData = nil then
         PropData := Obj2.Find(FieldName);
       if PropData <> nil then
-        Query.FieldByName(FieldName).Value := PropData.Value;
+        Field.Value := PropData.Value
+      else
+      begin
+        if not DoPatch then
+          Field.Value := Null;
+      end;
     end;
   end
   else
@@ -130,9 +155,10 @@ end;
 
 { TSqldbJSONResource }
 
-procedure TSqldbJSONResource.SetUpdateColumns(const AValue: String);
+procedure TSqldbJSONResource.SetInputFields(const AValue: String);
 begin
-  FUpdateColumns.DelimitedText := AValue;
+  FreeAndNil(FInputFieldsData);
+  TryStrToJSON(AValue, FInputFieldsData);
 end;
 
 function TSqldbJSONResource.GetQuery(AOwner: TComponent): TSQLQuery;
@@ -152,15 +178,13 @@ end;
 
 destructor TSqldbJSONResource.Destroy;
 begin
-  FUpdateColumns.Destroy;
+  FInputFieldsData.Free;
   inherited Destroy;
 end;
 
 procedure TSqldbJSONResource.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FUpdateColumns := TStringList.Create;
-  FUpdateColumns.Delimiter := ';';
   FPrimaryKey := 'Id';
 end;
 
