@@ -1,0 +1,88 @@
+object ModelFieldEditorForm: TModelFieldEditorForm
+  Left = 403
+  Height = 230
+  Top = 287
+  Width = 385
+  Caption = 'Edit Field'
+  ClientHeight = 230
+  ClientWidth = 385
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '1.1'
+  object FieldNameEdit: TTIEdit
+    Left = 8
+    Height = 23
+    Top = 24
+    Width = 294
+    Link.TIPropertyName = 'FieldName'
+    TabOrder = 0
+  end
+  object SaveButton: TBitBtn
+    Left = 133
+    Height = 30
+    Top = 193
+    Width = 123
+    Anchors = [akRight, akBottom]
+    Caption = 'Save'
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 3
+  end
+  object CancelButton: TBitBtn
+    Left = 261
+    Height = 30
+    Top = 193
+    Width = 120
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 8
+    Width = 60
+    Caption = 'Field Name'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 15
+    Top = 56
+    Width = 69
+    Caption = 'Display Label'
+    ParentColor = False
+  end
+  object DisplayLabelEdit: TTIEdit
+    Left = 8
+    Height = 23
+    Top = 72
+    Width = 294
+    Link.TIPropertyName = 'DisplayLabel'
+    TabOrder = 1
+  end
+  object FieldTypeComboBox: TTIComboBox
+    Left = 8
+    Height = 23
+    Top = 120
+    Width = 240
+    HistoryCaseSensitive = False
+    Link.TIPropertyName = 'FieldType'
+    MaxHistoryCount = 0
+    Style = csDropDownList
+    TabOrder = 2
+  end
+  object Label3: TLabel
+    Left = 8
+    Height = 15
+    Top = 104
+    Width = 54
+    Caption = 'Field Type'
+    ParentColor = False
+  end
+end

@@ -1,0 +1,50 @@
+object ModelEditorForm: TModelEditorForm
+  Left = 503
+  Height = 213
+  Top = 256
+  Width = 305
+  Caption = 'Model Editor'
+  ClientHeight = 213
+  ClientWidth = 305
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  LCLVersion = '0.9.31'
+  object CloseButton: TBitBtn
+    Left = 192
+    Height = 30
+    Top = 176
+    Width = 107
+    DefaultCaption = True
+    Kind = bkClose
+    ModalResult = 11
+    TabOrder = 0
+  end
+  object SaveButton: TBitBtn
+    Left = 80
+    Height = 30
+    Top = 176
+    Width = 107
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object NameEdit: TTIEdit
+    Left = 16
+    Height = 21
+    Top = 24
+    Width = 232
+    Link.TIPropertyName = 'Name'
+    TabOrder = 2
+  end
+  object Label1: TLabel
+    Left = 17
+    Height = 14
+    Top = 8
+    Width = 28
+    Caption = 'Name'
+    ParentColor = False
+  end
+end
