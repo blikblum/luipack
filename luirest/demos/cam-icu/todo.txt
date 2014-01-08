@@ -1,0 +1,3 @@
+Features:
+- Validate registry (server side / before send)
+
