@@ -1,0 +1,30 @@
+object CAMICUServiceModule: TCAMICUServiceModule
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  Height = 150
+  HorizontalOffset = 536
+  VerticalOffset = 210
+  Width = 439
+  object Connection: TSQLite3Connection
+    Connected = False
+    LoginPrompt = False
+    AfterConnect = ConnectionAfterConnect
+    KeepConnection = False
+    Transaction = Transaction
+    HostName = 'camicu.db'
+    LogEvents = []
+    Options = []
+    left = 90
+    top = 40
+  end
+  object Transaction: TSQLTransaction
+    Active = False
+    Action = caNone
+    Database = Connection
+    left = 208
+    top = 40
+  end
+end
