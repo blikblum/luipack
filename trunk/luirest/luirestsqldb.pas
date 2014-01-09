@@ -31,6 +31,8 @@ type
     FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
     FReadOnly: Boolean;
+    class var FDefaultConnection: TSQLConnection;
+    class procedure SetDefaultConnection(Value: TSQLConnection); static;
     procedure SetInputFields(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
@@ -45,6 +47,7 @@ type
     procedure HandlePut(ARequest: TRequest; AResponse: TResponse); override;
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
     property Connection: TSQLConnection read FConnection write FConnection;
+    class property DefaultConnection: TSQLConnection read FDefaultConnection write SetDefaultConnection;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
     property OutputFields: String read FOutputFields write FOutputFields;
     property PreserveCase: Boolean read FPreserveCase write FPreserveCase;
@@ -161,6 +164,13 @@ begin
   TryStrToJSON(AValue, FInputFieldsData);
 end;
 
+class procedure TSqldbJSONResource.SetDefaultConnection(Value: TSQLConnection);
+begin
+  if (FDefaultConnection <> nil) and (Value <> nil) then
+    raise Exception.Create('Default connection already set');
+  FDefaultConnection := Value;
+end;
+
 function TSqldbJSONResource.GetQuery(AOwner: TComponent): TSQLQuery;
 begin
   Result := TSQLQuery.Create(AOwner);
@@ -186,6 +196,7 @@ procedure TSqldbJSONResource.AfterConstruction;
 begin
   inherited AfterConstruction;
   FPrimaryKey := 'Id';
+  FConnection := FDefaultConnection;
 end;
 
 procedure TSqldbJSONResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
