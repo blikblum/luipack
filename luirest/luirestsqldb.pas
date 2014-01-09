@@ -36,6 +36,7 @@ type
     procedure SetInputFields(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
+    function GetResourceIdentifierSQL: String;
     function GetNewResourceId(Query: TSQLQuery): String; virtual;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
@@ -177,6 +178,16 @@ begin
   Result.DataBase := FConnection;
 end;
 
+function TSqldbJSONResource.GetResourceIdentifierSQL: String;
+begin
+  if FConditionsSQL <> '' then
+    Result := FConditionsSQL
+  else if (FPrimaryKeyParam <> '') and (FPrimaryKey <> '') then
+    Result := Format('where %s = :%s', [FPrimaryKey, FPrimaryKeyParam])
+  else
+    raise Exception.Create('Unable to resolve resource identifier SQL query');
+end;
+
 function TSqldbJSONResource.GetNewResourceId(Query: TSQLQuery): String;
 begin
   //found a way to retrieve LastInsertID only for sqlite3
@@ -209,7 +220,10 @@ begin
   try
     Query.DataBase := FConnection;
     Query.SQL.Add(FSelectSQL);
-    Query.SQL.Add(FConditionsSQL);
+    if FIsCollection then
+      Query.SQL.Add(FConditionsSQL)
+    else
+      Query.SQL.Add(GetResourceIdentifierSQL);
     JSONDataToParams(URIParams, Query.Params);
     try
       Query.Open;
@@ -268,7 +282,7 @@ begin
     try
       Query.DataBase := FConnection;
       Query.SQL.Add(FSelectSQL);
-      Query.SQL.Add(FConditionsSQL);
+      Query.SQL.Add(GetResourceIdentifierSQL);
       JSONDataToParams(URIParams, Query.Params);
       try
         Query.Open;
@@ -363,7 +377,7 @@ begin
     try
       Query.DataBase := FConnection;
       Query.SQL.Add(FSelectSQL);
-      Query.SQL.Add(FConditionsSQL);
+      Query.SQL.Add(GetResourceIdentifierSQL);
       JSONDataToParams(URIParams, Query.Params);
       Query.Open;
       if TryStrToJSON(ARequest.Content, RequestData) then
