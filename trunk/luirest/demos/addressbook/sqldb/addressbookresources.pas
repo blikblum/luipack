@@ -18,6 +18,8 @@ const
   RES_CONTACT = 2;
   RES_CONTACTPHONES = 3;
   RES_CONTACTPHONE = 4;
+  RES_CATEGORIES = 10;
+  RES_CATEGORY = 11;
 
 
 type
@@ -67,14 +69,11 @@ begin
     begin
       SqldbResource.IsCollection := True;
       SqldbResource.SelectSQL := 'Select Id, Name from contacts';
-      SqldbResource.PrimaryKey := 'Id';
       SqldbResource.SetDefaultSubPath('contactid', @CreateResource, RES_CONTACT);
     end;
     RES_CONTACT:
     begin
       SqldbResource.SelectSQL := 'Select Id, Name from Contacts';
-      SqldbResource.ConditionsSQL := 'where Id = :contactid';
-      SqldbResource.PrimaryKey := 'Id';
       SqldbResource.PrimaryKeyParam := 'contactid';
       SqldbResource.RegisterSubPath('phones', @CreateResource, RES_CONTACTPHONES);
     end;
@@ -83,7 +82,6 @@ begin
       SqldbResource.IsCollection := True;
       SqldbResource.SelectSQL := 'Select Id, ContactId, Number from Phones';
       SqldbResource.ConditionsSQL := 'where ContactId = :contactid';
-      SqldbResource.PrimaryKey := 'Id';
       SqldbResource.OutputFields := '["id", "number"]';
       SqldbResource.InputFields := '["number", "contactid"]';
       SqldbResource.SetDefaultSubPath('phoneid', @CreateResource, RES_CONTACTPHONE);
@@ -91,10 +89,19 @@ begin
     RES_CONTACTPHONE:
     begin
       SqldbResource.SelectSQL := 'Select Id, Number From Phones';
-      SqldbResource.ConditionsSQL := 'Where Id = :phoneid';
-      SqldbResource.PrimaryKey := 'Id';
       SqldbResource.PrimaryKeyParam := 'phoneid';
       SqldbResource.InputFields := '["number"]';
+    end;
+    RES_CATEGORIES:
+    begin
+      SqldbResource.IsCollection := True;
+      SqldbResource.SelectSQL := 'Select Id, Name from Categories';
+      SqldbResource.SetDefaultSubPath('categoryid', @CreateResource, RES_CATEGORY);
+    end;
+    RES_CATEGORY:
+    begin
+      SqldbResource.SelectSQL := 'Select Id, Name from Categories';
+      SqldbResource.PrimaryKeyParam := 'categoryid';
     end;
   end;
 end;

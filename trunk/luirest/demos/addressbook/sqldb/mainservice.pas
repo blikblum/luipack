@@ -33,6 +33,7 @@ begin
   FResourceFactory := TAddressBookResourceFactory.Create(Self);
   FResourceFactory.Database := 'addressbookdata.db';
   Resources.Register('contacts', @FResourceFactory.CreateResource, RES_CONTACTS);
+  Resources.Register('categories', @FResourceFactory.CreateResource, RES_CATEGORIES);
 end;
 
 end.
