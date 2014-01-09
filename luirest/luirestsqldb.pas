@@ -22,6 +22,7 @@ type
   private
     FConditionsSQL: String;
     FConnection: TSQLConnection;
+    FInputFields: String;
     FOutputFields: String;
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
@@ -33,11 +34,11 @@ type
     FReadOnly: Boolean;
     class var FDefaultConnection: TSQLConnection;
     class procedure SetDefaultConnection(Value: TSQLConnection); static;
-    procedure SetInputFields(const AValue: String);
   protected
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
     function GetNewResourceId(Query: TSQLQuery): String; virtual;
+    procedure Loaded; override;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
@@ -49,6 +50,7 @@ type
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
     property Connection: TSQLConnection read FConnection write FConnection;
     class property DefaultConnection: TSQLConnection read FDefaultConnection write SetDefaultConnection;
+    property InputFields: String read FInputFields write FInputFields;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
     property OutputFields: String read FOutputFields write FOutputFields;
     property PreserveCase: Boolean read FPreserveCase write FPreserveCase;
@@ -58,7 +60,6 @@ type
     property PutAsPatch: Boolean read FPutAsPatch write FPutAsPatch;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
-    property InputFields: String write SetInputFields;
   end;
 
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
@@ -159,12 +160,6 @@ end;
 
 { TSqldbJSONResource }
 
-procedure TSqldbJSONResource.SetInputFields(const AValue: String);
-begin
-  FreeAndNil(FInputFieldsData);
-  TryStrToJSON(AValue, FInputFieldsData);
-end;
-
 class procedure TSqldbJSONResource.SetDefaultConnection(Value: TSQLConnection);
 begin
   if (FDefaultConnection <> nil) and (Value <> nil) then
@@ -195,6 +190,13 @@ begin
     Result := IntToStr(TSQLite3Connection(FConnection).GetInsertID)
   else
     Result := '';
+end;
+
+procedure TSqldbJSONResource.Loaded;
+begin
+  inherited Loaded;
+  if FInputFields <> '' then
+    TryStrToJSON(FInputFields, FInputFieldsData);
 end;
 
 destructor TSqldbJSONResource.Destroy;
