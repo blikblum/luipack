@@ -12,9 +12,9 @@ object CAMICUServiceModule: TCAMICUServiceModule
     Connected = False
     LoginPrompt = False
     AfterConnect = ConnectionAfterConnect
+    DatabaseName = 'camicu.db'
     KeepConnection = False
     Transaction = Transaction
-    HostName = 'camicu.db'
     LogEvents = []
     Options = []
     left = 90
