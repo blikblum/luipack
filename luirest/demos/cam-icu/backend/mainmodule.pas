@@ -21,7 +21,6 @@ type
   private
     FFactory: TCAMICUResourceFactory;
   public
-    { public declarations }
   end;
 
 var
@@ -43,6 +42,7 @@ begin
   TSqldbJSONResource.DefaultConnection := Connection;
   FFactory := TCAMICUResourceFactory.Create(Self);
   Resources.Register('patients', @FFactory.GetResource, RES_PATIENTS);
+  Resources.Register('evaluations', @FFactory.GetResource, RES_EVALUATIONS);
 end;
 
 procedure TCAMICUServiceModule.DataModuleDestroy(Sender: TObject);

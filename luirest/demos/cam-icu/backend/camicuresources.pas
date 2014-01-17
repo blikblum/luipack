@@ -37,19 +37,47 @@ var
 begin
   SqldbResource := TSqldbJSONResource.Create;
   case ResourceTag of
-    RES_PATIENTS:
+    RES_PATIENTS, RES_ACTIVEPATIENTS:
       begin
         SqldbResource.IsCollection := True;
-        SqldbResource.ReadOnly := True;
         SqldbResource.SelectSQL := 'Select Id, Name, BirthDate, Registry From Patient';
         SqldbResource.SetDefaultSubPath('patientid', @GetResource, RES_PATIENT);
+        if ResourceTag = RES_ACTIVEPATIENTS then
+          SqldbResource.ConditionsSQL := 'Where DischargeDate IS NULL'
+        else
+        begin
+          SqldbResource.RegisterSubPath('active', @GetResource, RES_ACTIVEPATIENTS);
+          SqldbResource.ReadOnly := True;
+        end;
       end;
     RES_PATIENT:
       begin
         SqldbResource.SelectSQL := 'SELECT Id, Name, Registry, BirthDate, Gender, OriginationId, InternmentDate, InternmentTypeId, IsReInternment, IsReInternment48h, DiagnosticId, Apache2, SAPS3, DischargeDate, DischargeReasonId, VMDuration, HasICC, HasIRC, HasDCPF, HasDPOC, HasHematologyTumor, HasLocoregionalTumor, HasMetastasis, HasHAS, HasDM, HasPreviousIAM, HasAVC, HasVisualDeficit, HasAuditoryDeficit, HasDementia, HasAlcoholism, HasSmoking, HasImmunoSuppression,  HasSIDA,  HasRheumaticDisorder,  HasPsychiatricDisorder FROM Patient';
-        SqldbResource.ConditionsSQL := 'Where Id = :patientid';
         SqldbResource.PrimaryKeyParam := 'patientid';
+        SqldbResource.RegisterSubPath('evaluations', @GetResource, RES_PATIENT_EVALUATIONS);
       end;
+     RES_EVALUATIONS, RES_PATIENT_EVALUATIONS:
+      begin
+        SqldbResource.IsCollection := True;
+        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, SedationId from PatientEvaluation';
+        SqldbResource.SetDefaultSubPath('evaluationid', @GetResource, RES_EVALUATION);
+        if ResourceTag = RES_PATIENT_EVALUATIONS then
+          SqldbResource.ConditionsSQL := 'Where PatientId = :patientid'
+        else
+        begin
+          SqldbResource.ReadOnly := True;
+        end;
+      end;
+     RES_EVALUATION:
+      begin
+        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, SedationId from PatientEvaluation';
+        SqldbResource.PrimaryKeyParam := 'evaluationid';
+      end;
+    else
+    begin
+      FreeAndNil(SqldbResource);
+      raise Exception.CreateFmt('Resource type %d not defined', [ResourceTag]);
+    end;
   end;
 end;
 
