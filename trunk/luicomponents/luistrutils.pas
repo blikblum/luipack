@@ -57,6 +57,8 @@ procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String;
 
 function ExtractInitials(const S: AnsiString; const ExcludeWords: array of String): AnsiString;
 
+function RNPos(const C: string; S: string; N: Integer): Integer;
+
 implementation
 
 uses
@@ -233,6 +235,22 @@ begin
       Result := Result + Word[1];
     Inc(WordIndex);
     Word := ExtractWordPos(WordIndex, S, StdWordDelims, WordPos);
+  end;
+end;
+
+function RNPos(const C: string; S: string; N: Integer): Integer;
+var
+  Offset: Integer;
+begin
+  Result := 0;
+  Offset := Length(S);
+  while N > 0 do
+  begin
+    Result := RPosex(C, S, Offset);
+    if Result = 0 then
+      Exit;
+    Offset := Result - 1;
+    Dec(N);
   end;
 end;
 
