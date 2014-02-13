@@ -1,0 +1,28 @@
+object Form1: TForm1
+  Left = 365
+  Height = 193
+  Top = 221
+  Width = 404
+  Caption = 'Form1'
+  ClientHeight = 193
+  ClientWidth = 404
+  LCLVersion = '1.3'
+  object TestMyServiceButton: TButton
+    Left = 24
+    Height = 25
+    Top = 55
+    Width = 352
+    Caption = 'Test MyService'
+    OnClick = TestMyServiceButtonClick
+    TabOrder = 0
+  end
+  object TestMySecondServiceButton: TButton
+    Left = 24
+    Height = 25
+    Top = 96
+    Width = 352
+    Caption = 'Test MySecondService'
+    OnClick = TestMySecondServiceButtonClick
+    TabOrder = 1
+  end
+end
