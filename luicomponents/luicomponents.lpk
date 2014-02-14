@@ -24,7 +24,7 @@
       </Other>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="17">
+    <Files Count="18">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -84,16 +84,20 @@
       </Item14>
       <Item15>
         <Filename Value="luidataclasses.pas"/>
-        <UnitName Value="luidataclasses"/>
+        <UnitName Value="LuiDataClasses"/>
       </Item15>
       <Item16>
         <Filename Value="luijsonclasses.pas"/>
-        <UnitName Value="luijsonclasses"/>
+        <UnitName Value="LuiJSONClasses"/>
       </Item16>
       <Item17>
         <Filename Value="luiioccontainer.pas"/>
-        <UnitName Value="luiioccontainer"/>
+        <UnitName Value="LuiIoCContainer"/>
       </Item17>
+      <Item18>
+        <Filename Value="luiservices.pas"/>
+        <UnitName Value="luiservices"/>
+      </Item18>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
