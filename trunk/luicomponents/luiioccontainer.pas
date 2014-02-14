@@ -17,11 +17,9 @@ type
     FComponentClass: TComponentClass;
     FOnInstanceCreate: TInstanceCreateEvent;
     FSingletonReference: IInterface;
-    FIsSingleton: Boolean;
   public
     function GetInterfaceReference(const IID: TGuid): IInterface;
     property ComponentClass: TComponentClass read FComponentClass write FComponentClass;
-    property IsSingleton: Boolean read FIsSingleton write FIsSingleton;
     property OnInstanceCreate: TInstanceCreateEvent read FOnInstanceCreate write FOnInstanceCreate;
     property SingletonReference: IInterface read FSingletonReference;
   end;
@@ -37,6 +35,7 @@ type
     destructor Destroy; override;
     procedure Register(const IID: TGuid; ComponentClass: TComponentClass);
     procedure Register(const IID: TGuid; CreateCallback: TInstanceCreateEvent);
+    procedure Register(const IID: TGuid; Component: TComponent);
     function Resolve(const IID: TGuid; out Reference): Boolean;
     function Resolve(const IID: TGuid): IInterface;
   end;
@@ -116,25 +115,30 @@ var
   ComObject: IVCLComObject;
   Obj: TObject;
 begin
-  Result := nil;
-  if FComponentClass <> nil then
+  if FSingletonReference <> nil then
+    Result := FSingletonReference
+  else
   begin
-    Component := FComponentClass.Create(nil);
-    ComObject := TComponentReference.Create(Component);
-    Component.VCLComObject := ComObject;
-    Component.GetInterface(IID, Result);
-  end
-  else if FOnInstanceCreate <> nil then
-  begin
-    Obj := nil;
-    FOnInstanceCreate(Obj);
-    if Obj <> nil then
+    Result := nil;
+    if FComponentClass <> nil then
     begin
-      if not Obj.GetInterface(IID, Result) then
-        Obj.Destroy;
+      Component := FComponentClass.Create(nil);
+      ComObject := TComponentReference.Create(Component);
+      Component.VCLComObject := ComObject;
+      Component.GetInterface(IID, Result);
     end
-    else
-      raise Exception.CreateFmt('Object does not implement "%s"', [GUIDToString(IID)]);
+    else if FOnInstanceCreate <> nil then
+    begin
+      Obj := nil;
+      FOnInstanceCreate(Obj);
+      if Obj <> nil then
+      begin
+        if not Obj.GetInterface(IID, Result) then
+          Obj.Destroy;
+      end
+      else
+        raise Exception.CreateFmt('Object does not implement "%s"', [GUIDToString(IID)]);
+    end;
   end;
 end;
 
@@ -183,6 +187,20 @@ begin
     raise Exception.CreateFmt(SRegisterError, [GuidStr, 'Event']);
   Def := TInterfaceDef.Create;
   Def.OnInstanceCreate := CreateCallback;
+  FIntfList.Add(GuidStr, Def);
+end;
+
+procedure TIoCContainer.Register(const IID: TGuid; Component: TComponent);
+var
+  Def: TInterfaceDef;
+  GuidStr: String;
+begin
+  GuidStr := GUIDToString(IID);
+  if Component = nil then
+    raise Exception.CreateFmt(SRegisterError, [GuidStr, 'Component']);
+  Def := TInterfaceDef.Create;
+  if not Component.GetInterface(IID, Def.FSingletonReference) then
+    raise Exception.CreateFmt('Object instance does not implements "%s"', [GuidStr]);
   FIntfList.Add(GuidStr, Def);
 end;
 
