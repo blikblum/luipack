@@ -9,6 +9,7 @@ uses
   Classes, fpjson, db, LuiJSONClasses;
 
 type
+   //todo: implement Resource.ExtractData
 
   IDataResource = interface(IInterface)
     ['{ADACF400-8E33-4F0B-A10A-6A739DCA4CB5}']
@@ -37,6 +38,13 @@ type
     ['{D6A53F83-E973-4657-B763-087EF9BC518D}']
     function GetData: TJSONArray;
     property Data: TJSONArray read GetData;
+  end;
+
+  IResourceClient = interface
+    ['{254EE65D-14ED-4597-860D-757532BA51CE}']
+    function GetJSONArray(const ModelName: String): IJSONArrayResource;
+    function GetJSONObject(const ModelName: String): IJSONObjectResource;
+    procedure InvalidateCache(const ModelName: String);
   end;
 
   function SaveChanges(Resource: IJSONObjectResource; ChangeSet: TJSONChangeSet): Boolean;

@@ -126,7 +126,7 @@ type
 
   { TRESTResourceClient }
 
-  TRESTResourceClient = class(TComponent)
+  TRESTResourceClient = class(TComponent, IResourceClient)
   private
     FCacheHandler: TRESTCacheHandler;
     FModelDefs: TRESTResourceModelDefs;
