@@ -28,6 +28,7 @@ type
     FPrimaryKeyParam: String;
     FSelectSQL: String;
     FInputFieldsData: TJSONArray;
+    FIgnoreNotFound: Boolean;
     FIsCollection: Boolean;
     FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
@@ -38,7 +39,7 @@ type
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
     function GetNewResourceId(Query: TSQLQuery): String; virtual;
-    procedure Loaded; override;
+    procedure Loaded(Tag: PtrInt); override;
     procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
@@ -50,6 +51,7 @@ type
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
     property Connection: TSQLConnection read FConnection write FConnection;
     class property DefaultConnection: TSQLConnection read FDefaultConnection write SetDefaultConnection;
+    property IgnoreNotFound: Boolean read FIgnoreNotFound write FIgnoreNotFound;
     property InputFields: String read FInputFields write FInputFields;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
     property OutputFields: String read FOutputFields write FOutputFields;
@@ -192,9 +194,9 @@ begin
     Result := '';
 end;
 
-procedure TSqldbJSONResource.Loaded;
+procedure TSqldbJSONResource.Loaded(Tag: PtrInt);
 begin
-  inherited Loaded;
+  inherited Loaded(Tag);
   if FInputFields <> '' then
     TryStrToJSON(FInputFields, FInputFieldsData);
 end;
@@ -266,7 +268,10 @@ begin
       end
       else
       begin
-        SetResponseStatus(AResponse, 404, 'Resource "%s" not found', [ARequest.PathInfo]);
+        if FIgnoreNotFound then
+          AResponse.Contents.Add('{}')
+        else
+          SetResponseStatus(AResponse, 404, 'Resource "%s" not found', [ARequest.PathInfo]);
       end;
     end;
   finally
