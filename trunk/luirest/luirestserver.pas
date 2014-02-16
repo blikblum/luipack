@@ -49,7 +49,7 @@ type
     class var FServiceModule: TRESTServiceModule;
     procedure SubPathResourcesNeeded;
   protected
-    procedure Loaded; virtual;
+    procedure Loaded(Tag: PtrInt); virtual;
     procedure RedirectRequest(ARequest: TRequest; AResponse: TResponse;
       const Method, ResourcePath: String; Relative: Boolean = True);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
@@ -319,7 +319,7 @@ begin
     FSubPathResources := TRESTResourceStore.Create;
 end;
 
-procedure TRESTResource.Loaded;
+procedure TRESTResource.Loaded(Tag: PtrInt);
 begin
   //
 end;
@@ -517,7 +517,7 @@ begin
     begin
       if Assigned(OnResourceLoad) then
         OnResourceLoad(Result, FTag);
-      Result.Loaded;
+      Result.Loaded(FTag);
     end;
   end;
 end;
