@@ -66,6 +66,12 @@ procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: 
 
 function StrToJSON(const JSONStr: TJSONStringType): TJSONData;
 
+function TryReadJSONFile(const FileName: String; out JSONData: TJSONData): Boolean;
+
+function TryReadJSONFile(const FileName: String; out JSONArray: TJSONArray): Boolean;
+
+function TryReadJSONFile(const FileName: String; out JSONObject: TJSONObject): Boolean;
+
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
 
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
@@ -524,6 +530,47 @@ begin
   finally
     Parser.Destroy;
   end;
+end;
+
+function TryReadJSONFile(const FileName: String; out JSONData: TJSONData): Boolean;
+begin
+  JSONData := nil;
+  try
+    JSONData := TJSONFile.Load(FileName);
+  except
+    //
+  end;
+  Result := JSONData <> nil;
+end;
+
+function TryReadJSONFile(const FileName: String; out JSONArray: TJSONArray): Boolean;
+var
+  Data: TJSONData absolute JSONArray;
+begin
+  Data := nil;
+  try
+    Data := TJSONFile.Load(FileName);
+  except
+    //
+  end;
+  Result := (Data <> nil) and (Data.JSONType = jtArray);
+  if not Result then
+    FreeAndNil(Data);
+end;
+
+function TryReadJSONFile(const FileName: String; out JSONObject: TJSONObject): Boolean;
+var
+  Data: TJSONData absolute JSONObject;
+begin
+  Data := nil;
+  try
+    Data := TJSONFile.Load(FileName);
+  except
+    //
+  end;
+  Result := (Data <> nil) and (Data.JSONType = jtObject);
+  if not Result then
+    FreeAndNil(Data);
 end;
 
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
