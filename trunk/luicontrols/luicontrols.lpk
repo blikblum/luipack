@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
@@ -29,7 +29,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="14">
+    <Files Count="17">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -87,6 +87,18 @@ TSearchEdit
         <Filename Value="frames\jsonbooleanradiobuttonview.pas"/>
         <UnitName Value="JSONBooleanRadioButtonView"/>
       </Item14>
+      <Item15>
+        <Filename Value="jsonformmediator.pas"/>
+        <UnitName Value="jsonformmediator"/>
+      </Item15>
+      <Item16>
+        <Filename Value="formmediator.pas"/>
+        <UnitName Value="formmediator"/>
+      </Item16>
+      <Item17>
+        <Filename Value="presentationmanager.pas"/>
+        <UnitName Value="PresentationManager"/>
+      </Item17>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
