@@ -9,12 +9,13 @@ uses
 
 type
 
-  //workaround to avoid compilation error with fpc 2.6*
-  TFormClass = class of TForm;
+  { TPresenter }
 
   TPresenter = class(TComponent)
+  protected
+    procedure Initialize; virtual;
+    function GetViewCaption: String virtual;
   public
-    function ShowModal: TModalResult; virtual; abstract;
   end;
 
   TPresenterClass = class of TPresenter;
@@ -30,8 +31,7 @@ type
   IPresentationManager = interface
     ['{25532926-50FF-42F3-800D-AB4A7B01B3BA}']
     function GetPresentation(const PresentationName: String): IPresentation;
-    procedure Register(const PresentationName: String; PresenterClass: TPresenterClass);
-    procedure Register(const PresentationName: String; ViewClass: TFormClass);
+    procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass = nil);
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
   end;
 
@@ -44,15 +44,14 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetPresentation(const PresentationName: String): IPresentation;
-    procedure Register(const PresentationName: String; PresenterClass: TPresenterClass);
-    procedure Register(const PresentationName: String; ViewClass: TFormClass);
+    procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass = nil);
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
   end;
 
 implementation
 
 uses
-  VarRecUtils, LuiRTTIUtils;
+  LuiRTTIUtils, typinfo;
 
 type
   TPresentationDef = class
@@ -61,118 +60,129 @@ type
     FViewClass: TFormClass;
   end;
 
-  { TCustomPresentation }
+  { TPresentation }
 
-  TCustomPresentation = class(TInterfacedObject)
+  TPresentation = class(TInterfacedObject, IPresentation)
   private
-    FModalResult: TModalResult;
-  public
-    function ModalResult: TModalResult;
-  end;
-
-  { TFormPresentation }
-
-  TFormPresentation = class(TCustomPresentation, IPresentation)
-  private
-    FViewClass: TFormClass;
-    FProperties: TConstArray;
-  public
-    constructor Create(ViewClass: TFormClass);
-    destructor Destroy; override;
-    function SetProperties(const Properties: array of const): IPresentation;
-    function ShowModal(const Properties: array of const): TModalResult;
-    function ShowModal: IPresentation;
-  end;
-
-  { TPresenterPresentation }
-
-  TPresenterPresentation = class(TCustomPresentation, IPresentation)
-  private
+    FView: TForm;
     FPresenter: TPresenter;
+    FModalResult: TModalResult;
+    procedure CheckPresenterInstance;
+    procedure InitializeProperties;
   public
-    constructor Create(PresenterClass: TPresenterClass);
+    constructor Create(PresentationDef: TPresentationDef);
     destructor Destroy; override;
+    function ModalResult: TModalResult;
     function SetProperties(const Properties: array of const): IPresentation;
-    function ShowModal(const Properties: array of const): TModalResult;
     function ShowModal: IPresentation;
+    function ShowModal(const Properties: array of const): TModalResult;
   end;
+
+
+procedure TPresenter.Initialize;
+begin
+  //
+end;
+
+function TPresenter.GetViewCaption: String;
+begin
+  Result := '';
+end;
 
 { TPresenterPresentation }
 
-constructor TPresenterPresentation.Create(PresenterClass: TPresenterClass);
-begin
-  FPresenter := PresenterClass.Create(nil);
-end;
-
-destructor TPresenterPresentation.Destroy;
-begin
-  FPresenter.Free;
-  inherited Destroy;
-end;
-
-function TPresenterPresentation.SetProperties(
-  const Properties: array of const): IPresentation;
-begin
-  SetObjectProperties(FPresenter, Properties);
-  Result := Self;
-end;
-
-function TPresenterPresentation.ShowModal(
-  const Properties: array of const): TModalResult;
-begin
-  Result := SetProperties(Properties).ShowModal.ModalResult;
-end;
-
-function TPresenterPresentation.ShowModal: IPresentation;
-begin
-  FModalResult := FPresenter.ShowModal;
-  Result := Self;
-end;
-
-constructor TFormPresentation.Create(ViewClass: TFormClass);
-begin
-  FViewClass := ViewClass;
-end;
-
-destructor TFormPresentation.Destroy;
-begin
-  FinalizeConstArray(FProperties);
-  inherited Destroy;
-end;
-
-function TFormPresentation.SetProperties(
-  const Properties: array of const): IPresentation;
-begin
-  FinalizeConstArray(FProperties);
-  FProperties := CreateConstArray(Properties);
-  Result := Self;
-end;
-
-function TFormPresentation.ShowModal(
-  const Properties: array of const): TModalResult;
-begin
-  Result := SetProperties(Properties).ShowModal.ModalResult;
-end;
-
-function TFormPresentation.ShowModal: IPresentation;
-var
-  Form: TForm;
-begin
-  Form := FViewClass.Create(nil);
-  try
-    SetObjectProperties(Form, FProperties);
-    FModalResult := Form.ShowModal;
-  finally
-    Form.Destroy;
-  end;
-  Result := Self;
-end;
-
 { TFormPresentation }
 
-function TCustomPresentation.ModalResult: TModalResult;
+procedure TPresentation.CheckPresenterInstance;
+begin
+  if FPresenter = nil then
+    raise Exception.CreateFmt('%s requires a presenter', [FView.ClassName]);
+end;
+
+procedure TPresentation.InitializeProperties;
+var
+  PropInfo: PPropInfo;
+  TypeData: PTypeData;
+  Intf: IInterface;
+begin
+  PropInfo := GetPropInfo(FView, 'Presenter');
+  if PropInfo <> nil then
+  begin
+    //has a presenter property
+    TypeData := GetTypeData(PropInfo^.PropType);
+    case PropInfo^.PropType^.Kind of
+      tkInterface:
+        begin
+          CheckPresenterInstance;
+          if not FPresenter.GetInterface(TypeData^.GUID, Intf) then
+            raise Exception.CreateFmt('%s requires a presenter that implements %s',
+              [FView.ClassName, GUIDToString(TypeData^.GUID)]);
+          SetInterfaceProp(FView, PropInfo, Intf);
+        end;
+      tkClass:
+        begin
+          CheckPresenterInstance;
+          if not FPresenter.InheritsFrom(TypeData^.ClassType) then
+            raise Exception.CreateFmt('%s requires a presenter that inherits from %s',
+              [FView.ClassName, TypeData^.ClassType.ClassName]);
+          SetObjectProp(FView, PropInfo, FPresenter);
+        end;
+      else
+        raise Exception.CreateFmt('%s - Presenter property must be a COM interface or a class',
+          [FView.ClassName]);
+    end;
+  end;
+  //todo: check if presenter requires a view
+end;
+
+constructor TPresentation.Create(PresentationDef: TPresentationDef);
+begin
+  FView := PresentationDef.FViewClass.Create(nil);
+  if PresentationDef.FPresenterClass <> nil then
+    FPresenter := PresentationDef.FPresenterClass.Create(FView);
+end;
+
+destructor TPresentation.Destroy;
+begin
+  FView.Free;
+  inherited Destroy;
+end;
+
+function TPresentation.ModalResult: TModalResult;
 begin
   Result := FModalResult;
+end;
+
+function TPresentation.SetProperties(
+  const Properties: array of const): IPresentation;
+begin
+  if FPresenter <> nil then
+    SetObjectProperties(FPresenter, Properties)
+  else
+    SetObjectProperties(FView, Properties);
+  Result := Self;
+end;
+
+function TPresentation.ShowModal: IPresentation;
+var
+  ViewCaption: String;
+begin
+  InitializeProperties;
+  if FPresenter <> nil then
+  begin
+    FPresenter.Initialize;
+    ViewCaption := FPresenter.GetViewCaption;
+    if ViewCaption <> '' then
+      FView.Caption := ViewCaption;
+  end;
+  //todo: add presenter afterviewshow?
+  FModalResult := FView.ShowModal;
+  Result := Self;
+end;
+
+function TPresentation.ShowModal(const Properties: array of const): TModalResult;
+begin
+  Result := SetProperties(Properties).ShowModal.ModalResult;
 end;
 
 { TPresentationManager }
@@ -196,28 +206,11 @@ begin
   PresentationDef := TPresentationDef(FPresentationDefs.Find(PresentationName));
   if PresentationDef = nil then
     raise Exception.CreateFmt('Presentation "%s" not found', [PresentationName]);
-  if PresentationDef.FViewClass <> nil then
-    Result := TFormPresentation.Create(PresentationDef.FViewClass)
-  else
-    Result := TPresenterPresentation.Create(PresentationDef.FPresenterClass);
+  Result := TPresentation.Create(PresentationDef);
 end;
 
 procedure TPresentationManager.Register(const PresentationName: String;
-  PresenterClass: TPresenterClass);
-var
-  PresentationDef: TPresentationDef;
-begin
-  if PresenterClass = nil then
-    raise Exception.CreateFmt('Unable to register "%s" presentation: PresenterClass must be <> nil', [PresentationName]);
-  if FPresentationDefs.FindIndexOf(PresentationName) <> -1 then
-    raise Exception.CreateFmt('Presentation "%s" already registered', [PresentationName]);
-  PresentationDef := TPresentationDef.Create;
-  PresentationDef.FPresenterClass := PresenterClass;
-  FPresentationDefs.Add(PresentationName, PresentationDef);
-end;
-
-procedure TPresentationManager.Register(const PresentationName: String;
-  ViewClass: TFormClass);
+  ViewClass: TFormClass; PresenterClass: TPresenterClass);
 var
   PresentationDef: TPresentationDef;
 begin
@@ -227,6 +220,7 @@ begin
     raise Exception.CreateFmt('Presentation "%s" already registered', [PresentationName]);
   PresentationDef := TPresentationDef.Create;
   PresentationDef.FViewClass := ViewClass;
+  PresentationDef.FPresenterClass := PresenterClass;
   FPresentationDefs.Add(PresentationName, PresentationDef);
 end;
 
