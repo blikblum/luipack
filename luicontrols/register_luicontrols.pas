@@ -8,7 +8,8 @@ interface
 uses 
   Classes, SysUtils, LResources, LazarusPackageIntf,
   ToggleLabel, MenuButton, SearchEdit, ValidateEdit, WizardControls,
-  DropDownManager, DropDownButton, AdvancedLabel, VirtualPages, JSONMediators;
+  DropDownManager, DropDownButton, AdvancedLabel, VirtualPages, JSONMediators,
+  JSONFormMediator;
   
 procedure Register;
 
@@ -67,6 +68,11 @@ begin
   RegisterComponents(ComponentPage, [TJSONBooleanGroupMediator]);
 end;
 
+procedure RegisterUnitJSONFormMediator;
+begin
+  RegisterComponents(ComponentPage, [TJSONFormMediator]);
+end;
+
 procedure Register;
 
 begin
@@ -80,6 +86,7 @@ begin
   RegisterUnit('AdvancedLabel',@RegisterUnitAdvancedLabel);
   RegisterUnit('VirtualPages',@RegisterUnitVirtualPages);
   RegisterUnit('JSONMediators',@RegisterUnitJSONMediators);
+  RegisterUnit('JSONFormMediator',@RegisterUnitJSONFormMediator);
 end; 
 
 initialization
