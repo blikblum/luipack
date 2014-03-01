@@ -1,0 +1,195 @@
+object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
+  Left = 556
+  Height = 466
+  Top = 273
+  Width = 525
+  Caption = 'Edit JSON/Form Mediator'
+  ClientHeight = 466
+  ClientWidth = 525
+  Position = poScreenCenter
+  LCLVersion = '1.3'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 466
+    Top = 0
+    Width = 525
+    ActivePage = ElementsTabSheet
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object ElementsTabSheet: TTabSheet
+      Caption = 'Elements'
+      ClientHeight = 438
+      ClientWidth = 517
+      object ElementListView: TVirtualStringTree
+        Left = 4
+        Height = 393
+        Top = 40
+        Width = 192
+        Anchors = [akTop, akLeft, akBottom]
+        DefaultText = 'Node'
+        Header.AutoSizeIndex = 0
+        Header.Columns = <>
+        Header.DefaultHeight = 17
+        Header.MainColumn = -1
+        TabOrder = 0
+      end
+      object ImportFromModelsLabel: TAdvancedLabel
+        Cursor = crHandPoint
+        Left = 213
+        Height = 15
+        Top = 13
+        Width = 109
+        Link = True
+        OnClick = ImportFromModelsLabelClick
+        Caption = 'Import From Models'
+        Font.Color = clBlue
+        Font.Style = [fsUnderline]
+        ParentColor = False
+        ParentFont = False
+      end
+      object PropertyNameEdit: TLabeledEdit
+        Left = 212
+        Height = 23
+        Top = 128
+        Width = 287
+        EditLabel.AnchorSideLeft.Control = PropertyNameEdit
+        EditLabel.AnchorSideRight.Control = PropertyNameEdit
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = PropertyNameEdit
+        EditLabel.Left = 212
+        EditLabel.Height = 15
+        EditLabel.Top = 110
+        EditLabel.Width = 287
+        EditLabel.Caption = 'Property Name'
+        EditLabel.ParentColor = False
+        TabOrder = 1
+      end
+      object CaptionEdit: TLabeledEdit
+        Left = 212
+        Height = 23
+        Top = 192
+        Width = 287
+        EditLabel.AnchorSideLeft.Control = CaptionEdit
+        EditLabel.AnchorSideRight.Control = CaptionEdit
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = CaptionEdit
+        EditLabel.Left = 212
+        EditLabel.Height = 15
+        EditLabel.Top = 174
+        EditLabel.Width = 287
+        EditLabel.Caption = 'Caption'
+        EditLabel.ParentColor = False
+        TabOrder = 2
+      end
+      object NameEdit: TLabeledEdit
+        Left = 212
+        Height = 23
+        Top = 64
+        Width = 287
+        EditLabel.AnchorSideLeft.Control = NameEdit
+        EditLabel.AnchorSideRight.Control = NameEdit
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = NameEdit
+        EditLabel.Left = 212
+        EditLabel.Height = 15
+        EditLabel.Top = 46
+        EditLabel.Width = 287
+        EditLabel.Caption = 'Name'
+        EditLabel.ParentColor = False
+        TabOrder = 3
+      end
+      object ControlComboBox: TComboBox
+        Left = 213
+        Height = 23
+        Top = 246
+        Width = 286
+        ItemHeight = 15
+        Style = csDropDownList
+        TabOrder = 4
+      end
+      object Label1: TLabel
+        Left = 213
+        Height = 15
+        Top = 226
+        Width = 40
+        Caption = 'Control'
+        ParentColor = False
+      end
+      object DeleteElementLabel: TAdvancedLabel
+        Cursor = crHandPoint
+        Left = 212
+        Height = 15
+        Top = 296
+        Width = 33
+        Link = True
+        LinkColor = clRed
+        OnClick = DeleteElementLabelClick
+        Caption = 'Delete'
+        Font.Color = clRed
+        Font.Style = [fsUnderline]
+        ParentColor = False
+        ParentFont = False
+      end
+      object ImportFromControlsLabel: TAdvancedLabel
+        Cursor = crHandPoint
+        Left = 384
+        Height = 15
+        Top = 13
+        Width = 115
+        Link = True
+        OnClick = ImportFromControlsLabelClick
+        Caption = 'Import From Controls'
+        Font.Color = clBlue
+        Font.Style = [fsUnderline]
+        ParentColor = False
+        ParentFont = False
+      end
+    end
+  end
+  object AddElementButton: TBitBtn
+    Left = 7
+    Height = 30
+    Top = 30
+    Width = 194
+    Caption = 'Add Element'
+    Glyph.Data = {
+      36040000424D3604000000000000360000002800000010000000100000000100
+      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7B604BFF7D624DFF806D
+      5EFFFFFFF700FFFFFC00FDFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFECCEB5FFECCEB5FF7C61
+      4CFFFFFFF200FFFFFB00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00856346FFEFCFB2FFCBAB8EFF8563
+      46FFFFFFEB00FFFFF500FFFFFB00FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF800FFFFF200FFFFED00FFFFE6008E6342FFF6D0AEFFD2AC8AFF8E63
+      42FFFFFFE600FFFFED00FFFFF200FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7C614DFF836248FF8A6343FF8E6342FFD2AC8AFFD4AB8AFF9063
+      41FF8E6342FF876246FF7E624AFF826D5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFE6CCB4FFD3B59CFFD4B497FFD5B395FFD4B294FFCFAC8BFFCFA9
+      89FFCCA688FFC6A487FFDCBEA3FF7E614CFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF007C614CFFEED4BCFFEFD2B7FFF2D2B5FFF1CFB2FFEDCFB2FFEFCFB2FFF5CF
+      B1FFF4CEB0FFEFCDB0FFEBCDB2FF7F634BFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00806D5EFF7A624CFF836248FF8A6343FF8A6343FFEDCFB4FFEDCFB4FF8C63
+      43FF8C6342FF856346FF7F634BFF816F5EFFFFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFF700FFFFF200FFFFEB00FFFFE6008A6245FFECCEB5FFECCEB5FF8A62
+      45FFFFFFE600FFFFEB00FFFFF100FFFFF700FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFC00FFFFFB00FFFFF500FFFFED00836248FFEACEB6FFEACEB6FF8362
+      48FFFFFFEB00FFFFF500FFFFF900FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFB00FFFFF2007C614CFFE8CDB8FFE8CDB8FF7C61
+      4CFFFFFFF200FFFFFA00FFFFFF00FFFFFE00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFC00FFFFF700806D5EFF7C614CFF7C614CFF806D
+      5EFFFFFFF700FFFFFC00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    }
+    GlyphShowMode = gsmAlways
+    TabOrder = 1
+  end
+end
