@@ -14,7 +14,7 @@ type
   TPresenter = class(TComponent)
   protected
     procedure Initialize; virtual;
-    function GetViewCaption: String virtual;
+    function GetViewCaption(const DesignCaption: String): String; virtual;
   public
   end;
 
@@ -84,9 +84,9 @@ begin
   //
 end;
 
-function TPresenter.GetViewCaption: String;
+function TPresenter.GetViewCaption(const DesignCaption: String): String;
 begin
-  Result := '';
+  Result := DesignCaption;
 end;
 
 { TPresenterPresentation }
@@ -164,16 +164,12 @@ begin
 end;
 
 function TPresentation.ShowModal: IPresentation;
-var
-  ViewCaption: String;
 begin
   InitializeProperties;
   if FPresenter <> nil then
   begin
     FPresenter.Initialize;
-    ViewCaption := FPresenter.GetViewCaption;
-    if ViewCaption <> '' then
-      FView.Caption := ViewCaption;
+    FView.Caption := FPresenter.GetViewCaption(FView.Caption);
   end;
   //todo: add presenter afterviewshow?
   FModalResult := FView.ShowModal;
