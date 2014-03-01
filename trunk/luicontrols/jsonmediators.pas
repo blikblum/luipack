@@ -232,7 +232,7 @@ procedure TJSONBooleanGroupMediator.SaveData(Data: TJSONObject);
 var
   i: Integer;
   JSONProperty: TJSONBooleanProperty;
-  ViewValue: TBooleanValue;
+  PropName: String;
   View: TJSONBooleanRadioButtonViewFrame;
 begin
   if not FViewsLoaded or (Data = nil) then
@@ -240,37 +240,37 @@ begin
   for i := 0 to FProperties.Count -1 do
   begin
     JSONProperty := FProperties[i];
+    PropName := JSONProperty.Name;
     View := TJSONBooleanRadioButtonViewFrame(JSONProperty.FView);
-    ViewValue := View.Value;
-    case ViewValue of
+    case View.Value of
       bvTrue:
-        Data.Booleans[JSONProperty.Name] := True;
+        Data.Booleans[PropName] := True;
       bvFalse:
       begin
         if FUndefinedValue = bvFalse then
-          Data.Delete(JSONProperty.Name)
+          Data.Delete(PropName)
         else if FNullValue = bvFalse then
-          Data.Nulls[JSONProperty.Name] := True
+          Data.Nulls[PropName] := True
         else
-          Data.Booleans[JSONProperty.Name] := False;
+          Data.Booleans[PropName] := False;
       end;
       bvIndeterminate:
       begin
         if FUndefinedValue = bvIndeterminate then
-          Data.Delete(JSONProperty.Name)
+          Data.Delete(PropName)
         else if FFalseValue = bvIndeterminate then
-          Data.Booleans[JSONProperty.Name] := False
+          Data.Booleans[PropName] := False
         else
-          Data.Nulls[JSONProperty.Name] := True;
+          Data.Nulls[PropName] := True;
       end;
       bvNone:
       begin
         if FNullValue = bvNone then
-          Data.Nulls[JSONProperty.Name] := True
+          Data.Nulls[PropName] := True
         else if FFalseValue = bvNone then
-          Data.Booleans[JSONProperty.Name] := False
+          Data.Booleans[PropName] := False
         else
-          Data.Delete(JSONProperty.Name);
+          Data.Delete(PropName);
       end;
     end;
   end;
