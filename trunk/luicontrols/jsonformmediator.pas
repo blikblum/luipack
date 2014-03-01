@@ -99,6 +99,7 @@ type
     function GetItem(Index: Integer): TJSONFormElement;
   public
     constructor Create(AOwner: TJSONFormMediator);
+    function Add: TJSONFormElement;
     property Items[Index: Integer]: TJSONFormElement read GetItem; default;
   end;
 
@@ -585,6 +586,11 @@ end;
 constructor TJSONFormElements.Create(AOwner: TJSONFormMediator);
 begin
   inherited Create(AOwner, TJSONFormElement);
+end;
+
+function TJSONFormElements.Add: TJSONFormElement;
+begin
+  Result := TJSONFormElement(inherited Add);
 end;
 
 { TJSONFormElement }
