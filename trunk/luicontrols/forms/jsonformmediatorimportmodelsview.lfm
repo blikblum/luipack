@@ -1,0 +1,106 @@
+object JSONFormMediatorImportModelsForm: TJSONFormMediatorImportModelsForm
+  Left = 344
+  Height = 386
+  Top = 188
+  Width = 428
+  BorderStyle = bsDialog
+  Caption = 'Import From Models'
+  ClientHeight = 386
+  ClientWidth = 428
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.3'
+  object ImportButton: TBitBtn
+    Left = 179
+    Height = 30
+    Top = 352
+    Width = 120
+    Anchors = [akRight, akBottom]
+    Caption = 'Import'
+    Default = True
+    GlyphShowMode = gsmAlways
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = ImportButtonClick
+    TabOrder = 0
+  end
+  object CancelButton: TBitBtn
+    Left = 303
+    Height = 30
+    Top = 352
+    Width = 120
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    DefaultCaption = True
+    GlyphShowMode = gsmAlways
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object ModelsFileNameEdit: TFileNameEdit
+    Left = 8
+    Height = 23
+    Top = 22
+    Width = 393
+    OnAcceptFileName = ModelsFileNameEditAcceptFileName
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 1
+    MaxLength = 0
+    TabOrder = 2
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 6
+    Width = 115
+    Caption = 'Model Definitions File'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 15
+    Top = 52
+    Width = 39
+    Caption = 'Models'
+    ParentColor = False
+  end
+  object ModelListView: TVirtualStringTree
+    Left = 8
+    Height = 280
+    Top = 68
+    Width = 192
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    TabOrder = 3
+    TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnFocusChanged = ModelListViewFocusChanged
+  end
+  object FieldListView: TVirtualStringTree
+    Left = 231
+    Height = 280
+    Top = 68
+    Width = 192
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.DefaultHeight = 17
+    Header.MainColumn = -1
+    TabOrder = 4
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toHideSelection, toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
+  end
+  object ModelFieldsLabel: TLabel
+    Left = 231
+    Height = 15
+    Top = 52
+    Width = 67
+    Caption = 'Model Fields'
+    ParentColor = False
+  end
+end

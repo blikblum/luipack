@@ -100,6 +100,8 @@ type
   public
     constructor Create(AOwner: TJSONFormMediator);
     function Add: TJSONFormElement;
+    function ElementByName(const ElementName: String): TJSONFormElement;
+    function FindElement(const Name: String; ByPropertyName: Boolean = False): TJSONFormElement;
     property Items[Index: Integer]: TJSONFormElement read GetItem; default;
   end;
 
@@ -591,6 +593,39 @@ end;
 function TJSONFormElements.Add: TJSONFormElement;
 begin
   Result := TJSONFormElement(inherited Add);
+end;
+
+function TJSONFormElements.ElementByName(const ElementName: String): TJSONFormElement;
+begin
+  Result := FindElement(ElementName);
+  if Result = nil then
+    raise Exception.CreateFmt('Element "%s" not found', [ElementName]);
+end;
+
+function TJSONFormElements.FindElement(const Name: String;
+  ByPropertyName: Boolean): TJSONFormElement;
+var
+  i: Integer;
+begin
+  if ByPropertyName then
+  begin
+    for i := 0 to Count - 1 do
+    begin
+      Result := Items[i];
+      if SameText(Result.PropertyName, Name) then
+        Exit;
+    end;
+  end
+  else
+  begin
+    for i := 0 to Count - 1 do
+    begin
+      Result := Items[i];
+      if SameText(Result.Name, Name) then
+        Exit;
+    end;
+  end;
+  Result := nil;
 end;
 
 { TJSONFormElement }

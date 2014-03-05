@@ -8,7 +8,8 @@ interface
 
 uses
   JSONFormMediatorEditor, JSONFormMediatorEditorView, 
-  JSONFormMediatorImportControlsView, LazarusPackageIntf;
+  JSONFormMediatorImportControlsView, JSONFormMediatorImportModelsView, 
+  JSONElementUpdateMethodView, LazarusPackageIntf;
 
 implementation
 

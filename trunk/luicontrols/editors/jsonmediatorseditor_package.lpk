@@ -17,7 +17,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="5">
       <Item1>
         <Filename Value="jsonformmediatoreditor.pas"/>
         <HasRegisterProc Value="True"/>
@@ -31,21 +31,35 @@
         <Filename Value="..\forms\jsonformmediatorimportcontrolsview.pas"/>
         <UnitName Value="JSONFormMediatorImportControlsView"/>
       </Item3>
+      <Item4>
+        <Filename Value="..\forms\jsonformmediatorimportmodelsview.pas"/>
+        <UnitName Value="jsonformmediatorimportmodelsview"/>
+      </Item4>
+      <Item5>
+        <Filename Value="..\forms\jsonelementupdatemethodview.pas"/>
+        <UnitName Value="jsonelementupdatemethodview"/>
+      </Item5>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="4">
+    <RequiredPkgs Count="6">
       <Item1>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="vtvutils_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="datahub_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="IDEIntf"/>
       </Item3>
       <Item4>
-        <PackageName Value="FCL"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item4>
+      <Item5>
+        <PackageName Value="luicontrols"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="FCL"/>
+      </Item6>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

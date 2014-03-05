@@ -32,6 +32,7 @@ type
     FMediator: TJSONFormMediator;
     FTopLevelControl: TWinControl;
     procedure AddControlToList(Control: TControl);
+    procedure AddControlToParentList(ParentControl: TWinControl);
     function CreateCheckedControlList: TFPList;
     procedure LoadParentControlList;
     procedure ParentControlChanged;
@@ -50,7 +51,7 @@ implementation
 {$R *.lfm}
 
 uses
-  strutils;
+  strutils, ComCtrls;
 
 const
   ControlSuffixes: array[0..5] of String = (
@@ -63,31 +64,36 @@ const
   );
 
 
-procedure ImportElementsFormControls(Elements: TJSONFormElements; ControlList: TFPList);
+procedure LoadElementsFromControls(Elements: TJSONFormElements; ControlList: TFPList);
 var
   Control: TControl;
   ControlName, PropertyName: String;
   i, j, SuffixPos: Integer;
   NewElement: TJSONFormElement;
 begin
-  for i := 0 to ControlList.Count - 1 do
-  begin
-    Control := TControl(ControlList[i]);
-    ControlName := LowerCase(Control.Name);
-    PropertyName := ControlName;
-    for j := Low(ControlSuffixes) to High(ControlSuffixes) do
+  Elements.BeginUpdate;
+  try
+    for i := 0 to ControlList.Count - 1 do
     begin
-      if AnsiEndsText(ControlSuffixes[j], ControlName) then
+      Control := TControl(ControlList[i]);
+      ControlName := LowerCase(Control.Name);
+      PropertyName := ControlName;
+      for j := Low(ControlSuffixes) to High(ControlSuffixes) do
       begin
-        SuffixPos := RPos(ControlSuffixes[j], ControlName);
-        if SuffixPos > 0 then
-          PropertyName := Copy(ControlName, 1, SuffixPos - 1);
-        break;
+        if AnsiEndsText(ControlSuffixes[j], ControlName) then
+        begin
+          SuffixPos := RPos(ControlSuffixes[j], ControlName);
+          if SuffixPos > 0 then
+            PropertyName := Copy(ControlName, 1, SuffixPos - 1);
+          break;
+        end;
       end;
+      NewElement := Elements.Add;
+      NewElement.Control := Control;
+      NewElement.PropertyName := PropertyName;
     end;
-    NewElement := Elements.Add;
-    NewElement.Control := Control;
-    NewElement.PropertyName := PropertyName;
+  finally
+    Elements.EndUpdate;
   end;
 end;
 
@@ -105,7 +111,7 @@ var
 begin
   CheckedControlList := CreateCheckedControlList;
   try
-    ImportElementsFormControls(Mediator.Elements, CheckedControlList);
+    LoadElementsFromControls(Mediator.Elements, CheckedControlList);
   finally
     CheckedControlList.Destroy;
   end;
@@ -122,11 +128,29 @@ procedure TJSONFormMediatorImportControlsViewForm.AddControlToList(
 var
   i: Integer;
 begin
+  //todo: filter TPanel / TabSheet
   FControlList.Add(Control);
-  if RecursiveCheckBox.Checked and (Control is TWinControl) and (csAcceptsControls in Control.ControlStyle) then
+  if RecursiveCheckBox.Checked and (Control is TWinControl)
+    and ((csAcceptsControls in Control.ControlStyle) or Control.InheritsFrom(TCustomTabControl)) then
   begin
     for i := 0 to TWinControl(Control).ControlCount - 1 do
       AddControlToList(TWinControl(Control).Controls[i]);
+  end;
+end;
+
+procedure TJSONFormMediatorImportControlsViewForm.AddControlToParentList(
+  ParentControl: TWinControl);
+var
+  i: Integer;
+  Control: TControl;
+begin
+  ParentControlComboBox.AddItem(ParentControl.Name, ParentControl);
+  for i := 0 to ParentControl.ControlCount - 1 do
+  begin
+    Control := ParentControl.Controls[i];
+    if (Control is TWinControl) and
+      ((csAcceptsControls in Control.ControlStyle) or Control.InheritsFrom(TCustomTabControl)) then
+      AddControlToParentList(TWinControl(Control));
   end;
 end;
 
@@ -171,8 +195,10 @@ begin
   for i := 0 to TopLevelControl.ControlCount - 1 do
   begin
     Control := TopLevelControl.Controls[i];
-    if (Control is TWinControl) and (csAcceptsControls in Control.ControlStyle) then
-      ParentControlComboBox.AddItem(Control.Name, Control);
+    //todo: investigate why TPageControl does not have csAcceptControls
+    if (Control is TWinControl) and
+      ((csAcceptsControls in Control.ControlStyle) or Control.InheritsFrom(TCustomTabControl)) then
+      AddControlToParentList(TWinControl(Control));
   end;
 end;
 

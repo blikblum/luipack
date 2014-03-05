@@ -40,6 +40,7 @@ object JSONFormMediatorImportControlsViewForm: TJSONFormMediatorImportControlsVi
     NodeDataSize = 0
     TabOrder = 1
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toHideSelection, toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
     OnGetText = ControlListVewGetText
     OnInitNode = ControlListVewInitNode
   end
