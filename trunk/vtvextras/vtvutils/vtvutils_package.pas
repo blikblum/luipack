@@ -7,8 +7,9 @@ unit vtvutils_package;
 interface
 
 uses
-  VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, VTJSON, register_vtvutils, 
-  VTJSONEx, LazarusPackageIntf;
+  VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, VTJSON, 
+  register_vtvutils, VTJSONEx, CollectionVirtualTreeMediator, 
+  LazarusPackageIntf;
 
 implementation
 

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
@@ -19,7 +19,7 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="8">
       <Item1>
         <Filename Value="vtcomboeditlink.pas"/>
         <UnitName Value="VTComboEditLink"/>
@@ -49,6 +49,10 @@
         <Filename Value="vtjsonex.pas"/>
         <UnitName Value="vtjsonex"/>
       </Item7>
+      <Item8>
+        <Filename Value="collectionvirtualtreemediator.pas"/>
+        <UnitName Value="collectionvirtualtreemediator"/>
+      </Item8>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">

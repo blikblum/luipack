@@ -70,6 +70,7 @@ type
 
 { TCustomVirtualTreeController }
 
+
 constructor TCustomVirtualTreeController.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
