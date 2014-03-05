@@ -43,6 +43,7 @@ type
   private
     function GetItems(Index: Integer): TDataModelField;
   public
+    constructor Create(AOwner: TPersistent);
     function Add: TDataModelField;
     property Items[Index: Integer]: TDataModelField read GetItems; default;
   end;
@@ -103,7 +104,7 @@ end;
 constructor TDataModel.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
-  FFields := TDataModelFields.Create(Self, TDataModelField);
+  FFields := TDataModelFields.Create(Self);
 end;
 
 destructor TDataModel.Destroy;
@@ -126,6 +127,11 @@ end;
 function TDataModelFields.GetItems(Index: Integer): TDataModelField;
 begin
   Result := TDataModelField(inherited Items[Index]);
+end;
+
+constructor TDataModelFields.Create(AOwner: TPersistent);
+begin
+  inherited Create(AOwner, TDataModelField);
 end;
 
 function TDataModelFields.Add: TDataModelField;

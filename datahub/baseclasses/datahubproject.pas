@@ -14,6 +14,7 @@ type
   private
     FFileName: String;
     FModels: TDataModels;
+    FOnLoad: TNotifyEvent;
     FViews: TDataViews;
     procedure SetModels(Value: TDataModels);
     procedure SetViews(AValue: TDataViews);
@@ -28,6 +29,7 @@ type
     procedure Save;
     procedure SaveToFile(const AFileName: String);
     property FileName: String read FFileName write FFileName;
+    property OnLoad: TNotifyEvent read FOnLoad write FOnLoad;
   published
     property Models: TDataModels read FModels write SetModels;
     property Views: TDataViews read FViews write SetViews;
@@ -53,7 +55,8 @@ end;
 procedure TDataHubProject.HandleStreamProperty(Sender: TObject;
   AObject: TObject; Info: PPropInfo; var Res: TJSONData);
 begin
-  if (AObject is TDataModelField) and SameText(Info^.Name, 'FieldTypeName') then
+  if ((AObject is TDataModelField) and SameText(Info^.Name, 'FieldTypeName')) or
+    ((AObject = Self) and SameText(Info^.Name, 'Tag')) then
   begin
     FreeAndNil(Res);
   end;
@@ -123,6 +126,8 @@ begin
   finally
     DeStreamer.Destroy;
   end;
+  if FOnLoad <> nil then
+    FOnLoad(Self);
 end;
 
 procedure TDataHubProject.Save;
