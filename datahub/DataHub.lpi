@@ -4,6 +4,9 @@
     <Version Value="9"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <MainUnitHasUsesSectionForAllUnits Value="False"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <AutoCreateForms Value="False"/>
@@ -30,30 +33,33 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="7">
+    <RequiredPackages Count="8">
       <Item1>
-        <PackageName Value="luidialogs_package"/>
+        <PackageName Value="datahub_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="luidialogs_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="luicontrols"/>
       </Item3>
       <Item4>
-        <PackageName Value="vtvutils_package"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item4>
       <Item5>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="vtvutils_package"/>
       </Item5>
       <Item6>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item6>
       <Item7>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item7>
+      <Item8>
+        <PackageName Value="LCL"/>
+      </Item8>
     </RequiredPackages>
-    <Units Count="20">
+    <Units Count="17">
       <Unit0>
         <Filename Value="DataHub.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -68,107 +74,92 @@
         <UnitName Value="Main"/>
       </Unit1>
       <Unit2>
-        <Filename Value="baseclasses\datamodel.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="DataModel"/>
-      </Unit2>
-      <Unit3>
         <Filename Value="utils\vtcollectioncontroller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="VTCollectionController"/>
-      </Unit3>
-      <Unit4>
+      </Unit2>
+      <Unit3>
         <Filename Value="frames\modelfieldsview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ModelFieldsViewFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="ModelFieldsView"/>
-      </Unit4>
-      <Unit5>
+      </Unit3>
+      <Unit4>
         <Filename Value="forms\modelfieldeditor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ModelFieldEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ModelFieldEditor"/>
-      </Unit5>
-      <Unit6>
+      </Unit4>
+      <Unit5>
         <Filename Value="utils\datahubutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DataHubUtils"/>
-      </Unit6>
-      <Unit7>
+      </Unit5>
+      <Unit6>
         <Filename Value="exporters\dataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DataViewExporter"/>
-      </Unit7>
-      <Unit8>
+      </Unit6>
+      <Unit7>
         <Filename Value="exporters\lclviewbuilder.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="LCLViewBuilder"/>
-      </Unit8>
-      <Unit9>
+      </Unit7>
+      <Unit8>
         <Filename Value="exporters\lcldbdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="LCLDBDataViewExporter"/>
-      </Unit9>
-      <Unit10>
+      </Unit8>
+      <Unit9>
         <Filename Value="forms\modeleditor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ModelEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ModelEditor"/>
-      </Unit10>
-      <Unit11>
+      </Unit9>
+      <Unit10>
         <Filename Value="exporters\lcljsondataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="LCLJSONDataViewExporter"/>
-      </Unit11>
-      <Unit12>
+      </Unit10>
+      <Unit11>
         <Filename Value="exporters\lazreportdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="LazReportDataViewExporter"/>
-      </Unit12>
-      <Unit13>
+      </Unit11>
+      <Unit12>
         <Filename Value="importers\sqlite3datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Sqlite3DataModelImporter"/>
-      </Unit13>
-      <Unit14>
+      </Unit12>
+      <Unit13>
         <Filename Value="importers\datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DataModelImporter"/>
-      </Unit14>
-      <Unit15>
+      </Unit13>
+      <Unit14>
         <Filename Value="importers\forms\sqlite3tableloaderview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Sqlite3TableLoaderViewForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Sqlite3TableLoaderView"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="baseclasses\datahubproject.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="DataHubProject"/>
-      </Unit16>
-      <Unit17>
+      </Unit14>
+      <Unit15>
         <Filename Value="utils\datahublclutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DataHubLCLUtils"/>
-      </Unit17>
-      <Unit18>
+      </Unit15>
+      <Unit16>
         <Filename Value="exporters\htmlformexport.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HTMLFormExport"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="baseclasses\dataview.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="DataView"/>
-      </Unit19>
+      </Unit16>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -179,7 +170,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="forms;utils;frames;baseclasses;exporters;importers;importers\forms"/>
+      <OtherUnitFiles Value="forms;utils;frames;exporters;importers;importers\forms"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
