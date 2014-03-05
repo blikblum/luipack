@@ -1,11 +1,12 @@
 object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
-  Left = 556
+  Left = 455
   Height = 466
-  Top = 273
+  Top = 163
   Width = 525
   Caption = 'Edit JSON/Form Mediator'
   ClientHeight = 466
   ClientWidth = 525
+  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '1.3'
   object PageControl1: TPageControl
@@ -33,6 +34,8 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
         Header.DefaultHeight = 17
         Header.MainColumn = -1
         TabOrder = 0
+        TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
+        TreeOptions.SelectionOptions = [toFullRowSelect]
       end
       object ImportFromModelsLabel: TAdvancedLabel
         Cursor = crHandPoint
@@ -51,7 +54,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
       object PropertyNameEdit: TLabeledEdit
         Left = 212
         Height = 23
-        Top = 128
+        Top = 122
         Width = 287
         EditLabel.AnchorSideLeft.Control = PropertyNameEdit
         EditLabel.AnchorSideRight.Control = PropertyNameEdit
@@ -59,7 +62,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
         EditLabel.AnchorSideBottom.Control = PropertyNameEdit
         EditLabel.Left = 212
         EditLabel.Height = 15
-        EditLabel.Top = 110
+        EditLabel.Top = 104
         EditLabel.Width = 287
         EditLabel.Caption = 'Property Name'
         EditLabel.ParentColor = False
@@ -68,7 +71,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
       object CaptionEdit: TLabeledEdit
         Left = 212
         Height = 23
-        Top = 192
+        Top = 180
         Width = 287
         EditLabel.AnchorSideLeft.Control = CaptionEdit
         EditLabel.AnchorSideRight.Control = CaptionEdit
@@ -76,7 +79,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
         EditLabel.AnchorSideBottom.Control = CaptionEdit
         EditLabel.Left = 212
         EditLabel.Height = 15
-        EditLabel.Top = 174
+        EditLabel.Top = 162
         EditLabel.Width = 287
         EditLabel.Caption = 'Caption'
         EditLabel.ParentColor = False
@@ -102,7 +105,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
       object ControlComboBox: TComboBox
         Left = 213
         Height = 23
-        Top = 246
+        Top = 238
         Width = 286
         ItemHeight = 15
         Style = csDropDownList
@@ -111,7 +114,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
       object Label1: TLabel
         Left = 213
         Height = 15
-        Top = 226
+        Top = 221
         Width = 40
         Caption = 'Control'
         ParentColor = False
@@ -120,7 +123,7 @@ object JSONFormMediatorEditorViewForm: TJSONFormMediatorEditorViewForm
         Cursor = crHandPoint
         Left = 212
         Height = 15
-        Top = 296
+        Top = 287
         Width = 33
         Link = True
         LinkColor = clRed

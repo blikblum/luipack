@@ -21,6 +21,7 @@ type
     FMediatorId: String;
     FName: String;
     FPropertyName: String;
+    function GetName: String;
     procedure SetControl(Value: TControl);
   public
     procedure Assign(Source: TPersistent); override;
@@ -28,7 +29,7 @@ type
   published
     property Control: TControl read FControl write SetControl;
     property MediatorId: String read FMediatorId write FMediatorId;
-    property Name: String read FName write FName;
+    property Name: String read GetName write FName;
     property PropertyName: String read FPropertyName write FPropertyName;
   end;
 
@@ -89,6 +90,14 @@ begin
   FControl := Value;
 end;
 
+function TFormElement.GetName: String;
+begin
+  if FName <> '' then
+    Result := FName
+  else
+    Result := FPropertyName;
+end;
+
 procedure TFormElement.Assign(Source: TPersistent);
 begin
   if Source is TFormElement then
@@ -104,9 +113,7 @@ end;
 
 function TFormElement.GetDisplayName: string;
 begin
-  Result := FName;
-  if Result = '' then
-    Result := FPropertyName;
+  Result := Name;
   if Result = '' then
     Result := ClassName;
   if FControl <> nil then
