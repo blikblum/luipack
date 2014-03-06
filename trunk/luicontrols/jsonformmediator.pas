@@ -20,6 +20,7 @@ type
     class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); virtual;
     class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); virtual;
     class procedure Initialize(Element: TJSONFormElement); virtual;
+    class function AllowsCaptionLabel: Boolean; virtual;
   end;
 
   TJSONGUIMediatorClass = class of TJSONGUIMediator;
@@ -30,6 +31,7 @@ type
   public
     class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
     class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+    class function AllowsCaptionLabel: Boolean; override;
   end;
 
   { TJSONSpinEditMediator }
@@ -62,6 +64,7 @@ type
     class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
     class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
     class procedure Initialize(Element: TJSONFormElement); override;
+    class function AllowsCaptionLabel: Boolean; override;
   end;
 
   { TJSONCheckBoxMediator }
@@ -69,6 +72,7 @@ type
   TJSONCheckBoxMediator = class(TJSONGUIMediator)
     class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
     class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+    class function AllowsCaptionLabel: Boolean; override;
   end;
 
   { TJSONFormElement }
@@ -85,6 +89,8 @@ type
     procedure MediatorClassNeeded;
     procedure OptionsDataNeeded;
     procedure SaveData(Data: TJSONObject);
+  protected
+    function AllowsCaptionLabel: Boolean; override;
   public
     procedure Assign(Source: TPersistent); override;
     property OptionsData: TJSONObject read GetOptionsData;
@@ -113,6 +119,8 @@ type
     FElements: TJSONFormElements;
     procedure SetData(Value: TJSONObject);
     procedure SetElements(Value: TJSONFormElements);
+  protected
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -185,6 +193,11 @@ begin
     Data.Delete(PropName);
 end;
 
+class function TJSONCheckBoxMediator.AllowsCaptionLabel: Boolean;
+begin
+  Result := False;
+end;
+
 { TJSONRadioGroupMediator }
 
 class procedure TJSONRadioGroupMediator.DoJSONToGUI(Data: TJSONObject;
@@ -213,6 +226,11 @@ var
 begin
   RadioGroup := Element.Control as TRadioGroup;
   LoadItems(RadioGroup.Items, Element.OptionsData);
+end;
+
+class function TJSONRadioGroupMediator.AllowsCaptionLabel: Boolean;
+begin
+  Result := False;
 end;
 
 { TJSONComboBoxMediator }
@@ -476,6 +494,11 @@ begin
   //
 end;
 
+class function TJSONCaptionMediator.AllowsCaptionLabel: Boolean;
+begin
+  Result := False;
+end;
+
 constructor TJSONGUIMediatorStore.Create;
 begin
   FList := TFPHashList.Create;
@@ -530,11 +553,28 @@ begin
   //
 end;
 
+class function TJSONGUIMediator.AllowsCaptionLabel: Boolean;
+begin
+  Result := True;
+end;
+
 { TJSONFormMediator }
 
 procedure TJSONFormMediator.SetElements(Value: TJSONFormElements);
 begin
   FElements.Assign(Value);
+end;
+
+procedure TJSONFormMediator.Loaded;
+var
+  i: Integer;
+begin
+  inherited Loaded;
+  if not (csDesigning in ComponentState) then
+  begin
+    for i := 0 to Elements.Count - 1 do
+      InitializeCaptionDisplay(Elements[i]);
+  end;
 end;
 
 procedure TJSONFormMediator.SetData(Value: TJSONObject);
@@ -641,9 +681,11 @@ begin
   if not FInitialized then
   begin
     OptionsDataNeeded;
-    MediatorClassNeeded;
     if Control <> nil then
+    begin
+      MediatorClassNeeded;
       FMediatorClass.Initialize(Self);
+    end;
     FInitialized := True;
   end;
 end;
@@ -686,6 +728,17 @@ begin
     Initialize;
     FMediatorClass.DoGUIToJSON(Self, Data);
   end;
+end;
+
+function TJSONFormElement.AllowsCaptionLabel: Boolean;
+begin
+  if Control <> nil then
+  begin
+    MediatorClassNeeded;
+    Result := FMediatorClass.AllowsCaptionLabel;
+  end
+  else
+    Result := True;
 end;
 
 procedure TJSONFormElement.Assign(Source: TPersistent);

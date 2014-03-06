@@ -13,20 +13,29 @@ type
 
   TFormMediatorState = set of (fmsLoading);
 
+  TCaptionDisplay = (cdNone, cdDefault, cdAbove, cdSide);
+
   { TFormElement }
 
   TFormElement = class(TCollectionItem)
   private
+    FCaption: String;
     FControl: TControl;
     FMediatorId: String;
     FName: String;
     FPropertyName: String;
+    FCaptionDisplay: TCaptionDisplay;
     function GetName: String;
     procedure SetControl(Value: TControl);
+  protected
+    function AllowsCaptionLabel: Boolean; virtual;
   public
+    constructor Create(ACollection: TCollection); override;
     procedure Assign(Source: TPersistent); override;
     function GetDisplayName: string; override;
   published
+    property Caption: String read FCaption write FCaption;
+    property CaptionDisplay: TCaptionDisplay read FCaptionDisplay write FCaptionDisplay default cdDefault;
     property Control: TControl read FControl write SetControl;
     property MediatorId: String read FMediatorId write FMediatorId;
     property Name: String read GetName write FName;
@@ -49,19 +58,65 @@ type
 
   TCustomFormMediator = class(TComponent)
   private
+    FCaptionDisplay: TCaptionDisplay;
     FState: TFormMediatorState;
   protected
     procedure BeginLoad;
     procedure EndLoad;
+    procedure InitializeCaptionDisplay(Element: TFormElement);
   public
     property State: TFormMediatorState read FState;
   published
+    property CaptionDisplay: TCaptionDisplay read FCaptionDisplay write FCaptionDisplay default cdNone;
   end;
 
 
 implementation
 
+uses
+  StdCtrls;
+
 { TCustomFormMediator }
+
+procedure TCustomFormMediator.InitializeCaptionDisplay(Element: TFormElement);
+var
+  TheCaptionDisplay: TCaptionDisplay;
+  CaptionLabel: TLabel;
+  Control: TControl;
+begin
+  Control := Element.Control;
+  if (Control = nil) or (Element.Caption = '') then
+    Exit;
+  TheCaptionDisplay := Element.CaptionDisplay;
+  if TheCaptionDisplay = cdDefault then
+    TheCaptionDisplay := CaptionDisplay;
+  if TheCaptionDisplay = cdDefault then
+    TheCaptionDisplay := cdNone;
+  if TheCaptionDisplay = cdNone then
+    Exit;
+  if Element.AllowsCaptionLabel then
+  begin
+    CaptionLabel := TLabel.Create(Owner);
+    CaptionLabel.Caption := Element.Caption;
+    CaptionLabel.Parent := Control.Parent;
+    case TheCaptionDisplay of
+      cdAbove:
+        begin
+          CaptionLabel.Anchors := [akBottom, akLeft];
+          CaptionLabel.AnchorParallel(akLeft, 0, Control);
+          CaptionLabel.AnchorToNeighbour(akBottom, 2, Control);
+        end;
+      cdSide:
+        begin
+          CaptionLabel.Anchors := [akTop, akRight];
+          CaptionLabel.AnchorVerticalCenterTo(Control);
+          CaptionLabel.AnchorToNeighbour(akRight, 2, Control);
+        end;
+    end;
+  end
+  else
+    Control.Caption := Element.Caption;
+end;
 
 procedure TCustomFormMediator.BeginLoad;
 begin
@@ -72,7 +127,6 @@ procedure TCustomFormMediator.EndLoad;
 begin
   Exclude(FState, fmsLoading);
 end;
-
 
 procedure TFormElement.SetControl(Value: TControl);
 var
@@ -90,6 +144,17 @@ begin
   FControl := Value;
 end;
 
+function TFormElement.AllowsCaptionLabel: Boolean;
+begin
+  Result := True;
+end;
+
+constructor TFormElement.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  FCaptionDisplay := cdDefault;
+end;
+
 function TFormElement.GetName: String;
 begin
   if FName <> '' then
@@ -103,6 +168,8 @@ begin
   if Source is TFormElement then
   begin
     PropertyName := TFormElement(Source).PropertyName;
+    Caption := TFormElement(Source).Caption;
+    CaptionDisplay := TFormElement(Source).CaptionDisplay;
     Control := TFormElement(Source).Control;
     Name := TFormElement(Source).Name;
     MediatorId := TFormElement(Source).MediatorId;
