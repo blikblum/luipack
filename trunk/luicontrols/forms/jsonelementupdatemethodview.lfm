@@ -1,13 +1,13 @@
 object JSONElementUpdateMethodForm: TJSONElementUpdateMethodForm
-  Left = 476
+  Left = 539
   Height = 224
-  Top = 254
+  Top = 335
   Width = 318
   BorderStyle = bsDialog
   Caption = 'Form Element Found'
   ClientHeight = 224
   ClientWidth = 318
-  Position = poOwnerFormCenter
+  Position = poScreenCenter
   LCLVersion = '1.3'
   object InfoLabel: TLabel
     Left = 13
