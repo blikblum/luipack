@@ -32,6 +32,7 @@ type
     procedure AddModelButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ImportModelButtonClick(Sender: TObject);
+    procedure ModelsTreeViewDblClick(Sender: TObject);
     procedure ModelsTreeViewFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
     procedure NewProjectlButtonClick(Sender: TObject);
@@ -86,6 +87,18 @@ end;
 procedure TMainForm.ImportModelButtonClick(Sender: TObject);
 begin
   //todo: make a wizard interface
+end;
+
+procedure TMainForm.ModelsTreeViewDblClick(Sender: TObject);
+var
+  Item: TDataModel;
+begin
+  Item := FModelsController.GetCollectionItem(ModelsTreeView.FocusedNode) as TDataModel;
+  if Item <> nil then
+  begin
+    Item.Name := InputBox('Rename Model', 'New Name', Item.Name);
+    FModelsController.Load;
+  end;
 end;
 
 procedure TMainForm.AddModelButtonClick(Sender: TObject);
