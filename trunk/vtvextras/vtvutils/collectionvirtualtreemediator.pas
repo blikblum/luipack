@@ -131,7 +131,7 @@ end;
 constructor TCollectionVirtualTreeMediator.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Events := [evGetText, evInitNode, evChecked];
+  Events := [evGetText, evInitNode];
 end;
 
 destructor TCollectionVirtualTreeMediator.Destroy;
