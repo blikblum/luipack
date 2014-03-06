@@ -102,7 +102,7 @@ end;
 procedure TModelFieldsViewFrame.CreateFieldsCollection(
   var NewCollection: TCollection);
 begin
-  NewCollection := TDataModelFields.Create(nil, TDataViewField);
+  NewCollection := TDataModelFields.Create(nil);
 end;
 
 procedure TModelFieldsViewFrame.AddModelFieldButtonClick(Sender: TObject);

@@ -21,6 +21,7 @@ object MainForm: TMainForm
     TabOrder = 0
     TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnDblClick = ModelsTreeViewDblClick
     OnFocusChanged = ModelsTreeViewFocusChanged
   end
   object ViewsTreeView: TVirtualStringTree
