@@ -89,14 +89,16 @@ begin
           UpdateMethod := GetUpdateMethod(PropertyName, DefaultMethod)
         else
           UpdateMethod := DefaultMethod;
+        {0: skip / 1: merge / 2: overwrite}
         case UpdateMethod of
           1:
           begin
-            //todo: Caption
+            if Element.Caption = '' then
+              Element.Caption := Field.DisplayLabel;
           end;
           2:
           begin
-            //todo: Caption
+            Element.Caption := Field.DisplayLabel;
           end;
         end;
       end
