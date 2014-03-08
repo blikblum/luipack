@@ -138,7 +138,7 @@ uses
 
 type
 
-  TJSONDataMapType = (jdmText, jdmIndex, jdmValue);
+  TJSONListIndexType = (jliText, jliIndex, jliValue);
 
   { TJSONGUIMediatorStore }
 
@@ -248,7 +248,7 @@ begin
   ComboBox.ItemIndex := GetItemIndex(Data, PropName, ComboBox.Items, OptionsData);
   if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) then
   begin
-    if OptionsData.Get('datamap', 'text') = 'text' then
+    if OptionsData.Get('schema', 'text') = 'text' then
       ComboBox.Text := Data.Get(PropName, '')
     else
       ComboBox.Text := '';
@@ -265,7 +265,7 @@ begin
   ComboBox := Element.Control as TComboBox;
   PropName := Element.PropertyName;
   OptionsData := Element.OptionsData;
-  if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) and (OptionsData.Get('datamap', 'text') = 'text') then
+  if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) and (OptionsData.Get('schema', 'text') = 'text') then
     Data.Strings[PropName] := ComboBox.Text
   else
     SetItemIndex(Data, PropName, ComboBox.Items, ComboBox.ItemIndex, OptionsData);
@@ -284,45 +284,45 @@ end;
 class function TJSONListMediator.GetItemIndex(Data: TJSONObject;
   const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer;
 var
-  PropData, MapData: TJSONData;
+  PropData, SchemaData: TJSONData;
   SourceData: TJSONArray;
-  MapType: TJSONDataMapType;
-  ValuePropName: String;
+  IndexType: TJSONListIndexType;
+  ValuePath: String;
 begin
   Result := -1;
   PropData := Data.Find(PropName);
   if (PropData <> nil) and not (PropData.JSONType in [jtNull, jtArray, jtObject]) then
   begin
-    MapType := jdmText;
-    ValuePropName := 'value';
-    MapData := OptionsData.Find('datamap');
-    if MapData <> nil then
+    IndexType := jliText;
+    ValuePath := 'value';
+    SchemaData := OptionsData.Find('schema');
+    if SchemaData <> nil then
     begin
-      case MapData.JSONType of
+      case SchemaData.JSONType of
         jtString:
-          if MapData.AsString = 'index' then
-            MapType := jdmIndex
-          else if MapData.AsString = 'value' then
-            MapType := jdmValue;
+          if SchemaData.AsString = 'index' then
+            IndexType := jliIndex
+          else if SchemaData.AsString = 'value' then
+            IndexType := jliValue;
         jtObject:
           begin
-            MapType := jdmValue;
-            ValuePropName := TJSONObject(MapData).Get('valueprop', 'value');
+            IndexType := jliValue;
+            ValuePath := TJSONObject(SchemaData).Get('valuepath', 'value');
           end;
       end;
     end;
-    case MapType of
-      jdmText:
+    case IndexType of
+      jliText:
         Result := Items.IndexOf(PropData.AsString);
-      jdmIndex:
+      jliIndex:
         begin
           if PropData.JSONType = jtNumber then
             Result := PropData.AsInteger;
         end;
-      jdmValue:
+      jliValue:
         begin
           if FindJSONProp(OptionsData, 'datasource', SourceData) then
-            Result := GetJSONIndexOf(SourceData, [ValuePropName, PropData.Value]);
+            Result := GetJSONIndexOf(SourceData, [ValuePath, PropData.Value]);
         end;
     end;
     //check for out of range result
@@ -336,50 +336,47 @@ class procedure TJSONListMediator.SetItemIndex(Data: TJSONObject;
   const PropName: String; Items: TStrings; ItemIndex: Integer;
   OptionsData: TJSONObject);
 var
-  MapType: TJSONDataMapType;
-  MapData, ValueData: TJSONData;
+  IndexType: TJSONListIndexType;
+  SchemaData, ValueData: TJSONData;
   SourceData: TJSONArray;
-  ValuePropName: String;
+  ValuePath: String;
   ItemData: TJSONData;
 begin
   if ItemIndex > -1 then
   begin
-    MapType := jdmText;
-    ValuePropName := 'value';
-    MapData := OptionsData.Find('datamap');
-    if MapData <> nil then
+    IndexType := jliText;
+    ValuePath := 'value';
+    SchemaData := OptionsData.Find('schema');
+    if SchemaData <> nil then
     begin
-      case MapData.JSONType of
+      case SchemaData.JSONType of
         jtString:
-          if MapData.AsString = 'index' then
-            MapType := jdmIndex
-          else if MapData.AsString = 'value' then
-            MapType := jdmValue;
+          if SchemaData.AsString = 'index' then
+            IndexType := jliIndex
+          else if SchemaData.AsString = 'value' then
+            IndexType := jliValue;
         jtObject:
           begin
-            ValuePropName := TJSONObject(MapData).Get('valueprop', 'value');
-            MapType := jdmValue;
+            ValuePath := TJSONObject(SchemaData).Get('valuepath', 'value');
+            IndexType := jliValue;
           end;
       end;
     end;
-    case MapType of
-      jdmText:
+    case IndexType of
+      jliText:
         Data.Strings[PropName] := Items[ItemIndex];
-      jdmIndex:
+      jliIndex:
         Data.Integers[PropName] := ItemIndex;
-      jdmValue:
+      jliValue:
         begin
           if FindJSONProp(OptionsData, 'datasource', SourceData) then
           begin
             if ItemIndex < SourceData.Count then
             begin
               ItemData := SourceData.Items[ItemIndex];
-              if ItemData.JSONType = jtObject then
-              begin
-                ValueData := TJSONObject(ItemData).Find(ValuePropName);
-                if ValueData <> nil then
-                  Data.Elements[PropName] := ValueData.Clone;
-              end;
+              ValueData := ItemData.FindPath(ValuePath);
+              if ValueData <> nil then
+                Data.Elements[PropName] := ValueData.Clone;
             end;
           end;
         end;
@@ -394,26 +391,32 @@ class procedure TJSONListMediator.LoadItems(Items: TStrings;
   OptionsData: TJSONObject);
 var
   SourceData: TJSONArray;
-  MapData, ItemData: TJSONData;
-  TextProp: String;
+  SchemaData, ItemData, ValueData: TJSONData;
+  TextPath: String;
   i: Integer;
 begin
   if FindJSONProp(OptionsData, 'datasource', SourceData) then
   begin
-    MapData := OptionsData.Find('datamap');
-    if (MapData <> nil) and (MapData.JSONType = jtObject) then
-      TextProp := TJSONObject(MapData).Get('textprop', 'text')
+    SchemaData := OptionsData.Find('schema');
+    if (SchemaData <> nil) and (SchemaData.JSONType = jtObject) then
+      TextPath := TJSONObject(SchemaData).Get('textpath', 'text')
     else
-      TextProp := 'text';
+      TextPath := 'text';
     Items.Clear;
     for i := 0 to SourceData.Count - 1 do
     begin
       ItemData := SourceData.Items[i];
       case ItemData.JSONType of
-        jtString:
+        jtString, jtNumber, jtBoolean:
           Items.Add(ItemData.AsString);
         jtObject:
-          Items.Add(TJSONObject(ItemData).Get(TextProp, ''));
+          begin
+            ValueData := ItemData.FindPath(TextPath);
+            if ValueData <> nil then
+              Items.Add(ValueData.AsString)
+            else
+              Items.Add('');
+          end;
       end;
     end;
   end;
