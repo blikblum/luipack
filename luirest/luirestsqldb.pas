@@ -23,6 +23,7 @@ type
     FConditionsSQL: String;
     FConnection: TSQLConnection;
     FInputFields: String;
+    FJSONFields: String;
     FOutputFields: String;
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
@@ -30,17 +31,21 @@ type
     FInputFieldsData: TJSONArray;
     FIgnoreNotFound: Boolean;
     FIsCollection: Boolean;
+    FJSONFieldsData: TJSONArray;
     FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
     FReadOnly: Boolean;
     class var FDefaultConnection: TSQLConnection;
     class procedure SetDefaultConnection(Value: TSQLConnection); static;
   protected
+    procedure DecodeJSONFields(ResponseData: TJSONArray);
+    procedure DecodeJSONFields(ResponseData: TJSONObject);
+    procedure EncodeJSONFields(RequestData: TJSONObject);
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
     function GetNewResourceId(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
-    procedure SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject; DoPatch: Boolean = False);
+    procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False);
   public
     destructor Destroy; override;
     procedure AfterConstruction; override;
@@ -54,6 +59,7 @@ type
     property IgnoreNotFound: Boolean read FIgnoreNotFound write FIgnoreNotFound;
     property InputFields: String read FInputFields write FInputFields;
     property IsCollection: Boolean read FIsCollection write FIsCollection;
+    property JSONFields: String read FJSONFields write FJSONFields;
     property OutputFields: String read FOutputFields write FOutputFields;
     property PreserveCase: Boolean read FPreserveCase write FPreserveCase;
     property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
@@ -111,7 +117,7 @@ begin
 end;
 
 
-procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; Obj1, Obj2: TJSONObject;
+procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject;
   DoPatch: Boolean);
 var
   i: Integer;
@@ -119,15 +125,16 @@ var
   PropData: TJSONData;
   Field: TField;
 begin
+  EncodeJSONFields(RequestData);
   if FInputFieldsData <> nil then
   begin
     for i := 0 to FInputFieldsData.Count - 1 do
     begin
       FieldName := GetFieldName(FInputFieldsData, i, DBFieldName);
       Field := Query.FieldByName(DBFieldName);
-      PropData := Obj1.Find(FieldName);
+      PropData := RequestData.Find(FieldName);
       if PropData = nil then
-        PropData := Obj2.Find(FieldName);
+        PropData := Params.Find(FieldName);
       if PropData <> nil then
         Field.Value := PropData.Value
       else
@@ -146,9 +153,9 @@ begin
       FieldName := LowerCase(Field.FieldName);
       if SameText(FieldName, FPrimaryKey) then
         continue;
-      PropData := Obj1.Find(FieldName);
+      PropData := RequestData.Find(FieldName);
       if PropData = nil then
-        PropData := Obj2.Find(FieldName);
+        PropData := Params.Find(FieldName);
       if PropData <> nil then
         Field.Value := PropData.Value
       else
@@ -167,6 +174,129 @@ begin
   if (FDefaultConnection <> nil) and (Value <> nil) then
     raise Exception.Create('Default connection already set');
   FDefaultConnection := Value;
+end;
+
+procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
+var
+  i: Integer;
+  FieldDefData, PropData, DecodedData: TJSONData;
+  DecodedArrayData: TJSONArray absolute DecodedData;
+  DecodedObjectData: TJSONObject absolute DecodedData;
+  PropName, PropTypeName: String;
+  PropType: TJSONtype;
+begin
+  //todo: move this to DatasetToJSON / OutputFields?? -> Create a TJSONToDatasetClass
+  for i := 0 to JSONFieldsData.Count - 1 do
+  begin
+    //todo parse fielddef once (move out of here)
+    FieldDefData := JSONFieldsData.Items[i];
+    PropType := jtUnknown;
+    case FieldDefData.JSONType of
+      jtObject:
+        begin
+          PropName := TJSONObject(FieldDefData).Get('name', '');
+          PropTypeName := TJSONObject(FieldDefData).Get('type', '');
+          if PropTypeName = 'array' then
+            PropType := jtArray
+          else if PropTypeName = 'object' then
+            PropType := jtObject;
+        end;
+      jtString:
+        begin
+          PropName := FieldDefData.AsString;
+        end;
+    end;
+    PropData := RecordData.Find(PropName);
+    if PropData = nil then
+      raise Exception.CreateFmt('Error parsing JSON field: field "%s" not found', [PropName]);
+    if PropData.JSONType = jtString then
+    begin
+      case PropType of
+        jtArray:
+          if not TryStrToJSON(PropData.AsString, DecodedArrayData) then
+            DecodedArrayData := TJSONArray.Create;
+        jtObject:
+          if not TryStrToJSON(PropData.AsString, DecodedObjectData) then
+            DecodedObjectData := TJSONObject.Create;
+        else
+          if TryStrToJSON(PropData.AsString, DecodedData) then
+            DecodedData := TJSONNull.Create;
+      end;
+    end
+    else
+    begin
+      //initialize field with empty data
+      case PropType of
+        jtArray:
+          DecodedData := TJSONArray.Create;
+        jtObject:
+          DecodedData := TJSONObject.Create;
+        else
+          DecodedData := TJSONNull.Create;
+      end;
+    end;
+    RecordData.Elements[PropName] := DecodedData;
+  end;
+end;
+
+procedure TSqldbJSONResource.DecodeJSONFields(ResponseData: TJSONArray);
+var
+  i: Integer;
+begin
+  if FJSONFieldsData = nil then
+    Exit;
+  for i := 0 to ResponseData.Count - 1 do
+    DoDecodeJSONFields(ResponseData.Objects[i], FJSONFieldsData);
+end;
+
+procedure TSqldbJSONResource.DecodeJSONFields(ResponseData: TJSONObject);
+begin
+  if FJSONFieldsData = nil then
+    Exit;
+  DoDecodeJSONFields(ResponseData, FJSONFieldsData);
+end;
+
+procedure TSqldbJSONResource.EncodeJSONFields(RequestData: TJSONObject);
+var
+  FieldDefData: TJSONData;
+  PropType: TJSONtype;
+  PropName: String;
+  PropData: TJSONData;
+  PropTypeName: TJSONStringType;
+  i: Integer;
+begin
+  if FJSONFieldsData = nil then
+    Exit;
+  for i := 0 to FJSONFieldsData.Count - 1 do
+  begin
+    //todo parse fielddef once (move out of here)
+    FieldDefData := FJSONFieldsData.Items[i];
+    PropType := jtUnknown;
+    case FieldDefData.JSONType of
+      jtObject:
+        begin
+          PropName := TJSONObject(FieldDefData).Get('name', '');
+          PropTypeName := TJSONObject(FieldDefData).Get('type', '');
+          if PropTypeName = 'array' then
+            PropType := jtArray
+          else if PropTypeName = 'object' then
+            PropType := jtObject;
+        end;
+      jtString:
+        begin
+          PropName := FieldDefData.AsString;
+        end;
+    end;
+    PropData := RequestData.Find(PropName);
+    if PropData <> nil then
+    begin
+      //nullify if type does not match
+      if (PropType <> jtUnknown) and (PropData.JSONType <> PropType) then
+        RequestData.Nulls[PropName] := True
+      else
+        RequestData.Strings[PropName] := PropData.AsJSON;
+    end;
+  end;
 end;
 
 function TSqldbJSONResource.GetQuery(AOwner: TComponent): TSQLQuery;
@@ -199,10 +329,13 @@ begin
   inherited Loaded(Tag);
   if FInputFields <> '' then
     TryStrToJSON(FInputFields, FInputFieldsData);
+  if FJSONFields <> '' then
+    TryStrToJSON(FJSONFields, FJSONFieldsData);
 end;
 
 destructor TSqldbJSONResource.Destroy;
 begin
+  FJSONFieldsData.Free;
   FInputFieldsData.Free;
   inherited Destroy;
 end;
@@ -246,6 +379,7 @@ begin
       ResponseData := TJSONArray.Create;
       try
         DatasetToJSON(Query, TJSONArray(ResponseData), ConvertOptions, FOutputFields);
+        DecodeJSONFields(TJSONArray(ResponseData));
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
@@ -261,6 +395,7 @@ begin
         ResponseData := TJSONObject.Create;
         try
           DatasetToJSON(Query, TJSONObject(ResponseData), ConvertOptions, FOutputFields);
+          DecodeJSONFields(TJSONObject(ResponseData));
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
           ResponseData.Free;
