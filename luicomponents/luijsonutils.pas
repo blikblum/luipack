@@ -370,7 +370,6 @@ function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant)
 var
   PropCount, i: Integer;
   ItemData, PropData: TJSONData;
-  ItemObj: TJSONObject absolute ItemData;
   ObjMatches: Boolean;
 begin
   PropCount := Length(ObjProps);
@@ -386,7 +385,7 @@ begin
     begin
       for i := 0 to PropCount - 1 do
       begin
-        PropData := ItemObj.Find(ObjProps[i * 2]);
+        PropData := ItemData.FindPath(ObjProps[i * 2]);
         ObjMatches := (PropData <> nil) and SameValue(PropData, ObjProps[(i * 2) + 1]);
         if not ObjMatches then
           break;
