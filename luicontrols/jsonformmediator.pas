@@ -173,24 +173,118 @@ class procedure TJSONCheckBoxMediator.DoJSONToGUI(Data: TJSONObject;
   Element: TJSONFormElement);
 var
   CheckBox: TCheckBox;
+  PropData, ValueData: TJSONData;
+  Checked: Boolean;
 begin
-  //todo: add checked/unchecked options
   CheckBox := Element.Control as TCheckBox;
-  CheckBox.Checked := Data.Get(Element.PropertyName, False);
+  PropData := Data.Find(Element.PropertyName);
+  ValueData := Element.OptionsData.Find('value');
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
+  begin
+    if Element.OptionsData.Get('grouped', False) then
+    begin
+      case PropData.JSONType of
+        jtObject:
+          Checked := TJSONObject(PropData).Get(ValueData.AsString, False);
+        jtArray:
+          Checked := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) > -1;
+      end;
+    end
+    else
+    begin
+      if PropData = nil then
+        Checked := False
+      else
+        Checked := CompareJSONData(ValueData, PropData) = 0;
+    end;
+  end
+  else
+  begin
+    Checked := Data.Get(Element.PropertyName, False);
+  end;
+  CheckBox.Checked := Checked;
 end;
 
 class procedure TJSONCheckBoxMediator.DoGUIToJSON(Element: TJSONFormElement;
   Data: TJSONObject);
 var
   CheckBox: TCheckBox;
+  ValueData, PropData: TJSONData;
   PropName: String;
+  ValueIndex: Integer;
 begin
   CheckBox := Element.Control as TCheckBox;
   PropName := Element.PropertyName;
-  if CheckBox.Checked then
-    Data.Booleans[PropName] := True
+  ValueData := Element.OptionsData.Find('value');
+  if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
+  begin
+    PropData := Data.Find(PropName);
+    if Element.OptionsData.Get('grouped', False) then
+    begin
+      if PropData = nil then
+      begin
+        if CheckBox.Checked then
+          Data.Arrays[PropName] := TJSONArray.Create([ValueData.Value]);
+      end
+      else
+      begin
+        case PropData.JSONType of
+          jtArray:
+            begin
+              ValueIndex := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value);
+              if CheckBox.Checked then
+              begin
+                if ValueIndex = -1 then
+                  TJSONArray(PropData).Add(ValueData.Clone);
+              end
+              else
+              begin
+                if ValueIndex <> -1 then
+                  TJSONArray(PropData).Delete(ValueIndex);
+              end;
+            end;
+          jtObject:
+            begin
+              ValueIndex := TJSONObject(PropData).IndexOfName(ValueData.AsString);
+              if CheckBox.Checked then
+              begin
+                if ValueIndex = -1 then
+                  TJSONObject(PropData).Booleans[ValueData.AsString] := True;
+              end
+              else
+              begin
+                if ValueIndex > -1 then
+                  TJSONObject(PropData).Delete(ValueIndex);
+              end;
+            end;
+        end;
+      end;
+    end
+    else
+    begin
+      if CheckBox.Checked then
+        Data.Elements[PropName] := ValueData.Clone
+      else
+      begin
+        if Element.OptionsData.Get('removeprop', False) then
+          Data.Delete(PropName)
+        else
+          Data.Booleans[PropName] := False;
+      end;
+    end;
+  end
   else
-    Data.Delete(PropName);
+  begin
+    if CheckBox.Checked then
+      Data.Booleans[PropName] := True
+    else
+    begin
+      if Element.OptionsData.Get('removeprop', False) then
+        Data.Delete(PropName)
+      else
+        Data.Booleans[PropName] := False;
+    end;
+  end;
 end;
 
 class function TJSONCheckBoxMediator.AllowsCaptionLabel: Boolean;
