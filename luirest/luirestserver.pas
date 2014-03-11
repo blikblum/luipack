@@ -152,6 +152,7 @@ class procedure TJSONRESTResponseFormatter.SetStatus(AResponse: TResponse; Statu
   const Message: String; const Args: array of const);
 begin
   AResponse.Code := StatusCode;
+  //todo: return the effective Path (can be different from PathInfo)
   AResponse.Contents.Add(Format('{"message":"%s"}', [StringToJSONString(Format(Message, Args))]));
 end;
 
@@ -226,7 +227,7 @@ begin
     on E:Exception do
     begin
       //todo: send stack backtrace
-      SetResponseStatus(AResponse, 500, E.Message, []);
+      SetResponseStatus(AResponse, 500, '%s: %s', [E.ClassName, E.Message]);
     end;
   end;
 end;
