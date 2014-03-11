@@ -135,7 +135,7 @@ begin
       PropData := RequestData.Find(FieldName);
       if PropData = nil then
         PropData := Params.Find(FieldName);
-      if PropData <> nil then
+      if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
         Field.Value := PropData.Value
       else
       begin
@@ -156,7 +156,7 @@ begin
       PropData := RequestData.Find(FieldName);
       if PropData = nil then
         PropData := Params.Find(FieldName);
-      if PropData <> nil then
+      if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
         Field.Value := PropData.Value
       else
       begin
@@ -475,7 +475,8 @@ begin
         except
           on E: Exception do
           begin
-            SetResponseStatus(AResponse, 400, 'Error posting to %s: %s', [ARequest.PathInfo, E.Message]);
+            //todo: return the effective Path instead of PathInfo
+            SetResponseStatus(AResponse, 400, 'Error posting to %s. %s: %s', [ARequest.PathInfo, E.ClassName, E.Message]);
             Exit;
           end;
         end;
