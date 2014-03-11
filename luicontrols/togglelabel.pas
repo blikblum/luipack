@@ -64,6 +64,7 @@ type
     FPaintOnlyArrow: Boolean;
     FFontChanged: Boolean;
     function ChangeAllowed: Boolean;
+    procedure DoChange;
     procedure InvalidateArrow;
     procedure SetArrowColor(const AValue: TColor);
     procedure SetExpanded(const AValue: Boolean);
@@ -145,11 +146,18 @@ begin
     FOnChanging(Self, Result);
 end;
 
+procedure TToggleLabel.DoChange;
+begin
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+end;
+
 procedure TToggleLabel.SetExpanded(const AValue: Boolean);
 begin
   if FExpanded <> AValue then
   begin
     FExpanded := AValue;
+    DoChange;
     Invalidate;
   end;
 end;
@@ -276,8 +284,7 @@ begin
   if not ChangeAllowed then
     Exit;
   FExpanded := not FExpanded;
-  if Assigned(FOnChange) then
-    FOnChange(Self);
+  DoChange;
   TextChanged;
   inherited WMLButtonDown(Message);
 end;
