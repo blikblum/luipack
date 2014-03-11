@@ -539,6 +539,7 @@ begin
       ResponseData := TJSONObject.Create;
       try
         DatasetToJSON(Query, ResponseData, ConvertOptions, FOutputFields);
+        DecodeJSONFields(ResponseData);
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
