@@ -299,7 +299,9 @@ end;
 
 procedure TToggleLabel.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer);
 begin
-  inherited SetBoundsKeepBase(aLeft, aTop, aWidth + FTextOffset, aHeight);
+  if AutoSize then
+    Inc(aWidth, FTextOffset);
+  inherited SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight);
 end;
 
 procedure TToggleLabel.Paint;
