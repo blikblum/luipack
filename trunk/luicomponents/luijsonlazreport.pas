@@ -429,9 +429,11 @@ end;
 procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
   p3: Variant; var Val: Variant);
 var
-  V1: Variant;
+  V1, V2: Variant;
   S2, S3: String;
   VType: tvartype;
+  ArrayData: TJSONArray;
+  ItemData: TJSONData;
 begin
   if AName = 'IFNULL' then
   begin
@@ -493,6 +495,20 @@ begin
           Val := Null
         else
           Val := frParser.Calc(S3);
+      end;
+    end;
+  end else if AName = 'IFFINDITEM' then
+  begin
+    Val := '';
+    V1 := frParser.Calc(p1);
+    V2 := frParser.Calc(p2);
+    if VarIsStr(V1) and not VarIsNull(V2) then
+    begin
+      //todo: use findpath or change context dinamically??
+      if FindJSONProp(FData, VarToStr(V1), ArrayData) then
+      begin
+        if GetJSONIndexOf(ArrayData, V2) > -1 then
+          Val := frParser.Calc(p3);
       end;
     end;
   end
