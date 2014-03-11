@@ -312,7 +312,12 @@ var
   ResponseData: TJSONData;
 begin
   Result := True;
-  ResponseData := StreamToJSONData(ResponseStream);
+  try
+    ResponseData := StreamToJSON(ResponseStream);
+  except
+    FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
+    Exit;
+  end;
   case Method of
     hmtGet, hmtPost, hmtPut:
       begin
@@ -557,7 +562,12 @@ var
   ResponseData: TJSONData;
 begin
   Result := True;
-  ResponseData := StreamToJSONData(ResponseStream);
+  try
+    ResponseData := StreamToJSON(ResponseStream);
+  except
+    FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
+    Exit;
+  end;
   case Method of
     hmtGet:
       begin
@@ -574,6 +584,7 @@ begin
             [FModelDef.Name, JSONTypeName(ResponseData.JSONType)]));
           Exit;
         end;
+        //todo: keep the same data instance (extract items)
         FData.Free;
         FData := TJSONArray(ResponseData);
       end;
@@ -814,19 +825,14 @@ end;
 procedure TRESTResourceClient.ResponseError(const ResourcePath: String; ResourceTag: PtrInt;
   Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
 var
-  ResponseData: TJSONData;
+  ResponseData: TJSONObject;
   Message: String;
 begin
-  Message := '';
-  ResponseData := nil;
-  try
-    ResponseData := StreamToJSONData(ResponseStream);
-  except
-    //
-  end;
-  if (ResponseData <> nil) and (ResponseData.JSONType = jtObject) then
-    Message := TJSONObject(ResponseData).Get('message', '');
-  if Message = '' then
+  if TryStreamToJSON(ResponseStream, ResponseData) then
+  begin
+    Message := ResponseData.Get('message', '');
+  end
+  else
   begin
     //todo: check if message is a valid string
     SetLength(Message, ResponseStream.Size);
