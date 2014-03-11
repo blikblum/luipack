@@ -120,6 +120,7 @@ type
     procedure SetData(Value: TJSONObject);
     procedure SetElements(Value: TJSONFormElements);
   protected
+    function GetElements: TFormElements; override;
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -660,6 +661,11 @@ end;
 procedure TJSONFormMediator.SetElements(Value: TJSONFormElements);
 begin
   FElements.Assign(Value);
+end;
+
+function TJSONFormMediator.GetElements: TFormElements;
+begin
+  Result := FElements;
 end;
 
 procedure TJSONFormMediator.Loaded;
