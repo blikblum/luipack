@@ -63,7 +63,9 @@ type
   protected
     procedure BeginLoad;
     procedure EndLoad;
+    function GetElements: TFormElements; virtual; abstract;
     procedure InitializeCaptionDisplay(Element: TFormElement);
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     property State: TFormMediatorState read FState;
   published
@@ -116,6 +118,26 @@ begin
   end
   else
     Control.Caption := Element.Caption;
+end;
+
+procedure TCustomFormMediator.Notification(AComponent: TComponent;
+  Operation: TOperation);
+var
+  i: Integer;
+  Element: TFormElement;
+  Elements: TFormElements;
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+  begin
+    Elements := GetElements;
+    for i := 0 to Elements.Count - 1 do
+    begin
+      Element := TFormElement(Elements.Items[i]);
+      if AComponent = Element.Control then
+        Element.Control := nil;
+    end;
+  end;
 end;
 
 procedure TCustomFormMediator.BeginLoad;
