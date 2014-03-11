@@ -66,6 +66,8 @@ procedure SetJSONPropValue(JSONObj: TJSONObject; const PropName: String; Value: 
 
 function StrToJSON(const JSONStr: TJSONStringType): TJSONData;
 
+function StreamToJSON(Stream: TStream): TJSONData;
+
 function TryReadJSONFile(const FileName: String; out JSONData: TJSONData): Boolean;
 
 function TryReadJSONFile(const FileName: String; out JSONArray: TJSONArray): Boolean;
@@ -78,7 +80,11 @@ function TryStrToJSON(const JSONStr: TJSONStringType; out JSONArray: TJSONArray)
 
 function TryStrToJSON(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
 
-function StreamToJSONData(Stream: TStream): TJSONData;
+function TryStreamToJSON(Stream: TStream; out JSONData: TJSONData): Boolean;
+
+function TryStreamToJSON(Stream: TStream; out JSONArray: TJSONArray): Boolean;
+
+function TryStreamToJSON(Stream: TStream; out JSONObject: TJSONObject): Boolean;
 
 function DatasetToJSON(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 
@@ -572,44 +578,31 @@ begin
     FreeAndNil(Data);
 end;
 
-function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
-var
-  Parser: TJSONParser;
+function TryParseJSON(Parser: TJSONParser; var JSONData: TJSONData): Boolean;
 begin
   Result := True;
   JSONData := nil;
-  Parser := TJSONParser.Create(JSONStr);
   try
-    try
-      JSONData := Parser.Parse;
-    except
-      Result := False;
-    end;
-  finally
-    Parser.Destroy;
+    JSONData := Parser.Parse;
+  except
+    Result := False;
   end;
   Result := Result and (JSONData <> nil);
   if not Result then
     FreeAndNil(JSONData);
 end;
 
-function TryStrToJSON(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
+function TryParseJSON(Parser: TJSONParser; var JSONArray: TJSONArray): Boolean;
 var
-  Parser: TJSONParser;
   JSONData: TJSONData;
 begin
   Result := True;
   JSONArray := nil;
   JSONData := nil;
-  Parser := TJSONParser.Create(JSONStr);
   try
-    try
-      JSONData := Parser.Parse;
-    except
-      Result := False;
-    end;
-  finally
-    Parser.Destroy;
+    JSONData := Parser.Parse;
+  except
+    Result := False;
   end;
   Result := Result and (JSONData <> nil) and (JSONData.JSONType = jtArray);
   if Result then
@@ -618,23 +611,17 @@ begin
     JSONData.Free;
 end;
 
-function TryStrToJSON(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
+function TryParseJSON(Parser: TJSONParser; var JSONObject: TJSONObject): Boolean;
 var
-  Parser: TJSONParser;
   JSONData: TJSONData;
 begin
   Result := True;
   JSONObject := nil;
   JSONData := nil;
-  Parser := TJSONParser.Create(JSONStr);
   try
-    try
-      JSONData := Parser.Parse;
-    except
-      Result := False;
-    end;
-  finally
-    Parser.Destroy;
+    JSONData := Parser.Parse;
+  except
+    Result := False;
   end;
   Result := Result and (JSONData <> nil) and (JSONData.JSONType = jtObject);
   if Result then
@@ -643,7 +630,61 @@ begin
     JSONData.Free;
 end;
 
-function StreamToJSONData(Stream: TStream): TJSONData;
+function TryStrToJSON(const JSONStr: TJSONStringType; out JSONData: TJSONData): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(JSONStr);
+  Result := TryParseJSON(Parser, JSONData);
+  Parser.Destroy;
+end;
+
+function TryStrToJSON(const JSONStr: TJSONStringType; out JSONArray: TJSONArray): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(JSONStr);
+  Result := TryParseJSON(Parser, JSONArray);
+  Parser.Destroy;
+end;
+
+function TryStrToJSON(const JSONStr: TJSONStringType; out JSONObject: TJSONObject): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(JSONStr);
+  Result := TryParseJSON(Parser, JSONObject);
+  Parser.Destroy;
+end;
+
+function TryStreamToJSON(Stream: TStream; out JSONData: TJSONData): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(Stream);
+  Result := TryParseJSON(Parser, JSONData);
+  Parser.Destroy;
+end;
+
+function TryStreamToJSON(Stream: TStream; out JSONArray: TJSONArray): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(Stream);
+  Result := TryParseJSON(Parser, JSONArray);
+  Parser.Destroy;
+end;
+
+function TryStreamToJSON(Stream: TStream; out JSONObject: TJSONObject): Boolean;
+var
+  Parser: TJSONParser;
+begin
+  Parser := TJSONParser.Create(Stream);
+  Result := TryParseJSON(Parser, JSONObject);
+  Parser.Destroy;
+end;
+
+function StreamToJSON(Stream: TStream): TJSONData;
 var
   Parser: TJSONParser;
 begin
