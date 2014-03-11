@@ -181,19 +181,19 @@ begin
   ValueData := Element.OptionsData.Find('value');
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
   begin
-    if Element.OptionsData.Get('grouped', False) then
-    begin
-      case PropData.JSONType of
-        jtObject:
-          Checked := TJSONObject(PropData).Get(ValueData.AsString, False);
-        jtArray:
-          Checked := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) > -1;
-      end;
-    end
+    if PropData = nil then
+      Checked := False
     else
     begin
-      if PropData = nil then
-        Checked := False
+      if Element.OptionsData.Get('grouped', False) then
+      begin
+        case PropData.JSONType of
+          jtObject:
+            Checked := TJSONObject(PropData).Get(ValueData.AsString, False);
+          jtArray:
+            Checked := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) > -1;
+        end;
+      end
       else
         Checked := CompareJSONData(ValueData, PropData) = 0;
     end;
@@ -224,7 +224,7 @@ begin
       if PropData = nil then
       begin
         if CheckBox.Checked then
-          Data.Arrays[PropName] := TJSONArray.Create([ValueData.Value]);
+          Data.Arrays[PropName] := TJSONArray.Create([ValueData.Clone]);
       end
       else
       begin
@@ -379,7 +379,7 @@ class function TJSONListMediator.GetItemIndex(Data: TJSONObject;
   const PropName: String; Items: TStrings; OptionsData: TJSONObject): Integer;
 var
   PropData, SchemaData: TJSONData;
-  SourceData: TJSONArray;
+  ItemsData: TJSONArray;
   IndexType: TJSONListIndexType;
   ValuePath: String;
 begin
@@ -415,8 +415,8 @@ begin
         end;
       jliValue:
         begin
-          if FindJSONProp(OptionsData, 'datasource', SourceData) then
-            Result := GetJSONIndexOf(SourceData, [ValuePath, PropData.Value]);
+          if FindJSONProp(OptionsData, 'items', ItemsData) then
+            Result := GetJSONIndexOf(ItemsData, [ValuePath, PropData.Value]);
         end;
     end;
     //check for out of range result
@@ -432,7 +432,7 @@ class procedure TJSONListMediator.SetItemIndex(Data: TJSONObject;
 var
   IndexType: TJSONListIndexType;
   SchemaData, ValueData: TJSONData;
-  SourceData: TJSONArray;
+  ItemsData: TJSONArray;
   ValuePath: String;
   ItemData: TJSONData;
 begin
@@ -463,11 +463,11 @@ begin
         Data.Integers[PropName] := ItemIndex;
       jliValue:
         begin
-          if FindJSONProp(OptionsData, 'datasource', SourceData) then
+          if FindJSONProp(OptionsData, 'items', ItemsData) then
           begin
-            if ItemIndex < SourceData.Count then
+            if ItemIndex < ItemsData.Count then
             begin
-              ItemData := SourceData.Items[ItemIndex];
+              ItemData := ItemsData.Items[ItemIndex];
               ValueData := ItemData.FindPath(ValuePath);
               if ValueData <> nil then
                 Data.Elements[PropName] := ValueData.Clone;
@@ -484,12 +484,12 @@ end;
 class procedure TJSONListMediator.LoadItems(Items: TStrings;
   OptionsData: TJSONObject);
 var
-  SourceData: TJSONArray;
+  ItemsData: TJSONArray;
   SchemaData, ItemData, ValueData: TJSONData;
   TextPath: String;
   i: Integer;
 begin
-  if FindJSONProp(OptionsData, 'datasource', SourceData) then
+  if FindJSONProp(OptionsData, 'items', ItemsData) then
   begin
     SchemaData := OptionsData.Find('schema');
     if (SchemaData <> nil) and (SchemaData.JSONType = jtObject) then
@@ -497,9 +497,9 @@ begin
     else
       TextPath := 'text';
     Items.Clear;
-    for i := 0 to SourceData.Count - 1 do
+    for i := 0 to ItemsData.Count - 1 do
     begin
-      ItemData := SourceData.Items[i];
+      ItemData := ItemsData.Items[i];
       case ItemData.JSONType of
         jtString, jtNumber, jtBoolean:
           Items.Add(ItemData.AsString);
