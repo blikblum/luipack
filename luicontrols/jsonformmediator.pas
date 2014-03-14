@@ -182,9 +182,8 @@ begin
   ValueData := Element.OptionsData.Find('value');
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
   begin
-    if PropData = nil then
-      Checked := False
-    else
+    Checked := False;
+    if PropData <> nil then
     begin
       if Element.OptionsData.Get('grouped', False) then
       begin
