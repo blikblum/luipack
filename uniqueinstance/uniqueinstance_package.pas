@@ -2,21 +2,21 @@
   This source is only used to compile and install the package.
  }
 
-unit uniqueinstance_package; 
+unit uniqueinstance_package;
 
 interface
 
 uses
-  UniqueInstance, UniqueInstanceRaw, registeruniqueinstance, SimpleIPCWrapper, 
+  UniqueInstance, UniqueInstanceRaw, registeruniqueinstance, 
   UniqueInstanceBase, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('registeruniqueinstance', @registeruniqueinstance.Register); 
-end; 
+  RegisterUnit('registeruniqueinstance', @registeruniqueinstance.Register);
+end;
 
 initialization
-  RegisterPackage('uniqueinstance_package', @Register); 
+  RegisterPackage('uniqueinstance_package', @Register);
 end.
