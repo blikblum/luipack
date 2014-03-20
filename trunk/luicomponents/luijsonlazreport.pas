@@ -335,7 +335,9 @@ var
   Band: TfrBandView;
 begin
   if FData = nil then
-    raise Exception.Create('TJSONObjectReport.FData = nil');
+    raise Exception.Create('TfrJSONReport.FData = nil');
+  if Owner = nil then
+    raise Exception.Create('TfrJSONReport.Owner = nil');
   for i := 0 to FDataLinks.Count - 1 do
   begin
     DataLink := TfrJSONDataLink(FDataLinks[i]);
