@@ -23,6 +23,7 @@ begin
   ExporterClassStore.Register(TLCLDataViewExporter);
   ExporterClassStore.Register(TLCLJSONBooleanGroupExporter);
   ExporterClassStore.Register(TLazReportBooleanGroupDataViewExporter);
+  ExporterClassStore.Register(TJSONLazReportDataViewExporter);
   ExporterClassStore.Register(THTMLDataViewExporter);
 
   //...and importers
