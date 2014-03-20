@@ -219,7 +219,7 @@ begin
           if not TryStrToJSON(PropData.AsString, DecodedObjectData) then
             DecodedObjectData := TJSONObject.Create;
         else
-          if TryStrToJSON(PropData.AsString, DecodedData) then
+          if not TryStrToJSON(PropData.AsString, DecodedData) then
             DecodedData := TJSONNull.Create;
       end;
     end
