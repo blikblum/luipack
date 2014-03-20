@@ -17,7 +17,43 @@ type
     class procedure Execute(DataView: TDataView); override;
   end;
 
+  { TJSONLazReportDataViewExporter }
+
+  TJSONLazReportDataViewExporter = class(TDataViewExporter)
+  public
+    class function Description: String; override;
+    class procedure Execute(DataView: TDataView); override;
+  end;
+
 implementation
+
+{ TJSONLazReportDataViewExporter }
+
+class function TJSONLazReportDataViewExporter.Description: String;
+begin
+  Result := 'JSON LazReport (Quick and dirty)';
+end;
+
+class procedure TJSONLazReportDataViewExporter.Execute(DataView: TDataView);
+var
+  Output: TStringList;
+  Field: TDataViewField;
+  i: Integer;
+begin
+  Output := TStringList.Create;
+  for i := 0 to DataView.Fields.Count -1 do
+  begin
+    Field := DataView.Fields[i];
+    case Field.FieldType of
+      dftBoolean:
+        Output.Add(Format('([IFNULL(%s,'' '', ''X'')]) %s', [LowerCase(Field.FieldName), Field.DisplayLabel]));
+    else
+        Output.Add(Format('%s: [%s]', [Field.DisplayLabel, LowerCase(Field.FieldName)]));
+    end;
+  end;
+  Output.SaveToFile('jsonlazreporttest.txt');
+  Output.Destroy;
+end;
 
 { TLazReportBooleanGroupDataViewExporter }
 
