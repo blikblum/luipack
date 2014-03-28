@@ -190,7 +190,7 @@ end;
 
 destructor TRESTServiceModule.Destroy;
 begin
-  FResources.Destroy;
+  FResources.Free;
   inherited Destroy;
 end;
 
