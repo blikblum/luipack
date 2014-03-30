@@ -53,6 +53,7 @@ type
     procedure RedirectRequest(ARequest: TRequest; AResponse: TResponse;
       const Method, ResourcePath: String; Relative: Boolean = True);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
+    procedure SetURIParam(const ParamName, ParamValue: String; IsNumeric: Boolean = False);
   public
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
@@ -343,6 +344,27 @@ begin
   FServiceModule.FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
 end;
 
+procedure TRESTResource.SetURIParam(const ParamName, ParamValue: String;
+  IsNumeric: Boolean);
+var
+  DoubleValue: Double;
+  Int64Value: Int64;
+begin
+  //todo: implement constraints
+  //todo: add ERestException (define message + status code)
+  if TryStrToInt64(ParamValue, Int64Value) then
+    URIParams.Int64s[ParamName] := Int64Value
+  else if TryStrToFloat(ParamValue, DoubleValue) then
+    URIParams.Floats[ParamName] := DoubleValue
+  else
+  begin
+    if not IsNumeric then
+      URIParams.Strings[ParamName] := ParamValue
+    else
+      raise Exception.CreateFmt('Invalid param. "%s" expects a numeric value. Got "%s"', [ParamName, ParamValue]);
+  end;
+end;
+
 procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
   ResourceClass: TRESTResourceClass; Tag: PtrInt);
 begin
@@ -384,9 +406,6 @@ begin
 end;
 
 procedure TRESTResource.HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef);
-var
-  AInt64: Int64;
-  ADouble: Double;
 begin
   if FSubPathResources <> nil then
   begin
@@ -394,12 +413,7 @@ begin
     if SubPathResourceDef = nil then
     begin
       SubPathResourceDef := FSubPathResources.DefaultResourceDef;
-      if TryStrToInt64(SubPath, AInt64) then
-        URIParams.Int64s[FSubPathParamName] := AInt64
-      else if TryStrToFloat(SubPath, ADouble) then
-        URIParams.Floats[FSubPathParamName] := ADouble
-      else
-        URIParams.Strings[FSubPathParamName] := SubPath;
+      SetURIParam(FSubPathParamName, SubPath);
     end;
   end;
 end;
