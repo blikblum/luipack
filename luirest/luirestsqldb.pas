@@ -6,7 +6,7 @@ unit LuiRESTSqldb;
 interface
 
 uses
-  Classes, SysUtils, sqldb, db, LuiRESTServer, HTTPDefs, fphttp, fpjson,
+  Classes, SysUtils, sqldb, db, LuiRESTServer, HTTPDefs, fphttp, fpjson, pqconnection,
   {$ifdef USE_SQLITE3_SLIM}
   sqlite3slimconn
   {$else}
@@ -43,7 +43,7 @@ type
     procedure EncodeJSONFields(RequestData: TJSONObject);
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
-    function GetNewResourceId(Query: TSQLQuery): String; virtual;
+    function GetLastInsertId(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False);
   public
@@ -76,6 +76,15 @@ implementation
 
 uses
   LuiJSONUtils;
+
+type
+  TSQLConnectionAccess = class(TSQLConnection)
+
+  end;
+
+  TSQLConnectorAccess = class(TSQLConnector)
+
+  end;
 
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 var
@@ -315,13 +324,34 @@ begin
     raise Exception.Create('Unable to resolve resource identifier SQL query');
 end;
 
-function TSqldbJSONResource.GetNewResourceId(Query: TSQLQuery): String;
+function TSqldbJSONResource.GetLastInsertId(Query: TSQLQuery): String;
+var
+  Info: TSQLStatementInfo;
+  ActualConnection: TSQLConnection;
+  LastIdQuery: TSQLQuery;
 begin
-  //found a way to retrieve LastInsertID only for sqlite3
-  if (FConnection is TSQLite3Connection) then
-    Result := IntToStr(TSQLite3Connection(FConnection).GetInsertID)
+  Result := '';
+  if (FConnection is TSQLConnector) then
+    ActualConnection := TSQLConnectorAccess(FConnection).Proxy
   else
-    Result := '';
+    ActualConnection := FConnection;
+  //Currently implemented only for sqlite3 and pg
+  if (ActualConnection is TSQLite3Connection) then
+    Result := IntToStr(TSQLite3Connection(ActualConnection).GetInsertID)
+  else if (ActualConnection is TPQConnection) then
+  begin
+    Info := TSQLConnectionAccess(ActualConnection).GetStatementInfo(Query.SQL.Text, True, stNoSchema);
+    LastIdQuery := TSQLQuery.Create(nil);
+    try
+      LastIdQuery.DataBase := ActualConnection;
+      LastIdQuery.SQL.Text := Format('SELECT currval(''%s_%s_seq'');', [Info.TableName, FPrimaryKey]);
+      LastIdQuery.Open;
+      if LastIdQuery.RecordCount > 0 then
+        Result := LastIdQuery.Fields[0].AsString;
+    finally
+      LastIdQuery.Destroy;
+    end;
+  end;
 end;
 
 procedure TSqldbJSONResource.Loaded(Tag: PtrInt);
@@ -488,7 +518,7 @@ begin
         SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
         Exit;
       end;
-      NewResourceId := GetNewResourceId(Query);
+      NewResourceId := GetLastInsertId(Query);
       if NewResourceId <> '' then
       begin
         NewResourcePath := ARequest.PathInfo;

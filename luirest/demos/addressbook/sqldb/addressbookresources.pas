@@ -27,35 +27,13 @@ type
   { TAddressBookResourceFactory }
 
   TAddressBookResourceFactory = class(TComponent)
-  private
-    FConnection: TSQLite3Connection;
-    FDatabase: String;
-    FTransaction: TSQLTransaction;
-    procedure SetDatabase(const AValue: String);
   public
-    constructor Create(AOwner: TComponent); override;
     procedure CreateResource(out Resource: TRESTResource; ResourceTag: PtrInt);
-    property Connection: TSQLite3Connection read FConnection;
-    property Database: String read FDatabase write SetDatabase;
   end;
 
 implementation
 
 { TAddressBookResourceFactory }
-
-procedure TAddressBookResourceFactory.SetDatabase(const AValue: String);
-begin
-  FDatabase := AValue;
-  FConnection.DatabaseName := AValue;
-end;
-
-constructor TAddressBookResourceFactory.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  FConnection := TSQLite3Connection.Create(Self);
-  FTransaction := TSQLTransaction.Create(Self);
-  FTransaction.DataBase := FConnection;
-end;
 
 procedure TAddressBookResourceFactory.CreateResource(out Resource: TRESTResource;
   ResourceTag: PtrInt);
@@ -63,7 +41,6 @@ var
   SqldbResource: TSqldbJSONResource absolute Resource;
 begin
   SqldbResource := TSqldbJSONResource.Create;
-  SqldbResource.Connection := FConnection;
   case ResourceTag of
     RES_CONTACTS:
     begin
