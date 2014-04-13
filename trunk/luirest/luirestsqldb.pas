@@ -6,7 +6,8 @@ unit LuiRESTSqldb;
 interface
 
 uses
-  Classes, SysUtils, sqldb, db, LuiRESTServer, HTTPDefs, fphttp, fpjson, pqconnection,
+  Classes, SysUtils, sqldb, db, LuiRESTServer, HTTPDefs, fphttp, fpjson,
+  pqconnection, IBConnection, mysql51conn,
   {$ifdef USE_SQLITE3_SLIM}
   sqlite3slimconn
   {$else}
@@ -43,7 +44,7 @@ type
     procedure EncodeJSONFields(RequestData: TJSONObject);
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
-    function GetLastInsertId(Query: TSQLQuery): String; virtual;
+    function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False);
   public
@@ -75,7 +76,7 @@ procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 implementation
 
 uses
-  LuiJSONUtils;
+  LuiJSONUtils, dbconst;
 
 type
   TSQLConnectionAccess = class(TSQLConnection)
@@ -324,33 +325,76 @@ begin
     raise Exception.Create('Unable to resolve resource identifier SQL query');
 end;
 
-function TSqldbJSONResource.GetLastInsertId(Query: TSQLQuery): String;
+//adapted from sqldb
+function CreateInsertQuery(Query: TSQLQuery; const TableName: String; FieldNamesQuoteChars : TQuoteChars): TSQLQuery;
+var
+  x          : integer;
+  sql_fields : string;
+  sql_values : string;
+  Field: TField;
+  Param: TParam;
+begin
+  sql_fields := '';
+  sql_values := '';
+  for x := 0 to Query.Fields.Count -1 do
+  begin
+    Field := Query.Fields[x];
+    if (not Field.IsNull) and (pfInUpdate in Field.ProviderFlags) and (not Field.ReadOnly) then
+    begin
+      sql_fields := sql_fields + FieldNamesQuoteChars[0] + Field.FieldName + FieldNamesQuoteChars[1] + ',';
+      sql_values := sql_values + ':"' + Field.FieldName + '",';
+    end;
+  end;
+  if length(sql_fields) = 0 then
+    DatabaseErrorFmt(sNoUpdateFields,['insert'],Query);
+  Result := TSQLQuery.Create(nil);
+  Result.DataBase := Query.DataBase;
+  Result.Transaction := Query.Transaction;
+  Result.ParseSQL := False;
+  setlength(sql_fields,length(sql_fields)-1);
+  setlength(sql_values,length(sql_values)-1);
+  Result.SQL.Add('insert into ' + TableName + ' (' + sql_fields + ') values (' + sql_values + ')');
+  for x := 0 to Result.Params.Count - 1 do
+  begin
+    Param := Result.Params[x];
+    Field := Query.FieldByName(Param.Name);
+    Param.AssignFieldValue(Field, Field.Value);
+  end;
+end;
+
+function TSqldbJSONResource.InsertRecord(Query: TSQLQuery): String;
 var
   Info: TSQLStatementInfo;
   ActualConnection: TSQLConnection;
-  LastIdQuery: TSQLQuery;
+  InsertQuery: TSQLQuery;
 begin
   Result := '';
   if (FConnection is TSQLConnector) then
     ActualConnection := TSQLConnectorAccess(FConnection).Proxy
   else
     ActualConnection := FConnection;
-  //Currently implemented only for sqlite3 and pg
-  if (ActualConnection is TSQLite3Connection) then
-    Result := IntToStr(TSQLite3Connection(ActualConnection).GetInsertID)
-  else if (ActualConnection is TPQConnection) then
-  begin
-    Info := TSQLConnectionAccess(ActualConnection).GetStatementInfo(Query.SQL.Text, True, stNoSchema);
-    LastIdQuery := TSQLQuery.Create(nil);
-    try
-      LastIdQuery.DataBase := ActualConnection;
-      LastIdQuery.SQL.Text := Format('SELECT currval(''%s_%s_seq'');', [Info.TableName, FPrimaryKey]);
-      LastIdQuery.Open;
-      if LastIdQuery.RecordCount > 0 then
-        Result := LastIdQuery.Fields[0].AsString;
-    finally
-      LastIdQuery.Destroy;
+  Info := TSQLConnectionAccess(ActualConnection).GetStatementInfo(Query.SQL.Text, True, stNoSchema);
+  InsertQuery := CreateInsertQuery(Query, Info.TableName, ActualConnection.FieldNameQuoteChars);
+  try
+    if (ActualConnection is TPQConnection) or (ActualConnection is TIBConnection) then
+    begin
+      InsertQuery.SQL.Add(Format('Returning %s', [FPrimaryKey]));
+      InsertQuery.Open;
+      if InsertQuery.RecordCount > 0 then
+        Result := InsertQuery.Fields[0].AsString;
+      ActualConnection.Transaction.CommitRetaining;
+    end
+    else
+    begin
+      InsertQuery.ExecSQL;
+      ActualConnection.Transaction.CommitRetaining;
+      if (ActualConnection is TSQLite3Connection) then
+        Result := IntToStr(TSQLite3Connection(ActualConnection).GetInsertID)
+      else if (ActualConnection is TConnectionName{MySql}) then
+        Result := IntToStr(TConnectionName(ActualConnection).GetInsertID);
     end;
+  finally
+    InsertQuery.Destroy;
   end;
 end;
 
@@ -483,6 +527,7 @@ procedure TSqldbJSONResource.HandlePost(ARequest: TRequest; AResponse: TResponse
 var
   RequestData: TJSONObject;
   Query: TSQLQuery;
+  PKField: TField;
   NewResourcePath, NewResourceId: String;
 begin
   if FIsCollection and not FReadOnly then
@@ -497,16 +542,19 @@ begin
       begin
         try
           Query.Open;
+          //workaround to an issue with firebird that sets Required in PK PKField
+          PKField := Query.FindField(FPrimaryKey);
+          if PKField <> nil then
+            PKField.Required := False;
           Query.Append;
           SetQueryData(Query, RequestData, URIParams);
           Query.Post;
-          Query.ApplyUpdates;
-          FConnection.Transaction.CommitRetaining;
+          NewResourceId := InsertRecord(Query);
         except
           on E: Exception do
           begin
             //todo: return the effective Path instead of PathInfo
-            SetResponseStatus(AResponse, 400, 'Error posting to %s. %s: %s', [ARequest.PathInfo, E.ClassName, E.Message]);
+            AResponse.Contents.Add(E.Message);
             Exit;
           end;
         end;
@@ -518,7 +566,6 @@ begin
         SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
         Exit;
       end;
-      NewResourceId := GetLastInsertId(Query);
       if NewResourceId <> '' then
       begin
         NewResourcePath := ARequest.PathInfo;
