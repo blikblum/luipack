@@ -39,7 +39,7 @@ var
   Config: TIniFile;
   DatabaseType: String;
 begin
-  Config := TIniFile.Create('dbconfig.ini');
+  Config := TIniFile.Create('addressbookdb.ini');
   DatabaseType := Config.ReadString('database', 'type', 'sqlite3slim');
   SQLConnector.ConnectorType := DatabaseType;
   SQLConnector.DatabaseName := Config.ReadString(DatabaseType, 'databasename', 'addressbookdata.db');
