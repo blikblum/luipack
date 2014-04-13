@@ -34,7 +34,9 @@ type
     procedure ControlNeeded;
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
     function GetVisible: Boolean;
+    procedure InitializePopupForm;
     procedure RemoveHandlers;
+    procedure SetControl(Value: TWinControl);
     procedure SetState(DoEvents: Boolean);
     procedure SetVisible(const Value: Boolean);
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
@@ -42,7 +44,7 @@ type
     procedure DoHide; virtual;
     procedure DoShow; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    property Control: TWinControl read FControl write FControl;
+    property Control: TWinControl read FControl write SetControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
     property Options: TDropDownOptions read FOptions write FOptions;
     property OnCreateControl: TDropDownCreateControl read FOnCreateControl write FOnCreateControl;
@@ -84,16 +86,7 @@ begin
     begin
       FControl := FControlClass.Create(Self);
       if ddoUsePopupForm in FOptions then
-      begin
-        if FPopupForm = nil then
-        begin
-          FPopupForm := TForm.Create(nil);
-          FPopupForm.BorderStyle := bsNone;
-          FPopupForm.PopupMode := pmAuto;
-        end;
-        FPopupForm.SetBounds(FPopupForm.Left, FPopupForm.Top, FControl.Width, FControl.Height);
-        FControl.Parent := FPopupForm;
-      end
+        InitializePopupForm
       else
       begin
         FControl.Visible := False;
@@ -126,10 +119,30 @@ begin
     Result := False;
 end;
 
+procedure TCustomDropDownManager.InitializePopupForm;
+begin
+  if FPopupForm = nil then
+  begin
+    FPopupForm := TForm.Create(nil);
+    FPopupForm.BorderStyle := bsNone;
+    FPopupForm.PopupMode := pmAuto;
+  end;
+  FPopupForm.SetBounds(FPopupForm.Left, FPopupForm.Top, FControl.Width, FControl.Height);
+  FControl.Parent := FPopupForm;
+end;
+
 procedure TCustomDropDownManager.RemoveHandlers;
 begin
   Application.RemoveOnUserInputHandler(@UserInputHandler);
   Screen.RemoveHandlerActiveControlChanged(@FocusChangeHandler);
+end;
+
+procedure TCustomDropDownManager.SetControl(Value: TWinControl);
+begin
+  if FControl = Value then Exit;
+  FControl := Value;
+  if (Value <> nil) and (ddoUsePopupForm in FOptions) then
+    InitializePopupForm;
 end;
 
 procedure TCustomDropDownManager.SetState(DoEvents: Boolean);
