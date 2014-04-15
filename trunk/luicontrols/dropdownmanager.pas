@@ -14,7 +14,7 @@ type
   //todo:
   // make use of window shadow
 
-  TDropDownOption = (ddoUsePopupForm);
+  TDropDownOption = (ddoUsePopupForm, ddoSetFocus);
 
   TDropDownOptions = set of TDropDownOption;
 
@@ -70,10 +70,15 @@ type
 
 implementation
 
+uses
+  LCLProc;
+
 { TCustomDropDownManager }
 
 function TCustomDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
+  if AControl <> nil then
+    DebugLn('ControlGrabsFocus ', AControl.Name);
   Result := (AControl <> nil) and (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and ((ddoUsePopupForm in FOptions) or (GetParentForm(FControl) = GetParentForm(AControl)));
 end;
@@ -155,7 +160,7 @@ begin
     IsControlVisible := FControl.Visible;
   if IsControlVisible then
   begin
-    if FControl.CanFocus then
+    if (ddoSetFocus in FOptions) and FControl.CanFocus then
       FControl.SetFocus;
     if DoEvents then
       DoShow;
