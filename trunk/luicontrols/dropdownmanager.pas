@@ -77,8 +77,6 @@ uses
 
 function TCustomDropDownManager.ControlGrabsFocus(AControl: TControl): Boolean;
 begin
-  if AControl <> nil then
-    DebugLn('ControlGrabsFocus ', AControl.Name);
   Result := (AControl <> nil) and (AControl <> FControl) and (AControl <> FMasterControl) and
     not FControl.IsParentOf(AControl) and ((ddoUsePopupForm in FOptions) or (GetParentForm(FControl) = GetParentForm(AControl)));
 end;
@@ -112,7 +110,7 @@ end;
 
 procedure TCustomDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
 begin
-  if ControlGrabsFocus(Application.MouseControl) then
+  if ControlGrabsFocus(LastControl) then
     Visible := False;
 end;
 
