@@ -46,7 +46,7 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     property Control: TWinControl read FControl write SetControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
-    property Options: TDropDownOptions read FOptions write FOptions;
+    property Options: TDropDownOptions read FOptions write FOptions default [];
     property OnCreateControl: TDropDownCreateControl read FOnCreateControl write FOnCreateControl;
     property OnHide: TNotifyEvent read FOnHide write FOnHide;
     property OnShow: TNotifyEvent read FOnShow write FOnShow;
