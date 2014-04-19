@@ -171,7 +171,7 @@ begin
           jtObject:
             begin
               PropData := TJSONObject(ArrayItem).Find(ParName);
-              if PropData <> nil then
+              if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
                 ParValue := PropData.Value;
             end;
           jtNumber, jtString, jtBoolean:
@@ -184,7 +184,7 @@ begin
     jtObject:
       begin
         PropData := TJSONObject(FData).Find(ParName);
-        if PropData <> nil then
+        if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
           ParValue := PropData.Value;
       end;
   end;
