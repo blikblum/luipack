@@ -46,7 +46,8 @@ type
     function GetResourceIdentifierSQL: String;
     function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
-    procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False);
+    procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
+    procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False); virtual;
   public
     destructor Destroy; override;
     procedure AfterConstruction; override;
@@ -407,6 +408,21 @@ begin
     TryStrToJSON(FJSONFields, FJSONFieldsData);
 end;
 
+procedure TSqldbJSONResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
+var
+  ParamData: TJSONData;
+  PKField: TField;
+begin
+  PKField := Query.FindField(FPrimaryKey);
+  if PKField = nil then
+    raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [FPrimaryKey]);
+  ParamData := Params.Find(FPrimaryKeyParam);
+  if ParamData <> nil then
+    PKField.Value := ParamData.Value
+  else
+    raise Exception.CreateFmt('Param "%s" (PrimaryKeyParam) not specified', [FPrimaryKeyParam]);
+end;
+
 destructor TSqldbJSONResource.Destroy;
 begin
   FJSONFieldsData.Free;
@@ -602,7 +618,13 @@ begin
       Query.Open;
       if TryStrToJSON(ARequest.Content, RequestData) then
       try
-        Query.Edit;
+        if Query.RecordCount > 0 then
+          Query.Edit
+        else
+        begin
+          Query.Append;
+          SetPrimaryKeyData(Query, URIParams);
+        end;
         SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
         Query.Post;
         Query.ApplyUpdates;
