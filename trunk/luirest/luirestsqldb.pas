@@ -46,6 +46,7 @@ type
     function GetResourceIdentifierSQL: String;
     function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
+    procedure PrepareQuery(Query: TSQLQuery); virtual;
     procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False); virtual;
   public
@@ -403,9 +404,20 @@ procedure TSqldbJSONResource.Loaded(Tag: PtrInt);
 begin
   inherited Loaded(Tag);
   if FInputFields <> '' then
-    TryStrToJSON(FInputFields, FInputFieldsData);
+  begin
+    if not TryStrToJSON(FInputFields, FInputFieldsData) then
+      raise Exception.CreateFmt('Invalid InputFields: "%s"', [FInputFields]);
+  end;
   if FJSONFields <> '' then
-    TryStrToJSON(FJSONFields, FJSONFieldsData);
+  begin
+    if not TryStrToJSON(FJSONFields, FJSONFieldsData) then
+      raise Exception.CreateFmt('Invalid JSONFields: "%s"', [FJSONFields]);
+  end;
+end;
+
+procedure TSqldbJSONResource.PrepareQuery(Query: TSQLQuery);
+begin
+  //
 end;
 
 procedure TSqldbJSONResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
@@ -515,6 +527,7 @@ begin
       Query.DataBase := FConnection;
       Query.SQL.Add(FSelectSQL);
       Query.SQL.Add(GetResourceIdentifierSQL);
+      PrepareQuery(Query);
       JSONDataToParams(URIParams, Query.Params);
       try
         Query.Open;
@@ -553,6 +566,7 @@ begin
       Query.DataBase := FConnection;
       Query.SQL.Add(FSelectSQL);
       Query.SQL.Add('where 1 <> 1');
+      PrepareQuery(Query);
       JSONDataToParams(URIParams, Query.Params);
       if TryStrToJSON(ARequest.Content, RequestData) then
       begin
@@ -603,9 +617,7 @@ end;
 procedure TSqldbJSONResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 var
   RequestData: TJSONObject;
-  ResponseData: TJSONObject;
   Query: TSQLQuery;
-  ConvertOptions: TDatasetToJSONOptions;
 begin
   if not FIsCollection and not FReadOnly then
   begin
@@ -615,6 +627,7 @@ begin
       Query.SQL.Add(FSelectSQL);
       Query.SQL.Add(GetResourceIdentifierSQL);
       JSONDataToParams(URIParams, Query.Params);
+      PrepareQuery(Query);
       Query.Open;
       if TryStrToJSON(ARequest.Content, RequestData) then
       try
@@ -632,17 +645,7 @@ begin
       finally
         RequestData.Free;
       end;
-      ConvertOptions := [djoSetNull];
-      if FPreserveCase then
-        Include(ConvertOptions, djoPreserveCase);
-      ResponseData := TJSONObject.Create;
-      try
-        DatasetToJSON(Query, ResponseData, ConvertOptions, FOutputFields);
-        DecodeJSONFields(ResponseData);
-        AResponse.Contents.Add(ResponseData.AsJSON);
-      finally
-        ResponseData.Free;
-      end;
+      RedirectRequest(ARequest, AResponse, 'GET', ARequest.PathInfo, False);
     finally
       Query.Destroy;
     end;
