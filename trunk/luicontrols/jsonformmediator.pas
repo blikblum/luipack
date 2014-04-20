@@ -91,8 +91,10 @@ type
     procedure SaveData(Data: TJSONObject);
   protected
     function AllowsCaptionLabel: Boolean; override;
+    function FormMediator: TJSONFormMediator;
   public
     procedure Assign(Source: TPersistent); override;
+    procedure Reset(UpdateData: Boolean);
     property OptionsData: TJSONObject read GetOptionsData;
   published
     property Options: String read FOptions write FOptions;
@@ -125,8 +127,11 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function ElementByName(const ElementName: String): TJSONFormElement;
     procedure LoadData;
+    procedure LoadData(const PropertySet: String);
     procedure SaveData;
+    procedure SaveData(const PropertySet: String);
     property Data: TJSONObject read FData write SetData;
   published
     property Elements: TJSONFormElements read FElements write SetElements;
@@ -697,6 +702,11 @@ begin
   inherited Destroy;
 end;
 
+function TJSONFormMediator.ElementByName(const ElementName: String): TJSONFormElement;
+begin
+  Result := FElements.ElementByName(ElementName);
+end;
+
 procedure TJSONFormMediator.LoadData;
 var
   i: Integer;
@@ -711,6 +721,18 @@ begin
   end;
 end;
 
+procedure TJSONFormMediator.LoadData(const PropertySet: String);
+var
+  Element: TJSONFormElement;
+begin
+  //todo: implement property Set
+  //for now load a element only
+  Element := FElements.FindElement(PropertySet, True);
+  if Element = nil then
+    raise Exception.CreateFmt('Could not find a element with property "%s"', [PropertySet]);
+  Element.LoadData(FData);
+end;
+
 procedure TJSONFormMediator.SaveData;
 var
   i: Integer;
@@ -718,6 +740,18 @@ begin
   //todo: check Data
   for i := 0 to FElements.Count - 1 do
     TJSONFormElement(FElements[i]).SaveData(FData);
+end;
+
+procedure TJSONFormMediator.SaveData(const PropertySet: String);
+var
+  Element: TJSONFormElement;
+begin
+  //todo: implement property Set
+  //for now save a element only
+  Element := FElements.FindElement(PropertySet, True);
+  if Element = nil then
+    raise Exception.CreateFmt('Could not find a element with property "%s"', [PropertySet]);
+  Element.SaveData(FData);
 end;
 
 { TJSONFormElements }
@@ -843,12 +877,33 @@ begin
     Result := True;
 end;
 
+function TJSONFormElement.FormMediator: TJSONFormMediator;
+begin
+  Result := (Collection.Owner as TJSONFormMediator);
+end;
+
 procedure TJSONFormElement.Assign(Source: TPersistent);
 begin
   inherited Assign(Source);
   if Source is TJSONFormElement then
   begin
     Options := TJSONFormElement(Source).Options;
+  end;
+end;
+
+procedure TJSONFormElement.Reset(UpdateData: Boolean);
+var
+  Data: TJSONObject;
+begin
+  FInitialized := False;
+  if UpdateData then
+  begin
+    Data := FormMediator.Data;
+    if Data <> nil then
+    begin
+      SaveData(Data);
+      LoadData(Data);
+    end;
   end;
 end;
 
