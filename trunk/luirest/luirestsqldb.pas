@@ -425,14 +425,17 @@ var
   ParamData: TJSONData;
   PKField: TField;
 begin
-  PKField := Query.FindField(FPrimaryKey);
-  if PKField = nil then
-    raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [FPrimaryKey]);
-  ParamData := Params.Find(FPrimaryKeyParam);
-  if ParamData <> nil then
-    PKField.Value := ParamData.Value
-  else
-    raise Exception.CreateFmt('Param "%s" (PrimaryKeyParam) not specified', [FPrimaryKeyParam]);
+  if FPrimaryKeyParam <> '' then
+  begin
+    PKField := Query.FindField(FPrimaryKey);
+    if PKField = nil then
+      raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [FPrimaryKey]);
+    ParamData := Params.Find(FPrimaryKeyParam);
+    if ParamData <> nil then
+      PKField.Value := ParamData.Value
+    else
+      raise Exception.CreateFmt('Param "%s" (PrimaryKeyParam) not specified', [FPrimaryKeyParam]);
+  end;
 end;
 
 destructor TSqldbJSONResource.Destroy;
