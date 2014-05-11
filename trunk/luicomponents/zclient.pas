@@ -80,7 +80,7 @@ begin
   FreeAndNil(FQueryDefs);
   DefFile := TFileStream.Create(FileName, fmOpenRead);
   try
-    FQueryDefs := StreamToJSONData(DefFile) as TJSONObject;
+    FQueryDefs := StreamToJSON(DefFile) as TJSONObject;
   finally
     DefFile.Destroy;
   end;
