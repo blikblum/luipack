@@ -75,6 +75,13 @@ type
     class function AllowsCaptionLabel: Boolean; override;
   end;
 
+  { TJSONMemoMediator }
+
+  TJSONMemoMediator = class(TJSONGUIMediator)
+    class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
+    class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+  end;
+
   { TJSONFormElement }
 
   TJSONFormElement = class(TFormElement)
@@ -171,6 +178,58 @@ procedure RegisterJSONMediator(ControlClass: TControlClass;
   MediatorClass: TJSONGUIMediatorClass);
 begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
+end;
+
+{ TJSONMemoMediator }
+
+class procedure TJSONMemoMediator.DoJSONToGUI(Data: TJSONObject;
+  Element: TJSONFormElement);
+var
+  PropData: TJSONArray;
+  ItemData: TJSONData;
+  i: Integer;
+  MemoLines: TStrings;
+begin
+  if not (Element.OptionsData.Get('datatype', '') = 'array') then
+    inherited DoJSONToGUI(Data, Element)
+  else
+  begin
+    MemoLines := (Element.Control as TMemo).Lines;
+    MemoLines.BeginUpdate;
+    try
+      MemoLines.Clear;
+      if FindJSONProp(Data, Element.PropertyName, PropData) then
+      begin
+        for i := 0 to PropData.Count - 1 do
+        begin
+          ItemData := PropData.Items[i];
+          if ItemData.JSONType = jtString then
+            MemoLines.Add(ItemData.AsString);
+        end;
+      end;
+    finally
+      MemoLines.EndUpdate;
+    end;
+  end;
+end;
+
+class procedure TJSONMemoMediator.DoGUIToJSON(Element: TJSONFormElement;
+  Data: TJSONObject);
+var
+  MemoLines: TStrings;
+  PropData: TJSONArray;
+  i: Integer;
+begin
+  if not (Element.OptionsData.Get('datatype', '') = 'array') then
+    inherited DoGUIToJSON(Element, Data)
+  else
+  begin
+    MemoLines := (Element.Control as TMemo).Lines;
+    PropData := TJSONArray.Create;
+    for i := 0 to MemoLines.Count - 1 do
+      PropData.Add(MemoLines[i]);
+    Data.Elements[Element.PropertyName] := PropData;
+  end;
 end;
 
 { TJSONCheckBoxMediator }
@@ -910,7 +969,7 @@ end;
 initialization
   MediatorStore := TJSONGUIMediatorStore.Create;
   RegisterJSONMediator(TEdit, TJSONGUIMediator);
-  RegisterJSONMediator(TMemo, TJSONGUIMediator);
+  RegisterJSONMediator(TMemo, TJSONMemoMediator);
   RegisterJSONMediator(TComboBox, TJSONComboBoxMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
   RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
