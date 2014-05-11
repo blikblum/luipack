@@ -331,6 +331,7 @@ procedure TRESTResource.RedirectRequest(ARequest: TRequest; AResponse: TResponse
 var
   Offset: Integer;
 begin
+  //todo: add ability to retieve the original request path and method
   if Relative then
     Offset := 1
   else
