@@ -108,10 +108,23 @@ type
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
+  { TServiceInfoResource }
+
+  TServiceInfoResource = class(TRESTResource)
+  public
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
 implementation
 
 uses
   LuiJSONUtils, fpjson, XMLWrite, DOM, variants;
+
+procedure TServiceInfoResource.HandleGet(ARequest: TRequest;
+  AResponse: TResponse);
+begin
+  AResponse.Contents.Add('{"version":"0.1"}');
+end;
 
 { TCategory }
 

@@ -6,7 +6,7 @@ unit AddressBookResources;
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb,
+  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb, HTTPDefs,
   {$ifdef USE_SQLITE3_SLIM}
   sqlite3slimconn
   {$else}
@@ -24,6 +24,13 @@ const
 
 type
 
+  { TServiceInfoResource }
+
+  TServiceInfoResource = class(TRESTResource)
+  public
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
   { TAddressBookResourceFactory }
 
   TAddressBookResourceFactory = class(TComponent)
@@ -32,6 +39,14 @@ type
   end;
 
 implementation
+
+{ TServiceInfoResource }
+
+procedure TServiceInfoResource.HandleGet(ARequest: TRequest;
+  AResponse: TResponse);
+begin
+  AResponse.Contents.Add('{"version":"0.1"}');
+end;
 
 { TAddressBookResourceFactory }
 

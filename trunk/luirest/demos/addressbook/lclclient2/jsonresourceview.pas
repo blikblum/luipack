@@ -244,7 +244,7 @@ begin
     CategoryName := '';
     CategoryId := ContactData.Get('categoryid', -1);
     if CategoryId <> -1 then
-    begin;
+    begin
       CategoryIndex := GetJSONIndexOf(Categories.Data, ['id', CategoryId]);
       if CategoryIndex <> -1 then
         CategoryName := Categories.Data.Objects[CategoryIndex].Strings['name'];

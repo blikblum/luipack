@@ -1,0 +1,130 @@
+object MainForm: TMainForm
+  Left = 401
+  Height = 347
+  Top = 295
+  Width = 615
+  Caption = 'AddressBook MVP'
+  ClientHeight = 347
+  ClientWidth = 615
+  LCLVersion = '1.3'
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 8
+    Width = 47
+    Caption = 'Contacts'
+    ParentColor = False
+  end
+  object ContactsGrid: TStringGrid
+    Left = 8
+    Height = 280
+    Top = 25
+    Width = 346
+    ColCount = 3
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
+    RowCount = 1
+    TabOrder = 0
+    OnSelectCell = ContactsGridSelectCell
+    ColWidths = (
+      47
+      189
+      84
+    )
+    Cells = (
+      3
+      0
+      0
+      'Id'
+      1
+      0
+      'Name'
+      2
+      0
+      'Category'
+    )
+  end
+  object AddContactButton: TButton
+    Left = 8
+    Height = 25
+    Top = 309
+    Width = 75
+    Caption = 'Add'
+    OnClick = AddContactButtonClick
+    TabOrder = 1
+  end
+  object EditContactButton: TButton
+    Left = 96
+    Height = 25
+    Top = 309
+    Width = 75
+    Caption = 'Edit'
+    OnClick = EditContactButtonClick
+    TabOrder = 2
+  end
+  object DeleteContactButton: TButton
+    Left = 184
+    Height = 25
+    Top = 309
+    Width = 75
+    Caption = 'Delete'
+    OnClick = DeleteContactButtonClick
+    TabOrder = 3
+  end
+  object PhonesLabel: TLabel
+    Left = 360
+    Height = 15
+    Top = 8
+    Width = 84
+    Caption = 'Contact Phones'
+    ParentColor = False
+  end
+  object PhonesGrid: TStringGrid
+    Left = 360
+    Height = 100
+    Top = 25
+    Width = 243
+    ColCount = 2
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
+    RowCount = 1
+    TabOrder = 4
+    ColWidths = (
+      51
+      150
+    )
+    Cells = (
+      2
+      0
+      0
+      'Id'
+      1
+      0
+      'Number'
+    )
+  end
+  object AddPhoneButton: TButton
+    Left = 360
+    Height = 25
+    Top = 132
+    Width = 75
+    Caption = 'Add'
+    TabOrder = 5
+  end
+  object EditPhoneButton: TButton
+    Left = 444
+    Height = 25
+    Top = 132
+    Width = 75
+    Caption = 'Edit'
+    TabOrder = 6
+  end
+  object DeletePhoneButton: TButton
+    Left = 528
+    Height = 25
+    Top = 132
+    Width = 75
+    Caption = 'Delete'
+    TabOrder = 7
+  end
+end

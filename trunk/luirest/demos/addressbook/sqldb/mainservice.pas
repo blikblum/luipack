@@ -57,6 +57,7 @@ begin
   FResourceFactory := TAddressBookResourceFactory.Create(Self);
   Resources.Register('contacts', @FResourceFactory.CreateResource, RES_CONTACTS);
   Resources.Register('categories', @FResourceFactory.CreateResource, RES_CATEGORIES);
+  Resources.Register('info', TServiceInfoResource, 0);
 end;
 
 end.
