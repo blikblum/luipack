@@ -12,12 +12,15 @@ type
 
   { TInterfaceDef }
 
-  TInterfaceDef = class
+  TInterfaceDef = class(TObject, IFPObserver)
   private
     FComponentClass: TComponentClass;
     FOnInstanceCreate: TInstanceCreateEvent;
     FSingletonReference: IInterface;
+    procedure FPOObservedChanged(ASender: TObject;
+      Operation: TFPObservedOperation; Data: Pointer);
   public
+    destructor Destroy; override;
     function GetInterfaceReference(const IID: TGuid): IInterface;
     property ComponentClass: TComponentClass read FComponentClass write FComponentClass;
     property OnInstanceCreate: TInstanceCreateEvent read FOnInstanceCreate write FOnInstanceCreate;
@@ -108,6 +111,20 @@ begin
 end;
 
 { TInterfaceDef }
+
+procedure TInterfaceDef.FPOObservedChanged(ASender: TObject;
+  Operation: TFPObservedOperation; Data: Pointer);
+begin
+  if Operation = ooFree then
+    FSingletonReference := nil;
+end;
+
+destructor TInterfaceDef.Destroy;
+begin
+  if FSingletonReference <> nil then
+    (FSingletonReference as TPersistent).FPODetachObserver(Self);
+  inherited Destroy;
+end;
 
 function TInterfaceDef.GetInterfaceReference(const IID: TGuid): IInterface;
 var
@@ -201,6 +218,7 @@ begin
   Def := TInterfaceDef.Create;
   if not Component.GetInterface(IID, Def.FSingletonReference) then
     raise Exception.CreateFmt('Object instance does not implements "%s"', [GuidStr]);
+  Component.FPOAttachObserver(Def);
   FIntfList.Add(GuidStr, Def);
 end;
 
