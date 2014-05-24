@@ -60,12 +60,12 @@ begin
     RES_CONTACTS:
     begin
       SqldbResource.IsCollection := True;
-      SqldbResource.SelectSQL := 'Select Id, Name from contacts';
+      SqldbResource.SelectSQL := 'Select Id, CategoryId, Name from contacts';
       SqldbResource.SetDefaultSubPath('contactid', @CreateResource, RES_CONTACT);
     end;
     RES_CONTACT:
     begin
-      SqldbResource.SelectSQL := 'Select Id, Name from Contacts';
+      SqldbResource.SelectSQL := 'Select Id, CategoryId, Name from Contacts';
       SqldbResource.PrimaryKeyParam := 'contactid';
       SqldbResource.RegisterSubPath('phones', @CreateResource, RES_CONTACTPHONES);
     end;
