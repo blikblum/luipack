@@ -89,6 +89,7 @@ object MainForm: TMainForm
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect, goSmoothScroll]
     RowCount = 1
     TabOrder = 4
+    OnSelectCell = PhonesGridSelectCell
     ColWidths = (
       51
       150
@@ -109,6 +110,7 @@ object MainForm: TMainForm
     Top = 132
     Width = 75
     Caption = 'Add'
+    OnClick = AddPhoneButtonClick
     TabOrder = 5
   end
   object EditPhoneButton: TButton
@@ -117,6 +119,7 @@ object MainForm: TMainForm
     Top = 132
     Width = 75
     Caption = 'Edit'
+    OnClick = EditPhoneButtonClick
     TabOrder = 6
   end
   object DeletePhoneButton: TButton
@@ -125,6 +128,7 @@ object MainForm: TMainForm
     Top = 132
     Width = 75
     Caption = 'Delete'
+    OnClick = DeletePhoneButtonClick
     TabOrder = 7
   end
 end

@@ -42,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="18">
       <Unit0>
         <Filename Value="AddressBookMVP.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -108,6 +108,42 @@
         <Filename Value="src\includes\defaultaddress.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="src\views\contactview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ContactForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ContactView"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="src\presenters\contactpresenter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ContactPresenter"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="src\views\categoriesview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CategoriesForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CategoriesView"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="src\models\contactphonemodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ContactPhoneModel"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="webservice.json"/>
+        <IsPartOfProject Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="src\views\contactphoneview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ContactPhoneForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ContactPhoneView"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

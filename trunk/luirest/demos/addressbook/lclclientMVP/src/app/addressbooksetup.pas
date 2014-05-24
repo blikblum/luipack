@@ -13,7 +13,11 @@ implementation
 
 uses
   PresentationManager,
-  AppConfigView;
+  AppConfigView,
+  ContactPresenter, ContactView,
+  ContactPhoneView,
+  CategoriesView
+  ;
 
 procedure ConfigureApp(App: TAddressBookApp);
 var
@@ -21,6 +25,9 @@ var
 begin
   Presentations := App.Presentations;
   Presentations.Register('appconfig', TAppConfigViewForm);
+  Presentations.Register('contact', TContactForm, TContactPresenter);
+  Presentations.Register('contactphone', TContactPhoneForm);
+  Presentations.Register('categories', TCategoriesForm);
 end;
 
 end.

@@ -1,0 +1,100 @@
+object ContactForm: TContactForm
+  Cursor = crHandPoint
+  Left = 588
+  Height = 166
+  Top = 324
+  Width = 334
+  Caption = 'ContactForm'
+  ClientHeight = 166
+  ClientWidth = 334
+  OnShow = FormShow
+  Position = poOwnerFormCenter
+  LCLVersion = '1.3'
+  object NameEdit: TLabeledEdit
+    Left = 8
+    Height = 23
+    Top = 32
+    Width = 240
+    EditLabel.AnchorSideLeft.Control = NameEdit
+    EditLabel.AnchorSideRight.Control = NameEdit
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = NameEdit
+    EditLabel.Left = 8
+    EditLabel.Height = 15
+    EditLabel.Top = 14
+    EditLabel.Width = 240
+    EditLabel.Caption = 'Name'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object CategoryComboBox: TComboBox
+    Left = 8
+    Height = 23
+    Top = 82
+    Width = 236
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 65
+    Width = 48
+    Caption = 'Category'
+    ParentColor = False
+  end
+  object CancelButton: TBitBtn
+    Left = 208
+    Height = 30
+    Top = 128
+    Width = 120
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 2
+  end
+  object SaveButton: TBitBtn
+    Left = 80
+    Height = 30
+    Top = 128
+    Width = 120
+    Anchors = [akRight, akBottom]
+    Caption = 'Save'
+    Default = True
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = SaveButtonClick
+    TabOrder = 3
+  end
+  object EditCategoriesLabel: TAdvancedLabel
+    Left = 249
+    Height = 15
+    Top = 87
+    Width = 79
+    Link = True
+    OnClick = EditCategoriesLabelClick
+    Caption = 'Edit Categories'
+    Font.Color = clBlue
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
+  end
+  object ContactMediator: TJSONFormMediator
+    Elements = <    
+      item
+        Control = NameEdit
+        Name = 'name'
+        PropertyName = 'name'
+      end    
+      item
+        Control = CategoryComboBox
+        Name = 'categoryid'
+        PropertyName = 'categoryid'
+        Options = '{"schema":{"valuepath":"id","textpath":"name"}}'
+      end>
+    left = 72
+    top = 66
+  end
+end

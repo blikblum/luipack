@@ -13,6 +13,7 @@ type
 
   TContact = class(TSimpleJSONModel)
   protected
+    function CreateData: TJSONObject; override;
     class function GetResourceName: String; override;
   end;
 
@@ -45,6 +46,11 @@ begin
 end;
 
 { TContact }
+
+function TContact.CreateData: TJSONObject;
+begin
+  Result := TJSONObject.Create(['name', 'New Contact']);
+end;
 
 class function TContact.GetResourceName: String;
 begin
