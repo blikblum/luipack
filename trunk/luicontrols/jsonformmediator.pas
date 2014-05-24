@@ -570,7 +570,7 @@ begin
         jtObject:
           begin
             ValueData := ItemData.FindPath(TextPath);
-            if ValueData <> nil then
+            if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
               Items.Add(ValueData.AsString)
             else
               Items.Add('');
@@ -969,6 +969,7 @@ end;
 initialization
   MediatorStore := TJSONGUIMediatorStore.Create;
   RegisterJSONMediator(TEdit, TJSONGUIMediator);
+  RegisterJSONMediator(TLabeledEdit, TJSONGUIMediator);
   RegisterJSONMediator(TMemo, TJSONMemoMediator);
   RegisterJSONMediator(TComboBox, TJSONComboBoxMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
