@@ -7,9 +7,9 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Controls,
-  MainView,
-  AddressBookApp, AddressBookSetup, MainPresenter, ContactModel, CategoryModel;
+  Forms, Controls, MainView, AddressBookApp, AddressBookSetup, MainPresenter,
+  ContactModel, CategoryModel, ContactView, ContactPresenter, CategoriesView,
+  ContactPhoneModel, ContactPhoneView;
 
 {$R *.res}
 
@@ -39,6 +39,9 @@ begin
     MainForm.Presenter := TMainPresenter.Create(Application);
     MainForm.Presenter.Initialize;
   end;
+  Application.CreateForm(TContactForm, ContactForm);
+  Application.CreateForm(TCategoriesForm, CategoriesForm);
+  Application.CreateForm(TContactPhoneForm, ContactPhoneForm);
   Application.Run;
 end.
 

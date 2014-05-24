@@ -1,0 +1,52 @@
+object ContactPhoneForm: TContactPhoneForm
+  Left = 382
+  Height = 99
+  Top = 110
+  Width = 279
+  Caption = 'Edit Number'
+  ClientHeight = 99
+  ClientWidth = 279
+  OnShow = FormShow
+  Position = poOwnerFormCenter
+  LCLVersion = '1.3'
+  object NumberEdit: TLabeledEdit
+    Left = 8
+    Height = 23
+    Top = 32
+    Width = 256
+    EditLabel.AnchorSideLeft.Control = NumberEdit
+    EditLabel.AnchorSideRight.Control = NumberEdit
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = NumberEdit
+    EditLabel.Left = 8
+    EditLabel.Height = 15
+    EditLabel.Top = 14
+    EditLabel.Width = 256
+    EditLabel.Caption = 'Number'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object SaveButton: TBitBtn
+    Left = 40
+    Height = 30
+    Top = 64
+    Width = 107
+    Caption = 'Save'
+    Default = True
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = SaveButtonClick
+    TabOrder = 1
+  end
+  object CancelButton: TBitBtn
+    Left = 165
+    Height = 30
+    Top = 64
+    Width = 107
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 2
+  end
+end
