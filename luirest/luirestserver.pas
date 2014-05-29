@@ -208,6 +208,20 @@ begin
   Inc(StrOffset, P + 1);
 end;
 
+function GetJSONExceptionBackTrace: String;
+var
+  i: Integer;
+  Frames: PPointer;
+begin
+  Result := '["' + StringToJSONString(BackTraceStrFunc(ExceptAddr)) + '"';
+  Frames := ExceptFrames;
+  for i := 0 to ExceptFrameCount - 1 do
+  begin
+    Result := Result + ',"' + StringToJSONString(BackTraceStrFunc(Frames[i]))+'"';
+  end;
+  Result := Result + ']';
+end;
+
 procedure TRESTServiceModule.HandleRequest(ARequest: TRequest;
   AResponse: TResponse);
 var
@@ -227,8 +241,9 @@ begin
   except
     on E:Exception do
     begin
-      //todo: send stack backtrace
-      SetResponseStatus(AResponse, 500, '%s: %s', [E.ClassName, E.Message]);
+      AResponse.Code := 500;
+      AResponse.Contents.Add(Format('{"message":"%s", "backtrace":%s}', [StringToJSONString(Format('%s: %s', [E.ClassName, E.Message])),
+        GetJSONExceptionBackTrace]));
     end;
   end;
 end;
