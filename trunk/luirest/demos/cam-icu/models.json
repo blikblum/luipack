@@ -9,61 +9,61 @@
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "Name",
+          "DisplayLabel" : "Nome",
           "FieldID" : "{DF4A6285-E968-4BB4-A1AD-234927B16F16}",
           "FieldName" : "Name",
           "FieldType" : "dftString"
         },
         {
-          "DisplayLabel" : "Registry",
+          "DisplayLabel" : "Registro",
           "FieldID" : "{D0D5E0E7-301F-46F9-873C-8D6F56340EE8}",
           "FieldName" : "Registry",
           "FieldType" : "dftString"
         },
         {
-          "DisplayLabel" : "BirthDate",
+          "DisplayLabel" : "Data de Nascimento",
           "FieldID" : "{310771EA-46CF-4532-9E54-62AE9A708F73}",
           "FieldName" : "BirthDate",
           "FieldType" : "dftDate"
         },
         {
-          "DisplayLabel" : "Gender",
+          "DisplayLabel" : "Gênero",
           "FieldID" : "{E24ED55A-BFD4-457A-AEBC-3FBFE42AF353}",
           "FieldName" : "Gender",
           "FieldType" : "dftString"
         },
         {
-          "DisplayLabel" : "OriginationId",
+          "DisplayLabel" : "Origem",
           "FieldID" : "{70529E6B-0175-4C19-A9AC-D7F17061ED08}",
           "FieldName" : "OriginationId",
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "InternmentDate",
+          "DisplayLabel" : "Data de Internamento",
           "FieldID" : "{E0D96E71-4C67-441B-AAE8-1D9858B2D844}",
           "FieldName" : "InternmentDate",
           "FieldType" : "dftDateTime"
         },
         {
-          "DisplayLabel" : "InternmentTypeId",
+          "DisplayLabel" : "Tipo de Internamento",
           "FieldID" : "{D295132D-CCB3-4B79-AD13-AFD981B15D3E}",
           "FieldName" : "InternmentTypeId",
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "IsReInternment",
+          "DisplayLabel" : "Reinternamento",
           "FieldID" : "{BFF0C121-C313-4864-8662-24D26D92ED99}",
           "FieldName" : "IsReInternment",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "IsReInternment48h",
+          "DisplayLabel" : "Reinternamento em 48h",
           "FieldID" : "{4DEE10EF-A1A5-4D57-A8D3-8CB1CCD13302}",
           "FieldName" : "IsReInternment48h",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "DiagnosticId",
+          "DisplayLabel" : "Diagnóstico",
           "FieldID" : "{EBB7F919-6B27-4DF2-868C-6FCAFE105254}",
           "FieldName" : "DiagnosticId",
           "FieldType" : "dftInteger"
@@ -81,149 +81,148 @@
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "DischargeDate",
+          "DisplayLabel" : "Data de Alta",
           "FieldID" : "{4D92AB99-79DB-4BAC-A132-5E9803DCDEAC}",
           "FieldName" : "DischargeDate",
           "FieldType" : "dftDate"
         },
         {
-          "DisplayLabel" : "DischargeReasonId",
+          "DisplayLabel" : "Motivo da Alta",
           "FieldID" : "{F6CD810E-86CE-4B4D-B93F-F4257F13E836}",
           "FieldName" : "DischargeReasonId",
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "VMDuration",
+          "DisplayLabel" : "Duração da Ventilação Mecânica",
           "FieldID" : "{71A9EE5D-FC9F-41E9-8B9B-60395DFD06BD}",
           "FieldName" : "VMDuration",
           "FieldType" : "dftInteger"
         },
         {
-          "DisplayLabel" : "HasICC",
+          "DisplayLabel" : "ICC",
           "FieldID" : "{39DEB664-B3D2-4FE6-BCE7-DEEF5FD6776D}",
           "FieldName" : "HasICC",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasIRC",
+          "DisplayLabel" : "IRC",
           "FieldID" : "{18070A97-2068-4D6D-BAC6-8C9BFF4B5706}",
           "FieldName" : "HasIRC",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasDCPF",
+          "DisplayLabel" : "DCPF",
           "FieldID" : "{C40F6912-74CC-44BE-AF70-1DE028F784BA}",
           "FieldName" : "HasDCPF",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasDPOC",
+          "DisplayLabel" : "DPOC",
           "FieldID" : "{FF15B09F-C9EF-4E81-8E76-28482FCE2B57}",
           "FieldName" : "HasDPOC",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasHematologyTumor",
+          "DisplayLabel" : "Tumor Hematológico",
           "FieldID" : "{DDAFE048-4479-476E-B5C4-A99929D5B78F}",
           "FieldName" : "HasHematologyTumor",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasLocoregionalTumor",
+          "DisplayLabel" : "Tumor Locoregional",
           "FieldID" : "{DF0E9306-764B-4B23-9890-898E9A1ABE8C}",
           "FieldName" : "HasLocoregionalTumor",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasMetastasis",
+          "DisplayLabel" : "Metástase",
           "FieldID" : "{BC404C3D-C7CB-4AD7-AF9F-21DF8C89E35A}",
           "FieldName" : "HasMetastasis",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasHAS",
+          "DisplayLabel" : "HAS",
           "FieldID" : "{26448293-5210-44D4-AC08-AC655D20DEC7}",
           "FieldName" : "HasHAS",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasDM",
+          "DisplayLabel" : "DM",
           "FieldID" : "{6CE739A0-C7D8-4D86-9B9F-71AF6488D7BC}",
           "FieldName" : "HasDM",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasPreviousIAM",
+          "DisplayLabel" : "IAM Prévio",
           "FieldID" : "{50CB260A-9F4E-49FC-8189-1384E371006A}",
           "FieldName" : "HasPreviousIAM",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasAVC",
+          "DisplayLabel" : "AVC",
           "FieldID" : "{81B74660-5751-424C-9E37-CD336DB10374}",
           "FieldName" : "HasAVC",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasVisualDeficit",
+          "DisplayLabel" : "Deficit Visual",
           "FieldID" : "{C29ADB7F-2574-4659-9D8B-681ABF322611}",
           "FieldName" : "HasVisualDeficit",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasAuditoryDeficit",
+          "DisplayLabel" : "Deficit Auditivo",
           "FieldID" : "{ABCDA4D1-B362-445B-AE9A-F83B1E9B6A99}",
           "FieldName" : "HasAuditoryDeficit",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasDementia",
+          "DisplayLabel" : "Demência",
           "FieldID" : "{F75B45AC-3E89-48D7-87ED-6BFBB9902E13}",
           "FieldName" : "HasDementia",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasAlcoholism",
+          "DisplayLabel" : "Alcoolismo",
           "FieldID" : "{192F213D-A73A-47F8-8672-B410D04B20F6}",
           "FieldName" : "HasAlcoholism",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasSmoking",
+          "DisplayLabel" : "Tabagismo",
           "FieldID" : "{87163EE3-9BD6-4A74-A8B5-A1889A3C3AF8}",
           "FieldName" : "HasSmoking",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasImmunoSuppression",
+          "DisplayLabel" : "Imunosupressão",
           "FieldID" : "{7FF15EC3-399A-4B64-A213-EE35FE9AC1B0}",
           "FieldName" : "HasImmunoSuppression",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasSIDA",
+          "DisplayLabel" : "SIDA",
           "FieldID" : "{9B0EE17C-5CE0-4773-B655-908367D4FF6E}",
           "FieldName" : "HasSIDA",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasRheumaticDisorder",
+          "DisplayLabel" : "Doença Reumática",
           "FieldID" : "{32D10088-0D8E-4944-A009-73E3CAEE7665}",
           "FieldName" : "HasRheumaticDisorder",
           "FieldType" : "dftBoolean"
         },
         {
-          "DisplayLabel" : "HasPsychiatricDisorder",
+          "DisplayLabel" : "Doença Psiquiátrica",
           "FieldID" : "{C4F2D849-4BC1-4D19-A1AA-57642CFE5E49}",
           "FieldName" : "HasPsychiatricDisorder",
           "FieldType" : "dftBoolean"
         }
       ],
-      "Name" : "NewModel"
+      "Name" : "Patient"
     }
   ],
   "Name" : "",
-  "Tag" : 0,
   "Views" : [
   ]
 }

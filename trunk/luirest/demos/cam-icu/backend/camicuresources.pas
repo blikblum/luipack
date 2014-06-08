@@ -40,7 +40,7 @@ begin
     RES_PATIENTS, RES_ACTIVEPATIENTS:
       begin
         SqldbResource.IsCollection := True;
-        SqldbResource.SelectSQL := 'Select Id, Name, BirthDate, Registry From Patient';
+        SqldbResource.SelectSQL := 'SELECT Id, Name, Registry, BirthDate, Gender, OriginationId, InternmentDate, InternmentTypeId, IsReInternment, IsReInternment48h, DiagnosticId, Apache2, SAPS3, DischargeDate, DischargeReasonId, VMDuration, HasICC, HasIRC, HasDCPF, HasDPOC, HasHematologyTumor, HasLocoregionalTumor, HasMetastasis, HasHAS, HasDM, HasPreviousIAM, HasAVC, HasVisualDeficit, HasAuditoryDeficit, HasDementia, HasAlcoholism, HasSmoking, HasImmunoSuppression,  HasSIDA,  HasRheumaticDisorder,  HasPsychiatricDisorder FROM Patient';
         SqldbResource.SetDefaultSubPath('patientid', @GetResource, RES_PATIENT);
         if ResourceTag = RES_ACTIVEPATIENTS then
           SqldbResource.ConditionsSQL := 'Where DischargeDate IS NULL'
