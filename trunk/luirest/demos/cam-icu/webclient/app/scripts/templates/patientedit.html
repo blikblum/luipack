@@ -1,0 +1,160 @@
+<h2 class="title-el"/>
+
+<form role="form">
+  <fieldset>
+    <legend>Cadastro</legend>
+  <div class="row">
+      <div class="form-group col-xs-4">
+        <label for="patient-registry">Registro</label>
+        <input id="patient-registry" name="registry" type="text" class="form-control" disabled/>
+      </div>
+      <div class="form-group col-xs-8">
+        <label for="patient-name">Nome</label>
+        <input id="patient-name" name="name" type="text" class="form-control"/>
+      </div>
+  </div>
+  <div class="row">
+    <div class="form-group col-xs-4">
+      <label for="patient-birthdate">Data de Nascimento</label>
+      <input id="patient-birthdate" name="birthdate" type="text" class="form-control"/>
+    </div>
+    <div class="form-group col-xs-4">
+      <label for="patient-gender">Gênero</label>
+      <input id="patient-gender" name="gender" type="text" class="form-control"/>
+    </div>
+  </div>
+  </fieldset>
+  <fieldset>
+    <legend>Dados do Internamento</legend>
+    <div class="row">
+      <div class="form-group col-xs-4">
+        <label for="patient-originationid">Origem</label>
+        <input id="patient-originationid" name="originationid" type="text" class="form-control"/>
+      </div>
+      <div class="form-group col-xs-4">
+        <label for="patient-internmentdate">Data de Internamento</label>
+        <input id="patient-internmentdate" name="internmentdate" type="text" class="form-control"/>
+      </div>
+      <div class="form-group col-xs-4">
+        <label for="patient-internmenttypeid">Tipo de Internamento</label>
+        <input id="patient-internmenttypeid" name="internmenttypeid" type="text" class="form-control"/>
+      </div>
+    </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" name="isreinternment"/>Reinternamento</label>
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox"name="isreinternment48h"/>Reinternamento em 48h</label>
+  </div>
+  </fieldset>
+  <fieldset>
+    <legend>Dados Clínicos</legend>
+  <div class="row">
+  <div class="form-group col-xs-4">
+    <label for="patient-diagnosticid">Diagnóstico</label>
+    <input id="patient-diagnosticid" name="diagnosticid" type="text" class="form-control"/>
+  </div>
+  <div class="form-group col-xs-4">
+    <label for="patient-apache2">Apache2</label>
+    <input id="patient-apache2" name="apache2" type="text" class="form-control"/>
+  </div>
+  <div class="form-group col-xs-4">
+    <label for="patient-saps3">SAPS3</label>
+    <input id="patient-saps3" name="saps3" type="text" class="form-control"/>
+  </div>
+  </div>
+    <label>Comorbidades</label>
+    <div class="row">
+    <div class="col-md-3">
+        <div class="checkbox">
+            <label>
+                <input name="hasirc" type="checkbox"/>IRC</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasdcpf" type="checkbox"/>DCPF</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasdpoc" type="checkbox"/>DPOC</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hashematologytumor" type="checkbox"/>Tumor Hematológico</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="checkbox">
+            <label>
+                <input name="haslocoregionaltumor" type="checkbox"/>Tumor Locoregional</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasmetastasis" type="checkbox"/>Metástase</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hashas" type="checkbox"/>HAS</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasdm" type="checkbox"/>DM</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="haspreviousiam" type="checkbox"/>IAM Prévio</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="checkbox">
+            <label>
+                <input name="hasavc" type="checkbox"/>AVC</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasvisualdeficit" type="checkbox"/>Deficit Visual</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasauditorydeficit" type="checkbox"/>Deficit Auditivo</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasdementia" type="checkbox"/>Demência</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasalcoholism" type="checkbox"/>Alcoolismo</label>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="checkbox">
+            <label>
+                <input name="hassmoking" type="checkbox"/>Tabagismo</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasimmunosuppression" type="checkbox"/>Imunosupressão</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hassida" type="checkbox"/>SIDA</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="hasrheumaticdisorder" type="checkbox"/>Doença Reumática</label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input name="haspsychiatricdisorder" type="checkbox"/>Doença Psiquiátrica</label>
+        </div>
+    </div>
+    </div>
+  </fieldset>
+
+</form>
+<button type="button" class="btn btn-default cancel">Cancelar</button>
+<button type="button" class="btn btn-primary save-model">Salvar</button>
+
