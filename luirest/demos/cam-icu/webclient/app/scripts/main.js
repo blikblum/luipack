@@ -30,7 +30,9 @@ require.config({
         underscore: '../bower_components/underscore/underscore',
         bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap',
         handlebars: '../bower_components/handlebars/handlebars',
-        stickit: '../bower_components/backbone.stickit/backbone.stickit'
+        stickit: '../bower_components/backbone.stickit/backbone.stickit',
+        stickitform: '../bower_components/backbone.stickit.form/src/backbone.stickit.form',
+        text: '../bower_components/requirejs-text/text'
     }
 });
 

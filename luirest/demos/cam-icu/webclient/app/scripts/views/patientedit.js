@@ -4,19 +4,53 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'templates',
-    'vendor/jquery.serialize-object'
-], function ($, _, Backbone, JST, FormSerializer) {
+    'text!templates/patientedit.html',
+    'stickitform'
+], function ($, _, Backbone, html, StickitForm) {
     'use strict';
 
     var PatienteditView = Backbone.View.extend({
-      template: JST['app/scripts/templates/patientedit.hbs'],
+      html: html,
       initialize:function(){
 
 
       },
+      bindings: function(){
+        var bindings = StickitForm.getBindings({
+          /**
+           * Required. List the model attributes to bind here.
+           */
+          attributes: ['registry', 'name', 'gender', 'birthdate'],
+          /**
+           * Optional. If attributes require extra stickit options, these will extend generated bindings.
+           */
+          extend: {
+            'country': {
+              selectOptions: {
+                collection: ['Norway', 'Sweden', 'Denmark', 'Finland', 'Iceland']
+              },
+              setOptions: {
+                validate: false,
+                silent: true
+              }
+            },
+            'age': {
+              events: ['change'],
+              onSet: function(val) {
+                return parseInt(val, 10) || undefined;
+              }
+            }
+          }
+        });
+
+        return bindings;
+      },
       render: function () {
-        this.$el.html(this.template(this.model.toJSON()));
+        var title = (this.model.isNew()) ? 'Adicionar': 'Editar';
+        title += ' Paciente';
+        this.$el.html(this.html);
+        this.$('.title-el').html(title);
+        this.stickit();
         return this;
       },
       events:{
@@ -29,8 +63,6 @@ define([
       saveModel: function(){
         var self = this;
         var saved = false;
-        var data = this.$('form').serializeObject();
-        this.model.set(data);
         if (this.model.isNew()){
           this.model.collection = this.collection;
           this.model.save({
