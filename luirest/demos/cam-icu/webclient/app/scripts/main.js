@@ -19,18 +19,22 @@ require.config({
         },
         handlebars: {
             exports: 'Handlebars'
-        }
+        },
+      stickit:{
+        deps: ['backbone']
+      }
     },
     paths: {
         jquery: '../bower_components/jquery/jquery',
         backbone: '../bower_components/backbone/backbone',
         underscore: '../bower_components/underscore/underscore',
         bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap',
-        handlebars: '../bower_components/handlebars/handlebars'
+        handlebars: '../bower_components/handlebars/handlebars',
+        stickit: '../bower_components/backbone.stickit/backbone.stickit'
     }
 });
 
-var app = {};
+var app = app || {};
 app.data = {}
 app.BASE_URL = '../../luirest/camicu.cgi';
 app.mainView = null;
@@ -46,14 +50,24 @@ require([
     'jquery',
     'backbone',
   'collections/patients',
-  'routes/main'
+  'routes/main',
+  'stickit',
+  'bootstrap'
 ], function ($, Backbone, PatientCollection, MainRouter) {
+
    $(document).ready(function(){
+     if (app.started) return;
+     console.log('app start');
+     app.started = true;
      app.data.patients = new PatientCollection();
-     app.data.patients.fetch({reset: true});
      app.mainRouter = new MainRouter();
      Backbone.history.start();
-     app.mainRouter.navigate('#patients', {trigger:true})
+     app.data.patients.fetch({
+       reset: true,
+       success: function(){
+         app.mainRouter.navigate('#patients', {trigger:true})
+       }
+     });
    })
 
 });
