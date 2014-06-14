@@ -9,22 +9,28 @@ uses
 
 type
 
+  TZConnectionErrorEvent = procedure(Sender: TObject; const Message: String);
+
   { TZCustomClient }
 
   TZCustomClient = class(TComponent)
   private
     FConnection: TZConnection;
     FDeStreamer: TJSONDeStreamer;
+    FOnConnectionError: TZConnectionErrorEvent;
     FQueryDefs: TJSONObject;
     FLastActiveCheck: TDateTime;
     procedure CheckQueryDefs;
+    function DoCheckConnection(Notify: Boolean): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function Active: Boolean;
+    function CheckConnection: Boolean;
     function CreateQuery(AOwner: TComponent; const QueryAlias: String): TZReadOnlyQuery;
     procedure LoadDefs(const FileName: String);
     property Connection: TZConnection read FConnection;
+    property OnConnectionError: TZConnectionErrorEvent read FOnConnectionError write FOnConnectionError;
   end;
 
 implementation
@@ -47,29 +53,12 @@ end;
 
 function TZCustomClient.Active: Boolean;
 begin
-  Result := Connection.Connected;
-  if Result then
-  begin
-    if MinutesBetween(Now, FLastActiveCheck) > 5 then
-    begin
-      try
-        Connection.Reconnect;
-      except
-        Result := False;
-      end;
-      Result := Connection.Connected;
-    end;
-  end
-  else
-  begin
-    Result := True;
-    try
-      Connection.Connect;
-    except
-      Result := False;
-    end;
-  end;
-  FLastActiveCheck := Now;
+  Result := DoCheckConnection(False);
+end;
+
+function TZCustomClient.CheckConnection: Boolean;
+begin
+  Result := DoCheckConnection(True);
 end;
 
 
@@ -108,6 +97,47 @@ procedure TZCustomClient.CheckQueryDefs;
 begin
   if FQueryDefs = nil then
     raise Exception.Create('ESUSClient query definitions not initialized');
+end;
+
+function TZCustomClient.DoCheckConnection(Notify: Boolean): Boolean;
+var
+  ErrorStr: String;
+begin
+  ErrorStr := '';
+  Result := Connection.Connected;
+  if Result then
+  begin
+    if MinutesBetween(Now, FLastActiveCheck) > 5 then
+    begin
+      try
+        Connection.Reconnect;
+      except
+        on E: Exception do
+        begin
+          ErrorStr := E.Message;
+          Result := False;
+        end;
+      end;
+      Result := Connection.Connected;
+    end;
+  end
+  else
+  begin
+    Result := True;
+    try
+      Connection.Connect;
+    except
+      on E: Exception do
+      begin
+        ErrorStr := E.Message;
+        Result := False;
+      end;
+
+    end;
+  end;
+  if not Result and Notify and Assigned(FOnConnectionError) then
+    FOnConnectionError(Self, ErrorStr);
+  FLastActiveCheck := Now;
 end;
 
 end.
