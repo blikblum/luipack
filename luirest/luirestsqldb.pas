@@ -587,7 +587,7 @@ begin
           on E: Exception do
           begin
             //todo: return the effective Path instead of PathInfo
-            AResponse.Contents.Add(E.Message);
+            SetResponseStatus(AResponse, 400, 'Error posting to %s: %s', [ARequest.PathInfo, E.Message]);
             Exit;
           end;
         end;
