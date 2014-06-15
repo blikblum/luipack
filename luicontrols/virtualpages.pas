@@ -450,7 +450,18 @@ begin
     raise Exception.CreateFmt(SListIndexError, [NewPageIndex]);
   if OldPageIndex >= Count then
     raise Exception.CreateFmt(SListIndexError, [OldPageIndex]);
-  if (NewPageIndex > -1) then
+  if OldPageIndex > -1 then
+  begin
+    Page := Items[OldPageIndex];
+    PageControl := Page.Control;
+    if PageControl <> nil then
+    begin
+      DoPageHide(Page);
+      CallMethod(PageControl, 'PageHide');
+      PageControl.Visible := False;
+    end;
+  end;
+  if NewPageIndex > -1 then
   begin
     Page := Items[NewPageIndex];
     PageControl := Page.Control;
@@ -486,17 +497,6 @@ begin
       DoPageShow(Page);
       CallMethod(PageControl, 'PageShow');
     end;
-  end;
-  if (OldPageIndex > -1) then
-  begin
-   Page := Items[OldPageIndex];
-   PageControl := Page.Control;
-   if PageControl <> nil then
-   begin
-     DoPageHide(Page);
-     CallMethod(PageControl, 'PageHide');
-     PageControl.Visible := False;
-   end;
   end;
 end;
 
