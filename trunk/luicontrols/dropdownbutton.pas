@@ -106,6 +106,7 @@ end;
 
 procedure TDropDownButton.FormVisibleChange(Sender: TObject; Form: TCustomForm);
 begin
+  //todo: see if still necessary
   if Form.Visible then
   begin
     FDropDown.UpdateState;
