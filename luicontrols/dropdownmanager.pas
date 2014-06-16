@@ -32,7 +32,9 @@ type
     FPopupForm: TForm;
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure ControlNeeded;
+    procedure DoUpdateState(Data: PtrInt);
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
+    procedure FormFirstShow(Sender: TObject);
     function GetVisible: Boolean;
     procedure InitializePopupForm;
     procedure RemoveHandlers;
@@ -43,6 +45,7 @@ type
   protected
     procedure DoHide; virtual;
     procedure DoShow; virtual;
+    procedure Loaded; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     property Control: TWinControl read FControl write SetControl;
     property MasterControl: TControl read FMasterControl write FMasterControl;
@@ -106,6 +109,11 @@ begin
     if FControl = nil then
       raise Exception.Create('TDropDownWindow: Control not defined');
   end;
+end;
+
+procedure TCustomDropDownManager.DoUpdateState(Data: PtrInt);
+begin
+  UpdateState;
 end;
 
 procedure TCustomDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
@@ -218,6 +226,11 @@ begin
   end;
 end;
 
+procedure TCustomDropDownManager.FormFirstShow(Sender: TObject);
+begin
+  Application.QueueAsyncCall(@DoUpdateState, 0);
+end;
+
 procedure TCustomDropDownManager.DoHide;
 begin
   if Assigned(FOnHide) then
@@ -228,6 +241,19 @@ procedure TCustomDropDownManager.DoShow;
 begin
   if Assigned(FOnShow) then
     FOnShow(Self);
+end;
+
+procedure TCustomDropDownManager.Loaded;
+var
+  Form: TCustomForm;
+begin
+  inherited Loaded;
+  if not (csDesigning in ComponentState) and (Owner is TControl) then
+  begin
+    Form := GetParentForm(TControl(Owner));
+    if Form <> nil then
+      Form.AddHandlerFirstShow(@FormFirstShow);
+  end;
 end;
 
 procedure TCustomDropDownManager.Notification(AComponent: TComponent;
