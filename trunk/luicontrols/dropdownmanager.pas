@@ -185,6 +185,7 @@ procedure TCustomDropDownManager.SetVisible(const Value: Boolean);
 var
   P: TPoint;
 begin
+  //todo: store value and apply when form is show
   if (FControl = nil) and not Value then
     Exit;
   ControlNeeded;
