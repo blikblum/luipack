@@ -55,6 +55,7 @@ type
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
     procedure SetURIParam(const ParamName, ParamValue: String; IsNumeric: Boolean = False);
   public
+    constructor Create; virtual;
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); virtual;
@@ -379,6 +380,11 @@ begin
     else
       raise Exception.CreateFmt('Invalid param. "%s" expects a numeric value. Got "%s"', [ParamName, ParamValue]);
   end;
+end;
+
+constructor TRESTResource.Create;
+begin
+  //
 end;
 
 procedure TRESTResource.RegisterSubPath(const ResourceId: ShortString;
