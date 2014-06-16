@@ -9,7 +9,7 @@ uses
 
 type
 
-  TZConnectionErrorEvent = procedure(Sender: TObject; const Message: String);
+  TZConnectionErrorEvent = procedure(Sender: TObject; const Message: String) of object;
 
   { TZCustomClient }
 
