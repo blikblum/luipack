@@ -19,6 +19,7 @@ type
     FButton: TDropDownButton;
   protected
     procedure DoHide; override;
+    procedure DoInitialize(Data: PtrInt); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
@@ -34,15 +35,12 @@ type
   TDropDownButton = class(TCustomDropDownButton)
   private
     FDropDown: TOwnedDropDownManager;
-    procedure FormVisibleChange(Sender: TObject; Form: TCustomForm);
     procedure SetDropDown(AValue: TOwnedDropDownManager);
   protected
     procedure DoShowDropDown; override;
     procedure DoHideDropDown; override;
-    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
   published
     property DropDown: TOwnedDropDownManager read FDropDown write SetDropDown;
     property Options;
@@ -85,12 +83,23 @@ type
 
 implementation
 
+type
+  TToggleSpeedButtonAccess = class(TToggleSpeedButton)
+
+  end;
+
 { TOwnedDropDownManager }
 
 procedure TOwnedDropDownManager.DoHide;
 begin
   FButton.DropDownClosed;
   inherited DoHide;
+end;
+
+procedure TOwnedDropDownManager.DoInitialize(Data: PtrInt);
+begin
+  TToggleSpeedButtonAccess(FButton).UpdateDown(Visible);
+  inherited DoInitialize(Data);
 end;
 
 constructor TOwnedDropDownManager.Create(AOwner: TComponent);
@@ -103,17 +112,6 @@ begin
 end;
 
 { TDropDownButton }
-
-procedure TDropDownButton.FormVisibleChange(Sender: TObject; Form: TCustomForm);
-begin
-  //todo: see if still necessary
-  if Form.Visible then
-  begin
-    FDropDown.UpdateState;
-    UpdateDown(FDropDown.Visible);
-  end;
-  Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChange);
-end;
 
 procedure TDropDownButton.SetDropDown(AValue: TOwnedDropDownManager);
 begin
@@ -130,12 +128,6 @@ begin
   FDropDown.Visible := False;
 end;
 
-procedure TDropDownButton.Loaded;
-begin
-  inherited Loaded;
-  Screen.AddHandlerFormVisibleChanged(@FormVisibleChange);
-end;
-
 constructor TDropDownButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -143,12 +135,6 @@ begin
   //necessary to the button toggle
   AllowAllUp := True;
   GroupIndex := 1;
-end;
-
-destructor TDropDownButton.Destroy;
-begin
-  Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChange);
-  inherited Destroy;
 end;
 
 end.

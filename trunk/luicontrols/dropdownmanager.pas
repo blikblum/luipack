@@ -30,11 +30,13 @@ type
     FOnShow: TNotifyEvent;
     FOptions: TDropDownOptions;
     FPopupForm: TForm;
+    FVisible: Variant;
+    FInitialized: Boolean;
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure ControlNeeded;
-    procedure DoUpdateState(Data: PtrInt);
     procedure FocusChangeHandler(Sender: TObject; LastControl: TControl);
     procedure FormFirstShow(Sender: TObject);
+    procedure FormVisibleChanged(Sender: TObject; Form: TCustomForm);
     function GetVisible: Boolean;
     procedure InitializePopupForm;
     procedure RemoveHandlers;
@@ -44,6 +46,7 @@ type
     procedure UserInputHandler(Sender: TObject; Msg: Cardinal);
   protected
     procedure DoHide; virtual;
+    procedure DoInitialize(Data: PtrInt); virtual;
     procedure DoShow; virtual;
     procedure Loaded; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -56,7 +59,6 @@ type
   public
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
-    procedure UpdateState;
     property ControlClass: TWinControlClass read FControlClass write FControlClass;
     property Visible: Boolean read GetVisible write SetVisible;
   end;
@@ -74,7 +76,7 @@ type
 implementation
 
 uses
-  LCLProc;
+  LCLProc, variants;
 
 { TCustomDropDownManager }
 
@@ -111,9 +113,16 @@ begin
   end;
 end;
 
-procedure TCustomDropDownManager.DoUpdateState(Data: PtrInt);
+procedure TCustomDropDownManager.DoInitialize(Data: PtrInt);
 begin
-  UpdateState;
+  FInitialized := True;
+  if not VarIsEmpty(FVisible) then
+    SetVisible(FVisible)
+  else
+  begin
+    if FControl <> nil then
+      SetState(False);
+  end;
 end;
 
 procedure TCustomDropDownManager.FocusChangeHandler(Sender: TObject; LastControl: TControl);
@@ -124,10 +133,15 @@ end;
 
 function TCustomDropDownManager.GetVisible: Boolean;
 begin
-  if FControl <> nil then
-    Result := FControl.Visible
+  if not FInitialized and not VarIsEmpty(FVisible) then
+    Result := FVisible
   else
-    Result := False;
+  begin
+    if FControl <> nil then
+      Result := FControl.Visible
+    else
+      Result := False;
+  end;
 end;
 
 procedure TCustomDropDownManager.InitializePopupForm;
@@ -185,7 +199,11 @@ procedure TCustomDropDownManager.SetVisible(const Value: Boolean);
 var
   P: TPoint;
 begin
-  //todo: store value and apply when form is show
+  if not FInitialized then
+  begin
+    FVisible := Value;
+    Exit;
+  end;
   if (FControl = nil) and not Value then
     Exit;
   ControlNeeded;
@@ -229,7 +247,14 @@ end;
 
 procedure TCustomDropDownManager.FormFirstShow(Sender: TObject);
 begin
-  Application.QueueAsyncCall(@DoUpdateState, 0);
+  Application.QueueAsyncCall(@DoInitialize, 0);
+end;
+
+procedure TCustomDropDownManager.FormVisibleChanged(Sender: TObject;
+  Form: TCustomForm);
+begin
+  Form.AddHandlerFirstShow(@FormFirstShow);
+  Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChanged);
 end;
 
 procedure TCustomDropDownManager.DoHide;
@@ -252,8 +277,11 @@ begin
   if not (csDesigning in ComponentState) and (Owner is TControl) then
   begin
     Form := GetParentForm(TControl(Owner));
+    //todo: review approach when Form is not acessible at this time
     if Form <> nil then
-      Form.AddHandlerFirstShow(@FormFirstShow);
+      Form.AddHandlerFirstShow(@FormFirstShow)
+    else
+      Screen.AddHandlerFormVisibleChanged(@FormVisibleChanged);
   end;
 end;
 
@@ -291,12 +319,6 @@ begin
   end
   else
     inherited Assign(Source);
-end;
-
-procedure TCustomDropDownManager.UpdateState;
-begin
-  if FControl <> nil then
-    SetState(False);
 end;
 
 end.
