@@ -20,6 +20,8 @@ type
 
   TDropDownCreateControl = procedure(Sender: TObject; Control: TControl) of object;
 
+  TDropDownState = (ddsUndefined, ddsVisible, ddsHidden);
+
   TCustomDropDownManager = class(TComponent)
   private
     FControl: TWinControl;
@@ -30,7 +32,9 @@ type
     FOnShow: TNotifyEvent;
     FOptions: TDropDownOptions;
     FPopupForm: TForm;
+    //todo: replace FVisible by TDropDownState?
     FVisible: Variant;
+    FDropDownState: TDropDownState;
     FInitialized: Boolean;
     function ControlGrabsFocus(AControl: TControl): Boolean;
     procedure ControlNeeded;
@@ -180,18 +184,26 @@ begin
     IsControlVisible := FControl.Visible;
   if IsControlVisible then
   begin
-    if (ddoSetFocus in FOptions) and FControl.CanFocus then
-      FControl.SetFocus;
-    if DoEvents then
-      DoShow;
-    Application.AddOnUserInputHandler(@UserInputHandler);
-    Screen.AddHandlerActiveControlChanged(@FocusChangeHandler);
+    if FDropDownState <> ddsVisible then
+    begin
+      FDropDownState := ddsVisible;
+      if (ddoSetFocus in FOptions) and FControl.CanFocus then
+        FControl.SetFocus;
+      if DoEvents then
+        DoShow;
+      Application.AddOnUserInputHandler(@UserInputHandler);
+      Screen.AddHandlerActiveControlChanged(@FocusChangeHandler);
+    end;
   end
   else
   begin
-    RemoveHandlers;
-    if DoEvents then
-      DoHide;
+    if FDropDownState <> ddsHidden then
+    begin
+      FDropDownState := ddsHidden;
+      RemoveHandlers;
+      if DoEvents then
+        DoHide;
+    end;
   end;
 end;
 
@@ -225,11 +237,7 @@ begin
       FPopupForm.Hide;
   end
   else
-  begin
-    if FControl.Visible = Value then
-      Exit;
     FControl.Visible := Value;
-  end;
   SetState(True);
 end;
 
