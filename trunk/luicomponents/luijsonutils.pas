@@ -11,6 +11,7 @@ type
 
   { TJSONFile }
 
+  //todo: remove it
   TJSONFile = class
   public
     class function Load(const AFileName: String): TJSONData; static;
@@ -54,6 +55,8 @@ function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Intege
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
 
+function ReadJSONFile(const AFileName: String): TJSONData;
+
 function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
 function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
@@ -86,6 +89,8 @@ function TryStreamToJSON(Stream: TStream; out JSONArray: TJSONArray): Boolean;
 
 function TryStreamToJSON(Stream: TStream; out JSONObject: TJSONObject): Boolean;
 
+procedure WriteJSONFile(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
+
 function DatasetToJSON(Dataset: TDataset; Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType): TJSONData;
 
 procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray; Options: TDatasetToJSONOptions);
@@ -97,7 +102,6 @@ procedure DatasetToJSON(Dataset: TDataset; JSONArray: TJSONArray;
 
 procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject;
   Options: TDatasetToJSONOptions; const ExtOptions: TJSONStringType);
-
 
 implementation
 
@@ -403,13 +407,35 @@ begin
   Result := -1;
 end;
 
-procedure RemoveJSONProp(JSONObj: TJSONObject; const PropName: String);
+function ReadJSONFile(const AFileName: String): TJSONData;
 var
-  i: Integer;
+  Parser: TJSONParser;
+  Stream: TFileStream;
 begin
-  i := JSONObj.IndexOfName(PropName);
-  if i <> -1 then
-    JSONObj.Delete(i);
+  Result := nil;
+  //todo: handle UTF-8
+  if not FileExists(AFileName) then
+    raise Exception.CreateFmt('TJSONFile - File "%s" does not exist', [AFileName]);
+  Stream := nil;
+  Parser := nil;
+  try
+    try
+      Stream := TFileStream.Create(AFileName, fmOpenRead);
+      Parser := TJSONParser.Create(Stream);
+      Result := Parser.Parse;
+    finally
+      Parser.Free;
+      Stream.Free;
+    end;
+  except
+    on E: EFOpenError do
+      raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [AFileName, E.Message]);
+    on E: EParserError do
+    begin
+       FreeAndNil(Result);
+       raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [AFileName, E.Message]);
+    end;
+  end;
 end;
 
 //based in TStringList.QuickSort
@@ -696,6 +722,19 @@ begin
   end;
 end;
 
+procedure WriteJSONFile(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
+var
+  Output: TStringList;
+begin
+  Output := TStringList.Create;
+  try
+    Output.Text := AData.FormatJSON(FormatOptions);
+    Output.SaveToFile(AFileName);
+  finally
+    Output.Destroy;
+  end;
+end;
+
 procedure CopyFieldsToJSONObject(Fields: TFieldMaps; JSONObject: TJSONObject; SetNull: Boolean);
 var
   i: Integer;
@@ -915,47 +954,13 @@ end;
 { TJSONFile }
 
 class function TJSONFile.Load(const AFileName: String): TJSONData;
-var
-  Parser: TJSONParser;
-  Stream: TFileStream;
 begin
-  Result := nil;
-  //todo: handle UTF-8
-  if not FileExists(AFileName) then
-    raise Exception.CreateFmt('TJSONFile - File "%s" does not exist', [AFileName]);
-  Stream := nil;
-  Parser := nil;
-  try
-    try
-      Stream := TFileStream.Create(AFileName, fmOpenRead);
-      Parser := TJSONParser.Create(Stream);
-      Result := Parser.Parse;
-    finally
-      Parser.Free;
-      Stream.Free;
-    end;
-  except
-    on E: EFOpenError do
-      raise Exception.CreateFmt('TJSONFile - Error loading "%s" : %s', [AFileName, E.Message]);
-    on E: EParserError do
-    begin
-       FreeAndNil(Result);
-       raise Exception.CreateFmt('TJSONFile - Error parsing "%s" : %s', [AFileName, E.Message]);
-    end;
-  end;
+  Result := ReadJSONFile(AFileName);
 end;
 
 class procedure TJSONFile.Save(AData: TJSONData; const AFileName: String; FormatOptions: TFormatOptions);
-var
-  Output: TStringList;
 begin
-  Output := TStringList.Create;
-  try
-    Output.Text := AData.FormatJSON(FormatOptions);
-    Output.SaveToFile(AFileName);
-  finally
-    Output.Destroy;
-  end;
+  WriteJSONFile(AData, AFileName, FormatOptions);
 end;
 
 end.
