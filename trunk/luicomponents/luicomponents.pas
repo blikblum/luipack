@@ -10,8 +10,8 @@ uses
   LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
   LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
   LuiJSONUtils, LuiDBExport, LuiObjectUtils, VarRecUtils, LuiDBUtils, 
-  LuiDataClasses, LuiJSONClasses, LuiIoCContainer, LuiServices, 
-  LazarusPackageIntf;
+  LuiDataClasses, LuiJSONClasses, LuiIoCContainer, LuiServices, LuiJSONModel, 
+  JSONModelDescriptors, LazarusPackageIntf;
 
 implementation
 

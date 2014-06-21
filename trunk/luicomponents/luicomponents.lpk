@@ -24,7 +24,7 @@
       </Other>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="18">
+    <Files Count="20">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -96,15 +96,26 @@
       </Item17>
       <Item18>
         <Filename Value="luiservices.pas"/>
-        <UnitName Value="luiservices"/>
+        <UnitName Value="LuiServices"/>
       </Item18>
+      <Item19>
+        <Filename Value="luijsonmodel.pas"/>
+        <UnitName Value="LuiJSONModel"/>
+      </Item19>
+      <Item20>
+        <Filename Value="jsonmodeldescriptors.pas"/>
+        <UnitName Value="JSONModelDescriptors"/>
+      </Item20>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="1">
+    <RequiredPkgs Count="2">
       <Item1>
+        <PackageName Value="IDEIntf"/>
+      </Item1>
+      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item1>
+      </Item2>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
