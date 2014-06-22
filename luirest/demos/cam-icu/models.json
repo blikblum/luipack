@@ -220,6 +220,53 @@
         }
       ],
       "Name" : "Patient"
+    },
+    {
+      "Fields" : [
+        {
+          "DisplayLabel" : "Id",
+          "FieldID" : "{FBACE567-EC48-4564-B86B-A0C6A5CAC02C}",
+          "FieldName" : "Id",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "PatientId",
+          "FieldID" : "{41CF201A-0912-4B42-80BB-309A13319B04}",
+          "FieldName" : "PatientId",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Data",
+          "FieldID" : "{2CA8D0FF-FF0F-4248-8BEA-95B7D4E869D3}",
+          "FieldName" : "Date",
+          "FieldType" : "dftDate"
+        },
+        {
+          "DisplayLabel" : "RASS",
+          "FieldID" : "{3C1119A8-F3B3-4D3C-B9BE-03407BF18880}",
+          "FieldName" : "RASS",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Delirium",
+          "FieldID" : "{B9A1FB8F-18E2-4C89-B9FE-44E8B9FC179F}",
+          "FieldName" : "DeliriumId",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Ventilação",
+          "FieldID" : "{75950B6B-341E-4228-8855-DBA688C9772D}",
+          "FieldName" : "VentilationId",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Sedação",
+          "FieldID" : "{7E5613D5-89E8-4DD0-BF94-70E4734F1F39}",
+          "FieldName" : "SedationId",
+          "FieldType" : "dftInteger"
+        }
+      ],
+      "Name" : "Evaluation"
     }
   ],
   "Name" : "",
