@@ -62,27 +62,29 @@ define([
       },
       saveModel: function(){
         var self = this;
-        var saved = false;
         if (this.model.isNew()){
           this.model.collection = this.collection;
-          this.model.save({
+          this.model.save({}, {
             success: function(){
-              saved = true;
-              this.collection.add(this.model);
+              console.log('Paciente salvo');
+              self.collection.add(self.model);
+              app.mainRouter.navigate('#patients', {trigger: true});
+            },
+            error: function(model, response, options) {
+                console.log('Erro ao salvar os dados: ', response, options);
             }
           });
 
         } else {
-          this.model.save({
+          this.model.save({}, {
             success: function(){
-              saved = true;
-            }
+              console.log('Paciente salvo');
+              app.mainRouter.navigate('#patients', {trigger: true});
+            },
+            error: function(model, response, options) {
+               console.log('Erro ao salvar os dados: ', response, options);
+              }
           });
-        }
-        if (saved) {
-          app.mainRouter.navigate('#patients', {trigger: true});
-        } else{
-          alert('Erro ao salvar os dados');
         }
       }
     });

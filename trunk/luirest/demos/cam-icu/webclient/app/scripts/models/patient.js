@@ -10,12 +10,27 @@ define([
     var PatientModel = Backbone.Model.extend({
         defaults: {
         },
-      getEvaluations: function(){
+      getEvaluations: function(callback){
         if (!this._evaluations){
-          this.evaluations = new Evaluations({patient: this});
-          this.evaluations.fetch();
+          this._evaluations = new Evaluations({patient: this});
+        };
+        if (!this._evaluations._fetched){
+            this._evaluations.fetch({
+                success: function(collection){
+                    collection._fetched = true;
+                    if (callback){
+                        callback(collection);
+                    }
+                }
+            });
+
+        } else {
+            if (callback) {
+                callback(this._evaluations)
+            }
         }
-        return this.evaluations;
+
+        return this._evaluations;
       }
     });
 

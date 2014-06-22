@@ -7,7 +7,6 @@ define([
     'use strict';
 
     var EvaluationModel = Backbone.Model.extend({
-        url: '',
 
         initialize: function(options) {
 

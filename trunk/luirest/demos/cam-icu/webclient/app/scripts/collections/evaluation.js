@@ -13,7 +13,7 @@ define([
           this.patient = options.patient;
         },
         url: function(){
-          return '/patients/active/' + this.patient.get('id') + '/evaluations'
+          return app.BASE_URL + '/patients/active/' + this.patient.get('id') + '/evaluations'
         }
     });
 

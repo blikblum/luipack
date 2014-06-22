@@ -11,7 +11,7 @@ define([
     var EvaluationlistitemView = Backbone.View.extend({
         template: JST['app/scripts/templates/evaluationlistitem.hbs'],
 
-        tagName: 'div',
+        tagName: 'tr',
 
         id: '',
 

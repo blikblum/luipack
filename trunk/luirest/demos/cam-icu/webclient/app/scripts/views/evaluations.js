@@ -21,11 +21,20 @@ define([
         events: {},
 
         bindings: {
-            '.name-el':'name'
+            '.name-el':'name',
+            '.add-evaluation-el': {
+                attributes: [{
+                    name: 'href',
+                    observe: 'id',
+                    onGet: function(val){
+                      return '#patients/' + val + '/addevaluation';
+                    }
+                }]
+            }
         },
 
-        initialize: function () {
-          this.evaluations = this.model.getEvaluations();
+        initialize: function (options) {
+          this.evaluations = options.evaluations;
           this.listenTo(this.evaluations, 'add', this.renderEvaluation);
         },
 
