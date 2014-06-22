@@ -9,23 +9,30 @@ object Form1: TForm1
   Caption = 'ATBinHex for LCL demo'
   ClientHeight = 557
   ClientWidth = 719
+  Position = poScreenCenter
+  LCLVersion = '1.3'
   object BinHexViewer: TATBinHex
     Cursor = crIBeam
     Left = 170
     Height = 557
+    Top = 0
     Width = 549
     Align = alClient
     BorderStyle = bsSingle
+    Font.Color = clWindowText
     Font.Height = -13
     Font.Name = 'Courier New'
     ParentColor = False
     TabOrder = 0
     FontOEM.CharSet = OEM_CHARSET
+    FontOEM.Color = clWindowText
     FontOEM.Height = -12
     FontOEM.Name = 'Terminal'
   end
   object PanelLeft: TPanel
+    Left = 0
     Height = 557
+    Top = 0
     Width = 170
     Align = alLeft
     ClientHeight = 557
@@ -56,6 +63,8 @@ object Form1: TForm1
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1
+      ClientHeight = 150
+      ClientWidth = 146
       ItemIndex = 0
       Items.Strings = (
         'Text'
@@ -88,14 +97,14 @@ object Form1: TForm1
     end
   end
   object OpenDialog1: TOpenDialog
-    Title = 'Open existing file'
     Filter = 'All|*.*|Text Files|*.txt'
     FilterIndex = 0
     left = 80
     top = 88
   end
   object FontDialog1: TFontDialog
-    Title = 'Select a font'
+    MinFontSize = 0
+    MaxFontSize = 0
     left = 331
     top = 65
   end

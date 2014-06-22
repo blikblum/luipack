@@ -5,7 +5,7 @@ unit fmain;
 interface
 
 uses
-  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, ATBinHex,
+  Classes, SysUtils, LResources, StdCtrls, Forms, Controls, Graphics, Dialogs, ATBinHex,
   ExtCtrls, Buttons, lclintf;
 
 type

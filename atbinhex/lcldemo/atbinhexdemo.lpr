@@ -10,8 +10,9 @@ uses
   Forms
   { add your units here }, fmain, Printer4Lazarus;
 
+{$R *.res}
+
 begin
-  Application.Title:='ATBinHexLCLDemo';
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
   Application.Run;
