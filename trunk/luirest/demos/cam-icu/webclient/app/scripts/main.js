@@ -38,7 +38,8 @@ require.config({
 
 var app = app || {};
 app.data = {}
-app.BASE_URL = '../../luirest/camicu.cgi';
+//app.BASE_URL = '../../luirest/camicu.cgi';
+app.BASE_URL = '../cgi-bin/camicu.cgi';
 app.mainView = null;
 app.setMainView = function(newView){
   if (app.mainView) {
@@ -48,19 +49,59 @@ app.setMainView = function(newView){
   $('#main').append(newView.$el);
 }
 
+var toOADate = (function () {
+    var epoch = new Date(1899,11,30);
+    var msPerDay = 8.64e7;
+
+    return function(d) {
+        var v = -1 * (epoch - d)/msPerDay;
+
+        // Deal with dates prior to 1899-12-30 00:00:00
+        var dec = v - Math.floor(v);
+
+        if (v < 0 && dec) {
+            v = Math.floor(v) - dec;
+        }
+
+        return v;
+    }
+}());
+
+
+var fromOADate = (function() {
+    var epoch = new Date(1899,11,30);
+    var msPerDay = 8.64e7;
+
+    return function(n) {
+        // Deal with -ve values
+        var dec = n - Math.floor(n);
+
+        if (n < 0 && dec) {
+            n = Math.floor(n) - dec;
+        }
+
+        return new Date(n*msPerDay + +epoch);
+    }
+}());
+
 require([
     'jquery',
     'backbone',
   'collections/patients',
   'routes/main',
+  'handlebars',
   'stickit',
-  'bootstrap'
-], function ($, Backbone, PatientCollection, MainRouter) {
+  'bootstrap',
+], function ($, Backbone, PatientCollection, MainRouter, Handlebars) {
 
    $(document).ready(function(){
      if (app.started) return;
      console.log('app start');
+     Handlebars.registerHelper('dateToStr', function(val){
+         return fromOADate(val).toLocaleDateString();
+     });
      app.started = true;
+
      app.data.patients = new PatientCollection();
      app.mainRouter = new MainRouter();
      Backbone.history.start();
