@@ -15,10 +15,62 @@ define([
 
         bindings: function(){
             var bindings = StickitForm.getBindings({
-                attributes: ['date', 'rass', 'deliriumid', 'sedationid', 'ventilationid']
+                attributes: ['date', 'rass', 'deliriumid', 'sedationid', 'ventilationid'],
+                extend: {
+                    date:{
+                      onGet: function(val){
+                          return fromOADate(val).toLocaleDateString();
+                      }
+                    },
+                    deliriumid: {
+                        selectOptions:{
+                            collection: [{name: 'Hipoativo', value: 1},{name: 'Misto', value: 2},{name: 'Hiperativo', value: 3},{name: 'Não', value: 4},{name: 'Não Avaliado', value: 5}],
+                            labelPath: 'name',
+                            defaultOption: {label: 'NC', value: 9}
+                        }
+                    },
+                    ventilationid: {
+                        selectOptions:{
+                            collection: function() {
+                               return [
+                                    {name: 'Mecânica', value: 1},
+                                    {name: 'Espontânea', value: 2},
+                                    {name: 'VNI', value: 3}
+                                ];
+                            },
+                            labelPath: 'name',
+                            defaultOption: {label: 'NC', value: 9}
+                        }
+                    },
+                    sedationid: {
+                        selectOptions:{
+                            collection: [{name: 'Propofol', value: 1},{name: 'Midazolam', value: 2},{name: 'Midazolan + Fentanil', value: 23},
+                                {name: 'Fentanil', value: 3},{name: 'Cetamina', value: 4},{name: 'Morfina', value: 5},{name: 'Dexmetomedina', value: 6},
+                                {name: 'Nada', value: 7}
+                            ],
+                            labelPath: 'name',
+                            defaultOption: {label: 'NC', value: 9}
+                        }
+                    }
+                }
             });
+            _.extend(bindings, {
+                '.title-el':{
+                    observe: 'id',
+                    onGet: function (val) {
+                        var title = (this.model.isNew()) ? 'Adicionar': 'Editar';
+                        title += ' Avaliação';
+                        return title;
+                    }
+                }
+            })
+
             return bindings;
         } ,
+
+        patientBindings: {
+          '.name-el':'name'
+        },
 
         tagName: 'div',
 
@@ -36,11 +88,9 @@ define([
         },
 
         render: function () {
-            var title = (this.model.isNew()) ? 'Adicionar': 'Editar';
-            title += ' Avaliação';
             this.$el.html(this.html);
-            this.$('.title-el').html(title);
             this.stickit();
+            this.stickit(this.collection.patient, this.patientBindings);
             return this;
         },
 
@@ -64,9 +114,12 @@ define([
                     app.mainRouter.navigate('#patients/' + model.get('patientid') + '/evaluations', true);
                 },
                 error: function(model, response, options){
+                    var msg = '--';
                     console.log('Error saving evaluation', model, response, options);
-                    alert('Erro ao salvar avaliação');
-
+                    if ((response.responseJSON) && (response.responseJSON.message)){
+                        msg = response.responseJSON.message;
+                    }
+                    alert('Erro ao salvar avaliação: ' + msg);
                 }
             })
         }

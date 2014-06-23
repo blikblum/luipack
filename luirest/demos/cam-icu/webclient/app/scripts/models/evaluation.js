@@ -12,7 +12,13 @@ define([
 
         },
 
-        defaults: {
+        defaults: function(){
+            var now;
+            now = new Date();
+            now = (now - new Date(1899, 11, 30)) / (24 * 60 * 60 * 1000);
+            return {
+                date: now
+            }
         },
 
         validate: function(attrs, options) {

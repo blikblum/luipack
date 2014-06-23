@@ -59,7 +59,7 @@ begin
      RES_EVALUATIONS, RES_PATIENT_EVALUATIONS:
       begin
         SqldbResource.IsCollection := True;
-        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, SedationId from PatientEvaluation';
+        SqldbResource.SelectSQL := 'Select Id, Date, PatientId, RASS, DeliriumId, VentilationId, SedationId from PatientEvaluation';
         SqldbResource.SetDefaultSubPath('evaluationid', @GetResource, RES_EVALUATION);
         if ResourceTag = RES_PATIENT_EVALUATIONS then
           SqldbResource.ConditionsSQL := 'Where PatientId = :patientid'

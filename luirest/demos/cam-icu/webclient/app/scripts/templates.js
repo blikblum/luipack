@@ -5,22 +5,21 @@ this["JST"] = this["JST"] || {};
 this["JST"]["app/scripts/templates/evaluationlistitem.hbs"] = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, functionType="function";
 
 
   buffer += "<td>";
-  if (stack1 = helpers.date) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.date; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</td>\r\n<td></td>\r\n<td>\r\n    <a href=\"#patients/";
-  if (stack1 = helpers.patientid) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.patientid; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  options = {hash:{},data:data};
+  buffer += escapeExpression(((stack1 = helpers.dateToStr || depth0.dateToStr),stack1 ? stack1.call(depth0, depth0.date, options) : helperMissing.call(depth0, "dateToStr", depth0.date, options)))
+    + "</td>\r\n<td></td>\r\n<td>\r\n    <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#patients/";
+  if (stack2 = helpers.patientid) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.patientid; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
     + "/evaluations/";
-  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "\"><span class=\"glyphicon glyphicon-edit\"></span></a>\r\n</td>\r\n\r\n";
+  if (stack2 = helpers.id) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.id; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "\"> Editar</a>\r\n</td>\r\n\r\n";
   return buffer;
   });
 
@@ -34,15 +33,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</td>\r\n<td></td>\r\n<td>\r\n  <a href=\"#/patients/";
+    + "</td>\r\n<td></td>\r\n<td>\r\n  <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#/patients/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "/edit\"><span class=\"glyphicon glyphicon-edit\"></span></a>\r\n  <a href=\"#/patients/";
+    + "/edit\"> Editar</a> &nbsp\r\n  <span class=\"glyphicon glyphicon-list-alt\"></span><a href=\"#/patients/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "/evaluations\"><span class=\"glyphicon glyphicon-list-alt\"></span></a>\r\n</td>\r\n\r\n\r\n";
+    + "/evaluations\"> Avaliações</a>\r\n</td>\r\n\r\n\r\n";
   return buffer;
   });
 
