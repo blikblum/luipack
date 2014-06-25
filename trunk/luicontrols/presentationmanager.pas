@@ -5,7 +5,7 @@ unit PresentationManager;
 interface
 
 uses
-  Forms, Classes, SysUtils, contnrs;
+  Forms, Classes, SysUtils, contnrs, Controls;
 
 type
 
@@ -22,7 +22,10 @@ type
 
   IPresentation = interface
     ['{5FFDE1D3-AA0B-43C9-8ED3-437E33806B15}']
+    function GetName: String;
+    function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
+    function Show: IPresentation;
     function ShowModal: IPresentation;
     function ShowModal(const Properties: array of const): TModalResult;
     function ModalResult: TModalResult;
@@ -51,7 +54,7 @@ type
 implementation
 
 uses
-  LuiRTTIUtils, typinfo;
+  LuiRTTIUtils, typinfo, LuiMiscUtils;
 
 type
   TPresentationDef = class
@@ -64,16 +67,22 @@ type
 
   TPresentation = class(TInterfacedObject, IPresentation)
   private
-    FView: TForm;
+    FName: String;
     FPresenter: TPresenter;
+    FView: TForm;
     FModalResult: TModalResult;
+    FInitialized: Boolean;
     procedure CheckPresenterInstance;
+    procedure Initialize;
     procedure InitializeProperties;
   public
-    constructor Create(PresentationDef: TPresentationDef);
+    constructor Create(const Name: String; PresentationDef: TPresentationDef);
     destructor Destroy; override;
     function ModalResult: TModalResult;
+    function GetName: String;
+    function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
+    function Show: IPresentation;
     function ShowModal: IPresentation;
     function ShowModal(const Properties: array of const): TModalResult;
   end;
@@ -97,6 +106,20 @@ procedure TPresentation.CheckPresenterInstance;
 begin
   if FPresenter = nil then
     raise Exception.CreateFmt('%s requires a presenter', [FView.ClassName]);
+end;
+
+procedure TPresentation.Initialize;
+begin
+  if FInitialized then
+    Exit;
+  InitializeProperties;
+  if FPresenter <> nil then
+  begin
+    FPresenter.Initialize;
+    FView.Caption := FPresenter.GetViewCaption(FView.Caption);
+  end;
+  CallMethod(FView, 'Initialize');
+  FInitialized := True;
 end;
 
 procedure TPresentation.InitializeProperties;
@@ -135,11 +158,13 @@ begin
   //todo: check if presenter requires a view
 end;
 
-constructor TPresentation.Create(PresentationDef: TPresentationDef);
+constructor TPresentation.Create(const Name: String;
+  PresentationDef: TPresentationDef);
 begin
   FView := PresentationDef.FViewClass.Create(nil);
   if PresentationDef.FPresenterClass <> nil then
     FPresenter := PresentationDef.FPresenterClass.Create(FView);
+  FName := Name;
 end;
 
 destructor TPresentation.Destroy;
@@ -153,6 +178,26 @@ begin
   Result := FModalResult;
 end;
 
+function TPresentation.GetName: String;
+begin
+  Result := FName;
+end;
+
+function TPresentation.SetParent(Parent: TWinControl): IPresentation;
+begin
+  FView.Parent := Parent;
+  if Parent <> nil then
+  begin
+    FView.BorderStyle := bsNone;
+    FView.Align := alClient;
+  end
+  else
+  begin
+    //todo: save restore BorderStyle
+  end;
+  Result := Self;
+end;
+
 function TPresentation.SetProperties(
   const Properties: array of const): IPresentation;
 begin
@@ -163,14 +208,18 @@ begin
   Result := Self;
 end;
 
+function TPresentation.Show: IPresentation;
+begin
+  Initialize;
+  FView.Show;
+  Result := Self;
+end;
+
 function TPresentation.ShowModal: IPresentation;
 begin
-  InitializeProperties;
-  if FPresenter <> nil then
-  begin
-    FPresenter.Initialize;
-    FView.Caption := FPresenter.GetViewCaption(FView.Caption);
-  end;
+  if FView.Parent <> nil then
+    raise Exception.Create('Is not allowed to show modal form with parent');
+  Initialize;
   //todo: add presenter afterviewshow?
   FModalResult := FView.ShowModal;
   Result := Self;
@@ -202,7 +251,7 @@ begin
   PresentationDef := TPresentationDef(FPresentationDefs.Find(PresentationName));
   if PresentationDef = nil then
     raise Exception.CreateFmt('Presentation "%s" not found', [PresentationName]);
-  Result := TPresentation.Create(PresentationDef);
+  Result := TPresentation.Create(PresentationName, PresentationDef);
 end;
 
 procedure TPresentationManager.Register(const PresentationName: String;
