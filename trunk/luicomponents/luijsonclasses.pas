@@ -51,11 +51,14 @@ type
     FItemData: TJSONArray;
     FGroupKey: String;
     FSortFunction: TJSONArraySortCompare;
+    FInvalid: Boolean;
+    function GetData: TJSONArray;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure Build;
-    property Data: TJSONArray read FData;
+    procedure LoadData;
+    procedure Invalidate;
+    property Data: TJSONArray read GetData;
     property ChildrenProperty: String read FChildrenProperty write FChildrenProperty;
     property GroupData: TJSONArray read FGroupData write FGroupData;
     property GroupKey: String read FGroupKey write FGroupKey;
@@ -249,6 +252,13 @@ end;
 
 { TJSONGroupTree }
 
+function TJSONGroupTree.GetData: TJSONArray;
+begin
+  if FInvalid then
+    LoadData;
+  Result := FData;
+end;
+
 constructor TJSONGroupTree.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -263,7 +273,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TJSONGroupTree.Build;
+procedure TJSONGroupTree.LoadData;
 var
   GroupMap: TJSONObjectMap;
   ChildrenData: TJSONArray;
@@ -272,10 +282,10 @@ var
 begin
   FData.Clear;
   GroupMap := TJSONObjectMap.Create;
-  //todo: add option to sort the resulting array after build.
+  //todo: add option to sort the resulting array after LoadData.
   //In this case sort the groupmap can be sorted
   try
-    //build map
+    //LoadData map
     for i := 0 to FGroupData.Count -1 do
     begin
       GroupObjData := FGroupData.Objects[i];
@@ -293,13 +303,13 @@ begin
         ChildrenData := TJSONArray(GroupObjData.Find(FChildrenProperty));
         if ChildrenData = nil then
         begin
-          ChildrenData := TJSONArray.Create;
+          ChildrenData := TJSONArray.Create(False);
           GroupObjData.Add(FChildrenProperty, ChildrenData);
         end;
-        ChildrenData.Add(ItemObjData.Clone);
+        ChildrenData.Add(ItemObjData);
       end;
     end;
-    //build the tree with only those with children
+    //LoadData the tree with only those with children
     for i := 0 to GroupMap.Count -1 do
     begin
       GroupObjData := GroupMap.Data[i];
@@ -316,6 +326,13 @@ begin
   finally
     GroupMap.Destroy;
   end;
+  FInvalid := False;
+  FPONotifyObservers(Self, ooChange, nil);
+end;
+
+procedure TJSONGroupTree.Invalidate;
+begin
+  FInvalid := True;
 end;
 
 { TJSONLookup }
