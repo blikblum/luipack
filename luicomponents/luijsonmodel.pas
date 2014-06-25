@@ -61,6 +61,7 @@ type
     FOwnsData: Boolean;
     function GetCount: Integer;
     function GetParams: TParams;
+    function GetResource: IJSONArrayResource;
     procedure ItemResourceNeeded(Item: TJSONModel);
     procedure ItemsNeeded;
   protected
@@ -73,8 +74,9 @@ type
     procedure ParseData(ResourceData: TJSONData; out CollectionData: TJSONArray;
       out FreeCollectionData: Boolean); virtual;
     procedure ResetData;
+    procedure ResourceNeeded;
     procedure SaveItem(Item: TJSONModel);
-    property Resource: IJSONArrayResource read FResource;
+    property Resource: IJSONArrayResource read GetResource;
   public
     constructor Create; virtual;
     constructor Create(AItemClass: TJSONModelClass); virtual;
@@ -102,7 +104,14 @@ uses
 
 function TJSONCollection.GetParams: TParams;
 begin
+  ResourceNeeded;
   Result := FResource.Params;
+end;
+
+function TJSONCollection.GetResource: IJSONArrayResource;
+begin
+  ResourceNeeded;
+  Result := FResource;
 end;
 
 function TJSONCollection.GetCount: Integer;
@@ -117,6 +126,7 @@ end;
 
 procedure TJSONCollection.ItemResourceNeeded(Item: TJSONModel);
 begin
+  ResourceNeeded;
   if FItemResource = nil then
     FItemResource := FItemClass.GetResourceClient.GetJSONObject(FItemClass.GetResourceName);
   FItemResource.Params.Assign(FResource.Params);
@@ -152,11 +162,18 @@ end;
 
 procedure TJSONCollection.ResetData;
 begin
+  ResourceNeeded;
   if FOwnsData then
     FreeAndNil(FData);
   ParseData(FResource.Data, FData, FOwnsData);
   FreeAndNil(FItems);
   Changed;
+end;
+
+procedure TJSONCollection.ResourceNeeded;
+begin
+  if FResource = nil then
+    FResource := FItemClass.GetResourceClient.GetJSONArray(FItemClass.GetResourceName);
 end;
 
 procedure TJSONCollection.Changed;
@@ -236,7 +253,6 @@ end;
 constructor TJSONCollection.Create;
 begin
   FItemClass := GetItemClass;
-  FResource := FItemClass.GetResourceClient.GetJSONArray(FItemClass.GetResourceName);
 end;
 
 constructor TJSONCollection.Create(AItemClass: TJSONModelClass);
@@ -244,7 +260,6 @@ begin
   if AItemClass = nil then
     raise Exception.Create('TJSONCollection - ItemClass is not set');
   FItemClass := AItemClass;
-  FResource := AItemClass.GetResourceClient.GetJSONArray(AItemClass.GetResourceName);
 end;
 
 destructor TJSONCollection.Destroy;
@@ -292,6 +307,7 @@ end;
 
 function TJSONCollection.Fetch: Boolean;
 begin
+  ResourceNeeded;
   Result := FResource.Fetch;
   if Result then
   begin
@@ -313,6 +329,7 @@ end;
 
 function TJSONCollection.ParamByName(const ParamName: String): TParam;
 begin
+  ResourceNeeded;
   Result := FResource.ParamByName(ParamName);
 end;
 
