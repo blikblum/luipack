@@ -61,7 +61,7 @@ begin
 '  protected'+ LineEnding +
 '    class function GetItemClass: TJSONModelClass; override;'+ LineEnding +
 '  public'+ LineEnding +
-'    function Add: TMyModel; inline;'+ LineEnding +
+'    function CreateItem: TMyModel;'+ LineEnding +
 '    function Find(const Id: Variant): TMyModel;'+ LineEnding +
 '    function Get(ItemData: TJSONObject): TMyModel;'+ LineEnding +
 '    property Items[Index: Integer]: TMyModel read GetItem; default;'+ LineEnding +
@@ -95,9 +95,9 @@ begin
 '  Result := TMyModel;'+ LineEnding +
 'end;'+ LineEnding +
 ''+ LineEnding +
-'function TMyCollection.Add: TWard;'+ LineEnding +
+'function TMyCollection.CreateItem: TMyModel;'+ LineEnding +
 'begin'+ LineEnding +
-'  Result := TMyModel(inherited Add);'+ LineEnding +
+'  Result := TMyModel(inherited CreateItem);'+ LineEnding +
 'end;'+ LineEnding +
 ''+ LineEnding +
 'function TMyCollection.Find(const Id: Variant): TMyModel;'+ LineEnding +
