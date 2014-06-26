@@ -9,6 +9,8 @@ uses
 
 type
 
+  //todo: define json data ownership -> currently is a mess
+
   TJSONCollection = class;
 
   { TJSONModel }
@@ -41,6 +43,7 @@ type
     procedure Fetch(const IdValue: Variant);
     function ParamByName(const ParamName: String): TParam;
     procedure Save;
+    procedure Save(const IdValue: Variant);
     property Data: TJSONObject read FData;
     class property DefaultResourceClient: IResourceClient write SetDefaultResourceClient;
     property Index: Integer read GetIndex;
@@ -75,17 +78,20 @@ type
       out FreeCollectionData: Boolean); virtual;
     procedure ResetData;
     procedure ResourceNeeded;
-    procedure SaveItem(Item: TJSONModel);
     property Resource: IJSONArrayResource read GetResource;
   public
     constructor Create; virtual;
     constructor Create(AItemClass: TJSONModelClass); virtual;
     destructor Destroy; override;
-    function Add: TJSONModel;
+    function Add(Item: TJSONModel): TJSONModel;
+    function CreateItem: TJSONModel;
     function Get(ItemData: TJSONObject): TJSONModel;
     function Fetch: Boolean;
     function Find(const Id: Variant): TJSONModel;
+    function IndexOf(Item: TJSONModel): Integer;
     function ParamByName(const ParamName: String): TParam;
+    function SaveItem(Item: TJSONModel; AddItem: Boolean = True): Boolean;
+    function SaveItem(Item: TJSONModel; const IdValue: Variant; AddItem: Boolean = True): Boolean;
     property Count: Integer read GetCount;
     property Data: TJSONArray read FData;
     property ItemClass: TJSONModelClass read FItemClass;
@@ -186,7 +192,7 @@ begin
   ItemResourceNeeded(Item);
   if FItemResource.Delete then
   begin
-    //todo: add check to see if really removed
+    //todo: CreateItem check to see if really removed
     Data.Extract(Item.Data);
     Item.FOwnsData := True;
     FPONotifyObservers(Self, ooDeleteItem, Item);
@@ -224,29 +230,26 @@ begin
   FreeCollectionData := False;
 end;
 
-procedure TJSONCollection.SaveItem(Item: TJSONModel);
-var
-  ItemIsNew: Boolean;
+function TJSONCollection.SaveItem(Item: TJSONModel; AddItem: Boolean): Boolean;
 begin
   ItemResourceNeeded(Item);
-  ItemIsNew := Item.IsNew;
-  if FItemResource.Save then
+  Result := FItemResource.Save;
+  if Result and AddItem then
   begin
-    if Data.IndexOf(Item.Data) = -1 then
-    begin
-      if Item.FOwnsData then
-      begin
-        Item.FOwnsData := False;
-        Data.Add(Item.Data);
-      end
-      else
-        Data.Add(TJSONObject(Item.Data.Clone));
-    end;
-    //todo: see how to trigger the ooChange event
-    {
-    if not ItemIsNew then
-      FPONotifyObservers(Self, ooChange, Item);
-    }
+    if IndexOf(Item) = -1 then
+      Add(Item);
+  end;
+end;
+
+function TJSONCollection.SaveItem(Item: TJSONModel; const IdValue: Variant;
+  AddItem: Boolean): Boolean;
+begin
+  ItemResourceNeeded(Item);
+  Result := FItemResource.Save(IdValue);
+  if Result and AddItem then
+  begin
+    if IndexOf(Item) = -1 then
+      Add(Item);
   end;
 end;
 
@@ -270,15 +273,24 @@ begin
   inherited Destroy;
 end;
 
-function TJSONCollection.Add: TJSONModel;
+function TJSONCollection.CreateItem: TJSONModel;
+begin
+  Result := Add(FItemClass.Create);
+end;
+
+function TJSONCollection.Add(Item: TJSONModel): TJSONModel;
 begin
   ItemsNeeded;
-  Result := FItemClass.Create;
-  Result.FCollection := Self;
-  Result.FOwnsData := False;
-  FData.Add(Result.Data);
-  FItems.Add(Result);
-  FPONotifyObservers(Self, ooAddItem, Result);
+  FItems.Add(Item);
+  if FData = nil then
+  begin
+    FData := TJSONArray.Create;
+    FOwnsData := True;
+  end;
+  Item.FOwnsData := False;
+  FData.Add(Item.Data);
+  Item.FCollection := Self;
+  FPONotifyObservers(Self, ooAddItem, Item);
 end;
 
 function TJSONCollection.Get(ItemData: TJSONObject): TJSONModel;
@@ -319,12 +331,22 @@ function TJSONCollection.Find(const Id: Variant): TJSONModel;
 var
   ItemIndex: Integer;
 begin
-  //todo: get directly from FItems or add mechanism to ensure consistency between FItems and FData
+  //todo: get directly from FItems or CreateItem mechanism to ensure consistency between FItems and FData
   ItemIndex := GetJSONIndexOf(FData, [FItemClass.GetIdField, Id]);
   if ItemIndex > -1 then
     Result := GetItem(ItemIndex)
   else
     Result := nil;
+end;
+
+function TJSONCollection.IndexOf(Item: TJSONModel): Integer;
+begin
+  if FItems <> nil then
+    Result := FItems.IndexOf(Item)
+  else if FData <> nil then
+    Result := FData.IndexOf(Item.Data)
+  else
+    Result := -1;
 end;
 
 function TJSONCollection.ParamByName(const ParamName: String): TParam;
@@ -464,6 +486,17 @@ begin
   begin
     ResourceNeeded;
     FResource.Save;
+  end;
+end;
+
+procedure TJSONModel.Save(const IdValue: Variant);
+begin
+  if FCollection <> nil then
+    FCollection.SaveItem(Self)
+  else
+  begin
+    ResourceNeeded;
+    FResource.Save(IdValue);
   end;
 end;
 
