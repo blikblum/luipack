@@ -38,8 +38,8 @@ require.config({
 
 var app = app || {};
 app.data = {}
-//app.BASE_URL = '../../luirest/camicu.cgi';
-app.BASE_URL = '../cgi-bin/camicu.cgi';
+app.BASE_URL = '../../luirest/camicu.cgi';
+//app.BASE_URL = '../cgi-bin/camicu.cgi';
 app.mainView = null;
 app.setMainView = function(newView){
   if (app.mainView) {
