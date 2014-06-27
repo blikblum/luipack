@@ -8,3 +8,8 @@ body {
 }
 
 .popover {max-width:400px;}
+
+.radio + .radio,
+.checkbox + .checkbox {
+    margin-top: 10px;
+}
