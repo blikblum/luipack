@@ -7,16 +7,19 @@
       <div class="form-group col-sm-4">
         <label for="patient-registry">Registro</label>
         <input id="patient-registry" name="registry" type="text" class="form-control" disabled/>
+          <span class="help-block hidden"></span>
       </div>
       <div class="form-group col-sm-8">
         <label for="patient-name">Nome</label>
         <input id="patient-name" name="name" type="text" class="form-control"/>
+          <span class="help-block hidden"></span>
       </div>
   </div>
   <div class="row">
     <div class="form-group col-sm-4">
       <label for="patient-birthdate">Data de Nascimento</label>
-      <input id="patient-birthdate" name="birthdate" type="date" class="form-control"/>
+      <input id="patient-birthdate" name="birthdate" type="text" class="form-control date-control"/>
+        <span class="help-block hidden"></span>
     </div>
     <div class="form-group col-sm-4">
       <label for="patient-gender">Gênero</label>
@@ -30,14 +33,17 @@
       <div class="form-group col-sm-4">
         <label for="patient-originationid">Origem</label>
         <select id="patient-originationid" name="originationid"  class="form-control"></select>
+          <span class="help-block hidden"></span>
       </div>
       <div class="form-group col-sm-4">
         <label for="patient-internmentdate">Data de Internamento</label>
-        <input id="patient-internmentdate" name="internmentdate" type="date" class="form-control"/>
+        <input id="patient-internmentdate" name="internmentdate" type="text" class="form-control date-control"/>
+          <span class="help-block hidden"></span>
       </div>
       <div class="form-group col-sm-4">
         <label for="patient-internmenttypeid">Tipo de Internamento</label>
         <select id="patient-internmenttypeid" name="internmenttypeid" class="form-control"></select>
+          <span class="help-block hidden"></span>
       </div>
     </div>
   <div class="checkbox">
@@ -55,6 +61,7 @@
   <div class="form-group col-sm-4">
     <label for="patient-diagnosticid">Diagnóstico</label>
     <select id="patient-diagnosticid" name="diagnosticid" class="form-control"></select>
+      <span class="help-block hidden"></span>
   </div>
   <div class="form-group col-sm-4">
     <label for="patient-apache2">Apache2</label>
@@ -159,6 +166,8 @@
   </fieldset>
 
 </form>
+<hr/>
+<div class="alert alert-danger hidden" role="alert"></div>
 <button type="button" class="btn btn-default cancel">Cancelar</button>
 <button type="button" class="btn btn-primary save-model">Salvar</button>
 

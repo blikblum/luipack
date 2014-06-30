@@ -12,7 +12,9 @@
     "handlebars": "~1.3.0",
     "backbone.stickit": "~0.8.0",
     "backbone.stickit.form": "*",
-    "backbone.computedfields": "~0.0.7"
+    "backbone.computedfields": "~0.0.7",
+    "backbone-validation": "~0.9.1",
+    "jquery.maskedinput": "~1.3.1"
   },
   "devDependencies": {},
   "resolutions": {

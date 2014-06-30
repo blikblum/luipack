@@ -5,15 +5,15 @@ define([
     'underscore',
     'backbone',
     'text!templates/patientedit.html',
-    'stickitform'
-], function ($, _, Backbone, html, StickitForm) {
+    'stickitform',
+    'validation'
+], function ($, _, Backbone, html, StickitForm, Validation) {
     'use strict';
 
     var PatienteditView = Backbone.View.extend({
       html: html,
       initialize:function(){
-
-
+          Validation.bind(this);
       },
       bindings: function(){
         var bindings = StickitForm.getBindings({
@@ -24,6 +24,14 @@ define([
             'hasdementia','hasalcoholism','hasimmunosuppression','hassida','hasrheumaticdisorder', 'haspsychiatricdisorder'],
 
           extend: {
+              birthdate:{
+                  onGet: 'formatDate',
+                  onSet: 'parseDate'
+              },
+            internmentdate:{
+                onGet: 'formatDate',
+                onSet: 'parseDate'
+            },
             gender: {
               selectOptions: {
                 collection: [{'label': 'Masculino', value:'M'}, {label: 'Feminino', value: 'F'}]
@@ -32,6 +40,7 @@ define([
               originationid: {
                   selectOptions: {
                       collection: [
+                          {label: 'NC', value: 9},
                           {label: 'Enfermaria', value: 1},
                           {label: 'Centro Cirúrgico', value: 2},
                           {label: 'Semi Intensiva', value: 3},
@@ -39,17 +48,18 @@ define([
                           {label: 'Home Care', value: 5},
                           {label: 'Outro Hospital', value: 6},
                       ],
-                      defaultOption: {label: 'NC', value: 9}
+                      defaultOption: {label: 'Selecione uma opção...', value: null}
                   }
               },
               internmenttypeid: {
                   selectOptions: {
                       collection: [
+                          {label: 'NC', value: 9},
                           {label: 'Clínico', value: 1},
                           {label: 'Cirurgia Urgência Emergência', value: 2},
                           {label: 'Cirugia Eletiva', value: 3}
                       ],
-                      defaultOption: {label: 'NC', value: 9}
+                      defaultOption: {label: 'Selecione uma opção...', value: null}
                   }
               },
               diagnosticid: {
@@ -84,13 +94,33 @@ define([
 
         return bindings;
       },
+      formatDate: function (val){
+          if (val){
+              return fromOADate(val).toLocaleDateString('pt-BR');
+          }
+      },
+      parseDate: function (val){
+          var parts;
+          var date;
+
+          if (val){
+              parts = val.split('/');
+              date = new Date(parts[2], parts[1] - 1, parts[0]);
+              return toOADate(date);
+          }
+      },
       render: function () {
         var title = (this.model.isNew()) ? 'Adicionar': 'Editar';
         title += ' Paciente';
         this.$el.html(this.html);
         this.$('.title-el').html(title);
+        this.$('.date-control').mask('99/99/9999');
         this.stickit();
         return this;
+      },
+      remove: function () {
+          Validation.unbind(this);
+          return Backbone.View.prototype.remove.apply(this, arguments);
       },
       events:{
         'click button.save-model':'saveModel',
@@ -101,6 +131,11 @@ define([
       },
       saveModel: function(){
         var self = this;
+        if (!this.model.isValid(true)){
+            this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
+            return;
+        }
+
         if (this.model.isNew()){
           this.model.collection = this.collection;
           this.model.save({}, {
@@ -110,7 +145,9 @@ define([
               app.mainRouter.navigate('#patients', {trigger: true});
             },
             error: function(model, response, options) {
+
                 console.log('Erro ao salvar os dados: ', response, options);
+                this.$('.alert-danger').removeClass('hidden').html('Erro ao salvar dados');
             }
           });
 
@@ -122,6 +159,7 @@ define([
             },
             error: function(model, response, options) {
                console.log('Erro ao salvar os dados: ', response, options);
+                this.$('.alert-danger').removeClass('hidden').html('Erro ao salvar dados');
               }
           });
         }

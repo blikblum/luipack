@@ -22,6 +22,9 @@ require.config({
         },
       stickit:{
         deps: ['backbone']
+      },
+        maskedinput: {
+          deps: ['jquery']
       }
     },
     paths: {
@@ -32,7 +35,9 @@ require.config({
         handlebars: '../bower_components/handlebars/handlebars',
         stickit: '../bower_components/backbone.stickit/backbone.stickit',
         stickitform: '../bower_components/backbone.stickit.form/src/backbone.stickit.form',
-        text: '../bower_components/requirejs-text/text'
+        text: '../bower_components/requirejs-text/text',
+        validation: '../bower_components/backbone-validation/dist/backbone-validation-amd',
+        maskedinput: '../bower_components/jquery.maskedinput/jquery.maskedinput'
     }
 });
 
@@ -90,15 +95,45 @@ require([
   'collections/patients',
   'routes/main',
   'handlebars',
+  'validation',
   'stickit',
   'bootstrap',
-], function ($, Backbone, PatientCollection, MainRouter, Handlebars) {
+  'maskedinput'
+], function ($, Backbone, PatientCollection, MainRouter, Handlebars, Validation) {
+
+    Validation.configure({
+        forceUpdate: true
+    });
+
+    _.extend(Validation.messages, {
+        required: 'Campo obrigatório'
+    });
+
+    _.extend(Validation.callbacks, {
+        valid: function (view, attr, selector) {
+            var $el = view.$('[name=' + attr + ']'),
+                $group = $el.closest('.form-group');
+
+            $group.removeClass('has-error');
+            $group.find('.help-block').html('').addClass('hidden');
+        },
+        invalid: function (view, attr, error, selector) {
+            var $el = view.$('[name=' + attr + ']'),
+                $group = $el.closest('.form-group');
+
+            $group.addClass('has-error');
+            $group.find('.help-block').html(error).removeClass('hidden');
+        }
+    });
 
    $(document).ready(function(){
      if (app.started) return;
      console.log('app start');
      Handlebars.registerHelper('dateToStr', function(val){
-         return fromOADate(val).toLocaleDateString();
+         if(val){
+             return fromOADate(val).toLocaleDateString('pt-BR');
+         }
+
      });
      app.started = true;
 
