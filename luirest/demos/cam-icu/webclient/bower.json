@@ -14,7 +14,8 @@
     "backbone.stickit.form": "*",
     "backbone.computedfields": "~0.0.7",
     "backbone-validation": "~0.9.1",
-    "jquery.maskedinput": "~1.3.1"
+    "jquery.maskedinput": "~1.3.1",
+    "backbone.localstorage": "~1.1.9"
   },
   "devDependencies": {},
   "resolutions": {
