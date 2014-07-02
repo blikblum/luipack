@@ -21,7 +21,26 @@ define([
             }
         },
 
-        validate: function(attrs, options) {
+        validation: {
+            date: {
+              required: true
+            },
+            deliriumid: {
+                required: true
+            },
+            ventilationid: {
+                required: true
+            },
+            rass: {
+                required: true
+            },
+            shiftid: {
+                required: true
+            }
+            /*,
+            sedation: {
+                required: true
+            }*/
         },
 
         parse: function(response, options)  {

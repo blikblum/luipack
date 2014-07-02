@@ -5,9 +5,10 @@ define([
     'underscore',
     'backbone',
     'text!templates/evaluation.html',
-    'stickitform'
+    'stickitform',
+    'validation'
 
-], function ($, _, Backbone, html, StickitForm) {
+], function ($, _, Backbone, html, StickitForm, Validation) {
     'use strict';
 
     var EvaluationView = Backbone.View.extend({
@@ -15,18 +16,53 @@ define([
 
         bindings: function(){
             var bindings = StickitForm.getBindings({
-                attributes: ['date', 'rass', 'deliriumid', 'sedationid', 'ventilationid'],
+                attributes: ['date', 'rass', 'deliriumid', 'sedation', 'ventilationid', 'shiftid'],
                 extend: {
                     date:{
                       onGet: function(val){
                           return fromOADate(val).toLocaleDateString();
                       }
                     },
+                    sedation: {
+                      onGet: function (val) {
+                          if (_.isArray(val)){
+                              return val.map(function (item) {
+                                  return item.toString();
+                              })
+                          };
+                      },
+                      onSet: function (val) {
+                          if (_.isArray){
+                            return val.map(function (item) {
+                                 return parseInt(item);
+                              });
+                          } else
+                           return parseInt(val);
+                      }
+                    },
+                    shiftid: {
+                        selectOptions:{
+                            collection: [
+                                {name: 'Manhã', value: 1},
+                                {name: 'Tarde', value: 2},
+                                {name: 'Noite', value: 3}
+                            ],
+                            labelPath: 'name',
+                            defaultOption: {label: 'Selecione uma opção...', value: null}
+                        }
+                    },
                     deliriumid: {
                         selectOptions:{
-                            collection: [{name: 'Hipoativo', value: 1},{name: 'Misto', value: 2},{name: 'Hiperativo', value: 3},{name: 'Não', value: 4},{name: 'Não Avaliado', value: 5}],
+                            collection: [
+                                {name: 'Hipoativo', value: 1},
+                                {name: 'Misto', value: 2},
+                                {name: 'Hiperativo', value: 3},
+                                {name: 'Não', value: 4},
+                                {name: 'Não Avaliado', value: 5},
+                                {name: 'NC', value: 9}
+                            ],
                             labelPath: 'name',
-                            defaultOption: {label: 'NC', value: 9}
+                            defaultOption: {label: 'Selecione uma opção...', value: null}
                         }
                     },
                     ventilationid: {
@@ -35,21 +71,11 @@ define([
                                return [
                                     {name: 'Mecânica', value: 1},
                                     {name: 'Espontânea', value: 2},
-                                    {name: 'VNI', value: 3}
+                                    {name: 'VNI', value: 3}, {name: 'NC', value: 9}
                                 ];
                             },
                             labelPath: 'name',
-                            defaultOption: {label: 'NC', value: 9}
-                        }
-                    },
-                    sedationid: {
-                        selectOptions:{
-                            collection: [{name: 'Propofol', value: 1},{name: 'Midazolam', value: 2},{name: 'Midazolan + Fentanil', value: 23},
-                                {name: 'Fentanil', value: 3},{name: 'Cetamina', value: 4},{name: 'Morfina', value: 5},{name: 'Dexmetomedina', value: 6},
-                                {name: 'Nada', value: 7}
-                            ],
-                            labelPath: 'name',
-                            defaultOption: {label: 'NC', value: 9}
+                            defaultOption: {label: 'Selecione uma opção...', value: null}
                         }
                     }
                 }
@@ -66,7 +92,8 @@ define([
             })
 
             return bindings;
-        } ,
+        },
+
 
         patientBindings: {
           '.name-el':'name'
@@ -84,6 +111,7 @@ define([
         },
 
         initialize: function () {
+            Validation.bind(this);
             this.listenTo(this.model, 'change', this.render);
         },
 
@@ -93,13 +121,20 @@ define([
             this.stickit(this.collection.patient, this.patientBindings);
             return this;
         },
-
+        remove: function () {
+            Validation.unbind(this);
+            return Backbone.View.prototype.remove.apply(this, arguments);
+        },
         cancel: function () {
             //window.history.back();
             app.mainRouter.navigate('#patients/' + this.collection.patient.get('id') + '/evaluations', true)
         },
 
         saveModel: function () {
+            if (!this.model.isValid(true)){
+                this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
+                return;
+            }
             var self = this;
             var isNew = this.model.isNew();
             if (isNew){
@@ -119,7 +154,7 @@ define([
                     if ((response.responseJSON) && (response.responseJSON.message)){
                         msg = response.responseJSON.message;
                     }
-                    alert('Erro ao salvar avaliação: ' + msg);
+                    this.$('.alert-danger').removeClass('hidden').html('Erro ao salvar dados');
                 }
             })
         }
