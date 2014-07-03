@@ -67,6 +67,14 @@ type
     class function AllowsCaptionLabel: Boolean; override;
   end;
 
+  { TJSONRadioButtonMediator }
+
+  TJSONRadioButtonMediator = class(TJSONGUIMediator)
+    class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
+    class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+    class function AllowsCaptionLabel: Boolean; override;
+  end;
+
   { TJSONCheckBoxMediator }
 
   TJSONCheckBoxMediator = class(TJSONGUIMediator)
@@ -180,6 +188,41 @@ begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
 end;
 
+{ TJSONRadioButtonMediator }
+
+class procedure TJSONRadioButtonMediator.DoJSONToGUI(Data: TJSONObject;
+  Element: TJSONFormElement);
+var
+  RadioButton: TRadioButton;
+  PropData, ValueData: TJSONData;
+  Checked: Boolean;
+begin
+  RadioButton := Element.Control as TRadioButton;
+  PropData := Data.Find(Element.PropertyName);
+  ValueData := Element.OptionsData.Find('value');
+  Checked := False;
+  if (PropData <> nil) and (ValueData <> nil) then
+    Checked := CompareJSONData(PropData, ValueData) = 0;
+  RadioButton.Checked := Checked;
+end;
+
+class procedure TJSONRadioButtonMediator.DoGUIToJSON(Element: TJSONFormElement;
+  Data: TJSONObject);
+var
+  RadioButton: TRadioButton;
+  ValueData: TJSONData;
+begin
+  RadioButton := Element.Control as TRadioButton;
+  ValueData := Element.OptionsData.Find('value');
+  if RadioButton.Checked and (ValueData <> nil) then
+    Data.Elements[Element.PropertyName] := ValueData.Clone;
+end;
+
+class function TJSONRadioButtonMediator.AllowsCaptionLabel: Boolean;
+begin
+  Result := False;
+end;
+
 { TJSONMemoMediator }
 
 class procedure TJSONMemoMediator.DoJSONToGUI(Data: TJSONObject;
@@ -249,7 +292,7 @@ begin
     Checked := False;
     if PropData <> nil then
     begin
-      if Element.OptionsData.Get('grouped', False) then
+      if Element.OptionsData.Get('grouped', False) or (PropData.JSONType in [jtObject, jtArray]) then
       begin
         case PropData.JSONType of
           jtObject:
@@ -977,6 +1020,7 @@ initialization
   RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
   RegisterJSONMediator(TRadioGroup, TJSONRadioGroupMediator);
   RegisterJSONMediator(TCheckBox, TJSONCheckBoxMediator);
+  RegisterJSONMediator(TRadioButton, TJSONRadioButtonMediator);
 
 finalization
   MediatorStore.Destroy;
