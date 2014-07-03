@@ -48,7 +48,7 @@ define([
                                 {name: 'Noite', value: 3}
                             ],
                             labelPath: 'name',
-                            defaultOption: {label: 'Selecione uma opção...', value: null}
+                            defaultOption: {label: 'Selecione...', value: null}
                         }
                     },
                     deliriumid: {

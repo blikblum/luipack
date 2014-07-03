@@ -46,12 +46,20 @@ var app = app || {};
 app.data = {}
 app.BASE_URL = '../../luirest/camicu.cgi';
 //app.BASE_URL = '../cgi-bin/camicu.cgi';
-app.useLocalStorage = true;
+//app.useLocalStorage = true;
 app.mainView = null;
-app.setMainView = function(newView){
+app.setMainView = function(newView, currentRoute){
   if (app.mainView) {
     app.mainView.remove()
   }
+  if (currentRoute){
+      app.previousRoute = currentRoute;
+      $('#back-button').parent().removeClass('invisible');
+  } else {
+      delete app.previousRoute;
+      $('#back-button').parent().addClass('invisible');
+  }
+
   app.mainView = newView;
   $('#main').append(newView.$el);
 }
@@ -100,8 +108,7 @@ require([
   'validation',
   'stickit',
   'bootstrap',
-  'maskedinput',
-  'localstorage'
+  'maskedinput'
 ], function ($, Backbone, PatientCollection, MainRouter, Handlebars, Validation) {
 
     Validation.configure({
@@ -132,6 +139,12 @@ require([
    $(document).ready(function(){
      if (app.started) return;
      console.log('app start');
+       $('#back-button').on('click', function (e) {
+           e.preventDefault();
+           if (app.previousRoute) {
+               app.mainRouter.navigate(app.previousRoute, true);
+           }
+       })
      Handlebars.registerHelper('dateToStr', function(val){
          if(val){
              return fromOADate(val).toLocaleDateString('pt-BR');

@@ -1,5 +1,21 @@
 body {
     background: #fafafa;
+    padding-top: 60px;
+}
+
+.navbar-brand {
+    float: none;
+}
+
+.navbar-center
+{
+    position: absolute;
+    width: 60%;
+    left: 20%;
+    top: 0;
+    text-align: center;
+    margin: auto;
+    height:100%;
 }
 
 .hero-unit {
@@ -12,4 +28,12 @@ body {
 .radio + .radio,
 .checkbox + .checkbox {
     margin-top: 10px;
+}
+
+h3 .btn {
+    margin-top: -0.3em;
+}
+
+#back-button {
+    margin-left: 4px;
 }

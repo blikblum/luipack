@@ -59,7 +59,7 @@ begin
      RES_EVALUATIONS, RES_PATIENT_EVALUATIONS:
       begin
         SqldbResource.IsCollection := True;
-        SqldbResource.SelectSQL := 'Select Id, Date, PatientId, RASS, DeliriumId, VentilationId, Sedation from PatientEvaluation';
+        SqldbResource.SelectSQL := 'Select Id, Date, PatientId, RASS, DeliriumId, VentilationId, Sedation, ShiftId from PatientEvaluation';
         SqldbResource.JSONFields := '[{"name":"sedation","type":"array"}]';
         SqldbResource.SetDefaultSubPath('evaluationid', @GetResource, RES_EVALUATION);
         if ResourceTag = RES_PATIENT_EVALUATIONS then
@@ -71,7 +71,7 @@ begin
       end;
      RES_EVALUATION:
       begin
-        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, Sedation from PatientEvaluation';
+        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, Sedation, ShiftId from PatientEvaluation';
         SqldbResource.PrimaryKeyParam := 'evaluationid';
         SqldbResource.JSONFields := '[{"name":"sedation","type":"array"}]';
       end;

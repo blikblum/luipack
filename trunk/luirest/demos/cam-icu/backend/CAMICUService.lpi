@@ -43,7 +43,6 @@
       <Unit0>
         <Filename Value="CAMICUService.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CAMICUService"/>
       </Unit0>
       <Unit1>
         <Filename Value="mainmodule.pas"/>
@@ -70,12 +69,6 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Other>
-      <CompilerMessages>
-        <MsgFileName Value=""/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">
