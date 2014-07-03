@@ -54,10 +54,10 @@ define([
               internmenttypeid: {
                   selectOptions: {
                       collection: [
-                          {label: 'NC', value: 9},
                           {label: 'Clínico', value: 1},
-                          {label: 'Cirurgia Urgência Emergência', value: 2},
-                          {label: 'Cirugia Eletiva', value: 3}
+                          {label: 'Cirúrgico', value: 2},
+                          {label: 'Trauma', value: 3},
+                          {label: 'Neurologia / Neurocirurgia', value: 4}
                       ],
                       defaultOption: {label: 'Selecione uma opção...', value: null}
                   }

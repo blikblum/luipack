@@ -26,14 +26,14 @@ define([
       },
       addPatient: function(registry){
         var patient = new PatientModel({registry:registry});
-        app.setMainView(new PatienteditView({collection: app.data.patients, model: patient}).render())
+        app.setMainView(new PatienteditView({collection: app.data.patients, model: patient}).render(),'#/patients')
       },
         editPatient: function (patientId) {
             var patient = app.data.patients.get(patientId);
             var view;
             if (patient){
                 view = new PatienteditView({model: patient});
-                app.setMainView(view.render());
+                app.setMainView(view.render(), '#/patients');
             } else {
                 alert('Paciente com id ' + patientId + ' não encontrado');
                 app.mainRouter.navigate('#/patients');
@@ -45,7 +45,7 @@ define([
             if (patient){
                 patient.getEvaluations(function(evaluations){
                     view = new EvaluationsView({model: patient, evaluations: evaluations});
-                    app.setMainView(view.render());
+                    app.setMainView(view.render(), '#/patients');
                 });
             } else {
                 alert('Paciente com id ' + patientId + ' não encontrado');
@@ -63,7 +63,7 @@ define([
             var view;
             if (evaluation){
                 view = new EvaluationView({model: evaluation, collection: evaluations});
-                app.setMainView(view.render());
+                app.setMainView(view.render(),'#/patients/' +patientId +'/evaluations');
             } else {
                 alert('Evolução com id ' + evaluationId + ' não encontrada');
             }
@@ -74,7 +74,7 @@ define([
             var evaluations = patient.getEvaluations();
             var evaluation = new Evaluation({});
             var view = new EvaluationView({model: evaluation, collection: evaluations});
-            app.setMainView(view.render());
+            app.setMainView(view.render(), '#/patients/' +patientId +'/evaluations');
         }
 
     });

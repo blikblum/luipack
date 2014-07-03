@@ -14,10 +14,10 @@ define([
     },
     url: function() {
         return app.BASE_URL + '/patients/active/' + this.patient.get('id') + '/evaluations'
-    };
+    }};
     
-    if (app.useLocalStorage) 
-        props.localStorage = new Backbone.LocalStorage("evaluation");
+    //if (app.useLocalStorage)
+    //    props.localStorage = new Backbone.LocalStorage("evaluation");
 
     var EvaluationCollection = Backbone.Collection.extend(props);
 

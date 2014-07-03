@@ -33,15 +33,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</td>\r\n<td></td>\r\n<td>\r\n  <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#/patients/";
+    + "<br/><span class=\"glyphicon glyphicon-list-alt\"></span><a href=\"#/patients/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "/edit\"> Editar</a> &nbsp\r\n  <span class=\"glyphicon glyphicon-list-alt\"></span><a href=\"#/patients/";
+    + "/evaluations\"> Avaliações</a></td>\r\n<td>\r\n  <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#/patients/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "/evaluations\"> Avaliações</a>\r\n</td>\r\n\r\n\r\n";
+    + "/edit\"> Editar</a> &nbsp\r\n</td>\r\n\r\n\r\n";
   return buffer;
   });
 
@@ -51,7 +51,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<div class=\"panel panel-default\">\r\n  <div class=\"panel-heading\">\r\n    <strong class=\"panel-title\">Pacientes</strong> <a href=\"#\" class=\"btn btn-primary btn-sm pull-right add-popover\" data-placement=\"bottom\" data-toggle=\"popover\" data-title=\"Insira o registro\" type=\"button\" data-html=\"true\"><span class=\"glyphicon glyphicon-plus-sign\"></span> Admitir Paciente</a>\r\n    <div class=\"hide add-popover-content\">\r\n      <form class=\"form-inline\" role=\"form\">\r\n        <div class=\"form-group\">\r\n          <input type=\"number\" class=\"form-control patient-registry\" placeholder=\"Registro\">\r\n        </div>\r\n        <button type=\"submit\" class=\"btn btn-primary add-patient\">Admitir</button>\r\n      </form>\r\n    </div>\r\n  </div>\r\n  <div class=\"panel-body\">\r\n    <table id=\"patients-table\" class=\"table table-hover\">\r\n      <thead>\r\n      </thead>\r\n      <tbody>\r\n      </tbody>\r\n    </table>\r\n  </div>\r\n</div>\r\n\r\n";
+  return "     <div class=\"row\">\r\n        <div class=\"col-md-12\">\r\n            <h3>Pacientes\r\n                <a href=\"#\" class=\"btn btn-primary btn-sm pull-right add-popover\" data-placement=\"bottom\" data-toggle=\"popover\" data-title=\"Insira o registro\" type=\"button\" data-html=\"true\"><span class=\"glyphicon glyphicon-plus-sign\"></span> Adicionar</a>\r\n            </h3>\r\n            <div class=\"hide add-popover-content\">\r\n                <form class=\"form-inline\" role=\"form\">\r\n                    <div class=\"form-group\">\r\n                        <input type=\"number\" class=\"form-control patient-registry\" placeholder=\"Registro\">\r\n                    </div>\r\n                    <button type=\"submit\" class=\"btn btn-primary add-patient\">Admitir</button>\r\n                </form>\r\n            </div>\r\n        </div>\r\n    </div>\r\n\r\n    <table id=\"patients-table\" class=\"table table-hover\">\r\n      <thead>\r\n      </thead>\r\n      <tbody>\r\n      </tbody>\r\n    </table>\r\n\r\n";
   });
 
 return this["JST"];
