@@ -1,0 +1,79 @@
+<h2 class="name-el"/>
+<h3>PRE-DELIRIC</h3>
+<form role="form">
+
+    <div class="form-group">
+        <label>Hospitalização de Urgência</label><br>
+        <label class="radio-inline">
+            <input type="radio" name="isurgency" value="true"> Sim
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="isurgency" value="false"> Não
+        </label>
+        <span class="help-block hidden"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="predeliric-morphine">Uso de morfina</label>
+        <select id="predeliric-morphine" name="morphine" class="form-control"></select>
+        <span class="help-block hidden"></span>
+    </div>
+
+    <div class="form-group">
+    <label>Presença de infecção</label><br>
+    <label class="radio-inline">
+        <input type="radio" name="hasinfection" value="true"> Sim
+    </label>
+    <label class="radio-inline">
+        <input type="radio" name="hasinfection" value="false"> Não
+    </label>
+        <span class="help-block hidden"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label for="predeliric-coma">Coma</label>
+        <select id="predeliric-coma" name="coma" class="form-control"></select>
+        <span class="help-block hidden"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Sedação</label><br>
+        <label class="radio-inline">
+            <input type="radio" name="hassedation" value="true"> Sim
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="hassedation" value="false"> Não
+        </label>
+        <span class="help-block hidden"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="predeliric-urea">Uréia (mmol/L)</label>
+        <input id="predeliric-urea" name="urea" type="number" class="form-control"/>
+        <span class="help-block hidden"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label>Acidose metabólica (pH < 7,35)</label><br>
+        <label class="radio-inline">
+            <input type="radio" name="hasacidosis" value="true"> Sim
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="hasacidosis" value="false"> Não
+        </label>
+        <span class="help-block hidden"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="predeliric-apache2">Apache 2</label>
+        <input id="predeliric-apache2" name="apache2" type="number" class="form-control"/>
+        <span class="help-block hidden"></span>
+    </div>
+</form>
+<hr/>
+<div class="alert alert-danger hidden" role="alert"></div>
+<button type="button" class="btn btn-default cancel">Cancelar</button>
+<button type="button" class="btn btn-primary save-model">Salvar</button>
+

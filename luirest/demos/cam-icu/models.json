@@ -267,6 +267,71 @@
         }
       ],
       "Name" : "Evaluation"
+    },
+    {
+      "Fields" : [
+        {
+          "DisplayLabel" : "PatientId",
+          "FieldID" : "{EE6ACE74-08B2-4AEC-9FE4-4AB8D764CFC7}",
+          "FieldName" : "PatientId",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Hospitalização de Urgência",
+          "FieldID" : "{F88D2229-E379-4928-8C55-479D2C0FBF32}",
+          "FieldName" : "IsUrgency",
+          "FieldType" : "dftBoolean"
+        },
+        {
+          "DisplayLabel" : "Uso de morfina",
+          "FieldID" : "{DA7417F2-452E-4B5C-AD2A-8F213B058204}",
+          "FieldName" : "Morphine",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Presença de infecção",
+          "FieldID" : "{AAA78405-744E-488F-AACE-6F9BEC8D5F86}",
+          "FieldName" : "HasInfection",
+          "FieldType" : "dftBoolean"
+        },
+        {
+          "DisplayLabel" : "Coma",
+          "FieldID" : "{F2951205-D4C2-4E6E-9A10-8F778113A111}",
+          "FieldName" : "Coma",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Sedação",
+          "FieldID" : "{ABCA9835-88FD-4CE9-8340-67F140E4ED54}",
+          "FieldName" : "HasSedation",
+          "FieldType" : "dftBoolean"
+        },
+        {
+          "DisplayLabel" : "Uréia",
+          "FieldID" : "{0CA87649-093C-447D-854A-79FDD00D245D}",
+          "FieldName" : "Urea",
+          "FieldType" : "dftFloat"
+        },
+        {
+          "DisplayLabel" : "Acidose metabólica",
+          "FieldID" : "{A2382637-6E23-4E1C-848A-5C61A5B094A9}",
+          "FieldName" : "HasAcidosis",
+          "FieldType" : "dftBoolean"
+        },
+        {
+          "DisplayLabel" : "Apache 2",
+          "FieldID" : "{01059D45-A81F-4C2C-88C6-583E995C7357}",
+          "FieldName" : "Apache2",
+          "FieldType" : "dftInteger"
+        },
+        {
+          "DisplayLabel" : "Risk",
+          "FieldID" : "{E25D4532-F56F-4872-8412-53B33155EAF8}",
+          "FieldName" : "Risk",
+          "FieldType" : "dftFloat"
+        }
+      ],
+      "Name" : "PreDeliric"
     }
   ],
   "Name" : "",

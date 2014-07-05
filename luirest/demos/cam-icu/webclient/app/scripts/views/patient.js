@@ -12,11 +12,14 @@ define([
       tagName: 'tr',
       template: JST['app/scripts/templates/patient.hbs'],
       initialize: function(){
-        this.listenTo(this.model, 'change', this.render)
         this.listenTo(this.model, 'destroy', this.remove)
       },
       render: function(){
-        this.$el.html(this.template(this.model.toJSON()))
+        var context = this.model.toJSON();
+        //hack to get updated values in view
+        context.predeliricrisk = this.model.get('predeliricrisk');
+        context.evaluationcount = this.model.get('evaluationcount');
+        this.$el.html(this.template(context))
         return this
       }
 

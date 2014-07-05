@@ -112,7 +112,6 @@ define([
 
         initialize: function () {
             Validation.bind(this);
-            this.listenTo(this.model, 'change', this.render);
         },
 
         render: function () {

@@ -26,21 +26,24 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 this["JST"]["app/scripts/templates/patient.hbs"] = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, stack2, options, functionType="function", escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
 
 
   buffer += "<td>";
   if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "<br/><span class=\"glyphicon glyphicon-list-alt\"></span><a href=\"#/patients/";
+    + "<br/><a href=\"#/patients/";
   if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "/evaluations\"> Avaliações</a></td>\r\n<td>\r\n  <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#/patients/";
-  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+    + "/evaluations\">";
+  options = {hash:{},data:data};
+  buffer += escapeExpression(((stack1 = helpers.pluralCount || depth0.pluralCount),stack1 ? stack1.call(depth0, depth0.evaluationcount, "avaliação", "avaliações", options) : helperMissing.call(depth0, "pluralCount", depth0.evaluationcount, "avaliação", "avaliações", options)))
+    + "</a></td>\r\n<td>\r\n  <span class=\"glyphicon glyphicon-edit\"></span><a href=\"#/patients/";
+  if (stack2 = helpers.id) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.id; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
     + "/edit\"> Editar</a> &nbsp\r\n</td>\r\n\r\n\r\n";
   return buffer;
   });
