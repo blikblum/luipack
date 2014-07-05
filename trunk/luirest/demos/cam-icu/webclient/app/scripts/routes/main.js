@@ -8,8 +8,9 @@ define([
     'views/patientedit',
     'views/evaluations',
     'views/evaluation',
-    'models/evaluation'
-], function ($, Backbone, PatientModel, PatientsView, PatienteditView, EvaluationsView, EvaluationView, Evaluation) {
+    'models/evaluation',
+    'views/predeliric'
+], function ($, Backbone, PatientModel, PatientsView, PatienteditView, EvaluationsView, EvaluationView, Evaluation, PreDeliricView) {
     'use strict';
 
     var MainRouter = Backbone.Router.extend({
@@ -19,7 +20,9 @@ define([
           'patients/:patientid/evaluations': 'showEvaluations',
           'patients/:patientid/edit': 'editPatient',
           'patients/:patientid/evaluations/:evaluationid': 'showPatientEvaluation',
-          'patients/:patientid/addevaluation': 'addPatientEvaluation'
+          'patients/:patientid/addevaluation': 'addPatientEvaluation',
+          'patients/:patientid/predeliric': 'showPatientPredeliric'
+
         },
       showPatients: function(){
         app.setMainView(new PatientsView({collection: app.data.patients}).render())
@@ -43,7 +46,7 @@ define([
             var patient = app.data.patients.get(patientId);
             var view;
             if (patient){
-                patient.getEvaluations(function(evaluations){
+                patient.getEvaluations().done(function(evaluations){
                     view = new EvaluationsView({model: patient, evaluations: evaluations});
                     app.setMainView(view.render(), '#/patients');
                 });
@@ -55,29 +58,42 @@ define([
         },
         showPatientEvaluation: function (patientId, evaluationId) {
             var patient = app.data.patients.get(patientId);
-            var evaluation, evaluations;
-            if (patient) {
-                evaluations = patient.getEvaluations();
-                evaluation = evaluations.get(evaluationId);
-            }
+            var evaluation;
             var view;
-            if (evaluation){
-                view = new EvaluationView({model: evaluation, collection: evaluations});
-                app.setMainView(view.render(),'#/patients/' +patientId +'/evaluations');
-            } else {
-                alert('Evolução com id ' + evaluationId + ' não encontrada');
+            if (patient) {
+                patient.getEvaluations().done(function (evaluations) {
+                      evaluation = evaluations.get(evaluationId);
+                      if (evaluation) {
+                          view = new EvaluationView({model: evaluation, collection: evaluations});
+                          app.setMainView(view.render(), '#/patients/' + patientId + '/evaluations');
+                      }
+                }).fail(function () {
+                    alert('Evolução com id ' + evaluationId + ' não encontrada');
+                });
             }
 
         },
         addPatientEvaluation: function(patientId){
             var patient = app.data.patients.get(patientId);
-            var evaluations = patient.getEvaluations();
+            var view;
             var evaluation = new Evaluation({});
-            var view = new EvaluationView({model: evaluation, collection: evaluations});
-            app.setMainView(view.render(), '#/patients/' +patientId +'/evaluations');
+            patient.getEvaluations().done(function (evaluations) {
+                view = new EvaluationView({model: evaluation, collection: evaluations});
+                app.setMainView(view.render(), '#/patients/' +patientId +'/evaluations');
+            });
+        },
+        showPatientPredeliric: function (patientId) {
+            var patient = app.data.patients.get(patientId);
+            var view;
+            if (patient) {
+                patient.getPreDeliric().done(function (predeliric) {
+                    view = new PreDeliricView({model: predeliric});
+                    app.setMainView(view.render(), '#/patients/' + patientId + '/evaluations');
+                }).fail(function () {
+                    alert('Predeliric do paciente com id ' + patientId + ' não encontrada');
+                });
+            }
         }
-
     });
-
     return MainRouter;
 });

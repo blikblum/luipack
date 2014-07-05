@@ -22,6 +22,23 @@ define([
 
         bindings: {
             '.name-el':'name',
+            '.predeliric-risk .badge': {
+                observe: 'predeliricrisk',
+                onGet: function (val) {
+                    if (!val){
+                        return '--'
+                    }
+                }
+            },
+            '.predeliric-risk a': {
+                attributes: [{
+                    name: 'href',
+                    observe: 'id',
+                    onGet: function(val){
+                        return '#patients/' + val + '/predeliric';
+                    }
+                }]
+            },
             '.add-evaluation-el': {
                 attributes: [{
                     name: 'href',

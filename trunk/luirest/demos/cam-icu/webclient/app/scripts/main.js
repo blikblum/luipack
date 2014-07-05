@@ -38,7 +38,8 @@ require.config({
         text: '../bower_components/requirejs-text/text',
         validation: '../bower_components/backbone-validation/dist/backbone-validation-amd',
         maskedinput: '../bower_components/jquery.maskedinput/jquery.maskedinput',
-        localstorage: '../bower_components/backbone.localstorage/backbone.localStorage'
+        localstorage: '../bower_components/backbone.localstorage/backbone.localStorage',
+        computed: '../bower_components/backbone.computedfields/lib/amd/backbone.computedfields'
     }
 });
 
@@ -108,7 +109,8 @@ require([
   'validation',
   'stickit',
   'bootstrap',
-  'maskedinput'
+  'maskedinput',
+  'computed'
 ], function ($, Backbone, PatientCollection, MainRouter, Handlebars, Validation) {
 
     Validation.configure({
@@ -151,6 +153,18 @@ require([
          }
 
      });
+
+       Handlebars.registerHelper('pluralize', function(number, singular, plural) {
+           if (number === 1)
+               return singular;
+           else
+               return (typeof plural === 'string' ? plural : singular + 's');
+       });
+
+       Handlebars.registerHelper('pluralCount', function(number, singular, plural) {
+           return number+' '+Handlebars.helpers.pluralize.apply(this, arguments);
+       });
+
      app.started = true;
 
      app.data.patients = new PatientCollection();
