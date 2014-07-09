@@ -29,7 +29,7 @@ type
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
     FSelectSQL: String;
-    FInputFieldsData: TJSONArray;
+    FInputFieldsData: TJSONData;
     FIgnoreNotFound: Boolean;
     FIsCollection: Boolean;
     FJSONFieldsData: TJSONArray;
@@ -134,15 +134,16 @@ procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; RequestData, Params:
 var
   i: Integer;
   FieldName, DBFieldName: String;
-  PropData: TJSONData;
+  PropData, FieldNameData: TJSONData;
   Field: TField;
+  ExcludeFieldsData: TJSONArray;
 begin
   EncodeJSONFields(RequestData);
-  if FInputFieldsData <> nil then
+  if (FInputFieldsData <> nil) and (FInputFieldsData.JSONType = jtArray) then
   begin
     for i := 0 to FInputFieldsData.Count - 1 do
     begin
-      FieldName := GetFieldName(FInputFieldsData, i, DBFieldName);
+      FieldName := GetFieldName(TJSONArray(FInputFieldsData), i, DBFieldName);
       Field := Query.FieldByName(DBFieldName);
       PropData := RequestData.Find(FieldName);
       if PropData = nil then
@@ -174,6 +175,21 @@ begin
       begin
         if not DoPatch then
           Field.Value := Null;
+      end;
+    end;
+    //check for exclusions
+    if (FInputFieldsData <> nil) and (FInputFieldsData.JSONType = jtObject) and
+      FindJSONProp(TJSONObject(FInputFieldsData), 'exclude', ExcludeFieldsData) then
+    begin
+      for i := 0 to ExcludeFieldsData.Count - 1 do
+      begin
+        FieldNameData := ExcludeFieldsData.Items[i];
+        if FieldNameData.JSONType = jtString then
+        begin
+          Field := Query.FindField(FieldNameData.AsString);
+          if Field <> nil then
+            Field.ProviderFlags := Field.ProviderFlags - [pfInUpdate];
+        end;
       end;
     end;
   end;
@@ -405,8 +421,8 @@ begin
   inherited Loaded(Tag);
   if FInputFields <> '' then
   begin
-    if not TryStrToJSON(FInputFields, FInputFieldsData) then
-      raise Exception.CreateFmt('Invalid InputFields: "%s"', [FInputFields]);
+    if not TryStrToJSON(FInputFields, FInputFieldsData) or not (FInputFieldsData.JSONType in [jtArray, jtObject]) then
+      raise Exception.CreateFmt('Invalid InputFields: "%s"', [FInputFields])
   end;
   if FJSONFields <> '' then
   begin

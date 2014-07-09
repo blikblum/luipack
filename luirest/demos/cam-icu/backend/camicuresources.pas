@@ -27,14 +27,6 @@ type
     procedure GetResource(out Resource: TRESTResource; ResourceTag: PtrInt);
   end;
 
-  { TCustomPatientResource }
-
-  TCustomPatientResource = class (TSqldbJSONResource)
-  protected
-    procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject;
-      DoPatch: Boolean = False); override;
-  end;
-
 implementation
 
 uses
@@ -45,22 +37,6 @@ const
     ', (Select Count(*) from PatientEvaluation where PatientEvaluation.PatientId = Patient.Id) as EvaluationCount' +
     ', (Select Risk from PatientPreDeliric where PatientPreDeliric.PatientId = Patient.Id) as PreDeliricRisk FROM Patient';
 
-{ TCustomPatientResource }
-
-procedure TCustomPatientResource.SetQueryData(Query: TSQLQuery; RequestData,
-  Params: TJSONObject; DoPatch: Boolean);
-var
-  F: TField;
-begin
-  inherited SetQueryData(Query, RequestData, Params, DoPatch);
-  F := Query.FindField('EvaluationCount');
-  if F <> nil then
-    F.Clear;
-  F := Query.FindField('PreDeliric');
-  if F <> nil then
-    F.Clear;
-end;
-
 { TCAMICUResourceFactory }
 
 procedure TCAMICUResourceFactory.GetResource(out Resource: TRESTResource;
@@ -68,15 +44,13 @@ procedure TCAMICUResourceFactory.GetResource(out Resource: TRESTResource;
 var
   SqldbResource: TSqldbJSONResource absolute Resource;
 begin
-  if Tag in [RES_PATIENT, RES_PATIENTS, RES_ACTIVEPATIENTS] then
-    SqldbResource := TCustomPatientResource.Create
-  else
-    SqldbResource := TSqldbJSONResource.Create;
+  SqldbResource := TSqldbJSONResource.Create;
   case ResourceTag of
     RES_PATIENTS, RES_ACTIVEPATIENTS:
       begin
         SqldbResource.IsCollection := True;
         SqldbResource.SelectSQL := PatientSelect;
+        SqldbResource.InputFields := '{"exclude":["predeliricrisk","evaluationcount"]}';
         SqldbResource.SetDefaultSubPath('patientid', @GetResource, RES_PATIENT);
         if ResourceTag = RES_ACTIVEPATIENTS then
           SqldbResource.ConditionsSQL := 'Where DischargeDate IS NULL'
@@ -90,6 +64,7 @@ begin
       begin
         SqldbResource.SelectSQL := PatientSelect;
         SqldbResource.PrimaryKeyParam := 'patientid';
+        SqldbResource.InputFields := '{"exclude":["predeliricrisk","evaluationcount"]}';
         SqldbResource.RegisterSubPath('evaluations', @GetResource, RES_PATIENT_EVALUATIONS);
         SqldbResource.RegisterSubPath('predeliric', @GetResource, RES_PATIENT_PREDELIRIC);
       end;
