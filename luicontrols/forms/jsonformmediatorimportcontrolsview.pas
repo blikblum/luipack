@@ -54,13 +54,14 @@ uses
   strutils, ComCtrls;
 
 const
-  ControlSuffixes: array[0..5] of String = (
+  ControlSuffixes: array[0..6] of String = (
     'edit',
     'combobox',
     'memo',
     'checkbox',
     'label',
-    'picker'
+    'picker',
+    'radiobutton'
   );
 
 
@@ -90,6 +91,7 @@ begin
       end;
       NewElement := Elements.Add;
       NewElement.Control := Control;
+      NewElement.Name := PropertyName;
       NewElement.PropertyName := PropertyName;
     end;
   finally
