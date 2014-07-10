@@ -152,6 +152,10 @@ type
     property Elements: TJSONFormElements read FElements write SetElements;
   end;
 
+  procedure RegisterJSONMediator(const MediatorId: String; MediatorClass: TJSONGUIMediatorClass);
+
+  procedure RegisterJSONMediator(ControlClass: TControlClass; MediatorClass: TJSONGUIMediatorClass);
+
 implementation
 
 uses
@@ -326,7 +330,7 @@ begin
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
   begin
     PropData := Data.Find(PropName);
-    if Element.OptionsData.Get('grouped', False) then
+    if Element.OptionsData.Get('grouped', False) or ((PropData <> nil) and (PropData.JSONType in [jtObject, jtArray])) then
     begin
       if PropData = nil then
       begin
