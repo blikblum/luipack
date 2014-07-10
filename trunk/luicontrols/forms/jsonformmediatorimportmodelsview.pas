@@ -105,6 +105,7 @@ begin
       else
       begin
         Element := Elements.Add;
+        Element.Name := PropertyName;
         Element.PropertyName := PropertyName;
       end;
     end;
