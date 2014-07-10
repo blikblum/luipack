@@ -17,6 +17,11 @@ define([
         bindings: function(){
             var bindings = StickitForm.getBindings({
                 attributes: ['date', 'rass', 'deliriumid', 'sedation', 'ventilationid', 'shiftid'],
+                defaults: {
+                    setOptions: {
+                        validate: true
+                    }
+                },
                 extend: {
                     date:{
                       onGet: function(val){

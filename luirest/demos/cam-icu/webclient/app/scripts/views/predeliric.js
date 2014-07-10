@@ -5,8 +5,9 @@ define([
     'underscore',
     'backbone',
     'text!templates/predeliric.html',
-    'stickitform'
-], function ($, _, Backbone, html, StickitForm) {
+    'stickitform',
+    'validation'
+], function ($, _, Backbone, html, StickitForm, Validation) {
     'use strict';
 
     var PredeliricView = Backbone.View.extend({
@@ -17,6 +18,11 @@ define([
         bindings: function () {
             var bindings = StickitForm.getBindings({
                 attributes: ['isurgency','morphine','hasinfection','coma','hassedation','urea','hasacidosis','apache2'],
+                defaults: {
+                    setOptions: {
+                        validate: true
+                    }
+                },
                 extend: {
                    morphine: {
                      selectOptions: {
@@ -57,7 +63,7 @@ define([
         },
 
         initialize: function () {
-
+            Validation.bind(this);
         },
 
         render: function () {
@@ -66,13 +72,21 @@ define([
             this.stickit(this.model.patient, this.patientBindings);
             return this;
         },
+        remove: function () {
+            Validation.unbind(this);
+            return Backbone.View.prototype.remove.apply(this, arguments);
+        },
+        clearErrorMessage: function () {
+            this.$('.alert-danger').addClass('hidden');
+        },
         cancel: function () {
           //window.history.back();
-          app.mainRouter.navigate('#patients/' + this.collection.patient.get('id') + '/evaluations', true)
+          app.mainRouter.navigate('#patients/' + this.model.patient.get('id') + '/evaluations', true)
         },
         saveModel: function () {
             if (!this.model.isValid(true)){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
+                this.listenToOnce(this.model, 'validated', this.clearErrorMessage());
                 return;
             }
             var self = this;

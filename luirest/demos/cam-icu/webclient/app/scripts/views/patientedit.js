@@ -22,7 +22,11 @@ define([
             'hasicc','hasirc','hasdcpf','hasdpoc','hashematologytumor','haslocoregionaltumor', 'hasmetastasis',
             'hashas', 'hasdm', 'haspreviousiam', 'hassmoking','hasavc','hasvisualdeficit','hasauditorydeficit',
             'hasdementia','hasalcoholism','hasimmunosuppression','hassida','hasrheumaticdisorder', 'haspsychiatricdisorder'],
-
+            defaults: {
+                setOptions: {
+                    validate: true
+                }
+            },
           extend: {
               birthdate:{
                   onGet: 'formatDate',
