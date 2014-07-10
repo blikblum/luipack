@@ -340,7 +340,11 @@ begin
   else if (FPrimaryKeyParam <> '') and (FPrimaryKey <> '') then
     Result := Format('where %s = :%s', [FPrimaryKey, FPrimaryKeyParam])
   else
-    raise Exception.Create('Unable to resolve resource identifier SQL query');
+  begin
+    Result := '';
+    if not ReadOnly then
+      raise Exception.Create('Unable to resolve resource identifier SQL query');
+  end;
 end;
 
 //adapted from sqldb
