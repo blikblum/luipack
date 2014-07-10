@@ -92,6 +92,7 @@ type
 
 procedure TOwnedDropDownManager.DoHide;
 begin
+  TToggleSpeedButtonAccess(FButton).UpdateDown(False);
   FButton.DropDownClosed;
   inherited DoHide;
 end;
