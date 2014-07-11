@@ -63,7 +63,6 @@
       <Unit0>
         <Filename Value="DataHub.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DataHub"/>
       </Unit0>
       <Unit1>
         <Filename Value="forms\main.pas"/>
@@ -76,7 +75,6 @@
       <Unit2>
         <Filename Value="utils\vtcollectioncontroller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="VTCollectionController"/>
       </Unit2>
       <Unit3>
         <Filename Value="frames\modelfieldsview.pas"/>
@@ -92,12 +90,10 @@
         <ComponentName Value="ModelFieldEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ModelFieldEditor"/>
       </Unit4>
       <Unit5>
         <Filename Value="utils\datahubutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DataHubUtils"/>
       </Unit5>
       <Unit6>
         <Filename Value="exporters\dataviewexporter.pas"/>
@@ -112,7 +108,6 @@
       <Unit8>
         <Filename Value="exporters\lcldbdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="LCLDBDataViewExporter"/>
       </Unit8>
       <Unit9>
         <Filename Value="forms\modeleditor.pas"/>
@@ -120,12 +115,10 @@
         <ComponentName Value="ModelEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ModelEditor"/>
       </Unit9>
       <Unit10>
         <Filename Value="exporters\lcljsondataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="LCLJSONDataViewExporter"/>
       </Unit10>
       <Unit11>
         <Filename Value="exporters\lazreportdataviewexporter.pas"/>
@@ -135,12 +128,10 @@
       <Unit12>
         <Filename Value="importers\sqlite3datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Sqlite3DataModelImporter"/>
       </Unit12>
       <Unit13>
         <Filename Value="importers\datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DataModelImporter"/>
       </Unit13>
       <Unit14>
         <Filename Value="importers\forms\sqlite3tableloaderview.pas"/>
@@ -148,12 +139,10 @@
         <ComponentName Value="Sqlite3TableLoaderViewForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Sqlite3TableLoaderView"/>
       </Unit14>
       <Unit15>
         <Filename Value="utils\datahublclutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DataHubLCLUtils"/>
       </Unit15>
       <Unit16>
         <Filename Value="exporters\htmlformexport.pas"/>
@@ -180,12 +169,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

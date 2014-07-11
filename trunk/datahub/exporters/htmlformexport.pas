@@ -19,6 +19,9 @@ type
 
 implementation
 
+uses
+  LuiDOMClasses;
+
 { THTMLDataViewExporter }
 
 class function THTMLDataViewExporter.Description: String;
@@ -27,34 +30,52 @@ begin
 end;
 
 class procedure THTMLDataViewExporter.Execute(DataView: TDataView);
-const
-  FieldHTMLTemplate = '  <div class="form-group">' + LineEnding +
-    '    <label for="%s">%s</label>' + LineEnding +
-    '    <input type="text" class="form-control" name="%s" id="%s" value="{{%s}}">'+ LineEnding+
-    '  </div>';
 var
-  Output: TStringList;
+  DOMTree: TTagTree;
   Field: TDataViewField;
-  FieldHTML, FieldHTMLId: String;
+  FieldId: String;
   i: Integer;
 begin
   //todo: use DOMTree
   //todo: implement options: configurable enclose tag/class, id prefix, optional classes,constraints, input type, place holder
-  Output := TStringList.Create;
+  DOMTree := TTagTree.Create;
   try
-    Output.Add('<form role="form">');
+    DOMTree.Open('form').SetAttribute('role', 'form');
     for i := 0 to DataView.Fields.Count - 1 do
     begin
       Field := DataView.Fields[i];
-      FieldHTMLId := Format('%s-%s', [LowerCase(Field.Model.Name), LowerCase(Field.FieldName)]);
-      FieldHTML := Format(FieldHTMLTemplate, [FieldHTMLId, Field.DisplayLabel,
-        LowerCase(Field.FieldName), FieldHTMLId, LowerCase(Field.FieldName)]);
-      Output.Add(FieldHTML);
+      FieldId := Format('%s-%s', [LowerCase(Field.Model.Name), LowerCase(Field.FieldName)]);
+      case Field.FieldType of
+        dftBoolean:
+          begin
+            DOMTree
+            .Open('div').SetAttribute('class', 'checkbox')
+              .Open('label')
+                .Add('input')
+                  .SetAttribute('type', 'checkbox')
+                  .SetAttribute('name', LowerCase(Field.FieldName))
+                .AddText(Field.DisplayLabel)
+              .Close
+            .Close;
+          end;
+      else
+        begin
+          DOMTree
+          .Open('div').SetAttribute('class', 'form-group')
+            .Add('label', Field.DisplayLabel).SetAttribute('for', FieldId)
+            .Add('input')
+              .SetAttribute('type', 'text')
+              .SetAttribute('class', 'form-control')
+              .SetAttribute('name', LowerCase(Field.FieldName))
+              .SetAttribute('id', FieldId)
+          .Close;
+        end;
+      end;
     end;
-    Output.Add('</form>');
-    Output.SaveToFile('export_htmlform.html');
+    DOMTree.Close;
+    DOMTree.SaveToFile('export_htmlform2.html');
   finally
-    Output.Destroy;
+    DOMTree.Destroy;
   end;
 end;
 
