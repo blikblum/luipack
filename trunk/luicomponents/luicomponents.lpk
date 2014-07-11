@@ -16,15 +16,9 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerMessages>
-          <UseMsgFile Value="True"/>
-        </CompilerMessages>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="20">
+    <Files Count="21">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -106,6 +100,10 @@
         <Filename Value="jsonmodeldescriptors.pas"/>
         <UnitName Value="JSONModelDescriptors"/>
       </Item20>
+      <Item21>
+        <Filename Value="luidomclasses.pas"/>
+        <UnitName Value="LuiDOMClasses"/>
+      </Item21>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">

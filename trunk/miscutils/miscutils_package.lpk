@@ -1,22 +1,22 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="3">
+  <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="miscutils_package"/>
+    <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Am,érico Pereira Câmara"/>
     <CompilerOptions>
-      <Version Value="5"/>
+      <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="include\$(LCLWidgetType)\"/>
+        <IncludeFiles Value="include\$(LCLWidgetType)"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <CodeGeneration>
-        <Generate Value="Faster"/>
-      </CodeGeneration>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
     </CompilerOptions>
     <Description Value="Miscellaneous functions and classes"/>
     <License Value="Modified LGPL"/>
