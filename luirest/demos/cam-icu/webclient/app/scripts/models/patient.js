@@ -12,25 +12,41 @@ define([
         defaults: {
         },
         initialize: function () {
-
+            this.computedFields = new Backbone.ComputedFields(this);
         },
-        //todo: move to computed
-        get: function (attr) {
-          if (attr === 'evaluationcount') {
-              if (this._evaluations) {
-                  return this._evaluations.length;
-              } else {
-                  return this.attributes['evaluationcount']
-              }
-          } else if (attr === 'predeliricrisk') {
-              if (this._predeliric) {
-                  return this._predeliric.get('risk');
-              } else {
-                  return this.attributes['predeliricrisk']
-              }
-          } else {
-           return Backbone.Model.prototype.get.apply(this, arguments);
-          }
+        computed: {
+            age: {
+              get: function () {
+                return calculateOAAge(this.get('birthdate'))
+            }, 
+            },
+            evaluationcount: {
+                get: function (){
+                  if (this._evaluations) {
+                     return this._evaluations.length;
+                   } else {
+                     return this.get('evaluationcount')
+                   }  
+                },
+                depends: [function (callback) {
+                    this._updateEvaluationCount = callback;
+                }],
+                toJSON: false
+            },
+            predeliricrisk: {
+                get: function(){
+                    if (this._predeliric) {
+                          return this._predeliric.get('risk');
+                      } else {
+                          return this.get('predeliricrisk')
+                      }
+                
+                },
+                depends: [function (callback) {
+                    this._updatePredeliricRisk = callback;
+                }],
+                toJSON: false
+            }
         },
         validation:{
           name: {
@@ -65,8 +81,10 @@ define([
           } else {
               evaluations = new Evaluations({patient: this});
               evaluations.fetch({
-                  success: function(collection) {
+                  success: function(collection) {                      
                       self._evaluations = evaluations;
+                      self._updateEvaluationCount();
+                      evaluations.on('add remove reset', self._updateEvaluationCount);
                       deferred.resolveWith(self, [evaluations]);
                   },
                   error: function () {
@@ -89,6 +107,8 @@ define([
             predeliric.fetch({
                 success: function(model) {
                     self._predeliric = predeliric;
+                    self._updatePredeliricRisk();
+                    predeliric.on('change:risk', self._updatePredeliricRisk);
                     deferred.resolveWith(self, [predeliric]);
                 },
                 error: function () {

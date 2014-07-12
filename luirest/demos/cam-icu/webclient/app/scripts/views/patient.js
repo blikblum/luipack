@@ -15,13 +15,11 @@ define([
         this.listenTo(this.model, 'destroy', this.remove)
       },
       render: function(){
-        var context = this.model.toJSON();
-        //hack to get updated values in view
-        context.predeliricrisk = this.model.get('predeliricrisk');
-        context.evaluationcount = this.model.get('evaluationcount');
+        var context = this.model.toJSON({ computedFields: true });
         this.$el.html(this.template(context))
         return this
       }
+      
 
     });
 
