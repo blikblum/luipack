@@ -100,6 +100,22 @@ var fromOADate = (function() {
     }
 }());
 
+var calculateOAAge = function(birthOADate, baseOADate) {
+    var baseDate;
+    var birthDate = fromOADate(birthOADate);
+    if (baseOADate) {
+      baseDate = fromOADate(baseOADate)
+    } else {
+      baseDate = new Date();
+    }
+    var age = baseDate.getFullYear() - birthDate.getFullYear();
+    var m = baseDate.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && baseDate.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
 require([
     'jquery',
     'backbone',

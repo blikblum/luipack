@@ -18,9 +18,17 @@ define([
         },
         initialize: function(options) {
             this.patient = options.patient;
+            this.computedFields = new Backbone.ComputedFields(this);
         },
-
         defaults: {
+        },
+        computed: {
+            risk: {
+              get: function (){
+                return this.calculateRisk();
+              }
+              depends: ['coma', 'apache2', 'hassedation', 'hasacidosis', 'urea', 'isurgency', 'morphine', 'hasinfection']
+            }
         },
         validation: {
             coma: {
@@ -50,11 +58,19 @@ define([
                 required: true
             }
         },
-
-        parse: function(response, options)  {
-            return response;
+        calculateRisk: function() {
+            var patient = this.patient;              
+            var age = patient.get('age') || 0;
+            var coma = this.get('coma') || 0;              
+            var risk = 0.0;
+                          
+                          
+            return risk;              
         }
     });
-
+                       
+                          
     return PreDeliricModel;
+                          
+                          
 });
