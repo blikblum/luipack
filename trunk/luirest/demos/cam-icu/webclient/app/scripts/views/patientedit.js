@@ -58,8 +58,8 @@ define([
               internmenttypeid: {
                   selectOptions: {
                       collection: [
-                          {label: 'Clínico', value: 1},
-                          {label: 'Cirúrgico', value: 2},
+                          {label: 'Clínico', value: 2},
+                          {label: 'Cirúrgico', value: 1},
                           {label: 'Trauma', value: 3},
                           {label: 'Neurologia / Neurocirurgia', value: 4}
                       ],
