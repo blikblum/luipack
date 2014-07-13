@@ -48,6 +48,19 @@ define([
                     }
                 }
             });
+            
+            _.extend(bindings, {
+                '.risk-el': {
+                    observe: 'risk',
+                    onGet: function(val) {
+                        if (val) {
+                            return (val * 100) + '%'
+                        } else {
+                            return '--'
+                        }                        
+                    }
+                }
+            })
 
 
             return bindings;
