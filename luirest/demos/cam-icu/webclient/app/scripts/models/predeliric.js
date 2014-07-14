@@ -26,7 +26,7 @@ define([
             risk: {
               get: function (){
                 return this.calculateRisk();
-              }
+              },
               depends: ['coma', 'apache2', 'hassedation', 'hasacidosis', 'urea', 'isurgency', 'morphine', 'hasinfection']
             }
         },
@@ -64,10 +64,10 @@ define([
             var internmenttypeid = patient.get('internmenttypeid') || 0;
             var coma = this.get('coma') || 0;
             var apache2 = this.get('apache2') || 0;
-            var hassedation = this.get('hassedation') || false;
-            var hasacidosis = this.get('hasacidosis') || false;
+            var hassedation = this.get('hassedation') || 0;
+            var hasacidosis = this.get('hasacidosis') || 0;
             var urea = this.get('urea') || 0;
-            var isurgency = this.get('isurgency') || false;
+            var isurgency = this.get('isurgency') || 0;
             var morphine = this.get('morphine') || 0;
             var hasinfection = this.get('hasinfection') || 0;
             

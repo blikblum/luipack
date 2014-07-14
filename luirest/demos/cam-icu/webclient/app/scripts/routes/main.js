@@ -9,8 +9,12 @@ define([
     'views/evaluations',
     'views/evaluation',
     'models/evaluation',
-    'views/predeliric'
-], function ($, Backbone, PatientModel, PatientsView, PatienteditView, EvaluationsView, EvaluationView, Evaluation, PreDeliricView) {
+    'views/predeliric',
+    'views/patientactions',
+    'views/discharge',
+    'views/bednumber'
+], function ($, Backbone, PatientModel, PatientsView, PatienteditView, EvaluationsView, EvaluationView, Evaluation,
+             PreDeliricView, PatientActionsView, DischargeView, BednumberView) {
     'use strict';
 
     var MainRouter = Backbone.Router.extend({
@@ -21,8 +25,10 @@ define([
           'patients/:patientid/edit': 'editPatient',
           'patients/:patientid/evaluations/:evaluationid': 'showPatientEvaluation',
           'patients/:patientid/addevaluation': 'addPatientEvaluation',
-          'patients/:patientid/predeliric': 'showPatientPredeliric'
-
+          'patients/:patientid/predeliric': 'showPatientPredeliric',
+          'patients/:patientid/actions': 'showPatientActions',
+          'patients/:patientid/discharge': 'showDischarge',
+          'patients/:patientid/bednumber': 'showBednumber'
         },
       showPatients: function(){
         app.setMainView(new PatientsView({collection: app.data.patients}).render())
@@ -36,7 +42,7 @@ define([
             var view;
             if (patient){
                 view = new PatienteditView({model: patient});
-                app.setMainView(view.render(), '#/patients');
+                app.setMainView(view.render(), '#/patients/' + patientId + '/actions');
             } else {
                 alert('Paciente com id ' + patientId + ' não encontrado');
                 app.mainRouter.navigate('#/patients');
@@ -50,6 +56,18 @@ define([
                     view = new EvaluationsView({model: patient, evaluations: evaluations});
                     app.setMainView(view.render(), '#/patients');
                 });
+            } else {
+                alert('Paciente com id ' + patientId + ' não encontrado');
+                app.mainRouter.navigate('#/patients');
+            }
+
+        },
+        showPatientActions: function (patientId) {
+            var patient = app.data.patients.get(patientId);
+            var view;
+            if (patient){
+                view = new PatientActionsView({model: patient});
+                app.setMainView(view.render(), '#/patients');
             } else {
                 alert('Paciente com id ' + patientId + ' não encontrado');
                 app.mainRouter.navigate('#/patients');
@@ -92,6 +110,22 @@ define([
                 }).fail(function () {
                     alert('Predeliric do paciente com id ' + patientId + ' não encontrada');
                 });
+            }
+        },
+        showDischarge: function (patientId) {
+            var patient = app.data.patients.get(patientId);
+            var view;
+            if (patient) {
+               view = new DischargeView({model: patient});
+               app.setMainView(view.render(), '#/patients/' + patientId + '/actions');
+            }
+        },
+        showBednumber: function (patientId) {
+            var patient = app.data.patients.get(patientId);
+            var view;
+            if (patient) {
+                view = new BednumberView({model: patient});
+                app.setMainView(view.render(), '#/patients/' + patientId + '/actions');
             }
         }
     });

@@ -5,7 +5,7 @@ unit CAMICUResources;
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqlite3slimconn, sqldb, fpjson;
+  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqlite3slimconn, sqldb;
 
 const
 
@@ -29,9 +29,6 @@ type
 
 implementation
 
-uses
-  db;
-
 const
   PatientSelect = 'SELECT Id, Name, Registry, BedNumber, BirthDate, Gender, OriginationId, InternmentDate, InternmentTypeId, IsReInternment, IsReInternment48h, DiagnosticId, Apache2, SAPS3, DischargeDate, DischargeReasonId, VMDuration, HasICC, HasIRC, HasDCPF, HasDPOC, HasHematologyTumor, HasLocoregionalTumor, HasMetastasis, HasHAS, HasDM, HasPreviousIAM, HasAVC, HasVisualDeficit, HasAuditoryDeficit, HasDementia, HasAlcoholism, HasSmoking, HasImmunoSuppression, HasSIDA, HasRheumaticDisorder, HasPsychiatricDisorder' +
     ', (Select Count(*) from PatientEvaluation where PatientEvaluation.PatientId = Patient.Id) as EvaluationCount' +
@@ -50,6 +47,7 @@ begin
       begin
         SqldbResource.IsCollection := True;
         SqldbResource.SelectSQL := PatientSelect;
+        SqldbResource.ConditionsSQL := 'Order By BedNumber';
         SqldbResource.InputFields := '{"exclude":["predeliricrisk","evaluationcount"]}';
         SqldbResource.SetDefaultSubPath('patientid', @GetResource, RES_PATIENT);
         if ResourceTag = RES_ACTIVEPATIENTS then

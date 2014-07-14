@@ -25,9 +25,14 @@ define([
             '.predeliric-risk .badge': {
                 observe: 'predeliricrisk',
                 onGet: function (val) {
-                    if (!val){
+                    var num;
+                    if (!isFinite(val)){
                         return '--'
+                    } else {
+                        num = val * 100;
+                        return num.toFixed(1) + '%'
                     }
+
                 }
             },
             '.predeliric-risk a': {
