@@ -59,6 +59,7 @@ type
     destructor Destroy; override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); virtual;
+    procedure HandlePatch(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandlePut(ARequest: TRequest; AResponse: TResponse); virtual;
     procedure HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef); virtual;
@@ -316,6 +317,8 @@ begin
     end
     else if Method = 'DELETE' then
       Resource.HandleDelete(ARequest, AResponse)
+    else if Method = 'PATCH' then
+      Resource.HandlePatch(ARequest, AResponse)
     else
       SetResponseStatus(AResponse, 501, 'Method "%s" not implemented', [Method]);
   finally
@@ -448,6 +451,11 @@ end;
 procedure TRESTResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin
   SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['GET']);
+end;
+
+procedure TRESTResource.HandlePatch(ARequest: TRequest; AResponse: TResponse);
+begin
+  SetResponseStatus(AResponse, 405, 'Method "%s" not allowed for this resource', ['PATCH']);
 end;
 
 procedure TRESTResource.HandlePost(ARequest: TRequest; AResponse: TResponse);

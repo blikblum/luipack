@@ -54,6 +54,7 @@ type
     procedure AfterConstruction; override;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePatch(ARequest: TRequest; AResponse: TResponse); override;
     procedure HandlePost(ARequest: TRequest; AResponse: TResponse); override;
     procedure HandlePut(ARequest: TRequest; AResponse: TResponse); override;
     property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
@@ -573,6 +574,21 @@ begin
   end
   else
     inherited HandleDelete(ARequest, AResponse);
+end;
+
+procedure TSqldbJSONResource.HandlePatch(ARequest: TRequest;
+  AResponse: TResponse);
+var
+  SavedPutAsPatch: Boolean;
+begin
+  //todo: refactor to get a cleaner implementation
+  SavedPutAsPatch := PutAsPatch;
+  PutAsPatch := True;
+  try
+    HandlePut(ARequest, AResponse);
+  finally
+    PutAsPatch := SavedPutAsPatch;
+  end;
 end;
 
 procedure TSqldbJSONResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
