@@ -9,7 +9,8 @@ define([
 
     var PatientCollection = Backbone.Collection.extend({
       url: app.BASE_URL + '/patients/active',
-        model: PatientModel
+        model: PatientModel,
+        comparator: 'bednumber'
     });
 
     return PatientCollection;

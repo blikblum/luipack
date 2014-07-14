@@ -18,7 +18,9 @@ define([
             age: {
               get: function () {
                 return calculateOAAge(this.get('birthdate'))
-            }, 
+                },
+              depends: ['birthdate'],
+                toJSON: false
             },
             evaluationcount: {
                 get: function (){
@@ -52,6 +54,9 @@ define([
           name: {
              required: true
           },
+          bednumber: {
+            pattern: 'number'
+          },
           birthdate: {
              required: true
           },
@@ -69,8 +74,13 @@ define([
             },
             diagnosticid: {
                 required: true
+            },
+            dischargedate: {
+                required: true
+            },
+            dischargereasonid: {
+                required: true
             }
-
         },
       getEvaluations: function() {
           var self = this;

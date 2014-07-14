@@ -17,7 +17,7 @@ define([
       },
       bindings: function(){
         var bindings = StickitForm.getBindings({
-          attributes: ['registry', 'name', 'gender', 'birthdate', 'originationid', 'internmenttypeid',
+          attributes: ['registry', 'name', 'bednumber', 'gender', 'birthdate', 'originationid', 'internmenttypeid',
             'diagnosticid', 'internmentdate', 'isreinternment', 'isreinternment48h', 'apache2', 'saps3',
             'hasicc','hasirc','hasdcpf','hasdpoc','hashematologytumor','haslocoregionaltumor', 'hasmetastasis',
             'hashas', 'hasdm', 'haspreviousiam', 'hassmoking','hasavc','hasvisualdeficit','hasauditorydeficit',
@@ -41,6 +41,12 @@ define([
                 collection: [{'label': 'Masculino', value:'M'}, {label: 'Feminino', value: 'F'}]
               }
             },
+            bednumber: {
+              onSet: function(val) {
+                  return +val;
+              }
+            }
+            ,
               originationid: {
                   selectOptions: {
                       collection: [
@@ -135,7 +141,9 @@ define([
       },
       saveModel: function(){
         var self = this;
-        if (!this.model.isValid(true)){
+        //do not validate discharge fields
+        var validationAttrs = _.keys(_.omit(this.model.validation, 'dischargedate', 'dischargereasonid'))
+        if (!this.model.isValid(validationAttrs)){
             this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
             return;
         }

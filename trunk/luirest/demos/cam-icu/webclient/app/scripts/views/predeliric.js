@@ -45,6 +45,18 @@ define([
                             ],
                             defaultOption: {'label': 'Selecione uma opção...', 'value': null}
                         }
+                    },
+                    isurgency: {
+                        onSet: 'strToNumber'
+                    },
+                    hassedation: {
+                        onSet: 'strToNumber'
+                    },
+                    hasinfection: {
+                        onSet: 'strToNumber'
+                    },
+                    hasacidosis: {
+                        onSet: 'strToNumber'
                     }
                 }
             });
@@ -53,8 +65,10 @@ define([
                 '.risk-el': {
                     observe: 'risk',
                     onGet: function(val) {
-                        if (val) {
-                            return (val * 100) + '%'
+                        var num;
+                        if (isFinite(val)) {
+                            num = val * 100;
+                            return num.toFixed(1) + '%';
                         } else {
                             return '--'
                         }                        
@@ -70,6 +84,11 @@ define([
             '.name-el':'name'
         },
 
+        strToNumber: function(val) {
+           if (val) {
+               return +val;
+           }
+        },
         events: {
             'click button.save-model': 'saveModel',
             'click button.cancel': 'cancel'
@@ -99,7 +118,7 @@ define([
         saveModel: function () {
             if (!this.model.isValid(true)){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
-                this.listenToOnce(this.model, 'validated', this.clearErrorMessage());
+                this.listenToOnce(this.model, 'validated', this.clearErrorMessage);
                 return;
             }
             var self = this;
