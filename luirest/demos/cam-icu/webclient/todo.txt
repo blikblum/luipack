@@ -1,0 +1,5 @@
+- login
+- handle zombie views issue
+- edit model
+- calculate predeliric risk
+- consistent code format and naming
