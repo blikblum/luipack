@@ -66,8 +66,10 @@ define([
                     observe: 'risk',
                     onGet: function(val) {
                         var num;
+                        //todo: enable after correct risk calc
+                        return '';
                         if (isFinite(val)) {
-                            num = val * 100;
+                            num = val;
                             return num.toFixed(1) + '%';
                         } else {
                             return '--'

@@ -92,7 +92,7 @@ define([
                 patch: true,
                 success: function(model, response, options){
                     console.log('Discharge saved', model, response, options);
-                    app.data.patients.remove(this.model);
+                    app.data.patients.remove(self.model);
                     app.mainRouter.navigate('#patients/' + model.get('id') + '/actions', true);
                 },
                 error: function(model, response, options){

@@ -134,7 +134,8 @@ define([
       },
       events:{
         'click button.save-model':'saveModel',
-        'click button.cancel':'cancel'
+        'click button.cancel':'cancel',
+        'click button.settoday-el': 'setInternmentDateToday'
       },
       cancel: function () {
         app.mainRouter.navigate('#patients', {trigger:true});
@@ -175,7 +176,11 @@ define([
               }
           });
         }
-      }
+      },
+        setInternmentDateToday: function (e) {
+            e.preventDefault()
+            this.model.set('internmentdate', toOADate(new Date()));
+        }
     });
 
     return PatienteditView;

@@ -32,9 +32,10 @@ define([
       events: {
         'submit .popover-content form': 'addPatient'
       },
-      addPatient: function(){
-        var registry = this.$('.popover-content input.patient-registry').val();
-        app.mainRouter.navigate('#patients/add/' + registry, {trigger: true});
+      addPatient: function(e){
+          var registry = this.$('.popover-content input.patient-registry').val();
+          e.preventDefault()
+          app.mainRouter.navigate('#patients/add/' + registry, {trigger: true});
       }
 
     });
