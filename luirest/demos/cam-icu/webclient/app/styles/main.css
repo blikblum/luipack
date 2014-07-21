@@ -30,7 +30,7 @@ body {
     margin-top: 10px;
 }
 
-h3 .btn {
+h3 > .btn {
     margin-top: -0.3em;
 }
 
@@ -39,4 +39,11 @@ h3 .btn {
 }
 .justified-bottom {
     margin-bottom: 0;
+}
+
+.badge-error {
+    background-color: #d9534f;
+}
+.badge-error[href]:hover, .badge-error[href]:focus {
+    background-color: #c9302c;
 }

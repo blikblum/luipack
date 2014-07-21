@@ -1,6 +1,6 @@
 <h2 class="name-el"/>
 <ul class="list-group justified-bottom">
-    <li class="list-group-item predeliric-risk">
+    <li class="list-group-item predeliric-risk label-danger">
         <a href="#">
         <span class="badge pull-right"/>
         PRE-DELIRIC
@@ -11,12 +11,13 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Avaliações
-
-                    <a href="#" class="btn btn-primary add-evaluation-el pull-right">
-                      <span class="glyphicon glyphicon-plus"></span> Adicionar</a>
-
+       <a href="#" class="btn btn-primary add-evaluation-el pull-right"><span class="glyphicon glyphicon-plus"></span> Adicionar</a>
     </h3>
   </div>
+</div>
+<div class="alert alert-warning alert-duplicate hidden" role="alert">
+    <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+    Já existe uma avaliação com a data de hoje
 </div>
 <table id="evaluations-table" class="table table-hover">
   <thead>
