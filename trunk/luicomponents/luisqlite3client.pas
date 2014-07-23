@@ -21,6 +21,8 @@ type
      FConditionsSQL: String;
      FInputFields: String;
      FInputFieldsData: TJSONArray;
+     FJSONFields: String;
+     FJSONFieldsData: TJSONArray;
      FName: String;
      FParams: TParams;
      FPrimaryKey: String;
@@ -30,6 +32,7 @@ type
      function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
      function GetUpdateSQL(const ResourceId: String): String;
      procedure SetInputFields(const AValue: String);
+     procedure SetJSONFields(const Value: String);
      procedure SetParams(AValue: TParams);
    protected
      function GetDisplayName: string; override;
@@ -41,6 +44,7 @@ type
      property CacheMode: TSqlite3CacheMode read FCacheMode write FCacheMode default cmNone;
      property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
      property InputFields: String read FInputFields write SetInputFields;
+     property JSONFields: String read FJSONFields write SetJSONFields;
      property Name: String read FName write FName;
      property Params: TParams read FParams write SetParams;
      property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
@@ -156,7 +160,8 @@ type
     FIdValue: Variant;
     FOwnsData: Boolean;
     function DoFetch(const Id: String): Boolean;
-    function DoSave(const Id: String): Boolean;
+    function DoSave(const Id: Variant): Boolean;
+    procedure SetPrimaryKeyValue(const IdValue: Variant);
     procedure SetSQL(const Id: String);
   protected
   public
@@ -255,18 +260,22 @@ begin
   end;
 end;
 
-function TRESTJSONObjectResource.DoSave(const Id: String): Boolean;
+function TRESTJSONObjectResource.DoSave(const Id: Variant): Boolean;
 var
   SQL: String;
 begin
   Result := True;
   try
-    SQL := FModelDef.GetUpdateSQL(Id);
+    SQL := FModelDef.GetUpdateSQL(VarToStr(Id));
     FDataset.SQL := BindParams(SQL);
     FDataset.Open;
     try
-      if Id = '' then
-        FDataset.Append
+      if FDataset.RecordCount = 0 then
+      begin
+        FDataset.Append;
+        if not (VarIsNull(Id) or VarIsEmpty(Id)) then
+          SetPrimaryKeyValue(Id);
+      end
       else
         FDataset.Edit;
       FModelDef.JSONDataToDataset(FData, FDataset, False);
@@ -278,6 +287,19 @@ begin
   except
     Result := False;
   end;
+end;
+
+procedure TRESTJSONObjectResource.SetPrimaryKeyValue(const IdValue: Variant);
+var
+  PKField: TField;
+begin
+  PKField := FDataset.FindField(FModelDef.PrimaryKey);
+  if PKField = nil then
+    raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [FModelDef.PrimaryKey]);
+  if not VarIsNull(IdValue) then
+    PKField.Value := IdValue
+  else
+    raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [FModelDef.PrimaryKey]);
 end;
 
 procedure TRESTJSONObjectResource.SetSQL(const Id: String);
@@ -401,7 +423,7 @@ end;
 function TRESTJSONObjectResource.Save: Boolean;
 var
   IdFieldData: TJSONData;
-  Id: String;
+  Id: Variant;
 begin
   Result := False;
   if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
@@ -418,7 +440,7 @@ begin
       if (IdFieldData <> nil) then
       begin
         if (IdFieldData.JSONType in [jtString, jtNumber]) then
-          Id := IdFieldData.AsString
+          Id := IdFieldData.Value
         else
         begin
           //FResourceClient.DoError(GetResourcePath, reRequest, 0, 'Save: Id field must be string or number');
@@ -426,18 +448,18 @@ begin
         end
       end
       else
-        Id := '';
+        Id := Null;
     end;
   end
   else
-    Id := VarToStr(FIdValue);
+    Id := FIdValue;
   Result := DoSave(Id);
 end;
 
 function TRESTJSONObjectResource.Save(IdValue: Variant): Boolean;
 begin
   FIdValue := IdValue;
-  Result := DoSave(VarToStr(IdValue));
+  Result := DoSave(IdValue);
 end;
 
 procedure TRESTJSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
@@ -674,7 +696,15 @@ begin
   if FInputFields = AValue then Exit;
   FInputFields := AValue;
   FreeAndNil(FInputFieldsData);
-  TryStrToJSON(FInputFields, FInputFieldsData);
+  TryStrToJSON(AValue, FInputFieldsData);
+end;
+
+procedure TSqlite3ResourceModelDef.SetJSONFields(const Value: String);
+begin
+  if FJSONFields = Value then Exit;
+  FJSONFields := Value;
+  FreeAndNil(FJSONFieldsData);
+  TryStrToJSON(Value, FJSONFieldsData);
 end;
 
 function TSqlite3ResourceModelDef.GetDisplayName: string;
@@ -691,6 +721,7 @@ end;
 
 destructor TSqlite3ResourceModelDef.Destroy;
 begin
+  FJSONFieldsData.Free;
   FInputFieldsData.Free;
   FParams.Destroy;
   inherited Destroy;
@@ -704,6 +735,7 @@ begin
      FName := TSqlite3ResourceModelDef(Source).FName;
      Params := TSqlite3ResourceModelDef(Source).Params;
      FSelectSQL := TSqlite3ResourceModelDef(Source).FSelectSQL;
+     FJSONFields := TSqlite3ResourceModelDef(Source).FJSONFields;
   end
   else
     inherited Assign(Source);
