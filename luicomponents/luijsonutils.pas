@@ -2,6 +2,8 @@ unit LuiJSONUtils;
 
 {$mode objfpc}{$H+}
 
+//todo: JSONChain (Pluck,Pick,Find,Join)
+
 interface
 
 uses
