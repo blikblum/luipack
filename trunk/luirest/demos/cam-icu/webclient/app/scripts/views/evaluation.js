@@ -132,13 +132,14 @@ define([
         },
 
         initialize: function () {
-            Validation.bind(this);
+          this.editModel = this.model.clone();
+          Validation.bind(this);
         },
 
         render: function () {
             var sedation;
             this.$el.html(this.html);
-            this.stickit();
+            this.stickit(this.editModel);
             this.stickit(this.collection.patient, this.patientBindings);
             sedation = this.model.get('sedation');
             if (_.isArray(sedation) && (sedation.indexOf(7) > -1)) {
@@ -156,7 +157,7 @@ define([
         },
 
         saveModel: function () {
-            if (!this.model.isValid(true)){
+            if (!this.editModel.isValid(true)){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
                 return;
             }
@@ -165,8 +166,9 @@ define([
             if (isNew){
                 this.model.collection = this.collection;
             };
-            this.model.save({}, {
-                success: function(model, response, options){
+            this.model.save(this.editModel.attributes, {
+              wait: true,
+                success: function(model, response, options){                    
                     console.log('Evaluation saved', model, response, options);
                     if (isNew) {
                         self.collection.add(model);

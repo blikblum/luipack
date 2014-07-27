@@ -27,12 +27,12 @@ define([
         },
 
         initialize: function () {
-
+          this.editModel = this.model.clone();
         },
 
         render: function () {
             this.$el.html(this.html);
-            this.stickit();
+            this.stickit(this.editModel);
             return this;
         },
         cancel: function () {
@@ -43,12 +43,13 @@ define([
             var attrs;
             var self = this;
             //todo: use Validation plugin
-            if (!isFinite(this.model.get('bednumber'))) {
+            if (!isFinite(this.editModel.get('bednumber'))) {
                 alert('Leito deve ser um valor numérico');
                 return;
             }
-            attrs = _.pick(this.model.attributes, 'id', 'bednumber');
+            attrs = _.pick(this.editModel.attributes, 'id', 'bednumber');
             this.model.save(attrs, {
+              wait: true,
                 patch: true,
                 success: function(model, response, options){
                     console.log('Bednumber saved', model, response, options);

@@ -1,5 +1,4 @@
 - login
-- handle zombie views issue
-- edit model
+- handle zombie views issue. DONE. Debug
 - calculate predeliric risk
 - consistent code format and naming

@@ -98,11 +98,12 @@ define([
 
         initialize: function () {
             Validation.bind(this);
+          this.editModel = this.model.clone();
         },
 
         render: function () {
             this.$el.html(this.html);
-            this.stickit();
+            this.stickit(this.editModel);
             this.stickit(this.model.patient, this.patientBindings);
             return this;
         },
@@ -118,13 +119,13 @@ define([
           app.mainRouter.navigate('#patients/' + this.model.patient.get('id') + '/evaluations', true)
         },
         saveModel: function () {
-            if (!this.model.isValid(true)){
+            if (!this.editModel.isValid(true)){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
                 this.listenToOnce(this.model, 'validated', this.clearErrorMessage);
                 return;
             }
             var self = this;
-            this.model.save({}, {
+            this.model.save(this.editModel.attributes, {
                 success: function(model, response, options){
                     console.log('Predeliric saved', model, response, options);
                     app.mainRouter.navigate('#patients/' + model.get('patientid') + '/evaluations', true);

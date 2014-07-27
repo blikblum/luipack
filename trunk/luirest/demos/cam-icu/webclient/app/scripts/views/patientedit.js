@@ -13,6 +13,7 @@ define([
     var PatienteditView = Backbone.View.extend({
       html: html,
       initialize:function(){
+          this.editModel = this.model.clone();
           Validation.bind(this);
       },
       bindings: function(){
@@ -125,7 +126,7 @@ define([
         this.$el.html(this.html);
         this.$('.title-el').html(title);
         this.$('.date-control').mask('99/99/9999');
-        this.stickit();
+        this.stickit(this.editModel);
         return this;
       },
       remove: function () {
@@ -144,14 +145,15 @@ define([
         var self = this;
         //do not validate discharge fields
         var validationAttrs = _.keys(_.omit(this.model.validation, 'dischargedate', 'dischargereasonid'))
-        if (!this.model.isValid(validationAttrs)){
+        if (!this.editModel.isValid(validationAttrs)){
             this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
             return;
         }
 
         if (this.model.isNew()){
           this.model.collection = this.collection;
-          this.model.save({}, {
+          this.model.save(this.editModel.attributes, {
+            wait: true,
             success: function(model){
               console.log('Paciente salvo', model);
               self.collection.add(self.model);

@@ -67,6 +67,7 @@ define([
 
         initialize: function (options) {
           this.evaluations = options.evaluations;
+          this.subViews = [];
           this.listenTo(this.evaluations, 'add', this.renderEvaluation);
         },
 
@@ -74,11 +75,24 @@ define([
             this.$el.html(this.html);
             this.stickit();
             this.$tbody = this.$('#evaluations-table tbody');
+            this.clearSubViews();
             this.evaluations.each(this.renderEvaluation, this);
             return this;
         },
+        remove: function () {
+          return Backbone.View.prototype.remove.apply(this, arguments);        
+          this.clearSubViews();
+        },
+        clearSubViews: function () {
+          this.subViews.forEach(function(view) {
+            view.remove();
+          });
+          this.subViews = [];
+        },
         renderEvaluation: function(evaluation){
-          this.$tbody.append(new EvaluationListItemView({model: evaluation}).render().$el)
+          var view = new EvaluationListItemView({model: evaluation});
+          this.subViews.push(view);
+          this.$tbody.append(view.render().$el)
         },
         addEvaluation: function (e) {
             var today = Math.floor(toOADate(new Date()));
