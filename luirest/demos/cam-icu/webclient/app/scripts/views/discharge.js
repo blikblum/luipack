@@ -45,6 +45,7 @@ define([
 
         initialize: function () {
             Validation.bind(this);
+          this.editModel = this.model.clone();
         },
         remove: function () {
             Validation.unbind(this);
@@ -69,7 +70,7 @@ define([
         render: function () {
             this.$el.html(this.html);
             this.$('.date-control').mask('99/99/9999');
-            this.stickit();
+            this.stickit(this.editModel);
             return this;
         },
         clearErrorMessage: function () {
@@ -82,13 +83,14 @@ define([
         saveModel: function () {
             var attrs;
             var self = this;
-            if (!this.model.isValid(['dischargedate', 'dischargereasonid'])){
+            if (!this.editModel.isValid(['dischargedate', 'dischargereasonid'])){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
                 this.listenToOnce(this.model, 'validated', this.clearErrorMessage);
                 return;
             }
-            attrs = _.pick(this.model.attributes, 'id', 'dischargedate', 'dischargereasonid');
+            attrs = _.pick(this.editModel.attributes, 'id', 'dischargedate', 'dischargereasonid');
             this.model.save(attrs, {
+              wait: true,
                 patch: true,
                 success: function(model, response, options){
                     console.log('Discharge saved', model, response, options);
