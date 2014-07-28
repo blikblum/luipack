@@ -13,8 +13,6 @@ define([
     var PredeliricView = Backbone.View.extend({
         html: html,
 
-        tagName: 'div',
-
         bindings: function () {
             var bindings = StickitForm.getBindings({
                 attributes: ['isurgency','morphine','hasinfection','coma','hassedation','urea','hasacidosis','apache2'],

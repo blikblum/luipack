@@ -70,6 +70,10 @@ define([
             var isurgency = this.get('isurgency') || 0;
             var morphine = this.get('morphine') || 0;
             var hasinfection = this.get('hasinfection') || 0;
+
+          if (!coma || !apache2 || !hassedation || !hasacidosis || !urea || !isurgency || !morphine || !hasinfection) {
+            return null;
+          }
             
             var risk = 0.0;
             
