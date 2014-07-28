@@ -16,7 +16,7 @@ define([
 
         bindings: function(){
             var bindings = StickitForm.getBindings({
-                attributes: ['date', 'rass', 'deliriumid', 'sedation', 'ventilationid', 'shiftid', 'icdsc'],
+                attributes: ['date', 'rass', 'deliriumid', 'sedation', 'nosedation', 'ventilationid', 'shiftid', 'icdsc'],
                 defaults: {
                     setOptions: {
                         validate: true
@@ -30,14 +30,13 @@ define([
                     },
                     sedation: {
                       onGet: 'mapNumToStr',
-                      onSet: function (val) {
-                          val = this.mapStrToNum(val);
-                          if (_.isArray(val) && (val.length > 0)) {
-                              this.$('.nosedation-el').prop('checked', false);
-                          }
-                          return val;
-                      }
+                      onSet: 'mapStrToNum'
                     },
+                  nosedation: {
+                    observe: 'sedation',
+                    onGet: 'mapNumToStr',
+                    onSet: 'mapStrToNum'
+                  },
                     icdsc: {
                         onGet: 'mapNumToStr',
                         onSet: 'mapStrToNum'
@@ -119,16 +118,9 @@ define([
           '.name-el':'name'
         },
 
-        tagName: 'div',
-
-        id: '',
-
-        className: '',
-
         events: {
             'click button.save-model': 'saveModel',
-            'click button.cancel': 'cancel',
-            'change .nosedation-el': 'onNoSedationClick'
+            'click button.cancel': 'cancel'
         },
 
         initialize: function () {
@@ -139,14 +131,9 @@ define([
         },
 
         render: function () {
-            var sedation;
             this.$el.html(this.html);
             this.stickit(this.editModel);
             this.stickit(this.collection.patient, this.patientBindings);
-            sedation = this.model.get('sedation');
-            if (_.isArray(sedation) && (sedation.indexOf(7) > -1)) {
-                this.$('.nosedation-el').prop('checked', true);
-            }
             return this;
         },
         remove: function () {
@@ -186,24 +173,6 @@ define([
                     this.$('.alert-danger').removeClass('hidden').html('Erro ao salvar dados');
                 }
             })
-        },
-        onNoSedationClick: function (e) {
-            var sedation;
-            var index;
-            e.preventDefault();
-            if (e.currentTarget.checked) {
-                this.model.set('sedation', [7])
-            } else {
-                sedation = this.model.get('sedation');
-                if (_.isArray(sedation)) {
-                    index = sedation.indexOf(7);
-                    if (index) {
-                        sedation.splice(index, 1)
-                        this.model.set('sedation', sedation);
-                    }
-                }
-
-            }
         }
     });
 

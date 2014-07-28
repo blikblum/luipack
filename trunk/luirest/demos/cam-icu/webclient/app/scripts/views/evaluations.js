@@ -12,15 +12,10 @@ define([
     var EvaluationsView = Backbone.View.extend({
         html: html,
 
-        tagName: 'div',
-
-        id: '',
-
-        className: '',
-
         events: {
             'click .add-evaluation-el': 'addEvaluation',
-            'click .alert .close': 'closeAlert'
+            'click .alert .close': 'closeAlert',
+          'click li.predeliric-risk': 'showPreDeliric'
         },
 
         bindings: {
@@ -108,7 +103,11 @@ define([
         closeAlert: function (e) {
             e.preventDefault()
             $(e.currentTarget).parent().addClass('hidden');
-        }
+        },
+      showPreDeliric: function(e) {
+        e.preventDefault();
+        app.mainRouter.navigate('#patients/' + this.model.get('id') + '/predeliric', true);
+      }
     });
 
     return EvaluationsView;
