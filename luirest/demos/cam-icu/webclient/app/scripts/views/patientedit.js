@@ -151,6 +151,7 @@ define([
         var self = this;
         //do not validate discharge fields
         var validationAttrs = _.keys(_.omit(this.model.validation, 'dischargedate', 'dischargereasonid'))
+        //todo: add workaround to Validation plugin bug https://github.com/thedersen/backbone.validation/issues/205
         if (!this.editModel.isValid(validationAttrs)){
             this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
             return;

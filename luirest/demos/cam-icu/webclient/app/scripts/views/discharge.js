@@ -86,6 +86,7 @@ define([
         saveModel: function () {
             var attrs;
             var self = this;
+          //todo: add workaround to Validation plugin bug https://github.com/thedersen/backbone.validation/issues/205
             if (!this.editModel.isValid(['dischargedate', 'dischargereasonid'])){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
                 this.listenToOnce(this.editModel, 'validated', this.clearErrorMessage);

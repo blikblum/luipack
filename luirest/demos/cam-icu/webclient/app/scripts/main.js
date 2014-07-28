@@ -47,7 +47,7 @@ var app = app || {};
 app.data = {}
 app.BASE_URL = '../../luirest/camicu.cgi';
 //app.BASE_URL = '../cgi-bin/camicu.cgi';
-//app.useLocalStorage = true;
+
 app.mainView = null;
 app.setMainView = function(newView, currentRoute){
   if (app.mainView) {
