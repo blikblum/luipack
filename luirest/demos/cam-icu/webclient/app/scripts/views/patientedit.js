@@ -14,7 +14,9 @@ define([
       html: html,
       initialize:function(){
           this.editModel = this.model.clone();
-          Validation.bind(this);
+          Validation.bind(this, {
+            model: this.editModel
+          });
       },
       bindings: function(){
         var bindings = StickitForm.getBindings({
@@ -139,7 +141,11 @@ define([
         'click button.settoday-el': 'setInternmentDateToday'
       },
       cancel: function () {
-        app.mainRouter.navigate('#patients', {trigger:true});
+        if (this.model.isNew()) {
+          app.mainRouter.navigate('#patients', {trigger:true});
+        } else {
+          app.mainRouter.navigate('#patients/' + this.model.get('id') + '/actions', {trigger:true});
+        }
       },
       saveModel: function(){
         var self = this;
@@ -167,7 +173,7 @@ define([
           });
 
         } else {
-          this.model.save({}, {
+          this.model.save(this.editModel.attributes, {
             success: function(model){
               console.log('Paciente salvo', model);
               app.mainRouter.navigate('#patients', {trigger: true});
@@ -181,7 +187,7 @@ define([
       },
         setInternmentDateToday: function (e) {
             e.preventDefault()
-            this.model.set('internmentdate', toOADate(new Date()));
+            this.editModel.set('internmentdate', toOADate(new Date()));
         }
     });
 

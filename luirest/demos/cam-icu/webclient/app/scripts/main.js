@@ -183,15 +183,27 @@ require([
 
      app.started = true;
 
-     app.data.patients = new PatientCollection();
+     app.initialize = function () {
+       var deferred = $.Deferred();
+       if (app.data.patients) {
+         deferred.resolve()
+       } else {
+         app.data.patients = new PatientCollection();
+         app.data.patients.fetch({
+           reset: true,
+           success: function(){
+             deferred.resolve();
+           },
+           error: function () {
+             deferred.reject();
+           }
+         });
+       }
+       return deferred.promise();
+     };
+
      app.mainRouter = new MainRouter();
      Backbone.history.start();
-     app.data.patients.fetch({
-       reset: true,
-       success: function(){
-         app.mainRouter.navigate('#patients', {trigger:true})
-       }
-     });
    })
 
 });

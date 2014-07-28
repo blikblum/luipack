@@ -133,7 +133,9 @@ define([
 
         initialize: function () {
           this.editModel = this.model.clone();
-          Validation.bind(this);
+          Validation.bind(this, {
+            model: this.editModel
+          });
         },
 
         render: function () {
