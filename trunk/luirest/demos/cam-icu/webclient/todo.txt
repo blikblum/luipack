@@ -1,4 +1,11 @@
+High Priority
 - login
 - handle zombie views issue. DONE. Debug
 - calculate predeliric risk
 - consistent code format and naming
+Low Priority
+- Form mixin: store model as realModel, clone it as this.model and let stickit, validation bind to this.model
+- Better router: shared "before" handler to initialize app?
+
+
+

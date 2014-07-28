@@ -97,8 +97,10 @@ define([
         },
 
         initialize: function () {
-            Validation.bind(this);
           this.editModel = this.model.clone();
+          Validation.bind(this, {
+            model: this.editModel
+          });
         },
 
         render: function () {
@@ -121,7 +123,7 @@ define([
         saveModel: function () {
             if (!this.editModel.isValid(true)){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
-                this.listenToOnce(this.model, 'validated', this.clearErrorMessage);
+                this.listenToOnce(this.editModel, 'validated', this.clearErrorMessage);
                 return;
             }
             var self = this;

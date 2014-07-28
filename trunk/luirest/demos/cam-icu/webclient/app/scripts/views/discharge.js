@@ -40,12 +40,15 @@ define([
 
         events: {
             'click button.save-model':'saveModel',
-            'click button.cancel':'cancel'
+            'click button.cancel':'cancel',
+          'click button.settoday-action': 'setDischargeDateToday'
         },
 
         initialize: function () {
-            Validation.bind(this);
           this.editModel = this.model.clone();
+            Validation.bind(this, {
+              model: this.editModel
+            });
         },
         remove: function () {
             Validation.unbind(this);
@@ -85,7 +88,7 @@ define([
             var self = this;
             if (!this.editModel.isValid(['dischargedate', 'dischargereasonid'])){
                 this.$('.alert-danger').removeClass('hidden').html('Um ou mais campos contem dados inválidos');
-                this.listenToOnce(this.model, 'validated', this.clearErrorMessage);
+                this.listenToOnce(this.editModel, 'validated', this.clearErrorMessage);
                 return;
             }
             attrs = _.pick(this.editModel.attributes, 'id', 'dischargedate', 'dischargereasonid');
@@ -95,7 +98,7 @@ define([
                 success: function(model, response, options){
                     console.log('Discharge saved', model, response, options);
                     app.data.patients.remove(self.model);
-                    app.mainRouter.navigate('#patients/' + model.get('id') + '/actions', true);
+                    app.mainRouter.navigate('#patients', true);
                 },
                 error: function(model, response, options){
                     var msg = '--';
@@ -106,7 +109,11 @@ define([
                     this.$('.alert-danger').removeClass('hidden').html('Erro ao salvar dados');
                 }
             })
-        }
+        },
+      setDischargeDateToday: function (e) {
+        e.preventDefault();
+        this.editModel.set('dischargedate', toOADate(new Date()));
+      }
     });
 
     return DischargeView;
