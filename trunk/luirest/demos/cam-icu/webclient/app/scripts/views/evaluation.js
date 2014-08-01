@@ -52,6 +52,25 @@ define([
                             defaultOption: {label: 'Selecione...', value: null}
                         }
                     },
+                  rass: {
+                    selectOptions:{
+                      collection: [
+                        {name: '+4 Combativo', value: 4},
+                        {name: '+3 Muito agitado', value: 3},
+                        {name: '+2 Agitado', value: 2},
+                        {name: '+1 Inquieto', value: 1},
+                        {name: ' 0 Alerta e calmo', value: 0},
+                        {name: '-1 Sonolento', value: -1},
+                        {name: '-2 Sedação leve', value: -2},
+                        {name: '-3 Sedação moderada', value: -3},
+                        {name: '-4 Sedação profunda', value: -4},
+                        {name: '-5 Não desperta', value: -5}
+
+                      ],
+                      labelPath: 'name',
+                      defaultOption: {label: 'Selecione uma opção...', value: null}
+                    }
+                  },
                     deliriumid: {
                         selectOptions:{
                             collection: [
