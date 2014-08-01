@@ -90,15 +90,17 @@ define([
           this.$tbody.append(view.render().$el)
         },
         addEvaluation: function (e) {
-            var today = Math.floor(toOADate(new Date()));
-            e.preventDefault();
-            if (this.evaluations.some(function(model) {
-               return Math.floor(model.get('date')) === today;
-            })) {
-                this.$('.alert-duplicate').removeClass('hidden');
-            } else {
-                app.mainRouter.navigate('#patients/' + this.model.get('id') + '/addevaluation', true);
-            }
+          var todayCount;
+          var today = Math.floor(toOADate(new Date()));
+          e.preventDefault();
+          todayCount = this.evaluations.filter(function (model) {
+            return Math.floor(model.get('date')) === today;
+          }).length;
+          if (todayCount > 1) {
+            this.$('.alert-duplicate').removeClass('hidden');
+          } else {
+            app.mainRouter.navigate('#patients/' + this.model.get('id') + '/addevaluation', true);
+          }
         },
         closeAlert: function (e) {
             e.preventDefault()
