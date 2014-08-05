@@ -13,6 +13,7 @@ uses
 type
 
   TFrameEditorForm = class(TForm, IFrameController)
+    CloseButton: TBitBtn;
     PrintButton: TBitBtn;
     CancelButton: TBitBtn;
     ButtonPanel: TPanel;
@@ -65,6 +66,10 @@ begin
   else if BitButton = CancelButton then
   begin
     CallMethod(FFrame, Format('%sCancel', [FActionPrefix]));
+  end
+  else if BitButton = CloseButton then
+  begin
+    CallMethod(FFrame, Format('%sClose', [FActionPrefix]));
   end;
 end;
 
@@ -79,16 +84,18 @@ begin
   PrintButton.Visible := False;
   SaveButton.Visible := False;
   CancelButton.Visible := False;
+  CloseButton.Visible := False;
   for i := 0 to ButtonsData.Count - 1 do
   begin
     ButtonData := ButtonsData.Items[i];
     case ButtonData.JSONType of
       jtString:
         begin
-          case AnsiIndexText(ButtonData.AsString, ['save', 'cancel', 'print']) of
+          case AnsiIndexText(ButtonData.AsString, ['save', 'cancel', 'print', 'close']) of
             0: SaveButton.Visible := True;
             1: CancelButton.Visible := True;
             2: PrintButton.Visible := True;
+            3: CloseButton.Visible := True;
           end;
         end;
     end;
