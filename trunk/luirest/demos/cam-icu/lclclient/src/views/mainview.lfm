@@ -1,0 +1,95 @@
+object MainForm: TMainForm
+  Left = 336
+  Height = 484
+  Top = 199
+  Width = 728
+  Caption = 'CAMICU - Admin'
+  ClientHeight = 484
+  ClientWidth = 728
+  Position = poScreenCenter
+  LCLVersion = '1.3'
+  object PatientListView: TVirtualJSONListView
+    Left = 2
+    Height = 442
+    Top = 40
+    Width = 524
+    TextProperty = 'text'
+    Align = alClient
+    BorderSpacing.Top = 38
+    BorderSpacing.Right = 200
+    BorderSpacing.Around = 2
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Position = 0
+        Text = 'Leito'
+        PropertyName = 'bednumber'
+      end    
+      item
+        Position = 1
+        Text = 'Nome'
+        Width = 200
+        PropertyName = 'name'
+      end    
+      item
+        Position = 2
+        Text = 'Nascimento'
+        Width = 80
+        PropertyName = 'birthdate'
+      end>
+    Header.DefaultHeight = 19
+    Header.Height = 19
+    Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible]
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnFocusChanged = PatientListViewFocusChanged
+  end
+  object PatientBar: TJvXPBar
+    Left = 536
+    Height = 158
+    Top = 40
+    Width = 185
+    Items = <    
+      item
+        Caption = 'Avaliações'
+        Name = 'PatientBarEvaluations'
+      end    
+      item
+        Caption = 'PRE-DELIRIC'
+        Name = 'PatientBarPreDeliric'
+      end    
+      item
+        Caption = 'Editar Cadastro'
+        GroupIndex = 1
+        Name = 'PatientBarCadastre'
+      end    
+      item
+        Caption = 'Mudar Leito'
+        GroupIndex = 1
+        Name = 'PatientBarBedNumber'
+      end    
+      item
+        Caption = 'Registrar Alta'
+        GroupIndex = 1
+        Name = 'PatientBarDischarge'
+      end    
+      item
+        Caption = 'Excluir'
+        GroupIndex = 1
+        Name = 'PatientBarDelete'
+      end>
+    Font.Color = 8650752
+    Font.Height = -11
+    HeaderFont.Color = 8650752
+    HeaderFont.Height = -11
+    HeaderFont.Style = [fsBold]
+    OwnerDraw = False
+    ShowRollButton = False
+    ShowItemFrame = False
+    RoundedItemFrame = 0
+    TopSpace = 0
+    Anchors = [akTop, akRight]
+  end
+end

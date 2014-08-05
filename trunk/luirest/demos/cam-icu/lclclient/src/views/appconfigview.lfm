@@ -1,0 +1,51 @@
+object AppConfigViewForm: TAppConfigViewForm
+  Left = 542
+  Height = 109
+  Top = 306
+  Width = 376
+  Caption = 'System Config'
+  ClientHeight = 109
+  ClientWidth = 376
+  FormStyle = fsSystemStayOnTop
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.3'
+  object BaseURLEdit: TLabeledEdit
+    Left = 8
+    Height = 23
+    Top = 32
+    Width = 360
+    EditLabel.AnchorSideLeft.Control = BaseURLEdit
+    EditLabel.AnchorSideRight.Control = BaseURLEdit
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = BaseURLEdit
+    EditLabel.Left = 8
+    EditLabel.Height = 15
+    EditLabel.Top = 14
+    EditLabel.Width = 360
+    EditLabel.Caption = 'Server Location'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object SaveButton: TBitBtn
+    Left = 60
+    Height = 30
+    Top = 71
+    Width = 150
+    Caption = 'Salvar'
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = SaveButtonClick
+    TabOrder = 1
+  end
+  object CloseButton: TBitBtn
+    Left = 218
+    Height = 30
+    Top = 71
+    Width = 150
+    Caption = 'Fechar'
+    Kind = bkClose
+    ModalResult = 11
+    TabOrder = 2
+  end
+end
