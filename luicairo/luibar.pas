@@ -213,6 +213,7 @@ type
     FHoverIndex: Integer;
     FSpacing: Integer;
     FTextAlign: TLuiBarTextAlign;
+    FTextHeight: Integer;
     FTextPadding: Integer;
     function CellInPos(X, Y: Integer): Integer;
     function GetAlignOffset(CellSize, ControlSize: Integer): Integer;
@@ -242,6 +243,7 @@ type
     procedure DefaultDrawCellText(Cell: TLuiBarCell);
     procedure DoAfterDraw; virtual;
     function DoCalculateCellWidth(Cell: TLuiBarCell): Integer;
+    procedure DoCreateContext; override;
     procedure DoDraw; override;
     function DoDrawing(Cell: TLuiBarCell; DrawType: TLuiBarDrawType): Boolean; virtual;
     procedure DoDrawBackground; virtual;
@@ -1035,6 +1037,15 @@ begin
   end;
 end;
 
+procedure TCustomLuiBar.DoCreateContext;
+var
+  FontExtents: cairo_font_extents_t;
+begin
+  inherited DoCreateContext;
+  Context.FontExtents(@FontExtents);
+  FTextHeight := Round(FontExtents.ascent);
+end;
+
 procedure TCustomLuiBar.DoDraw;
 var
   i: Integer;
@@ -1301,8 +1312,8 @@ const
   TextPatternMap: array[Boolean] of TLuiBarPatternType = (ptText, ptSelectedText);
 var
   Extents: cairo_text_extents_t;
+  FExtents: cairo_font_extents_t;
   TextWidth: Integer;
-  TextHeight: Integer;
   TextBox: TRect;
   EffectiveTextAlign: TLuiBarTextAlign;
   ImagePos: TPoint;
@@ -1314,7 +1325,8 @@ begin
     EffectiveTextAlign := FTextAlign;
     TextExtents(Cell.Title, @Extents);
     TextWidth := Round(Extents.Width);
-    TextHeight := Round(Extents.Height);
+    FontExtents(@FExtents);
+    FTextHeight := Round(FExtents.ascent);
     ImageInfo := DoGetImageInfo(Cell);
     if (FImages <> nil) and (ImageInfo.Index >= 0) then
     begin
@@ -1347,8 +1359,8 @@ begin
           begin
             ImagePos.y := Cell.Height - FImages.Height;
             //ignore TextHeight if Title = ''
-            if TextHeight <> 0 then
-              Dec(ImagePos.y, TextHeight + FImagePadding);
+            if Cell.Title <> '' then
+              Dec(ImagePos.y, FTextHeight + FImagePadding);
             ImagePos.y := ImagePos.y div 2;
           end
           else
@@ -1364,10 +1376,10 @@ begin
           if lboCenterImage in FOptions then
           begin
             ImagePos.y := Cell.Height - FImages.Height;
-            if TextHeight <> 0 then
-              Dec(ImagePos.y, TextHeight + FImagePadding);
+            if Cell.Title <> '' then
+              Dec(ImagePos.y, FTextHeight + FImagePadding);
             ImagePos.y := ImagePos.y div 2;
-            Inc(ImagePos.y, TextHeight + FImagePadding)
+            Inc(ImagePos.y, FTextHeight + FImagePadding)
           end
           else
           begin
@@ -1410,17 +1422,17 @@ begin
       begin
         with TextBox do
           MoveTo((Right - Left - TextWidth) div 2 + Left,
-            (Bottom - Top + TextHeight) div 2 + Top);
+            ((Bottom - Top) div 2 + Top) - FExtents.descent +(FExtents.height/2));
       end;
       taLeft:
       begin
         with TextBox do
-          MoveTo(Left, (Bottom - Top + TextHeight) div 2 + Top);
+          MoveTo(Left, (Bottom - Top + FTextHeight) div 2 + Top);
       end;
       taRight:
       begin
         with TextBox do
-          MoveTo(Right - TextWidth, (Bottom - Top + TextHeight) div 2 + Top);
+          MoveTo(Right - TextWidth, (Bottom - Top + FTextHeight) div 2 + Top);
       end;
     end;
 
