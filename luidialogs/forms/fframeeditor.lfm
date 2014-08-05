@@ -65,21 +65,19 @@ object FrameEditorForm: TFrameEditorForm
       Visible = False
     end
     object CancelButton: TBitBtn
-      Left = 478
+      Left = 343
       Height = 30
       Top = 5
       Width = 130
       Align = alRight
       BorderSpacing.Around = 5
-      Cancel = True
       Caption = 'Cancelar'
-      Default = True
       Kind = bkCancel
       OnClick = ButtonClick
       TabOrder = 1
     end
     object SaveButton: TBitBtn
-      Left = 343
+      Left = 208
       Height = 30
       Top = 5
       Width = 130
@@ -89,6 +87,19 @@ object FrameEditorForm: TFrameEditorForm
       Kind = bkOK
       OnClick = ButtonClick
       TabOrder = 2
+    end
+    object CloseButton: TBitBtn
+      Left = 478
+      Height = 30
+      Top = 5
+      Width = 130
+      Align = alRight
+      BorderSpacing.Around = 5
+      Caption = 'Fechar'
+      Kind = bkClose
+      ModalResult = 11
+      OnClick = ButtonClick
+      TabOrder = 3
     end
   end
 end
