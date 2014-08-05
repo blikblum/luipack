@@ -5,7 +5,8 @@ unit CAMICUResources;
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqlite3slimconn, sqldb;
+  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqlite3slimconn, sqldb,
+  HTTPDefs, fpjson;
 
 const
 
@@ -19,6 +20,13 @@ const
 
 type
 
+  { TServiceInfoResource }
+
+  TServiceInfoResource = class(TRESTResource)
+  public
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
   { TCAMICUResourceFactory }
 
   TCAMICUResourceFactory = class(TComponent)
@@ -29,10 +37,30 @@ type
 
 implementation
 
+uses
+  sqlite3dyn,
+  LuiJSONUtils;
+
 const
   PatientSelect = 'SELECT Id, Name, Registry, BedNumber, BirthDate, Gender, OriginationId, InternmentDate, InternmentTypeId, IsReInternment, IsReInternment48h, DiagnosticId, Apache2, SAPS3, DischargeDate, DischargeReasonId, VMDuration, HasICC, HasIRC, HasDCPF, HasDPOC, HasHematologyTumor, HasLocoregionalTumor, HasMetastasis, HasHAS, HasDM, HasPreviousIAM, HasAVC, HasVisualDeficit, HasAuditoryDeficit, HasDementia, HasAlcoholism, HasSmoking, HasImmunoSuppression, HasSIDA, HasRheumaticDisorder, HasPsychiatricDisorder' +
     ', (Select Count(*) from PatientEvaluation where PatientEvaluation.PatientId = Patient.Id) as EvaluationCount' +
     ', (Select Risk from PatientPreDeliric where PatientPreDeliric.PatientId = Patient.Id) as PreDeliricRisk FROM Patient';
+
+{ TServiceInfoResource }
+
+procedure TServiceInfoResource.HandleGet(ARequest: TRequest;
+  AResponse: TResponse);
+var
+  ResponseData: TJSONObject;
+begin
+  //todo: remove this as soon get rid of sqldb
+  InitialiseSQLite;
+  if not TryReadJSONFile('serviceinfo.json', ResponseData) then
+    ResponseData := TJSONObject.Create;
+  ResponseData.Strings['sqliteversion'] := StrPas(sqlite3_libversion());
+  AResponse.Contents.Text := ResponseData.AsJSON;
+  ResponseData.Destroy;
+end;
 
 { TCAMICUResourceFactory }
 
