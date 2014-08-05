@@ -9,7 +9,9 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
     </General>
     <VersionInfo>
       <StringTable ProductVersion=""/>
@@ -44,7 +46,6 @@
       <Unit0>
         <Filename Value="atbinhexdemo.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ATBinHexDemo"/>
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
@@ -67,6 +68,9 @@
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <SearchPaths>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <UseAnsiStrings Value="False"/>
@@ -79,8 +83,5 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

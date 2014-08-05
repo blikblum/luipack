@@ -36,6 +36,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 { TForm1 }
 
 procedure TForm1.ButOpenFileClick(Sender: TObject);
@@ -64,9 +66,6 @@ begin
     3: BinHexViewer.Mode:=vbmodeUnicode;
   end;
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 
