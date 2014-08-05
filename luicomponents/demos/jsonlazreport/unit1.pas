@@ -64,7 +64,7 @@ begin
     JSONDataMemo.Lines.SaveToStream(Stream);
     Stream.Position := 0;
     try
-      Result := StreamToJSONData(Stream) as TJSONObject;
+      Result := StreamToJSON(Stream) as TJSONObject;
     except
       on E: Exception do
         ShowMessage(E.Message);
