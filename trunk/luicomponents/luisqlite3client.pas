@@ -159,10 +159,10 @@ type
     FData: TJSONObject;
     FIdValue: Variant;
     FOwnsData: Boolean;
-    function DoFetch(const Id: String): Boolean;
+    function DoFetch(const Id: Variant): Boolean;
     function DoSave(const Id: Variant): Boolean;
     procedure SetPrimaryKeyValue(const IdValue: Variant);
-    procedure SetSQL(const Id: String);
+    procedure SetSQL(const Id: Variant);
   protected
   public
     constructor Create(AModelDef: TSqlite3ResourceModelDef; ResourceClient: TSqlite3ResourceClient); override;
@@ -243,7 +243,7 @@ end;
 
 { TRESTJSONObjectResource }
 
-function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
+function TRESTJSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
   try
@@ -302,15 +302,19 @@ begin
     raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [FModelDef.PrimaryKey]);
 end;
 
-procedure TRESTJSONObjectResource.SetSQL(const Id: String);
+procedure TRESTJSONObjectResource.SetSQL(const Id: Variant);
 var
   SQL: String;
+  IdValue: String;
 begin
   SQL := FModelDef.SelectSQL;
   if Id <> '' then
   begin
-    //todo: fix when Id = string
-    SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, Id]);
+    if VarIsStr(Id) then
+      IdValue := '''' + VarToStr(Id) + ''''
+    else
+      IdValue := VarToStr(Id);
+    SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, IdValue]);
   end;
   FDataset.SQL := BindParams(SQL);
 end;
