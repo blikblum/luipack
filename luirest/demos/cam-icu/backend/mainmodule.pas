@@ -41,6 +41,7 @@ procedure TCAMICUServiceModule.DataModuleCreate(Sender: TObject);
 begin
   TSqldbJSONResource.DefaultConnection := Connection;
   FFactory := TCAMICUResourceFactory.Create(Self);
+  Resources.Register('serviceinfo', TServiceInfoResource, 0);
   Resources.Register('patients', @FFactory.GetResource, RES_PATIENTS);
   Resources.Register('evaluations', @FFactory.GetResource, RES_EVALUATIONS);
 end;
