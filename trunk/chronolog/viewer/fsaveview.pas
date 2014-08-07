@@ -35,6 +35,8 @@ type
 
 implementation
 
+{$R *.lfm}
+
 { TfrmSaveView }
 
 procedure TfrmSaveView.butOKClick(Sender: TObject);
@@ -65,8 +67,6 @@ begin
 
 end;
 
-initialization
-  {$I fsaveview.lrs}
 
 end.
 

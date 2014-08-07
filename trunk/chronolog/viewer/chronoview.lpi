@@ -1,17 +1,21 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
+    <Version Value="9"/>
     <PathDelim Value="\"/>
-    <Version Value="6"/>
     <General>
       <Flags>
-        <AlwaysBuild Value="False"/>
+        <LRSInOutputDirectory Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <IconPath Value=".\"/>
-      <TargetFileExt Value=".exe"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
     </General>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
       <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
@@ -40,43 +44,46 @@
       <Unit0>
         <Filename Value="chronoview.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ChronoView"/>
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
-        <ComponentName Value="frmMain"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="fmain.lrs"/>
+        <ComponentName Value="frmMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
         <UnitName Value="fMain"/>
       </Unit1>
       <Unit2>
         <Filename Value="fsaveview.pas"/>
-        <ComponentName Value="frmSaveView"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="fsaveview.lrs"/>
+        <ComponentName Value="frmSaveView"/>
         <UnitName Value="fSaveView"/>
       </Unit2>
       <Unit3>
         <Filename Value="chronodataprovider.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ChronoDataProvider"/>
       </Unit3>
       <Unit4>
         <Filename Value="dmodule.pas"/>
-        <ComponentName Value="dmMain"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmMain"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-        <ResourceFilename Value="dmodule.lrs"/>
         <UnitName Value="dmodule"/>
       </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="8"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <SearchPaths>
-      <SrcPath Value="$(LazarusDir)\lcl\;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)\;$(ProjectDir)..\outros\cpu\lib\;E:\work\pascal\chronolog\"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
     <CodeGeneration>
       <Checks>
         <IOChecks Value="True"/>
@@ -85,11 +92,8 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="True"/>
+        <DebugInfoType Value="dsStabs"/>
       </Debugging>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

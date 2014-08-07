@@ -7,55 +7,58 @@ object frmMain: TfrmMain
   VertScrollBar.Page = 526
   ActiveControl = PanelTop
   Caption = 'ChronoView'
-  ClientHeight = 527
+  ClientHeight = 526
   ClientWidth = 733
   Menu = menuMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  object nbMain: TNotebook
-    Height = 501
+  LCLVersion = '1.3'
+  object nbMain: TPageControl
+    Left = 0
+    Height = 500
     Top = 26
     Width = 733
+    ActivePage = pageResults
     Align = alClient
-    PageIndex = 0
+    TabIndex = 0
     TabOrder = 0
-    object pageResults: TPage
+    object pageResults: TTabSheet
       Caption = 'Results'
+      ClientHeight = 472
       ClientWidth = 725
-      ClientHeight = 475
       object gridResults: TDBGrid
         Left = 148
-        Height = 430
+        Height = 427
         Top = 10
         Width = 552
         Anchors = [akTop, akLeft, akRight, akBottom]
-        FixedColor = clBtnFace
-        FixedHotColor = cl3DLight
+        Color = clWindow
+        Columns = <>
+        FixedCols = 0
         Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
-        OptionsExtra = [dgeAutoColumns, dgeCheckboxColumn]
-        ParentColor = False
         Scrollbars = ssAutoBoth
         TabOrder = 1
-        TabStop = True
       end
       object listResults: TListBox
         Left = 4
         Height = 192
         Top = 10
         Width = 132
+        ItemHeight = 0
         OnSelectionChange = listResultsSelectionChange
         TabOrder = 0
       end
     end
-    object pageSummary: TPage
+    object pageSummary: TTabSheet
       Caption = 'Summary'
-      ClientWidth = 729
       ClientHeight = 458
+      ClientWidth = 729
       object listSummary: TListBox
         Left = 4
         Height = 192
         Top = 10
         Width = 132
+        ItemHeight = 0
         OnSelectionChange = listSummarySelectionChange
         TabOrder = 0
       end
@@ -67,19 +70,16 @@ object frmMain: TfrmMain
         Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
-        FixedColor = clBtnFace
         FixedCols = 0
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
         RowCount = 2
-        ScrollBars = ssAutoBoth
         TabOrder = 1
-        TabStop = True
       end
     end
-    object pageCustomViews: TPage
+    object pageCustomViews: TTabSheet
       Caption = 'Custom Views'
-      ClientWidth = 729
       ClientHeight = 458
+      ClientWidth = 729
       object Label4: TLabel
         Left = 4
         Height = 14
@@ -103,19 +103,17 @@ object frmMain: TfrmMain
         Width = 508
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 1
-        FixedColor = clBtnFace
         FixedCols = 0
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
         RowCount = 2
-        ScrollBars = ssAutoBoth
         TabOrder = 5
-        TabStop = True
       end
       object CheckRows: TCheckListBox
         Left = 4
         Height = 172
         Top = 48
         Width = 132
+        ItemHeight = 0
         TabOrder = 0
       end
       object butShowView: TButton
@@ -133,6 +131,7 @@ object frmMain: TfrmMain
         Height = 170
         Top = 240
         Width = 132
+        ItemHeight = 0
         TabOrder = 2
       end
       object butSaveView: TButton
@@ -147,21 +146,19 @@ object frmMain: TfrmMain
       end
       object comboViews: TComboBox
         Left = 4
-        Height = 21
+        Height = 23
         Top = 8
         Width = 132
-        AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
-        ItemHeight = 13
-        MaxLength = 0
+        ItemHeight = 15
         OnChange = comboViewsChange
         Style = csDropDownList
         TabOrder = 4
       end
     end
-    object PageCharts: TPage
+    object PageCharts: TTabSheet
       Caption = 'Charts'
-      ClientWidth = 733
       ClientHeight = 501
+      ClientWidth = 733
       object Label2: TLabel
         Left = 4
         Height = 14
@@ -184,23 +181,22 @@ object frmMain: TfrmMain
         Top = 8
         Width = 100
         AutoSize = True
-        Transparent = False
       end
       object CheckXAxis: TCheckListBox
         Left = 4
         Height = 172
         Top = 216
         Width = 132
+        ItemHeight = 0
         TabOrder = 0
-        TopIndex = -1
       end
       object CheckDataSeries: TCheckListBox
         Left = 4
         Height = 172
         Top = 24
         Width = 132
+        ItemHeight = 0
         TabOrder = 1
-        TopIndex = -1
       end
       object ButCreateChart: TButton
         Left = 61
@@ -213,10 +209,10 @@ object frmMain: TfrmMain
         TabOrder = 2
       end
     end
-    object pageReports: TPage
+    object pageReports: TTabSheet
       Caption = 'Reports'
-      ClientWidth = 733
       ClientHeight = 501
+      ClientWidth = 733
       object Label1: TLabel
         Left = 50
         Height = 14
@@ -238,7 +234,9 @@ object frmMain: TfrmMain
     end
   end
   object PanelTop: TPanel
+    Left = 0
     Height = 26
+    Top = 0
     Width = 733
     Align = alTop
     BevelOuter = bvNone
@@ -247,34 +245,31 @@ object frmMain: TfrmMain
     TabOrder = 1
     object comboScale: TComboBox
       Left = 168
-      Height = 21
+      Height = 23
       Top = 1
       Width = 152
-      AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
-      ItemHeight = 13
+      ItemHeight = 15
       Items.Strings = (
         'View Microseconds'
         'View Miliseconds'
         'View Seconds'
       )
-      MaxLength = 0
       OnChange = comboScaleChange
       Style = csDropDownList
       TabOrder = 0
     end
     object comboGroupBy: TComboBox
-      Height = 21
+      Left = 0
+      Height = 23
       Top = 1
       Width = 160
-      AutoCompleteText = [cbactEndOfLineComplete, cbactSearchAscending]
       Enabled = False
-      ItemHeight = 13
+      ItemHeight = 15
       Items.Strings = (
         'Group by Session'
         'Group by Action'
       )
-      MaxLength = 0
       OnChange = comboMainChange
       Style = csDropDownList
       TabOrder = 1

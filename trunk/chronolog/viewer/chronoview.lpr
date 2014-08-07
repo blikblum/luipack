@@ -26,6 +26,8 @@ uses
   Forms
   { add your units here }, fmain, dmodule;
 
+{$R *.res}
+
 begin
   Application.Initialize;
   Application.CreateForm(TdmMain, dmMain);
