@@ -24,7 +24,8 @@ unit fMain;
 interface
 
 uses
-  Classes, SysUtils, LCLProc, LResources, Forms, Controls, Graphics, Dialogs, Menus, DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons;
+  Classes, SysUtils, LCLProc, LResources, Forms, Controls, Graphics, Dialogs, Menus,
+  DB, inifiles, ExtCtrls, StdCtrls, DBGrids, Grids, CheckLst, Buttons, ComCtrls;
 
 type
   { TfrmMain }
@@ -51,12 +52,12 @@ type
     listSummary: TListBox;
     listResults: TListBox;
     MIOpenRecent: TMenuItem;
-    nbMain: TNotebook;
-    PageCharts: TPage;
-    pageReports: TPage;
-    pageSummary: TPage;
-    pageCustomViews: TPage;
-    pageResults: TPage;
+    nbMain: TPageControl;
+    PageCharts: TTabSheet;
+    pageReports: TTabSheet;
+    pageSummary: TTabSheet;
+    pageCustomViews: TTabSheet;
+    pageResults: TTabSheet;
     dlgSaveHtml: TSaveDialog;
     PanelTop: TPanel;
     MIOpen: TMenuItem;
@@ -93,6 +94,8 @@ var
   frmMain: TfrmMain;
 
 implementation
+
+{$R *.lfm}
 
 uses
   fsaveview, DomUtils, dmodule, GnuPlotChart;
@@ -635,9 +638,6 @@ procedure TfrmMain.comboScaleChange(Sender: TObject);
 begin
   dmMain.ChronoData.ScaleIndex := comboScale.ItemIndex;
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 

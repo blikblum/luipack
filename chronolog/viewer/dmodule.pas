@@ -30,6 +30,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 { TdmMain }
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -42,9 +44,6 @@ procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   ChronoData.Destroy;
 end;
-
-initialization
-  {$I dmodule.lrs}
 
 end.
 

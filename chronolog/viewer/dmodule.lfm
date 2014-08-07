@@ -1,6 +1,7 @@
 object dmMain: TdmMain
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
+  OldCreateOrder = False
   Height = 300
   HorizontalOffset = 531
   VerticalOffset = 284
@@ -15,7 +16,7 @@ object dmMain: TdmMain
     left = 40
     top = 80
   end
-  object srcResults: TDatasource
+  object srcResults: TDataSource
     DataSet = dsResults
     left = 80
     top = 40
