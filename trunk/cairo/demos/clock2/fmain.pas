@@ -36,8 +36,9 @@ var
 
 implementation
 
-{ TForm1 }
+{$R *.lfm}
 
+{ TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
@@ -69,9 +70,6 @@ procedure TForm1.TimerClockTimer(Sender: TObject);
 begin
   FClock.Time := Time;
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 

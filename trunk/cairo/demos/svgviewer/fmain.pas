@@ -32,6 +32,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 { TForm1 }
 
 procedure TForm1.CairoControl1Draw(Sender: TObject);
@@ -67,9 +69,6 @@ begin
   FSvgFile.Load(Value);
   CairoControl1.Redraw;
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 
