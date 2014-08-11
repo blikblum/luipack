@@ -4,7 +4,11 @@ unit Sqlite3Ext;
 
 interface
 
-function sqlite3_enable_shared_cache(Enable: Boolean): LongInt; cdecl; external 'sqlite3';
+uses
+  ctypes, sqlite3;
+
+procedure sqlite3_result_int(ctx: psqlite3_context; V: cint); cdecl; external Sqlite3Lib;
+procedure sqlite3_result_int64(ctx: psqlite3_context; V: sqlite3_int64); cdecl; external Sqlite3Lib;
 
 implementation
 
