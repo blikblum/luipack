@@ -11,7 +11,7 @@
 "Path":"patients"
 },
 {
-"Name":"evaluation",
+"Name":"patientevaluation",
 "Path":"patients/{patientid}/evaluations",
 "Params":
 [

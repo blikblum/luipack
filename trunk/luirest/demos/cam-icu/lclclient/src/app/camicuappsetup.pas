@@ -13,7 +13,8 @@ implementation
 
 uses
   PresentationManager,
-  AppConfigView
+  AppConfigView,
+  PatientEvaluationsView, PatientEvaluationsPresenter
   ;
 
 procedure ConfigureApp(App: TCAMICUApp);
@@ -22,7 +23,7 @@ var
 begin
   Presentations := App.Presentations;
   Presentations.Register('appconfig', TAppConfigViewForm);
-  //Presentations.Register('patient', TPatientForm, TPatientPresenter);
+  Presentations.Register('patientevaluations', TPatientEvaluationsForm, TPatientEvaluationsPresenter);
 end;
 
 end.

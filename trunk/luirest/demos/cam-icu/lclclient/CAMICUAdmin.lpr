@@ -7,8 +7,9 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Controls, MainView, CAMICUApp,
-  CAMICUAppSetup, MainPresenter, PatientModel;
+  Forms, Controls, zvdatetimectrls, MainView, CAMICUApp,
+  CAMICUAppSetup, MainPresenter, PatientModel, PatientEvaluationModel,
+PatientEvaluationsView, PatientEvaluationsPresenter, EvaluationView;
 
 {$R *.res}
 
@@ -38,6 +39,8 @@ begin
     MainForm.Presenter := TMainPresenter.Create(Application);
     MainForm.Presenter.Initialize;
   end;
+  Application.CreateForm(TPatientEvaluationsForm, PatientEvaluationsForm);
+  Application.CreateForm(TEvaluationForm, EvaluationForm);
   Application.Run;
 end.
 

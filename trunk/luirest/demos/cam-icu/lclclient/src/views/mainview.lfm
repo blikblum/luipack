@@ -1,18 +1,19 @@
 object MainForm: TMainForm
   Left = 336
-  Height = 484
+  Height = 513
   Top = 199
-  Width = 728
+  Width = 774
   Caption = 'CAMICU - Admin'
-  ClientHeight = 484
-  ClientWidth = 728
+  ClientHeight = 513
+  ClientWidth = 774
   Position = poScreenCenter
   LCLVersion = '1.3'
   object PatientListView: TVirtualJSONListView
     Left = 2
-    Height = 442
+    Height = 471
     Top = 40
-    Width = 524
+    Width = 570
+    OnGetText = PatientListViewGetText
     TextProperty = 'text'
     Align = alClient
     BorderSpacing.Top = 38
@@ -36,6 +37,18 @@ object MainForm: TMainForm
         Text = 'Nascimento'
         Width = 80
         PropertyName = 'birthdate'
+      end    
+      item
+        Position = 3
+        Text = 'Admissão'
+        Width = 74
+        PropertyName = 'internmentdate'
+      end    
+      item
+        Position = 4
+        Text = 'Alta'
+        Width = 74
+        PropertyName = 'dischargedate'
       end>
     Header.DefaultHeight = 19
     Header.Height = 19
@@ -47,7 +60,7 @@ object MainForm: TMainForm
     OnFocusChanged = PatientListViewFocusChanged
   end
   object PatientBar: TJvXPBar
-    Left = 536
+    Left = 582
     Height = 158
     Top = 40
     Width = 185
@@ -55,6 +68,7 @@ object MainForm: TMainForm
       item
         Caption = 'Avaliações'
         Name = 'PatientBarEvaluations'
+        OnClick = PatientBarEvaluationsClick
       end    
       item
         Caption = 'PRE-DELIRIC'
