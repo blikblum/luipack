@@ -101,10 +101,61 @@ type
 
   TJSONCollectionClass = class of TJSONCollection;
 
+  { TJSONCollectionSelection }
+
+  TJSONCollectionSelection = class(TPersistent, IFPObserver)
+  private
+    FCollection: TJSONCollection;
+    FData: TJSONObject;
+    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
+    procedure SetData(Value: TJSONObject);
+  public
+    constructor Create(ACollection: TJSONCollection);
+    destructor Destroy; override;
+    property Data: TJSONObject read FData write SetData;
+  end;
+
 implementation
 
 uses
   LuiJSONUtils;
+
+{ TJSONCollectionSelection }
+
+procedure TJSONCollectionSelection.FPOObservedChanged(ASender: TObject;
+  Operation: TFPObservedOperation; Data: Pointer);
+begin
+  if (ASender = FCollection) then
+  begin
+    case Operation of
+      //free itself
+      ooFree: Free;
+    end;
+  end;
+end;
+
+procedure TJSONCollectionSelection.SetData(Value: TJSONObject);
+begin
+  if FData = Value then Exit;
+  FData := Value;
+  FPONotifyObservers(Self, ooChange, nil);
+end;
+
+constructor TJSONCollectionSelection.Create(ACollection: TJSONCollection);
+begin
+  ACollection.FPOAttachObserver(Self);
+  FCollection := ACollection;
+end;
+
+destructor TJSONCollectionSelection.Destroy;
+begin
+  if FCollection <> nil then
+  begin
+    FCollection.FPODetachObserver(Self);
+    FCollection := nil;
+  end;
+  inherited Destroy;
+end;
 
 { TJSONCollection }
 
