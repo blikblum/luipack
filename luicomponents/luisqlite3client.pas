@@ -150,9 +150,9 @@ type
     property Data: TJSONArray read GetData;
   end;
 
-  { TRESTJSONObjectResource }
+  { TSqlite3JSONObjectResource }
 
-  TRESTJSONObjectResource = class(TSqlite3DataResource, IJSONObjectResource)
+  TSqlite3JSONObjectResource = class(TSqlite3DataResource, IJSONObjectResource)
   private
     //todo: implement save through dirty checking
     //FSnapshot/FReference: TJSONObject;
@@ -243,7 +243,7 @@ end;
 
 { TRESTJSONObjectResource }
 
-function TRESTJSONObjectResource.DoFetch(const Id: Variant): Boolean;
+function TSqlite3JSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
   try
@@ -260,7 +260,7 @@ begin
   end;
 end;
 
-function TRESTJSONObjectResource.DoSave(const Id: Variant): Boolean;
+function TSqlite3JSONObjectResource.DoSave(const Id: Variant): Boolean;
 var
   SQL: String;
 begin
@@ -289,7 +289,7 @@ begin
   end;
 end;
 
-procedure TRESTJSONObjectResource.SetPrimaryKeyValue(const IdValue: Variant);
+procedure TSqlite3JSONObjectResource.SetPrimaryKeyValue(const IdValue: Variant);
 var
   PKField: TField;
 begin
@@ -302,7 +302,7 @@ begin
     raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [FModelDef.PrimaryKey]);
 end;
 
-procedure TRESTJSONObjectResource.SetSQL(const Id: Variant);
+procedure TSqlite3JSONObjectResource.SetSQL(const Id: Variant);
 var
   SQL: String;
   IdValue: String;
@@ -314,12 +314,13 @@ begin
       IdValue := '''' + VarToStr(Id) + ''''
     else
       IdValue := VarToStr(Id);
+    //todo: handle when ConditionsSQL <> ''
     SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, IdValue]);
   end;
   FDataset.SQL := BindParams(SQL);
 end;
 
-constructor TRESTJSONObjectResource.Create(AModelDef: TSqlite3ResourceModelDef;
+constructor TSqlite3JSONObjectResource.Create(AModelDef: TSqlite3ResourceModelDef;
   ResourceClient: TSqlite3ResourceClient);
 begin
   inherited Create(AModelDef, ResourceClient);
@@ -327,14 +328,14 @@ begin
   FData := TJSONObject.Create;
 end;
 
-destructor TRESTJSONObjectResource.Destroy;
+destructor TSqlite3JSONObjectResource.Destroy;
 begin
   if FOwnsData then
     FData.Free;
   inherited Destroy;
 end;
 
-function TRESTJSONObjectResource.Delete: Boolean;
+function TSqlite3JSONObjectResource.Delete: Boolean;
 var
   IdFieldData: TJSONData;
   Id: String;
@@ -385,7 +386,7 @@ begin
   end;
 end;
 
-function TRESTJSONObjectResource.Fetch: Boolean;
+function TSqlite3JSONObjectResource.Fetch: Boolean;
 var
   IdFieldData: TJSONData;
   IdField, Id: String;
@@ -413,18 +414,18 @@ begin
   Result := DoFetch(Id);
 end;
 
-function TRESTJSONObjectResource.Fetch(IdValue: Variant): Boolean;
+function TSqlite3JSONObjectResource.Fetch(IdValue: Variant): Boolean;
 begin
   FIdValue := IdValue;
   Result := DoFetch(VarToStr(IdValue));
 end;
 
-function TRESTJSONObjectResource.GetData: TJSONObject;
+function TSqlite3JSONObjectResource.GetData: TJSONObject;
 begin
   Result := FData;
 end;
 
-function TRESTJSONObjectResource.Save: Boolean;
+function TSqlite3JSONObjectResource.Save: Boolean;
 var
   IdFieldData: TJSONData;
   Id: Variant;
@@ -460,13 +461,13 @@ begin
   Result := DoSave(Id);
 end;
 
-function TRESTJSONObjectResource.Save(IdValue: Variant): Boolean;
+function TSqlite3JSONObjectResource.Save(IdValue: Variant): Boolean;
 begin
   FIdValue := IdValue;
   Result := DoSave(IdValue);
 end;
 
-procedure TRESTJSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
+procedure TSqlite3JSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
 begin
   if FOwnsData then
     FData.Free;
@@ -836,7 +837,7 @@ var
   ModelDef: TSqlite3ResourceModelDef;
 begin
   ModelDef := FindModelDef(ModelName);
-  Result := TRESTJSONObjectResource.Create(ModelDef, Self);
+  Result := TSqlite3JSONObjectResource.Create(ModelDef, Self);
 end;
 
 procedure TSqlite3ResourceClient.InvalidateCache(const ModelName: String);
