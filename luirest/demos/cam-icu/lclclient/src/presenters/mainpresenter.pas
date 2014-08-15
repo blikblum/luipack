@@ -18,6 +18,7 @@ type
     FPatients: TPatients;
     FSelectedPatientData: TJSONObject;
     procedure SetSelectedPatientData(Value: TJSONObject);
+  protected
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -25,6 +26,7 @@ type
     procedure DeletePatient;
     procedure EditPatient;
     procedure Initialize; override;
+    procedure ShowPatientEvaluations;
     property Patients: TPatients read FPatients;
     property OnSelectedPatientChange: TNotifyEvent read FOnSelectedPatientChange write FOnSelectedPatientChange;
     property SelectedPatientData: TJSONObject read FSelectedPatientData write SetSelectedPatientData;
@@ -92,6 +94,13 @@ begin
     Exit;
   Patient := FPatients.Get(FSelectedPatientData);
   Presentations['contact'].ShowModal(['Model', Patient]);
+end;
+
+procedure TMainPresenter.ShowPatientEvaluations;
+begin
+  if FSelectedPatientData = nil then
+    Exit;
+  Presentations['patientevaluations'].ShowModal(['PatientData', FSelectedPatientData]);
 end;
 
 end.

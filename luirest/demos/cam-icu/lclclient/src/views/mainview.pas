@@ -15,8 +15,12 @@ type
   TMainForm = class(TForm, IFPObserver)
     PatientBar: TJvXPBar;
     PatientListView: TVirtualJSONListView;
+    procedure PatientBarEvaluationsClick(Sender: TObject);
     procedure PatientListViewFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
+    procedure PatientListViewGetText(Sender: TCustomVirtualJSONDataView;
+      Node: PVirtualNode; NodeData: TJSONData; Column: TColumnIndex;
+      TextType: TVSTTextType; var CellText: String);
   private
     FPresenter: TMainPresenter;
     procedure FPOObservedChanged(ASender: TObject;
@@ -34,6 +38,9 @@ var
 
 implementation
 
+uses
+  LuiJSONUtils;
+
 {$R *.lfm}
 
 { TMainForm }
@@ -45,6 +52,29 @@ var
 begin
   PatientListView.GetData(Node, NodeData);
   FPresenter.SelectedPatientData := NodeData;
+end;
+
+procedure TMainForm.PatientListViewGetText(Sender: TCustomVirtualJSONDataView;
+  Node: PVirtualNode; NodeData: TJSONData; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: String);
+const
+  PropNames: array[2..4] of String = ('birthdate', 'internmentdate', 'dischargedate');
+var
+  NodeObjData: TJSONObject absolute NodeData;
+  ADate: TDateTime;
+begin
+  case Column of
+    2, 3, 4:
+      begin
+        if FindJSONProp(NodeObjData, PropNames[Column], ADate) then
+          CellText := DateToStr(ADate);
+      end;
+  end;
+end;
+
+procedure TMainForm.PatientBarEvaluationsClick(Sender: TObject);
+begin
+  FPresenter.ShowPatientEvaluations;
 end;
 
 procedure TMainForm.FPOObservedChanged(ASender: TObject;

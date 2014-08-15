@@ -1,0 +1,144 @@
+object EvaluationForm: TEvaluationForm
+  Left = 421
+  Height = 345
+  Top = 255
+  Width = 424
+  Caption = 'Avaliação'
+  ClientHeight = 345
+  ClientWidth = 424
+  Position = poOwnerFormCenter
+  LCLVersion = '1.3'
+  object DatePicker: TZVDateTimePicker
+    Left = 8
+    Height = 23
+    Top = 26
+    Width = 83
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    AutoSize = False
+    TabOrder = 0
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 41864
+    Time = 0.011744745366741
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 8
+    Width = 24
+    Caption = 'Data'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 144
+    Height = 15
+    Top = 8
+    Width = 32
+    Caption = 'Turno'
+    ParentColor = False
+  end
+  object ShiftComboBox: TComboBox
+    Left = 144
+    Height = 23
+    Top = 26
+    Width = 120
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 1
+  end
+  object Label3: TLabel
+    Left = 8
+    Height = 15
+    Top = 61
+    Width = 27
+    Caption = 'RASS'
+    ParentColor = False
+  end
+  object RASSComboBox: TComboBox
+    Left = 8
+    Height = 23
+    Top = 79
+    Width = 120
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 2
+  end
+  object Label4: TLabel
+    Left = 144
+    Height = 15
+    Top = 61
+    Width = 45
+    Caption = 'Delirium'
+    ParentColor = False
+  end
+  object DeliriumComboBox: TComboBox
+    Left = 144
+    Height = 23
+    Top = 79
+    Width = 120
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 3
+  end
+  object Label5: TLabel
+    Left = 288
+    Height = 15
+    Top = 61
+    Width = 55
+    Caption = 'Ventilação'
+    ParentColor = False
+  end
+  object VentilationComboBox: TComboBox
+    Left = 288
+    Height = 23
+    Top = 79
+    Width = 129
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 4
+  end
+  object CheckGroup1: TCheckGroup
+    Left = 8
+    Height = 129
+    Top = 120
+    Width = 185
+    AutoFill = True
+    Caption = 'Sedação'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    TabOrder = 5
+  end
+  object ICDSCCheckGroup: TCheckGroup
+    Left = 216
+    Height = 129
+    Top = 120
+    Width = 201
+    AutoFill = True
+    Caption = 'ICDSC'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    TabOrder = 6
+  end
+end

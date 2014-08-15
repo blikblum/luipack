@@ -1,0 +1,83 @@
+object PatientEvaluationsForm: TPatientEvaluationsForm
+  Left = 355
+  Height = 431
+  Top = 212
+  Width = 623
+  Caption = 'Avaliações'
+  ClientHeight = 431
+  ClientWidth = 623
+  Position = poOwnerFormCenter
+  LCLVersion = '1.3'
+  object EvaluationListView: TVirtualJSONListView
+    Left = 8
+    Height = 384
+    Top = 40
+    Width = 608
+    OnGetText = EvaluationListViewGetText
+    TextProperty = 'text'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Position = 0
+        Text = 'Data'
+        Width = 80
+        PropertyName = 'date'
+      end    
+      item
+        Position = 1
+        Text = 'Turno'
+        Width = 80
+        PropertyName = 'shiftid'
+      end    
+      item
+        Position = 2
+        Text = 'Ações'
+        Width = 140
+      end>
+    Header.DefaultHeight = 17
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toHideSelection, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages, toAlwaysHideSelection]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnBeforeItemErase = EvaluationListViewBeforeItemErase
+    OnHotChange = EvaluationListViewHotChange
+    object EditEvaluationLabel: TAdvancedLabel
+      Cursor = crHandPoint
+      Left = 432
+      Height = 15
+      Top = 44
+      Width = 30
+      Link = True
+      OnClick = EditEvaluationLabelClick
+      Caption = 'Editar'
+      Font.Color = clBlue
+      Font.Style = [fsUnderline]
+      ParentColor = False
+      ParentFont = False
+      Visible = False
+    end
+    object DeleteEvaluationLabel: TAdvancedLabel
+      Cursor = crHandPoint
+      Left = 499
+      Height = 15
+      Top = 44
+      Width = 34
+      Link = True
+      OnClick = DeleteEvaluationLabelClick
+      Caption = 'Excluir'
+      Font.Color = clBlue
+      Font.Style = [fsUnderline]
+      ParentColor = False
+      ParentFont = False
+      Visible = False
+    end
+  end
+  object AddButton: TBitBtn
+    Left = 448
+    Height = 30
+    Top = 3
+    Width = 168
+    Caption = 'Adicionar'
+    TabOrder = 1
+  end
+end

@@ -28,27 +28,30 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="6">
+    <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="JvXPBarLaz"/>
+        <PackageName Value="ZVDateTimeCtrls"/>
       </Item1>
       <Item2>
-        <PackageName Value="vtvutils_package"/>
+        <PackageName Value="JvXPBarLaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="luirest_package"/>
+        <PackageName Value="vtvutils_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="luirest_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luicontrols"/>
       </Item5>
       <Item6>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item6>
+      <Item7>
+        <PackageName Value="LCL"/>
+      </Item7>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="15">
       <Unit0>
         <Filename Value="CAMICUAdmin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -69,7 +72,6 @@
       <Unit3>
         <Filename Value="src\app\camicuconsts.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CAMICUConsts"/>
       </Unit3>
       <Unit4>
         <Filename Value="src\views\appconfigview.pas"/>
@@ -77,7 +79,6 @@
         <ComponentName Value="AppConfigViewForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="AppConfigView"/>
       </Unit4>
       <Unit5>
         <Filename Value="src\app\camicuappsetup.pas"/>
@@ -92,7 +93,6 @@
       <Unit7>
         <Filename Value="src\models\patientmodel.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="PatientModel"/>
       </Unit7>
       <Unit8>
         <Filename Value="src\includes\defaultaddress.inc"/>
@@ -106,6 +106,31 @@
         <Filename Value="src\components\basepresenter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="src\models\patientevaluationmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PatientEvaluationModel"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="src\views\patientevaluationsview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PatientEvaluationsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="PatientEvaluationsView"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="src\presenters\patientevaluationspresenter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PatientEvaluationsPresenter"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="src\views\evaluationview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EvaluationForm"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EvaluationView"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
