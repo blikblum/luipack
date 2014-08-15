@@ -499,7 +499,8 @@ end;
 
 function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
 var
-  PropIndex1, PropIndex2: Integer;
+  PropIndex1: Integer;
+  PropData1, PropData2: TJSONData;
   PropName: String;
 begin
   if (JSONObj1 = nil) or (JSONObj2 = nil) then
@@ -509,10 +510,19 @@ begin
   while Result and (PropIndex1 < JSONObj1.Count) do
   begin
     PropName := JSONObj1.Names[PropIndex1];
-    PropIndex2 := JSONObj2.IndexOfName(PropName);
-    if PropIndex2 >= 0 then
+    PropData2 := JSONObj2.Find(PropName);
+    if PropData2 <> nil then
     begin
-      Result := CompareJSONData(JSONObj1.Items[PropIndex1], JSONObj2.Items[PropIndex2]) = 0;
+      PropData1 := JSONObj1.Items[PropIndex1];
+      Result := PropData1.JSONType = PropData2.JSONType;
+      if Result then
+      begin
+        //todo: compare array
+        if PropData1.JSONType = jtObject then
+          Result := SameJSONObject(TJSONObject(PropData1), TJSONObject(PropData2))
+        else
+          Result := CompareJSONData(PropData1, PropData2) = 0;
+      end;
     end
     else
     begin
