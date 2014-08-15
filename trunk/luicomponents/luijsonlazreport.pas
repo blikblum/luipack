@@ -378,16 +378,22 @@ var
   PropData: TJSONData;
   PropDataObj: TJSONObject absolute PropData;
   DataLink: TfrJSONDataLink;
-  PropertyName: String;
+  PropertyName, ParamName: String;
   DotPos: Integer;
 begin
   inherited DoGetValue(ParName, ParValue);
   if VarIsEmpty(ParValue) then
   begin
-    DotPos := Pos('.', ParName);
+    ParamName := Trim(ParName);
+    if ParamName = '' then
+      Exit;
+    //handle recursive params
+    if ParamName[1] = '[' then
+      ParamName := VarToStr(frParser.Calc(ParamName));
+    DotPos := Pos('.', ParamName);
     if DotPos = 0 then
     begin
-      PropData := FData.Find(ParName);
+      PropData := FData.Find(ParamName);
       if (PropData <> nil) then
       begin
         case PropData.JSONType of
@@ -401,27 +407,35 @@ begin
     end
     else
     begin
-      PropertyName := Copy(ParName, 1, DotPos - 1);
+      //extract left side of property
+      PropertyName := Copy(ParamName, 1, DotPos - 1);
       DataLink := TfrJSONDataLink(FDataLinks.Find(PropertyName));
       if (DataLink <> nil) and (DataLink.Dataset <> nil) then
       begin
-        PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
+        //todo: refactor
+        //recursive params
+        PropertyName := Copy(ParamName, DotPos + 1, Length(ParamName));
+        if (Length(PropertyName) > 0) and (PropertyName[1] = '[') then
+          PropertyName := VarToStr(frParser.Calc(PropertyName));
         DataLink.Dataset.GetValue(PropertyName, ParValue);
       end
       else
       begin
         if FindJSONProp(FData, PropertyName, PropDataObj) then
         begin
-          PropertyName := Copy(ParName, DotPos + 1, Length(ParName));
+          //recursive params
+          PropertyName := Copy(ParamName, DotPos + 1, Length(ParamName));
+          if (Length(PropertyName) > 0) and (PropertyName[1] = '[') then
+            PropertyName := VarToStr(frParser.Calc(PropertyName));
           PropData := PropDataObj.Find(PropertyName);
-          if PropData <> nil then
+          if (PropData <> nil) and not (PropData.JSONType in [jtArray, jtObject]) then
             ParValue := PropData.Value;
         end;
       end;
     end;
     if VarIsEmpty(ParValue) then
     begin
-      PropData := FNullValues.Find(ParName);
+      PropData := FNullValues.Find(ParamName);
       if PropData <> nil then
         ParValue := PropData.Value;
     end;
