@@ -11,13 +11,10 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
-        <CompilerMessages>
-          <MsgFileName Value=""/>
-        </CompilerMessages>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Files Count="5">
+    <Files Count="7">
       <Item1>
         <Filename Value="jsonformmediatoreditor.pas"/>
         <HasRegisterProc Value="True"/>
@@ -39,27 +36,38 @@
         <Filename Value="..\forms\jsonelementupdatemethodview.pas"/>
         <UnitName Value="jsonelementupdatemethodview"/>
       </Item5>
+      <Item6>
+        <Filename Value="..\forms\jsonstringpropertyeditorview.pas"/>
+        <UnitName Value="jsonstringpropertyeditorview"/>
+      </Item6>
+      <Item7>
+        <Filename Value="jsonstringpropertyeditor.pas"/>
+        <UnitName Value="jsonstringpropertyeditor"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="6">
+    <RequiredPkgs Count="7">
       <Item1>
-        <PackageName Value="vtvutils_package"/>
+        <PackageName Value="SynEdit"/>
       </Item1>
       <Item2>
-        <PackageName Value="datahub_package"/>
+        <PackageName Value="vtvutils_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="datahub_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="IDEIntf"/>
       </Item4>
       <Item5>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item5>
       <Item6>
-        <PackageName Value="FCL"/>
+        <PackageName Value="luicontrols"/>
       </Item6>
+      <Item7>
+        <PackageName Value="FCL"/>
+      </Item7>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

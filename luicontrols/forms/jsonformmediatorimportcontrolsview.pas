@@ -54,14 +54,16 @@ uses
   strutils, ComCtrls;
 
 const
-  ControlSuffixes: array[0..6] of String = (
+  ControlSuffixes: array[0..8] of String = (
     'edit',
     'combobox',
     'memo',
     'checkbox',
+    'checkgroup',
     'label',
     'picker',
-    'radiobutton'
+    'radiobutton',
+    'radiogroup'
   );
 
 
