@@ -5,7 +5,8 @@ unit JSONFormMediatorEditor;
 interface
 
 uses
-  Classes, SysUtils, ComponentEditors, LazarusPackageIntf, LazIdeIntf, JSONFormMediator;
+  Classes, SysUtils, ComponentEditors, LazarusPackageIntf, LazIdeIntf,
+  JSONFormMediator, PropEdits;
 
 type
 
@@ -23,11 +24,12 @@ procedure Register;
 implementation
 
 uses
-  JSONFormMediatorEditorView;
+  typinfo, JSONFormMediatorEditorView, JSONStringPropertyEditor, fpjson;
 
 procedure Register;
 begin
    RegisterComponentEditor(TJSONFormMediator, TJSONFormMediatorEditor);
+   RegisterPropertyEditor(TypeInfo(TJSONStringProperty), nil, '', TJSONStringPropertyEditor);
 end;
 
 { TJSONFormMediatorEditor }

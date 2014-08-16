@@ -9,7 +9,8 @@ interface
 uses
   JSONFormMediatorEditor, JSONFormMediatorEditorView, 
   JSONFormMediatorImportControlsView, JSONFormMediatorImportModelsView, 
-  JSONElementUpdateMethodView, LazarusPackageIntf;
+  JSONElementUpdateMethodView, JSONStringPropertyEditorView, 
+  JSONStringPropertyEditor, LazarusPackageIntf;
 
 implementation
 

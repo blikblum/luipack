@@ -13,6 +13,8 @@ type
 
   TJSONFormElement = class;
 
+  TJSONStringProperty = type TJSONStringType;
+
   { TJSONGUIMediator }
 
   TJSONGUIMediator = class
@@ -75,6 +77,14 @@ type
     class function AllowsCaptionLabel: Boolean; override;
   end;
 
+  { TJSONCheckGroupMediator }
+
+  TJSONCheckGroupMediator = class(TJSONListMediator)
+    class procedure DoJSONToGUI(Data: TJSONObject; Element: TJSONFormElement); override;
+    class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+    class procedure Initialize(Element: TJSONFormElement); override;
+  end;
+
   { TJSONCheckBoxMediator }
 
   TJSONCheckBoxMediator = class(TJSONGUIMediator)
@@ -95,7 +105,7 @@ type
   TJSONFormElement = class(TFormElement)
   private
     FMediatorClass: TJSONGUIMediatorClass;
-    FOptions: String;
+    FOptions: TJSONStringProperty;
     FOptionsData: TJSONObject;
     FInitialized: Boolean;
     function GetOptionsData: TJSONObject;
@@ -112,7 +122,7 @@ type
     procedure Reset(UpdateData: Boolean);
     property OptionsData: TJSONObject read GetOptionsData;
   published
-    property Options: String read FOptions write FOptions;
+    property Options: TJSONStringProperty read FOptions write FOptions;
   end;
 
   { TJSONFormElements }
@@ -190,6 +200,151 @@ procedure RegisterJSONMediator(ControlClass: TControlClass;
   MediatorClass: TJSONGUIMediatorClass);
 begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
+end;
+
+function GetSchemaInfo(OptionsData: TJSONObject; out ItemsData: TJSONArray; out TextPath, ValuePath: String): Boolean;
+var
+  SchemaData: TJSONData;
+begin
+  Result := FindJSONProp(OptionsData, 'items', ItemsData);
+  if Result then
+  begin
+    SchemaData := OptionsData.Find('schema');
+    if (SchemaData <> nil) and (SchemaData.JSONType = jtObject) then
+    begin
+      TextPath := TJSONObject(SchemaData).Get('textpath', 'text');
+      ValuePath := TJSONObject(SchemaData).Get('valuepath', 'text');
+    end
+    else
+    begin
+      TextPath := 'text';
+      ValuePath := 'value';
+    end;
+  end;
+end;
+
+{ TJSONCheckGroupMediator }
+
+class procedure TJSONCheckGroupMediator.DoJSONToGUI(Data: TJSONObject;
+  Element: TJSONFormElement);
+var
+  CheckGroup: TCheckGroup;
+  ValuePath: String;
+  OptionsData, SchemaData: TJSONObject;
+  ItemsData: TJSONArray;
+  PropData, ItemData, ValueData: TJSONData;
+  i: Integer;
+begin
+  CheckGroup := Element.Control as TCheckGroup;
+  PropData := Data.Find(Element.PropertyName);
+  OptionsData := Element.OptionsData;
+  //for now require PropData and items to be set
+  if (PropData <> nil) and FindJSONProp(OptionsData, 'items', ItemsData) then
+  begin
+    if ItemsData.Count <> CheckGroup.Items.Count then
+      raise Exception.Create('Mismatch item count between TCheckGroup and mediator configuration');
+    if FindJSONProp(OptionsData, 'schema', SchemaData) then
+    begin
+      ValuePath := SchemaData.Get('valuepath', 'value');
+    end
+    else
+    begin
+      ValuePath := 'value';
+    end;
+
+    case PropData.JSONType of
+      jtObject:
+        begin
+          //todo
+        end;
+      jtArray:
+        begin
+          for i := 0 to ItemsData.Count -1 do
+          begin
+            ItemData := ItemsData.Items[i];
+            if ItemData.JSONType = jtObject then
+              ValueData := TJSONObject(ItemData).FindPath(ValuePath)
+            else
+              ValueData := ItemData;
+            if ValueData.JSONType in [jtString, jtNull, jtNumber] then
+              CheckGroup.Checked[i] := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) <> -1
+            else
+              CheckGroup.Checked[i] := False;
+          end;
+        end;
+    end;
+  end
+  else
+  begin
+    for i := 0 to CheckGroup.Items.Count - 1 do
+    begin
+      CheckGroup.Checked[i] := False;
+    end;
+  end;
+end;
+
+class procedure TJSONCheckGroupMediator.DoGUIToJSON(Element: TJSONFormElement;
+  Data: TJSONObject);
+var
+  CheckGroup: TCheckGroup;
+  ValuePath: String;
+  OptionsData, SchemaData: TJSONObject;
+  ItemsData: TJSONArray;
+  PropData, ItemData, ValueData: TJSONData;
+  i: Integer;
+begin
+  CheckGroup := Element.Control as TCheckGroup;
+  PropData := Data.Find(Element.PropertyName);
+  OptionsData := Element.OptionsData;
+  if FindJSONProp(OptionsData, 'items', ItemsData) then
+  begin
+    if ItemsData.Count <> CheckGroup.Items.Count then
+      raise Exception.Create('Mismatch item count between TCheckGroup and mediator configuration');
+    if FindJSONProp(OptionsData, 'schema', SchemaData) then
+    begin
+      ValuePath := SchemaData.Get('valuepath', 'value');
+    end
+    else
+    begin
+      ValuePath := 'value';
+    end;
+
+    if (PropData = nil) or (PropData.JSONType in [jtString, jtNumber, jtNull]) then
+    begin
+      PropData := TJSONArray.Create;
+      Data.Elements[Element.PropertyName] := PropData;
+    end
+    else
+      PropData.Clear;
+
+    case PropData.JSONType of
+      jtObject:
+        begin
+          //todo
+        end;
+      jtArray:
+        begin
+          for i := 0 to ItemsData.Count -1 do
+          begin
+            ItemData := ItemsData.Items[i];
+            if ItemData.JSONType = jtObject then
+              ValueData := TJSONObject(ItemData).FindPath(ValuePath)
+            else
+              ValueData := ItemData;
+            if CheckGroup.Checked[i] and (ValueData.JSONType in [jtString, jtNull, jtNumber]) then
+              TJSONArray(PropData).Add(ValueData.Clone);
+          end;
+        end;
+    end;
+  end;
+end;
+
+class procedure TJSONCheckGroupMediator.Initialize(Element: TJSONFormElement);
+var
+  CheckGroup: TCheckGroup;
+begin
+  CheckGroup := Element.Control as TCheckGroup;
+  LoadItems(CheckGroup.Items, Element.OptionsData);
 end;
 
 { TJSONRadioButtonMediator }
@@ -1022,9 +1177,10 @@ initialization
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
   RegisterJSONMediator(TSpinEdit, TJSONSpinEditMediator);
   RegisterJSONMediator(TFloatSpinEdit, TJSONSpinEditMediator);
+  RegisterJSONMediator(TRadioButton, TJSONRadioButtonMediator);
   RegisterJSONMediator(TRadioGroup, TJSONRadioGroupMediator);
   RegisterJSONMediator(TCheckBox, TJSONCheckBoxMediator);
-  RegisterJSONMediator(TRadioButton, TJSONRadioButtonMediator);
+  RegisterJSONMediator(TCheckGroup, TJSONCheckGroupMediator);
 
 finalization
   MediatorStore.Destroy;
