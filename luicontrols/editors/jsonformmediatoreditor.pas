@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, ComponentEditors, LazarusPackageIntf, LazIdeIntf,
-  JSONFormMediator, PropEdits;
+  JSONFormMediator, PropEdits, LuiJSONUtils;
 
 type
 
@@ -24,12 +24,14 @@ procedure Register;
 implementation
 
 uses
-  typinfo, JSONFormMediatorEditorView, JSONStringPropertyEditor, fpjson;
+  typinfo, JSONFormMediatorEditorView, JSONStringPropertyEditor;
 
 procedure Register;
 begin
    RegisterComponentEditor(TJSONFormMediator, TJSONFormMediatorEditor);
-   RegisterPropertyEditor(TypeInfo(TJSONStringProperty), nil, '', TJSONStringPropertyEditor);
+   RegisterPropertyEditor(TypeInfo(TJSONDataString), nil, '', TJSONStringPropertyEditor);
+   RegisterPropertyEditor(TypeInfo(TJSONObjectString), nil, '', TJSONObjectStringPropertyEditor);
+   RegisterPropertyEditor(TypeInfo(TJSONArrayString), nil, '', TJSONArrayStringPropertyEditor);
 end;
 
 { TJSONFormMediatorEditor }

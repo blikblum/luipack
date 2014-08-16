@@ -5,7 +5,7 @@ unit JSONFormMediator;
 interface
 
 uses
-  Classes, SysUtils, FormMediator, Controls, fpjson;
+  Classes, SysUtils, FormMediator, Controls, fpjson, LuiJSONUtils;
 
 type
 
@@ -105,7 +105,7 @@ type
   TJSONFormElement = class(TFormElement)
   private
     FMediatorClass: TJSONGUIMediatorClass;
-    FOptions: TJSONStringProperty;
+    FOptions: TJSONObjectString;
     FOptionsData: TJSONObject;
     FInitialized: Boolean;
     function GetOptionsData: TJSONObject;
@@ -122,7 +122,7 @@ type
     procedure Reset(UpdateData: Boolean);
     property OptionsData: TJSONObject read GetOptionsData;
   published
-    property Options: TJSONStringProperty read FOptions write FOptions;
+    property Options: TJSONObjectString read FOptions write FOptions;
   end;
 
   { TJSONFormElements }
@@ -169,7 +169,7 @@ type
 implementation
 
 uses
-  contnrs, LuiJSONUtils, Spin, ExtCtrls, StdCtrls;
+  contnrs, Spin, ExtCtrls, StdCtrls;
 
 type
 
