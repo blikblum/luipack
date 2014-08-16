@@ -107,7 +107,7 @@ object EvaluationForm: TEvaluationForm
     Style = csDropDownList
     TabOrder = 4
   end
-  object CheckGroup1: TCheckGroup
+  object SedationCheckGroup: TCheckGroup
     Left = 8
     Height = 129
     Top = 120
@@ -140,5 +140,47 @@ object EvaluationForm: TEvaluationForm
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     TabOrder = 6
+  end
+  object EvaluationMediator: TJSONFormMediator
+    Elements = <    
+      item
+        Control = DatePicker
+        Name = 'date'
+        PropertyName = 'date'
+      end    
+      item
+        Control = ShiftComboBox
+        Name = 'shift'
+        PropertyName = 'shift'
+      end    
+      item
+        Control = RASSComboBox
+        Name = 'rass'
+        PropertyName = 'rass'
+      end    
+      item
+        Control = DeliriumComboBox
+        Name = 'delirium'
+        PropertyName = 'delirium'
+        Options = 'xxx'#13#10
+      end    
+      item
+        Control = VentilationComboBox
+        Name = 'ventilation'
+        PropertyName = 'ventilation'
+        Options = 'dddddddd'#13#10
+      end    
+      item
+        Control = SedationCheckGroup
+        Name = 'sedation'
+        PropertyName = 'sedation'
+      end    
+      item
+        Control = ICDSCCheckGroup
+        Name = 'icdsc'
+        PropertyName = 'icdsc'
+      end>
+    left = 152
+    top = 264
   end
 end

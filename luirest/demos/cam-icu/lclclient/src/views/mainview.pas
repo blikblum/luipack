@@ -13,6 +13,8 @@ type
   { TMainForm }
 
   TMainForm = class(TForm, IFPObserver)
+    Label1: TLabel;
+    PatientCountLabel: TLabel;
     PatientBar: TJvXPBar;
     PatientListView: TVirtualJSONListView;
     procedure PatientBarEvaluationsClick(Sender: TObject);
@@ -27,6 +29,7 @@ type
       Operation: TFPObservedOperation; Data: Pointer);
     procedure PatientSelectedChange(Sender: TObject);
     procedure SetPresenter(Value: TMainPresenter);
+    procedure UpdatePatientCount;
     procedure UpdatePatientSelection;
   public
   published
@@ -90,6 +93,7 @@ begin
             PatientListView.Data := FPresenter.Patients.Data;
             PatientListView.LoadData;
             UpdatePatientSelection;
+            UpdatePatientCount;
           end
           else
             PatientListView.Invalidate;
@@ -108,6 +112,11 @@ begin
   FPresenter := Value;
   FPresenter.Patients.FPOAttachObserver(Self);
   FPresenter.OnSelectedPatientChange := @PatientSelectedChange;
+end;
+
+procedure TMainForm.UpdatePatientCount;
+begin
+  PatientCountLabel.Caption := IntToStr(FPresenter.Patients.Count) + ' paciente(s)';
 end;
 
 procedure TMainForm.UpdatePatientSelection;

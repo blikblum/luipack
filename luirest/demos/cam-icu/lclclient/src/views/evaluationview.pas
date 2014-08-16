@@ -6,15 +6,16 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, ZVDateTimePicker;
+  ExtCtrls, JSONFormMediator, ZVDateTimePicker;
 
 type
 
   { TEvaluationForm }
 
   TEvaluationForm = class(TForm)
-    CheckGroup1: TCheckGroup;
+    SedationCheckGroup: TCheckGroup;
     ICDSCCheckGroup: TCheckGroup;
+    EvaluationMediator: TJSONFormMediator;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
