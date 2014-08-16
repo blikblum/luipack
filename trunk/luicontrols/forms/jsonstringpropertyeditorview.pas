@@ -5,7 +5,7 @@ unit JSONStringPropertyEditorView;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, SynEdit, SynHighlighterJScript, SynMemo, Forms,
+  Classes, SysUtils, FileUtil, SynEdit, SynHighlighterJScript, Forms,
   Controls, Graphics, Dialogs, ButtonPanel, StdCtrls, fpjson;
 
 type
@@ -24,16 +24,15 @@ type
   private
     { private declarations }
     FData: TJSONData;
+    FJSONType: TJSONtype;
     function GetJSONString: TJSONStringType;
     function LoadJSONString(const Value: TJSONStringType): Boolean;
     procedure SetJSONString(const Value: TJSONStringType);
   public
     { public declarations }
+    property JSONType: TJSONtype read FJSONType write FJSONType;
     property JSONString: TJSONStringType read GetJSONString write SetJSONString;
   end;
-
-var
-  JSONStringPropertyEditorForm: TJSONStringPropertyEditorForm;
 
 implementation
 
@@ -45,8 +44,11 @@ uses
 { TJSONStringPropertyEditorForm }
 
 procedure TJSONStringPropertyEditorForm.OKButtonClick(Sender: TObject);
+var
+  Str: String;
 begin
-  if LoadJSONString(JSONStringEdit.Lines.Text) then
+  Str := JSONStringEdit.Lines.Text;
+  if (Str = '') or LoadJSONString(Str) then
     ModalResult := mrOK;
 end;
 
@@ -55,35 +57,55 @@ begin
   if FData <> nil then
     Result := FData.AsJSON
   else
-    Result := JSONStringEdit.Lines.Text;
+    //todo: remove line endings
+    Result := Trim(JSONStringEdit.Lines.Text);
 end;
 
 function TJSONStringPropertyEditorForm.LoadJSONString(
   const Value: TJSONStringType): Boolean;
 var
   Parser: TJSONParser;
+  ErrorMessage: String;
 begin
-  Result := True;
+  Result := False;
+  ErrorMessage := '';
+  FreeAndNil(FData);
+  if Trim(Value) = '' then
+    Exit;
   //validate
   Parser := TJSONParser.Create(Value, True);
   try
-    FreeAndNil(FData);
-    //todo: see why parser does not raise an exception with Value = 'ddd'
+    //todo: see why parser does not raise an exception with Value = 'some string'
     FData := Parser.Parse;
   except
     on E: Exception do
     begin
-      Result := False;
-      MessageLabel.Visible := True;
-      MessageLabel.Caption := E.Message;
+      ErrorMessage := E.Message;
     end;
+  end;
+  if FData = nil then
+  begin
+    //sometimes FData = nil but exception is not raised
+    if ErrorMessage = '' then
+      ErrorMessage := 'Unable to convert property value to JSON';
+  end
+  else
+  begin
+    if (FJSONType <> jtUnknown) and (FData.JSONType <> FJSONType) then
+      ErrorMessage := Format('Invalid JSON format. Expected "%s" got "%s"', [JSONTypeName(FJSONType), JSONTypeName(FData.JSONType)]);
+  end;
+  Result := ErrorMessage = '';
+  if not Result then
+  begin
+    MessageLabel.Caption := ErrorMessage;
+    MessageLabel.Visible := True;
   end;
 end;
 
 procedure TJSONStringPropertyEditorForm.SetJSONString(
   const Value: TJSONStringType);
 begin
-  if LoadJSONString(Value) and (FData <> nil) then
+  if LoadJSONString(Value) then
     JSONStringEdit.Lines.Text := FData.FormatJSON
   else
     JSONStringEdit.Lines.Text := Value;
@@ -91,6 +113,7 @@ end;
 
 procedure TJSONStringPropertyEditorForm.FormCreate(Sender: TObject);
 begin
+  FJSONType := jtUnknown;
   BtnPanel.OKButton.ModalResult := mrNone;
 end;
 

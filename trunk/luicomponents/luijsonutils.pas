@@ -10,6 +10,10 @@ uses
   Classes, SysUtils, fpjson, db;
 
 type
+  //specialized json string types. Useful for e.g. property editors
+  TJSONDataString = type TJSONStringType;
+  TJSONObjectString = type TJSONStringType;
+  TJSONArrayString = type TJSONStringType;
 
   { TJSONFile }
 
