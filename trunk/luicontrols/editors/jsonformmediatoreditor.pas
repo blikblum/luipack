@@ -29,7 +29,7 @@ uses
 procedure Register;
 begin
    RegisterComponentEditor(TJSONFormMediator, TJSONFormMediatorEditor);
-   RegisterPropertyEditor(TypeInfo(TJSONDataString), nil, '', TJSONStringPropertyEditor);
+   RegisterPropertyEditor(TypeInfo(TJSONDataString), nil, '', TJSONDataStringPropertyEditor);
    RegisterPropertyEditor(TypeInfo(TJSONObjectString), nil, '', TJSONObjectStringPropertyEditor);
    RegisterPropertyEditor(TypeInfo(TJSONArrayString), nil, '', TJSONArrayStringPropertyEditor);
 end;
