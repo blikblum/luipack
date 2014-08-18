@@ -15,11 +15,11 @@ type
   private
     FBar: TLuiBar;
     FImages: TImageList;
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
-    procedure GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+    procedure GetImageInfo(Sender: TCustomLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure DrawBackground(Sender: TLuiBar);
+    procedure DrawBackground(Sender: TCustomLuiBar);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -34,7 +34,7 @@ const
 
 { TGnomeDoLuiBarSample }
 
-procedure TGnomeDoLuiBarSample.CreatePattern(Sender: TLuiBar;
+procedure TGnomeDoLuiBarSample.CreatePattern(Sender: TCustomLuiBar;
   PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
 begin
   case PatternType of
@@ -47,14 +47,14 @@ begin
   end;
 end;
 
-procedure TGnomeDoLuiBarSample.GetImageInfo(Sender: TLuiBar;
+procedure TGnomeDoLuiBarSample.GetImageInfo(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 begin
   ImageInfo.Index := Cell.Index;
   //ImageInfo.Effect := ;
 end;
 
-procedure TGnomeDoLuiBarSample.GetCellPattern(Sender: TLuiBar;
+procedure TGnomeDoLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
   );
 begin
@@ -63,7 +63,7 @@ begin
     Pattern := Sender.Patterns[SelectedOutlinePatternId];
 end;
 
-procedure TGnomeDoLuiBarSample.DrawBackground(Sender: TLuiBar);
+procedure TGnomeDoLuiBarSample.DrawBackground(Sender: TCustomLuiBar);
 var
   R: TDoubleRect;
   RoundInfo: TRoundedRectInfo;

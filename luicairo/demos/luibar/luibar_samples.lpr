@@ -10,6 +10,8 @@ uses
   Forms
   { you can add units after this }, fMain;
 
+{$R *.res}
+
 begin
   Application.Initialize;
   Application.CreateForm(TFormMain, FormMain);

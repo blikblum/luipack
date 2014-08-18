@@ -31,6 +31,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
   FolhaSample, YahooSample, UolSample, MSSDKSample, UbuntuSample,
   ConversaAfiadaSample, YouTubeSample, LgMobileLuiBarSample, xpStyleLuiBarSample,
@@ -43,7 +45,7 @@ procedure TFormMain.SamplesListSelectionChange(Sender: TObject; User: boolean);
 begin
   if SamplesList.ItemIndex = -1 then
     Exit;
-  SamplesNotebook.ActivePageComponent := TPage(SamplesList.Items.Objects[SamplesList.ItemIndex]);
+  SamplesNotebook.PageIndex := SamplesList.ItemIndex;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
@@ -64,19 +66,14 @@ begin
   RegisterSample('GnomeDo', TGnomeDoLuiBarSample.Create(Self));
   RegisterSample('Media Control (aTunes)', TMediaControlLuiBarSample.Create(Self));
   RegisterSample('Lui Widgets', TWidgetLuiBarSample.Create(Self));
+  SamplesList.ItemIndex := 0;
 end;
 
 procedure TFormMain.RegisterSample(const AName: String; APage: TPage);
 begin
   APage.Parent := SamplesNotebook;
-  {$if defined(LCLGtk) or defined(LCLWin32)}
-  APage.TabVisible := False;
-  {$endif}
   SamplesList.Items.AddObject(AName, APage);
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 

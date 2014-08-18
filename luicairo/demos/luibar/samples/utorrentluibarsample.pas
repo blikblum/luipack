@@ -14,10 +14,10 @@ type
   TUTorrentLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure AfterDraw(Sender: TLuiBar);
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure AfterDraw(Sender: TCustomLuiBar);
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -31,15 +31,16 @@ uses
 { TUTorrentLuiBarSample }
 
 
-procedure TUTorrentLuiBarSample.GetCellPattern(Sender: TLuiBar;
-  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+procedure TUTorrentLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
+  );
 begin
   Exit;
   if (PatternType = ptText) and (Sender.HoverIndex = Cell.Index) then
     Pattern := Sender.Patterns.BackGround;
 end;
 
-procedure TUTorrentLuiBarSample.AfterDraw(Sender: TLuiBar);
+procedure TUTorrentLuiBarSample.AfterDraw(Sender: TCustomLuiBar);
 var
   R: TDoubleRect;
 begin
@@ -52,8 +53,8 @@ begin
   end;
 end;
 
-procedure TUTorrentLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
-  DrawType: TLuiBarDrawType; var Allowed: Boolean);
+procedure TUTorrentLuiBarSample.Drawing(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   //draw only hover or selected cells
   Allowed := (DrawType <> dtCell) or

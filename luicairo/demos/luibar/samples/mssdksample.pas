@@ -14,9 +14,9 @@ type
   TMSSDKLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
-    procedure DrawCell(Sender: TLuiBar; Cell: TLuiBarCell);
+    procedure DrawCell(Sender: TCustomLuiBar; Cell: TLuiBarCell);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -25,7 +25,7 @@ implementation
 
 { TMSSDKLuiBarSample }
 
-procedure TMSSDKLuiBarSample.DrawCell(Sender: TLuiBar; Cell: TLuiBarCell);
+procedure TMSSDKLuiBarSample.DrawCell(Sender: TCustomLuiBar; Cell: TLuiBarCell);
 begin
   with Sender, Context do
   begin
@@ -49,7 +49,7 @@ begin
   end;
 end;
 
-procedure TMSSDKLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+procedure TMSSDKLuiBarSample.Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
   DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   //draw only selected cells

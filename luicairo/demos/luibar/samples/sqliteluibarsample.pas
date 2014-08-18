@@ -15,10 +15,10 @@ type
   TSqliteLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure DrawBackground(Sender: TLuiBar);
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure DrawBackground(Sender: TCustomLuiBar);
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -32,14 +32,15 @@ uses
 { TSqliteLuiBarSample }
 
 
-procedure TSqliteLuiBarSample.GetCellPattern(Sender: TLuiBar;
-  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+procedure TSqliteLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
+  );
 begin
   if (PatternType = ptText) and (Sender.HoverIndex = Cell.Index) then
     Pattern := Sender.Patterns.BackGround;
 end;
 
-procedure TSqliteLuiBarSample.DrawBackground(Sender: TLuiBar);
+procedure TSqliteLuiBarSample.DrawBackground(Sender: TCustomLuiBar);
 begin
   with Sender do
   begin
@@ -49,7 +50,7 @@ begin
   end;
 end;
 
-procedure TSqliteLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+procedure TSqliteLuiBarSample.Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
   DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   //don't draw background

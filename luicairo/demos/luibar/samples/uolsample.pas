@@ -20,7 +20,8 @@ type
     ImgList: TImageList;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
+    procedure GetImageInfo(Sender: TCustomLuiBar; Cell: TLuiBarCell;
+      var ImageInfo: TLuiBarImageInfo);
   end;
 
 implementation
@@ -171,8 +172,8 @@ begin
   end;
 end;
 
-procedure TUolLuiBarSample.GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell;
-  var ImageInfo: TLuiBarImageInfo);
+procedure TUolLuiBarSample.GetImageInfo(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 begin
   if Cell.Index <> 1 then
     ImageInfo.Index := Cell.Index + 1;

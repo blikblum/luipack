@@ -9,10 +9,12 @@ uses
 
 type
 
+  { TUbuntuLuiBarSample }
+
   TUbuntuLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -21,7 +23,7 @@ implementation
 
 { TUbuntuLuiBarSample }
 
-procedure TUbuntuLuiBarSample.CreatePattern(Sender: TLuiBar;
+procedure TUbuntuLuiBarSample.CreatePattern(Sender: TCustomLuiBar;
   PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
 begin
   case PatternType of

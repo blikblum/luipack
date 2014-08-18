@@ -14,8 +14,8 @@ type
   TGloboLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure DrawCell(Sender: TLuiBar; Cell: TLuiBarCell);
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure DrawCell(Sender: TCustomLuiBar; Cell: TLuiBarCell);
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -24,7 +24,7 @@ type
 implementation
 
 
-procedure TGloboLuiBarSample.DrawCell(Sender: TLuiBar; Cell: TLuiBarCell);
+procedure TGloboLuiBarSample.DrawCell(Sender: TCustomLuiBar; Cell: TLuiBarCell);
 var
   CellColor: TCairoColor;
 begin
@@ -42,7 +42,7 @@ begin
   Sender.Context.Fill;
 end;
 
-procedure TGloboLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+procedure TGloboLuiBarSample.Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
   DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   Allowed := DrawType <> dtCell;

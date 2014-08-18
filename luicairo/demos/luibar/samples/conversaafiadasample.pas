@@ -14,7 +14,7 @@ type
   TConversaAfiadaLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -23,7 +23,7 @@ implementation
 
 { TConversaAfiadaLuiBarSample }
 
-procedure TConversaAfiadaLuiBarSample.CreatePattern(Sender: TLuiBar;
+procedure TConversaAfiadaLuiBarSample.CreatePattern(Sender: TCustomLuiBar;
   PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
 begin
   case PatternType of

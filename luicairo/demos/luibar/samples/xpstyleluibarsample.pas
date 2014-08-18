@@ -15,8 +15,8 @@ type
   private
     FBar: TLuiBar;
     FImages: TImageList;
-    procedure GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure GetImageInfo(Sender: TCustomLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -26,15 +26,15 @@ implementation
 
 { TxpStyleLuiBarSample }
 
-procedure TxpStyleLuiBarSample.GetImageInfo(Sender: TLuiBar;
+procedure TxpStyleLuiBarSample.GetImageInfo(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 begin
   ImageInfo.Index := Cell.Index;
   //ImageInfo.Effect := ;
 end;
 
-procedure TxpStyleLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
-  DrawType: TLuiBarDrawType; var Allowed: Boolean);
+procedure TxpStyleLuiBarSample.Drawing(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   Allowed := (DrawType <> dtCell) or (Cell.Index = Sender.SelectedIndex);
 end;

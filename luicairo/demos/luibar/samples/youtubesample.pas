@@ -13,8 +13,8 @@ type
 
   TYouTubeLuiBarSample = class(TPage)
   private
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
   public
     constructor Create(AOwner: TComponent); override;
@@ -24,7 +24,7 @@ implementation
 
 { TYouTubeLuiBarSample }
 
-procedure TYouTubeLuiBarSample.CreatePattern(Sender: TLuiBar;
+procedure TYouTubeLuiBarSample.CreatePattern(Sender: TCustomLuiBar;
   PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
 begin
   case PatternType of
@@ -72,7 +72,7 @@ begin
   end;
 end;
 
-procedure TYouTubeLuiBarSample.GetCellPattern(Sender: TLuiBar;
+procedure TYouTubeLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
   );
 begin
