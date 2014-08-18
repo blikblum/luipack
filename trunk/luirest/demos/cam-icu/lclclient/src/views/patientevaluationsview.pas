@@ -49,13 +49,19 @@ implementation
 { TPatientEvaluationsForm }
 
 procedure TPatientEvaluationsForm.DeleteEvaluationLabelClick(Sender: TObject);
+var
+  EvaluationData: TJSONObject;
 begin
-
+  if EvaluationListView.GetData(EvaluationListView.HotNode, EvaluationData) then
+    FPresenter.DeleteEvaluation(EvaluationData);
 end;
 
 procedure TPatientEvaluationsForm.EditEvaluationLabelClick(Sender: TObject);
+var
+  EvaluationData: TJSONObject;
 begin
-
+  if EvaluationListView.GetData(EvaluationListView.HotNode, EvaluationData) then
+    FPresenter.EditEvaluation(EvaluationData);
 end;
 
 procedure TPatientEvaluationsForm.EvaluationListViewBeforeItemErase(

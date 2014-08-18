@@ -6,6 +6,7 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <AutoCreateForms Value="False"/>
       <Title Value="CAMICUAdmin"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -28,30 +29,33 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="7">
+    <RequiredPackages Count="8">
       <Item1>
-        <PackageName Value="ZVDateTimeCtrls"/>
+        <PackageName Value="JSONZVDateTimeMediator_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="JvXPBarLaz"/>
+        <PackageName Value="ZVDateTimeCtrls"/>
       </Item2>
       <Item3>
-        <PackageName Value="vtvutils_package"/>
+        <PackageName Value="JvXPBarLaz"/>
       </Item3>
       <Item4>
-        <PackageName Value="luirest_package"/>
+        <PackageName Value="vtvutils_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="luirest_package"/>
       </Item5>
       <Item6>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luicontrols"/>
       </Item6>
       <Item7>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item7>
+      <Item8>
+        <PackageName Value="LCL"/>
+      </Item8>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="16">
       <Unit0>
         <Filename Value="CAMICUAdmin.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -79,6 +83,7 @@
         <ComponentName Value="AppConfigViewForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AppConfigView"/>
       </Unit4>
       <Unit5>
         <Filename Value="src\app\camicuappsetup.pas"/>
@@ -132,6 +137,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="EvaluationView"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="src\presenters\evaluationpresenter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EvaluationPresenter"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -152,9 +162,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

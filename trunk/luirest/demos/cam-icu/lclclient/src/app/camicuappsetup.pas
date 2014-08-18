@@ -14,7 +14,8 @@ implementation
 uses
   PresentationManager,
   AppConfigView,
-  PatientEvaluationsView, PatientEvaluationsPresenter
+  PatientEvaluationsView, PatientEvaluationsPresenter,
+  EvaluationView, EvaluationPresenter
   ;
 
 procedure ConfigureApp(App: TCAMICUApp);
@@ -24,6 +25,7 @@ begin
   Presentations := App.Presentations;
   Presentations.Register('appconfig', TAppConfigViewForm);
   Presentations.Register('patientevaluations', TPatientEvaluationsForm, TPatientEvaluationsPresenter);
+  Presentations.Register('evaluation', TEvaluationForm, TEvaluationPresenter);
 end;
 
 end.

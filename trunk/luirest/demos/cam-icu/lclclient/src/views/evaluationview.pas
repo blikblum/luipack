@@ -6,13 +6,15 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, JSONFormMediator, ZVDateTimePicker;
+  ExtCtrls, Buttons, JSONFormMediator, ZVDateTimePicker, EvaluationPresenter;
 
 type
 
   { TEvaluationForm }
 
   TEvaluationForm = class(TForm)
+    CancelButton: TBitBtn;
+    SaveButton: TBitBtn;
     SedationCheckGroup: TCheckGroup;
     ICDSCCheckGroup: TCheckGroup;
     EvaluationMediator: TJSONFormMediator;
@@ -26,10 +28,13 @@ type
     RASSComboBox: TComboBox;
     DeliriumComboBox: TComboBox;
     VentilationComboBox: TComboBox;
+    procedure FormShow(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
   private
-    { private declarations }
+    FPresenter: TEvaluationPresenter;
   public
-    { public declarations }
+  published
+    property Presenter: TEvaluationPresenter read FPresenter write FPresenter;
   end;
 
 var
@@ -38,6 +43,20 @@ var
 implementation
 
 {$R *.lfm}
+
+{ TEvaluationForm }
+
+procedure TEvaluationForm.FormShow(Sender: TObject);
+begin
+  EvaluationMediator.Data := FPresenter.Evaluation.Data;
+  EvaluationMediator.LoadData;
+end;
+
+procedure TEvaluationForm.SaveButtonClick(Sender: TObject);
+begin
+  EvaluationMediator.SaveData;
+  FPresenter.SaveEvaluation;
+end;
 
 end.
 

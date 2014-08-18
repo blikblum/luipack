@@ -1,18 +1,19 @@
 object EvaluationForm: TEvaluationForm
   Left = 421
-  Height = 345
+  Height = 330
   Top = 255
-  Width = 424
+  Width = 411
   Caption = 'Avaliação'
-  ClientHeight = 345
-  ClientWidth = 424
+  ClientHeight = 330
+  ClientWidth = 411
+  OnShow = FormShow
   Position = poOwnerFormCenter
   LCLVersion = '1.3'
   object DatePicker: TZVDateTimePicker
     Left = 8
     Height = 23
     Top = 26
-    Width = 83
+    Width = 124
     CenturyFrom = 1941
     MaxDate = 2958465
     MinDate = -53780
@@ -21,22 +22,22 @@ object EvaluationForm: TEvaluationForm
     TrailingSeparator = False
     TextForNullDate = 'NULL'
     LeadingZeros = True
-    Kind = dtkDate
+    Kind = dtkDateTime
     TimeFormat = tf24
     TimeDisplay = tdHMS
     DateMode = dmComboBox
     Date = 41864
     Time = 0.011744745366741
     UseDefaultSeparators = True
-    HideDateTimeParts = []
+    HideDateTimeParts = [dtpSecond]
     MonthNames = 'Long'
   end
   object Label1: TLabel
     Left = 8
     Height = 15
     Top = 8
-    Width = 24
-    Caption = 'Data'
+    Width = 75
+    Caption = 'Data / Horário'
     ParentColor = False
   end
   object Label2: TLabel
@@ -51,7 +52,7 @@ object EvaluationForm: TEvaluationForm
     Left = 144
     Height = 23
     Top = 26
-    Width = 120
+    Width = 124
     ItemHeight = 15
     Style = csDropDownList
     TabOrder = 1
@@ -68,7 +69,8 @@ object EvaluationForm: TEvaluationForm
     Left = 8
     Height = 23
     Top = 79
-    Width = 120
+    Width = 124
+    DropDownCount = 10
     ItemHeight = 15
     Style = csDropDownList
     TabOrder = 2
@@ -85,13 +87,13 @@ object EvaluationForm: TEvaluationForm
     Left = 144
     Height = 23
     Top = 79
-    Width = 120
+    Width = 124
     ItemHeight = 15
     Style = csDropDownList
     TabOrder = 3
   end
   object Label5: TLabel
-    Left = 288
+    Left = 279
     Height = 15
     Top = 61
     Width = 55
@@ -99,10 +101,10 @@ object EvaluationForm: TEvaluationForm
     ParentColor = False
   end
   object VentilationComboBox: TComboBox
-    Left = 288
+    Left = 279
     Height = 23
     Top = 79
-    Width = 129
+    Width = 124
     ItemHeight = 15
     Style = csDropDownList
     TabOrder = 4
@@ -125,10 +127,10 @@ object EvaluationForm: TEvaluationForm
     TabOrder = 5
   end
   object ICDSCCheckGroup: TCheckGroup
-    Left = 216
-    Height = 129
+    Left = 210
+    Height = 168
     Top = 120
-    Width = 201
+    Width = 193
     AutoFill = True
     Caption = 'ICDSC'
     ChildSizing.LeftRightSpacing = 6
@@ -141,6 +143,28 @@ object EvaluationForm: TEvaluationForm
     ChildSizing.ControlsPerLine = 1
     TabOrder = 6
   end
+  object SaveButton: TBitBtn
+    Left = 95
+    Height = 30
+    Top = 294
+    Width = 150
+    Caption = 'Salvar'
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = SaveButtonClick
+    TabOrder = 7
+  end
+  object CancelButton: TBitBtn
+    Left = 253
+    Height = 30
+    Top = 294
+    Width = 150
+    Cancel = True
+    Caption = 'Cancelar'
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 8
+  end
   object EvaluationMediator: TJSONFormMediator
     Elements = <    
       item
@@ -151,36 +175,40 @@ object EvaluationForm: TEvaluationForm
       item
         Control = ShiftComboBox
         Name = 'shift'
-        PropertyName = 'shift'
+        PropertyName = 'shiftid'
+        Options = '{ "items" : [{ "text" : "Manhã", "value" : 1 }, { "text" : "Tarde", "value" : 2 }, { "text" : "Noite", "value" : 3 }] }'
       end    
       item
         Control = RASSComboBox
         Name = 'rass'
         PropertyName = 'rass'
+        Options = '{ "textpath" : "name", "items" : [{ "name" : "+4 Combativo", "value" : 4 }, { "name" : "+3 Muito agitado", "value" : 3 }, { "name" : "+2 Agitado", "value" : 2 }, { "name" : "+1 Inquieto", "value" : 1 }, { "name" : " 0 Alerta e calmo", "value" : 0 }, { "name" : "-1 Sonolento", "value" : -1 }, { "name" : "-2 Sedação leve", "value" : -2 }, { "name" : "-3 Sedação moderada", "value" : -3 }, { "name" : "-4 Sedação profunda", "value" : -4 }, { "name" : "-5 Não desperta", "value" : -5 }] }'
       end    
       item
         Control = DeliriumComboBox
         Name = 'delirium'
-        PropertyName = 'delirium'
-        Options = 'xxx'#13#10
+        PropertyName = 'deliriumid'
+        Options = '{ "textpath" : "name", "items" : [{ "name" : "Hipoativo", "value" : 1 }, { "name" : "Misto", "value" : 2 }, { "name" : "Hiperativo", "value" : 3 }, { "name" : "Não", "value" : 4 }, { "name" : "Não Avaliado", "value" : 5 }, { "name" : "NC", "value" : 9 }] }'
       end    
       item
         Control = VentilationComboBox
         Name = 'ventilation'
-        PropertyName = 'ventilation'
-        Options = 'dddddddd'#13#10
+        PropertyName = 'ventilationid'
+        Options = '{ "textpath" : "name", "items" : [{ "name" : "Mecânica", "value" : 1 }, { "name" : "Espontânea", "value" : 2 }, { "name" : "VNI", "value" : 3 }, { "name" : "NC", "value" : 9 }] }'
       end    
       item
         Control = SedationCheckGroup
         Name = 'sedation'
         PropertyName = 'sedation'
+        Options = '{ "items" : [{ "text" : "Sem sedação", "value" : 7 }, { "text" : "Propofol", "value" : 1 }, { "text" : "Midazolam", "value" : 2 }, { "text" : "Fentanil", "value" : 3 }, { "text" : "Cetamina", "value" : 4 }, { "text" : "Dexmetomedina", "value" : 6 }] }'
       end    
       item
         Control = ICDSCCheckGroup
         Name = 'icdsc'
         PropertyName = 'icdsc'
+        Options = '{ "items" : [{ "text" : "Nível de consciência alterado", "value" : 1 }, { "text" : "Inatenção", "value" : 2 }, { "text" : "Desorientação", "value" : 3 }, { "text" : "Alucinação\/Delírio\/Psicose", "value" : 4 }, { "text" : "Retardo ou agitação motora", "value" : 5 }, { "text" : "Fala ou humor inapropriado", "value" : 6 }, { "text" : "Ciclo de sono e vigília alterado", "value" : 7 }, { "text" : "Flutuação de sintoma", "value" : 8 }] }'
       end>
-    left = 152
-    top = 264
+    left = 160
+    top = 152
   end
 end
