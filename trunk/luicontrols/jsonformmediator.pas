@@ -202,27 +202,6 @@ begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
 end;
 
-function GetSchemaInfo(OptionsData: TJSONObject; out ItemsData: TJSONArray; out TextPath, ValuePath: String): Boolean;
-var
-  SchemaData: TJSONData;
-begin
-  Result := FindJSONProp(OptionsData, 'items', ItemsData);
-  if Result then
-  begin
-    SchemaData := OptionsData.Find('schema');
-    if (SchemaData <> nil) and (SchemaData.JSONType = jtObject) then
-    begin
-      TextPath := TJSONObject(SchemaData).Get('textpath', 'text');
-      ValuePath := TJSONObject(SchemaData).Get('valuepath', 'text');
-    end
-    else
-    begin
-      TextPath := 'text';
-      ValuePath := 'value';
-    end;
-  end;
-end;
-
 { TJSONCheckGroupMediator }
 
 class procedure TJSONCheckGroupMediator.DoJSONToGUI(Data: TJSONObject;
@@ -230,7 +209,7 @@ class procedure TJSONCheckGroupMediator.DoJSONToGUI(Data: TJSONObject;
 var
   CheckGroup: TCheckGroup;
   ValuePath: String;
-  OptionsData, SchemaData: TJSONObject;
+  OptionsData: TJSONObject;
   ItemsData: TJSONArray;
   PropData, ItemData, ValueData: TJSONData;
   i: Integer;
@@ -243,15 +222,7 @@ begin
   begin
     if ItemsData.Count <> CheckGroup.Items.Count then
       raise Exception.Create('Mismatch item count between TCheckGroup and mediator configuration');
-    if FindJSONProp(OptionsData, 'schema', SchemaData) then
-    begin
-      ValuePath := SchemaData.Get('valuepath', 'value');
-    end
-    else
-    begin
-      ValuePath := 'value';
-    end;
-
+    ValuePath := OptionsData.Get('valuepath', 'value');
     case PropData.JSONType of
       jtObject:
         begin
@@ -277,9 +248,7 @@ begin
   else
   begin
     for i := 0 to CheckGroup.Items.Count - 1 do
-    begin
       CheckGroup.Checked[i] := False;
-    end;
   end;
 end;
 
@@ -288,7 +257,7 @@ class procedure TJSONCheckGroupMediator.DoGUIToJSON(Element: TJSONFormElement;
 var
   CheckGroup: TCheckGroup;
   ValuePath: String;
-  OptionsData, SchemaData: TJSONObject;
+  OptionsData: TJSONObject;
   ItemsData: TJSONArray;
   PropData, ItemData, ValueData: TJSONData;
   i: Integer;
@@ -300,14 +269,7 @@ begin
   begin
     if ItemsData.Count <> CheckGroup.Items.Count then
       raise Exception.Create('Mismatch item count between TCheckGroup and mediator configuration');
-    if FindJSONProp(OptionsData, 'schema', SchemaData) then
-    begin
-      ValuePath := SchemaData.Get('valuepath', 'value');
-    end
-    else
-    begin
-      ValuePath := 'value';
-    end;
+    ValuePath := OptionsData.Get('valuepath', 'value');
 
     if (PropData = nil) or (PropData.JSONType in [jtString, jtNumber, jtNull]) then
     begin
@@ -653,8 +615,12 @@ begin
   PropData := Data.Find(PropName);
   if (PropData <> nil) and not (PropData.JSONType in [jtNull, jtArray, jtObject]) then
   begin
-    IndexType := jliText;
-    ValuePath := 'value';
+    //defaults to value if there's an items
+    if FindJSONProp(OptionsData, 'items', ItemsData) then
+      IndexType := jliValue
+    else
+      IndexType := jliText;
+    ValuePath := OptionsData.Get('valuepath', 'value');
     SchemaData := OptionsData.Find('schema');
     if SchemaData <> nil then
     begin
@@ -663,11 +629,14 @@ begin
           if SchemaData.AsString = 'index' then
             IndexType := jliIndex
           else if SchemaData.AsString = 'value' then
-            IndexType := jliValue;
+            IndexType := jliValue
+          else if SchemaData.AsString = 'text' then
+            IndexType := jliText;
         jtObject:
           begin
             IndexType := jliValue;
-            ValuePath := TJSONObject(SchemaData).Get('valuepath', 'value');
+            //todo: remove schema.valuepath
+            ValuePath := TJSONObject(SchemaData).Get('valuepath', ValuePath);
           end;
       end;
     end;
@@ -681,7 +650,7 @@ begin
         end;
       jliValue:
         begin
-          if FindJSONProp(OptionsData, 'items', ItemsData) then
+          if ItemsData <> nil then
             Result := GetJSONIndexOf(ItemsData, [ValuePath, PropData.Value]);
         end;
     end;
@@ -704,8 +673,12 @@ var
 begin
   if ItemIndex > -1 then
   begin
-    IndexType := jliText;
-    ValuePath := 'value';
+    //defaults to value if there's an items
+    if FindJSONProp(OptionsData, 'items', ItemsData) then
+      IndexType := jliValue
+    else
+      IndexType := jliText;
+    ValuePath := OptionsData.Get('valuepath', 'value');
     SchemaData := OptionsData.Find('schema');
     if SchemaData <> nil then
     begin
@@ -714,11 +687,14 @@ begin
           if SchemaData.AsString = 'index' then
             IndexType := jliIndex
           else if SchemaData.AsString = 'value' then
-            IndexType := jliValue;
+            IndexType := jliValue
+          else if SchemaData.AsString = 'text' then
+            IndexType := jliText;
         jtObject:
           begin
-            ValuePath := TJSONObject(SchemaData).Get('valuepath', 'value');
             IndexType := jliValue;
+            //todo: remove schema.valuepath
+            ValuePath := TJSONObject(SchemaData).Get('valuepath', ValuePath);
           end;
       end;
     end;
@@ -729,7 +705,7 @@ begin
         Data.Integers[PropName] := ItemIndex;
       jliValue:
         begin
-          if FindJSONProp(OptionsData, 'items', ItemsData) then
+          if ItemsData <> nil then
           begin
             if ItemIndex < ItemsData.Count then
             begin
@@ -751,17 +727,18 @@ class procedure TJSONListMediator.LoadItems(Items: TStrings;
   OptionsData: TJSONObject);
 var
   ItemsData: TJSONArray;
-  SchemaData, ItemData, ValueData: TJSONData;
+  SchemaData: TJSONObject;
+  ItemData, ValueData: TJSONData;
   TextPath: String;
   i: Integer;
 begin
   if FindJSONProp(OptionsData, 'items', ItemsData) then
   begin
-    SchemaData := OptionsData.Find('schema');
-    if (SchemaData <> nil) and (SchemaData.JSONType = jtObject) then
-      TextPath := TJSONObject(SchemaData).Get('textpath', 'text')
-    else
-      TextPath := 'text';
+    TextPath := OptionsData.Get('textpath', 'text');
+    //todo: remove schema.textpath
+    if FindJSONProp(OptionsData, 'schema', SchemaData) then
+      TextPath := SchemaData.Get('textpath', TextPath);
+
     Items.Clear;
     for i := 0 to ItemsData.Count - 1 do
     begin
