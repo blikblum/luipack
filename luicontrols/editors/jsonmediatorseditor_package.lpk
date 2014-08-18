@@ -10,11 +10,8 @@
         <OtherUnitFiles Value="..\forms"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
-    <Files Count="7">
+    <Files Count="8">
       <Item1>
         <Filename Value="jsonformmediatoreditor.pas"/>
         <HasRegisterProc Value="True"/>
@@ -30,20 +27,24 @@
       </Item3>
       <Item4>
         <Filename Value="..\forms\jsonformmediatorimportmodelsview.pas"/>
-        <UnitName Value="jsonformmediatorimportmodelsview"/>
+        <UnitName Value="JSONFormMediatorImportModelsView"/>
       </Item4>
       <Item5>
         <Filename Value="..\forms\jsonelementupdatemethodview.pas"/>
-        <UnitName Value="jsonelementupdatemethodview"/>
+        <UnitName Value="JSONElementUpdateMethodView"/>
       </Item5>
       <Item6>
         <Filename Value="..\forms\jsonstringpropertyeditorview.pas"/>
-        <UnitName Value="jsonstringpropertyeditorview"/>
+        <UnitName Value="JSONStringPropertyEditorView"/>
       </Item6>
       <Item7>
         <Filename Value="jsonstringpropertyeditor.pas"/>
         <UnitName Value="jsonstringpropertyeditor"/>
       </Item7>
+      <Item8>
+        <Filename Value="jsonstringpropertyeditor.pas"/>
+        <UnitName Value="jsonstringpropertyeditor"/>
+      </Item8>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="7">

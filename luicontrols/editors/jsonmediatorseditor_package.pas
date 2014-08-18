@@ -10,7 +10,7 @@ uses
   JSONFormMediatorEditor, JSONFormMediatorEditorView, 
   JSONFormMediatorImportControlsView, JSONFormMediatorImportModelsView, 
   JSONElementUpdateMethodView, JSONStringPropertyEditorView, 
-  JSONStringPropertyEditor, LazarusPackageIntf;
+  jsonstringpropertyeditor, LazarusPackageIntf;
 
 implementation
 
