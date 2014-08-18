@@ -53,6 +53,8 @@ var
 
 implementation
 
+{$R *.lfm}
+
 uses
   strutils;
 
@@ -175,9 +177,6 @@ procedure TMainForm.TimerCallbackOther(AId: PtrUInt);
 begin
   ListBox1.Items.Add('TimerCallbackOther called');
 end;
-
-initialization
-  {$I Unit1.lrs}
 
 end.
 
