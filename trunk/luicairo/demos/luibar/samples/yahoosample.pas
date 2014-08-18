@@ -13,9 +13,10 @@ type
 
   TYahooLuiBarSample = class(TPage)
   private
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
-      var Pattern: TCairoPattern);
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType;
+    var Pattern: TCairoPattern);
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    var Pattern: TCairoPattern);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -27,8 +28,8 @@ const
 
 { TYahooLuiBarSample }
 
-procedure TYahooLuiBarSample.CreatePattern(Sender: TLuiBar;
-  PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+procedure TYahooLuiBarSample.CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType;
+    var Pattern: TCairoPattern);
 begin
   case PatternType of
     ptNormal, ptHover:
@@ -52,8 +53,9 @@ begin
   end;
 end;
 
-procedure TYahooLuiBarSample.GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell;
-  PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+procedure TYahooLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
+  );
 begin
   if (Sender.HoverIndex = Cell.Index) and (PatternType = ptText) then
     Pattern := Sender.Patterns.Indexed[HoverTextPatternId];

@@ -14,7 +14,7 @@ type
   TTerraEsportesLuiBarSample = class(TPage)
   private
     FBar: TLuiBar;
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
   public
     constructor Create(AOwner: TComponent); override;
@@ -24,8 +24,9 @@ implementation
 
 { TTerraEsportesLuiBarSample }
 
-procedure TTerraEsportesLuiBarSample.GetCellPattern(Sender: TLuiBar;
-  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
+procedure TTerraEsportesLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
+  );
 begin
   if (PatternType = ptOutLine) and (Sender.SelectedIndex <> Cell.Index) and
     (Sender.HoverIndex <> Cell.Index) then

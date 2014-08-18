@@ -8,9 +8,11 @@ object FormMain: TFormMain
   ClientWidth = 755
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '0.9.25'
+  LCLVersion = '1.3'
   object LeftPanel: TPanel
+    Left = 0
     Height = 543
+    Top = 0
     Width = 224
     Align = alLeft
     ClientHeight = 543
@@ -22,6 +24,7 @@ object FormMain: TFormMain
       Top = 1
       Width = 222
       Align = alClient
+      ItemHeight = 0
       OnSelectionChange = SamplesListSelectionChange
       TabOrder = 0
     end
@@ -29,13 +32,16 @@ object FormMain: TFormMain
   object SamplesNotebook: TNotebook
     Left = 229
     Height = 543
+    Top = 0
     Width = 526
     Align = alClient
     TabOrder = 1
+    TabStop = True
   end
   object SplitterVertical: TSplitter
     Left = 224
     Height = 543
+    Top = 0
     Width = 5
   end
 end

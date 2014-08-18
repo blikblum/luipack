@@ -15,11 +15,11 @@ type
   private
     FBar: TLuiBar;
     FImages: TImageList;
-    procedure GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure GetImageInfo(Sender: TCustomLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure DrawCellPath(Sender: TLuiBar; Cell: TLuiBarCell);
-    procedure Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
+    procedure DrawCellPath(Sender: TCustomLuiBar; Cell: TLuiBarCell);
+    procedure Drawing(Sender: TCustomLuiBar; Cell: TLuiBarCell;
       DrawType: TLuiBarDrawType; var Allowed: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
@@ -34,14 +34,14 @@ const
 
 { TLgMobileLuiBarSample }
 
-procedure TLgMobileLuiBarSample.GetImageInfo(Sender: TLuiBar;
+procedure TLgMobileLuiBarSample.GetImageInfo(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 begin
   ImageInfo.Index := Cell.Index;
   //ImageInfo.Effect := ;
 end;
 
-procedure TLgMobileLuiBarSample.GetCellPattern(Sender: TLuiBar;
+procedure TLgMobileLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
   );
 begin
@@ -54,7 +54,8 @@ begin
       Pattern := Sender.Patterns[HoverOutlinePattern]
 end;
 
-procedure TLgMobileLuiBarSample.DrawCellPath(Sender: TLuiBar; Cell: TLuiBarCell);
+procedure TLgMobileLuiBarSample.DrawCellPath(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell);
 begin
   with Sender.Context do
   begin
@@ -63,8 +64,8 @@ begin
   end;
 end;
 
-procedure TLgMobileLuiBarSample.Drawing(Sender: TLuiBar; Cell: TLuiBarCell;
-  DrawType: TLuiBarDrawType; var Allowed: Boolean);
+procedure TLgMobileLuiBarSample.Drawing(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell; DrawType: TLuiBarDrawType; var Allowed: Boolean);
 begin
   Allowed := DrawType <> dtCellPath;
 end;

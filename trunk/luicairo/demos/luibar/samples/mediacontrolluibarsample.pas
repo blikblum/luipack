@@ -18,13 +18,13 @@ type
     FPlaying: Boolean;
     FAudioOn: Boolean;
     FButtonPressed: Boolean;
-    procedure GetCellPattern(Sender: TLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
+    procedure GetCellPattern(Sender: TCustomLuiBar; Cell: TLuiBarCell; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure GetImageInfo(Sender: TLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
-    procedure CreatePattern(Sender: TLuiBar; PatternType: TLuiBarPatternType;
+    procedure GetImageInfo(Sender: TCustomLuiBar; Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
+    procedure CreatePattern(Sender: TCustomLuiBar; PatternType: TLuiBarPatternType;
       var Pattern: TCairoPattern);
-    procedure DrawCellPath(Sender: TLuiBar; Cell: TLuiBarCell);
-    procedure CellSelect(Sender: TLuiBar);
+    procedure DrawCellPath(Sender: TCustomLuiBar; Cell: TLuiBarCell);
+    procedure CellSelect(Sender: TCustomLuiBar);
     procedure MouseDownHandle(Sender: TObject; Button: TMouseButton;
                           Shift: TShiftState; X, Y: Integer);
     procedure MouseUpHandle(Sender: TObject; Button: TMouseButton;
@@ -44,7 +44,7 @@ const
 
 { MediaControlLuiBarSample }
 
-procedure TMediaControlLuiBarSample.GetCellPattern(Sender: TLuiBar;
+procedure TMediaControlLuiBarSample.GetCellPattern(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; PatternType: TLuiBarPatternType; var Pattern: TCairoPattern
   );
 begin
@@ -56,7 +56,7 @@ begin
     Pattern := Sender.Patterns[ButtonPressedPatternId];
 end;
 
-procedure TMediaControlLuiBarSample.GetImageInfo(Sender: TLuiBar;
+procedure TMediaControlLuiBarSample.GetImageInfo(Sender: TCustomLuiBar;
   Cell: TLuiBarCell; var ImageInfo: TLuiBarImageInfo);
 begin
   case Cell.Index of
@@ -89,7 +89,7 @@ begin
   end;
 end;
 
-procedure TMediaControlLuiBarSample.CreatePattern(Sender: TLuiBar;
+procedure TMediaControlLuiBarSample.CreatePattern(Sender: TCustomLuiBar;
   PatternType: TLuiBarPatternType; var Pattern: TCairoPattern);
 begin
   case PatternType of
@@ -116,7 +116,8 @@ begin
   end;
 end;
 
-procedure TMediaControlLuiBarSample.DrawCellPath(Sender: TLuiBar; Cell: TLuiBarCell);
+procedure TMediaControlLuiBarSample.DrawCellPath(Sender: TCustomLuiBar;
+  Cell: TLuiBarCell);
 var
   R: TDoubleRect;
   RoundInfo: TRoundedRectInfo;
@@ -157,7 +158,7 @@ begin
   end;
 end;
 
-procedure TMediaControlLuiBarSample.CellSelect(Sender: TLuiBar);
+procedure TMediaControlLuiBarSample.CellSelect(Sender: TCustomLuiBar);
 begin
   case Sender.SelectedIndex of
     2: FPlaying := not FPlaying;
