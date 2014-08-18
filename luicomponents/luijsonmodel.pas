@@ -31,7 +31,6 @@ type
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
-    property Collection: TJSONCollection read FCollection;
     property ResourceClient: IResourceClient read GetResourceClient;
     property ResourceName: String read GetResourceName;
   public
@@ -44,6 +43,7 @@ type
     function ParamByName(const ParamName: String): TParam;
     procedure Save;
     procedure Save(const IdValue: Variant);
+    property Collection: TJSONCollection read FCollection;
     property Data: TJSONObject read FData;
     class property DefaultResourceClient: IResourceClient write SetDefaultResourceClient;
     property Index: Integer read GetIndex;
