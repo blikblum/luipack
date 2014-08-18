@@ -7,9 +7,11 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Controls, zvdatetimectrls, MainView, CAMICUApp,
-  CAMICUAppSetup, MainPresenter, PatientModel, PatientEvaluationModel,
-PatientEvaluationsView, PatientEvaluationsPresenter, EvaluationView;
+  sysutils, Forms, Controls, MainView, CAMICUApp,
+  CAMICUAppSetup, MainPresenter, PatientModel,
+  //needed to register
+  JSONZVDateTimeMediator
+  ;
 
 {$R *.res}
 
@@ -35,12 +37,11 @@ begin
   if not Application.Terminated then
   begin
     Application.CreateForm(TMainForm, MainForm);
+    MainForm.Caption := Format('%s (%s)', [MainForm.Caption, App.Config.BaseURL]);
     //setup MainView manually
     MainForm.Presenter := TMainPresenter.Create(Application);
     MainForm.Presenter.Initialize;
   end;
-  Application.CreateForm(TPatientEvaluationsForm, PatientEvaluationsForm);
-  Application.CreateForm(TEvaluationForm, EvaluationForm);
   Application.Run;
 end.
 

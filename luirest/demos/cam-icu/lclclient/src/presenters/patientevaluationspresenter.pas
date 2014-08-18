@@ -20,6 +20,8 @@ type
     procedure Initialize; override;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure DeleteEvaluation(EvaluationData: TJSONObject);
+    procedure EditEvaluation(EvaluationData: TJSONObject);
     property Evaluations: TPatientEvaluations read FEvaluations;
   published
     property PatientData: TJSONObject read FPatientData write FPatientData;
@@ -46,6 +48,24 @@ constructor TPatientEvaluationsPresenter.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FEvaluations := TPatientEvaluations.Create;
+end;
+
+procedure TPatientEvaluationsPresenter.DeleteEvaluation(
+  EvaluationData: TJSONObject);
+var
+  Evaluation: TPatientEvaluation;
+begin
+  Evaluation := FEvaluations.Get(EvaluationData);
+  Evaluation.Delete;
+end;
+
+procedure TPatientEvaluationsPresenter.EditEvaluation(
+  EvaluationData: TJSONObject);
+var
+  Evaluation: TPatientEvaluation;
+begin
+  Evaluation := FEvaluations.Get(EvaluationData);
+  Presentations['evaluation'].ShowModal(['Evaluation', Evaluation]);
 end;
 
 end.

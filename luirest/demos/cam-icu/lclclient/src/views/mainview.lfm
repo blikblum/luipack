@@ -20,7 +20,6 @@ object MainForm: TMainForm
     BorderSpacing.Right = 200
     BorderSpacing.Bottom = 20
     BorderSpacing.Around = 2
-    Font.Name = 'Cambria'
     Header.AutoSizeIndex = 0
     Header.Columns = <    
       item

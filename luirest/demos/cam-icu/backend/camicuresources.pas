@@ -109,7 +109,7 @@ begin
       end;
      RES_EVALUATION:
       begin
-        SqldbResource.SelectSQL := 'Select Id, PatientId, RASS, DeliriumId, VentilationId, Sedation, ShiftId, ICDSC from PatientEvaluation';
+        SqldbResource.SelectSQL := 'Select Id, Date, PatientId, RASS, DeliriumId, VentilationId, Sedation, ShiftId, ICDSC from PatientEvaluation';
         SqldbResource.PrimaryKeyParam := 'evaluationid';
         SqldbResource.JSONFields := '[{"name":"sedation","type":"array"},{"name":"icdsc","type":"array"}]';
       end;
