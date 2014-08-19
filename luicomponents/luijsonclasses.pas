@@ -1,6 +1,7 @@
 unit LuiJSONClasses;
 
 {$mode objfpc}{$H+}
+{.$define FPC_HAS_WEAK_JSON}
 
 interface
 
@@ -303,7 +304,11 @@ begin
         ChildrenData := TJSONArray(GroupObjData.Find(FChildrenProperty));
         if ChildrenData = nil then
         begin
+          {$ifdef FPC_HAS_WEAK_JSON}
           ChildrenData := TJSONArray.Create(False);
+          {$else}
+          ChildrenData := TJSONArray.Create;
+          {$endif}
           GroupObjData.Add(FChildrenProperty, ChildrenData);
         end;
         ChildrenData.Add(ItemObjData);
