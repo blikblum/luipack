@@ -1,0 +1,53 @@
+object JSONFilterFrame: TJSONFilterFrame
+  Left = 0
+  Height = 87
+  Top = 0
+  Width = 337
+  ClientHeight = 87
+  ClientWidth = 337
+  Color = clWhite
+  ParentColor = False
+  TabOrder = 0
+  DesignLeft = 508
+  DesignTop = 246
+  object ListView: TVirtualJSONListView
+    Left = 1
+    Height = 68
+    Top = 1
+    Width = 335
+    TextProperty = 'text'
+    Align = alClient
+    BorderSpacing.Bottom = 17
+    BorderSpacing.Around = 1
+    BorderStyle = bsNone
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Position = 0
+        Width = 335
+      end>
+    Header.DefaultHeight = 17
+    Header.Options = [hoAutoResize, hoColumnResize, hoDrag, hoShowSortGlyphs]
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnClick = ListViewClick
+    OnFocusChanged = ListViewFocusChanged
+    OnInitNode = ListViewInitNode
+    OnKeyDown = ListViewKeyDown
+    OnKeyUp = ListViewKeyUp
+  end
+  object ActionLabel: TLabel
+    Cursor = crHandPoint
+    Left = 1
+    Height = 15
+    Top = 71
+    Width = 63
+    Caption = 'ActionLabel'
+    Font.Color = clBlue
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
+  end
+end
