@@ -140,6 +140,7 @@ type
     //todo: implement save through dirty checking
     //FSnapshot/FReference: TJSONArray;
     FData: TJSONArray;
+    procedure DecodeJSONFields(ResponseData: TJSONArray);
   protected
   public
     constructor Create(AModelDef: TSqlite3ResourceModelDef; ResourceClient: TSqlite3ResourceClient); override;
@@ -159,8 +160,10 @@ type
     FData: TJSONObject;
     FIdValue: Variant;
     FOwnsData: Boolean;
+    procedure DecodeJSONFields(ResponseData: TJSONObject);
     function DoFetch(const Id: Variant): Boolean;
     function DoSave(const Id: Variant): Boolean;
+    procedure EncodeJSONFields(RequestData: TJSONObject);
     procedure SetPrimaryKeyValue(const IdValue: Variant);
     procedure SetSQL(const Id: Variant);
   protected
@@ -176,6 +179,68 @@ type
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
+
+procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
+var
+  i: Integer;
+  FieldDefData, PropData, DecodedData: TJSONData;
+  DecodedArrayData: TJSONArray absolute DecodedData;
+  DecodedObjectData: TJSONObject absolute DecodedData;
+  PropName, PropTypeName: String;
+  PropType: TJSONtype;
+begin
+  for i := 0 to JSONFieldsData.Count - 1 do
+  begin
+    //todo parse fielddef once (move out of here)
+    FieldDefData := JSONFieldsData.Items[i];
+    PropType := jtUnknown;
+    case FieldDefData.JSONType of
+      jtObject:
+        begin
+          PropName := TJSONObject(FieldDefData).Get('name', '');
+          PropTypeName := TJSONObject(FieldDefData).Get('type', '');
+          if PropTypeName = 'array' then
+            PropType := jtArray
+          else if PropTypeName = 'object' then
+            PropType := jtObject;
+        end;
+      jtString:
+        begin
+          PropName := FieldDefData.AsString;
+        end;
+    end;
+    PropData := RecordData.Find(PropName);
+    if PropData = nil then
+      raise Exception.CreateFmt('Error parsing JSON field: field "%s" not found', [PropName]);
+    if PropData.JSONType = jtString then
+    begin
+      case PropType of
+        jtArray:
+          if not TryStrToJSON(PropData.AsString, DecodedArrayData) then
+            DecodedArrayData := TJSONArray.Create;
+        jtObject:
+          if not TryStrToJSON(PropData.AsString, DecodedObjectData) then
+            DecodedObjectData := TJSONObject.Create;
+        else
+          if not TryStrToJSON(PropData.AsString, DecodedData) then
+            DecodedData := TJSONNull.Create;
+      end;
+    end
+    else
+    begin
+      //initialize field with empty data
+      case PropType of
+        jtArray:
+          DecodedData := TJSONArray.Create;
+        jtObject:
+          DecodedData := TJSONObject.Create;
+        else
+          DecodedData := TJSONNull.Create;
+      end;
+    end;
+    RecordData.Elements[PropName] := DecodedData;
+  end;
+end;
 
 { TSqlite3CacheHandler }
 
@@ -243,6 +308,13 @@ end;
 
 { TRESTJSONObjectResource }
 
+procedure TSqlite3JSONObjectResource.DecodeJSONFields(ResponseData: TJSONObject);
+begin
+  if FModelDef.FJSONFieldsData = nil then
+    Exit;
+  DoDecodeJSONFields(ResponseData, FModelDef.FJSONFieldsData);
+end;
+
 function TSqlite3JSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
@@ -252,6 +324,7 @@ begin
     try
       FData.Clear;
       DatasetToJSON(FDataset, FData, [djoSetNull], '');
+      DecodeJSONFields(FData);
     finally
       FDataset.Close;
     end;
@@ -278,6 +351,7 @@ begin
       end
       else
         FDataset.Edit;
+      EncodeJSONFields(FData);
       FModelDef.JSONDataToDataset(FData, FDataset, False);
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
@@ -286,6 +360,49 @@ begin
     end;
   except
     Result := False;
+  end;
+end;
+
+procedure TSqlite3JSONObjectResource.EncodeJSONFields(RequestData: TJSONObject);
+var
+  FieldDefData: TJSONData;
+  PropType: TJSONtype;
+  PropName: String;
+  PropData: TJSONData;
+  PropTypeName: TJSONStringType;
+  i: Integer;
+begin
+  if FModelDef.FJSONFieldsData = nil then
+    Exit;
+  for i := 0 to FModelDef.FJSONFieldsData.Count - 1 do
+  begin
+    //todo parse fielddef once (move out of here)
+    FieldDefData := FModelDef.FJSONFieldsData.Items[i];
+    PropType := jtUnknown;
+    case FieldDefData.JSONType of
+      jtObject:
+        begin
+          PropName := TJSONObject(FieldDefData).Get('name', '');
+          PropTypeName := TJSONObject(FieldDefData).Get('type', '');
+          if PropTypeName = 'array' then
+            PropType := jtArray
+          else if PropTypeName = 'object' then
+            PropType := jtObject;
+        end;
+      jtString:
+        begin
+          PropName := FieldDefData.AsString;
+        end;
+    end;
+    PropData := RequestData.Find(PropName);
+    if PropData <> nil then
+    begin
+      //nullify if type does not match
+      if (PropType <> jtUnknown) and (PropData.JSONType <> PropType) then
+        RequestData.Nulls[PropName] := True
+      else
+        RequestData.Strings[PropName] := PropData.AsJSON;
+    end;
   end;
 end;
 
@@ -569,6 +686,16 @@ begin
   inherited Destroy;
 end;
 
+procedure TSqlite3JSONArrayResource.DecodeJSONFields(ResponseData: TJSONArray);
+var
+  i: Integer;
+begin
+  if FModelDef.FJSONFieldsData = nil then
+    Exit;
+  for i := 0 to ResponseData.Count - 1 do
+    DoDecodeJSONFields(ResponseData.Objects[i], FModelDef.FJSONFieldsData);
+end;
+
 function TSqlite3JSONArrayResource.Fetch: Boolean;
 var
   SQL: String;
@@ -583,6 +710,7 @@ begin
     try
       FData.Clear;
       DatasetToJSON(FDataset, FData, [djoSetNull], '');
+      DecodeJSONFields(FData);
     finally
       FDataset.Close;
     end;
