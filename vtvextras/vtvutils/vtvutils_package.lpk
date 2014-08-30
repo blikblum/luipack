@@ -8,6 +8,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
+        <OtherUnitFiles Value="frames;views"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
       <Parsing>
@@ -15,11 +16,8 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
-    <Files Count="8">
+    <Files Count="10">
       <Item1>
         <Filename Value="vtcomboeditlink.pas"/>
         <UnitName Value="VTComboEditLink"/>
@@ -47,12 +45,20 @@
       </Item6>
       <Item7>
         <Filename Value="vtjsonex.pas"/>
-        <UnitName Value="vtjsonex"/>
+        <UnitName Value="VTJSONEx"/>
       </Item7>
       <Item8>
         <Filename Value="collectionvirtualtreemediator.pas"/>
-        <UnitName Value="collectionvirtualtreemediator"/>
+        <UnitName Value="CollectionVirtualTreeMediator"/>
       </Item8>
+      <Item9>
+        <Filename Value="views\jsonfilterview.lfm"/>
+        <Type Value="LFM"/>
+      </Item9>
+      <Item10>
+        <Filename Value="views\jsonfilterview.pas"/>
+        <UnitName Value="JSONFilterView"/>
+      </Item10>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="3">
