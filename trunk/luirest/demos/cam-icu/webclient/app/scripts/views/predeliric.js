@@ -45,17 +45,29 @@ define([
                         }
                     },
                     isurgency: {
-                        onSet: 'strToNumber'
+                      onGet: 'boolToStr',
+                        onSet: 'strToBool'
                     },
                     hassedation: {
-                        onSet: 'strToNumber'
+                      onGet: 'boolToStr',
+                        onSet: 'strToBool'
                     },
                     hasinfection: {
-                        onSet: 'strToNumber'
+                      onGet: 'boolToStr',
+                        onSet: 'strToBool'
                     },
                     hasacidosis: {
-                        onSet: 'strToNumber'
-                    }
+                      onGet: 'boolToStr',
+                      onSet: 'strToBool'
+                    },
+                  apache2: {
+                    onGet: 'numberToStr',
+                    onSet: 'strToNumber'
+                  },
+                  urea: {
+                    onGet: 'numberToStr',
+                    onSet: 'strToNumber'
+                  }
                 }
             });
             
@@ -73,22 +85,45 @@ define([
                             return '--'
                         }                        
                     }
-                }
-            })
+            }});
 
 
             return bindings;
         },
 
-        patientBindings: {
+       patientBindings: {
             '.name-el':'name'
         },
+      strToNumber: function(val) {
+        if (val) {
+          return +val;
+        }
+      },
+      numberToStr: function(val) {
+        if (typeof val != 'undefined') {
+          return val.toString();
+        }
+      },
 
-        strToNumber: function(val) {
-           if (val) {
-               return +val;
-           }
+        strToBool: function(val) {
+           if (typeof val != 'undefined') {
+               if (val === 'true') {
+                 return true
+               } else {
+                 return false;
+               }
+            }
         },
+      boolToStr: function(val) {
+        if (typeof val != 'undefined') {
+
+          if (val) {
+            return 'true'
+          } else {
+            return 'false'
+          }
+        }
+      },
         events: {
             'click button.save-model': 'saveModel',
             'click button.cancel': 'cancel'

@@ -96,8 +96,8 @@ define([
                           {label: 'Hepático', value: 5},
                           {label: 'Cardiovascular', value: 6},
                           {label: 'Digestivo', value: 7},
-                          {label: 'Monitorização', value: 6},
-                          {label: 'Pós-PCR', value: 7}
+                          {label: 'Monitorização', value: 8},
+                          {label: 'Pós-PCR', value: 9}
                       ],
                       defaultOption: {label: 'Selecione uma opção...', value: null}
                   }
