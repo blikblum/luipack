@@ -100,7 +100,7 @@ type
 
    { TSqlite3ResourceClient }
 
-   TSqlite3ResourceClient = class(TComponent)
+   TSqlite3ResourceClient = class(TComponent, IResourceClient)
    private
      FCacheHandler: TSqlite3CacheHandler;
      FDatabase: String;
