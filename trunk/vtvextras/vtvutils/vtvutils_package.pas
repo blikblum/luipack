@@ -8,7 +8,7 @@ interface
 
 uses
   VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, VTJSON, 
-  register_vtvutils, VTJSONEx, CollectionVirtualTreeMediator, 
+  register_vtvutils, VTJSONEx, CollectionVirtualTreeMediator, JSONFilterView, 
   LazarusPackageIntf;
 
 implementation
