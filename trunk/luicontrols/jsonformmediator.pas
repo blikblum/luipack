@@ -36,6 +36,13 @@ type
     class function AllowsCaptionLabel: Boolean; override;
   end;
 
+  { TJSONEditMediator }
+
+  TJSONEditMediator = class(TJSONGUIMediator)
+  public
+    class procedure DoGUIToJSON(Element: TJSONFormElement; Data: TJSONObject); override;
+  end;
+
   { TJSONSpinEditMediator }
 
   TJSONSpinEditMediator = class(TJSONGUIMediator)
@@ -200,6 +207,36 @@ procedure RegisterJSONMediator(ControlClass: TControlClass;
   MediatorClass: TJSONGUIMediatorClass);
 begin
   RegisterJSONMediator(ControlClass.ClassName, MediatorClass);
+end;
+
+{ TJSONEditMediator }
+
+class procedure TJSONEditMediator.DoGUIToJSON(Element: TJSONFormElement;
+  Data: TJSONObject);
+var
+  Edit: TCustomEdit;
+  Int64Value: Int64;
+  DoubleValue: Double;
+  PropName, EditText: String;
+begin
+  Edit := Element.Control as TCustomEdit;
+  PropName := Element.PropertyName;
+  EditText := Edit.Text;
+  if Edit.NumbersOnly then
+  begin
+    //try to convert to number
+    if TryStrToInt64(EditText, Int64Value) then
+      Data.Int64s[PropName] := Int64Value
+    else if TryStrToFloat(PropName, DoubleValue) then
+      Data.Floats[PropName] := DoubleValue
+    else
+      //todo: implement default handling for empty
+      Data.Nulls[PropName] := True;
+  end
+  else
+  begin
+    Data.Strings[PropName] := EditText;
+  end;
 end;
 
 { TJSONCheckGroupMediator }
@@ -870,8 +907,15 @@ type
 
 class procedure TJSONGUIMediator.DoJSONToGUI(Data: TJSONObject;
   Element: TJSONFormElement);
+var
+  PropData: TJSONData;
+  Text: String;
 begin
-  TControlAccess(Element.Control).Text := Data.Get(Element.PropertyName, '');
+  if FindJSONProp(Data, Element.PropertyName, PropData) and (PropData.JSONType in [jtString, jtNumber, jtBoolean]) then
+    Text := PropData.AsString
+  else
+    Text := '';
+  TControlAccess(Element.Control).Text := Text;
 end;
 
 class procedure TJSONGUIMediator.DoGUIToJSON(Element: TJSONFormElement;
@@ -1147,8 +1191,8 @@ end;
 
 initialization
   MediatorStore := TJSONGUIMediatorStore.Create;
-  RegisterJSONMediator(TEdit, TJSONGUIMediator);
-  RegisterJSONMediator(TLabeledEdit, TJSONGUIMediator);
+  RegisterJSONMediator(TEdit, TJSONEditMediator);
+  RegisterJSONMediator(TLabeledEdit, TJSONEditMediator);
   RegisterJSONMediator(TMemo, TJSONMemoMediator);
   RegisterJSONMediator(TComboBox, TJSONComboBoxMediator);
   RegisterJSONMediator(TLabel, TJSONCaptionMediator);
