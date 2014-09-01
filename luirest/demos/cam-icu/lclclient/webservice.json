@@ -33,5 +33,9 @@
 "ParamType":"ptInput"
 }
 ]
+},
+{
+"Name":"evaluation",
+"Path":"evaluations"
 }
 ]

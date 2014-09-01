@@ -1,0 +1,126 @@
+object PatientCadastreForm: TPatientCadastreForm
+  Left = 347
+  Height = 257
+  Top = 195
+  Width = 398
+  Caption = 'Cadastro Paciente'
+  ClientHeight = 257
+  ClientWidth = 398
+  OnShow = FormShow
+  Position = poOwnerFormCenter
+  LCLVersion = '1.3'
+  object NameEdit: TEdit
+    Left = 13
+    Height = 23
+    Top = 32
+    Width = 320
+    TabOrder = 0
+  end
+  object BirthDatePicker: TZVDateTimePicker
+    Left = 13
+    Height = 23
+    Top = 86
+    Width = 83
+    CenturyFrom = 1941
+    MaxDate = 2958465
+    MinDate = -53780
+    TabOrder = 1
+    TrailingSeparator = False
+    TextForNullDate = 'NULL'
+    LeadingZeros = True
+    Kind = dtkDate
+    TimeFormat = tf24
+    TimeDisplay = tdHMS
+    DateMode = dmComboBox
+    Date = 41882
+    Time = 0.274040949072514
+    UseDefaultSeparators = True
+    HideDateTimeParts = []
+    MonthNames = 'Long'
+  end
+  object RegistryEdit: TEdit
+    Left = 13
+    Height = 23
+    Top = 144
+    Width = 83
+    TabOrder = 2
+  end
+  object BedNumberEdit: TEdit
+    Left = 128
+    Height = 23
+    Top = 144
+    Width = 83
+    NumbersOnly = True
+    TabOrder = 3
+  end
+  object GenderComboBox: TComboBox
+    Left = 128
+    Height = 23
+    Top = 86
+    Width = 121
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 4
+  end
+  object SaveButton: TBitBtn
+    Left = 89
+    Height = 30
+    Top = 223
+    Width = 150
+    Anchors = [akRight, akBottom]
+    Caption = 'Salvar'
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = SaveButtonClick
+    TabOrder = 5
+  end
+  object CancelButton: TBitBtn
+    Left = 244
+    Height = 30
+    Top = 223
+    Width = 150
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancelar'
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 6
+  end
+  object PatientCadastreMediator: TJSONFormMediator
+    CaptionDisplay = cdAbove
+    Elements = <    
+      item
+        Caption = 'Nome'
+        Control = NameEdit
+        Name = 'name'
+        PropertyName = 'name'
+      end    
+      item
+        Caption = 'Data de Nascimento'
+        Control = BirthDatePicker
+        Name = 'birthdate'
+        PropertyName = 'birthdate'
+      end    
+      item
+        Caption = 'Registro'
+        Control = RegistryEdit
+        Name = 'registry'
+        PropertyName = 'registry'
+      end    
+      item
+        Caption = 'Leito'
+        Control = BedNumberEdit
+        Name = 'bednumber'
+        PropertyName = 'bednumber'
+      end    
+      item
+        Caption = 'Gênero'
+        Control = GenderComboBox
+        Name = 'gender'
+        PropertyName = 'gender'
+        Options = '{ "items" : [{ "text" : "Masculino", "value" : "M" }, { "text" : "Feminino", "value" : "F" }] }'
+      end>
+    left = 240
+    top = 112
+  end
+end
