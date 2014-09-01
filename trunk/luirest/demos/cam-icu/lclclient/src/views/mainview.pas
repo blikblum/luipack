@@ -6,18 +6,22 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Grids, JvXPBar, VTJSON, MainPresenter, fpjson, VirtualTrees;
+  Grids, JvXPBar, VTJSON, AdvancedLabel, MainPresenter, fpjson, VirtualTrees;
 
 type
 
   { TMainForm }
 
   TMainForm = class(TForm, IFPObserver)
+    ExportDataLabel: TAdvancedLabel;
     Label1: TLabel;
     PatientCountLabel: TLabel;
     PatientBar: TJvXPBar;
     PatientListView: TVirtualJSONListView;
+    procedure ExportDataLabelClick(Sender: TObject);
+    procedure PatientBarDeleteItemClick(Sender: TObject);
     procedure PatientBarEvaluationsClick(Sender: TObject);
+    procedure PatientBarCadastreItemClick(Sender: TObject);
     procedure PatientListViewFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
     procedure PatientListViewGetText(Sender: TCustomVirtualJSONDataView;
@@ -78,6 +82,26 @@ end;
 procedure TMainForm.PatientBarEvaluationsClick(Sender: TObject);
 begin
   FPresenter.ShowPatientEvaluations;
+end;
+
+procedure TMainForm.PatientBarDeleteItemClick(Sender: TObject);
+begin
+  if FPresenter.SelectedPatientData = nil then
+    Exit;
+  if MessageDlg('Excluir paciente',
+    Format('Tem certeza que deseja excluir "%s" ?', [FPresenter.SelectedPatientData.Get('name', '')]) +
+    LineEnding + 'Os dados serão excluídos permanentemente', mtConfirmation, mbYesNo, 1) = mrYes then
+    FPresenter.DeletePatient;
+end;
+
+procedure TMainForm.ExportDataLabelClick(Sender: TObject);
+begin
+
+end;
+
+procedure TMainForm.PatientBarCadastreItemClick(Sender: TObject);
+begin
+  FPresenter.ShowPatientCadastre;
 end;
 
 procedure TMainForm.FPOObservedChanged(ASender: TObject;

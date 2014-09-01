@@ -80,6 +80,7 @@ object MainForm: TMainForm
         Caption = 'Editar Cadastro'
         GroupIndex = 1
         Name = 'PatientBarCadastre'
+        OnClick = PatientBarCadastreItemClick
       end    
       item
         Caption = 'Mudar Leito'
@@ -95,6 +96,7 @@ object MainForm: TMainForm
         Caption = 'Excluir'
         GroupIndex = 1
         Name = 'PatientBarDelete'
+        OnClick = PatientBarDeleteItemClick
       end>
     Font.Color = 8650752
     Font.Height = -11
@@ -127,5 +129,19 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     Caption = 'PatientCountLabel'
     ParentColor = False
+  end
+  object ExportDataLabel: TAdvancedLabel
+    Left = 584
+    Height = 15
+    Top = 224
+    Width = 79
+    Link = True
+    OnClick = ExportDataLabelClick
+    Anchors = [akTop, akRight]
+    Caption = 'Exportar Dados'
+    Font.Color = clBlue
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
   end
 end

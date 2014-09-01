@@ -124,6 +124,7 @@ object EvaluationForm: TEvaluationForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
+    OnItemClick = SedationCheckGroupItemClick
     TabOrder = 5
   end
   object ICDSCCheckGroup: TCheckGroup
@@ -148,6 +149,7 @@ object EvaluationForm: TEvaluationForm
     Height = 30
     Top = 294
     Width = 150
+    Anchors = [akRight, akBottom]
     Caption = 'Salvar'
     Kind = bkOK
     ModalResult = 1
@@ -159,6 +161,7 @@ object EvaluationForm: TEvaluationForm
     Height = 30
     Top = 294
     Width = 150
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = 'Cancelar'
     Kind = bkCancel

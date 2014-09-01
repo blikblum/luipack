@@ -15,7 +15,8 @@ uses
   PresentationManager,
   AppConfigView,
   PatientEvaluationsView, PatientEvaluationsPresenter,
-  EvaluationView, EvaluationPresenter
+  EvaluationView, EvaluationPresenter,
+  PatientCadastreView
   ;
 
 procedure ConfigureApp(App: TCAMICUApp);
@@ -26,6 +27,7 @@ begin
   Presentations.Register('appconfig', TAppConfigViewForm);
   Presentations.Register('patientevaluations', TPatientEvaluationsForm, TPatientEvaluationsPresenter);
   Presentations.Register('evaluation', TEvaluationForm, TEvaluationPresenter);
+  Presentations.Register('patientcadastre', TPatientCadastreForm);
 end;
 
 end.

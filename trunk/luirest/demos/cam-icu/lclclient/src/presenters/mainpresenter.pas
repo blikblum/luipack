@@ -24,7 +24,7 @@ type
     destructor Destroy; override;
     procedure AddPatient;
     procedure DeletePatient;
-    procedure EditPatient;
+    procedure ShowPatientCadastre;
     procedure Initialize; override;
     procedure ShowPatientEvaluations;
     property Patients: TPatients read FPatients;
@@ -83,17 +83,16 @@ begin
     Exit;
   Patient := FPatients.Get(FSelectedPatientData);
   Patient.Delete;
-  Patient.Free;
 end;
 
-procedure TMainPresenter.EditPatient;
+procedure TMainPresenter.ShowPatientCadastre;
 var
   Patient: TPatient;
 begin
   if FSelectedPatientData = nil then
     Exit;
   Patient := FPatients.Get(FSelectedPatientData);
-  Presentations['contact'].ShowModal(['Model', Patient]);
+  Presentations['patientcadastre'].ShowModal(['Patient', Patient]);
 end;
 
 procedure TMainPresenter.ShowPatientEvaluations;
