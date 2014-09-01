@@ -131,6 +131,7 @@ object MainForm: TMainForm
     ParentColor = False
   end
   object ExportDataLabel: TAdvancedLabel
+    Cursor = crHandPoint
     Left = 584
     Height = 15
     Top = 224

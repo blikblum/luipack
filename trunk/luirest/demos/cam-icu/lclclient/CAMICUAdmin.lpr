@@ -10,8 +10,8 @@ uses
   sysutils, Forms, Controls, MainView, CAMICUApp,
   CAMICUAppSetup, MainPresenter, PatientModel,
   //needed to register
-  JSONZVDateTimeMediator, laz_fpspreadsheet, PatientCadastreView, DataExporter,
-  EvaluationModel
+  JSONZVDateTimeMediator, laz_fpspreadsheet,
+  PatientCadastreView, DataExporter, EvaluationModel
   ;
 
 {$R *.res}

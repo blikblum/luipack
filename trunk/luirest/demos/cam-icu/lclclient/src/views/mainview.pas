@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Grids, JvXPBar, VTJSON, AdvancedLabel, MainPresenter, fpjson, VirtualTrees;
+  JvXPBar, VTJSON, AdvancedLabel, MainPresenter, fpjson, VirtualTrees;
 
 type
 
@@ -46,7 +46,7 @@ var
 implementation
 
 uses
-  LuiJSONUtils;
+  LuiJSONUtils, DataExporter;
 
 {$R *.lfm}
 
@@ -96,7 +96,15 @@ end;
 
 procedure TMainForm.ExportDataLabelClick(Sender: TObject);
 begin
-
+  with TSaveDialog.Create(nil) do
+  begin
+    try
+      if Execute then
+        TCAMICUDataExporter.SaveToSpreadSheet(FPresenter.Patients, FileName);
+    finally
+      Destroy;
+    end;
+  end;
 end;
 
 procedure TMainForm.PatientBarCadastreItemClick(Sender: TObject);
