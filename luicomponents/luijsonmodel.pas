@@ -285,10 +285,12 @@ function TJSONCollection.SaveItem(Item: TJSONModel; AddItem: Boolean): Boolean;
 begin
   ItemResourceNeeded(Item);
   Result := FItemResource.Save;
-  if Result and AddItem then
+  if Result then
   begin
-    if IndexOf(Item) = -1 then
-      Add(Item);
+    if AddItem and (IndexOf(Item) = -1) then
+      Add(Item)
+    else
+      FPONotifyObservers(Self, ooChange, Item);
   end;
 end;
 
@@ -297,10 +299,12 @@ function TJSONCollection.SaveItem(Item: TJSONModel; const IdValue: Variant;
 begin
   ItemResourceNeeded(Item);
   Result := FItemResource.Save(IdValue);
-  if Result and AddItem then
+  if Result then
   begin
-    if IndexOf(Item) = -1 then
-      Add(Item);
+    if AddItem and (IndexOf(Item) = -1) then
+      Add(Item)
+    else
+      FPONotifyObservers(Self, ooChange, Item);
   end;
 end;
 
