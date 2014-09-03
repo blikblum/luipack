@@ -30,7 +30,7 @@ type
      FTableName: String;
      procedure JSONDataToDataset(JSONObj: TJSONObject; Dataset: TDataset; DoPatch: Boolean);
      function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
-     function GetUpdateSQL(const ResourceId: String): String;
+     function GetUpdateSQL(const ResourceId: Variant): String;
      procedure SetInputFields(const AValue: String);
      procedure SetJSONFields(const Value: String);
      procedure SetParams(AValue: TParams);
@@ -336,14 +336,16 @@ end;
 function TSqlite3JSONObjectResource.DoSave(const Id: Variant): Boolean;
 var
   SQL: String;
+  IsAppend: Boolean;
 begin
   Result := True;
   try
-    SQL := FModelDef.GetUpdateSQL(VarToStr(Id));
+    SQL := FModelDef.GetUpdateSQL(Id);
     FDataset.SQL := BindParams(SQL);
     FDataset.Open;
     try
-      if FDataset.RecordCount = 0 then
+      IsAppend := FDataset.RecordCount = 0;
+      if IsAppend then
       begin
         FDataset.Append;
         if not (VarIsNull(Id) or VarIsEmpty(Id)) then
@@ -355,6 +357,8 @@ begin
       FModelDef.JSONDataToDataset(FData, FDataset, False);
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
+      if IsAppend and Result then
+        FData.Int64s[FModelDef.PrimaryKey] := FDataset.LastInsertRowId;
     finally
       FDataset.Close;
     end;
@@ -794,10 +798,11 @@ begin
     raise Exception.CreateFmt('Invalid input field name - model "%s" index "%d"', [FName, FieldIndex]);
 end;
 
-function TSqlite3ResourceModelDef.GetUpdateSQL(const ResourceId: String): String;
+function TSqlite3ResourceModelDef.GetUpdateSQL(const ResourceId: Variant): String;
 var
   i: Integer;
   DBFieldName: String;
+  IdValue: String;
 begin
   if FInputFieldsData = nil then
     Result := SelectSQL
@@ -813,14 +818,17 @@ begin
     end;
     Result := Result + ' from ' + FTableName;
   end;
-  if ResourceId = '' then
+  if VarIsNull(ResourceId) or VarIsEmpty(ResourceId) then
   begin
     Result := Result + ' Where 1 = -1';
   end
   else
   begin
-    //todo: fix when ResourceId = string
-    Result := Result + Format(' Where %s = %s', [PrimaryKey, ResourceId]);
+    if VarIsStr(ResourceId) then
+      IdValue := '''' + VarToStr(ResourceId) + ''''
+    else
+      IdValue := VarToStr(ResourceId);
+    Result := Result + Format(' Where %s = %s', [PrimaryKey, IdValue]);
   end;
 end;
 
