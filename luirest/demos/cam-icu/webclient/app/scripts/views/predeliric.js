@@ -75,9 +75,7 @@ define([
                 '.risk-el': {
                     observe: 'risk',
                     onGet: function(val) {
-                        var num;
-                        //todo: enable after correct risk calc
-                        return '';
+                        var num;                        
                         if (isFinite(val)) {
                             num = val;
                             return num.toFixed(1) + '%';
@@ -99,7 +97,7 @@ define([
           return +val;
         }
       },
-      numberToStr: function(val) {
+      numberToStr: function(val) {        
         if (typeof val != 'undefined') {
           return val.toString();
         }

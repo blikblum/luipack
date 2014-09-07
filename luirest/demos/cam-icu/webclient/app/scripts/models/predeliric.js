@@ -75,7 +75,7 @@ define([
             return null;
           }
             
-            var risk = 0.0;
+            var risk = -4.0369;
             
             risk += (age * 0.0183) 
             
@@ -111,7 +111,7 @@ define([
                 risk += 0.1378
             }
             
-            risk += (urea * 0.0141)
+            risk += ((urea * 0.357) * 0.0141)
             
             if (isurgency) {
                 risk += 0.1891
@@ -130,7 +130,11 @@ define([
             
             if (hasinfection) {
                 risk += 0.4965
-            }
+            }                      
+          
+            risk = Math.exp(risk) / (1 + Math.exp(risk));
+            
+            risk *= 100;
                           
             return risk;              
         }
