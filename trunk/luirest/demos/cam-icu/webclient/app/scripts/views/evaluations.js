@@ -28,9 +28,7 @@ define([
                         return 'Pendente'
                     } else {
                         num = val;
-                        //todo: enable later
-                        //return num.toFixed(1) + '%'
-                        return null;
+                        return num.toFixed(1) + '%'                        
                     }
 
                 },
