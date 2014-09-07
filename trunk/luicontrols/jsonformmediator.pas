@@ -803,11 +803,20 @@ class procedure TJSONSpinEditMediator.DoJSONToGUI(Data: TJSONObject;
 var
   SpinEdit: TCustomFloatSpinEdit;
   PropData: TJSONData;
+  DefaultValue: Double;
 begin
   SpinEdit := Element.Control as TCustomFloatSpinEdit;
   PropData := Data.Find(Element.PropertyName);
   if (PropData = nil) or (PropData.JSONType = jtNull) then
-    SpinEdit.ValueEmpty := True
+  begin
+    if FindJSONProp(Element.OptionsData, 'default', DefaultValue) then
+    begin
+      SpinEdit.Value := DefaultValue;
+      SpinEdit.ValueEmpty := False;
+    end
+    else
+      SpinEdit.ValueEmpty := True;
+  end
   else
   begin
     SpinEdit.Value := PropData.AsFloat;
