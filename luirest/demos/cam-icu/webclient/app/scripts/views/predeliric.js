@@ -75,10 +75,8 @@ define([
                 '.risk-el': {
                     observe: 'risk',
                     onGet: function(val) {
-                        var num;                        
-                        if (isFinite(val)) {
-                            num = val;
-                            return num.toFixed(1) + '%';
+                        if (val != null && isFinite(val)) {
+                            return val.toFixed(1) + '%';
                         } else {
                             return '--'
                         }                        
@@ -90,15 +88,15 @@ define([
         },
 
        patientBindings: {
-            '.name-el':'name'
+          '.name-el':'name'
         },
       strToNumber: function(val) {
-        if (val) {
+        if (val != null) {
           return +val;
         }
       },
       numberToStr: function(val) {        
-        if (typeof val != 'undefined') {
+        if (val != null) {
           return val.toString();
         }
       },

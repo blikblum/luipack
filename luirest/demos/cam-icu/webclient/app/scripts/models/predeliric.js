@@ -60,18 +60,18 @@ define([
         },
         calculateRisk: function() {
             var patient = this.patient;              
-            var age = patient.get('age') || 0;
-            var internmenttypeid = patient.get('internmenttypeid') || 0;
-            var coma = this.get('coma') || 0;
-            var apache2 = this.get('apache2') || 0;
-            var hassedation = this.get('hassedation') || 0;
-            var hasacidosis = this.get('hasacidosis') || 0;
-            var urea = this.get('urea') || 0;
-            var isurgency = this.get('isurgency') || 0;
-            var morphine = this.get('morphine') || 0;
-            var hasinfection = this.get('hasinfection') || 0;
+            var age = patient.get('age');
+            var internmenttypeid = patient.get('internmenttypeid');
+            var coma = this.get('coma');
+            var apache2 = this.get('apache2');
+            var hassedation = this.get('hassedation');
+            var hasacidosis = this.get('hasacidosis');
+            var urea = this.get('urea');
+            var isurgency = this.get('isurgency');
+            var morphine = this.get('morphine');
+            var hasinfection = this.get('hasinfection');
 
-          if (!coma || !apache2 || !hassedation || !hasacidosis || !urea || !isurgency || !morphine || !hasinfection) {
+          if ([coma, apache2, hassedation, hasacidosis, urea, isurgency, morphine, hasinfection].some(function(item){return item == null})) {
             return null;
           }
             

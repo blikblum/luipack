@@ -23,12 +23,10 @@ define([
             '.predeliric-risk .badge': {
                 observe: 'predeliricrisk',
                 onGet: function (val) {
-                    var num;
                     if  (!val || !isFinite(val)){
                         return 'Pendente'
                     } else {
-                        num = val;
-                        return num.toFixed(1) + '%'                        
+                        return val.toFixed(1) + '%'
                     }
 
                 },
@@ -37,12 +35,15 @@ define([
                         name: 'class',
                         observe: 'predeliricrisk',
                         onGet: function (val) {
-                            var classValue = 'badge pull-right'
-                            if  (!val || !isFinite(val)){
-                                return classValue + ' badge-error';
-                            } else {
-                                return classValue;
+                            var classValue = 'badge pull-right';
+                            if  (val && isFinite(val)){
+                              if (val >= 50) {
+                                classValue += ' badge-error';
+                              } else {
+                                classValue += ' badge-success';
+                              }
                             }
+                          return classValue;
                         }
                     }
                 ]

@@ -47,3 +47,10 @@ h3 > .btn {
 .badge-error[href]:hover, .badge-error[href]:focus {
     background-color: #c9302c;
 }
+
+.badge-success {
+    background-color: #5cb85c;
+}
+.badge-success[href]:hover, .badge-success[href]:focus {
+    background-color: #449d44;
+}
