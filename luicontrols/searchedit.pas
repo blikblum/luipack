@@ -147,7 +147,9 @@ end;
 procedure TSearchEdit.DisplayEmptyText;
 begin
   Font.Color := clGray;
+  FSettingText := True;
   inherited RealSetText(FEmptyText);
+  FSettingText := False;
 end;
 
 function TSearchEdit.GetExecuteDelay: Integer;
