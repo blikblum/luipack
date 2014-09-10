@@ -45,6 +45,7 @@ type
     procedure Paint; override;
   public
     procedure Initialize;
+    procedure LoadData;
     procedure SelectFirst;
     procedure SetTerm(const SearchTerm: String);
     property ActionCaption: String write SetActionCaption;
@@ -90,8 +91,10 @@ begin
   end
   else if Key = VK_ESCAPE then
   begin
-    Visible := False;
-    Key := VK_UNKNOWN;
+    //todo notify ESC is pressed
+    //if Parent <> nil then
+      //Parent.;
+    //Key := VK_UNKNOWN;
   end;
 end;
 
@@ -116,7 +119,6 @@ begin
   begin
     if FOnChange <> nil then
       FOnChange(Self);
-    Visible := False;
   end;
 end;
 
@@ -175,8 +177,7 @@ procedure TJSONFilterFrame.InitializeListView;
 begin
   TVirtualJSONDataViewColumn(ListView.Header.Columns[0]).PropertyName := FTextProperty;
   ListView.Data := FData;
-  ListView.LoadData;
-  ListView.ValidateNode(ListView.RootNode, True);
+  LoadData;
 end;
 
 procedure TJSONFilterFrame.Paint;
@@ -200,6 +201,12 @@ begin
     ListView.BorderSpacing.Bottom := 0;
 end;
 
+procedure TJSONFilterFrame.LoadData;
+begin
+  ListView.LoadData;
+  ListView.ValidateNode(ListView.RootNode, True);
+end;
+
 procedure TJSONFilterFrame.SelectFirst;
 begin
   if ListView.CanFocus then
@@ -210,10 +217,13 @@ end;
 
 procedure TJSONFilterFrame.SetTerm(const SearchTerm: String);
 begin
+  ListView.ClearSelection;
   FMatchCount := 0;
   FSearchTerm := Trim(SearchTerm);
   if SearchTerm <> '' then
-    FSearchTerm := '*' + SearchTerm + '*';
+    FSearchTerm := '*' + SearchTerm + '*'
+  else
+    FSearchTerm := '*';
   UpdateListView;
 end;
 
