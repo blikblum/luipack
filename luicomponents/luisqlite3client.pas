@@ -28,7 +28,7 @@ type
      FPrimaryKey: String;
      FSelectSQL: String;
      FTableName: String;
-     procedure JSONDataToDataset(JSONObj: TJSONObject; Dataset: TDataset; DoPatch: Boolean);
+     procedure SetDatasetData(Dataset: TDataset; JSONObj: TJSONObject; Params: TParams; DoPatch: Boolean);
      function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
      function GetUpdateSQL(const ResourceId: Variant): String;
      procedure SetInputFields(const AValue: String);
@@ -336,6 +336,7 @@ end;
 function TSqlite3JSONObjectResource.DoSave(const Id: Variant): Boolean;
 var
   SQL: String;
+  TempData: TJSONObject;
   IsAppend: Boolean;
 begin
   Result := True;
@@ -353,8 +354,20 @@ begin
       end
       else
         FDataset.Edit;
-      EncodeJSONFields(FData);
-      FModelDef.JSONDataToDataset(FData, FDataset, False);
+      //quick hack to save properties in correct format
+      //todo: optimize to avoid data copy. Normalize FJSONFieldData as a hash to allow quick lookup
+      if FModelDef.FJSONFieldsData <> nil then
+      begin
+        TempData := TJSONObject(FData.Clone);
+        try
+          EncodeJSONFields(TempData);
+          FModelDef.SetDatasetData(FDataset, TempData, FParams, False);
+        finally
+          TempData.Destroy;
+        end;
+      end
+      else
+        FModelDef.SetDatasetData(FDataset, FData, FParams, False);
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
       if IsAppend and Result then
@@ -429,15 +442,16 @@ var
   IdValue: String;
 begin
   SQL := FModelDef.SelectSQL;
-  if Id <> '' then
+  if not (VarIsEmpty(Id) or VarIsNull(Id)) then
   begin
     if VarIsStr(Id) then
       IdValue := '''' + VarToStr(Id) + ''''
     else
       IdValue := VarToStr(Id);
-    //todo: handle when ConditionsSQL <> ''
     SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, IdValue]);
-  end;
+  end
+  else
+    SQL := SQL + ' ' + FModelDef.FConditionsSQL;
   FDataset.SQL := BindParams(SQL);
 end;
 
@@ -538,7 +552,7 @@ end;
 function TSqlite3JSONObjectResource.Fetch(IdValue: Variant): Boolean;
 begin
   FIdValue := IdValue;
-  Result := DoFetch(VarToStr(IdValue));
+  Result := DoFetch(IdValue);
 end;
 
 function TSqlite3JSONObjectResource.GetData: TJSONObject;
@@ -730,14 +744,15 @@ begin
   FParams.Assign(AValue);
 end;
 
-procedure TSqlite3ResourceModelDef.JSONDataToDataset(JSONObj: TJSONObject; Dataset: TDataset;
-  DoPatch: Boolean);
+procedure TSqlite3ResourceModelDef.SetDatasetData(Dataset: TDataset;
+  JSONObj: TJSONObject; Params: TParams; DoPatch: Boolean);
 var
   i: Integer;
   FieldName, DBFieldName: String;
   PropData: TJSONData;
   Field: TField;
   Fields: TFields;
+  Param: TParam;
 begin
   if FInputFieldsData <> nil then
   begin
@@ -746,13 +761,19 @@ begin
       FieldName := GetFieldName(i, DBFieldName);
       Field := Dataset.FieldByName(DBFieldName);
       PropData := JSONObj.Find(FieldName);
-      if PropData <> nil then
-        Field.Value := PropData.Value
-      else
+      if PropData = nil then
       begin
-        if not DoPatch then
-          Field.Value := Null;
-      end;
+        Param := Params.FindParam(FieldName);
+        if (Param <> nil) and not Param.IsNull then
+          Field.Value := Param.Value
+        else
+        begin
+          if not DoPatch then
+            Field.Value := Null;
+        end;
+      end
+      else
+        Field.Value := PropData.Value;
     end;
   end
   else
