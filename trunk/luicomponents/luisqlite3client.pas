@@ -323,8 +323,11 @@ begin
     FDataset.Open;
     try
       FData.Clear;
-      DatasetToJSON(FDataset, FData, [djoSetNull], '');
-      DecodeJSONFields(FData);
+      if FDataset.RecordCount > 0 then
+      begin
+        DatasetToJSON(FDataset, FData, [djoSetNull], '');
+        DecodeJSONFields(FData);
+      end;
     finally
       FDataset.Close;
     end;
@@ -579,7 +582,7 @@ begin
       IdFieldData := FData.Find(FDataset.PrimaryKey);
       if (IdFieldData <> nil) then
       begin
-        if (IdFieldData.JSONType in [jtString, jtNumber]) then
+        if (IdFieldData.JSONType in [jtString, jtNumber, jtNull]) then
           Id := IdFieldData.Value
         else
         begin
