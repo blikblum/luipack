@@ -125,6 +125,7 @@ type
     function AllowsCaptionLabel: Boolean; override;
     function FormMediator: TJSONFormMediator;
   public
+    destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
     procedure Reset(UpdateData: Boolean);
     property OptionsData: TJSONObject read GetOptionsData;
@@ -1171,6 +1172,12 @@ end;
 function TJSONFormElement.FormMediator: TJSONFormMediator;
 begin
   Result := (Collection.Owner as TJSONFormMediator);
+end;
+
+destructor TJSONFormElement.Destroy;
+begin
+  FOptionsData.Free;
+  inherited Destroy;
 end;
 
 procedure TJSONFormElement.Assign(Source: TPersistent);
