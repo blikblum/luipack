@@ -527,7 +527,8 @@ end;
 function TSqlite3JSONObjectResource.Fetch: Boolean;
 var
   IdFieldData: TJSONData;
-  IdField, Id: String;
+  IdField: String;
+  Id: Variant;
 begin
   IdField := FModelDef.PrimaryKey;
   if IdField <> '' then
@@ -544,10 +545,10 @@ begin
       Result := False;
       Exit;
     end;
-    Id := IdFieldData.AsString;
+    Id := IdFieldData.Value;
   end
   else
-    Id := '';
+    Id := Null;
   FIdValue := Unassigned;
   Result := DoFetch(Id);
 end;
