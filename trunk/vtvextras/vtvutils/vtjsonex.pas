@@ -189,7 +189,7 @@ procedure TJSONQuestionTreeView.DoChecked(Node: PVirtualNode);
 var
   QuestionData, OptionData, CheckData: TJSONObject;
   ValueData: TJSONData;
-  OptionPropName, QuestionPropName: String;
+  OptionPropName, QuestionPropName, ValuePropName: String;
 begin
   //hack to skip when check state is being programatically set
   if Node^.Dummy = 1 then
@@ -197,11 +197,12 @@ begin
   if (GetNodeLevel(Node) = 1) and GetData(Node, OptionData)
     and GetData(Node^.Parent, QuestionData) then
   begin
+    ValuePropName := QuestionData.Get('valueprop', 'value');
     QuestionPropName := QuestionData.Get('prop', '');
     OptionPropName := OptionData.Get('prop', QuestionPropName);
     if OptionPropName <> '' then
     begin
-      ValueData := OptionData.Find('value');
+      ValueData := OptionData.Find(ValuePropName);
       if Node^.CheckType = ctRadioButton then
       begin
         if not OptionData.Get('custom', False) then
@@ -214,7 +215,10 @@ begin
         else
         begin
           if Node^.CheckState = csCheckedNormal then
+          begin
+            FAnswerData.Delete(OptionPropName);
             EditNode(Node, 0);
+          end;
        end;
       end
       else
@@ -258,10 +262,13 @@ var
 begin
   inherited DoGetText(Node, Column, TextType, CellText);
   if (GetNodeLevel(Node) > 0) and GetData(Node, NodeData)
-    and NodeData.Get('custom', False) and GetData(Node^.Parent, ParentData) then
+    and NodeData.Get('custom', False) and GetData(Node^.Parent, ParentData)
+    and (Node^.CheckState = csCheckedNormal) then
   begin
     PropName := ParentData.Get('prop', '');
     PropName := NodeData.Get('prop', PropName);
+    if (tsEditing in TreeStates) and (Node = FocusedNode) then
+      CellText := '';
     CellText := FAnswerData.Get(PropName, CellText);
   end;
 end;
