@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
@@ -16,14 +16,11 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="SqliteExtensions provides classes to manipulate sqlite databases"/>
     <License Value="Modified LGPL"/>
     <Version Minor="1"/>
-    <Files Count="6">
+    <Files Count="7">
       <Item1>
         <Filename Value="sqlitetrees.pas"/>
         <UnitName Value="SqliteTrees"/>
@@ -49,13 +46,20 @@
         <Filename Value="sqlite3slimconn.pp"/>
         <UnitName Value="sqlite3slimconn"/>
       </Item6>
+      <Item7>
+        <Filename Value="sqlite3jsonfunctions.pas"/>
+        <UnitName Value="sqlite3jsonfunctions"/>
+      </Item7>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="1">
+    <RequiredPkgs Count="2">
       <Item1>
+        <PackageName Value="luicomponents"/>
+      </Item1>
+      <Item2>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item1>
+      </Item2>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>
