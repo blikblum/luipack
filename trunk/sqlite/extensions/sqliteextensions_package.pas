@@ -7,14 +7,16 @@ unit sqliteextensions_package;
 interface
 
 uses
-  SqliteTrees, Sqlite3Wrapper, Sqlite3Ext, SqliteUtils, register_sqliteextensions, 
-  sqlite3slimconn, LazarusPackageIntf;
+  SqliteTrees, Sqlite3Wrapper, Sqlite3Ext, SqliteUtils, 
+  register_sqliteextensions, sqlite3slimconn, Sqlite3JSONFunctions, 
+  LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
-  RegisterUnit('register_sqliteextensions', @register_sqliteextensions.Register);
+  RegisterUnit('register_sqliteextensions', @register_sqliteextensions.Register
+    );
 end;
 
 initialization
