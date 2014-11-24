@@ -509,7 +509,6 @@ type
     property OnFreeNode;
     property OnGetText;
     property OnNewText;
-    property DefaultNodeHeight;
     property OnCreateDataObject;
     property OnLoadNode;
     property OnNodeCopied;
@@ -3023,7 +3022,7 @@ begin
 end;
 
 procedure TCustomVirtualDBGrid.UpdateDBTree(StartNode: PVirtualNode; NodeCount: Cardinal;
-  AlwaysUpdate: Boolean; UpdateLoadedData: Boolean = False);
+  AlwaysUpdate: Boolean; UpdateLoadedData: Boolean);
 var
   Count: Cardinal;
 
