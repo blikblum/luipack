@@ -15,6 +15,7 @@ type
   public
     constructor Create; override;
     function GetLocalizedDescription : String; override;
+    function GetLocalizedName: string; override;
     function GetInterfaceSource(const aFilename, aSourceName,
       aResourceName: string): string; override;
     function GetInterfaceUsesSection : String; override;
@@ -37,6 +38,11 @@ end;
 function TJSONModelUnitDescriptor.GetLocalizedDescription: String;
 begin
   Result := 'Boilerplate code to use LuiJSONModel';
+end;
+
+function TJSONModelUnitDescriptor.GetLocalizedName: string;
+begin
+  Result := 'LuiJSONModel unit';
 end;
 
 function TJSONModelUnitDescriptor.GetInterfaceSource(const aFilename,
