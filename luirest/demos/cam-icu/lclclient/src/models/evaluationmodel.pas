@@ -44,23 +44,15 @@ end;
 
 procedure TEvaluations.FilterByPatient(PatientId: Integer);
 var
-  Parser: TFPExpressionParser;
   ItemData: TJSONObject;
   i: Integer;
 begin
   FFilteredData.Clear;
-  Parser := TFPExpressionParser.Create(nil);
-  try
-    Parser.Expression := 'patientid = ' + IntToStr(PatientId);
-    for i := 0 to Data.Count - 1 do
-    begin
-      ItemData := Data.Objects[i];
-      Parser.Identifiers.AddIntegerVariable('patientid', ItemData.Get('id', -1));
-      if (Parser.Evaluate = rtBoolean) and Parser.AsBoolean then
-        FFilteredData.Add(ItemData.Clone);
-    end;
-  finally
-    Parser.Destroy;
+  for i := 0 to Data.Count - 1 do
+  begin
+    ItemData := Data.Objects[i];
+    if ItemData.Get('patientid', PatientId + 1) = PatientId then
+      FFilteredData.Add(ItemData.Clone);
   end;
 end;
 

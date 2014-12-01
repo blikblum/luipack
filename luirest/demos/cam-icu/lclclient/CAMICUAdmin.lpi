@@ -190,7 +190,6 @@
         <ComponentName Value="PatientEvaluationsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="PatientEvaluationsView"/>
       </Unit12>
       <Unit13>
         <Filename Value="src\presenters\patientevaluationspresenter.pas"/>
@@ -202,12 +201,10 @@
         <ComponentName Value="EvaluationForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="EvaluationView"/>
       </Unit14>
       <Unit15>
         <Filename Value="src\presenters\evaluationpresenter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="EvaluationPresenter"/>
       </Unit15>
       <Unit16>
         <Filename Value="src\views\patientcadastreview.pas"/>
@@ -224,6 +221,7 @@
       <Unit18>
         <Filename Value="src\models\evaluationmodel.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="EvaluationModel"/>
       </Unit18>
     </Units>
   </ProjectOptions>

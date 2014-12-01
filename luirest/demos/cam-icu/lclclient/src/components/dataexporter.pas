@@ -30,12 +30,14 @@ type
   TCAMICUSpreadSheet = class
   private
     FData: TJSONArray;
+    FMaxEvaluationCount: Integer;
     FPatients: TPatients;
   public
     constructor Create;
     destructor Destroy; override;
     procedure SaveToFile(const FileName: String);
     property Data: TJSONArray read FData;
+    property MaxEvaluationCount: Integer read FMaxEvaluationCount write FMaxEvaluationCount;
     property Patients: TPatients read FPatients write FPatients;
   end;
 
@@ -44,6 +46,7 @@ type
 constructor TCAMICUSpreadSheet.Create;
 begin
   FData := TJSONArray.Create;
+  FMaxEvaluationCount := 40;
 end;
 
 destructor TCAMICUSpreadSheet.Destroy;
@@ -52,7 +55,7 @@ begin
   inherited Destroy;
 end;
 
-procedure WriteWorksheetRow(Worksheet: TsWorksheet; PatientData: TJSONObject; Evaluations: TJSONCollection; Row: Integer);
+procedure WriteWorksheetRow(Worksheet: TsWorksheet; PatientData: TJSONObject; EvaluationsData: TJSONArray; Row: Integer; MaxEvaluationCount: Integer);
 const
   EVALUATION_BASE_INDEX = 37;
 var
@@ -154,11 +157,12 @@ begin
   //todo: use vm info from evaluations?
   WriteIntegerDef(36, 'vmduration', 999);
 
+
   //evaluations
-  EvaluationCount := Min(Evaluations.Count, 20);
+  EvaluationCount := Min(EvaluationsData.Count, MaxEvaluationCount);
   for i := 0 to EvaluationCount - 1 do
   begin
-    EvaluationData := Evaluations[i].Data;
+    EvaluationData := EvaluationsData.Objects[i];
     //rass
     Worksheet.WriteNumber(Row, EVALUATION_BASE_INDEX + (i * 4), EvaluationData.Get('rass', 9));
     //delirium
@@ -171,7 +175,7 @@ begin
 end;
 
 const
-  ColumnNames: Array[0..116] of String = (
+  ColumnNames: Array[0..36] of String = (
     'Número',
     'Nome',
     'Registro',
@@ -208,118 +212,47 @@ const
     'Data_de_alta',
     'Motivo_alta',
     'Tempo_de_UTI',
-    'Tempo_de_VM',
+    'Tempo_de_VM'
+    );
 
-    'T1_RASS',
-    'T1_Delirium',
-    'T1_Ventilação',
-    'T1_Sedação',
-    'T2_RASS',
-    'T2_Delirium',
-    'T2_Ventilação',
-    'T2_Sedação',
-    'T3_RASS',
-    'T3_Delirium',
-    'T3_Ventilação',
-    'T3_Sedação',
-    'T4_RASS',
-    'T4_Delirium',
-    'T4_Ventilação',
-    'T4_Sedação',
-    'T5_RASS',
-    'T5_Delirium',
-    'T5_Ventilação',
-    'T5_Sedação',
-    'T6_RASS',
-    'T6_Delirium',
-    'T6_Ventilação',
-    'T6_Sedação',
-    'T7_RASS',
-    'T7_Delirium',
-    'T7_Ventilação',
-    'T7_Sedação',
-    'T8_RASS',
-    'T8_Delirium',
-    'T8_Ventilação',
-    'T8_Sedação',
-    'T9_RASS',
-    'T9_Delirium',
-    'T9_Ventilação',
-    'T9_Sedação',
-    'T10_RASS',
-    'T10_Delirium',
-    'T10_Ventilação',
-    'T10_Sedação',
-    'T11_RASS',
-    'T11_Delirium',
-    'T11_Ventilação',
-    'T11_Sedação',
-    'T12_RASS',
-    'T12_Delirium',
-    'T12_Ventilação',
-    'T12_Sedação',
-    'T13_RASS',
-    'T13_Delirium',
-    'T13_Ventilação',
-    'T13_Sedação',
-    'T14_RASS',
-    'T14_Delirium',
-    'T14_Ventilação',
-    'T14_Sedação',
-    'T15_RASS',
-    'T15_Delirium',
-    'T15_Ventilação',
-    'T15_Sedação',
-    'T16_RASS',
-    'T16_Delirium',
-    'T16_Ventilação',
-    'T16_Sedação',
-    'T17_RASS',
-    'T17_Delirium',
-    'T17_Ventilação',
-    'T17_Sedação',
-    'T18_RASS',
-    'T18_Delirium',
-    'T18_Ventilação',
-    'T18_Sedação',
-    'T19_RASS',
-    'T19_Delirium',
-    'T19_Ventilação',
-    'T19_Sedação',
-    'T20_RASS',
-    'T20_Delirium',
-    'T20_Ventilação',
-    'T20_Sedação'
+  EvaluationColumnNames: Array[0..3] of String = (
+    'T%d_RASS',
+    'T%d_Delirium',
+    'T%d_Ventilação',
+    'T%d_Sedação'
     );
 
 procedure TCAMICUSpreadSheet.SaveToFile(const FileName: String);
 var
-  i: Integer;
-  Evaluations: TPatientEvaluations;
+  i, j, k, NumEvaluationColumns: Integer;
+  Evaluations: TEvaluations;
   PatientData: TJSONObject;
   Workbook: TsWorkbook;
   Worksheet: TsWorksheet;
 begin
   FData.Clear;
-  //todo: fetch all evaluations once. Need to add feature to filter collection
-  {
-  Evaluations := TJSONCollection.Create(TEvaluation);
+  Evaluations := TEvaluations.Create;
   Evaluations.Fetch;
-  }
   Workbook := TsWorkbook.Create;
   Worksheet := Workbook.AddWorksheet('planilha');
-  Evaluations := TPatientEvaluations.Create;
   try
     for i := Low(ColumnNames) to High(ColumnNames) do
       Worksheet.WriteUTF8Text(0, i, ColumnNames[i]);
+    i := High(ColumnNames) + 1;
+    NumEvaluationColumns := Length(EvaluationColumnNames);
+    for j := 0 to MaxEvaluationCount - 1 do
+    begin
+      for k := Low(EvaluationColumnNames) to High(EvaluationColumnNames) do
+      begin
+        Worksheet.WriteUTF8Text(0, i + (j * NumEvaluationColumns) + k, Format(EvaluationColumnNames[k], [j + 1]));
+      end;
+    end;
 
     for i := 0 to FPatients.Data.Count - 1 do
     begin
       PatientData := FPatients.Data.Objects[i];
-      Evaluations.ParamByName('patientid').AsLargeInt := PatientData.Int64s['id'];
-      if not Evaluations.Fetch then
-        raise Exception.Create('Não foi possível carregar avaliações');
-      WriteWorksheetRow(Worksheet, PatientData, Evaluations, i + 1);
+      Evaluations.FilterByPatient(PatientData.Get('id', -1));
+      WriteWorksheetRow(Worksheet, PatientData, Evaluations.FilteredData, i + 1, MaxEvaluationCount);
     end;
     Workbook.WriteToFile(FileName, sfExcel8, True);
   finally
