@@ -69,6 +69,8 @@ function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
 function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
 
+function SetJSONPath(Data: TJSONData; const Path: String; ValueData: TJSONData): Boolean;
+
 procedure SortJSONArray(JSONArray: TJSONArray);
 
 procedure SortJSONArray(JSONArray: TJSONArray; CompareFn: TJSONArraySortCompare);
@@ -541,6 +543,75 @@ begin
       Result := False;
     end;
     Inc(PropIndex1);
+  end;
+end;
+
+function SetArrayPath(Data: TJSONArray; const Path: String;
+  ValueData: TJSONData): Boolean;
+begin
+  Result := False;
+end;
+
+function SetObjectPath(Data: TJSONObject; const Path: String;
+  ValueData: TJSONData): Boolean;
+var
+  PropName: String;
+  Len, StartPos, EndPos: Integer;
+  PropData: TJSONData;
+begin
+  Result := False;
+  //adapted from fpjson
+  if Path = '' then
+    Exit;
+  Len := Length(Path);
+  StartPos := 1;
+  while (StartPos < Len) and (Path[StartPos] = '.') do
+    Inc(StartPos);
+  EndPos := StartPos;
+  while (EndPos <= Len) and (not (Path[EndPos] in ['.', '['])) do
+    Inc(EndPos);
+  PropName := Copy(Path, StartPos, EndPos - StartPos);
+  if PropName = '' then
+    Exit;
+  //path completely handled
+  if EndPos > Len then
+  begin
+    Result := True;
+    Data.Elements[PropName] := ValueData;
+  end
+  else
+  begin
+    PropData := Data.Find(PropName);
+    if PropData <> nil then
+    begin
+      case PropData.JSONType of
+        jtObject:
+        begin
+          if Path[EndPos] = '.' then
+            Result := SetObjectPath(TJSONObject(PropData),
+              Copy(Path, EndPos, Len - EndPos + 1), ValueData);
+        end;
+        jtArray:
+          begin
+            if Path[EndPos] = '[' then
+              Result := SetArrayPath(TJSONArray(PropData),
+                Copy(Path, EndPos, Len - EndPos + 1), ValueData);
+          end;
+      end;
+    end;
+  end;
+end;
+
+function SetJSONPath(Data: TJSONData; const Path: String;
+  ValueData: TJSONData): Boolean;
+
+begin
+  Result := False;
+  case Data.JSONType of
+    jtObject:
+      Result := SetObjectPath(TJSONObject(Data), Path, ValueData);
+    jtArray:
+      Result := SetArrayPath(TJSONArray(Data), Path, ValueData);
   end;
 end;
 
