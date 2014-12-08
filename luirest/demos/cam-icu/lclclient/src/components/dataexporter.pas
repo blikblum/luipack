@@ -23,6 +23,57 @@ uses
   LuiJSONModel, EvaluationModel, PatientEvaluationModel,
   fpspreadsheet, xlsbiff8, LuiDateUtils, LuiJSONUtils, Math;
 
+const
+  ColumnNames: Array[0..38] of String = (
+    'Número',
+    'Nome',
+    'Registro',
+    'Idade',
+    'Sexo',
+    'Reinternação',
+    'Rei_em_48h',
+    'Data_internação',
+    'ICC',
+    'IRC',
+    'Cirrose',
+    'DPOC',
+    'Tumor_Hematológico',
+    'Tumor_Locoregional',
+    'Déficit_visual',
+    'DM',
+    'HAS',
+    'IAM_prévio',
+    'Alcoolismo',
+    'AVC',
+    'Tumor_metastático',
+    'Déficit_auditivo',
+    'Demência',
+    'Doença_psiquiátrica',
+    'Tabagismo',
+    'Imunossupressão_',
+    'SIDA',
+    'Doença_Reumática',
+    'Origem',
+    'Tipo_de_internação',
+    'Diagnóstico',
+    'APACHE_II',
+    'SAPS_3',
+    'Data_de_alta',
+    'Motivo_alta',
+    'Tempo_de_UTI',
+    'Tempo_de_VM',
+    'PreDeliric',
+    'Número_Avaliações'
+    );
+
+  EvaluationColumnNames: Array[0..3] of String = (
+    'T%d_RASS',
+    'T%d_Delirium',
+    'T%d_Ventilação',
+    'T%d_Sedação'
+    );
+
+
 type
 
   { TCAMICUSpreadSheet }
@@ -55,13 +106,25 @@ begin
   inherited Destroy;
 end;
 
+function GetVMDuration(EvaluationsData: TJSONArray): Integer;
+var
+  i, VentilationId: Integer;
+begin
+  Result := 0;
+  for i := 0 to EvaluationsData.Count - 1 do
+  begin
+    VentilationId := EvaluationsData.Objects[i].Get('ventilationid', 9);
+    if VentilationId = 1 then
+      Inc(Result);
+  end;
+end;
+
 procedure WriteWorksheetRow(Worksheet: TsWorksheet; PatientData: TJSONObject; EvaluationsData: TJSONArray; Row: Integer; MaxEvaluationCount: Integer);
-const
-  EVALUATION_BASE_INDEX = 37;
 var
   StrValue: String;
   EvaluationCount, i: Integer;
   EvaluationData: TJSONObject;
+  EvaluationBaseIndex: Integer;
 
   function BooleanToNumber(const PropName: String): Integer;
   begin
@@ -72,6 +135,11 @@ var
   end;
 
   procedure WriteIntegerDef(Col: Integer; const PropName: String; Default: Integer);
+  begin
+    Worksheet.WriteNumber(Row, Col, PatientData.Get(PropName, Default));
+  end;
+
+  procedure WriteFloatDef(Col: Integer; const PropName: String; Default: Double);
   begin
     Worksheet.WriteNumber(Row, Col, PatientData.Get(PropName, Default));
   end;
@@ -154,73 +222,26 @@ begin
   else
     Worksheet.WriteNumber(Row, 35, 999);
   //vm duration
-  //todo: use vm info from evaluations?
-  WriteIntegerDef(36, 'vmduration', 999);
+  Worksheet.WriteNumber(Row, 36, GetVMDuration(EvaluationsData));
+  WriteFloatDef(37, 'predeliricrisk', 999);
 
-
+  EvaluationBaseIndex := Length(ColumnNames);
   //evaluations
   EvaluationCount := Min(EvaluationsData.Count, MaxEvaluationCount);
+  Worksheet.WriteNumber(Row, 38, EvaluationCount);
   for i := 0 to EvaluationCount - 1 do
   begin
     EvaluationData := EvaluationsData.Objects[i];
     //rass
-    Worksheet.WriteNumber(Row, EVALUATION_BASE_INDEX + (i * 4), EvaluationData.Get('rass', 9));
+    Worksheet.WriteNumber(Row, EvaluationBaseIndex + (i * 4), EvaluationData.Get('rass', 9));
     //delirium
-    Worksheet.WriteNumber(Row, EVALUATION_BASE_INDEX + (i * 4) + 1, EvaluationData.Get('deliriumid', 9));
+    Worksheet.WriteNumber(Row, EvaluationBaseIndex + (i * 4) + 1, EvaluationData.Get('deliriumid', 9));
     //vm
-    Worksheet.WriteNumber(Row, EVALUATION_BASE_INDEX + (i * 4) + 2, EvaluationData.Get('ventilationid', 9));
+    Worksheet.WriteNumber(Row, EvaluationBaseIndex + (i * 4) + 2, EvaluationData.Get('ventilationid', 9));
     //sedation
-    Worksheet.WriteUTF8Text(Row, EVALUATION_BASE_INDEX + (i * 4) + 3, GetSedation(EvaluationData));
+    Worksheet.WriteUTF8Text(Row, EvaluationBaseIndex + (i * 4) + 3, GetSedation(EvaluationData));
   end;
 end;
-
-const
-  ColumnNames: Array[0..36] of String = (
-    'Número',
-    'Nome',
-    'Registro',
-    'Idade',
-    'Sexo',
-    'Reinternação',
-    'Rei_em_48h',
-    'Data_internação',
-    'ICC',
-    'IRC',
-    'Cirrose',
-    'DPOC',
-    'Tumor_Hematológico',
-    'Tumor_Locoregional',
-    'Déficit_visual',
-    'DM',
-    'HAS',
-    'IAM_prévio',
-    'Alcoolismo',
-    'AVC',
-    'Tumor_metastático',
-    'Déficit_auditivo',
-    'Demência',
-    'Doença_psiquiátrica',
-    'Tabagismo',
-    'Imunossupressão_',
-    'SIDA',
-    'Doença_Reumática',
-    'Origem',
-    'Tipo_de_internação',
-    'Diagnóstico',
-    'APACHE_II',
-    'SAPS_3',
-    'Data_de_alta',
-    'Motivo_alta',
-    'Tempo_de_UTI',
-    'Tempo_de_VM'
-    );
-
-  EvaluationColumnNames: Array[0..3] of String = (
-    'T%d_RASS',
-    'T%d_Delirium',
-    'T%d_Ventilação',
-    'T%d_Sedação'
-    );
 
 procedure TCAMICUSpreadSheet.SaveToFile(const FileName: String);
 var
