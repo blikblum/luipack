@@ -1,7 +1,6 @@
 unit LuiJSONClasses;
 
 {$mode objfpc}{$H+}
-{.$define FPC_HAS_WEAK_JSON}
 
 interface
 
@@ -103,6 +102,26 @@ uses
 
 type
   TJSONObjectMap = specialize TFPGMap<Integer, TJSONObject>;
+
+  TJSONArrayAccess = class(TJSONData)
+  private
+    FList: TFPObjectList;
+  end;
+
+  { TWeakJSONArray }
+
+  TWeakJSONArray = class(TJSONArray)
+  public
+    procedure AfterConstruction; override;
+  end;
+
+{ TWeakJSONArray }
+
+procedure TWeakJSONArray.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  TJSONArrayAccess(Self).FList.OwnsObjects := False;
+end;
 
 { TJSONChangeSet }
 
@@ -304,11 +323,7 @@ begin
         ChildrenData := TJSONArray(GroupObjData.Find(FChildrenProperty));
         if ChildrenData = nil then
         begin
-          {$ifdef FPC_HAS_WEAK_JSON}
-          ChildrenData := TJSONArray.Create(False);
-          {$else}
-          ChildrenData := TJSONArray.Create;
-          {$endif}
+          ChildrenData := TWeakJSONArray.Create;
           GroupObjData.Add(FChildrenProperty, ChildrenData);
         end;
         ChildrenData.Add(ItemObjData);
