@@ -550,12 +550,12 @@ var
 begin
   if FIsCollection then
   begin
-    SetResponseStatus(AResponse, 403, InvalidCollectionMethodError, ['DELETE']);
+    SetResponseStatus(AResponse, 405, InvalidCollectionMethodError, ['DELETE']);
     Exit;
   end;
   if FReadOnly then
   begin
-    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['PUT']);
+    SetResponseStatus(AResponse, 405, ReadOnlyAccessError, ['PUT']);
     Exit;
   end;
   Query := TSQLQuery.Create(nil);
@@ -609,12 +609,12 @@ var
 begin
   if not FIsCollection then
   begin
-    SetResponseStatus(AResponse, 403, 'POST allowed only for collection resources', []);
+    SetResponseStatus(AResponse, 405, 'POST allowed only for collection resources', []);
     Exit;
   end;
   if FReadOnly then
   begin
-    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['POST']);
+    SetResponseStatus(AResponse, 405, ReadOnlyAccessError, ['POST']);
     Exit;
   end;
   Query := TSQLQuery.Create(nil);
@@ -674,12 +674,12 @@ var
 begin
   if FIsCollection then
   begin
-    SetResponseStatus(AResponse, 403, InvalidCollectionMethodError, ['PUT']);
+    SetResponseStatus(AResponse, 405, InvalidCollectionMethodError, ['PUT']);
     Exit;
   end;
   if FReadOnly then
   begin
-    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['PUT']);
+    SetResponseStatus(AResponse, 405, ReadOnlyAccessError, ['PUT']);
     Exit;
   end;
   Query := TSQLQuery.Create(nil);
