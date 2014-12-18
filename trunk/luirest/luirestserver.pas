@@ -39,6 +39,13 @@ type
       const Args: array of const); override;
   end;
 
+  TRESTRequest = class
+  private
+    class var FResourcePath: string;
+  public
+    class property ResourcePath: String read FResourcePath;
+  end;
+
   { TRESTResource }
   {$M+}
   TRESTResource = class
@@ -122,7 +129,7 @@ type
     destructor Destroy; override;
     procedure HandleRequest(ARequest: TRequest; AResponse: TResponse); override;
     procedure ResolveRequest(ARequest: TRequest; AResponse: TResponse;
-      const Method, Path: String; PathOffset: Integer);
+      const Method, ResourcePath: String; PathOffset: Integer);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
     property Resources: TRESTResourceStore read FResources;
     property ResponseFormatter: TRESTResponseFormatterClass read FResponseFormatter write FResponseFormatter;
@@ -251,7 +258,7 @@ begin
 end;
 
 procedure TRESTServiceModule.ResolveRequest(ARequest: TRequest; AResponse: TResponse;
-  const Method, Path: String; PathOffset: Integer);
+  const Method, ResourcePath: String; PathOffset: Integer);
 var
   URIPart, NextURIPart: String;
   PartOffset: Integer;
@@ -261,11 +268,12 @@ var
 begin
   URIParams := TJSONObject.Create;
   try
+    TRESTRequest.FResourcePath := ResourcePath;
     PartOffset := PathOffset;
-    URIPart := GetURIPart(Path, PartOffset);
+    URIPart := GetURIPart(ResourcePath, PartOffset);
     if URIPart = '' then
     begin
-      SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, Path]);
+      SetResponseStatus(AResponse, 404, 'Resource path not found. PartOffset %d, URIPath: "%s"', [PartOffset, ResourcePath]);
       Exit;
     end;
     ResourceDef := FResources.Find(URIPart);
@@ -282,7 +290,7 @@ begin
       Exit;
     end;
 
-    NextURIPart := GetURIPart(Path, PartOffset);
+    NextURIPart := GetURIPart(ResourcePath, PartOffset);
     while NextURIPart <> '' do
     begin
       ResourceDef := nil;
@@ -303,7 +311,7 @@ begin
         Exit;
       end;
 
-      NextURIPart := GetURIPart(Path, PartOffset);
+      NextURIPart := GetURIPart(ResourcePath, PartOffset);
     end;
 
     if Method = 'GET' then
@@ -350,7 +358,6 @@ procedure TRESTResource.RedirectRequest(ARequest: TRequest; AResponse: TResponse
 var
   Offset: Integer;
 begin
-  //todo: add ability to retieve the original request path and method
   if Relative then
     Offset := 1
   else

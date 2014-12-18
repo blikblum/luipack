@@ -532,7 +532,7 @@ begin
         if FIgnoreNotFound then
           AResponse.Contents.Add('{}')
         else
-          SetResponseStatus(AResponse, 404, 'Resource "%s" not found', [ARequest.PathInfo]);
+          SetResponseStatus(AResponse, 404, 'Resource "%s" not found', [TRESTRequest.ResourcePath]);
       end;
     end;
   finally
