@@ -301,6 +301,8 @@ var
   i, KeyIndex: Integer;
 begin
   FData.Clear;
+  if (FGroupData = nil) or (FItemData = nil) then
+    raise Exception.Create('TJSONGroupTree - ItemData and GroupData must be set');
   GroupMap := TJSONObjectMap.Create;
   //todo: add option to sort the resulting array after LoadData.
   //In this case sort the groupmap can be sorted
