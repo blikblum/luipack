@@ -41,8 +41,8 @@ type
     procedure Fetch;
     procedure Fetch(const IdValue: Variant);
     function ParamByName(const ParamName: String): TParam;
-    procedure Save;
-    procedure Save(const IdValue: Variant);
+    function Save: Boolean;
+    function Save(const IdValue: Variant): Boolean;
     property Collection: TJSONCollection read FCollection;
     property Data: TJSONObject read FData;
     class property DefaultResourceClient: IResourceClient write SetDefaultResourceClient;
@@ -533,25 +533,25 @@ begin
   Result := FResource.ParamByName(ParamName);
 end;
 
-procedure TJSONModel.Save;
+function TJSONModel.Save: Boolean;
 begin
   if FCollection <> nil then
-    FCollection.SaveItem(Self)
+    Result := FCollection.SaveItem(Self)
   else
   begin
     ResourceNeeded;
-    FResource.Save;
+    Result := FResource.Save;
   end;
 end;
 
-procedure TJSONModel.Save(const IdValue: Variant);
+function TJSONModel.Save(const IdValue: Variant): Boolean;
 begin
   if FCollection <> nil then
-    FCollection.SaveItem(Self)
+    Result := FCollection.SaveItem(Self, IdValue)
   else
   begin
     ResourceNeeded;
-    FResource.Save(IdValue);
+    Result := FResource.Save(IdValue);
   end;
 end;
 
