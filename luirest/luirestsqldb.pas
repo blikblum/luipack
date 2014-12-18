@@ -90,6 +90,10 @@ type
 
   end;
 
+const
+  ReadOnlyAccessError = '%s not allowed in read only resources';
+  InvalidCollectionMethodError = '%s not allowed for collection resources';
+
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 var
   i: Integer;
@@ -544,36 +548,41 @@ procedure TSqldbJSONResource.HandleDelete(ARequest: TRequest; AResponse: TRespon
 var
   Query: TSQLQuery;
 begin
-  if not FIsCollection and not FReadOnly then
+  if FIsCollection then
   begin
-    Query := TSQLQuery.Create(nil);
+    SetResponseStatus(AResponse, 403, InvalidCollectionMethodError, ['DELETE']);
+    Exit;
+  end;
+  if FReadOnly then
+  begin
+    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['PUT']);
+    Exit;
+  end;
+  Query := TSQLQuery.Create(nil);
+  try
+    Query.DataBase := FConnection;
+    Query.SQL.Add(FSelectSQL);
+    Query.SQL.Add(GetResourceIdentifierSQL);
+    PrepareQuery(Query);
+    JSONDataToParams(URIParams, Query.Params);
     try
-      Query.DataBase := FConnection;
-      Query.SQL.Add(FSelectSQL);
-      Query.SQL.Add(GetResourceIdentifierSQL);
-      PrepareQuery(Query);
-      JSONDataToParams(URIParams, Query.Params);
-      try
-        Query.Open;
-      except
-        on E: Exception do
-        begin
-          SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s', [E.Message] );
-          Exit;
-        end;
-      end;
-      if not Query.IsEmpty then
+      Query.Open;
+    except
+      on E: Exception do
       begin
-        Query.Delete;
-        Query.ApplyUpdates;
-        FConnection.Transaction.Commit;
+        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s', [E.Message] );
+        Exit;
       end;
-    finally
-      Query.Destroy;
     end;
-  end
-  else
-    inherited HandleDelete(ARequest, AResponse);
+    if not Query.IsEmpty then
+    begin
+      Query.Delete;
+      Query.ApplyUpdates;
+      FConnection.Transaction.Commit;
+    end;
+  finally
+    Query.Destroy;
+  end;
 end;
 
 procedure TSqldbJSONResource.HandlePatch(ARequest: TRequest;
@@ -598,59 +607,64 @@ var
   PKField: TField;
   NewResourcePath, NewResourceId: String;
 begin
-  if FIsCollection and not FReadOnly then
+  if not FIsCollection then
   begin
-    Query := TSQLQuery.Create(nil);
-    try
-      Query.DataBase := FConnection;
-      Query.SQL.Add(FSelectSQL);
-      Query.SQL.Add('where 1 <> 1');
-      PrepareQuery(Query);
-      JSONDataToParams(URIParams, Query.Params);
-      if TryStrToJSON(ARequest.Content, RequestData) then
-      begin
-        try
-          Query.Open;
-          //workaround to an issue with firebird that sets Required in PK PKField
-          PKField := Query.FindField(FPrimaryKey);
-          if PKField <> nil then
-            PKField.Required := False;
-          Query.Append;
-          SetQueryData(Query, RequestData, URIParams);
-          Query.Post;
-          NewResourceId := InsertRecord(Query);
-        except
-          on E: Exception do
-          begin
-            //todo: return the effective Path instead of PathInfo
-            SetResponseStatus(AResponse, 400, 'Error posting to %s: %s', [ARequest.PathInfo, E.Message]);
-            Exit;
-          end;
+    SetResponseStatus(AResponse, 403, 'POST allowed only for collection resources', []);
+    Exit;
+  end;
+  if FReadOnly then
+  begin
+    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['POST']);
+    Exit;
+  end;
+  Query := TSQLQuery.Create(nil);
+  try
+    Query.DataBase := FConnection;
+    Query.SQL.Add(FSelectSQL);
+    Query.SQL.Add('where 1 <> 1');
+    PrepareQuery(Query);
+    JSONDataToParams(URIParams, Query.Params);
+    if TryStrToJSON(ARequest.Content, RequestData) then
+    begin
+      try
+        Query.Open;
+        //workaround to an issue with firebird that sets Required in PK PKField
+        PKField := Query.FindField(FPrimaryKey);
+        if PKField <> nil then
+          PKField.Required := False;
+        Query.Append;
+        SetQueryData(Query, RequestData, URIParams);
+        Query.Post;
+        NewResourceId := InsertRecord(Query);
+      except
+        on E: Exception do
+        begin
+          //todo: return the effective Path instead of PathInfo
+          SetResponseStatus(AResponse, 400, 'Error posting to %s: %s', [ARequest.PathInfo, E.Message]);
+          Exit;
         end;
-        RequestData.Free;
-      end
-      else
-      begin
-        //todo: improve error handling
-        SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
-        Exit;
       end;
-      if NewResourceId <> '' then
-      begin
-        NewResourcePath := ARequest.PathInfo;
-        if NewResourcePath[Length(NewResourcePath)] <> '/' then
-          NewResourcePath := NewResourcePath + '/';
-        NewResourcePath := NewResourcePath + NewResourceId;
-        RedirectRequest(ARequest, AResponse, 'GET', NewResourcePath, False);
-      end
-      else
-        SetResponseStatus(AResponse, 400, '"%s" - Unable to get resource id', [ARequest.PathInfo]);
-    finally
-      Query.Destroy;
+      RequestData.Free;
+    end
+    else
+    begin
+      //todo: improve error handling
+      SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
+      Exit;
     end;
-  end
-  else
-    inherited HandlePost(ARequest, AResponse);
+    if NewResourceId <> '' then
+    begin
+      NewResourcePath := ARequest.PathInfo;
+      if NewResourcePath[Length(NewResourcePath)] <> '/' then
+        NewResourcePath := NewResourcePath + '/';
+      NewResourcePath := NewResourcePath + NewResourceId;
+      RedirectRequest(ARequest, AResponse, 'GET', NewResourcePath, False);
+    end
+    else
+      SetResponseStatus(AResponse, 400, '"%s" - Unable to get resource id', [ARequest.PathInfo]);
+  finally
+    Query.Destroy;
+  end;
 end;
 
 procedure TSqldbJSONResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
@@ -658,39 +672,44 @@ var
   RequestData: TJSONObject;
   Query: TSQLQuery;
 begin
-  if not FIsCollection and not FReadOnly then
+  if FIsCollection then
   begin
-    Query := TSQLQuery.Create(nil);
+    SetResponseStatus(AResponse, 403, InvalidCollectionMethodError, ['PUT']);
+    Exit;
+  end;
+  if FReadOnly then
+  begin
+    SetResponseStatus(AResponse, 403, ReadOnlyAccessError, ['PUT']);
+    Exit;
+  end;
+  Query := TSQLQuery.Create(nil);
+  try
+    Query.DataBase := FConnection;
+    Query.SQL.Add(FSelectSQL);
+    Query.SQL.Add(GetResourceIdentifierSQL);
+    JSONDataToParams(URIParams, Query.Params);
+    PrepareQuery(Query);
+    Query.Open;
+    if TryStrToJSON(ARequest.Content, RequestData) then
     try
-      Query.DataBase := FConnection;
-      Query.SQL.Add(FSelectSQL);
-      Query.SQL.Add(GetResourceIdentifierSQL);
-      JSONDataToParams(URIParams, Query.Params);
-      PrepareQuery(Query);
-      Query.Open;
-      if TryStrToJSON(ARequest.Content, RequestData) then
-      try
-        if Query.RecordCount > 0 then
-          Query.Edit
-        else
-        begin
-          Query.Append;
-          SetPrimaryKeyData(Query, URIParams);
-        end;
-        SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
-        Query.Post;
-        Query.ApplyUpdates;
-        FConnection.Transaction.CommitRetaining;
-      finally
-        RequestData.Free;
+      if Query.RecordCount > 0 then
+        Query.Edit
+      else
+      begin
+        Query.Append;
+        SetPrimaryKeyData(Query, URIParams);
       end;
-      RedirectRequest(ARequest, AResponse, 'GET', ARequest.PathInfo, False);
+      SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
+      Query.Post;
+      Query.ApplyUpdates;
+      FConnection.Transaction.CommitRetaining;
     finally
-      Query.Destroy;
+      RequestData.Free;
     end;
-  end
-  else
-    inherited HandlePut(ARequest, AResponse);
+    RedirectRequest(ARequest, AResponse, 'GET', ARequest.PathInfo, False);
+  finally
+    Query.Destroy;
+  end;
 end;
 
 end.
