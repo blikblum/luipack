@@ -402,6 +402,7 @@ var
   IdFieldData: TJSONData;
   IdField, Id: String;
 begin
+  FIdValue := Unassigned;
   IdField := FModelDef.IdField;
   if IdField <> '' then
   begin
@@ -421,14 +422,18 @@ begin
   end
   else
     Id := '';
-  FIdValue := Unassigned;
   Result := DoFetch(Id);
 end;
 
 function TRESTJSONObjectResource.Fetch(IdValue: Variant): Boolean;
 begin
-  FIdValue := IdValue;
-  Result := DoFetch(VarToStr(IdValue));
+  if VarIsEmpty(IdValue) then
+    Result := Fetch
+  else
+  begin
+    FIdValue := IdValue;
+    Result := DoFetch(VarToStr(IdValue));
+  end;
 end;
 
 function TRESTJSONObjectResource.GetData: TJSONObject;
