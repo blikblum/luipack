@@ -530,6 +530,7 @@ var
   IdField: String;
   Id: Variant;
 begin
+  FIdValue := Unassigned;
   IdField := FModelDef.PrimaryKey;
   if IdField <> '' then
   begin
@@ -549,14 +550,18 @@ begin
   end
   else
     Id := Null;
-  FIdValue := Unassigned;
   Result := DoFetch(Id);
 end;
 
 function TSqlite3JSONObjectResource.Fetch(IdValue: Variant): Boolean;
 begin
-  FIdValue := IdValue;
-  Result := DoFetch(IdValue);
+  if not VarIsEmpty(IdValue) then
+  begin
+    FIdValue := IdValue;
+    Result := DoFetch(IdValue);
+  end
+  else
+    Result := Fetch;
 end;
 
 function TSqlite3JSONObjectResource.GetData: TJSONObject;

@@ -427,13 +427,13 @@ end;
 
 function TRESTJSONObjectResource.Fetch(IdValue: Variant): Boolean;
 begin
-  if VarIsEmpty(IdValue) then
-    Result := Fetch
-  else
+  if not VarIsEmpty(IdValue) then
   begin
     FIdValue := IdValue;
     Result := DoFetch(VarToStr(IdValue));
-  end;
+  end
+  else
+    Result := Fetch;
 end;
 
 function TRESTJSONObjectResource.GetData: TJSONObject;
