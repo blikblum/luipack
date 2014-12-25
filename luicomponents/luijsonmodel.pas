@@ -28,6 +28,7 @@ type
     procedure ResourceNeeded;
   protected
     function CreateData: TJSONObject; virtual;
+    function DoFetch(const IdValue: Variant): Boolean; virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -38,8 +39,8 @@ type
     destructor Destroy; override;
     class procedure ClearCache;
     procedure Delete;
-    procedure Fetch;
-    procedure Fetch(const IdValue: Variant);
+    function Fetch: Boolean;
+    function Fetch(const IdValue: Variant): Boolean;
     function ParamByName(const ParamName: String): TParam;
     function Save: Boolean;
     function Save(const IdValue: Variant): Boolean;
@@ -70,8 +71,8 @@ type
   protected
     procedure Changed;
     procedure DeleteItem(Item: TJSONModel);
-    procedure FetchItem(Item: TJSONModel);
-    procedure FetchItem(Item: TJSONModel; const IdValue: Variant);
+    function FetchItem(Item: TJSONModel): Boolean;
+    function FetchItem(Item: TJSONModel; const IdValue: Variant): Boolean;
     function GetItem(ItemIndex: Integer): TJSONModel;
     class function GetItemClass: TJSONModelClass; virtual;
     function GetResourceName: String; virtual;
@@ -253,21 +254,22 @@ begin
   end;
 end;
 
-procedure TJSONCollection.FetchItem(Item: TJSONModel);
+function TJSONCollection.FetchItem(Item: TJSONModel): Boolean;
 begin
   ItemResourceNeeded(Item);
-  if FItemResource.Fetch then
+  Result := FItemResource.Fetch;
+  if Result then
   begin
     if Data.IndexOf(Item.Data) <> -1 then
       FPONotifyObservers(Self, ooChange, Item);
   end;
 end;
 
-procedure TJSONCollection.FetchItem(Item: TJSONModel;
-  const IdValue: Variant);
+function TJSONCollection.FetchItem(Item: TJSONModel; const IdValue: Variant): Boolean;
 begin
   ItemResourceNeeded(Item);
-  if FItemResource.Fetch(IdValue) then
+  Result := FItemResource.Fetch(IdValue);
+  if Result then
   begin
     if Data.IndexOf(Item.Data) <> -1 then
       FPONotifyObservers(Self, ooChange, Item);
@@ -454,6 +456,17 @@ begin
   Result := TJSONObject.Create;
 end;
 
+function TJSONModel.DoFetch(const IdValue: Variant): Boolean;
+begin
+  if FCollection <> nil then
+    Result := FCollection.FetchItem(Self, IdValue)
+  else
+  begin
+    ResourceNeeded;
+    Result := FResource.Fetch(IdValue);
+  end;
+end;
+
 class function TJSONModel.GetIdField: String;
 begin
   //todo: get through Resource info?
@@ -511,26 +524,14 @@ begin
   end;
 end;
 
-procedure TJSONModel.Fetch;
+function TJSONModel.Fetch: Boolean;
 begin
-  if FCollection <> nil then
-    FCollection.FetchItem(Self)
-  else
-  begin
-    ResourceNeeded;
-    FResource.Fetch;
-  end;
+  Result := DoFetch(Unassigned);
 end;
 
-procedure TJSONModel.Fetch(const IdValue: Variant);
+function TJSONModel.Fetch(const IdValue: Variant): Boolean;
 begin
-  if FCollection <> nil then
-    FCollection.FetchItem(Self, IdValue)
-  else
-  begin
-    ResourceNeeded;
-    FResource.Fetch(IdValue);
-  end;
+  Result := DoFetch(IdValue);
 end;
 
 function TJSONModel.ParamByName(const ParamName: String): TParam;
