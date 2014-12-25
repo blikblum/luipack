@@ -607,8 +607,14 @@ end;
 
 function TSqlite3JSONObjectResource.Save(IdValue: Variant): Boolean;
 begin
-  FIdValue := IdValue;
-  Result := DoSave(IdValue);
+  if not VarIsEmpty(IdValue) then
+  begin
+    Result := DoSave(IdValue);
+    if Result then
+      FIdValue := IdValue;
+  end
+  else
+    Result := Save;
 end;
 
 procedure TSqlite3JSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
