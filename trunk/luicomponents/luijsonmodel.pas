@@ -322,6 +322,9 @@ constructor TJSONCollection.Create(AItemClass: TJSONModelClass);
 begin
   if AItemClass = nil then
     raise Exception.Create('TJSONCollection - ItemClass is not set');
+  if not AItemClass.InheritsFrom(GetItemClass) then
+    raise Exception.CreateFmt('TJSONCollection - "%s" does not inherit from "%s"',
+      [AItemClass.ClassName, GetItemClass.ClassName]);
   FItemClass := AItemClass;
 end;
 
