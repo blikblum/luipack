@@ -74,6 +74,7 @@ type
     procedure FetchItem(Item: TJSONModel; const IdValue: Variant);
     function GetItem(ItemIndex: Integer): TJSONModel;
     class function GetItemClass: TJSONModelClass; virtual;
+    function GetResourceName: String; virtual;
     procedure ParseData(ResourceData: TJSONData; out CollectionData: TJSONArray;
       out FreeCollectionData: Boolean); virtual;
     procedure ResetData;
@@ -230,7 +231,7 @@ end;
 procedure TJSONCollection.ResourceNeeded;
 begin
   if FResource = nil then
-    FResource := FItemClass.GetResourceClient.GetJSONArray(FItemClass.GetResourceName);
+    FResource := FItemClass.GetResourceClient.GetJSONArray(GetResourceName);
 end;
 
 procedure TJSONCollection.Changed;
@@ -370,6 +371,11 @@ end;
 class function TJSONCollection.GetItemClass: TJSONModelClass;
 begin
   Result := TJSONModel;
+end;
+
+function TJSONCollection.GetResourceName: String;
+begin
+  Result := FItemClass.GetResourceName;
 end;
 
 function TJSONCollection.Fetch: Boolean;
