@@ -29,6 +29,7 @@ type
   protected
     function CreateData: TJSONObject; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
+    function DoSave(const IdValue: Variant): Boolean; virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -467,6 +468,17 @@ begin
   end;
 end;
 
+function TJSONModel.DoSave(const IdValue: Variant): Boolean;
+begin
+  if FCollection <> nil then
+    Result := FCollection.SaveItem(Self, IdValue)
+  else
+  begin
+    ResourceNeeded;
+    Result := FResource.Save(IdValue);
+  end;
+end;
+
 class function TJSONModel.GetIdField: String;
 begin
   //todo: get through Resource info?
@@ -542,24 +554,12 @@ end;
 
 function TJSONModel.Save: Boolean;
 begin
-  if FCollection <> nil then
-    Result := FCollection.SaveItem(Self)
-  else
-  begin
-    ResourceNeeded;
-    Result := FResource.Save;
-  end;
+  Result := DoSave(Unassigned);
 end;
 
 function TJSONModel.Save(const IdValue: Variant): Boolean;
 begin
-  if FCollection <> nil then
-    Result := FCollection.SaveItem(Self, IdValue)
-  else
-  begin
-    ResourceNeeded;
-    Result := FResource.Save(IdValue);
-  end;
+  Result := DoSave(IdValue);
 end;
 
 end.
