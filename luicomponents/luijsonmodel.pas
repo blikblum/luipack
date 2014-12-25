@@ -87,6 +87,7 @@ type
     constructor Create(AItemClass: TJSONModelClass); virtual;
     destructor Destroy; override;
     function Add(Item: TJSONModel): TJSONModel;
+    procedure Clear;
     function CreateItem: TJSONModel;
     function Get(ItemData: TJSONObject): TJSONModel;
     function Fetch: Boolean;
@@ -350,6 +351,14 @@ begin
   FData.Add(Item.Data);
   Item.FCollection := Self;
   FPONotifyObservers(Self, ooAddItem, Item);
+end;
+
+procedure TJSONCollection.Clear;
+begin
+  if FData <> nil then
+    FData.Clear;
+  if FItems <> nil then
+    FItems.Clear;
 end;
 
 function TJSONCollection.Get(ItemData: TJSONObject): TJSONModel;
