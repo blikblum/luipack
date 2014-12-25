@@ -479,8 +479,14 @@ end;
 
 function TRESTJSONObjectResource.Save(IdValue: Variant): Boolean;
 begin
-  FIdValue := IdValue;
-  Result := DoSave(VarToStr(IdValue));
+  if not VarIsEmpty(IdValue) then
+  begin
+    Result := DoSave(VarToStr(IdValue));
+    if Result then
+      FIdValue := IdValue;
+  end
+  else
+    Result := Save;
 end;
 
 procedure TRESTJSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
