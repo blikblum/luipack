@@ -31,10 +31,16 @@ type
     function ModalResult: TModalResult;
   end;
 
+  { IPresentationManager }
+
   IPresentationManager = interface
     ['{25532926-50FF-42F3-800D-AB4A7B01B3BA}']
     function GetPresentation(const PresentationName: String): IPresentation;
     procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass = nil);
+    procedure Register(const PresentationName: String; ViewClass: TFormClass;
+      const DefaultProperties: array of const);
+    procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass;
+      const DefaultProperties: array of const);
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
   end;
 
@@ -47,20 +53,31 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetPresentation(const PresentationName: String): IPresentation;
-    procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass = nil);
+    procedure Register(const PresentationName: String; ViewClass: TFormClass;
+      PresenterClass: TPresenterClass = nil); inline;
+    procedure Register(const PresentationName: String; ViewClass: TFormClass;
+      const DefaultProperties: array of const); inline;
+    procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass;
+      const DefaultProperties: array of const);
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
   end;
 
 implementation
 
 uses
-  LuiRTTIUtils, typinfo, LuiMiscUtils;
+  LuiRTTIUtils, typinfo, LuiMiscUtils, VarRecUtils;
 
 type
+
+  { TPresentationDef }
+
   TPresentationDef = class
   private
     FPresenterClass: TPresenterClass;
     FViewClass: TFormClass;
+    FDefaultProperties: TConstArray;
+  public
+    destructor Destroy; override;
   end;
 
   { TPresentation }
@@ -86,6 +103,14 @@ type
     function ShowModal: IPresentation;
     function ShowModal(const Properties: array of const): TModalResult;
   end;
+
+{ TPresentationDef }
+
+destructor TPresentationDef.Destroy;
+begin
+  FinalizeConstArray(FDefaultProperties);
+  inherited Destroy;
+end;
 
 
 procedure TPresenter.Initialize;
@@ -165,6 +190,7 @@ begin
   if PresentationDef.FPresenterClass <> nil then
     FPresenter := PresentationDef.FPresenterClass.Create(FView);
   FName := Name;
+  SetProperties(PresentationDef.FDefaultProperties);
 end;
 
 destructor TPresentation.Destroy;
@@ -256,6 +282,19 @@ end;
 
 procedure TPresentationManager.Register(const PresentationName: String;
   ViewClass: TFormClass; PresenterClass: TPresenterClass);
+begin
+  Register(PresentationName, ViewClass, PresenterClass, []);
+end;
+
+procedure TPresentationManager.Register(const PresentationName: String;
+  ViewClass: TFormClass; const DefaultProperties: array of const);
+begin
+  Register(PresentationName, ViewClass, nil, DefaultProperties);
+end;
+
+procedure TPresentationManager.Register(const PresentationName: String;
+  ViewClass: TFormClass; PresenterClass: TPresenterClass;
+  const DefaultProperties: array of const);
 var
   PresentationDef: TPresentationDef;
 begin
@@ -266,8 +305,10 @@ begin
   PresentationDef := TPresentationDef.Create;
   PresentationDef.FViewClass := ViewClass;
   PresentationDef.FPresenterClass := PresenterClass;
+  PresentationDef.FDefaultProperties := CreateConstArray(DefaultProperties);
   FPresentationDefs.Add(PresentationName, PresentationDef);
 end;
+
 
 end.
 
