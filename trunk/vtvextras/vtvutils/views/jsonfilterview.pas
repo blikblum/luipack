@@ -11,10 +11,15 @@ uses
 
 type
 
+  TActionLink = class(TCustomLabel)
+  published
+    property OnClick;
+    property Caption;
+  end;
+
   { TJSONFilterFrame }
 
   TJSONFilterFrame = class(TFrame)
-    ActionLabel: TLabel;
     ListView: TVirtualJSONListView;
     procedure ListViewClick(Sender: TObject);
     procedure ListViewFocusChanged(Sender: TBaseVirtualTree;
@@ -24,6 +29,7 @@ type
     procedure ListViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ListViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
+    FActionLink: TActionLink;
     FData: TJSONData;
     FFilterProperty: String;
     FOnChange: TNotifyEvent;
@@ -32,8 +38,6 @@ type
     FMatchCount: Integer;
     FSearchTerm: String;
     FTextProperty: String;
-    procedure SetActionCaption(const Value: String);
-    procedure SetOnAction(Value: TNotifyEvent);
     procedure UpdateListView;
     procedure FilterCallback(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Data: Pointer; var Abort: Boolean);
@@ -44,19 +48,20 @@ type
   protected
     procedure Paint; override;
   public
+    constructor Create(TheOwner: TComponent); override;
     procedure Initialize;
     procedure LoadData;
     procedure SelectFirst;
     procedure SetTerm(const SearchTerm: String);
-    property ActionCaption: String write SetActionCaption;
     property Data: TJSONData read FData write FData;
     property FilterProperty: String read FFilterProperty write FFilterProperty;
     property HasMatches: Boolean read GetHasMatches;
-    property OnAction: TNotifyEvent write SetOnAction;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnSelect: TNotifyEvent read FOnSelect write FOnSelect;
     property SelectedData: TJSONObject read FSelectedData;
     property TextProperty: String read FTextProperty write FTextProperty;
+  published
+    property ActionLink: TActionLink read FActionLink;
   end;
 
 implementation
@@ -152,16 +157,6 @@ begin
     ListView.IterateSubtree(nil, @ClearCallback, nil);
 end;
 
-procedure TJSONFilterFrame.SetActionCaption(const Value: String);
-begin
-  ActionLabel.Caption := Value;
-end;
-
-procedure TJSONFilterFrame.SetOnAction(Value: TNotifyEvent);
-begin
-  ActionLabel.OnClick := Value;
-end;
-
 procedure TJSONFilterFrame.ClearCallback(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
 begin
@@ -191,11 +186,23 @@ begin
   Canvas.Frame3d(R, 1, bvRaised);
 end;
 
+constructor TJSONFilterFrame.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+  FActionLink := TActionLink.Create(Self);
+  FActionLink.Cursor := crHandPoint;
+  FActionLink.Anchors := [akBottom, akLeft];
+  FActionLink.SetBounds(2, ListView.Height + ListView.Top + 2, FActionLink.Width, FActionLink.Height);
+  FActionLink.Font.Color := clBlue;
+  FActionLink.Font.Style := [fsUnderline];
+  FActionLink.Parent := Self;
+end;
+
 procedure TJSONFilterFrame.Initialize;
 begin
   InitializeListView;
-  ActionLabel.Visible := ActionLabel.OnClick <> nil;
-  if ActionLabel.Visible then
+  FActionLink.Visible := FActionLink.OnClick <> nil;
+  if FActionLink.Visible then
     ListView.BorderSpacing.Bottom := 17
   else
     ListView.BorderSpacing.Bottom := 0;
