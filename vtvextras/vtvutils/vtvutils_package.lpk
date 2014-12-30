@@ -17,7 +17,7 @@
         </SyntaxOptions>
       </Parsing>
     </CompilerOptions>
-    <Files Count="10">
+    <Files Count="12">
       <Item1>
         <Filename Value="vtcomboeditlink.pas"/>
         <UnitName Value="VTComboEditLink"/>
@@ -59,18 +59,32 @@
         <Filename Value="views\jsonfilterview.pas"/>
         <UnitName Value="JSONFilterView"/>
       </Item10>
+      <Item11>
+        <Filename Value="views\jsoncollectionview.pas"/>
+        <UnitName Value="jsoncollectionview"/>
+      </Item11>
+      <Item12>
+        <Filename Value="views\jsoncollectionview.lfm"/>
+        <Type Value="LFM"/>
+      </Item12>
     </Files>
     <Type Value="RunAndDesignTime"/>
-    <RequiredPkgs Count="3">
+    <RequiredPkgs Count="5">
       <Item1>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luidialogs_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="luicontrols"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item3>
+      <Item4>
+        <PackageName Value="virtualtreeview_package"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="LCL"/>
+      </Item5>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)\"/>
