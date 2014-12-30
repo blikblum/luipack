@@ -1,9 +1,9 @@
 object JSONFilterFrame: TJSONFilterFrame
   Left = 0
-  Height = 87
+  Height = 88
   Top = 0
   Width = 337
-  ClientHeight = 87
+  ClientHeight = 88
   ClientWidth = 337
   Color = clWhite
   ParentColor = False
@@ -12,7 +12,7 @@ object JSONFilterFrame: TJSONFilterFrame
   DesignTop = 246
   object ListView: TVirtualJSONListView
     Left = 1
-    Height = 68
+    Height = 69
     Top = 1
     Width = 335
     TextProperty = 'text'
@@ -37,17 +37,5 @@ object JSONFilterFrame: TJSONFilterFrame
     OnInitNode = ListViewInitNode
     OnKeyDown = ListViewKeyDown
     OnKeyUp = ListViewKeyUp
-  end
-  object ActionLabel: TLabel
-    Cursor = crHandPoint
-    Left = 1
-    Height = 15
-    Top = 71
-    Width = 63
-    Caption = 'ActionLabel'
-    Font.Color = clBlue
-    Font.Style = [fsUnderline]
-    ParentColor = False
-    ParentFont = False
   end
 end
