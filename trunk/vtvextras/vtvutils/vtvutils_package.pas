@@ -9,7 +9,7 @@ interface
 uses
   VTComboEditLink, VTController, VirtualNodeInterfaces, VTObjectTree, VTJSON, 
   register_vtvutils, VTJSONEx, CollectionVirtualTreeMediator, JSONFilterView, 
-  LazarusPackageIntf;
+  JSONCollectionView, LazarusPackageIntf;
 
 implementation
 
