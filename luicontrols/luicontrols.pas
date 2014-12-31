@@ -10,7 +10,8 @@ uses
   ToggleLabel, register_luicontrols, SearchEdit, ValidateEdit, WizardControls, 
   DropDownManager, DropDownButton, AdvancedLabel, DropDownBaseButtons, 
   MenuButton, VirtualPages, JSONMediators, JSONBooleanRadioButtonView, 
-  JSONFormMediator, FormMediator, PresentationManager, LazarusPackageIntf;
+  JSONFormMediator, FormMediator, PresentationManager, 
+  PresentationDescriptors, PresentationOptionsView, LazarusPackageIntf;
 
 implementation
 

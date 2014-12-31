@@ -9,7 +9,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="frames"/>
+        <OtherUnitFiles Value="frames;ide;ide\forms"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)-$(LCLWidgetType)"/>
       </SearchPaths>
       <Parsing>
@@ -17,9 +17,6 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="Set of miscellaneous controls:
 TToggleLabel
@@ -29,7 +26,7 @@ TSearchEdit
     <License Value="Modified LGPL
 "/>
     <Version Minor="2"/>
-    <Files Count="17">
+    <Files Count="19">
       <Item1>
         <Filename Value="togglelabel.pas"/>
         <UnitName Value="ToggleLabel"/>
@@ -89,16 +86,24 @@ TSearchEdit
       </Item14>
       <Item15>
         <Filename Value="jsonformmediator.pas"/>
-        <UnitName Value="jsonformmediator"/>
+        <UnitName Value="JSONFormMediator"/>
       </Item15>
       <Item16>
         <Filename Value="formmediator.pas"/>
-        <UnitName Value="formmediator"/>
+        <UnitName Value="FormMediator"/>
       </Item16>
       <Item17>
         <Filename Value="presentationmanager.pas"/>
         <UnitName Value="PresentationManager"/>
       </Item17>
+      <Item18>
+        <Filename Value="ide\presentationdescriptors.pas"/>
+        <UnitName Value="PresentationDescriptors"/>
+      </Item18>
+      <Item19>
+        <Filename Value="ide\forms\presentationoptionsview.pas"/>
+        <UnitName Value="PresentationOptionsView"/>
+      </Item19>
     </Files>
     <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
@@ -110,7 +115,7 @@ TSearchEdit
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
