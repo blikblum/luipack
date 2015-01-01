@@ -17,6 +17,7 @@ type
     FPresenterProperties: TStrings;
     FPresenterUnitName: String;
     FViewClassName: String;
+    function GetPresenterPublishedSection: String;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -44,6 +45,24 @@ uses
   PresentationOptionsView;
 
 { TPresenterViewDescriptor }
+
+function TPresenterViewDescriptor.GetPresenterPublishedSection: String;
+var
+  i: Integer;
+  PropName, PropType: String;
+begin
+  Result := '';
+  if FPresenterProperties.Count = 0 then
+    Exit;
+  Result := '  published' + LineEnding;
+  for i := 0 to FPresenterProperties.Count - 1 do
+  begin
+    PropName := Trim(FPresenterProperties.Names[i]);
+    PropType := Trim(FPresenterProperties.ValueFromIndex[i]);
+    if (PropName = '') or (PropType = '') then
+      Result := Result + Format('    property %s: %s read F%0:s write F%0:s;', [PropName, PropType]) + LineEnding;
+  end;
+end;
 
 constructor TPresenterViewDescriptor.Create;
 begin
@@ -75,6 +94,7 @@ const
     'type' + LineEnding +
     ''+ LineEnding +
     '  {{presenterclass}} = class(TPresenter)' + LineEnding +
+    '{{presenterpublished}}' + LineEnding +
     '  end;' + LineEnding +
     ''+ LineEnding +
     'implementation'+ LineEnding +
@@ -148,6 +168,7 @@ begin
     LazarusIDE.ActiveProject.AddFile(PresenterFile, False);
     S := StringReplace(PresenterSrc, '{{presenterunit}}', FPresenterUnitName, [rfReplaceAll]);
     S := StringReplace(S, '{{presenterclass}}', FPresenterClassName, [rfReplaceAll]);
+    S := StringReplace(S, '{{presenterpublished}}', GetPresenterPublishedSection, []);
     PresenterFile.SetSourceText(S, True);
   end;
 end;
