@@ -101,4 +101,11 @@ object JSONModelUnitOptionsForm: TJSONModelUnitOptionsForm
     EditLabel.ParentColor = False
     TabOrder = 2
   end
+  object UnitNameChangeTimer: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = UnitNameChangeTimerTimer
+    left = 148
+    top = 15
+  end
 end
