@@ -15,6 +15,9 @@ procedure Register;
 
 implementation
 
+uses
+  PresentationDescriptors, ProjectIntf;
+
 const
   ComponentPage = 'Lui Controls';
 
@@ -76,6 +79,7 @@ end;
 procedure Register;
 
 begin
+  RegisterProjectFileDescriptor(TPresenterViewDescriptor.Create);
   RegisterUnit('ToggleLabel',@RegisterUnitToggleLabel);
   RegisterUnit('MenuButton',@RegisterUnitMenuButton);
   RegisterUnit('SearchEdit',@RegisterUnitSearchEdit);

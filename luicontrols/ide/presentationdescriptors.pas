@@ -5,7 +5,7 @@ unit PresentationDescriptors;
 interface
 
 uses
-  Classes, SysUtils, LazIDEIntf, ProjectIntf, Forms;
+  Classes, SysUtils, LazIDEIntf, ProjectIntf, Forms, Controls;
 
 type
 
@@ -14,10 +14,12 @@ type
   TPresenterViewDescriptor = class(TFileDescPascalUnitWithResource)
   private
     FPresenterClassName: String;
+    FPresenterProperties: TStrings;
     FPresenterUnitName: String;
     FViewClassName: String;
   public
     constructor Create; override;
+    destructor Destroy; override;
     function CreateSource(const aFilename, aSourceName,
       aResourceName: string): string; override;
     function GetLocalizedDescription: String; override;
@@ -31,11 +33,15 @@ type
       var NewSource: string; Quiet: boolean): TModalResult; override;
   published
     property PresenterClassName: String read FPresenterClassName write FPresenterClassName;
+    property PresenterProperties: TStrings read FPresenterProperties;
     property PresenterUnitName: String read FPresenterUnitName write FPresenterUnitName;
     property ViewClassName: String read FViewClassName write FViewClassName;
   end;
 
 implementation
+
+uses
+  PresentationOptionsView;
 
 { TPresenterViewDescriptor }
 
@@ -44,35 +50,75 @@ begin
   inherited Create;
   Name:='Presenter / View(TForm)';
   ResourceClass:=TForm;
-  UseCreateFormStatements:=true;
   RequiredPackages:='LCL';
+  FPresenterProperties := TStringList.Create;
+  DefaultSourceName := 'MyView';
+  ViewClassName := 'TMyForm';
+  PresenterUnitName := 'MyPresenter';
+  PresenterClassName := 'TMyPresenter';
 end;
+
+destructor TPresenterViewDescriptor.Destroy;
+begin
+  FPresenterProperties.Destroy;
+  inherited Destroy;
+end;
+
+const
+  PresenterSrc = 'unit {{presenterunit}};' + LineEnding +
+    ''  + LineEnding +
+    'interface'+ LineEnding +
+    ''+ LineEnding +
+    'uses' + LineEnding +
+    '  Classes, SysUtils, PresentationManager, fpjson;' + LineEnding +
+    '' + LineEnding +
+    'type' + LineEnding +
+    ''+ LineEnding +
+    '  {{presenterclass}} = class(TPresenter)' + LineEnding +
+    '  end;' + LineEnding +
+    ''+ LineEnding +
+    'implementation'+ LineEnding +
+    ''+ LineEnding +
+    'end.';
 
 function TPresenterViewDescriptor.CreateSource(const aFilename, aSourceName,
   aResourceName: string): string;
 begin
   Result := inherited CreateSource(aFilename, aSourceName, aResourceName);
+  Result := StringReplace(Result, '{{presenterunit}}', FPresenterUnitName, [rfReplaceAll]);
+  Result := StringReplace(Result, '{{presenterclass}}', FPresenterClassName, [rfReplaceAll]);
 end;
 
 function TPresenterViewDescriptor.GetLocalizedDescription: String;
 begin
-  Result := inherited GetLocalizedDescription;
+  Result := 'Boilerplate for Presenter / View (TForm) units';
 end;
 
 function TPresenterViewDescriptor.GetLocalizedName: string;
 begin
-  Result := inherited GetLocalizedName;
+  Result := 'Presenter / View (TForm)';
 end;
 
 function TPresenterViewDescriptor.GetInterfaceSource(const aFilename,
   aSourceName, aResourceName: string): string;
+const
+  LE = LineEnding;
 begin
-  Result := inherited GetInterfaceSource(aFilename, aSourceName, aResourceName);
+  Result:=
+     'type'+LE
+    +'  '+ViewClassName+' = class(TForm)'+LE
+    +'  private'+LE
+    +'    FPresenter: {{presenterclass}};'+ LE
+    +'  public'+LE
+    +'  published'+LE
+    +'    property Presenter: {{presenterclass}} read FPresenter write FPresenter;' +LE
+    +'  end;'+LE
+    +LE;
 end;
 
 function TPresenterViewDescriptor.GetInterfaceUsesSection: String;
 begin
-  Result := inherited GetInterfaceUsesSection + ', Forms, Controls, Graphics, Dialogs';
+  Result := inherited GetInterfaceUsesSection + ', Forms, Controls, Graphics, Dialogs, fpjson, {{presenterunit}}';
 end;
 
 function TPresenterViewDescriptor.GetImplementationSource(const aFilename,
@@ -84,8 +130,26 @@ end;
 
 function TPresenterViewDescriptor.Init(var NewFilename: string;
   NewOwner: TObject; var NewSource: string; Quiet: boolean): TModalResult;
+var
+  S: String;
+  PresenterFile: TLazProjectFile;
 begin
-  Result := inherited Init(NewFilename, NewOwner, NewSource, Quiet);
+  with TPresentationOptionsForm.Create(nil) do
+  begin
+    Descriptor := Self;
+    Result := ShowModal;
+    Destroy;
+  end;
+  if Result = mrOK then
+  begin
+    DefaultResourceName := Copy(ViewClassName, 2, Length(ViewClassName) - 1);
+    PresenterFile := LazarusIDE.ActiveProject.CreateProjectFile(PresenterUnitName + '.pas');
+    PresenterFile.IsPartOfProject := True;
+    LazarusIDE.ActiveProject.AddFile(PresenterFile, False);
+    S := StringReplace(PresenterSrc, '{{presenterunit}}', FPresenterUnitName, [rfReplaceAll]);
+    S := StringReplace(S, '{{presenterclass}}', FPresenterClassName, [rfReplaceAll]);
+    PresenterFile.SetSourceText(S, True);
+  end;
 end;
 
 end.
