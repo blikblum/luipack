@@ -3,10 +3,12 @@ object PresentationOptionsForm: TPresentationOptionsForm
   Height = 392
   Top = 148
   Width = 319
+  BorderStyle = bsDialog
   Caption = 'Presentation Options'
   ClientHeight = 392
   ClientWidth = 319
   OnShow = FormShow
+  Position = poScreenCenter
   LCLVersion = '1.3'
   object DividerBevel1: TDividerBevel
     Left = 8
