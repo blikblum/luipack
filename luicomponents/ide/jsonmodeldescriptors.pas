@@ -50,7 +50,7 @@ begin
   DefaultSourceName := 'MyModel';
   FModelName := 'TMyModel';
   FCollectionName := 'TMyCollection';
-  FResourceName := 'resource';
+  FResourceName := 'my';
 end;
 
 function TJSONModelUnitDescriptor.CreateSource(const aFilename, aSourceName,
