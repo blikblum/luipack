@@ -228,9 +228,8 @@ function TPresentation.SetProperties(
   const Properties: array of const): IPresentation;
 begin
   if FPresenter <> nil then
-    SetObjectProperties(FPresenter, Properties)
-  else
-    SetObjectProperties(FView, Properties);
+    SetObjectProperties(FPresenter, Properties);
+  SetObjectProperties(FView, Properties);
   Result := Self;
 end;
 
