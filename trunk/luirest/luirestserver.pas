@@ -298,9 +298,11 @@ begin
 
       if ResourceDef = nil then
       begin
-        SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s',
+        SetResponseStatus(AResponse, 404, 'Resource "%s" not registered. Resource: %s, SubPathRes: %s' + LineEnding
+          + 'Path: %s',
           [NextURIPart, Resource.ClassName,
-          BoolToStr(Boolean(Resource.FSubPathResources = nil), True)]);
+          BoolToStr(Boolean(Resource.FSubPathResources = nil), True),
+          TRESTRequest.ResourcePath]);
         Exit;
       end;
 
