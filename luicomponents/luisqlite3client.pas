@@ -614,7 +614,11 @@ begin
       FIdValue := IdValue;
   end
   else
-    Result := Save;
+  begin
+    //calling Save without parentesis does not work
+    //the compiler thinks is refering to the function result
+    Result := Save();
+  end;
 end;
 
 procedure TSqlite3JSONObjectResource.SetData(JSONObj: TJSONObject; OwnsData: Boolean);
