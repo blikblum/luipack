@@ -61,6 +61,8 @@ type
       const Method, ResourcePath: String; Relative: Boolean = True);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
     procedure SetURIParam(const ParamName, ParamValue: String; IsNumeric: Boolean = False);
+    property SubPathParamName: String read FSubPathParamName;
+    property SubPathResources: TRESTResourceStore read FSubPathResources;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -103,13 +105,13 @@ type
     FDefaultResourceDef: TRESTResourceDef;
     FList: TFPHashObjectList;
     procedure SetDefaultResourceDef(const Value: TRESTResourceDef);
-    property DefaultResourceDef: TRESTResourceDef read FDefaultResourceDef write SetDefaultResourceDef;
   public
     constructor Create;
     destructor Destroy; override;
     function Find(const ResourceId: ShortString): TRESTResourceDef;
     procedure Register(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure Register(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+    property DefaultResourceDef: TRESTResourceDef read FDefaultResourceDef write SetDefaultResourceDef;
   end;
 
   { TRESTServiceModule }
@@ -446,6 +448,8 @@ begin
     SubPathResourceDef := FSubPathResources.Find(SubPath);
     if SubPathResourceDef = nil then
     begin
+      //todo: add way to check if subpath is a valid default
+      //optionally add route handling based in pattern match
       SubPathResourceDef := FSubPathResources.DefaultResourceDef;
       SetURIParam(FSubPathParamName, SubPath);
     end;
