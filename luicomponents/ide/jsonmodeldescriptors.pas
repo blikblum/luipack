@@ -93,7 +93,7 @@ begin
 '  protected'+ LineEnding +
 '    class function GetItemClass: TJSONModelClass; override;'+ LineEnding +
 '  public'+ LineEnding +
-'    function CreateItem: {{modelname}};'+ LineEnding +
+'    function CreateItem(AddItem: Boolean = True): {{modelname}};'+ LineEnding +
 '    function Find(const Id: Variant): {{modelname}};'+ LineEnding +
 '    function Get(ItemData: TJSONObject): {{modelname}};'+ LineEnding +
 '    property Items[Index: Integer]: {{modelname}} read GetItem; default;'+ LineEnding +
@@ -127,7 +127,7 @@ begin
 '  Result := {{modelname}};'+ LineEnding +
 'end;'+ LineEnding +
 ''+ LineEnding +
-'function {{collectionname}}.CreateItem: {{modelname}};'+ LineEnding +
+'function {{collectionname}}.CreateItem(AddItem: Boolean): {{modelname}};'+ LineEnding +
 'begin'+ LineEnding +
 '  Result := {{modelname}}(inherited CreateItem);'+ LineEnding +
 'end;'+ LineEnding +

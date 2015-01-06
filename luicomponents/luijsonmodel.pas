@@ -88,7 +88,7 @@ type
     destructor Destroy; override;
     function Add(Item: TJSONModel): TJSONModel;
     procedure Clear;
-    function CreateItem: TJSONModel;
+    function CreateItem(AddItem: Boolean = True): TJSONModel;
     function Get(ItemData: TJSONObject): TJSONModel;
     function Fetch: Boolean;
     function Find(const Id: Variant): TJSONModel;
@@ -336,9 +336,12 @@ begin
   inherited Destroy;
 end;
 
-function TJSONCollection.CreateItem: TJSONModel;
+function TJSONCollection.CreateItem(AddItem: Boolean): TJSONModel;
 begin
-  Result := Add(FItemClass.Create);
+  Result := FItemClass.Create;
+  Result.FCollection := Self;
+  if AddItem then
+    Add(Result);
 end;
 
 function TJSONCollection.Add(Item: TJSONModel): TJSONModel;
