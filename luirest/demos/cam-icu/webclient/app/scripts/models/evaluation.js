@@ -1,52 +1,48 @@
 /*global define*/
 
 define([
-    'underscore',
-    'backbone'
+  'underscore',
+  'backbone'
 ], function (_, Backbone) {
-    'use strict';
+  'use strict';
 
-    var EvaluationModel = Backbone.Model.extend({
+  var EvaluationModel = Backbone.Model.extend({
 
-        initialize: function(options) {
+    initialize: function (options) {
 
-        },
+    },
 
-        defaults: function(){
-            var now;
-            now = new Date();
-            now = (now - new Date(1899, 11, 30)) / (24 * 60 * 60 * 1000);
-            return {
-                date: now
-            }
-        },
+    defaults: function () {
+      var now;
+      now = new Date();
+      now = (now - new Date(1899, 11, 30)) / (24 * 60 * 60 * 1000);
+      return {
+        date: now
+      }
+    },
 
-        validation: {
-            date: {
-              required: true
-            },
-            deliriumid: {
-                required: true
-            },
-            ventilationid: {
-                required: true
-            },
-            rass: {
-                required: true
-            },
-            shiftid: {
-                required: true
-            }
-            /*,
-            sedation: {
-                required: true
-            }*/
-        },
+    validation: {
+      date: {
+        required: true
+      },
+      deliriumid: {
+        required: true
+      },
+      ventilationid: {
+        required: true
+      },
+      rass: {
+        required: true
+      },
+      shiftid: {
+        required: true
+      }
+      /*,
+      sedation: {
+        required: true
+     }*/
+    }
+  });
 
-        parse: function(response, options)  {
-            return response;
-        }
-    });
-
-    return EvaluationModel;
+  return EvaluationModel;
 });

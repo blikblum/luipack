@@ -1,33 +1,33 @@
 /*global define*/
 
 define([
-    'jquery',
-    'underscore',
-    'backbone',
-    'templates'
+  'jquery',
+  'underscore',
+  'backbone',
+  'templates'
 ], function ($, _, Backbone, JST) {
-    'use strict';
+  'use strict';
 
-    var EvaluationlistitemView = Backbone.View.extend({
-        template: JST['app/scripts/templates/evaluationlistitem.hbs'],
+  var EvaluationlistitemView = Backbone.View.extend({
+    template: JST['app/scripts/templates/evaluationlistitem.hbs'],
 
-        tagName: 'tr',
+    tagName: 'tr',
 
-        id: '',
+    id: '',
 
-        className: '',
+    className: '',
 
-        events: {},
+    events: {},
 
-        initialize: function () {
-            this.listenTo(this.model, 'change', this.render);
-        },
+    initialize: function () {
+      this.listenTo(this.model, 'change', this.render);
+    },
 
-        render: function () {
-            this.$el.html(this.template(this.model.toJSON()));
-            return this;
-        }
-    });
+    render: function () {
+      this.$el.html(this.template(this.model.toJSON()));
+      return this;
+    }
+  });
 
-    return EvaluationlistitemView;
+  return EvaluationlistitemView;
 });

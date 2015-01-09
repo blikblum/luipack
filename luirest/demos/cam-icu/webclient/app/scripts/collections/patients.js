@@ -1,17 +1,17 @@
 /*global define*/
 
 define([
-    'underscore',
-    'backbone',
-    'models/patient'
+  'underscore',
+  'backbone',
+  'models/patient'
 ], function (_, Backbone, PatientModel) {
-    'use strict';
+  'use strict';
 
-    var PatientCollection = Backbone.Collection.extend({
-      url: app.BASE_URL + '/patients/active',
-        model: PatientModel,
-        comparator: 'bednumber'
-    });
+  var PatientCollection = Backbone.Collection.extend({
+    url: app.BASE_URL + '/patients/active',
+    model: PatientModel,
+    comparator: 'bednumber'
+  });
 
-    return PatientCollection;
+  return PatientCollection;
 });
