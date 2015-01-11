@@ -433,7 +433,7 @@ begin
     Result := DoFetch(VarToStr(IdValue));
   end
   else
-    Result := Fetch;
+    Result := Fetch();
 end;
 
 function TRESTJSONObjectResource.GetData: TJSONObject;
