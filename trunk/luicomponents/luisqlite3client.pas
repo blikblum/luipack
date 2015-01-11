@@ -561,7 +561,7 @@ begin
     Result := DoFetch(IdValue);
   end
   else
-    Result := Fetch;
+    Result := Fetch();
 end;
 
 function TSqlite3JSONObjectResource.GetData: TJSONObject;
