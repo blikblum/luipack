@@ -28,13 +28,13 @@ require.config({
     jquery: '../bower_components/jquery/jquery',
     backbone: '../bower_components/backbone/backbone',
     underscore: '../bower_components/underscore/underscore',
-    bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap',
+    bootstrap: '../bower_components/bootstrap-sass-official/assets/javascripts/bootstrap',
     handlebars: '../bower_components/handlebars/handlebars',
     stickit: '../bower_components/backbone.stickit/backbone.stickit',
     stickitform: '../bower_components/backbone.stickit.form/src/backbone.stickit.form',
     text: '../bower_components/requirejs-text/text',
     validation: '../bower_components/backbone-validation/dist/backbone-validation-amd',
-    maskedinput: '../bower_components/jquery.maskedinput/jquery.maskedinput',
+    maskedinput: '../bower_components/jquery.maskedinput/dist/jquery.maskedinput',
     localstorage: '../bower_components/backbone.localstorage/backbone.localStorage',
     computed: '../bower_components/backbone.computedfields/lib/amd/backbone.computedfields'
   }
@@ -60,7 +60,7 @@ app.setMainView = function (newView, currentRoute) {
 
   app.mainView = newView;
   $('#main').append(newView.$el);
-}
+};
 
 var toOADate = (function () {
   var epoch = new Date(1899, 11, 30);
@@ -111,7 +111,7 @@ var calculateOAAge = function (birthOADate, baseOADate) {
     age--;
   }
   return age;
-}
+};
 
 require([
   'jquery',
