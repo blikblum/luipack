@@ -360,11 +360,19 @@ begin
 end;
 
 procedure TJSONCollection.Clear;
+var
+  PreviousCount: Integer;
 begin
+  PreviousCount := 0;
   if FData <> nil then
+  begin
+    PreviousCount := FData.Count;
     FData.Clear;
+  end;
   if FItems <> nil then
     FItems.Clear;
+  if PreviousCount > 0 then
+    Changed;
 end;
 
 function TJSONCollection.Get(ItemData: TJSONObject): TJSONModel;
