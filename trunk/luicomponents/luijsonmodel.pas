@@ -89,9 +89,10 @@ type
     function Add(Item: TJSONModel): TJSONModel;
     procedure Clear;
     function CreateItem(AddItem: Boolean = True): TJSONModel;
-    function Get(ItemData: TJSONObject): TJSONModel;
+    procedure Exchange(Index1, Index2: Integer);
     function Fetch: Boolean;
     function Find(const Id: Variant): TJSONModel;
+    function Get(ItemData: TJSONObject): TJSONModel;
     function IndexOf(Item: TJSONModel): Integer;
     function ParamByName(const ParamName: String): TParam;
     function SaveItem(Item: TJSONModel; AddItem: Boolean = True): Boolean;
@@ -342,6 +343,15 @@ begin
   Result.FCollection := Self;
   if AddItem then
     Add(Result);
+end;
+
+procedure TJSONCollection.Exchange(Index1, Index2: Integer);
+begin
+  if FData <> nil then
+    FData.Exchange(Index1, Index2);
+  if FItems <> nil then
+    FItems.Exchange(Index1, Index2);
+  Changed;
 end;
 
 function TJSONCollection.Add(Item: TJSONModel): TJSONModel;
