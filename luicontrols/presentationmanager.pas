@@ -22,6 +22,7 @@ type
 
   IPresentation = interface
     ['{5FFDE1D3-AA0B-43C9-8ED3-437E33806B15}']
+    function CallMethod(const MethodName: String): IPresentation;
     function GetName: String;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
@@ -95,8 +96,9 @@ type
   public
     constructor Create(const Name: String; PresentationDef: TPresentationDef);
     destructor Destroy; override;
-    function ModalResult: TModalResult;
+    function CallMethod(const AMethodName: String): IPresentation;
     function GetName: String;
+    function ModalResult: TModalResult;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
     function Show: IPresentation;
@@ -143,7 +145,7 @@ begin
     FPresenter.Initialize;
     FView.Caption := FPresenter.GetViewCaption(FView.Caption);
   end;
-  CallMethod(FView, 'Initialize');
+  LuiMiscUtils.CallMethod(FView, 'Initialize');
   FInitialized := True;
 end;
 
@@ -197,6 +199,14 @@ destructor TPresentation.Destroy;
 begin
   FView.Free;
   inherited Destroy;
+end;
+
+function TPresentation.CallMethod(const AMethodName: String): IPresentation;
+begin
+  if FPresenter <> nil then
+    LuiMiscUtils.CallMethod(FPresenter, AMethodName);
+  LuiMiscUtils.CallMethod(FView, AMethodName);
+  Result := Self;
 end;
 
 function TPresentation.ModalResult: TModalResult;
