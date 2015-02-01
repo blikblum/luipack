@@ -1003,7 +1003,8 @@ procedure TJSONFormMediator.LoadData;
 var
   i: Integer;
 begin
-  //todo: check data
+  if FData = nil then
+    Exit;
   BeginLoad;
   try
     for i := 0 to FElements.Count - 1 do
@@ -1029,7 +1030,8 @@ procedure TJSONFormMediator.SaveData;
 var
   i: Integer;
 begin
-  //todo: check Data
+  if FData = nil then
+    Exit;
   for i := 0 to FElements.Count - 1 do
     TJSONFormElement(FElements[i]).SaveData(FData);
 end;
