@@ -27,6 +27,7 @@ type
     class procedure SetDefaultResourceClient(Value: IResourceClient); static;
     procedure ResourceNeeded;
   protected
+    procedure Changed;
     function CreateData: TJSONObject; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
     function DoSave(const IdValue: Variant): Boolean; virtual;
@@ -485,6 +486,11 @@ begin
   end;
 end;
 
+procedure TJSONModel.Changed;
+begin
+  FPONotifyObservers(Self, ooChange, nil);
+end;
+
 function TJSONModel.CreateData: TJSONObject;
 begin
   Result := TJSONObject.Create;
@@ -499,6 +505,7 @@ begin
     ResourceNeeded;
     Result := FResource.Fetch(IdValue);
   end;
+  Changed;
 end;
 
 function TJSONModel.DoSave(const IdValue: Variant): Boolean;
