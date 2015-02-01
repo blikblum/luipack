@@ -146,10 +146,13 @@ begin
   EncodeJSONFields(RequestData);
   if (FInputFieldsData <> nil) and (FInputFieldsData.JSONType = jtArray) then
   begin
+    for i := 0 to Query.Fields.Count - 1 do
+      Query.Fields[i].ReadOnly := True;
     for i := 0 to FInputFieldsData.Count - 1 do
     begin
       FieldName := GetFieldName(TJSONArray(FInputFieldsData), i, DBFieldName);
       Field := Query.FieldByName(DBFieldName);
+      Field.ReadOnly := False;
       PropData := RequestData.Find(FieldName);
       if PropData = nil then
         PropData := Params.Find(FieldName);
