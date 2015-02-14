@@ -147,7 +147,7 @@ type
     destructor Destroy; override;
     function Fetch: Boolean;
     function GetData: TJSONArray;
-    function Save: Boolean;
+    function Save(Options: TSaveOptions = []): Boolean;
     property Data: TJSONArray read GetData;
   end;
 
@@ -162,7 +162,7 @@ type
     FOwnsData: Boolean;
     procedure DecodeJSONFields(ResponseData: TJSONObject);
     function DoFetch(const Id: Variant): Boolean;
-    function DoSave(const Id: Variant): Boolean;
+    function DoSave(const Id: Variant; Options: TSaveOptions = []): Boolean;
     procedure EncodeJSONFields(RequestData: TJSONObject);
     procedure SetPrimaryKeyValue(const IdValue: Variant);
     procedure SetSQL(const Id: Variant);
@@ -174,8 +174,8 @@ type
     function Fetch: Boolean;
     function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
-    function Save: Boolean;
-    function Save(IdValue: Variant): Boolean;
+    function Save(Options: TSaveOptions = []): Boolean;
+    function Save(IdValue: Variant; Options: TSaveOptions = []): Boolean;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
@@ -336,7 +336,7 @@ begin
   end;
 end;
 
-function TSqlite3JSONObjectResource.DoSave(const Id: Variant): Boolean;
+function TSqlite3JSONObjectResource.DoSave(const Id: Variant; Options: TSaveOptions): Boolean;
 var
   SQL: String;
   TempData: TJSONObject;
@@ -364,13 +364,13 @@ begin
         TempData := TJSONObject(FData.Clone);
         try
           EncodeJSONFields(TempData);
-          FModelDef.SetDatasetData(FDataset, TempData, FParams, False);
+          FModelDef.SetDatasetData(FDataset, TempData, FParams, soPatch in Options);
         finally
           TempData.Destroy;
         end;
       end
       else
-        FModelDef.SetDatasetData(FDataset, FData, FParams, False);
+        FModelDef.SetDatasetData(FDataset, FData, FParams, soPatch in Options);
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
       if IsAppend and Result then
@@ -569,7 +569,7 @@ begin
   Result := FData;
 end;
 
-function TSqlite3JSONObjectResource.Save: Boolean;
+function TSqlite3JSONObjectResource.Save(Options: TSaveOptions): Boolean;
 var
   IdFieldData: TJSONData;
   Id: Variant;
@@ -605,7 +605,7 @@ begin
   Result := DoSave(Id);
 end;
 
-function TSqlite3JSONObjectResource.Save(IdValue: Variant): Boolean;
+function TSqlite3JSONObjectResource.Save(IdValue: Variant; Options: TSaveOptions): Boolean;
 begin
   if not VarIsEmpty(IdValue) then
   begin
@@ -712,7 +712,7 @@ begin
   FData := TJSONArray.Create;
 end;
 
-function TSqlite3JSONArrayResource.Save: Boolean;
+function TSqlite3JSONArrayResource.Save(Options: TSaveOptions): Boolean;
 begin
   Result := False;
 end;
