@@ -30,7 +30,7 @@ type
     procedure Changed;
     function CreateData: TJSONObject; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
-    function DoSave(const IdValue: Variant): Boolean; virtual;
+    function DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean; virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -44,8 +44,8 @@ type
     function Fetch: Boolean;
     function Fetch(const IdValue: Variant): Boolean;
     function ParamByName(const ParamName: String): TParam;
-    function Save: Boolean;
-    function Save(const IdValue: Variant): Boolean;
+    function Save(Options: TSaveOptions = []): Boolean;
+    function Save(const IdValue: Variant; Options: TSaveOptions = []): Boolean;
     property Collection: TJSONCollection read FCollection;
     property Data: TJSONObject read FData;
     class property DefaultResourceClient: IResourceClient write SetDefaultResourceClient;
@@ -96,8 +96,8 @@ type
     function Get(ItemData: TJSONObject): TJSONModel;
     function IndexOf(Item: TJSONModel): Integer;
     function ParamByName(const ParamName: String): TParam;
-    function SaveItem(Item: TJSONModel; AddItem: Boolean = True): Boolean;
-    function SaveItem(Item: TJSONModel; const IdValue: Variant; AddItem: Boolean = True): Boolean;
+    function SaveItem(Item: TJSONModel; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
+    function SaveItem(Item: TJSONModel; const IdValue: Variant; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
     property Count: Integer read GetCount;
     property Data: TJSONArray read FData;
     property ItemClass: TJSONModelClass read FItemClass;
@@ -288,10 +288,10 @@ begin
   FreeCollectionData := False;
 end;
 
-function TJSONCollection.SaveItem(Item: TJSONModel; AddItem: Boolean): Boolean;
+function TJSONCollection.SaveItem(Item: TJSONModel; Options: TSaveOptions; AddItem: Boolean): Boolean;
 begin
   ItemResourceNeeded(Item);
-  Result := FItemResource.Save;
+  Result := FItemResource.Save(Options);
   if Result then
   begin
     if AddItem and (IndexOf(Item) = -1) then
@@ -302,10 +302,10 @@ begin
 end;
 
 function TJSONCollection.SaveItem(Item: TJSONModel; const IdValue: Variant;
-  AddItem: Boolean): Boolean;
+  Options: TSaveOptions; AddItem: Boolean): Boolean;
 begin
   ItemResourceNeeded(Item);
-  Result := FItemResource.Save(IdValue);
+  Result := FItemResource.Save(IdValue, Options);
   if Result then
   begin
     if AddItem and (IndexOf(Item) = -1) then
@@ -508,14 +508,14 @@ begin
   Changed;
 end;
 
-function TJSONModel.DoSave(const IdValue: Variant): Boolean;
+function TJSONModel.DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean;
 begin
   if FCollection <> nil then
-    Result := FCollection.SaveItem(Self, IdValue)
+    Result := FCollection.SaveItem(Self, IdValue, Options)
   else
   begin
     ResourceNeeded;
-    Result := FResource.Save(IdValue);
+    Result := FResource.Save(IdValue, Options);
   end;
 end;
 
@@ -592,14 +592,15 @@ begin
   Result := FResource.ParamByName(ParamName);
 end;
 
-function TJSONModel.Save: Boolean;
+function TJSONModel.Save(Options: TSaveOptions): Boolean;
 begin
-  Result := DoSave(Unassigned);
+  Result := DoSave(Unassigned, Options);
 end;
 
-function TJSONModel.Save(const IdValue: Variant): Boolean;
+function TJSONModel.Save(const IdValue: Variant; Options: TSaveOptions
+  ): Boolean;
 begin
-  Result := DoSave(IdValue);
+  Result := DoSave(IdValue, Options);
 end;
 
 end.
