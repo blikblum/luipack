@@ -11,7 +11,7 @@ type
 
   TRESTResourceClient = class;
 
-  THTTPMethodType = (hmtGet, hmtPost, hmtPut, hmtDelete);
+  THTTPMethodType = (hmtGet, hmtPost, hmtPut, hmtPatch, hmtDelete);
 
   TRESTCacheMode = (cmNone, cmSession, cmLocal);
 
@@ -35,6 +35,8 @@ type
     FOnResponseError: TRESTResponseEvent;
     FOnResponseSuccess: TRESTResponseEvent;
     FOnSocketError: TSocketError;
+    function DoRequest(const ResourcePath: String; ResourceTag: PtrInt; const Payload: String;
+      MethodType: THTTPMethodType): Boolean;
     function DoResponseCallback(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream): Boolean;
     function GetHttp: THTTPSend;
@@ -46,6 +48,7 @@ type
     function Get(const ResourcePath: String; ResourceTag: PtrInt): Boolean;
     function Post(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
     function Put(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
+    function Patch(const ResourcePath: String; ResourceTag: PtrInt; const Data: String): Boolean;
   published
     property BaseURL: String read FBaseURL write SetBaseURL;
     property Http: THTTPSend read GetHttp;
@@ -153,6 +156,7 @@ type
     procedure DoError(const ResourcePath: String; ErrorType: TRESTErrorType; ErrorCode: Integer; const ErrorMessage: String);
     function Delete(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
     function Get(const ResourcePath: String; Resource: TRESTDataResource): Boolean;
+    function Patch(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
     function Post(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
     function Put(const ResourcePath: String; Resource: TRESTDataResource; const Data: String): Boolean;
     procedure ModelDefsChanged;
@@ -175,6 +179,15 @@ implementation
 uses
   LuiJSONUtils, variants, StrUtils;
 
+const
+  HTTPMethodNames: Array[THTTPMethodType] of String = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE'
+    );
+
 type
   { TRESTJSONArrayResource }
 
@@ -189,7 +202,7 @@ type
     destructor Destroy; override;
     function Fetch: Boolean;
     function GetData: TJSONArray;
-    function Save: Boolean;
+    function Save(Options: TSaveOptions = []): Boolean;
     property Data: TJSONArray read GetData;
   end;
 
@@ -203,7 +216,7 @@ type
     FIdValue: Variant;
     FOwnsData: Boolean;
     function DoFetch(const Id: String): Boolean;
-    function DoSave(const Id: String): Boolean;
+    function DoSave(const Id: String; Options: TSaveOptions = []): Boolean;
   protected
     function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
@@ -212,8 +225,8 @@ type
     function Fetch: Boolean;
     function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
-    function Save: Boolean;
-    function Save(IdValue: Variant): Boolean;
+    function Save(Options: TSaveOptions = []): Boolean;
+    function Save(IdValue: Variant; Options: TSaveOptions = []): Boolean;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
@@ -289,7 +302,7 @@ begin
   Result := FResourceClient.Get(GetResourcePath + IfThen(Id <> '', '/' + Id), Self);
 end;
 
-function TRESTJSONObjectResource.DoSave(const Id: String): Boolean;
+function TRESTJSONObjectResource.DoSave(const Id: String; Options: TSaveOptions): Boolean;
 var
   ResourcePath, IdField: String;
 begin
@@ -302,7 +315,10 @@ begin
   else
   begin
     ResourcePath := ResourcePath + IfThen(Id <> '', '/' + Id);
-    Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
+    if soPatch in Options then
+      Result := FResourceClient.Patch(ResourcePath, Self, FData.AsJSON)
+    else
+      Result := FResourceClient.Put(ResourcePath, Self, FData.AsJSON);
   end;
 end;
 
@@ -441,7 +457,7 @@ begin
   Result := FData;
 end;
 
-function TRESTJSONObjectResource.Save: Boolean;
+function TRESTJSONObjectResource.Save(Options: TSaveOptions): Boolean;
 var
   IdFieldData: TJSONData;
   Id: String;
@@ -474,14 +490,14 @@ begin
   end
   else
     Id := VarToStr(FIdValue);
-  Result := DoSave(Id);
+  Result := DoSave(Id, Options);
 end;
 
-function TRESTJSONObjectResource.Save(IdValue: Variant): Boolean;
+function TRESTJSONObjectResource.Save(IdValue: Variant; Options: TSaveOptions): Boolean;
 begin
   if not VarIsEmpty(IdValue) then
   begin
-    Result := DoSave(VarToStr(IdValue));
+    Result := DoSave(VarToStr(IdValue), Options);
     if Result then
       FIdValue := IdValue;
   end
@@ -489,7 +505,7 @@ begin
   begin
     //calling Save without parentesis does not work
     //the compiler thinks is refering to the function result
-    Result := Save();
+    Result := Save(Options);
   end;
 end;
 
@@ -612,7 +628,7 @@ begin
   end;
 end;
 
-function TRESTJSONArrayResource.Save: Boolean;
+function TRESTJSONArrayResource.Save(Options: TSaveOptions): Boolean;
 begin
   //
 end;
@@ -671,6 +687,28 @@ end;
 
 { TRESTClient }
 
+function TRESTClient.DoRequest(const ResourcePath: String; ResourceTag: PtrInt;
+  const Payload: String; MethodType: THTTPMethodType): Boolean;
+var
+  PayloadLength: Integer;
+begin
+  FHttpClient.Clear;
+  PayloadLength := Length(Payload);
+  if PayloadLength > 0 then
+    FHttpClient.Document.Write(Payload[1], PayloadLength);
+  Result := FHttpClient.HTTPMethod(HTTPMethodNames[MethodType], BaseURL + ResourcePath);
+  if Result then
+  begin
+    Result := DoResponseCallback(ResourcePath, ResourceTag, MethodType, FHttpClient.ResultCode, FHttpClient.Document) and
+      (FHttpClient.ResultCode < 300);
+  end
+  else
+  begin
+    if Assigned(FOnSocketError) then
+      FOnSocketError(Self, FHttpClient.Sock.LastError, FHttpClient.Sock.LastErrorDesc);
+  end;
+end;
+
 function TRESTClient.DoResponseCallback(const ResourcePath: String; ResourceTag: PtrInt;
   Method: THTTPMethodType; ResponseCode: Integer; ResponseStream: TStream): Boolean;
 begin
@@ -714,70 +752,30 @@ end;
 
 function TRESTClient.Delete(const ResourcePath: String; ResourceTag: PtrInt): Boolean;
 begin
-  FHttpClient.Clear;
-  Result := FHttpClient.HTTPMethod('DELETE', BaseURL + ResourcePath);
-  if Result then
-  begin
-    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtDelete, FHttpClient.ResultCode, FHttpClient.Document) and
-      (FHttpClient.ResultCode < 300);
-  end
-  else
-  begin
-    if Assigned(FOnSocketError) then
-      FOnSocketError(Self, FHttpClient.Sock.LastError, FHttpClient.Sock.LastErrorDesc);
-  end;
+  Result := DoRequest(ResourcePath, ResourceTag, '', hmtDelete);
 end;
 
 function TRESTClient.Get(const ResourcePath: String; ResourceTag: PtrInt): Boolean;
 begin
-  FHttpClient.Clear;
-  Result := FHttpClient.HTTPMethod('GET', BaseURL + ResourcePath);
-  if Result then
-  begin
-    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtGet, FHttpClient.ResultCode, FHttpClient.Document) and
-      (FHttpClient.ResultCode < 300);
-  end
-  else
-  begin
-    if Assigned(FOnSocketError) then
-      FOnSocketError(Self, FHttpClient.Sock.LastError, FHttpClient.Sock.LastErrorDesc);
-  end;
+  Result := DoRequest(ResourcePath, ResourceTag, '', hmtGet);
 end;
 
 function TRESTClient.Post(const ResourcePath: String; ResourceTag: PtrInt;
   const Data: String): Boolean;
 begin
-  FHttpClient.Clear;
-  FHttpClient.Document.Write(Data[1], Length(Data));
-  Result := FHttpClient.HTTPMethod('POST', BaseURL + ResourcePath);
-  if Result then
-  begin
-    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtPost, FHttpClient.ResultCode, FHttpClient.Document) and
-      (FHttpClient.ResultCode < 300);
-  end
-  else
-  begin
-    if Assigned(FOnSocketError) then
-      FOnSocketError(Self, FHttpClient.Sock.LastError, FHttpClient.Sock.LastErrorDesc);
-  end;
+  Result := DoRequest(ResourcePath, ResourceTag, Data, hmtPost);
 end;
 
 function TRESTClient.Put(const ResourcePath: String; ResourceTag: PtrInt;
   const Data: String): Boolean;
 begin
-  FHttpClient.Clear;
-  FHttpClient.Document.Write(Data[1], Length(Data));
-  Result := FHttpClient.HTTPMethod('PUT', BaseURL + ResourcePath);
-  if Result then
-  begin
-    Result := DoResponseCallback(ResourcePath, ResourceTag, hmtPut, FHttpClient.ResultCode, FHttpClient.Document) and
-      (FHttpClient.ResultCode < 300);
-  end
-  else
-  begin
-    if Assigned(FOnSocketError) then
-      FOnSocketError(Self, FHttpClient.Sock.LastError, FHttpClient.Sock.LastErrorDesc);
-  end;
+  Result := DoRequest(ResourcePath, ResourceTag, Data, hmtPut);
+end;
+
+function TRESTClient.Patch(const ResourcePath: String; ResourceTag: PtrInt;
+  const Data: String): Boolean;
+begin
+  Result := DoRequest(ResourcePath, ResourceTag, Data, hmtPatch);
 end;
 
 { TRESTResourceClient }
@@ -930,6 +928,17 @@ begin
     //todo: add local mode
     UpdateCache(ModelDef.Name, ResourcePath, FRESTClient.FHttpClient.Document);
   end;
+end;
+
+function TRESTResourceClient.Patch(const ResourcePath: String;
+  Resource: TRESTDataResource; const Data: String): Boolean;
+var
+  ModelDef: TRESTResourceModelDef;
+begin
+  ModelDef := Resource.ModelDef;
+  if ModelDef.CacheMode <> cmNone then
+    InvalidateCache(ModelDef.Name);
+  Result := FRESTClient.Patch(ResourcePath, PtrInt(Resource), Data);
 end;
 
 function TRESTResourceClient.Post(const ResourcePath: String; Resource: TRESTDataResource;

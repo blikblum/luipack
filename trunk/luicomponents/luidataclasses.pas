@@ -9,14 +9,19 @@ uses
   Classes, fpjson, db, LuiJSONClasses;
 
 type
-   //todo: implement Resource.ExtractData
+
+  TSaveOption = (soPatch);
+
+  TSaveOptions = set of TSaveOption;
+
+  //todo: implement Resource.ExtractData??
 
   IDataResource = interface(IInterface)
     ['{ADACF400-8E33-4F0B-A10A-6A739DCA4CB5}']
     function Fetch: Boolean; overload;
     function GetParams: TParams;
     function ParamByName(const ParamName: String): TParam;
-    function Save: Boolean; overload;
+    function Save(Options: TSaveOptions = []): Boolean; overload;
     property Params: TParams read GetParams;
   end;
 
@@ -27,7 +32,7 @@ type
     function Delete: Boolean;
     function Fetch(IdValue: Variant): Boolean; overload;
     function GetData: TJSONObject;
-    function Save(IdValue: Variant): Boolean; overload;
+    function Save(IdValue: Variant; Options: TSaveOptions = []): Boolean; overload;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
