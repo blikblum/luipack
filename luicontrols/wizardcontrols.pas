@@ -132,6 +132,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure CallMethod(const AMethodName: String; AllPages: Boolean);
     //IWizardManager
     function GetPageCount: Integer;
     function MoveBy(Offset: Integer): Boolean;
@@ -269,7 +270,7 @@ type
 implementation
 
 uses
-  LuiRTTIUtils;
+  LuiRTTIUtils, LuiMiscUtils;
 
 const
   WizardButtonNames: array[TWizardButton] of String = (
@@ -354,6 +355,31 @@ begin
   FObserverList.Destroy;
   FPages.Destroy;
   inherited Destroy;
+end;
+
+procedure TWizardManager.CallMethod(const AMethodName: String; AllPages: Boolean);
+var
+  Page: TWizardPage;
+  i: Integer;
+begin
+  if AllPages then
+  begin
+    for i := 0 to FPages.Count -1 do
+    begin
+      Page := FPages[i];
+      if Page.Control <> nil then
+        LuiMiscUtils.CallMethod(Page.Control, AMethodName);
+    end;
+  end
+  else
+  begin
+    if (FPageIndex > -1) and (FPageIndex < FPages.Count) then
+    begin
+     Page := FPages[FPageIndex];
+     if Page.Control <> nil then
+       LuiMiscUtils.CallMethod(Page.Control, AMethodName);
+    end;
+  end;
 end;
 
 function TWizardManager.GetPageCount: Integer;
