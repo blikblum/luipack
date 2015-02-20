@@ -449,7 +449,7 @@ var
   S2, S3: String;
   VType: tvartype;
   ArrayData: TJSONArray;
-  ItemData: TJSONData;
+
 begin
   if AName = 'IFNULL' then
   begin
@@ -489,9 +489,8 @@ begin
     V1 := frParser.Calc(P1);
     VType := VarType(V1);
     Val := (VType in [varempty, varnull]) or
-      ((VType in [varstring, varustring]) and (V1 = ''));
-  end
-  else if AName = 'IFTHEN' then
+      (((VType = varstring) or (VType = varustring)) and (V1 = ''));
+  end else if AName = 'IFTHEN' then
   begin
     V1 := frParser.Calc(P1);
     if (VarType(V1) in [varshortint, varboolean, varnull, varempty]) then
@@ -512,6 +511,26 @@ begin
         else
           Val := frParser.Calc(S3);
       end;
+    end;
+  end else if AName = 'IFTRUTHY' then
+  begin
+    V1 := frParser.Calc(P1);
+    VType := VarType(V1);
+    if ((VType in [varshortint, varboolean, varnull, varempty]) and (V1 <> 0))
+      or (((VType = varstring) or (VType = varustring)) and (V1 <> '')) then
+    begin
+      S2 := P2;
+      if S2 <> '' then
+        Val := frParser.Calc(S2)
+      else
+        Val := Null;
+    end
+    else
+    begin
+      if S3 = '' then
+        Val := Null
+      else
+        Val := frParser.Calc(S3);
     end;
   end else if AName = 'IFFINDITEM' then
   begin
