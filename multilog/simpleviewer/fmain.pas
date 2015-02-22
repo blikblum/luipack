@@ -24,7 +24,7 @@ interface
 
 uses
   Classes, MultiLog, SysUtils, LResources, Forms, Controls, Graphics, Dialogs,simpleipc,
-  ComCtrls, Buttons,LCLIntf,LCLType,LCLProc, StdCtrls, logtreeview;
+  ComCtrls, Buttons, LCLIntf, LCLType, LCLProc, logtreeview;
 
 type
 
@@ -64,6 +64,8 @@ var
   frmMain: TfrmMain;
 
 implementation
+
+{$R *.lfm}
 
 { TfrmMain }
 
@@ -158,9 +160,6 @@ procedure TfrmMain.UpdateStatusBar;
 begin
   StatusBarMain.SimpleText:=IntToStr(FMessageCount)+' messages';
 end;
-
-initialization
-  {$I fmain.lrs}
 
 end.
 

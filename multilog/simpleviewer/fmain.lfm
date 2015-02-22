@@ -26,6 +26,7 @@ object frmMain: TfrmMain
     TabOrder = 0
     object ToolButton2: TToolButton
       Left = 73
+      Height = 36
       Top = 0
       Width = 5
       Caption = 'ToolButton2'
@@ -57,6 +58,7 @@ object frmMain: TfrmMain
     end
     object ToolButton1: TToolButton
       Left = 114
+      Height = 36
       Top = 0
       Width = 5
       Caption = 'ToolButton1'
@@ -89,7 +91,9 @@ object frmMain: TfrmMain
     Align = alClient
     DefaultItemHeight = 18
     ScrollBars = ssAutoBoth
+    ShowTime = False
     TabOrder = 1
+    TimeFormat = 'hh:nn:ss:zzz'
   end
   object StatusBarMain: TStatusBar
     Left = 0

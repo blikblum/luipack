@@ -10,10 +10,12 @@
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <Title Value="IPC Log Viewer"/>
+      <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <XPManifest>
         <DpiAware Value="True"/>
       </XPManifest>
+      <Icon Value="0"/>
     </General>
     <BuildModes Count="1">
       <Item1 Name="default" Default="True"/>
@@ -41,7 +43,6 @@
       <Unit0>
         <Filename Value="simpleipcviewer.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="simpleipcviewer"/>
       </Unit0>
       <Unit1>
         <Filename Value="fmain.pas"/>
@@ -57,9 +58,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <SearchPaths>
-      <OtherUnitFiles Value="E:\work\pascal\sqliteds\;E:\work\packages\zarchive-0.2.1-work\zlibar\;E:\work\pascal\utils\"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-      <SrcPath Value="$(LazarusDir)\lcl;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -83,7 +82,6 @@
     <Other>
       <CustomOptions Value="-dBECAPE_RELEASE
 -B"/>
-      <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
 </CONFIG>
