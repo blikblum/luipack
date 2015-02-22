@@ -25,6 +25,9 @@ interface
 uses
   Classes, SysUtils, {$ifdef fpc}simpleipc{$else}winipc{$endif}, multilog;
 
+const
+  IPC_DEFAULT_SERVER_NAME = 'ipc_log_server';
+
 type
 
   { TIPCChannel }
@@ -39,7 +42,7 @@ type
     FBuffer: TMemoryStream;
     FClearMessage: TLogMessage;
   public
-    constructor Create;
+    constructor Create(const ServerName: String = IPC_DEFAULT_SERVER_NAME);
     destructor Destroy; override;
     procedure Clear; override;
     procedure Deliver(const AMsg: TLogMessage);override;
@@ -53,7 +56,7 @@ const
 
 { TIPCChannel }
 
-constructor TIPCChannel.Create;
+constructor TIPCChannel.Create(const ServerName: string);
 begin
   with FClearMessage do
   begin
@@ -71,7 +74,7 @@ begin
   {$endif}
   with FClient do
   begin
-    ServerID:='ipc_log_server';
+    ServerID:=ServerName;
     //todo: Start server only when channel is active
     if ServerRunning then
     begin
