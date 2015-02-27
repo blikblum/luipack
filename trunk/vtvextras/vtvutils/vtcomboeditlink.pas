@@ -55,6 +55,7 @@ type
     procedure ProcessMessage(var Message: TLMessage); virtual; stdcall;
     procedure SetBounds(R: TRect); virtual; stdcall;
     property Node: PVirtualNode read FNode;
+    //todo: change to Control
     property Combo: TCustomComboBox read FCombo;
     property OnPrepareCombo: TVTPrepareComboEvent read FOnPrepareCombo write FOnPrepareCombo;
     property OnComboSelect: TVTComboEditLinkEvent read FOnComboSelect write FOnComboSelect;
