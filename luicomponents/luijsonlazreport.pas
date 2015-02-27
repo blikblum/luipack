@@ -516,7 +516,7 @@ begin
   begin
     V1 := frParser.Calc(P1);
     VType := VarType(V1);
-    if ((VType in [varshortint, varboolean, varnull, varempty]) and (V1 <> 0))
+    if ((VType in [varshortint, varboolean]) and (V1 <> 0))
       or (((VType = varstring) or (VType = varustring)) and (V1 <> '')) then
     begin
       S2 := P2;
