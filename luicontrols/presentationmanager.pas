@@ -90,7 +90,6 @@ type
     FView: TForm;
     FModalResult: TModalResult;
     FInitialized: Boolean;
-    procedure CheckPresenterInstance;
     procedure Initialize;
     procedure InitializeProperties;
   public
@@ -114,6 +113,7 @@ begin
   inherited Destroy;
 end;
 
+{ TPresenter }
 
 procedure TPresenter.Initialize;
 begin
@@ -125,15 +125,7 @@ begin
   Result := DesignCaption;
 end;
 
-{ TPresenterPresentation }
-
-{ TFormPresentation }
-
-procedure TPresentation.CheckPresenterInstance;
-begin
-  if FPresenter = nil then
-    raise Exception.CreateFmt('%s requires a presenter', [FView.ClassName]);
-end;
+{ TPresentation }
 
 procedure TPresentation.Initialize;
 begin
@@ -149,40 +141,45 @@ begin
   FInitialized := True;
 end;
 
-procedure TPresentation.InitializeProperties;
+procedure BindProperty(Instance: TObject; const PropName: String; PropInstance: TObject);
 var
   PropInfo: PPropInfo;
   TypeData: PTypeData;
   Intf: IInterface;
 begin
-  PropInfo := GetPropInfo(FView, 'Presenter');
+  PropInfo := GetPropInfo(Instance, PropName);
   if PropInfo <> nil then
   begin
-    //has a presenter property
+    if PropInstance = nil then
+      raise Exception.CreateFmt('%s requires a %s', [Instance.ClassName, PropName]);
     TypeData := GetTypeData(PropInfo^.PropType);
     case PropInfo^.PropType^.Kind of
       tkInterface:
         begin
-          CheckPresenterInstance;
-          if not FPresenter.GetInterface(TypeData^.GUID, Intf) then
-            raise Exception.CreateFmt('%s requires a presenter that implements %s',
-              [FView.ClassName, GUIDToString(TypeData^.GUID)]);
-          SetInterfaceProp(FView, PropInfo, Intf);
+          if not PropInstance.GetInterface(TypeData^.GUID, Intf) then
+            raise Exception.CreateFmt('%s requires a %s that implements %s',
+              [Instance.ClassName, PropName, GUIDToString(TypeData^.GUID)]);
+          SetInterfaceProp(Instance, PropInfo, Intf);
         end;
       tkClass:
         begin
-          CheckPresenterInstance;
-          if not FPresenter.InheritsFrom(TypeData^.ClassType) then
-            raise Exception.CreateFmt('%s requires a presenter that inherits from %s',
-              [FView.ClassName, TypeData^.ClassType.ClassName]);
-          SetObjectProp(FView, PropInfo, FPresenter);
+          if not PropInstance.InheritsFrom(TypeData^.ClassType) then
+            raise Exception.CreateFmt('%s requires a %s that inherits from %s',
+              [Instance.ClassName, PropName, TypeData^.ClassType.ClassName]);
+          SetObjectProp(Instance, PropInfo, PropInstance);
         end;
       else
-        raise Exception.CreateFmt('%s - Presenter property must be a COM interface or a class',
-          [FView.ClassName]);
+        raise Exception.CreateFmt('%s - %s property must be a COM interface or a class',
+          [Instance.ClassName, PropName]);
     end;
   end;
-  //todo: check if presenter requires a view
+end;
+
+procedure TPresentation.InitializeProperties;
+begin
+  BindProperty(FView, 'Presenter', FPresenter);
+  if FPresenter <> nil then
+    BindProperty(FPresenter, 'View', FView);
 end;
 
 constructor TPresentation.Create(const Name: String;
