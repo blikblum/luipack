@@ -45,10 +45,13 @@ type
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
   end;
 
+  TPresentationCreateEvent = procedure(Presentation: IPresentation) of object;
+
   { TPresentationManager }
 
   TPresentationManager = class(TComponent, IPresentationManager)
   private
+    FOnPresentationCreate: TPresentationCreateEvent;
     FPresentationDefs: TFPHashObjectList;
   public
     constructor Create(AOwner: TComponent); override;
@@ -61,6 +64,7 @@ type
     procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass;
       const DefaultProperties: array of const);
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
+    property OnPresentationCreate: TPresentationCreateEvent read FOnPresentationCreate write FOnPresentationCreate;
   end;
 
 implementation
@@ -284,6 +288,8 @@ begin
   if PresentationDef = nil then
     raise Exception.CreateFmt('Presentation "%s" not found', [PresentationName]);
   Result := TPresentation.Create(PresentationName, PresentationDef);
+  if Assigned(FOnPresentationCreate) then
+    FOnPresentationCreate(Result);
 end;
 
 procedure TPresentationManager.Register(const PresentationName: String;
