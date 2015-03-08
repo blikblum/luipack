@@ -24,6 +24,7 @@ type
   TVTCustomComboEditLink = class(TInterfacedObject, IVTEditLink)
   private
     FCombo: TCustomComboBox;                  // A custom combo box control.
+    FOnEditingDone: TVTComboEditLinkEvent;
     FOnPrepareCombo: TVTPrepareComboEvent;
     FOnComboSelect: TVTComboEditLinkEvent;
     FTree: TCustomVirtualStringTree;        // A back reference to the tree calling.
@@ -58,6 +59,8 @@ type
     //todo: change to Control
     property Combo: TCustomComboBox read FCombo;
     property OnPrepareCombo: TVTPrepareComboEvent read FOnPrepareCombo write FOnPrepareCombo;
+    property OnEditingDone: TVTComboEditLinkEvent read FOnEditingDone write FOnEditingDone;
+    //rename to onselect
     property OnComboSelect: TVTComboEditLinkEvent read FOnComboSelect write FOnComboSelect;
   end;
 
@@ -165,7 +168,8 @@ end;
 
 procedure TVTCustomComboEditLink.DoEditingDone;
 begin
-  //todo
+  if Assigned(FOnEditingDone) then
+    FOnEditingDone(Self);
 end;
 
 procedure TVTCustomComboEditLink.DoSelect;
