@@ -41,6 +41,8 @@ uses
 
 procedure SetObjectProperties(Instance: TObject; const Properties: array of const);
 
+function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
+
 implementation
 
 uses
@@ -164,6 +166,17 @@ begin
       end;
     end;
   end;
+end;
+
+function GetProperty(Instance: TObject; const PropertyName: String;
+  Default: Boolean): Boolean;
+var
+  PropInfo: PPropInfo;
+begin
+  Result := Default;
+  PropInfo := GetPropInfo(Instance.ClassInfo, PropertyName, [tkBool]);
+  if PropInfo <> nil then
+    Result := GetOrdProp(Instance, PropInfo) <> 0;
 end;
 
 end.
