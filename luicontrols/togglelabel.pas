@@ -217,7 +217,7 @@ end;
 
 function TToggleLabel.GetLabelText: string;
 begin
-  if FExpanded then
+  if FExpanded and (FExpandedCaption <> '') then
     Result := FExpandedCaption
   else
     Result := Caption;
