@@ -26,6 +26,7 @@ type
     FPropertyName: String;
     FCaptionDisplay: TCaptionDisplay;
     function GetName: String;
+    function IsNameStored: Boolean;
     procedure SetControl(Value: TControl);
   protected
     function AllowsCaptionLabel: Boolean; virtual;
@@ -38,7 +39,7 @@ type
     property CaptionDisplay: TCaptionDisplay read FCaptionDisplay write FCaptionDisplay default cdDefault;
     property Control: TControl read FControl write SetControl;
     property MediatorId: String read FMediatorId write FMediatorId;
-    property Name: String read GetName write FName;
+    property Name: String read GetName write FName stored IsNameStored;
     property PropertyName: String read FPropertyName write FPropertyName;
   end;
 
@@ -183,6 +184,11 @@ begin
     Result := FName
   else
     Result := FPropertyName;
+end;
+
+function TFormElement.IsNameStored: Boolean;
+begin
+  Result := FName <> PropertyName;
 end;
 
 procedure TFormElement.Assign(Source: TPersistent);
