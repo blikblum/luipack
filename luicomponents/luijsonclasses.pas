@@ -57,6 +57,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure LoadData;
+    function GetFirst: TJSONObject;
     procedure Invalidate;
     property Data: TJSONArray read GetData;
     property ChildrenProperty: String read FChildrenProperty write FChildrenProperty;
@@ -94,6 +95,12 @@ type
     property Values[KeyValue: Variant]: Variant read GetValues;
   end;
 
+  { TWeakJSONArray }
+
+  TWeakJSONArray = class(TJSONArray)
+  public
+    procedure AfterConstruction; override;
+  end;
 
 implementation
 
@@ -106,13 +113,6 @@ type
   TJSONArrayAccess = class(TJSONData)
   private
     FList: TFPObjectList;
-  end;
-
-  { TWeakJSONArray }
-
-  TWeakJSONArray = class(TJSONArray)
-  public
-    procedure AfterConstruction; override;
   end;
 
 { TWeakJSONArray }
@@ -350,6 +350,28 @@ begin
   end;
   FInvalid := False;
   FPONotifyObservers(Self, ooChange, nil);
+end;
+
+function TJSONGroupTree.GetFirst: TJSONObject;
+var
+  GroupObjData: TJSONObject;
+  TheData, ChildrenData: TJSONArray;
+  i: Integer;
+begin
+  Result := nil;
+  TheData := GetData;
+  for i := 0 to TheData.Count - 1 do
+  begin
+    GroupObjData := TheData.Objects[i];
+    if FindJSONProp(GroupObjData, FChildrenProperty, ChildrenData) then
+    begin
+      if ChildrenData.Count > 0 then
+      begin
+        Result := ChildrenData.Objects[0];
+        Exit;
+      end;
+    end;
+  end;
 end;
 
 procedure TJSONGroupTree.Invalidate;
