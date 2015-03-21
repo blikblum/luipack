@@ -1,0 +1,46 @@
+object MainForm: TMainForm
+  Left = 346
+  Height = 99
+  Top = 145
+  Width = 317
+  Caption = 'CompareNaturalDemo'
+  ClientHeight = 99
+  ClientWidth = 317
+  Position = poScreenCenter
+  LCLVersion = '1.5'
+  object Str1Edit: TEdit
+    Left = 9
+    Height = 23
+    Top = 12
+    Width = 80
+    OnChange = Str2EditChange
+    TabOrder = 0
+    Text = 'Str1Edit'
+  end
+  object Str2Edit: TEdit
+    Left = 9
+    Height = 23
+    Top = 59
+    Width = 80
+    OnChange = Str2EditChange
+    TabOrder = 1
+    Text = 'Str2Edit'
+  end
+  object ResultLabel: TLabel
+    Left = 230
+    Height = 15
+    Top = 36
+    Width = 48
+    Caption = 'Result: --'
+    ParentColor = False
+  end
+  object CompareButton: TButton
+    Left = 118
+    Height = 25
+    Top = 32
+    Width = 75
+    Caption = 'Compare'
+    OnClick = CompareButtonClick
+    TabOrder = 2
+  end
+end
