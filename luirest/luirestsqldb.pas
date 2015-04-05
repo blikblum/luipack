@@ -156,9 +156,9 @@ begin
       FieldName := GetFieldName(TJSONArray(FInputFieldsData), i, DBFieldName);
       Field := Query.FieldByName(DBFieldName);
       Field.ReadOnly := False;
-      PropData := RequestData.Find(FieldName);
+      PropData := Params.Find(FieldName);
       if PropData = nil then
-        PropData := Params.Find(FieldName);
+        PropData := RequestData.Find(FieldName);
       if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
         Field.Value := PropData.Value
       else
@@ -177,9 +177,9 @@ begin
       FieldName := LowerCase(Field.FieldName);
       if SameText(FieldName, FPrimaryKey) then
         continue;
-      PropData := RequestData.Find(FieldName);
+      PropData := Params.Find(FieldName);
       if PropData = nil then
-        PropData := Params.Find(FieldName);
+        PropData := RequestData.Find(FieldName);
       if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
         Field.Value := PropData.Value
       else
