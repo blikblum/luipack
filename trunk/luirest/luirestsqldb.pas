@@ -17,6 +17,8 @@ uses
 
 type
 
+  THTTPMethodType = (hmtGet, hmtPost, hmtPut, hmtPatch, hmtDelete);
+
   { TSqldbJSONResource }
 
   TSqldbJSONResource = class(TRESTResource)
@@ -46,7 +48,8 @@ type
     function GetResourceIdentifierSQL: String;
     function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
-    procedure PrepareQuery(Query: TSQLQuery); virtual;
+    procedure PrepareQuery(Query: TSQLQuery; MethodType: THTTPMethodType;
+      const ASelectSQL, AConditionsSQL: String); virtual;
     procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False); virtual;
   public
@@ -443,9 +446,15 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.PrepareQuery(Query: TSQLQuery);
+procedure TSqldbJSONResource.PrepareQuery(Query: TSQLQuery;
+  MethodType: THTTPMethodType; const ASelectSQL, AConditionsSQL: String);
 begin
-  //
+  Query.SQL.Add(ASelectSQL);
+  //IsCollection = true only in GET or POST
+  if FIsCollection or (AConditionsSQL <> '') then
+    Query.SQL.Add(AConditionsSQL)
+  else
+    Query.SQL.Add(GetResourceIdentifierSQL);
 end;
 
 procedure TSqldbJSONResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
@@ -489,11 +498,7 @@ begin
   Query := TSQLQuery.Create(nil);
   try
     Query.DataBase := FConnection;
-    Query.SQL.Add(FSelectSQL);
-    if FIsCollection then
-      Query.SQL.Add(FConditionsSQL)
-    else
-      Query.SQL.Add(GetResourceIdentifierSQL);
+    PrepareQuery(Query, hmtGet, FSelectSQL, FConditionsSQL);
     JSONDataToParams(URIParams, Query.Params);
     try
       Query.Open;
@@ -564,9 +569,7 @@ begin
   Query := TSQLQuery.Create(nil);
   try
     Query.DataBase := FConnection;
-    Query.SQL.Add(FSelectSQL);
-    Query.SQL.Add(GetResourceIdentifierSQL);
-    PrepareQuery(Query);
+    PrepareQuery(Query, hmtDelete, FSelectSQL, FConditionsSQL);
     JSONDataToParams(URIParams, Query.Params);
     try
       Query.Open;
@@ -623,9 +626,7 @@ begin
   Query := TSQLQuery.Create(nil);
   try
     Query.DataBase := FConnection;
-    Query.SQL.Add(FSelectSQL);
-    Query.SQL.Add('where 1 <> 1');
-    PrepareQuery(Query);
+    PrepareQuery(Query, hmtPost, FSelectSQL, 'where 1 <> 1');
     JSONDataToParams(URIParams, Query.Params);
     if TryStrToJSON(ARequest.Content, RequestData) then
     begin
@@ -688,10 +689,8 @@ begin
   Query := TSQLQuery.Create(nil);
   try
     Query.DataBase := FConnection;
-    Query.SQL.Add(FSelectSQL);
-    Query.SQL.Add(GetResourceIdentifierSQL);
+    PrepareQuery(Query, hmtPut, FSelectSQL, FConditionsSQL);
     JSONDataToParams(URIParams, Query.Params);
-    PrepareQuery(Query);
     Query.Open;
     if TryStrToJSON(ARequest.Content, RequestData) then
     try
