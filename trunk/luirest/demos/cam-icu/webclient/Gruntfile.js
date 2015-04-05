@@ -192,6 +192,14 @@ module.exports = function (grunt) {
                         'bower_components/sass-bootstrap/fonts/*.*'
                     ]
                 }]
+            },
+            html: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= yeoman.app %>',
+                    dest: '.tmp/',
+                    src: 'scripts/templates/*.html'
+                }]
             }
         },
         bower: {
@@ -232,7 +240,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', [
         'clean:server',
         'createDefaultTemplate',
-        'handlebars',        
+        'handlebars',
         'connect:test',
         'mocha',
         'watch:test'
@@ -244,13 +252,14 @@ module.exports = function (grunt) {
         'handlebars',
         'compass:dist',
         'useminPrepare',
+        'copy:html',
         'requirejs',
         'imagemin',
         'htmlmin',
         'concat',
         'cssmin',
         'uglify',
-        'copy',
+        'copy:dist',
         'rev',
         'usemin'
     ]);
