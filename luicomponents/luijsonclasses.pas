@@ -311,6 +311,7 @@ begin
     for i := 0 to FGroupData.Count -1 do
     begin
       GroupObjData := FGroupData.Objects[i];
+      //todo: map JSONData to allow key in any type, not only integer
       GroupMap.Add(GroupObjData.Get(FGroupKey, 0), TJSONObject(GroupObjData.Clone));
     end;
     //add items to each group
