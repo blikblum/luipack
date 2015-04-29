@@ -252,7 +252,7 @@ type
     property OnHotChange;
     property OnIncrementalSearch;
     //property OnInitChildren;
-    //property OnInitNode;
+    property OnInitNode;
     property OnKeyAction;
     property OnKeyDown;
     property OnKeyPress;
@@ -1266,6 +1266,7 @@ begin
 
   if NodeChildCount > 0 then
     InitStates := InitStates + [ivsHasChildren];
+  inherited DoInitNode(ParentNode, Node, InitStates);
 end;
 
 function TVirtualJSONInspector.GetOptionsClass: TTreeOptionsClass;
