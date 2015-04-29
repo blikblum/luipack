@@ -527,8 +527,30 @@ begin
     end
     else
     begin
+      S3 := P3;
       if S3 = '' then
-        Val := Null
+        Val := V1
+      else
+        Val := frParser.Calc(S3);
+    end;
+  end else if AName = 'IFFALSY' then
+  begin
+    V1 := frParser.Calc(P1);
+    VType := VarType(V1);
+    if (VType in [varnull, varempty]) or ((VType in [varshortint, varinteger, varint64, varboolean]) and (V1 = 0))
+      or (((VType = varstring) or (VType = varustring)) and (V1 = '')) then
+    begin
+      S2 := P2;
+      if S2 <> '' then
+        Val := frParser.Calc(S2)
+      else
+        Val := Null;
+    end
+    else
+    begin
+      S3 := P3;
+      if S3 = '' then
+        Val := V1
       else
         Val := frParser.Calc(S3);
     end;
