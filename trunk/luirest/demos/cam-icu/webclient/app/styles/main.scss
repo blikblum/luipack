@@ -1,4 +1,4 @@
-$icon-font-path: "/bower_components/'bootstrap-sass-official/assets/fonts/";
+$icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/bootstrap/";
 
 @import 'bootstrap-sass-official/assets/stylesheets/_bootstrap.scss';
 
@@ -88,4 +88,61 @@ body {
     .jumbotron {
         border-bottom: 0;
     }
+}
+
+body {
+    background: #fafafa;
+    padding-top: 60px;
+}
+
+.navbar-brand {
+    float: none;
+}
+
+.navbar-center
+{
+    position: absolute;
+    width: 60%;
+    left: 20%;
+    top: 0;
+    text-align: center;
+    margin: auto;
+    height:100%;
+}
+
+.hero-unit {
+    margin: 50px auto 0 auto;
+    width: 300px;
+}
+
+.popover {max-width:400px;}
+
+.radio + .radio,
+.checkbox + .checkbox {
+    margin-top: 10px;
+}
+
+h3 > .btn {
+    margin-top: -0.3em;
+}
+
+#back-button {
+    margin-left: 4px;
+}
+.justified-bottom {
+    margin-bottom: 0;
+}
+
+.badge-error {
+    background-color: #d9534f;
+}
+.badge-error[href]:hover, .badge-error[href]:focus {
+    background-color: #c9302c;
+}
+
+.badge-success {
+    background-color: #5cb85c;
+}
+.badge-success[href]:hover, .badge-success[href]:focus {
+    background-color: #449d44;
 }

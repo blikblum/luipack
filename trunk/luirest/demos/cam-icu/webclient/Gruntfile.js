@@ -83,22 +83,20 @@ module.exports = function (grunt) {
                 }
             }
         },
-        compass: {
-            options: {
-                sassDir: '<%= yeoman.app %>/styles',
-                cssDir: '.tmp/styles',
-                imagesDir: '<%= yeoman.app %>/images',
-                javascriptsDir: '<%= yeoman.app %>/scripts',
-                fontsDir: '<%= yeoman.app %>/styles/fonts',
-                importPath: '<%= yeoman.app %>/bower_components',
-                relativeAssets: true
-            },
-            dist: {},
-            server: {
-                options: {
-                    debugInfo: true
-                }
-            }
+        sass: {
+          all: {
+              files: [{
+                  expand: true,
+                  cwd: '<%= yeoman.app %>/styles',
+                  src: ['*.scss'],
+                  dest: '<%= yeoman.app %>/styles',
+                  ext: '.css'
+
+              }]
+          },
+          options: {
+              includePaths: ['<%= yeoman.app %>/bower_components']
+          }
         },
         requirejs: {
             dist: {
@@ -250,7 +248,7 @@ module.exports = function (grunt) {
         'clean:dist',
         'createDefaultTemplate',
         'handlebars',
-        'compass:dist',
+        'sass',
         'useminPrepare',
         'copy:html',
         'requirejs',
