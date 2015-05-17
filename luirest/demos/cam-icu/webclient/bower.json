@@ -2,7 +2,7 @@
   "name": "webclient",
   "version": "0.0.0",
   "dependencies": {
-    "bootstrap-sass-official": "~3.2.0",
+    "bootstrap-sass-official": "~3.3.4",
     "jquery": "~2.0.3",
     "underscore": "~1.6.0",
     "backbone": "~1.1.0",
