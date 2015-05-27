@@ -444,7 +444,7 @@ var
   Checked: Boolean;
 begin
   CheckBox := Element.Control as TCheckBox;
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   ValueData := Element.OptionsData.Find('value');
   if (ValueData <> nil) and not (ValueData.JSONType in [jtNull, jtObject, jtArray]) then
   begin
@@ -466,7 +466,7 @@ begin
   end
   else
   begin
-    Checked := Data.Get(Element.PropertyName, False);
+    Checked := (PropData is TJSONBoolean) and PropData.AsBoolean;
   end;
   CheckBox.Checked := Checked;
 end;
@@ -541,15 +541,10 @@ begin
   end
   else
   begin
-    if CheckBox.Checked then
-      Data.Booleans[PropName] := True
+    if not CheckBox.Checked and Element.OptionsData.Get('removeprop', False) and (Pos('.', PropName) = 0) then
+      Data.Delete(PropName)
     else
-    begin
-      if Element.OptionsData.Get('removeprop', False) then
-        Data.Delete(PropName)
-      else
-        Data.Booleans[PropName] := False;
-    end;
+      SetJSONPath(Data, PropName, TJSONBoolean.Create(CheckBox.Checked));
   end;
 end;
 
