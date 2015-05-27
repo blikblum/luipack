@@ -20,7 +20,7 @@ type
 implementation
 
 uses
-  Math;
+  Math, LuiJSONUtils;
 
 { TJSONZVDateTimePickerMediator }
 
@@ -33,7 +33,7 @@ var
 begin
   Timer := Element.Control as TZVDateTimePicker;
   PropName := Element.PropertyName;
-  PropData := Data.Find(PropName);
+  PropData := Data.FindPath(PropName);
   if (PropData = nil) or (PropData.JSONType = jtNull) then
     Timer.DateTime := NaN
   else
@@ -87,6 +87,7 @@ class procedure TJSONZVDateTimePickerMediator.DoGUIToJSON(
 var
   Timer: TZVDateTimePicker;
   PropName: String;
+  PropData: TJSONData;
 begin
   Timer := Element.Control as TZVDateTimePicker;
   PropName := Element.PropertyName;
@@ -96,12 +97,13 @@ begin
   begin
     case Timer.Kind of
       dtkDate:
-        Data.Integers[PropName] := Trunc(Timer.Date);
+        PropData := TJSONInt64Number.Create(Trunc(Timer.Date));
       dtkDateTime:
-        Data.Floats[PropName] := Timer.DateTime;
+        PropData := TJSONFloatNumber.Create(Timer.DateTime);
       dtkTime:
-        Data.Floats[PropName] := Timer.Time;
+        PropData := TJSONFloatNumber.Create(Timer.Time);
     end;
+    SetJSONPath(Data, PropName, PropData);
   end;
 end;
 
