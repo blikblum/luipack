@@ -170,7 +170,7 @@ begin
           case ArrayItem.JSONType of
           jtObject:
             begin
-              PropData := TJSONObject(ArrayItem).Find(ParName);
+              PropData := TJSONObject(ArrayItem).FindPath(ParName);
               if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
                 ParValue := PropData.Value;
             end;
@@ -183,7 +183,7 @@ begin
       end;
     jtObject:
       begin
-        PropData := TJSONObject(FData).Find(ParName);
+        PropData := TJSONObject(FData).FindPath(ParName);
         if (PropData <> nil) and not (PropData.JSONType in [jtObject, jtArray]) then
           ParValue := PropData.Value;
       end;
