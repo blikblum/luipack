@@ -442,6 +442,15 @@ begin
   end;
 end;
 
+function VarIsTruthy(const V: Variant): Boolean;
+var
+  VType: tvartype;
+begin
+  VType := VarType(V);
+  Result := ((VType in [varsmallint..vardate, varboolean, vardecimal..varqword]) and (V <> 0))
+    or (((VType = varstring) or (VType = varustring)) and (V <> ''));
+end;
+
 procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
   p3: Variant; var Val: Variant);
 var
@@ -476,20 +485,15 @@ begin
     V1 := frParser.Calc(P1);
     Val := VarIsNull(V1);
   end
-  //due to lazreport design V1 is never varempty
-  {
-  else if AName = 'ISUNDEFINED' then
+  //todo: remove ISEMPTY
+  else if (AName = 'ISEMPTY') or (AName = 'ISFALSY') then
   begin
     V1 := frParser.Calc(P1);
-    Val := VarIsEmpty(V1);
-  end
-  }
-  else if AName = 'ISEMPTY' then
+    Val := not VarIsTruthy(V1);
+  end else if AName = 'ISTRUTHY' then
   begin
     V1 := frParser.Calc(P1);
-    VType := VarType(V1);
-    Val := (VType in [varempty, varnull]) or
-      (((VType = varstring) or (VType = varustring)) and (V1 = ''));
+    Val := VarIsTruthy(V1);
   end else if AName = 'IFTHEN' then
   begin
     V1 := frParser.Calc(P1);
@@ -515,9 +519,7 @@ begin
   end else if AName = 'IFTRUTHY' then
   begin
     V1 := frParser.Calc(P1);
-    VType := VarType(V1);
-    if ((VType in [varshortint, varboolean]) and (V1 <> 0))
-      or (((VType = varstring) or (VType = varustring)) and (V1 <> '')) then
+    if VarIsTruthy(V1) then
     begin
       S2 := P2;
       if S2 <> '' then
