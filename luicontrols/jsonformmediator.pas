@@ -400,7 +400,7 @@ begin
     MemoLines.BeginUpdate;
     try
       MemoLines.Clear;
-      if FindJSONProp(Data, Element.PropertyName, PropData) then
+      if FindJSONPath(Data, Element.PropertyName, PropData) then
       begin
         for i := 0 to PropData.Count - 1 do
         begin
@@ -916,7 +916,7 @@ var
   PropData: TJSONData;
   Text: String;
 begin
-  if FindJSONProp(Data, Element.PropertyName, PropData) and (PropData.JSONType in [jtString, jtNumber, jtBoolean]) then
+  if FindJSONPath(Data, Element.PropertyName, PropData) and (PropData.JSONType in [jtString, jtNumber, jtBoolean]) then
     Text := PropData.AsString
   else
     Text := '';
@@ -934,7 +934,7 @@ begin
   i := Data.IndexOfName(PropName);
   ControlText := TControlAccess(Element.Control).Text;
   if (i <> -1) or (ControlText <> '') then
-    Data.Strings[PropName] := ControlText;
+    SetJSONPath(Data, PropName, TJSONString.Create(ControlText));
 end;
 
 class procedure TJSONGUIMediator.Initialize(Element: TJSONFormElement);
