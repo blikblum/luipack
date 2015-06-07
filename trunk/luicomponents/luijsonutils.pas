@@ -43,6 +43,24 @@ procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
 
 function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
 
+function FindJSONPath(Data: TJSONData; const Path: String; AType : TJSONType): TJSONData;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONData): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONObject): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONArray): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Integer): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Int64): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Double): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Boolean): Boolean;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: String): Boolean;
+
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONData): Boolean;
 
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONObject): Boolean;
@@ -62,6 +80,16 @@ function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValu
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Integer): Integer;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Int64): Int64;
+
+function GetJSONPath(Data: TJSONData; const Path, Default: String): String;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Double): Double;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Boolean): Boolean;
 
 function ReadJSONFile(const AFileName: String): TJSONData;
 
@@ -300,6 +328,95 @@ begin
     Result := nil;
 end;
 
+function FindJSONPath(Data: TJSONData; const Path: String; AType: TJSONType): TJSONData;
+begin
+  Result := Data.FindPath(Path);
+  if Assigned(Result) and (Result.JSONType <> AType) then
+    Result := nil;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONData): Boolean;
+begin
+  PathData := Data.FindPath(Path);
+  Result := PathData <> nil;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONObject): Boolean;
+var
+  FoundData: TJSONData absolute PathData;
+begin
+  FoundData := FindJSONPath(Data, Path, jtObject);
+  Result := PathData <> nil;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathData: TJSONArray): Boolean;
+var
+  FoundData: TJSONData absolute PathData;
+begin
+  FoundData := FindJSONPath(Data, Path, jtArray);
+  Result := PathData <> nil;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Integer): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := FindJSONPath(Data, Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsInteger
+  else
+    PathValue := 0;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Int64): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := FindJSONPath(Data, Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsInt64
+  else
+    PathValue := 0;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Double): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := FindJSONPath(Data, Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsFloat
+  else
+    PathValue := 0;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: Boolean): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := FindJSONPath(Data, Path, jtBoolean);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsBoolean
+  else
+    PathValue := False;
+end;
+
+function FindJSONPath(Data: TJSONData; const Path: String; out PathValue: String): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := FindJSONPath(Data, Path, jtString);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsString
+  else
+    PathValue := '';
+end;
+
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropData: TJSONData): Boolean;
 begin
   PropData := JSONObj.Find(PropName);
@@ -421,6 +538,36 @@ begin
       Exit;
   end;
   Result := -1;
+end;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Integer): Integer;
+begin
+  if not FindJSONPath(Data, Path, Result) then
+    Result := Default;
+end;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Int64): Int64;
+begin
+  if not FindJSONPath(Data, Path, Result) then
+    Result := Default;
+end;
+
+function GetJSONPath(Data: TJSONData; const Path, Default: String): String;
+begin
+  if not FindJSONPath(Data, Path, Result) then
+    Result := Default;
+end;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Double): Double;
+begin
+  if not FindJSONPath(Data, Path, Result) then
+    Result := Default;
+end;
+
+function GetJSONPath(Data: TJSONData; const Path: String; Default: Boolean): Boolean;
+begin
+  if not FindJSONPath(Data, Path, Result) then
+    Result := Default;
 end;
 
 function ReadJSONFile(const AFileName: String): TJSONData;
