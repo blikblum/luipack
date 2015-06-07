@@ -43,6 +43,8 @@ type
     function Resolve(const IID: TGuid): IInterface;
   end;
 
+  //todo: Add ResolveProperties (TObject, IoCContaner) function
+
 
 implementation
 
