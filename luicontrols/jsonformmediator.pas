@@ -645,7 +645,7 @@ var
   ValuePath: String;
 begin
   Result := -1;
-  PropData := Data.Find(PropName);
+  PropData := Data.FindPath(PropName);
   if (PropData <> nil) and not (PropData.JSONType in [jtNull, jtArray, jtObject]) then
   begin
     //defaults to value if there's an items
@@ -733,9 +733,9 @@ begin
     end;
     case IndexType of
       jliText:
-        Data.Strings[PropName] := Items[ItemIndex];
+        SetJSONPath(Data, PropName, TJSONString.Create(Items[ItemIndex]));
       jliIndex:
-        Data.Integers[PropName] := ItemIndex;
+        SetJSONPath(Data, PropName, TJSONIntegerNumber.Create(ItemIndex));
       jliValue:
         begin
           if ItemsData <> nil then
@@ -745,7 +745,7 @@ begin
               ItemData := ItemsData.Items[ItemIndex];
               ValueData := ItemData.FindPath(ValuePath);
               if ValueData <> nil then
-                Data.Elements[PropName] := ValueData.Clone;
+                SetJSONPath(Data, PropName, ValueData.Clone);
             end;
           end;
         end;
