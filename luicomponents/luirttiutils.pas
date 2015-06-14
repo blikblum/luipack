@@ -48,6 +48,33 @@ implementation
 uses
   typinfo;
 
+function GetVarTypeName(VarType: SizeInt): String;
+begin
+  case VarType of
+    vtInteger       : Result := 'Integer';
+    vtBoolean       : Result := 'Boolean';
+    vtChar          : Result := 'Char';
+    vtWideChar      : Result := 'WideChar';
+    vtExtended      : Result := 'Extended';
+    vtString        : Result := 'ShortString';
+    vtPointer       : Result := 'Pointer';
+    vtPChar         : Result := 'PChar';
+    vtObject        : Result := 'TObject';
+    vtClass         : Result := 'TClass';
+    vtPWideChar     : Result := 'PWideChar';
+    vtAnsiString    : Result := 'AnsiString';
+    vtCurrency      : Result := 'Currency';
+    vtVariant       : Result := 'Variant';
+    vtInterface     : Result := 'Interface';
+    vtWideString    : Result := 'WideString';
+    vtInt64         : Result := 'Int64';
+    vtUnicodeString : Result := 'UnicodeString';
+    vtQWord         : Result := 'QWord';
+  else
+    Result := 'Unknown';
+  end;
+end;
+
 function VarRecToString(const VarRec: TVarRec): String;
 begin
   case VarRec.VType of
@@ -90,13 +117,23 @@ begin
 end;
 
 
-function VarRecToObject(const VarRec: TVarRec): TObject;
+procedure SetVarRecToObjectProp(Instance: TObject; PropInfo: PPropInfo; const Value: TVarRec);
+var
+  BaseClass: TClass;
+  ObjectValue: TObject;
 begin
-  case VarRec.VType of
-    vtObject: Result := VarRec.VObject;
+  if Value.VType = vtObject then
+  begin
+    ObjectValue := Value.VObject;
+    BaseClass := GetTypeData(PropInfo^.PropType)^.ClassType;
+    if (ObjectValue <> nil) and not ObjectValue.InheritsFrom(BaseClass) then
+      raise Exception.CreateFmt('Invalid class for %s.%s property. %s does not inherits from %s',
+        [Instance.ClassName, PropInfo^.Name, ObjectValue.ClassName, BaseClass.ClassName]);
+    SetObjectProp(Instance, PropInfo, ObjectValue);
+  end
   else
-    raise Exception.Create('Type mismatch: is not possible convert TVarRec to TObject');
-  end;
+    raise Exception.CreateFmt('Invalid type for %s.%s property. Expected %s, got %',
+      [Instance.ClassName, PropInfo^.Name, 'TObject', GetVarTypeName(Value.VType)]);
 end;
 
 function VarRecToInterface(const VarRec: TVarRec): Pointer;
@@ -153,7 +190,7 @@ begin
         tkFloat:
           SetFloatProp(Instance, PropInfo, VarRecToFloat(PropertyValue));
         tkClass:
-          SetObjectProp(Instance, PropInfo, VarRecToObject(PropertyValue));
+          SetVarRecToObjectProp(Instance, PropInfo, PropertyValue);
         tkInterface:
           SetInterfaceProp(Instance, PropInfo, IInterface(VarRecToInterface(PropertyValue)));
         tkInterfaceRaw:
