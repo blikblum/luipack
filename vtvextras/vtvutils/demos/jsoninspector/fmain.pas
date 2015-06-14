@@ -148,7 +148,7 @@ begin
   except
     on E: EFOpenError do
       ShowMessageFmt('Error opening "%s" : %s', [Value, E.Message]);
-    on E: EJSONScanner do
+    on E: EJSONParser do
     begin
       ShowMessageFmt('Error parsing "%s" : %s', [Value, E.Message]);
     end;
