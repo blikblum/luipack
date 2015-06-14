@@ -105,10 +105,19 @@ module.exports = function (grunt) {
                     baseUrl: '<%= yeoman.app %>/scripts',
                     optimize: 'none',
                     paths: {
-                        'templates': '../../.tmp/scripts/templates',
+                        'templates': '../../app/scripts/templates',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
-                        'backbone': '../../app/bower_components/backbone/backbone'
+                        'backbone': '../../app/bower_components/backbone/backbone',
+                        'bootstrap': '../../app/bower_components/bootstrap-sass-official/assets/javascripts/bootstrap',
+                        'handlebars': '../../app/bower_components/handlebars/handlebars',
+                        'stickit': '../../app/bower_components/backbone.stickit/backbone.stickit',
+                        'stickitform': '../../app/bower_components/backbone.stickit.form/src/backbone.stickit.form',
+                        'text': '../../app/bower_components/requirejs-text/text',
+                        'validation': '../../app/bower_components/backbone-validation/dist/backbone-validation-amd',
+                        'maskedinput': '../../app/bower_components/jquery.maskedinput/dist/jquery.maskedinput',
+                        'localstorage': '../../app/bower_components/backbone.localstorage/backbone.localStorage',
+                        'computed': '../../app/bower_components/backbone.computedfields/lib/amd/backbone.computedfields'
                     },
                     // TODO: Figure out how to make sourcemaps work with grunt-usemin
                     // https://github.com/yeoman/grunt-usemin/issues/30
@@ -256,7 +265,7 @@ module.exports = function (grunt) {
         'htmlmin',
         'concat',
         'cssmin',
-        'uglify',
+        //'uglify',
         'copy:dist',
         'rev',
         'usemin'
