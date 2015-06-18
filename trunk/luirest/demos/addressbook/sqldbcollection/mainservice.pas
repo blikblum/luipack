@@ -52,7 +52,7 @@ constructor TMainServiceModule.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   InitConnection;
-  TSqldbJSONResource.DefaultConnection := SQLConnector;
+  TSqldbResource.DefaultConnection := SQLConnector;
   Resources.Register('contacts', TContactsResource, 0);
   Resources.Register('categories', TCategoriesResource, 0);
   Resources.Register('info', TServiceInfoResource, 0);

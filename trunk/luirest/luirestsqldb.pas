@@ -19,9 +19,9 @@ type
 
   THTTPMethodType = (hmtGet, hmtPost, hmtPut, hmtPatch, hmtDelete);
 
-  { TSqldbJSONResource }
+  { TSqldbResource }
 
-  TSqldbJSONResource = class(TRESTResource)
+  TSqldbResource = class(TRESTResource)
   private
     FConditionsSQL: String;
     FConnection: TSQLConnection;
@@ -77,22 +77,27 @@ type
     property SelectSQL: String read FSelectSQL write FSelectSQL;
   end;
 
-  TSqldbJSONResourceClass = class of TSqldbJSONResource;
+  TSqldbResourceClass = class of TSqldbResource;
 
-  TSqldbCollectionResource = class(TSqldbJSONResource)
+  TSqldbCollectionResource = class(TSqldbResource)
   private
     procedure CreateItemResource(out Resource: TRESTResource; ResourceTag: PtrInt);
   protected
     class function IsItemIdValid(const ItemId: String): Boolean; virtual;
-    class function GetItemClass: TSqldbJSONResourceClass; virtual;
+    class function GetItemClass: TSqldbResourceClass; virtual;
     class function GetItemParam: String; virtual;
     procedure Loaded(Tag: PtrInt); override;
-    procedure PrepareItem(ItemResource: TSqldbJSONResource); virtual;
+    procedure PrepareItem(ItemResource: TSqldbResource); virtual;
   public
     constructor Create; override;
     procedure HandleSubPath(const SubPath: String;
       var SubPathResourceDef: TRESTResourceDef); override;
   end;
+
+  //for compatibility with old code
+  TSqldbJSONResource = TSqldbResource;
+
+  TSqldbJSONResourceClass = TSqldbResourceClass;
 
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 
@@ -154,7 +159,7 @@ begin
 end;
 
 
-procedure TSqldbJSONResource.SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject;
+procedure TSqldbResource.SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject;
   DoPatch: Boolean);
 var
   i: Integer;
@@ -223,9 +228,9 @@ begin
   end;
 end;
 
-{ TSqldbJSONResource }
+{ TSqldbResource }
 
-class procedure TSqldbJSONResource.SetDefaultConnection(Value: TSQLConnection);
+class procedure TSqldbResource.SetDefaultConnection(Value: TSQLConnection);
 begin
   if (FDefaultConnection <> nil) and (Value <> nil) then
     raise Exception.Create('Default connection already set');
@@ -295,7 +300,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.DecodeJSONFields(ResponseData: TJSONArray);
+procedure TSqldbResource.DecodeJSONFields(ResponseData: TJSONArray);
 var
   i: Integer;
 begin
@@ -305,14 +310,14 @@ begin
     DoDecodeJSONFields(ResponseData.Objects[i], FJSONFieldsData);
 end;
 
-procedure TSqldbJSONResource.DecodeJSONFields(ResponseData: TJSONObject);
+procedure TSqldbResource.DecodeJSONFields(ResponseData: TJSONObject);
 begin
   if FJSONFieldsData = nil then
     Exit;
   DoDecodeJSONFields(ResponseData, FJSONFieldsData);
 end;
 
-procedure TSqldbJSONResource.EncodeJSONFields(RequestData: TJSONObject);
+procedure TSqldbResource.EncodeJSONFields(RequestData: TJSONObject);
 var
   FieldDefData: TJSONData;
   PropType: TJSONtype;
@@ -355,13 +360,13 @@ begin
   end;
 end;
 
-function TSqldbJSONResource.GetQuery(AOwner: TComponent): TSQLQuery;
+function TSqldbResource.GetQuery(AOwner: TComponent): TSQLQuery;
 begin
   Result := TSQLQuery.Create(AOwner);
   Result.DataBase := FConnection;
 end;
 
-function TSqldbJSONResource.GetResourceIdentifierSQL: String;
+function TSqldbResource.GetResourceIdentifierSQL: String;
 begin
   if FConditionsSQL <> '' then
     Result := FConditionsSQL
@@ -412,7 +417,7 @@ begin
   end;
 end;
 
-function TSqldbJSONResource.InsertRecord(Query: TSQLQuery): String;
+function TSqldbResource.InsertRecord(Query: TSQLQuery): String;
 var
   Info: TSQLStatementInfo;
   ActualConnection: TSQLConnection;
@@ -448,7 +453,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.Loaded(Tag: PtrInt);
+procedure TSqldbResource.Loaded(Tag: PtrInt);
 begin
   inherited Loaded(Tag);
   if FInputFields <> '' then
@@ -463,7 +468,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.PrepareQuery(Query: TSQLQuery;
+procedure TSqldbResource.PrepareQuery(Query: TSQLQuery;
   MethodType: THTTPMethodType; const ASelectSQL, AConditionsSQL: String);
 begin
   Query.SQL.Add(ASelectSQL);
@@ -474,7 +479,7 @@ begin
     Query.SQL.Add(GetResourceIdentifierSQL);
 end;
 
-procedure TSqldbJSONResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
+procedure TSqldbResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
 var
   ParamData: TJSONData;
   PKField: TField;
@@ -492,21 +497,21 @@ begin
   end;
 end;
 
-destructor TSqldbJSONResource.Destroy;
+destructor TSqldbResource.Destroy;
 begin
   FJSONFieldsData.Free;
   FInputFieldsData.Free;
   inherited Destroy;
 end;
 
-procedure TSqldbJSONResource.AfterConstruction;
+procedure TSqldbResource.AfterConstruction;
 begin
   inherited AfterConstruction;
   FPrimaryKey := 'Id';
   FConnection := FDefaultConnection;
 end;
 
-procedure TSqldbJSONResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
+procedure TSqldbResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 var
   Query: TSQLQuery;
   ResponseData: TJSONData;
@@ -569,7 +574,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.HandleDelete(ARequest: TRequest; AResponse: TResponse);
+procedure TSqldbResource.HandleDelete(ARequest: TRequest; AResponse: TResponse);
 var
   Query: TSQLQuery;
 begin
@@ -608,7 +613,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.HandlePatch(ARequest: TRequest;
+procedure TSqldbResource.HandlePatch(ARequest: TRequest;
   AResponse: TResponse);
 var
   SavedPutAsPatch: Boolean;
@@ -623,7 +628,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
+procedure TSqldbResource.HandlePost(ARequest: TRequest; AResponse: TResponse);
 var
   RequestData: TJSONObject;
   Query: TSQLQuery;
@@ -687,7 +692,7 @@ begin
   end;
 end;
 
-procedure TSqldbJSONResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
+procedure TSqldbResource.HandlePut(ARequest: TRequest; AResponse: TResponse);
 var
   RequestData: TJSONObject;
   Query: TSQLQuery;
@@ -735,8 +740,8 @@ end;
 procedure TSqldbCollectionResource.CreateItemResource(out
   Resource: TRESTResource; ResourceTag: PtrInt);
 var
-  ResourceClass: TSqldbJSONResourceClass;
-  ItemResource: TSqldbJSONResource absolute Resource;
+  ResourceClass: TSqldbResourceClass;
+  ItemResource: TSqldbResource absolute Resource;
 begin
   ResourceClass := GetItemClass;
   if ResourceClass = nil then
@@ -760,9 +765,9 @@ begin
   Result := TryStrToFloat(ItemId, Num);
 end;
 
-class function TSqldbCollectionResource.GetItemClass: TSqldbJSONResourceClass;
+class function TSqldbCollectionResource.GetItemClass: TSqldbResourceClass;
 begin
-  Result := TSqldbJSONResource;
+  Result := TSqldbResource;
 end;
 
 class function TSqldbCollectionResource.GetItemParam: String;
@@ -790,7 +795,7 @@ begin
   SetDefaultSubPath(GetItemParam, @CreateItemResource, 0);
 end;
 
-procedure TSqldbCollectionResource.PrepareItem(ItemResource: TSqldbJSONResource);
+procedure TSqldbCollectionResource.PrepareItem(ItemResource: TSqldbResource);
 begin
   //
 end;
