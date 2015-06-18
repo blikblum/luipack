@@ -1,0 +1,27 @@
+object MainServiceModule: TMainServiceModule
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  Height = 162
+  HorizontalOffset = 403
+  VerticalOffset = 155
+  Width = 188
+  object SQLConnector: TSQLConnector
+    Connected = False
+    LoginPrompt = False
+    DatabaseName = 'addressbookdata.db'
+    KeepConnection = False
+    Transaction = SQLTransaction
+    HostName = 'localhost'
+    LogEvents = []
+    ConnectorType = 'SQLite3Slim'
+    left = 32
+    top = 32
+  end
+  object SQLTransaction: TSQLTransaction
+    Active = False
+    Database = SQLConnector
+    left = 120
+    top = 32
+  end
+end
