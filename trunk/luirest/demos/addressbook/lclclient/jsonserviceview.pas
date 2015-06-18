@@ -186,7 +186,7 @@ begin
   Message := '';
   ResponseData := nil;
   try
-    ResponseData := StreamToJSONData(ResponseStream);
+    ResponseData := StreamToJSON(ResponseStream);
   except
     SetLength(Message, ResponseStream.Size);
     ResponseStream.Write(Message[1], ResponseStream.Size);
@@ -206,7 +206,7 @@ procedure TJSONServiceViewFrame.RESTClientResponseSuccess(const ResourcePath: St
 var
   ResponseData: TJSONData;
 begin
-  ResponseData := StreamToJSONData(ResponseStream);
+  ResponseData := StreamToJSON(ResponseStream);
   case Method of
     hmtGet: ValidData := ResponseData <> nil;
     hmtPost, hmtPut:
