@@ -669,8 +669,7 @@ begin
     end
     else
     begin
-      //todo: improve error handling
-      SetResponseStatus(AResponse, 400, 'Error posting to %s', [ARequest.PathInfo]);
+      SetResponseStatus(AResponse, 400, 'Error posting to %s. Unable to decode request payload: "%s"', [ARequest.PathInfo, ARequest.Content]);
       Exit;
     end;
     if NewResourceId <> '' then
