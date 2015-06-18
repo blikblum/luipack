@@ -36,7 +36,7 @@ type
   TContactsResource = class(TSqldbCollectionResource)
   protected
     class function GetItemParam: String; override;
-    procedure PrepareItem(ItemResource: TSqldbJSONResource); override;
+    procedure PrepareItem(ItemResource: TSqldbResource); override;
   public
     constructor Create; override;
   end;
@@ -46,7 +46,7 @@ type
   TContactPhonesResource = class(TSqldbCollectionResource)
   protected
     class function GetItemParam: String; override;
-    procedure PrepareItem(ItemResource: TSqldbJSONResource); override;
+    procedure PrepareItem(ItemResource: TSqldbResource); override;
   public
     constructor Create; override;
   end;
@@ -60,7 +60,7 @@ begin
   Result := 'phoneid';
 end;
 
-procedure TContactPhonesResource.PrepareItem(ItemResource: TSqldbJSONResource);
+procedure TContactPhonesResource.PrepareItem(ItemResource: TSqldbResource);
 begin
   inherited PrepareItem(ItemResource);
   ItemResource.InputFields := '["number"]';
@@ -95,7 +95,7 @@ begin
   Result := 'contactid';
 end;
 
-procedure TContactsResource.PrepareItem(ItemResource: TSqldbJSONResource);
+procedure TContactsResource.PrepareItem(ItemResource: TSqldbResource);
 begin
   inherited PrepareItem(ItemResource);
   ItemResource.RegisterSubPath('phones', TContactPhonesResource, 0);
