@@ -77,6 +77,23 @@ type
     property SelectSQL: String read FSelectSQL write FSelectSQL;
   end;
 
+  TSqldbJSONResourceClass = class of TSqldbJSONResource;
+
+  TSqldbCollectionResource = class(TSqldbJSONResource)
+  private
+    procedure CreateItemResource(out Resource: TRESTResource; ResourceTag: PtrInt);
+  protected
+    class function IsItemIdValid(const ItemId: String): Boolean; virtual;
+    class function GetItemClass: TSqldbJSONResourceClass; virtual;
+    class function GetItemParam: String; virtual;
+    procedure Loaded(Tag: PtrInt); override;
+    procedure PrepareItem(ItemResource: TSqldbJSONResource); virtual;
+  public
+    constructor Create; override;
+    procedure HandleSubPath(const SubPath: String;
+      var SubPathResourceDef: TRESTResourceDef); override;
+  end;
+
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
 
 implementation
@@ -712,6 +729,77 @@ begin
   finally
     Query.Destroy;
   end;
+end;
+
+{ TSqldbCollectionResource }
+
+procedure TSqldbCollectionResource.CreateItemResource(out
+  Resource: TRESTResource; ResourceTag: PtrInt);
+var
+  ResourceClass: TSqldbJSONResourceClass;
+  ItemResource: TSqldbJSONResource absolute Resource;
+begin
+  ResourceClass := GetItemClass;
+  if ResourceClass = nil then
+    raise Exception.CreateFmt('ItemClass not defined for %s', [ClassName]);
+  ItemResource := ResourceClass.Create;
+  if ItemResource.SelectSQL = '' then
+    ItemResource.SelectSQL := SelectSQL;
+  if ItemResource.PrimaryKeyParam = '' then
+    ItemResource.PrimaryKeyParam := GetItemParam;
+  if ItemResource.InputFields = '' then
+    ItemResource.InputFields := InputFields;
+  if ItemResource.JSONFields = '' then
+    ItemResource.JSONFields := JSONFields;
+  PrepareItem(ItemResource);
+end;
+
+class function TSqldbCollectionResource.IsItemIdValid(const ItemId: String): Boolean;
+var
+  Num: Double;
+begin
+  Result := TryStrToFloat(ItemId, Num);
+end;
+
+class function TSqldbCollectionResource.GetItemClass: TSqldbJSONResourceClass;
+begin
+  Result := TSqldbJSONResource;
+end;
+
+class function TSqldbCollectionResource.GetItemParam: String;
+begin
+  raise Exception.CreateFmt('GetItemParam not set. Class: %s Path: %s', [ClassName, TRESTRequest.ResourcePath]);
+end;
+
+procedure TSqldbCollectionResource.HandleSubPath(const SubPath: String;
+  var SubPathResourceDef: TRESTResourceDef);
+begin
+  if SubPathResources <> nil then
+  begin
+    SubPathResourceDef := SubPathResources.Find(SubPath);
+    if (SubPathResourceDef = nil) and IsItemIdValid(SubPath) then
+    begin
+      SubPathResourceDef := SubPathResources.DefaultResourceDef;
+      SetURIParam(SubPathParamName, SubPath);
+    end;
+  end;
+end;
+
+procedure TSqldbCollectionResource.Loaded(Tag: PtrInt);
+begin
+  inherited Loaded(Tag);
+  SetDefaultSubPath(GetItemParam, @CreateItemResource, 0);
+end;
+
+procedure TSqldbCollectionResource.PrepareItem(ItemResource: TSqldbJSONResource);
+begin
+  //
+end;
+
+constructor TSqldbCollectionResource.Create;
+begin
+  inherited Create;
+  IsCollection := True;
 end;
 
 end.
