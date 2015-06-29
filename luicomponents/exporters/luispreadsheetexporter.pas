@@ -5,7 +5,7 @@ unit LuiSpreadsheetExporter;
 interface
 
 uses
-  Classes, SysUtils, LuiDBExport, fpspreadsheet, xlsbiff8, xlsbiff5, fpsopendocument, db;
+  Classes, SysUtils, LuiDBExport, fpspreadsheet, xlsbiff8, xlsbiff5, fpsopendocument, fpsTypes, db;
 
 type
 
