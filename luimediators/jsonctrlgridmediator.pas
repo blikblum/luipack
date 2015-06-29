@@ -41,7 +41,7 @@ type
     FOnItemNotification: TJSONGridItemNotification;
     procedure CheckProperties;
     procedure ClearGrid;
-    procedure DeleteItem(Item: TJSONGridItem);
+    procedure DoDeleteItem(Item: TJSONGridItem);
     function GetItemCount: Integer;
     function GetItems(Index: Integer): TJSONGridItem;
     procedure InternalAddItem(ItemData: TJSONObject);
@@ -51,11 +51,13 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure AddItem(ItemData: TJSONObject);
+    procedure DeleteItem(ItemData: TJSONObject);
     procedure LoadData;
     property Data: TJSONArray read FData write FData;
     property ItemControlClass: TControlClass read FItemControlClass write FItemControlClass;
     property ItemCount: Integer read GetItemCount;
     property Items[Index: Integer]: TJSONGridItem read GetItems;
+    function FindItem(ItemData: TJSONObject): TJSONGridItem;
   published
     property Control: TWinControl read FControl write FControl;
     property OnItemCreate: TJSONGridItemCreate read FOnItemCreate write FOnItemCreate;
@@ -83,7 +85,7 @@ begin
     FOnItemNotification(Item, Operation, Data);
   //todo: make delete optional
   if Operation = ooDeleteItem then
-    Application.QueueAsyncCall(TDataEvent(@DeleteItem), PtrInt(Item));
+    Application.QueueAsyncCall(TDataEvent(@DoDeleteItem), PtrInt(Item));
 end;
 
 constructor TJSONCtrlGridMediator.Create(AOwner: TComponent);
@@ -106,6 +108,15 @@ begin
   InternalAddItem(ItemData);
 end;
 
+procedure TJSONCtrlGridMediator.DeleteItem(ItemData: TJSONObject);
+var
+  Item: TJSONGridItem;
+begin
+  Item := FindItem(ItemData);
+  if Item <> nil then
+    DoDeleteItem(Item);
+end;
+
 procedure TJSONCtrlGridMediator.LoadData;
 var
   i: Integer;
@@ -121,6 +132,19 @@ begin
   end;
 end;
 
+function TJSONCtrlGridMediator.FindItem(ItemData: TJSONObject): TJSONGridItem;
+var
+  i: Integer;
+begin
+  for i := 0 to FItemList.Count - 1 do
+  begin
+    Result := TJSONGridItem(FItemList.Items[i]);
+    if Result.Data = ItemData then
+      Exit;
+  end;
+  Result := nil;
+end;
+
 procedure TJSONCtrlGridMediator.ClearGrid;
 var
   Item: TJSONGridItem;
@@ -134,7 +158,7 @@ begin
   end;
 end;
 
-procedure TJSONCtrlGridMediator.DeleteItem(Item: TJSONGridItem);
+procedure TJSONCtrlGridMediator.DoDeleteItem(Item: TJSONGridItem);
 begin
   FreeAndNil(Item.FControl);
   FItemList.Remove(Item);
