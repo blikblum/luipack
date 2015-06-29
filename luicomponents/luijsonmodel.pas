@@ -96,6 +96,7 @@ type
     function Get(ItemData: TJSONObject): TJSONModel;
     function IndexOf(Item: TJSONModel): Integer;
     function ParamByName(const ParamName: String): TParam;
+    procedure Remove(Item: TJSONModel);
     function SaveItem(Item: TJSONModel; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
     function SaveItem(Item: TJSONModel; const IdValue: Variant; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
     property Count: Integer read GetCount;
@@ -253,8 +254,7 @@ begin
     Data.Extract(Item.Data);
     Item.FOwnsData := True;
     FPONotifyObservers(Self, ooDeleteItem, Item);
-    if FItems <> nil then
-      FItems.Remove(Item);
+    Remove(Item);
   end;
 end;
 
@@ -453,6 +453,12 @@ begin
   Result := FResource.ParamByName(ParamName);
 end;
 
+procedure TJSONCollection.Remove(Item: TJSONModel);
+begin
+  if FItems <> nil then
+    FItems.Remove(Item);
+end;
+
 { TJSONModel }
 
 class procedure TJSONModel.SetDefaultResourceClient(Value: IResourceClient);
@@ -597,8 +603,7 @@ begin
   Result := DoSave(Unassigned, Options);
 end;
 
-function TJSONModel.Save(const IdValue: Variant; Options: TSaveOptions
-  ): Boolean;
+function TJSONModel.Save(const IdValue: Variant; Options: TSaveOptions): Boolean;
 begin
   Result := DoSave(IdValue, Options);
 end;
