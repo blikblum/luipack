@@ -1,0 +1,79 @@
+object Sqlite3TableLoaderViewForm: TSqlite3TableLoaderViewForm
+  Left = 454
+  Height = 250
+  Top = 292
+  Width = 280
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Sqlite3 Table Loader'
+  ClientHeight = 250
+  ClientWidth = 280
+  Position = poScreenCenter
+  LCLVersion = '1.3'
+  object TablesListBox: TListBox
+    Left = 8
+    Height = 144
+    Top = 65
+    Width = 264
+    ItemHeight = 0
+    OnSelectionChange = TablesListBoxSelectionChange
+    TabOrder = 0
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 15
+    Top = 51
+    Width = 72
+    Caption = 'Select a table:'
+    ParentColor = False
+  end
+  object OkButton: TBitBtn
+    Left = 64
+    Height = 30
+    Top = 216
+    Width = 96
+    Caption = 'Import'
+    Enabled = False
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = OkButtonClick
+    TabOrder = 1
+  end
+  object CancelButton: TBitBtn
+    Left = 176
+    Height = 30
+    Top = 216
+    Width = 96
+    Cancel = True
+    Caption = 'Cancel'
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 2
+  end
+  object FileNameEdit: TFileNameEdit
+    Left = 8
+    Height = 23
+    Top = 24
+    Width = 240
+    OnAcceptFileName = FileNameEditAcceptFileName
+    DialogOptions = []
+    FilterIndex = 0
+    HideDirectories = False
+    ButtonWidth = 23
+    NumGlyphs = 1
+    MaxLength = 0
+    TabOrder = 3
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 15
+    Top = 7
+    Width = 119
+    Caption = 'Select a sqlite3 datafile'
+    ParentColor = False
+  end
+  object Sqlite3Dataset: TSqlite3Dataset
+    left = 12
+    top = 216
+  end
+end
