@@ -3,35 +3,29 @@
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="datahub_package"/>
+    <Type Value="RunAndDesignTime"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
         <OtherUnitFiles Value="baseclasses"/>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
-      <Other>
-        <CompilerMessages>
-          <MsgFileName Value=""/>
-        </CompilerMessages>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Files Count="3">
       <Item1>
-        <Filename Value="baseclasses\datahubproject.pas"/>
+        <Filename Value="datahubproject.pas"/>
         <UnitName Value="DataHubProject"/>
       </Item1>
       <Item2>
-        <Filename Value="baseclasses\datamodel.pas"/>
+        <Filename Value="datamodel.pas"/>
         <UnitName Value="DataModel"/>
       </Item2>
       <Item3>
-        <Filename Value="baseclasses\dataview.pas"/>
+        <Filename Value="dataview.pas"/>
         <UnitName Value="DataView"/>
       </Item3>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="luicomponents"/>

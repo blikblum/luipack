@@ -7,12 +7,11 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, runtimetypeinfocontrols, Main,
-  //exporters
-  DataViewExporter, LCLDBDataViewExporter, LCLViewBuilder, LCLJSONDataViewExporter,
-  LazReportDataViewExporter, HTMLFormExport,
-  //importers
-  DataModelImporter,  Sqlite3DataModelImporter;
+  Forms,
+  Main,
+  DataModelImporter, DataViewExporter,
+  LCLDBDataViewExporter, LazReportDataViewExporter, LCLJSONDataViewExporter, HTMLFormExport,
+  Sqlite3DataModelImporter;
 
 {$R *.res}
 

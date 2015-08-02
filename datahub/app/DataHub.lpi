@@ -13,6 +13,9 @@
       <Title Value="DataHub"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="True"/>
+      </XPManifest>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -65,7 +68,7 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="forms\main.pas"/>
+        <Filename Value="src\presentations\main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
@@ -73,81 +76,68 @@
         <UnitName Value="Main"/>
       </Unit1>
       <Unit2>
-        <Filename Value="utils\vtcollectioncontroller.pas"/>
+        <Filename Value="src\presentations\modeleditor.pas"/>
         <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="frames\modelfieldsview.pas"/>
+        <Filename Value="src\presentations\modelfieldeditor.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="ModelFieldsViewFrame"/>
         <HasResources Value="True"/>
-        <ResourceBaseClass Value="Frame"/>
-        <UnitName Value="ModelFieldsView"/>
       </Unit3>
       <Unit4>
-        <Filename Value="forms\modelfieldeditor.pas"/>
+        <Filename Value="src\presentations\modelfieldsview.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="ModelFieldEditorForm"/>
         <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit4>
       <Unit5>
-        <Filename Value="utils\datahubutils.pas"/>
+        <Filename Value="src\exporters\dataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="exporters\dataviewexporter.pas"/>
+        <Filename Value="src\exporters\htmlformexport.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="DataViewExporter"/>
       </Unit6>
       <Unit7>
-        <Filename Value="exporters\lclviewbuilder.pas"/>
+        <Filename Value="src\exporters\lazreportdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="LCLViewBuilder"/>
       </Unit7>
       <Unit8>
-        <Filename Value="exporters\lcldbdataviewexporter.pas"/>
+        <Filename Value="src\exporters\lcldbdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="forms\modeleditor.pas"/>
+        <Filename Value="src\exporters\lcljsondataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="ModelEditorForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit9>
       <Unit10>
-        <Filename Value="exporters\lcljsondataviewexporter.pas"/>
+        <Filename Value="src\exporters\lclviewbuilder.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="exporters\lazreportdataviewexporter.pas"/>
+        <Filename Value="src\components\vtcollectioncontroller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="LazReportDataViewExporter"/>
       </Unit11>
       <Unit12>
-        <Filename Value="importers\sqlite3datamodelimporter.pas"/>
+        <Filename Value="src\helpers\datahublclutils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="importers\datamodelimporter.pas"/>
+        <Filename Value="src\helpers\datahubutils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="importers\forms\sqlite3tableloaderview.pas"/>
+        <Filename Value="src\importers\datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Sqlite3TableLoaderViewForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit14>
       <Unit15>
-        <Filename Value="utils\datahublclutils.pas"/>
+        <Filename Value="src\importers\sqlite3datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="exporters\htmlformexport.pas"/>
+        <Filename Value="src\importers\forms\sqlite3tableloaderview.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="HTMLFormExport"/>
+        <HasResources Value="True"/>
       </Unit16>
     </Units>
   </ProjectOptions>
@@ -159,7 +149,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="forms;utils;frames;exporters;importers;importers\forms"/>
+      <OtherUnitFiles Value="forms;frames;importers\forms;src\presentations;src\exporters;src\components;src\helpers;src\importers;src\importers\forms"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
