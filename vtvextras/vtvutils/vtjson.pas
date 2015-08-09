@@ -17,6 +17,10 @@ type
   TVTJSONInspectorFormatName = procedure (Sender: TVirtualJSONInspector;
     ParentData: TJSONData; ItemIndex: Integer; var DisplayName: String) of object;
 
+  TVTJSONInspectorFilterProperty = procedure (Sender: TVirtualJSONInspector;
+    ParentData, ItemData: TJSONData;
+    ItemIndex: Integer; var Accept: Boolean) of object;
+
   TVTJSONInspectorOption = (jioSkipNullProperties, jioSkipUnknownProperties);
 
   TVTJSONInspectorOptions = set of TVTJSONInspectorOption;
@@ -76,6 +80,7 @@ type
   TVirtualJSONInspector = class(TCustomVirtualStringTree)
   private
     FItemDataOffset: Cardinal;
+    FOnFilterProperty: TVTJSONInspectorFilterProperty;
     FOnFormatName: TVTJSONInspectorFormatName;
     FRootData: TJSONData;
     FOnFormatValue: TVTJSONInspectorFormatValue;
@@ -107,6 +112,7 @@ type
     property RootData: TJSONData read FRootData write SetRootData;
   published
     property PropertyDefs: TJSONPropertyDefs read FPropertyDefs write SetPropertyDefs;
+    property OnFilterProperty: TVTJSONInspectorFilterProperty read FOnFilterProperty write FOnFilterProperty;
     property OnFormatName: TVTJSONInspectorFormatName read FOnFormatName write FOnFormatName;
     property OnFormatValue: TVTJSONInspectorFormatValue read FOnFormatValue write FOnFormatValue;
    //inherited properties
@@ -1085,7 +1091,8 @@ begin
       Result := FPropertyDefs.Find(PropName) <> nil;
     end;
   end;
-  //todo: add OnFilterXXX
+  if Assigned(FOnFilterProperty) then
+    FOnFilterProperty(Self, ParentJSONData, JSONData, Index, Result);
 end;
 
 function TVirtualJSONInspector.GetItemData(Node: PVirtualNode): Pointer;
