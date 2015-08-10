@@ -108,6 +108,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function GetData(Node: PVirtualNode): TJSONData;
+    function GetName(Node: PVirtualNode): String;
     procedure Reload;
     property RootData: TJSONData read FRootData write SetRootData;
   published
@@ -1318,6 +1319,19 @@ begin
   end
   else
     Result := nil;
+end;
+
+function TVirtualJSONInspector.GetName(Node: PVirtualNode): String;
+var
+  ItemData: PItemData;
+begin
+  if Node <> nil then
+  begin
+    ItemData := GetItemData(Node);
+    Result := ItemData^.Name;
+  end
+  else
+    Result := '';
 end;
 
 procedure TVirtualJSONInspector.Reload;
