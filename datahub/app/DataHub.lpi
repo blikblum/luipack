@@ -83,7 +83,10 @@
       <Unit3>
         <Filename Value="src\presentations\modelfieldeditor.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="ModelFieldEditorForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ModelFieldEditor"/>
       </Unit3>
       <Unit4>
         <Filename Value="src\presentations\modelfieldsview.pas"/>

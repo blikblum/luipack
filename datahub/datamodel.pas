@@ -6,7 +6,7 @@ unit DataModel;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, fpjson;
 
 type
   TDataModel = class;
@@ -18,18 +18,24 @@ type
 
   TDataModelField = class(TCollectionItem)
   private
+    FConstraints: String;
+    FConstraintsData: TJSONObject;
     FDisplayLabel: String;
     FFieldID: String;
     FFieldName: String;
     FFieldType: TDataModelFieldType;
     function GetFieldTypeName: String;
     function GetModel: TDataModel;
+    procedure SetConstraints(const Value: String);
   protected
     function GetDisplayName: string; override;
   public
+    destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
+    property ConstraintsData: TJSONObject read FConstraintsData;
     property Model: TDataModel read GetModel;
   published
+    property Constraints: String read FConstraints write SetConstraints;
     property DisplayLabel: String read FDisplayLabel write FDisplayLabel;
     property FieldID: String read FFieldID write FFieldID;
     property FieldName: String read FFieldName write FFieldName;
@@ -81,6 +87,9 @@ type
 
 
 implementation
+
+uses
+  LuiJSONUtils;
 
 { TDataModels }
 
@@ -164,12 +173,27 @@ begin
     Result := (Collection.Owner as TDataModel);
 end;
 
+procedure TDataModelField.SetConstraints(const Value: String);
+begin
+  if FConstraints = Value then Exit;
+  FConstraints := Value;
+  FreeAndNil(FConstraintsData);
+  if not TryStrToJSON(Value, FConstraintsData) then
+    raise Exception.CreateFmt('Invalid Constraints. Expected a JSON Object encoded string. Got "%s"', [Value]);
+end;
+
 function TDataModelField.GetDisplayName: string;
 begin
   if FDisplayLabel <> '' then
     Result := FDisplayLabel
   else
     Result := FFieldName;
+end;
+
+destructor TDataModelField.Destroy;
+begin
+  FConstraintsData.Free;
+  inherited Destroy;
 end;
 
 procedure TDataModelField.Assign(Source: TPersistent);
@@ -180,6 +204,7 @@ begin
     DisplayLabel := TDataModelField(Source).DisplayLabel;
     FieldName := TDataModelField(Source).FieldName;
     FieldType := TDataModelField(Source).FieldType;
+    Constraints := TDataModelField(Source).Constraints;
   end
   else
     inherited Assign(Source);
