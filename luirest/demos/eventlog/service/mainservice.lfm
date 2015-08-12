@@ -1,0 +1,26 @@
+object LogServiceModule: TLogServiceModule
+  OldCreateOrder = False
+  ContentType = 'application/json; charset=UTF-8'
+  RootPath = '/'
+  Height = 156
+  HorizontalOffset = 466
+  VerticalOffset = 265
+  Width = 412
+  object Connection: TSQLite3Connection
+    Connected = False
+    LoginPrompt = False
+    DatabaseName = 'eventlog.db'
+    KeepConnection = False
+    Transaction = Transaction
+    LogEvents = []
+    Options = []
+    left = 37
+    top = 20
+  end
+  object Transaction: TSQLTransaction
+    Active = False
+    Database = Connection
+    left = 128
+    top = 20
+  end
+end
