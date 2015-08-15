@@ -3,11 +3,11 @@ object LogServiceModule: TLogServiceModule
   ContentType = 'application/json; charset=UTF-8'
   RootPath = '/'
   Height = 156
-  HorizontalOffset = 466
-  VerticalOffset = 265
+  HorizontalOffset = 465
+  VerticalOffset = 239
   Width = 412
   object Connection: TSQLite3Connection
-    Connected = False
+    Connected = True
     LoginPrompt = False
     DatabaseName = 'eventlog.db'
     KeepConnection = False
