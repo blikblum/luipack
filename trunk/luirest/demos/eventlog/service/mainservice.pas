@@ -5,7 +5,7 @@ unit MainService;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiRESTServer, sqlite3conn,
+  Classes, SysUtils, FileUtil, fphttp, HTTPDefs, LuiRESTServer, sqlite3slimconn,
   sqldb, LuiRESTSqldb;
 
 type
