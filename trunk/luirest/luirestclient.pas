@@ -57,6 +57,23 @@ type
     property OnSocketError: TSocketError read FOnSocketError write FOnSocketError;
   end;
 
+  TParamLocation = (plPath, plQuery);
+
+  { TModelDefParam }
+
+  TModelDefParam = class(TParam)
+  private
+    FLocation: TParamLocation;
+    FRequired: Boolean;
+    function GetRequired: Boolean;
+  public
+    constructor Create(ACollection: TCollection); override;
+    procedure Assign(Source: TPersistent); override;
+  published
+    property Location: TParamLocation read FLocation write FLocation default plPath;
+    property Required: Boolean read GetRequired write FRequired;
+  end;
+
   { TRESTResourceModelDef }
 
   TRESTResourceModelDef = class(TCollectionItem)
@@ -230,6 +247,32 @@ type
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
+
+{ TModelDefParam }
+
+function TModelDefParam.GetRequired: Boolean;
+begin
+  if FLocation = plPath then
+    Result := True
+  else
+    Result := FRequired;
+end;
+
+constructor TModelDefParam.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  FLocation := plPath;
+end;
+
+procedure TModelDefParam.Assign(Source: TPersistent);
+begin
+  inherited Assign(Source);
+  if Source is TModelDefParam then
+  begin
+    FRequired := TModelDefParam(Source).FRequired;
+    FLocation := TModelDefParam(Source).Location;
+  end;
+end;
 
 { TRESTCacheHandler }
 
@@ -544,7 +587,7 @@ end;
 constructor TRESTDataResource.Create(AModelDef: TRESTResourceModelDef;
   ResourceClient: TRESTResourceClient);
 begin
-  FParams := TParams.Create(TParam);
+  FParams := TParams.Create(TModelDefParam);
   FParams.Assign(AModelDef.Params);
   FModelDef := AModelDef;
   FResourceClient := ResourceClient;
@@ -558,16 +601,38 @@ end;
 
 function TRESTDataResource.GetResourcePath: String;
 var
-  Param: TParam;
+  Param: TModelDefParam;
+  QueryStr: String;
+  IsNull: Boolean;
   i: Integer;
 begin
   Result := FModelDef.Path;
+  QueryStr := '';
   for i := 0 to FParams.Count - 1 do
   begin
-    Param := FParams.Items[i];
-    Result := StringReplace(Result, '{' + Param.Name + '}', Param.AsString,
-      [rfReplaceAll, rfIgnoreCase]);
+    Param := TModelDefParam(FParams.Items[i]);
+    IsNull := Param.IsNull;
+    if Param.Required and IsNull then
+      raise Exception.CreateFmt('Param "%s" of "%s" model not assigned', [Param.Name, FModelDef.Name]);
+    if Param.Location = plPath then
+    begin
+      Result := StringReplace(Result, '{' + Param.Name + '}', Param.AsString,
+        [rfReplaceAll, rfIgnoreCase]);
+    end
+    else
+    begin
+      if not IsNull then
+      begin
+        //todo: encode query fields
+        if QueryStr = '' then
+          QueryStr := Param.Name + '=' + Param.AsString
+        else
+          QueryStr := QueryStr + '&' + Param.Name + '=' + Param.AsString;
+      end;
+    end;
   end;
+  if QueryStr <> '' then
+    Result := Result + '?' + QueryStr;
 end;
 
 function TRESTDataResource.GetParams: TParams;
@@ -662,7 +727,7 @@ end;
 constructor TRESTResourceModelDef.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
-  FParams := TParams.Create(TParam);
+  FParams := TParams.Create(TModelDefParam);
   FCacheMode := cmNone;
 end;
 
