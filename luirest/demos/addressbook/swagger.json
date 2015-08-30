@@ -1,0 +1,127 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "0.1",
+        "title": "Addressbook LuiREST Demo"
+    },
+    "basePath": "/luirest/addressbook.cgi",
+    "paths": {
+        "/contacts": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Contact"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/contactbody"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Contact"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/contacts/{contactid}": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/contactid"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Contact"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/contactbody"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Contact"
+                        }
+                    }
+                }
+            }
+        },
+        "/contacts/{contactid}/phones": {
+            "parameters": [
+                {
+                    "$ref": "#/parameters/contactid"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Phone"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Contact": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "categoryid": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Phone": {
+            "properties": {
+                "number": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "parameters": {
+        "contactid": {
+            "name": "contactid",
+            "in": "path",
+            "type": "integer",
+            "required": true
+        },
+        "contactbody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Contact"
+            }
+        }
+    }
+}
