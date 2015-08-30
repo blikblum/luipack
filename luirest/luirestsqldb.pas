@@ -428,7 +428,11 @@ begin
     ActualConnection := TSQLConnectorAccess(FConnection).Proxy
   else
     ActualConnection := FConnection;
+  {$IF FPC_FULLVERSION >= 30000}
+  Info := TSQLConnectionAccess(ActualConnection).GetStatementInfo(Query.SQL.Text);
+  {$ELSE}
   Info := TSQLConnectionAccess(ActualConnection).GetStatementInfo(Query.SQL.Text, True, stNoSchema);
+  {$ENDIF}
   InsertQuery := CreateInsertQuery(Query, Info.TableName, ActualConnection.FieldNameQuoteChars);
   try
     if (ActualConnection is TPQConnection) or (ActualConnection is TIBConnection) then
