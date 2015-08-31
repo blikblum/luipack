@@ -3,6 +3,7 @@
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="luirest_package"/>
+    <Type Value="RunAndDesignTime"/>
     <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -15,11 +16,8 @@
           <OptimizationLevel Value="2"/>
         </Optimizations>
       </CodeGeneration>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
-    <Files Count="6">
+    <Files Count="7">
       <Item1>
         <Filename Value="luirestserver.pas"/>
         <UnitName Value="LuiRESTServer"/>
@@ -45,8 +43,11 @@
         <Filename Value="luirestclient.pas"/>
         <UnitName Value="LuiRESTClient"/>
       </Item6>
+      <Item7>
+        <Filename Value="luirestswagger.pas"/>
+        <UnitName Value="luirestswagger"/>
+      </Item7>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="6">
       <Item1>
         <PackageName Value="sqliteextensions_package"/>

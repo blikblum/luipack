@@ -104,6 +104,9 @@ type
   private
     FDefaultResourceDef: TRESTResourceDef;
     FList: TFPHashObjectList;
+    function GetCount: Integer;
+    function GetItem(Index: Integer): TRESTResourceDef;
+    function GetName(Index: Integer): String;
     procedure SetDefaultResourceDef(const Value: TRESTResourceDef);
   public
     constructor Create;
@@ -111,7 +114,10 @@ type
     function Find(const ResourceId: ShortString): TRESTResourceDef;
     procedure Register(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt);
     procedure Register(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+    property Count: Integer read GetCount;
     property DefaultResourceDef: TRESTResourceDef read FDefaultResourceDef write SetDefaultResourceDef;
+    property Items[Index: Integer]: TRESTResourceDef read GetItem; default;
+    property Names[Index: Integer]: String read GetName;
   end;
 
   { TRESTServiceModule }
@@ -490,6 +496,21 @@ begin
     Exit;
   FreeAndNil(FDefaultResourceDef);
   FDefaultResourceDef := Value;
+end;
+
+function TRESTResourceStore.GetItem(Index: Integer): TRESTResourceDef;
+begin
+  Result := TRESTResourceDef(FList.Items[Index]);
+end;
+
+function TRESTResourceStore.GetCount: Integer;
+begin
+  Result := FList.Count;
+end;
+
+function TRESTResourceStore.GetName(Index: Integer): String;
+begin
+  Result := FList.NameOfIndex(Index);
 end;
 
 constructor TRESTResourceStore.Create;
