@@ -27,7 +27,7 @@ var
 implementation
 
 uses
-  LuiRESTSqldb, IniFiles;
+  LuiRESTSqldb, IniFiles, LuiRESTSwagger;
 
 {$R *.lfm}
 
@@ -56,6 +56,7 @@ begin
   Resources.Register('contacts', TContactsResource, 0);
   Resources.Register('categories', TCategoriesResource, 0);
   Resources.Register('info', TServiceInfoResource, 0);
+  Resources.Register('swagger', TSwaggerDefinitionResource, PtrInt(Resources));
 end;
 
 end.

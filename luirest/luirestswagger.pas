@@ -160,7 +160,7 @@ procedure TSwaggerDefinitionResource.ParseResources(ResourceDefs: TRESTResourceS
 var
   i: Integer;
   Resource: TRESTResource;
-  SubPath: String;
+  SubPath, ParamName: String;
 begin
   for i := 0 to ResourceDefs.Count - 1 do
   begin
@@ -168,11 +168,11 @@ begin
     Resource := ResourceDefs[i].GetResource(URIParams, nil);
     SubPath := ResourceDefs.Names[i];
     AddPath(Resource, BasePath + '/' + SubPath);
-    SubPath := TRESTResourceAccess(Resource).SubPathParamName;
-    if SubPath <> '' then
+    ParamName := TRESTResourceAccess(Resource).SubPathParamName;
+    if ParamName <> '' then
     begin
       Resource := TRESTResourceAccess(Resource).SubPathResources.DefaultResourceDef.GetResource(URIParams, nil);
-      AddPath(Resource, BasePath + '/{' + SubPath + '}');
+      AddPath(Resource, BasePath + '/' + SubPath + '/{' + ParamName + '}');
     end;
   end;
 end;
