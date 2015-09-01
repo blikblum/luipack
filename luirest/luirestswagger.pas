@@ -15,6 +15,8 @@ type
   private
     FRootResources: TRESTResourceStore;
     FPathList: TStringList;
+    FParametersData: TJSONObject;
+    procedure AddParameter(const ParamName: String);
     procedure AddPath(Resource: TRESTResource; const Path: String);
     procedure ParseResources(ResourceDefs: TRESTResourceStore;
       const BasePath: String);
@@ -22,6 +24,7 @@ type
     procedure Loaded(Tag: PtrInt); override;
   public
     constructor Create; override;
+    destructor Destroy; override;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
@@ -44,13 +47,32 @@ begin
   inherited Create;
   FPathList := TStringList.Create;
   FPathList.OwnsObjects := True;
+  FParametersData := TJSONObject.Create;
 end;
 
-function CreatePathInfoData(Resource: TRESTResource): TJSONObject;
+destructor TSwaggerDefinitionResource.Destroy;
+begin
+  FParametersData.Destroy;
+  FPathList.Destroy;
+  inherited Destroy;
+end;
+
+function CreatePathParamsData(URIParams: TJSONObject): TJSONArray;
+var
+  i: Integer;
+begin
+  Result := TJSONArray.Create;
+  for i := 0 to URIParams.Count -1 do
+    Result.Add(TJSONObject.Create(['$ref', '#/parameters/' + URIParams.Names[i]]));
+end;
+
+function CreatePathInfoData(Resource: TRESTResource; URIParams: TJSONObject): TJSONObject;
 begin
   //todo: DRY + check response codes
   //todo: find a way to check if method is overriden
   Result := TJSONObject.Create;
+  if URIParams.Count > 0 then
+    Result.Add('parameters', CreatePathParamsData(URIParams));
   {
   if TMethod(Resource.HandleGet).Code <> TMethod(TRESTResource(@TRESTResource).HandleGet).Code then
   begin
@@ -96,9 +118,11 @@ begin
   }
 end;
 
-function CreateSqldbPathInfoData(Resource: TSqldbResource): TJSONObject;
+function CreateSqldbPathInfoData(Resource: TSqldbResource; URIParams: TJSONObject): TJSONObject;
 begin
   Result := TJSONObject.Create;
+  if URIParams.Count > 0 then
+    Result.Add('parameters', CreatePathParamsData(URIParams));
   Result.Add('get', TJSONObject.Create([
     'responses', TJSONObject.Create([
         '200', TJSONObject.Create([
@@ -142,15 +166,26 @@ type
 
   end;
 
+procedure TSwaggerDefinitionResource.AddParameter(const ParamName: String);
+begin
+  if FParametersData.IndexOfName(ParamName) >= 0 then
+    Exit;
+  FParametersData.Add(ParamName, TJSONObject.Create([
+    'name', ParamName,
+    'in', 'path',
+    'required', True
+  ]));
+end;
+
 procedure TSwaggerDefinitionResource.AddPath(Resource: TRESTResource;
   const Path: String);
 var
   PathInfoData: TJSONObject;
 begin
   if Resource is TSqldbResource then
-    PathInfoData := CreateSqldbPathInfoData(TSqldbResource(Resource))
+    PathInfoData := CreateSqldbPathInfoData(TSqldbResource(Resource), URIParams)
   else
-    PathInfoData := CreatePathInfoData(Resource);
+    PathInfoData := CreatePathInfoData(Resource, URIParams);
   FPathList.AddObject(Path, PathInfoData);
   if TRESTResourceAccess(Resource).SubPathResources <> nil then
     ParseResources(TRESTResourceAccess(Resource).SubPathResources, Path);
@@ -173,8 +208,11 @@ begin
     ParamName := TRESTResourceAccess(Resource).SubPathParamName;
     if ParamName <> '' then
     begin
+      AddParameter(ParamName);
+      URIParams.Add(ParamName, True);
       Resource := TRESTResourceAccess(Resource).SubPathResources.DefaultResourceDef.GetResource(URIParams, nil);
       AddPath(Resource, BasePath + '/' + SubPath + '/{' + ParamName + '}');
+      URIParams.Delete(ParamName);
     end;
   end;
 end;
@@ -185,7 +223,8 @@ var
   RootData, PathsData: TJSONObject;
   i: Integer;
 begin
-
+  FPathList.Clear;
+  FParametersData.Clear;
   RootData := TJSONObject.Create;
   PathsData := TJSONObject.Create;
   RootData.Add('paths', PathsData);
@@ -196,6 +235,7 @@ begin
       PathsData.Add(FPathList[i], FPathList.Objects[i] as TJSONObject);
       FPathList.Objects[i] := nil;
     end;
+    RootData.Add('parameters', FParametersData.Clone);
     AResponse.Contents.Add(RootData.AsJSON);
     AResponse.Code := 200;
   finally
