@@ -166,6 +166,8 @@ begin
   begin
     //todo: proper order. Use Index to insert or use a custom sort
     Resource := ResourceDefs[i].GetResource(URIParams, nil);
+    if Resource = Self then
+      continue;
     SubPath := ResourceDefs.Names[i];
     AddPath(Resource, BasePath + '/' + SubPath);
     ParamName := TRESTResourceAccess(Resource).SubPathParamName;
