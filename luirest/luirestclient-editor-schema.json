@@ -1,0 +1,38 @@
+{
+  "title": "Resources",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "title": "Resource",
+    "properties": {
+      "Name": {
+        "type": "string"
+      },
+      "Path": {
+        "type": "string"
+      },
+      "Params": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Name": {
+              "type": "string"
+            },
+            "DataType": {
+              "type": "string",
+              "enum": [
+                "ftInteger",
+                "ftString"
+              ],
+              "default": "ftInteger"
+            },
+            "ParamType": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
