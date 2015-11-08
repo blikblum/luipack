@@ -427,7 +427,7 @@ begin
           PropertyName := Copy(ParamName, DotPos + 1, Length(ParamName));
           if (Length(PropertyName) > 0) and (PropertyName[1] = '[') then
             PropertyName := VarToStr(frParser.Calc(PropertyName));
-          PropData := PropDataObj.Find(PropertyName);
+          PropData := PropDataObj.FindPath(PropertyName);
           if (PropData <> nil) and not (PropData.JSONType in [jtArray, jtObject]) then
             ParValue := PropData.Value;
         end;
