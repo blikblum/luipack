@@ -262,6 +262,8 @@ constructor TModelDefParam.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
   FLocation := plPath;
+  ParamType := ptInput;
+  DataType := ftInteger;
 end;
 
 procedure TModelDefParam.Assign(Source: TPersistent);
