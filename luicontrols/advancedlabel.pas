@@ -45,6 +45,7 @@ type
     FLinkStyle: TFontStyles;
     FSavedBaseFontColor: TColor;
     FSavedBaseFontStyle: TFontStyles;
+    FSavedCursor: TCursor;
     FAutoLink: Boolean;
     FLink: Boolean;
     procedure ApplyLinkProperties;
@@ -142,9 +143,11 @@ procedure TAdvancedLabel.ApplyLinkProperties;
 begin
   FSavedBaseFontColor := FBaseFontColor;
   FSavedBaseFontStyle := FBaseFontStyle;
+  FSavedCursor := Cursor;
   FBaseFontColor := FLinkColor;
   FBaseFontStyle := FLinkStyle;
   UpdateFont(FLinkColor, FLinkStyle);
+  Cursor := crHandPoint;
 end;
 
 function TAdvancedLabel.GetOnClick: TNotifyEvent;
@@ -163,6 +166,7 @@ begin
     FBaseFontColor := FSavedBaseFontColor;
     FBaseFontStyle := FSavedBaseFontStyle;
     RestoreFontProperties;
+    Cursor := FSavedCursor;
   end;
 end;
 
