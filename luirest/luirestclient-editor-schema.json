@@ -1,34 +1,61 @@
 {
-  "title": "Resources",
-  "type": "array",
-  "items": {
-    "type": "object",
-    "title": "Resource",
-    "properties": {
-      "Name": {
-        "type": "string"
+  "title":"Resources",
+  "type":"array",
+  "items":{
+    "type":"object",
+    "title":"Resource",
+    "defaultProperties":[
+      "Name",
+      "Path",
+      "Params"
+    ],
+    "headerTemplate":"{{self.Name}}",
+    "properties":{
+      "Name":{
+        "type":"string"
       },
-      "Path": {
-        "type": "string"
+      "Path":{
+        "type":"string"
       },
-      "Params": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "Name": {
-              "type": "string"
+      "IdField":{
+        "type":"string"
+      },
+      "CacheMode":{
+        "type":"string"
+      },
+      "Params":{
+        "type":"array",
+        "propertyOrder":2000,
+        "format":"tabs",
+        "items":{
+          "type":"object",
+          "headerTemplate":"{{self.Name}}",
+          "defaultProperties":[
+            "Name"
+          ],
+          "format":"grid",
+          "properties":{
+            "Name":{
+              "type":"string"
             },
-            "DataType": {
-              "type": "string",
-              "enum": [
+            "Location":{
+              "type":"string",
+              "enum":[
+                "plQuery",
+                "plPath"
+              ]
+            },
+            "DataType":{
+              "type":"string",
+              "enum":[
                 "ftInteger",
                 "ftString"
               ],
-              "default": "ftInteger"
+              "default":"ftString"
             },
-            "ParamType": {
-              "type": "string"
+            "Required":{
+              "type":"boolean",
+              "default":true
             }
           }
         }
