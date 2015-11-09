@@ -3,6 +3,7 @@
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="luicomponents"/>
+    <Type Value="RunAndDesignTime"/>
     <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Américo Pereira Câmara / Rudy Velthuis (VarRecUtils)"/>
     <CompilerOptions>
@@ -17,12 +18,9 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="22">
+    <Files Count="24">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -112,8 +110,15 @@
         <Filename Value="ide\forms\jsonmodelunitoptionsview.pas"/>
         <UnitName Value="JSONModelUnitOptionsView"/>
       </Item22>
+      <Item23>
+        <Filename Value="ide\custommacros.pas"/>
+        <UnitName Value="custommacros"/>
+      </Item23>
+      <Item24>
+        <Filename Value="ide\forms\directoryselectview.pas"/>
+        <UnitName Value="directoryselectview"/>
+      </Item24>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="IDEIntf"/>

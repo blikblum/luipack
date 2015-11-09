@@ -11,8 +11,8 @@ uses
   LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
   LuiJSONUtils, LuiDBExport, LuiObjectUtils, VarRecUtils, LuiDBUtils, 
   LuiDataClasses, LuiJSONClasses, LuiIoCContainer, LuiServices, LuiJSONModel, 
-  JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, 
-  LazarusPackageIntf;
+  JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, CustomMacros, 
+  DirectorySelectView, LazarusPackageIntf;
 
 implementation
 

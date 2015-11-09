@@ -13,7 +13,7 @@ procedure Register;
 implementation
 
 uses
-  JSONModelDescriptors;
+  JSONModelDescriptors, CustomMacros;
 
 procedure RegisterUnitLuiConfig;
 begin
@@ -40,6 +40,7 @@ begin
   RegisterUnit('LuiConfig', @RegisterUnitLuiConfig);
   RegisterUnit('LuiOrderedDataset', @RegisterUnitLuiOrderedDataset);
   RegisterUnit('LuiRecordBuffer', @RegisterUnitLuiRecordBuffer);
+  CustomMacros.Register;
 end;
 
 end.
