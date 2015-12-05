@@ -127,7 +127,7 @@ begin
   begin
     IPCClient := TSimpleIPCClient.Create(Self);
     IPCClient.ServerId := GetServerId(FIdentifier);
-    if IPCClient.ServerRunning then
+    if not Assigned(FIPCServer) and IPCClient.ServerRunning then
     begin
       //A older instance is running.
       FPriorInstanceRunning := True;
@@ -143,7 +143,8 @@ begin
     end
     else
     begin
-      InitializeUniqueServer(IPCClient.ServerID);
+      if not Assigned(FIPCServer) then
+        InitializeUniqueServer(IPCClient.ServerID);
       FIPCServer.OnMessage := @ReceiveMessage;
       //there's no more need for IPCClient
       IPCClient.Destroy;
