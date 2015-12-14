@@ -20,6 +20,9 @@ type
   TRESTResponseEvent = procedure(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
     ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean) of object;
 
+  TRESTRequestEvent = procedure(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
+    const Payload: String) of object;
+
   TSocketError = procedure(Sender: TObject; ErrorCode: Integer; const ErrorMessage: String) of object;
 
   TRESTErrorEvent = procedure(Sender: TObject; const ResourcePath: String; ErrorType: TRESTErrorType;
@@ -32,6 +35,7 @@ type
   private
     FBaseURL: String;
     FHttpClient: THTTPSend;
+    FOnRequest: TRESTRequestEvent;
     FOnResponseError: TRESTResponseEvent;
     FOnResponseSuccess: TRESTResponseEvent;
     FOnSocketError: TSocketError;
@@ -52,6 +56,7 @@ type
   published
     property BaseURL: String read FBaseURL write SetBaseURL;
     property Http: THTTPSend read GetHttp;
+    property OnRequest: TRESTRequestEvent read FOnRequest write FOnRequest;
     property OnResponseSuccess: TRESTResponseEvent read FOnResponseSuccess write FOnResponseSuccess;
     property OnResponseError: TRESTResponseEvent read FOnResponseError write FOnResponseError;
     property OnSocketError: TSocketError read FOnSocketError write FOnSocketError;
@@ -129,6 +134,9 @@ type
     property Params: TParams read GetParams;
   end;
 
+  TRESTResourceRequestEvent = procedure(const ResourcePath: String; Resource: TRESTDataResource; Method: THTTPMethodType;
+    const Payload: String) of object;
+
   //todo: abstract cache handler so it can be plugged another implementation
 
   { TRESTCacheHandler }
@@ -149,9 +157,11 @@ type
   TRESTResourceClient = class(TComponent, IResourceClient)
   private
     FCacheHandler: TRESTCacheHandler;
+    FDefaultHeaders: TStrings;
     FModelDefs: TRESTResourceModelDefs;
     FModelDefLookup: TFPHashObjectList;
     FOnError: TRESTErrorEvent;
+    FOnRequest: TRESTResourceRequestEvent;
     FRESTClient: TRESTClient;
     procedure BuildModelDefLookup;
     procedure CacheHandlerNeeded;
@@ -159,7 +169,10 @@ type
     function GetBaseURL: String;
     function GetCacheData(const ModelName, ResourcePath: String;
       DataResource: TRESTDataResource): Boolean;
+    function GetDefaultHeaders: TStrings;
     function GetHttp: THTTPSend;
+    procedure Request(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
+      const Payload: String);
     procedure ResponseError(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
       ResponseCode: Integer; ResponseStream: TStream; var ValidData: Boolean);
     procedure ResponseSuccess(const ResourcePath: String; ResourceTag: PtrInt; Method: THTTPMethodType;
@@ -185,9 +198,11 @@ type
     procedure InvalidateCache(const ModelName: String);
   published
     property BaseURL: String read GetBaseURL write SetBaseURL;
+    property DefaultHeaders: TStrings read GetDefaultHeaders;
     property Http: THTTPSend read GetHttp;
     property ModelDefs: TRESTResourceModelDefs read FModelDefs write SetModelDefs;
     property OnError: TRESTErrorEvent read FOnError write FOnError;
+    property OnRequest: TRESTResourceRequestEvent read FOnRequest write FOnRequest;
   end;
 
 
@@ -760,6 +775,8 @@ var
   PayloadLength: Integer;
 begin
   FHttpClient.Clear;
+  if Assigned(FOnRequest) then
+    FOnRequest(ResourcePath, ResourceTag, MethodType, Payload);
   PayloadLength := Length(Payload);
   if PayloadLength > 0 then
     FHttpClient.Document.Write(Payload[1], PayloadLength);
@@ -847,6 +864,15 @@ end;
 
 { TRESTResourceClient }
 
+procedure TRESTResourceClient.Request(const ResourcePath: String;
+  ResourceTag: PtrInt; Method: THTTPMethodType; const Payload: String);
+begin
+  if FDefaultHeaders <> nil then
+    FRESTClient.Http.Headers.AddStrings(FDefaultHeaders);
+  if Assigned(FOnRequest) then
+    FOnRequest(ResourcePath, TRESTDataResource(ResourceTag), Method, Payload);
+end;
+
 procedure TRESTResourceClient.BuildModelDefLookup;
 var
   i: Integer;
@@ -895,6 +921,13 @@ begin
     CacheData.Position := 0;
     Result := DataResource.ParseResponse(ResourcePath, hmtGet, CacheData);
   end;
+end;
+
+function TRESTResourceClient.GetDefaultHeaders: TStrings;
+begin
+  if FDefaultHeaders = nil then
+    FDefaultHeaders := TStringList.Create;
+  Result := FDefaultHeaders;
 end;
 
 function TRESTResourceClient.GetHttp: THTTPSend;
@@ -1040,6 +1073,7 @@ begin
   inherited Create(AOwner);
   FModelDefs := TRESTResourceModelDefs.Create(Self);
   FRESTClient := TRESTClient.Create(Self);
+  FRESTClient.OnRequest := @Request;
   FRESTClient.OnResponseError := @ResponseError;
   FRESTClient.OnResponseSuccess := @ResponseSuccess;
   FRESTClient.OnSocketError := @SocketError;
@@ -1048,6 +1082,7 @@ end;
 destructor TRESTResourceClient.Destroy;
 begin
   FCacheHandler.Free;
+  FDefaultHeaders.Free;
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
