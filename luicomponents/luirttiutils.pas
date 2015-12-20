@@ -41,7 +41,15 @@ uses
 
 procedure SetObjectProperties(Instance: TObject; const Properties: array of const);
 
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Integer): Boolean;
+
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Int64): Boolean;
+
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Boolean): Boolean;
+
 function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: Int64): Int64;
 
 implementation
 
@@ -205,15 +213,46 @@ begin
   end;
 end;
 
-function GetProperty(Instance: TObject; const PropertyName: String;
-  Default: Boolean): Boolean;
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Integer): Boolean;
 var
   PropInfo: PPropInfo;
 begin
-  Result := Default;
+  PropInfo := GetPropInfo(Instance.ClassInfo, PropertyName, [tkInteger]);
+  Result := PropInfo <> nil;
+  if Result then
+    Value := GetOrdProp(Instance, PropInfo);
+end;
+
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Int64): Boolean;
+var
+  PropInfo: PPropInfo;
+begin
+  PropInfo := GetPropInfo(Instance.ClassInfo, PropertyName, [tkInt64, tkInteger]);
+  Result := PropInfo <> nil;
+  if Result then
+    Value := GetOrdProp(Instance, PropInfo);
+end;
+
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: Boolean): Boolean;
+var
+  PropInfo: PPropInfo;
+begin
   PropInfo := GetPropInfo(Instance.ClassInfo, PropertyName, [tkBool]);
-  if PropInfo <> nil then
-    Result := GetOrdProp(Instance, PropInfo) <> 0;
+  Result := PropInfo <> nil;
+  if Result then
+    Value := GetOrdProp(Instance, PropInfo) <> 0;
+end;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
+begin
+  if not FindProperty(Instance, PropertyName, Result) then
+    Result := Default;
+end;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: Int64): Int64;
+begin
+  if not FindProperty(Instance, PropertyName, Result) then
+    Result := Default;
 end;
 
 end.
