@@ -77,6 +77,7 @@ type
     FValueProperty: String;
     FOwnsData: Boolean;
     function FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
+    function GetItems(KeyValue: Variant): TJSONObject;
     function GetKeys(Index: Integer): Variant;
     function GetStrings(const KeyValue: Variant): String;
     function GetValues(const KeyValue: Variant): Variant;
@@ -88,6 +89,7 @@ type
     function IndexOf(const KeyValue: Variant): Integer;
     procedure LoadData(AData: TJSONArray; OwnsData: Boolean = False);
     property Data: TJSONArray read FData;
+    property Items[KeyValue: Variant]: TJSONObject read GetItems;
     property KeyProperty: String read FKeyProperty write FKeyProperty;
     property Keys[Index: Integer]: Variant read GetKeys;
     property Strings[KeyValue: Variant]: String read GetStrings;
@@ -467,6 +469,11 @@ begin
     Result := ItemData.Find(PropertyName)
   else
     Result := nil;
+end;
+
+function TJSONLookup.GetItems(KeyValue: Variant): TJSONObject;
+begin
+  Result := FindJSONObject(FData, [FKeyProperty, KeyValue]);
 end;
 
 function TJSONLookup.GetKeys(Index: Integer): Variant;
