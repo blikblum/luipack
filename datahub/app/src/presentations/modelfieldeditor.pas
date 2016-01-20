@@ -74,7 +74,8 @@ begin
      dftInteger, dftFloat, dftCurrency:
        Result := NumberRules;
    end;
-   SetLength(Result, Length(Result) + 1);
+   SetLength(Result, Length(Result) + 2);
+   Result[Length(Result) - 2] := 'primaryKey';
    Result[Length(Result) - 1] := 'required';
 end;
 
@@ -111,7 +112,7 @@ begin
   begin
     PropData := ConstraintsInspector.GetData(Node);
     PropName := ConstraintsInspector.GetName(Node);
-    if PropName = 'required' then
+    if AnsiMatchStr(PropName, ['required', 'primaryKey']) then
     begin
       Details.Element := teButton;
       Details.Part := BP_CHECKBOX;
@@ -135,18 +136,20 @@ var
   P: TPoint;
   PropData: TJSONData;
   Info: THitInfo;
+  PropName: String;
 begin
   P := ConstraintsInspector.ScreenToClient(Mouse.CursorPos);
   ConstraintsInspector.GetHitTestInfoAt(P.x, P.y, True, Info);
   if (Info.HitNode <> nil) and (Info.HitColumn = 1) then
   begin
-    if ConstraintsInspector.GetName(Info.HitNode) = 'required' then
+    PropName := ConstraintsInspector.GetName(Info.HitNode);
+    if AnsiMatchStr(PropName, ['required', 'primaryKey']) then
     begin
       PropData := ConstraintsInspector.GetData(Info.HitNode);
       if not (PropData is TJSONBoolean) or not PropData.AsBoolean then
-        FEditConstraintsData.Booleans['required'] := True
+        FEditConstraintsData.Booleans[PropName] := True
       else
-        FEditConstraintsData.Booleans['required'] := False;
+        FEditConstraintsData.Booleans[PropName] := False;
       ConstraintsInspector.Reload;
     end;
   end;
@@ -155,7 +158,7 @@ end;
 procedure TModelFieldEditorForm.FieldTypeComboBoxEditingDone(Sender: TObject);
 begin
   ConstraintsInspector.Reload;
-  ConstraintsInspector.Invalidate; //todo: should not be necessary Investigate
+  ConstraintsInspector.Invalidate; //todo: should not be necessary Invalidate
 end;
 
 procedure TModelFieldEditorForm.FormShow(Sender: TObject);
@@ -195,6 +198,7 @@ begin
   FEditField := TDataModelField.Create(nil);
   FEditConstraintsData := TJSONObject.Create(
     [
+    'primaryKey', nil,
     'required', nil,
     'minimum', nil,
     'maximum', nil,

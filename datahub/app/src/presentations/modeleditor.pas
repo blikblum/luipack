@@ -15,11 +15,14 @@ type
   TModelEditorForm = class(TForm)
     CloseButton: TBitBtn;
     Label1: TLabel;
+    FieldsDefinitinsMemo: TMemo;
+    Label2: TLabel;
     SaveButton: TBitBtn;
     NameEdit: TTIEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
   private
     FEditModel: TDataModel;
   public
@@ -33,7 +36,7 @@ var
 implementation
 
 uses
-  DataHubUtils;
+  DataHubUtils, QuickDefinitionParser, fpjson, fpjsonrtti;
 
 {$R *.lfm}
 
@@ -52,6 +55,41 @@ end;
 procedure TModelEditorForm.FormShow(Sender: TObject);
 begin
   SetRTTILinkObject(Self, FEditModel);
+end;
+
+procedure TModelEditorForm.SaveButtonClick(Sender: TObject);
+var
+  Parser: TQuickFieldsDefinitionParser;
+  Data: TJSONArray;
+  DeStreamer: TJSONDeStreamer;
+  CanSave: Boolean;
+begin
+  CanSave := True;
+  Parser := TQuickFieldsDefinitionParser.Create(FieldsDefinitinsMemo.Lines);
+  try
+    try
+      Data := Parser.Parse;
+      if Data.Count > 0 then
+      begin
+        DeStreamer := TJSONDeStreamer.Create(nil);
+        try
+          DeStreamer.JSONToCollection(Data, FEditModel.Fields);
+        finally
+          DeStreamer.Destroy;
+        end;
+      end;
+    except
+      on E:Exception do
+      begin
+        ShowMessage(E.Message);
+        CanSave := False;
+      end;
+    end;
+  finally
+    Parser.Destroy;
+  end;
+  if CanSave then
+    ModalResult := mrOK;
 end;
 
 class function TModelEditorForm.EditModel(Model: TDataModel): Boolean;
