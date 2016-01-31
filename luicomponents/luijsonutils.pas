@@ -95,6 +95,8 @@ function ReadJSONFile(const AFileName: String): TJSONData;
 
 function SameValue(JSONData: TJSONData; Value: Variant): Boolean;
 
+function SameJSONArray(JSONArray1, JSONArray2: TJSONArray): Boolean;
+
 function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
 
 function SetJSONPath(Data: TJSONData; const Path: String; ValueData: TJSONData): Boolean;
@@ -155,6 +157,39 @@ type
 
   TFieldMaps = array of TFieldMap;
 
+function CompareJSONObject(JSONObj1, JSONObj2: TJSONObject): Integer;
+var
+  Obj1Index, Obj1Count: Integer;
+  Obj1Data, Obj2Data: TJSONData;
+  PropName: String;
+begin
+  Obj1Count := JSONObj1.Count;
+  Result := CompareValue(Obj1Count, JSONObj2.Count);
+  Obj1Index := 0;
+  while (Result = 0) and (Obj1Index < Obj1Count) do
+  begin
+    PropName := JSONObj1.Names[Obj1Index];
+    Obj2Data := JSONObj2.Find(PropName);
+    Obj1Data := JSONObj1.Items[Obj1Index];
+    Result := CompareJSONData(Obj1Data, Obj2Data);
+    Inc(Obj1Index);
+  end;
+end;
+
+function CompareJSONArray(JSONArray1, JSONArray2: TJSONArray): Integer;
+var
+  ItemIndex, Array1Count: Integer;
+begin
+  Array1Count := JSONArray1.Count;
+  Result := CompareValue(Array1Count, JSONArray2.Count);
+  ItemIndex := 0;
+  while (Result = 0) and (ItemIndex < Array1Count) do
+  begin
+    Result := CompareJSONData(JSONArray1.Items[ItemIndex], JSONArray2.Items[ItemIndex]);
+    Inc(ItemIndex);
+  end;
+end;
+
 function CompareJSONData(Data1, Data2: TJSONData): Integer;
 var
   Data1Type, Data2Type: TJSONtype;
@@ -175,6 +210,10 @@ begin
           Result := CompareText(Data1.AsString, Data2.AsString);
         jtBoolean:
           Result := CompareValue(Ord(Data1.AsBoolean), Ord(Data2.AsBoolean));
+        jtObject:
+          Result := CompareJSONObject(TJSONObject(Data1), TJSONObject(Data2));
+        jtArray:
+          Result := CompareJSONArray(TJSONArray(Data1), TJSONArray(Data2));
         else
           Result := 0;
         end;
@@ -658,39 +697,18 @@ begin
   end;
 end;
 
+function SameJSONArray(JSONArray1, JSONArray2: TJSONArray): Boolean;
+begin
+  if (JSONArray1 = nil) or (JSONArray2 = nil) then
+    Exit(False);
+  Result := CompareJSONArray(JSONArray1, JSONArray2) = 0;
+end;
+
 function SameJSONObject(JSONObj1, JSONObj2: TJSONObject): Boolean;
-var
-  PropIndex1: Integer;
-  PropData1, PropData2: TJSONData;
-  PropName: String;
 begin
   if (JSONObj1 = nil) or (JSONObj2 = nil) then
     Exit(False);
-  Result := JSONObj1.Count = JSONObj2.Count;
-  PropIndex1 := 0;
-  while Result and (PropIndex1 < JSONObj1.Count) do
-  begin
-    PropName := JSONObj1.Names[PropIndex1];
-    PropData2 := JSONObj2.Find(PropName);
-    if PropData2 <> nil then
-    begin
-      PropData1 := JSONObj1.Items[PropIndex1];
-      Result := PropData1.JSONType = PropData2.JSONType;
-      if Result then
-      begin
-        //todo: compare array
-        if PropData1.JSONType = jtObject then
-          Result := SameJSONObject(TJSONObject(PropData1), TJSONObject(PropData2))
-        else
-          Result := CompareJSONData(PropData1, PropData2) = 0;
-      end;
-    end
-    else
-    begin
-      Result := False;
-    end;
-    Inc(PropIndex1);
-  end;
+  Result := CompareJSONObject(JSONObj1, JSONObj2) = 0;
 end;
 
 function SetArrayPath(Data: TJSONArray; const Path: String;
