@@ -6,7 +6,7 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="LuiComponentsTestRunner"/>
+      <Title Value="LuiComponentsLCLTestRunner"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
@@ -33,7 +33,7 @@
         <PackageName Value="luicomponents"/>
       </Item1>
       <Item2>
-        <PackageName Value="FPCUnitTestRunner"/>
+        <PackageName Value="fptest_lcl"/>
       </Item2>
       <Item3>
         <PackageName Value="LCL"/>
@@ -42,16 +42,21 @@
         <PackageName Value="FCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
-        <Filename Value="LuiComponentsTestRunner.lpr"/>
+        <Filename Value="LuiComponentsLCLTestRunner.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
+        <Filename Value="jsonutilstests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="JSONUtilsTests"/>
+      </Unit1>
+      <Unit2>
         <Filename Value="rttiutilstests.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RTTIUtilsTests"/>
-      </Unit1>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -61,9 +66,11 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
     </SearchPaths>
     <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
     </Linking>
   </CompilerOptions>
   <Debugging>

@@ -5,7 +5,7 @@ unit RTTIUtilsTests;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, fpjson;
+  Classes, SysUtils, TestFramework, fpjson;
 
 type
 
@@ -31,15 +31,14 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure SetClassPropertyWithDerivedClass_PropertySet;
-    procedure SetClassPropertyWithNonDerivedClass_Exception;
+    procedure SetDescendantClass;
+    procedure SetNonDescendantClass;
   end;
 
 implementation
 
 uses
   LuiRTTIUtils;
-
 
 procedure TSetPropertiesTestCase.SetUp;
 begin
@@ -51,22 +50,22 @@ begin
   FreeAndNil(FObj);
 end;
 
-procedure TSetPropertiesTestCase.SetClassPropertyWithDerivedClass_PropertySet;
+procedure TSetPropertiesTestCase.SetDescendantClass;
 var
   JSONArray: TJSONArray;
 begin
   JSONArray := TJSONArray.Create;
 
   SetObjectProperties(FObj, ['JSONArray', JSONArray]);
-  CheckSame(JSONArray, FObj.JSONArray);
+  CheckSame(JSONArray, FObj.JSONArray, 'Data must match property');
 
   SetObjectProperties(FObj, ['JSONData', JSONArray]);
-  CheckSame(JSONArray, FObj.JSONData);
+  CheckSame(JSONArray, FObj.JSONData, 'Data must match property');
 
   JSONArray.Destroy;
 end;
 
-procedure TSetPropertiesTestCase.SetClassPropertyWithNonDerivedClass_Exception;
+procedure TSetPropertiesTestCase.SetNonDescendantClass;
 var
   JSONObject: TJSONObject;
   Raised: Boolean;
@@ -85,7 +84,7 @@ end;
 
 
 initialization
-  RegisterTest('RTTIUtils', TSetPropertiesTestCase);
+  ProjectRegisterTests('RTTIUtils', [TSetPropertiesTestCase.Suite]);
 
 end.
 
