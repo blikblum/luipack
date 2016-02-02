@@ -17,9 +17,9 @@ type
   protected
   published
     procedure OnlyName;
-    procedure StringType;
-    procedure IntegerType;
     procedure FieldTypes;
+    procedure CompleteDefinition;
+    procedure Constraints;
   end;
 
 implementation
@@ -44,49 +44,29 @@ end;
 
 procedure TQuickDefinitionParserTest.OnlyName;
 begin
-  CheckEqualsArray([TJSONObject.Create(['FieldName', 'id'])], ParseDef('id'), 'Only field name').FreeActual;
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'id', 'FieldType', 'dftString'])],
+    ParseDef('id'), 'Only field name, defaults to String type').FreeActual;
 end;
 
-{
-
- else if AnsiMatchText(S, ['FLOAT', 'REAL']) then
-   Result := 'dftFloat'
- else if AnsiMatchText(S, ['STR', 'STRING']) then
-   Result := 'dftString'
- else if AnsiMatchText(S, ['MEMO', 'TEXT']) then
-   Result := 'dtMemo'
- else if AnsiMatchText(S, ['BOOL', 'BOOLEAN']) then
-   Result := 'dftBoolean'
- else if AnsiMatchText(S, ['INT64', 'LARGEINT']) then
-   Result := 'dftLargeInt'
- else if AnsiMatchText(S, ['DATE']) then
-   Result := 'dftDate'
- else if AnsiMatchText(S, ['DATETIME']) then
-   Result := 'dftDateTime'
- else if AnsiMatchText(S, ['TIME']) then
-   Result := 'dftTime'
- else if AnsiMatchText(S, ['BLOB']) then
-   Result := 'dftBlob'
-}
 const
-  FieldTypesMap: array[0..3] of array[0..1] of String = (
-    ('INT', 'dftIntege'),
+  FieldTypesMap: array[0..15] of array[0..1] of String = (
+    ('INT', 'dftInteger'),
     ('INTEGER', 'dftInteger'),
     ('STR', 'dftString'),
-    ('STRING', 'dftString')
+    ('STRING', 'dftString'),
+    ('FLOAT', 'dftFloat'),
+    ('REAL', 'dftFloat'),
+    ('MEMO', 'dftMemo'),
+    ('TEXT', 'dftMemo'),
+    ('BOOL', 'dftBoolean'),
+    ('BOOLEAN', 'dftBoolean'),
+    ('LARGEINT', 'dftLargeInt'),
+    ('INT64', 'dftLargeInt'),
+    ('DATE', 'dftDate'),
+    ('DATETIME', 'dftDateTime'),
+    ('TIME', 'dftTime'),
+    ('BLOB', 'dftBlob')
   );
-
-procedure TQuickDefinitionParserTest.StringType;
-begin
-  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftString'])], ParseDef('name STR'), 'Abbr string field');
-  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftString'])], ParseDef('name STRING'), 'String field');
-end;
-
-procedure TQuickDefinitionParserTest.IntegerType;
-begin
-  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftInteger'])], ParseDef('name INT'), 'Abbr Integer field');
-  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftInteger'])], ParseDef('name INTEGER'), 'Integer field');
-end;
 
 procedure TQuickDefinitionParserTest.FieldTypes;
 var
@@ -101,6 +81,50 @@ begin
     FieldData := TJSONObject.Create(['FieldName', 'name', 'FieldType', FieldTypesMap[i][1]]);
     CheckEqualsArray([FieldData], ParseDef(Def), Msg).FreeActual;
   end;
+end;
+
+procedure TQuickDefinitionParserTest.CompleteDefinition;
+begin
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftString', 'DisplayLabel',
+    'Person Name'])],
+    ParseDef('name str Person Name'),
+    'Definition with all fields');
+end;
+
+procedure TQuickDefinitionParserTest.Constraints;
+var
+  ConstraintsData: TJSONObject;
+begin
+  ConstraintsData := TJSONObject.Create(['primaryKey', true]);
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'id', 'FieldType', 'dftInteger',
+    'Constraints', ConstraintsData.AsJSON])],
+    ParseDef('id int' +LineEnding + '  key'),
+    'Primary key constraint'
+    );
+  ConstraintsData.Free;
+
+  ConstraintsData := TJSONObject.Create(['required', true]);
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'name', 'FieldType', 'dftString',
+    'Constraints', ConstraintsData.AsJSON])],
+    ParseDef('name' +LineEnding + '  required'),
+    'Required constraint'
+    );
+  ConstraintsData.Free;
+
+  ConstraintsData := TJSONObject.Create(['minimum', 2, 'maximum', 4]);
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'age', 'FieldType', 'dftInteger',
+    'Constraints', ConstraintsData.AsJSON])],
+    ParseDef('age int' + LineEnding + '  min 2' + LineEnding + ' maximum 4'),
+    'Minimum and maximum constraints'
+    );
+  ConstraintsData.Free;
+
+  ConstraintsData := TJSONObject.Create(['minLength', 10, 'maxLength', 1000]);
+  CheckEqualsArray([TJSONObject.Create(['FieldName', 'desc', 'FieldType', 'dftMemo',
+    'Constraints', ConstraintsData.AsJSON])],
+    ParseDef('desc memo' +LineEnding + '  minLength 10' + LineEnding + ' maxLength 1000'),
+    'Min/MaxLength constraints'
+    );
 end;
 
 initialization

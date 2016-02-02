@@ -33,7 +33,7 @@ begin
   else if AnsiMatchText(S, ['STR', 'STRING']) then
     Result := 'dftString'
   else if AnsiMatchText(S, ['MEMO', 'TEXT']) then
-    Result := 'dtMemo'
+    Result := 'dftMemo'
   else if AnsiMatchText(S, ['BOOL', 'BOOLEAN']) then
     Result := 'dftBoolean'
   else if AnsiMatchText(S, ['INT64', 'LARGEINT']) then
@@ -82,18 +82,32 @@ begin
   end;
 end;
 
+procedure SetNumProp(Data: TJSONObject; const PropName, Value: String);
+var
+  IntNum: Int64;
+  FloatNum: Double;
+begin
+  if TryStrToInt64(Value, IntNum) then
+    Data.Int64s[PropName] := IntNum
+  else if TryStrToFloat(Value, FloatNum) then
+    Data.Floats[PropName] := FloatNum
+  else
+    raise Exception.CreateFmt('Expected a number value for %s, got "%s"', [PropName, Value]);
+end;
+
 procedure ParseConstraintInfo(const S: String; ConstraintsData: TJSONObject);
 var
   SpacePos: Integer;
   Name, Value: String;
-  NumberValue: Double;
 begin
   //todo: consider field type
   SpacePos := Pos(' ', S);
   if SpacePos = 0 then
   begin
     if AnsiMatchText(S, ['KEY', 'PRIMARYKEY']) then
-      ConstraintsData.Booleans['primarykey'] := True
+      ConstraintsData.Booleans['primaryKey'] := True
+    else if AnsiMatchText(S, ['required']) then
+      ConstraintsData.Booleans['required'] := True
     else
       raise Exception.CreateFmt('Invalid constraint declaration: "%s"', [S]);
   end
@@ -101,40 +115,23 @@ begin
   begin
     Name := Copy(S, 1, SpacePos - 1);
     Value := Copy(S, SpacePos + 1, Length(S));
-    if AnsiMatchText(Name, ['primaryKey', 'key']) then
-      ConstraintsData.Booleans['primaryKey'] := True
-    else if AnsiMatchText(Name, ['required']) then
-      ConstraintsData.Booleans['primaryKey'] := True
-    else if AnsiMatchText(Name, ['pattern']) then
+    if AnsiMatchText(Name, ['pattern']) then
       ConstraintsData.Strings['pattern'] := Value
     else if AnsiMatchText(Name, ['minimum', 'min']) then
     begin
-      if TryStrToFloat(Value, NumberValue) then
-        ConstraintsData.Floats['minimum'] := NumberValue
-      else
-        raise Exception.CreateFmt('Expected a number value for minimum, got "%s"', [Value]);
+      SetNumProp(ConstraintsData, 'minimum', Value);
     end
     else if AnsiMatchText(Name, ['max', 'maximum']) then
     begin
-      if TryStrToFloat(Value, NumberValue) then
-        ConstraintsData.Floats['maximum'] := NumberValue
-      else
-        raise Exception.CreateFmt('Expected a number value for maximum, got "%s"', [Value]);
+      SetNumProp(ConstraintsData, 'maximum', Value);
     end
     else if AnsiMatchText(Name, ['minLength', 'minLen']) then
     begin
-      if TryStrToFloat(Value, NumberValue) then
-        ConstraintsData.Floats['minLength'] := NumberValue
-      else
-        raise Exception.CreateFmt('Expected a number value for minLength, got "%s"', [Value]);
+      SetNumProp(ConstraintsData, 'minLength', Value);
     end
     else if AnsiMatchText(Name, ['maxLength', 'maxLen']) then
     begin
-      if TryStrToFloat(Value, NumberValue) then
-        ConstraintsData.Floats['maxLength'] := NumberValue
-      else
-        raise Exception.CreateFmt('Expected a number value for maxLength, got "%s"', [Value]);
-    end
+      SetNumProp(ConstraintsData, 'maxLength', Value);    end
     else
       raise Exception.CreateFmt('Constraint not recognized: "%s"', [Name]);
   end;
@@ -188,7 +185,7 @@ begin
     if ConstraintsData <> nil then
     begin
       if (ConstraintsData.Count > 0) and (FieldData <> nil) then
-        FieldData.Add('constraints', ConstraintsData.AsJSON);
+        FieldData.Add('Constraints', ConstraintsData.AsJSON);
       FreeAndNil(ConstraintsData);
     end;
   except
