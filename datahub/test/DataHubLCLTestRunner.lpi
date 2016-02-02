@@ -67,9 +67,13 @@
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="DataHubLCLTestRunner"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value="..\app\src\helpers"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
       <Options>
