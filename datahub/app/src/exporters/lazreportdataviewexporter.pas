@@ -27,6 +27,9 @@ type
 
 implementation
 
+uses
+  LazReportExporterConfigView;
+
 { TJSONLazReportDataViewExporter }
 
 class function TJSONLazReportDataViewExporter.Description: String;
@@ -36,10 +39,19 @@ end;
 
 class procedure TJSONLazReportDataViewExporter.Execute(DataView: TDataView);
 var
+  ConfigForm: TLazReportExporterConfigForm;
   Output: TStringList;
   Field: TDataViewField;
   i: Integer;
 begin
+  ConfigForm := TLazReportExporterConfigForm.Create(nil);
+  try
+    ConfigForm.View := DataView;
+    ConfigForm.ShowModal;
+  finally
+    ConfigForm.Destroy;
+  end;
+  Exit;
   Output := TStringList.Create;
   for i := 0 to DataView.Fields.Count -1 do
   begin
