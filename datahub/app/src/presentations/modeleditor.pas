@@ -63,6 +63,7 @@ var
   Data: TJSONArray;
   DeStreamer: TJSONDeStreamer;
   CanSave: Boolean;
+  i: Integer;
 begin
   CanSave := True;
   Parser := TQuickFieldsDefinitionParser.Create(FieldsDefinitinsMemo.Lines);
@@ -73,7 +74,8 @@ begin
       begin
         DeStreamer := TJSONDeStreamer.Create(nil);
         try
-          DeStreamer.JSONToCollection(Data, FEditModel.Fields);
+          for i := 0 to Data.Count - 1 do
+            DeStreamer.JSONToObject(Data.Objects[i], FEditModel.Fields.Add);
         finally
           DeStreamer.Destroy;
         end;
