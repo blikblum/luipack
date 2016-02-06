@@ -7,11 +7,12 @@ object LazReportExporterConfigForm: TLazReportExporterConfigForm
   ClientHeight = 283
   ClientWidth = 437
   LCLVersion = '1.7'
-  object FileNameEdit1: TFileNameEdit
+  object TemplateFileNameEdit: TFileNameEdit
     Left = 8
     Height = 23
     Top = 24
     Width = 424
+    OnAcceptFileName = TemplateFileNameEditAcceptFileName
     FilterIndex = 0
     HideDirectories = False
     ButtonWidth = 23
@@ -79,7 +80,9 @@ object LazReportExporterConfigForm: TLazReportExporterConfigForm
     Width = 120
     Anchors = [akRight, akBottom]
     Caption = 'Export'
+    Enabled = False
     ModalResult = 1
+    OnClick = ExportButtonClick
     TabOrder = 3
   end
   object CancelButton: TBitBtn

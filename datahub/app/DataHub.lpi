@@ -94,7 +94,10 @@
       <Unit4>
         <Filename Value="src\presentations\modelfieldsview.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="ModelFieldsViewFrame"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="ModelFieldsView"/>
       </Unit4>
       <Unit5>
         <Filename Value="src\exporters\dataviewexporter.pas"/>
@@ -126,6 +129,7 @@
       <Unit11>
         <Filename Value="src\components\vtcollectioncontroller.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="VTCollectionController"/>
       </Unit11>
       <Unit12>
         <Filename Value="src\helpers\datahublclutils.pas"/>
@@ -138,6 +142,7 @@
       <Unit14>
         <Filename Value="src\importers\datamodelimporter.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="DataModelImporter"/>
       </Unit14>
       <Unit15>
         <Filename Value="src\importers\sqlite3datamodelimporter.pas"/>
@@ -157,6 +162,7 @@
         <Filename Value="src\exporters\forms\lazreportexporterconfigview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="LazReportExporterConfigForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LazReportExporterConfigView"/>
       </Unit18>

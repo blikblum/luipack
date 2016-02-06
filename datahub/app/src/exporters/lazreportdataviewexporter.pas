@@ -52,6 +52,7 @@ begin
     ConfigForm.Destroy;
   end;
   Exit;
+
   Output := TStringList.Create;
   for i := 0 to DataView.Fields.Count -1 do
   begin
@@ -63,7 +64,7 @@ begin
         Output.Add(Format('%s: [%s]', [Field.DisplayLabel, LowerCase(Field.FieldName)]));
     end;
   end;
-  Output.SaveToFile('jsonlazreporttest.txt');
+  Output.SaveToFile('c:\temp\jsonlazreporttest.txt');
   Output.Destroy;
 end;
 
