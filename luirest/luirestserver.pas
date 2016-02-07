@@ -125,6 +125,7 @@ type
   TRESTServiceModule = class(TCustomHTTPModule)
   private
     FOnRequest: TRESTRequestEvent;
+    FOnResponse: TRESTRequestEvent;
     FResources: TRESTResourceStore;
     FContentType: String;
     FOnResourceLoad: TRESTResourceLoadEvent;
@@ -146,6 +147,7 @@ type
     property RootPath: String read FRootPath write SetRootPath;
     //events
     property OnRequest: TRESTRequestEvent read FOnRequest write FOnRequest;
+    property OnResponse: TRESTRequestEvent read FOnResponse write FOnResponse;
     property OnResourceLoad: TRESTResourceLoadEvent read FOnResourceLoad write FOnResourceLoad;
   end;
 
@@ -263,6 +265,8 @@ begin
         GetJSONExceptionBackTrace]));
     end;
   end;
+  if Assigned(FOnResponse) then
+    FOnResponse(Self, ARequest, AResponse);
 end;
 
 procedure TRESTServiceModule.ResolveRequest(ARequest: TRequest; AResponse: TResponse;
