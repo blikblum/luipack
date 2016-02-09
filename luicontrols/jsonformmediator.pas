@@ -223,7 +223,7 @@ begin
   Edit := Element.Control as TCustomEdit;
   PropName := Element.PropertyName;
   EditText := Edit.Text;
-  if Edit.NumbersOnly then
+  if Edit.NumbersOnly and not (Element.OptionsData.Get('type', '') = 'string') then
   begin
     //try to convert to number
     if TryStrToInt64(EditText, Int64Value) then
