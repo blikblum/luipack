@@ -41,8 +41,10 @@ type
 
   TRESTRequest = class
   private
+    class var FMethod: string;
     class var FResourcePath: string;
   public
+    class property Method: String read FMethod;
     class property ResourcePath: String read FResourcePath;
   end;
 
@@ -153,6 +155,9 @@ type
 
 implementation
 
+uses
+  LuiJSONUtils;
+
 const
   SRegisterError = 'RegisterResource (%s): %s must be <> nil';
   SDefaultSubPathError = 'SetDefaultSubPath (%s): %s must be <> nil';
@@ -241,6 +246,36 @@ begin
   Result := Result + ']';
 end;
 
+procedure SetErrorResponse(ARequest: TRequest; AResponse: TResponse; E: Exception);
+var
+  ErrorData, ResponseData: TJSONObject;
+  ResponseStr, RequestStr, ResolvedRequestStr: String;
+begin
+  ErrorData := TJSONObject.Create;
+  try
+    ErrorData.Add('message', Format('%s: %s', [E.ClassName, E.Message]));
+    RequestStr := Format('%s %s', [ARequest.Method, ARequest.PathInfo]);
+    ResolvedRequestStr := Format('%s %s', [TRESTRequest.Method, TRESTRequest.FResourcePath]);
+    if RequestStr <> ResolvedRequestStr then
+      ErrorData.Add('resolvedRequest', ResolvedRequestStr);
+    ResponseStr := AResponse.Content;
+    if ResponseStr <> '' then
+    begin
+      //todo: implement an specific Exception class where can be passed specific data in a
+      //systematic way
+      if TryStrToJSON(ResponseStr, ResponseData) then
+        ErrorData.Add('response', ResponseData)
+      else
+        ErrorData.Add('response', ResponseStr);
+    end;
+    ErrorData.Add('backtrace', GetJSONExceptionBackTrace);
+    AResponse.Contents.Clear;
+    AResponse.Contents.Add(ErrorData.AsJSON);
+  finally
+    ErrorData.Destroy;
+  end;
+end;
+
 procedure TRESTServiceModule.HandleRequest(ARequest: TRequest;
   AResponse: TResponse);
 var
@@ -261,8 +296,7 @@ begin
     on E:Exception do
     begin
       AResponse.Code := 500;
-      AResponse.Contents.Add(Format('{"message":"%s", "backtrace":%s}', [StringToJSONString(Format('%s: %s', [E.ClassName, E.Message])),
-        GetJSONExceptionBackTrace]));
+      SetErrorResponse(ARequest, AResponse, E);
     end;
   end;
   if Assigned(FOnResponse) then
@@ -281,6 +315,7 @@ begin
   URIParams := TJSONObject.Create;
   try
     TRESTRequest.FResourcePath := ResourcePath;
+    TRESTRequest.FMethod := Method;
     PartOffset := PathOffset;
     URIPart := GetURIPart(ResourcePath, PartOffset);
     if URIPart = '' then

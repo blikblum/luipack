@@ -531,8 +531,8 @@ begin
     except
       on E: Exception do
       begin
-        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s', [E.Message] );
-        Exit;
+        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s - SQL: %s', [E.Message, Query.SQL.Text] );
+        raise;
       end;
     end;
     if FIsCollection then
@@ -602,8 +602,8 @@ begin
     except
       on E: Exception do
       begin
-        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s', [E.Message] );
-        Exit;
+        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query:  %s - SQL: %s', [E.Message, Query.SQL.Text]);
+        raise;
       end;
     end;
     if not Query.IsEmpty then
@@ -669,9 +669,8 @@ begin
       except
         on E: Exception do
         begin
-          //todo: return the effective Path instead of PathInfo
-          SetResponseStatus(AResponse, 400, 'Error posting to %s: %s', [ARequest.PathInfo, E.Message]);
-          Exit;
+          SetResponseStatus(AResponse, 500, 'Error posting to %s: %s - SQL: %s', [ARequest.PathInfo, E.Message, Query.SQL.Text]);
+          raise;
         end;
       end;
       RequestData.Free;
@@ -712,6 +711,7 @@ begin
     Exit;
   end;
   Query := TSQLQuery.Create(nil);
+  RequestData := nil;
   try
     Query.DataBase := FConnection;
     PrepareQuery(Query, hmtPut, FSelectSQL, FConditionsSQL);
@@ -730,11 +730,16 @@ begin
       Query.Post;
       Query.ApplyUpdates;
       FConnection.Transaction.CommitRetaining;
-    finally
-      RequestData.Free;
+    except
+      on E: Exception do
+      begin
+        SetResponseStatus(AResponse, 500, 'An exception ocurred updating: %s - SQL: %s', [E.Message, Query.SQL.Text]);
+        raise;
+      end;
     end;
     RedirectRequest(ARequest, AResponse, 'GET', ARequest.PathInfo, False);
   finally
+    RequestData.Free;
     Query.Destroy;
   end;
 end;
