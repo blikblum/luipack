@@ -31,6 +31,7 @@ type
     function CreateData: TJSONObject; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
     function DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean; virtual;
+    procedure ParseData(AData: TJSONObject); virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -511,6 +512,8 @@ begin
     ResourceNeeded;
     Result := FResource.Fetch(IdValue);
   end;
+  if Result then
+    ParseData(FData);
   Changed;
 end;
 
@@ -523,6 +526,11 @@ begin
     ResourceNeeded;
     Result := FResource.Save(IdValue, Options);
   end;
+end;
+
+procedure TJSONModel.ParseData(AData: TJSONObject);
+begin
+  //
 end;
 
 class function TJSONModel.GetIdField: String;
