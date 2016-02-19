@@ -230,7 +230,7 @@ Procedure TSQLite3Cursor.Prepare(Buf : String; APArams : TParams);
 begin
   if assigned(aparams) and (aparams.count > 0) then 
     buf := aparams.parsesql(buf,false,false,false,psinterbase,fparambinding);
-  checkerror(sqlite3_prepare(fhandle,pchar(buf),length(buf),@fstatement,@ftail));
+  checkerror(sqlite3_prepare_v2(fhandle,pchar(buf),length(buf),@fstatement,@ftail));
   FPrepared:=True;
 end;
 
@@ -673,33 +673,33 @@ end;
 
 function TSQLite3Connection.Commit(trans: TSQLHandle): boolean;
 begin
-  execsql('COMMIT');
+  //execsql('COMMIT');
   result:= true;
 end;
 
 function TSQLite3Connection.RollBack(trans: TSQLHandle): boolean;
 begin
-  execsql('ROLLBACK');
+  //execsql('ROLLBACK');
   result:= true;
 end;
 
 function TSQLite3Connection.StartdbTransaction(trans: TSQLHandle;
                aParams: string): boolean;
 begin
-  execsql('BEGIN');
+  //execsql('BEGIN');
   result:= true;
 end;
 
 procedure TSQLite3Connection.CommitRetaining(trans: TSQLHandle);
 begin
   commit(trans);  
-  execsql('BEGIN');
+  //execsql('BEGIN');
 end;
 
 procedure TSQLite3Connection.RollBackRetaining(trans: TSQLHandle);
 begin
   rollback(trans);
-  execsql('BEGIN');
+  //execsql('BEGIN');
 end;
 
 procedure TSQLite3Connection.DoInternalConnect;
