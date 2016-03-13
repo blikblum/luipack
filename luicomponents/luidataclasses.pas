@@ -45,6 +45,13 @@ type
     property Data: TJSONArray read GetData;
   end;
 
+  IDatasetResource = interface(IDataResource)
+    ['{F5F63C3A-1CA1-4FD8-A6B8-387FD2C10129}']
+    function GetDataset: TDataSet;
+    function Fetch(IdValue: Variant): Boolean; overload;
+    property Dataset: TDataSet read GetDataset;
+  end;
+
   IResourceClient = interface
     ['{254EE65D-14ED-4597-860D-757532BA51CE}']
     function GetJSONArray(const ModelName: String): IJSONArrayResource;

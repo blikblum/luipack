@@ -118,6 +118,7 @@ type
    public
      constructor Create(AOwner: TComponent); override;
      destructor Destroy; override;
+     function GetDataset(const ModelName: String): IDatasetResource;
      function GetJSONArray(const ModelName: String): IJSONArrayResource;
      function GetJSONObject(const ModelName: String): IJSONObjectResource;
      procedure InvalidateCache(const ModelName: String);
@@ -164,8 +165,6 @@ type
     function DoFetch(const Id: Variant): Boolean;
     function DoSave(const Id: Variant; Options: TSaveOptions = []): Boolean;
     procedure EncodeJSONFields(RequestData: TJSONObject);
-    procedure SetPrimaryKeyValue(const IdValue: Variant);
-    procedure SetSQL(const Id: Variant);
   protected
   public
     constructor Create(AModelDef: TSqlite3ResourceModelDef; ResourceClient: TSqlite3ResourceClient); override;
@@ -178,6 +177,19 @@ type
     function Save(IdValue: Variant; Options: TSaveOptions = []): Boolean;
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
+  end;
+
+  { TSqlite3DatasetResource }
+
+  TSqlite3DatasetResource = class(TSqlite3DataResource, IDatasetResource)
+  private
+    FIdValue: Variant;
+    function DoFetch(const IdValue: Variant): Boolean;
+  public
+    function Fetch: Boolean;
+    function Fetch(IdValue: Variant): Boolean;
+    function GetDataset: TDataSet;
+    function Save(Options: TSaveOptions = []): Boolean;
   end;
 
 procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
@@ -240,6 +252,102 @@ begin
     end;
     RecordData.Elements[PropName] := DecodedData;
   end;
+end;
+
+function GetItemSQL(const Id: Variant; ModelDef: TSqlite3ResourceModelDef): String;
+var
+  IdValue: String;
+begin
+  Result := ModelDef.SelectSQL;
+  if not (VarIsEmpty(Id) or VarIsNull(Id)) then
+  begin
+    if VarIsStr(Id) then
+      IdValue := '''' + VarToStr(Id) + ''''
+    else
+      IdValue := VarToStr(Id);
+    Result := Result + Format(' Where %s = %s', [ModelDef.PrimaryKey, IdValue]);
+  end
+  else
+    Result := Result + ' ' + ModelDef.FConditionsSQL;
+end;
+
+procedure SetPrimaryKeyValue(Dataset: TDataSet; ModelDef: TSqlite3ResourceModelDef; const IdValue: Variant);
+var
+  PKField: TField;
+begin
+  PKField := Dataset.FindField(ModelDef.PrimaryKey);
+  if PKField = nil then
+    raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [ModelDef.PrimaryKey]);
+  if not VarIsNull(IdValue) then
+    PKField.Value := IdValue
+  else
+    raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [ModelDef.PrimaryKey]);
+end;
+
+{ TSqlite3DatasetResource }
+
+function TSqlite3DatasetResource.DoFetch(const IdValue: Variant): Boolean;
+begin
+  Result := True;
+  try
+    FDataset.Close;
+    FDataset.SQL := BindParams(GetItemSQL(IdValue, FModelDef));
+    FDataset.Open;
+  except
+    Result := False;
+  end;
+end;
+
+function TSqlite3DatasetResource.GetDataset: TDataSet;
+begin
+  Result := FDataset;
+end;
+
+function TSqlite3DatasetResource.Fetch: Boolean;
+begin
+  FIdValue := Unassigned;
+  Result := DoFetch(Null);
+end;
+
+function TSqlite3DatasetResource.Fetch(IdValue: Variant): Boolean;
+begin
+  if not VarIsEmpty(IdValue) then
+  begin
+    FIdValue := IdValue;
+    Result := DoFetch(IdValue);
+  end
+  else
+    Result := Fetch();
+end;
+
+function TSqlite3DatasetResource.Save(Options: TSaveOptions): Boolean;
+var
+  Param: TParam;
+  Field: TField;
+  i: Integer;
+begin
+  if FDataset.RecordCount > 0 then
+  begin
+    FDataset.Edit;
+    try
+      //todo: move this code to descendant TDataset
+      if not (VarIsNull(FIdValue) or VarIsEmpty(FIdValue)) then
+        SetPrimaryKeyValue(FDataset, FModelDef, FIdValue);
+      //todo: handle dataset with multiple records
+      for i := 0 to Params.Count -1 do
+      begin
+        Param := Params[i];
+        if Param.IsNull then
+          continue;
+        Field := FDataset.FindField(Param.Name);
+        if Field <> nil then
+          Field.Value := Param.Value;
+      end;
+    finally
+      FDataset.Post;
+    end;
+  end;
+  FDataset.ApplyUpdates;
 end;
 
 { TSqlite3CacheHandler }
@@ -319,7 +427,7 @@ function TSqlite3JSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
   try
-    SetSQL(Id);
+    FDataset.SQL := BindParams(GetItemSQL(Id, FModelDef));
     FDataset.Open;
     try
       FData.Clear;
@@ -353,7 +461,7 @@ begin
       begin
         FDataset.Append;
         if not (VarIsNull(Id) or VarIsEmpty(Id)) then
-          SetPrimaryKeyValue(Id);
+          SetPrimaryKeyValue(FDataset, FModelDef, Id);
       end
       else
         FDataset.Edit;
@@ -426,38 +534,6 @@ begin
   end;
 end;
 
-procedure TSqlite3JSONObjectResource.SetPrimaryKeyValue(const IdValue: Variant);
-var
-  PKField: TField;
-begin
-  PKField := FDataset.FindField(FModelDef.PrimaryKey);
-  if PKField = nil then
-    raise Exception.CreateFmt('Field "%s" (PrimaryKey) not found', [FModelDef.PrimaryKey]);
-  if not VarIsNull(IdValue) then
-    PKField.Value := IdValue
-  else
-    raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [FModelDef.PrimaryKey]);
-end;
-
-procedure TSqlite3JSONObjectResource.SetSQL(const Id: Variant);
-var
-  SQL: String;
-  IdValue: String;
-begin
-  SQL := FModelDef.SelectSQL;
-  if not (VarIsEmpty(Id) or VarIsNull(Id)) then
-  begin
-    if VarIsStr(Id) then
-      IdValue := '''' + VarToStr(Id) + ''''
-    else
-      IdValue := VarToStr(Id);
-    SQL := SQL + Format(' Where %s = %s', [FModelDef.PrimaryKey, IdValue]);
-  end
-  else
-    SQL := SQL + ' ' + FModelDef.FConditionsSQL;
-  FDataset.SQL := BindParams(SQL);
-end;
-
 constructor TSqlite3JSONObjectResource.Create(AModelDef: TSqlite3ResourceModelDef;
   ResourceClient: TSqlite3ResourceClient);
 begin
@@ -508,7 +584,7 @@ begin
 
   Result := True;
   try
-    SetSQL(Id);
+    FDataset.SQL := BindParams(GetItemSQL(Id, FModelDef));
     FDataset.Open;
     try
       if not FDataset.IsEmpty then
@@ -779,20 +855,20 @@ begin
     begin
       FieldName := GetFieldName(i, DBFieldName);
       Field := Dataset.FieldByName(DBFieldName);
-      PropData := JSONObj.Find(FieldName);
-      if PropData = nil then
+      Param := Params.FindParam(FieldName);
+      if (Param <> nil) and not Param.IsNull then
+        Field.Value := Param.Value
+      else
       begin
-        Param := Params.FindParam(FieldName);
-        if (Param <> nil) and not Param.IsNull then
-          Field.Value := Param.Value
+        PropData := JSONObj.Find(FieldName);
+        if PropData <> nil then
+          Field.Value := PropData.Value
         else
         begin
           if not DoPatch then
             Field.Value := Null;
         end;
-      end
-      else
-        Field.Value := PropData.Value;
+      end;
     end;
   end
   else
@@ -805,13 +881,19 @@ begin
       FieldName := LowerCase(Field.FieldName);
       if SameText(FieldName, FPrimaryKey) then
         continue;
-      PropData := JSONObj.Find(FieldName);
-      if PropData <> nil then
-        Field.Value := PropData.Value
+      Param := Params.FindParam(FieldName);
+      if (Param <> nil) and not Param.IsNull then
+        Field.Value := Param.Value
       else
       begin
-        if not DoPatch then
-          Field.Value := Null;
+        PropData := JSONObj.Find(FieldName);
+        if PropData <> nil then
+          Field.Value := PropData.Value
+        else
+        begin
+          if not DoPatch then
+            Field.Value := Null;
+        end;
       end;
     end;
   end;
@@ -998,6 +1080,14 @@ begin
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
+end;
+
+function TSqlite3ResourceClient.GetDataset(const ModelName: String): IDatasetResource;
+var
+  ModelDef: TSqlite3ResourceModelDef;
+begin
+  ModelDef := FindModelDef(ModelName);
+  Result := TSqlite3DatasetResource.Create(ModelDef, Self);
 end;
 
 function TSqlite3ResourceClient.GetJSONArray(const ModelName: String): IJSONArrayResource;
