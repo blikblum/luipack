@@ -116,6 +116,7 @@
       <Unit8>
         <Filename Value="src\exporters\lcldbdataviewexporter.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="LCLDBDataViewExporter"/>
       </Unit8>
       <Unit9>
         <Filename Value="src\exporters\lcljsondataviewexporter.pas"/>

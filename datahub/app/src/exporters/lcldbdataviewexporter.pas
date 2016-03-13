@@ -28,7 +28,7 @@ type
 implementation
 
 uses
-  LCLViewBuilder, Forms, LResources;
+  LCLViewBuilder, Forms, LResources, Dialogs;
 
 type
   TMyForm = class(TForm)
@@ -47,7 +47,19 @@ var
   Form: TMyForm;
   Builder: TLCLViewBuilder;
   Stream: TMemoryStream;
+  SaveDialog: TSaveDialog;
+  FileName: String;
 begin
+  FileName := '';
+  SaveDialog := TSaveDialog.Create(nil);
+  try
+    if SaveDialog.Execute then
+      FileName := SaveDialog.FileName;
+  finally
+    SaveDialog.Destroy;
+  end;
+  if FileName = '' then
+    Exit;
   Form := TMyForm.CreateNew(nil);
   Stream  := TMemoryStream.Create;
   Builder := TLCLViewBuilder.Create;

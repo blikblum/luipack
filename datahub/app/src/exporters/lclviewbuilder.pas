@@ -44,6 +44,7 @@ type
     procedure Execute(AOwner: TComponent);
     property Control: TWinControl read FControl write FControl;
     property Fields: TDataViewFields read FFields write FFields;
+    property UnitFile: TStringList read FUnitFile;
   end;
 
   { TLCLDBViewBuilder }
@@ -348,7 +349,6 @@ begin
   FUnitFile.Add('{$R *.lfm}');
   FUnitFile.Add('');
   FUnitFile.Add('end.');
-  FUnitFile.SaveToFile('myform.pas');
 end;
 
 end.
