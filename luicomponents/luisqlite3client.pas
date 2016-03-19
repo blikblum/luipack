@@ -19,6 +19,7 @@ type
    private
      FCacheMode: TSqlite3CacheMode;
      FConditionsSQL: String;
+     FDataField: String;
      FInputFields: String;
      FInputFieldsData: TJSONArray;
      FJSONFields: String;
@@ -43,6 +44,7 @@ type
    published
      property CacheMode: TSqlite3CacheMode read FCacheMode write FCacheMode default cmNone;
      property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
+     property DataField: String read FDataField write FDataField;
      property InputFields: String read FInputFields write SetInputFields;
      property JSONFields: String read FJSONFields write SetJSONFields;
      property Name: String read FName write FName;
@@ -423,6 +425,24 @@ begin
   DoDecodeJSONFields(ResponseData, FModelDef.FJSONFieldsData);
 end;
 
+procedure LoadDataField(Dataset: TDataSet; Data: TJSONObject; const FieldName: String);
+var
+  Field: TField;
+  FieldData: TJSONObject;
+begin
+  Field := Dataset.FieldByName(FieldName);
+  if TryStrToJSON(Field.AsString, FieldData) then
+  begin
+    CopyJSONObject(FieldData, Data);
+    FieldData.Free;
+  end;
+end;
+
+procedure SaveDataField(Dataset: TDataSet; Data: TJSONObject; const FieldName: String);
+begin
+  Dataset.FieldByName(FieldName).AsString := Data.AsJSON;
+end;
+
 function TSqlite3JSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
@@ -433,8 +453,17 @@ begin
       FData.Clear;
       if FDataset.RecordCount > 0 then
       begin
-        DatasetToJSON(FDataset, FData, [djoSetNull], '');
-        DecodeJSONFields(FData);
+        if FModelDef.DataField = '' then
+        begin
+          DatasetToJSON(FDataset, FData, [djoSetNull], '');
+          DecodeJSONFields(FData);
+        end
+        else
+        begin
+          LoadDataField(FDataset, FData, FModelDef.DataField);
+          if (VarIsNull(FIdValue) or VarIsEmpty(FIdValue)) and (FModelDef.PrimaryKey <> '') then
+            FIdValue := FDataset.FieldByName(FModelDef.PrimaryKey).Value;
+        end;
       end;
     finally
       FDataset.Close;
@@ -465,24 +494,41 @@ begin
       end
       else
         FDataset.Edit;
-      //quick hack to save properties in correct format
-      //todo: optimize to avoid data copy. Normalize FJSONFieldData as a hash to allow quick lookup
-      if FModelDef.FJSONFieldsData <> nil then
+      if FModelDef.DataField = '' then
       begin
-        TempData := TJSONObject(FData.Clone);
+        //quick hack to save properties in correct format
+        //todo: optimize to avoid data copy. Normalize FJSONFieldData as a hash to allow quick lookup
+        if FModelDef.FJSONFieldsData <> nil then
+        begin
+          TempData := TJSONObject(FData.Clone);
+          try
+            EncodeJSONFields(TempData);
+            FModelDef.SetDatasetData(FDataset, TempData, FParams, soPatch in Options);
+          finally
+            TempData.Destroy;
+          end;
+        end
+        else
+          FModelDef.SetDatasetData(FDataset, FData, FParams, soPatch in Options);
+      end
+      else
+      begin
+        TempData := TJSONObject.Create([FModelDef.DataField, FData.AsJSON]);
         try
-          EncodeJSONFields(TempData);
-          FModelDef.SetDatasetData(FDataset, TempData, FParams, soPatch in Options);
+          FModelDef.SetDatasetData(FDataset, TempData, FParams, True);
         finally
           TempData.Destroy;
         end;
-      end
-      else
-        FModelDef.SetDatasetData(FDataset, FData, FParams, soPatch in Options);
+      end;
       FDataset.Post;
       Result := FDataset.ApplyUpdates;
       if IsAppend and Result then
-        FData.Int64s[FModelDef.PrimaryKey] := FDataset.LastInsertRowId;
+      begin
+        if FModelDef.DataField = '' then
+          FData.Int64s[FModelDef.PrimaryKey] := FDataset.LastInsertRowId
+        else
+          FIdValue := FDataset.LastInsertRowId;
+      end;
     finally
       FDataset.Close;
     end;
@@ -848,6 +894,8 @@ var
   Field: TField;
   Fields: TFields;
   Param: TParam;
+  S: TJSONStringType;
+  V: Variant;
 begin
   if FInputFieldsData <> nil then
   begin
@@ -998,7 +1046,9 @@ begin
      FName := TSqlite3ResourceModelDef(Source).FName;
      Params := TSqlite3ResourceModelDef(Source).Params;
      FSelectSQL := TSqlite3ResourceModelDef(Source).FSelectSQL;
-     FJSONFields := TSqlite3ResourceModelDef(Source).FJSONFields;
+     JSONFields := TSqlite3ResourceModelDef(Source).FJSONFields;
+     InputFields := TSqlite3ResourceModelDef(Source).FInputFields;
+     FDataField := TSqlite3ResourceModelDef(Source).FDataField;
   end
   else
     inherited Assign(Source);
