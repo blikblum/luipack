@@ -630,6 +630,7 @@ begin
 
   Result := True;
   try
+    FDataset.Close;
     FDataset.SQL := BindParams(GetItemSQL(Id, FModelDef));
     FDataset.Open;
     try
@@ -894,8 +895,6 @@ var
   Field: TField;
   Fields: TFields;
   Param: TParam;
-  S: TJSONStringType;
-  V: Variant;
 begin
   if FInputFieldsData <> nil then
   begin
