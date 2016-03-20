@@ -254,6 +254,7 @@ type
   public
     destructor Destroy; override;
     function Delete: Boolean;
+    function Delete(IdValue: Variant): Boolean;
     function Fetch: Boolean;
     function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
@@ -471,6 +472,25 @@ begin
     Id := VarToStr(FIdValue);
   ResourcePath := ResourcePath + '/' + Id;
   Result := FResourceClient.Delete(ResourcePath, Self);
+end;
+
+function TRESTJSONObjectResource.Delete(IdValue: Variant): Boolean;
+var
+  ResourcePath: String;
+begin
+  if not VarIsEmpty(IdValue) then
+  begin
+    ResourcePath := GetResourcePath;
+    if not VarIsNull(IdValue) then
+      ResourcePath := ResourcePath + '/' + VarToStr(IdValue);
+    Result := FResourceClient.Delete(ResourcePath, Self);
+  end
+  else
+  begin
+    //calling Delete without parentesis does not work
+    //the compiler thinks is refering to the function result
+    Result := Delete();
+  end;
 end;
 
 function TRESTJSONObjectResource.Fetch: Boolean;
