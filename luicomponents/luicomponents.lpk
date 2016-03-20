@@ -20,7 +20,7 @@
       </Parsing>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="24">
+    <Files Count="25">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -118,6 +118,10 @@
         <Filename Value="ide\forms\directoryselectview.pas"/>
         <UnitName Value="directoryselectview"/>
       </Item24>
+      <Item25>
+        <Filename Value="sqlclientbase.pas"/>
+        <UnitName Value="sqlclientbase"/>
+      </Item25>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

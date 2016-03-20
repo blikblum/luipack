@@ -7,12 +7,11 @@ unit luicomponents;
 interface
 
 uses
-  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, 
-  LuiRecordBuffer, LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, 
-  LuiJSONUtils, LuiDBExport, LuiObjectUtils, VarRecUtils, LuiDBUtils, 
-  LuiDataClasses, LuiJSONClasses, LuiIoCContainer, LuiServices, LuiJSONModel, 
-  JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, CustomMacros, 
-  DirectorySelectView, LazarusPackageIntf;
+  LuiConfig, IniConfigProvider, register_luicomponents, LuiOrderedDataset, LuiRecordBuffer, 
+  LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, LuiJSONUtils, LuiDBExport, 
+  LuiObjectUtils, VarRecUtils, LuiDBUtils, LuiDataClasses, LuiJSONClasses, LuiIoCContainer, 
+  LuiServices, LuiJSONModel, JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, 
+  CustomMacros, DirectorySelectView, SQLClientBase, LazarusPackageIntf;
 
 implementation
 
