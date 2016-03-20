@@ -732,7 +732,7 @@ function TSqlite3JSONObjectResource.Save(IdValue: Variant; Options: TSaveOptions
 begin
   if not VarIsEmpty(IdValue) then
   begin
-    Result := DoSave(IdValue);
+    Result := DoSave(IdValue, Options);
     if Result then
       FIdValue := IdValue;
   end
