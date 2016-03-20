@@ -631,7 +631,7 @@ begin
       //FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Data not set');
       Exit;
     end;
-    IdFieldData := FData.Find(FDataset.PrimaryKey);
+    IdFieldData := FData.Find(FModelDef.PrimaryKey);
     if IdFieldData <> nil then
     begin
       if (IdFieldData.JSONType in [jtString, jtNumber]) then
@@ -726,7 +726,7 @@ begin
     end
     else
     begin
-      IdFieldData := FData.Find(FDataset.PrimaryKey);
+      IdFieldData := FData.Find(FModelDef.PrimaryKey);
       if (IdFieldData <> nil) then
       begin
         if (IdFieldData.JSONType in [jtString, jtNumber, jtNull]) then
