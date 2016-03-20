@@ -30,6 +30,7 @@ type
   IJSONObjectResource = interface(IDataResource)
     ['{25B16F6D-DCEB-4D36-A4D6-260E23271B7B}']
     function Delete: Boolean;
+    function Delete(IdValue: Variant): Boolean;
     function Fetch(IdValue: Variant): Boolean; overload;
     function GetData: TJSONObject;
     function Save(IdValue: Variant; Options: TSaveOptions = []): Boolean; overload;
