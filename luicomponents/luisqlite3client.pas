@@ -164,6 +164,7 @@ type
     FIdValue: Variant;
     FOwnsData: Boolean;
     procedure DecodeJSONFields(ResponseData: TJSONObject);
+    function DoDelete(const Id: Variant): Boolean;
     function DoFetch(const Id: Variant): Boolean;
     function DoSave(const Id: Variant; Options: TSaveOptions = []): Boolean;
     procedure EncodeJSONFields(RequestData: TJSONObject);
@@ -172,6 +173,7 @@ type
     constructor Create(AModelDef: TSqlite3ResourceModelDef; ResourceClient: TSqlite3ResourceClient); override;
     destructor Destroy; override;
     function Delete: Boolean;
+    function Delete(IdValue: Variant): Boolean;
     function Fetch: Boolean;
     function Fetch(IdValue: Variant): Boolean;
     function GetData: TJSONObject;
@@ -425,6 +427,27 @@ begin
   DoDecodeJSONFields(ResponseData, FModelDef.FJSONFieldsData);
 end;
 
+function TSqlite3JSONObjectResource.DoDelete(const Id: Variant): Boolean;
+begin
+  Result := True;
+  try
+    FDataset.Close;
+    FDataset.SQL := BindParams(GetItemSQL(Id, FModelDef));
+    FDataset.Open;
+    try
+      if not FDataset.IsEmpty then
+      begin
+        FDataset.Delete;
+        FDataset.ApplyUpdates;
+      end;
+    finally
+      FDataset.Close;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
 procedure LoadDataField(Dataset: TDataSet; Data: TJSONObject; const FieldName: String);
 var
   Field: TField;
@@ -627,23 +650,18 @@ begin
   end
   else
     Id := VarToStr(FIdValue);
+  Result := DoDelete(Id);
+end;
 
-  Result := True;
-  try
-    FDataset.Close;
-    FDataset.SQL := BindParams(GetItemSQL(Id, FModelDef));
-    FDataset.Open;
-    try
-      if not FDataset.IsEmpty then
-      begin
-        FDataset.Delete;
-        FDataset.ApplyUpdates;
-      end;
-    finally
-      FDataset.Close;
-    end;
-  except
-    Result := False;
+function TSqlite3JSONObjectResource.Delete(IdValue: Variant): Boolean;
+begin
+  if not VarIsEmpty(IdValue) then
+    Result := DoDelete(IdValue)
+  else
+  begin
+    //calling Delete without parentesis does not work
+    //the compiler thinks is refering to the function result
+    Result := Delete();
   end;
 end;
 
