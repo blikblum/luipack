@@ -161,6 +161,7 @@ type
    end;
 
    TDatasetAdapter = class
+   public
      function ApplyUpdates(Dataset: TDataSet): Boolean; virtual; abstract;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
      function GetLastInsertId(Dataset: TDataSet): Int64; virtual; abstract;
@@ -1147,6 +1148,7 @@ constructor TSQLResourceClient.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FModelDefs := TSQLResourceModelDefs.Create(Self);
+  FAdapter := CreateAdapter;
 end;
 
 destructor TSQLResourceClient.Destroy;
