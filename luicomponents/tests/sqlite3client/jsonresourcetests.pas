@@ -5,7 +5,7 @@ unit JSONResourceTests;
 interface
 
 uses
-  Classes, SysUtils, TestFramework, LuiDataClasses, JSONTestHelpers, sqldb, LuiFPTestHelpers;
+  Classes, SysUtils, TestFramework, LuiDataClasses, JSONTestHelpers, LuiFPTestHelpers;
 
 type
 
@@ -184,7 +184,7 @@ begin
   Obj.Clear;
   Obj.Strings['x'] := 'y';
   FObject.Data.CopyFrom(Obj);
-  //do not  pass key in save
+  //do not pass key in save
   CheckTrue(FObject.Save);
 
   FObject := FClient.GetJSONObject('systemdata');
@@ -198,10 +198,14 @@ var
   Arr: TJSONArray;
   Obj: TJSONObject;
 begin
-  ContactId := GetLastContactId;
+  FObject := FClient.GetJSONObject('contact');
+  FObject.Data.Strings['name'] := 'new';
+  FObject.Save;
+  ContactId := FObject.Data.Get('id', 0);
+
   FObject := FClient.GetJSONObject('contactdetail');
   CheckTrue(FObject.Fetch(ContactId));
-  CheckTrue(FObject.Data.Count = 0);
+  CheckEquals(0, FObject.Data.Count);
   FObject.Save;
 
   FObject := FClient.GetJSONObject('contactdetail');
@@ -228,7 +232,7 @@ end;
 
 procedure TJSONResourceTests.Patch;
 var
-  ContactId: Integer;
+  ContactId, CategoryId: Integer;
   PristineData: TJSONObject;
 begin
   ContactId := GetLastContactId;
@@ -237,13 +241,18 @@ begin
   PristineData := TJSONObject.Create;
   PristineData.CopyFrom(FObject.Data);
 
+  FObject := FClient.GetJSONObject('category');
+  FObject.Data.Strings['name'] := 'New Category';
+  FObject.Save;
+  CategoryId := FObject.Data.Get('id', 0);
+
   FObject := FClient.GetJSONObject('contact');
-  FObject.Data.Integers['categoryid'] := 999;
+  FObject.Data.Integers['categoryid'] := CategoryId;
   CheckTrue(FObject.Save(ContactId, [soPatch]));
 
   FObject := FClient.GetJSONObject('contact');
   FObject.Fetch(ContactId);
-  PristineData.Integers['categoryid'] := 999;
+  PristineData.Integers['categoryid'] := CategoryId;
   CheckEqualsJSON(PristineData, FObject.Data, 'Should modify only one field');
   PristineData.Destroy;
 end;
