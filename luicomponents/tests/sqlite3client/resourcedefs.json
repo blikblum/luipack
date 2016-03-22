@@ -34,7 +34,7 @@
 {
 "Name": "contactdetail",
 "SelectSQL": "Select * from ContactDetails",
-"PrimaryKey": "PatientId",
+"PrimaryKey": "ContactId",
 "TableName": "ContactDetails",
 "JSONFields": "[{\"name\":\"objectdata\",\"type\":\"object\"},{\"name\":\"arraydata\",\"type\":\"array\"}]"
 }

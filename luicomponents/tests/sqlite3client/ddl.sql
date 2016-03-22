@@ -10,7 +10,7 @@ CREATE TABLE [Contacts] (
 
 
 CREATE TABLE [ContactDetails] (
-  [PatientId] INTEGER PRIMARY KEY,
+  [ContactId] INTEGER PRIMARY KEY REFERENCES [Contacts]([Id]) ON DELETE CASCADE,
   [ObjectData] TEXT,
   [ArrayData] TEXT);
 
