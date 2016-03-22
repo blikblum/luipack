@@ -10,7 +10,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="ide;ide\forms"/>
+        <OtherUnitFiles Value="ide;ide\forms;."/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -20,7 +20,7 @@
       </Parsing>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="25">
+    <Files Count="26">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -122,6 +122,10 @@
         <Filename Value="sqlclientbase.pas"/>
         <UnitName Value="sqlclientbase"/>
       </Item25>
+      <Item26>
+        <Filename Value="luisqldbclient.pas"/>
+        <UnitName Value="LuiSqlite3Client"/>
+      </Item26>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

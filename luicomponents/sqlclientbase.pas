@@ -164,7 +164,7 @@ type
    public
      function ApplyUpdates(Dataset: TDataSet): Boolean; virtual; abstract;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
-     function GetLastInsertId(Dataset: TDataSet): Int64; virtual; abstract;
+     function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; virtual; abstract;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); virtual; abstract;
    end;
 
@@ -516,7 +516,7 @@ begin
   Result := True;
   try
     SQL := FModelDef.GetUpdateSQL(Id);
-     FClient.Adapter.SetSQL(FDataset, BindParams(SQL));
+    FClient.Adapter.SetSQL(FDataset, BindParams(SQL));
     FDataset.Open;
     try
       IsAppend := FDataset.RecordCount = 0;
@@ -555,15 +555,17 @@ begin
         end;
       end;
       FDataset.Post;
-      Result :=  FClient.Adapter.ApplyUpdates(FDataset);
-      if IsAppend and Result then
+      if IsAppend then
       begin
-        LastInsertId := FClient.Adapter.GetLastInsertId(FDataset);
+        LastInsertId := FClient.Adapter.InsertRecord(FDataset, FClient, FModelDef);
+        Result := LastInsertId <> -1;
         if FModelDef.DataField = '' then
           FData.Int64s[FModelDef.PrimaryKey] := LastInsertId
         else
           FIdValue := LastInsertId;
-      end;
+      end
+      else
+        Result := FClient.Adapter.ApplyUpdates(FDataset);
     finally
       FDataset.Close;
     end;

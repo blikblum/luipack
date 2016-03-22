@@ -1,0 +1,41 @@
+[
+{
+"Name": "contact",
+"SelectSQL": "Select * from Contacts",
+"TableName": "Contacts"
+},
+{
+"Name": "category",
+"SelectSQL": "Select * from Categories",
+"TableName": "Categories"
+},
+{
+"Name":"contactphone",
+"SelectSQL":"Select * from Phones",
+"ConditionsSQL": "where ContactId = :contactid",
+"TableName": "Phones",
+"Params":
+[
+{
+"Name":"contactid",
+"DataType":"ftInteger",
+"ParamType":"ptInput"
+}
+]
+},
+{
+"Name":"systemdata",
+"SelectSQL":"Select Key, Value as Data from SystemData",
+"PrimaryKey": "key",
+"DataField": "data",
+"InputFields":"[{\"name\":\"data\",\"mapping\":\"Value\"},\"key\"]",
+"TableName":"SystemData"
+},
+{
+"Name": "contactdetail",
+"SelectSQL": "Select * from ContactDetails",
+"PrimaryKey": "ContactId",
+"TableName": "ContactDetails",
+"JSONFields": "[{\"name\":\"objectdata\",\"type\":\"object\"},{\"name\":\"arraydata\",\"type\":\"array\"}]"
+}
+]

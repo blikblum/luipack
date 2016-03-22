@@ -5,7 +5,7 @@ unit LuiSqlite3Client;
 interface
 
 uses
-  Classes, SysUtils, Sqlite3DS, LuiDataClasses, db, fpjson, SQLClientBase;
+  Classes, SysUtils, Sqlite3DS, db, SQLClientBase;
 
 type
 
@@ -16,7 +16,7 @@ type
    public
      function ApplyUpdates(Dataset: TDataSet): Boolean; override;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
-     function GetLastInsertId(Dataset: TDataSet): Int64; override;
+     function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; override;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
 
@@ -58,10 +58,12 @@ begin
   DS.ExecSQL('PRAGMA foreign_keys = ON');
 end;
 
-function TSqlite3DatasetAdapter.GetLastInsertId(Dataset: TDataSet): Int64;
+function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient;
+  ModelDef: TSQLModelDef): Int64;
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin
+  DS.ApplyUpdates;
   Result := DS.LastInsertRowId;
 end;
 
