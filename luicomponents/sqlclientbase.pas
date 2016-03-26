@@ -160,10 +160,15 @@ type
      procedure Invalidate(const ModelName: String);
    end;
 
+   { TDatasetAdapter }
+
    TDatasetAdapter = class
    public
      function ApplyUpdates(Dataset: TDataSet): Boolean; virtual; abstract;
+     function BindParams(const SQL: String; Params: TParams): String; virtual;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
+     function CreateParams(Dataset: TDataSet): TParams; virtual; abstract;
+     procedure DestroyParams(Params: TParams); virtual;
      function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; virtual; abstract;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); virtual; abstract;
    end;
@@ -296,6 +301,18 @@ begin
     PKField.Value := IdValue
   else
     raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [ModelDef.PrimaryKey]);
+end;
+
+{ TDatasetAdapter }
+
+function TDatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
+begin
+  Result := SQL;
+end;
+
+procedure TDatasetAdapter.DestroyParams(Params: TParams);
+begin
+  //
 end;
 
 { TSqlite3DatasetResource }
@@ -813,31 +830,21 @@ constructor TSQLDataResource.Create(AModelDef: TSQLModelDef;
 begin
   FModelDef := AModelDef;
   FClient := Client;
-  FParams := TParams.Create(TParam);
-  FParams.Assign(AModelDef.Params);
   FDataset := Client.Adapter.CreateDataset(Client, AModelDef);
+  FParams := Client.Adapter.CreateParams(FDataset);
+  FParams.Assign(AModelDef.Params);
 end;
 
 destructor TSQLDataResource.Destroy;
 begin
   FDataset.Destroy;
-  FParams.Destroy;
+  FClient.Adapter.DestroyParams(FParams);
   inherited Destroy;
 end;
 
 function TSQLDataResource.BindParams(const SQLTemplate: String): String;
-var
-  Param: TParam;
-  i: Integer;
 begin
-  Result := SQLTemplate;
-  for i := 0 to FParams.Count - 1 do
-  begin
-    //todo: handle InputFields
-    Param := FParams.Items[i];
-    Result := StringReplace(Result, ':' + Param.Name, Param.AsString,
-      [rfReplaceAll, rfIgnoreCase]);
-  end;
+  Result := FClient.Adapter.BindParams(SQLTemplate, FParams);
 end;
 
 function TSQLDataResource.GetParams: TParams;

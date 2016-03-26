@@ -15,6 +15,7 @@ type
    public
      function ApplyUpdates(Dataset: TDataSet): Boolean; override;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
+     function CreateParams(Dataset: TDataSet): TParams; override;
      function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; override;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
@@ -110,6 +111,13 @@ begin
   DS := TSQLQuery.Create(nil);
   //DS.PrimaryKey := ModelDef.PrimaryKey;
   DS.DataBase := TSQLDbResourceClient(Client).Connection;
+end;
+
+function TSQLDbAdapter.CreateParams(Dataset: TDataSet): TParams;
+var
+  Query: TSQLQuery absolute Dataset;
+begin
+  Result := Query.Params;
 end;
 
 function TSQLDbAdapter.InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient;
