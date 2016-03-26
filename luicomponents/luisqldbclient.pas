@@ -13,11 +13,11 @@ type
 
    TSQLDbAdapter = class(TDatasetAdapter)
    public
-     function ApplyUpdates(Dataset: TDataSet): Boolean; override;
-     function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
-     function CreateParams(Dataset: TDataSet): TParams; override;
-     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
-     procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
+     class function ApplyUpdates(Dataset: TDataSet): Boolean; override;
+     class function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
+     class function CreateParams(Dataset: TDataSet): TParams; override;
+     class function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
+     class procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
 
    { TSQLDbResourceClient }
@@ -26,7 +26,7 @@ type
    private
      FConnection: TSQLConnection;
    protected
-     function CreateAdapter: TDatasetAdapter; override;
+     function GetAdapter: TDatasetAdapterClass; override;
    public
    published
      property Connection: TSQLConnection read FConnection write FConnection;
@@ -92,7 +92,7 @@ end;
 
 { TSQLDbAdapter }
 
-function TSQLDbAdapter.ApplyUpdates(Dataset: TDataSet): Boolean;
+class function TSQLDbAdapter.ApplyUpdates(Dataset: TDataSet): Boolean;
 var
   DS: TSQLQuery absolute Dataset;
 begin
@@ -104,7 +104,8 @@ begin
   Result := True;
 end;
 
-function TSQLDbAdapter.CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet;
+class function TSQLDbAdapter.CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef
+  ): TDataSet;
 var
   DS: TSQLQuery absolute Result;
 begin
@@ -114,14 +115,14 @@ begin
   DS.ParamCheck := False;
 end;
 
-function TSQLDbAdapter.CreateParams(Dataset: TDataSet): TParams;
+class function TSQLDbAdapter.CreateParams(Dataset: TDataSet): TParams;
 var
   Query: TSQLQuery absolute Dataset;
 begin
   Result := Query.Params;
 end;
 
-function TSQLDbAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
+class function TSQLDbAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
 var
   Query: TSQLQuery absolute Dataset;
   Info: TSQLStatementInfo;
@@ -161,7 +162,7 @@ begin
   end;
 end;
 
-procedure TSQLDbAdapter.SetSQL(Dataset: TDataSet; const SQL: String);
+class procedure TSQLDbAdapter.SetSQL(Dataset: TDataSet; const SQL: String);
 var
   DS: TSQLQuery absolute Dataset;
 begin
@@ -170,9 +171,9 @@ end;
 
 { TSQLDbResourceClient }
 
-function TSQLDbResourceClient.CreateAdapter: TDatasetAdapter;
+function TSQLDbResourceClient.GetAdapter: TDatasetAdapterClass;
 begin
-  Result := TSQLDbAdapter.Create;
+  Result := TSQLDbAdapter;
 end;
 
 end.

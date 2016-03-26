@@ -66,13 +66,28 @@ type
      constructor Create(AOwner: TSQLResourceClient);
    end;
 
+   { TDatasetAdapter }
+
+   TDatasetAdapter = class
+   public
+     class function ApplyUpdates(Dataset: TDataSet): Boolean; virtual; abstract;
+     class function BindParams(const SQL: String; Params: TParams): String; virtual;
+     class function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
+     class function CreateParams(Dataset: TDataSet): TParams; virtual; abstract;
+     class procedure DestroyParams(Params: TParams); virtual;
+     class function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; virtual; abstract;
+     class procedure SetSQL(Dataset: TDataSet; const SQL: String); virtual; abstract;
+   end;
+
+   TDatasetAdapterClass = class of TDatasetAdapter;
+
    { TSQLDataResource }
 
    TSQLDataResource = class(TInterfacedObject)
    private
      FDataset: TDataSet;
      FModelDef: TSQLModelDef;
-     FClient: TSQLResourceClient;
+     FAdapter: TDatasetAdapterClass;
      FParams: TParams;
    protected
      function BindParams(const SQLTemplate: String): String;
@@ -160,18 +175,6 @@ type
      procedure Invalidate(const ModelName: String);
    end;
 
-   { TDatasetAdapter }
-
-   TDatasetAdapter = class
-   public
-     function ApplyUpdates(Dataset: TDataSet): Boolean; virtual; abstract;
-     function BindParams(const SQL: String; Params: TParams): String; virtual;
-     function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
-     function CreateParams(Dataset: TDataSet): TParams; virtual; abstract;
-     procedure DestroyParams(Params: TParams); virtual;
-     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; virtual; abstract;
-     procedure SetSQL(Dataset: TDataSet; const SQL: String); virtual; abstract;
-   end;
 
    { TSQLResourceClient }
 
@@ -179,7 +182,6 @@ type
    private
      FCacheHandler: TSQLCacheHandler;
      FDatabase: String;
-     FAdapter: TDatasetAdapter;
      FModelDefs: TSQLResourceModelDefs;
      FModelDefLookup: TFPHashObjectList;
      procedure BuildModelDefLookup;
@@ -190,12 +192,12 @@ type
      procedure SetModelDefs(AValue: TSQLResourceModelDefs);
      procedure UpdateCache(const ModelName, Path: String; Stream: TStream);
    protected
-     function CreateAdapter: TDatasetAdapter; virtual; abstract;
+     function GetAdapter: TDatasetAdapterClass; virtual; abstract;
      procedure ModelDefsChanged;
    public
      constructor Create(AOwner: TComponent); override;
      destructor Destroy; override;
-     property Adapter: TDatasetAdapter read FAdapter;
+     property Adapter: TDatasetAdapterClass read GetAdapter;
      function GetDataset(const ModelName: String): IDatasetResource;
      function GetJSONArray(const ModelName: String): IJSONArrayResource;
      function GetJSONObject(const ModelName: String): IJSONObjectResource;
@@ -305,12 +307,12 @@ end;
 
 { TDatasetAdapter }
 
-function TDatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
+class function TDatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
 begin
   Result := SQL;
 end;
 
-procedure TDatasetAdapter.DestroyParams(Params: TParams);
+class procedure TDatasetAdapter.DestroyParams(Params: TParams);
 begin
   //
 end;
@@ -322,7 +324,7 @@ begin
   Result := True;
   try
     FDataset.Close;
-    FClient.Adapter.SetSQL(FDataset, BindParams(GetItemSQL(IdValue, FModelDef)));
+    FAdapter.SetSQL(FDataset, BindParams(GetItemSQL(IdValue, FModelDef)));
     FDataset.Open;
   except
     Result := False;
@@ -378,7 +380,7 @@ begin
       FDataset.Post;
     end;
   end;
-  Result := FClient.Adapter.ApplyUpdates(FDataset);
+  Result := FAdapter.ApplyUpdates(FDataset);
 end;
 
 { TSQLCacheHandler }
@@ -459,13 +461,13 @@ begin
   Result := True;
   try
     FDataset.Close;
-    FClient.Adapter.SetSQL(FDataset, BindParams(GetItemSQL(Id, FModelDef)));
+    FAdapter.SetSQL(FDataset, BindParams(GetItemSQL(Id, FModelDef)));
     FDataset.Open;
     try
       if not FDataset.IsEmpty then
       begin
         FDataset.Delete;
-        FClient.Adapter.ApplyUpdates(FDataset);
+        FAdapter.ApplyUpdates(FDataset);
       end;
     finally
       FDataset.Close;
@@ -497,7 +499,7 @@ function TSQLJSONObjectResource.DoFetch(const Id: Variant): Boolean;
 begin
   Result := True;
   try
-    FClient.Adapter.SetSQL(FDataset, BindParams(GetItemSQL(Id, FModelDef)));
+    FAdapter.SetSQL(FDataset, BindParams(GetItemSQL(Id, FModelDef)));
     FDataset.Open;
     try
       FData.Clear;
@@ -533,7 +535,7 @@ begin
   Result := True;
   try
     SQL := FModelDef.GetUpdateSQL(Id);
-    FClient.Adapter.SetSQL(FDataset, BindParams(SQL));
+    FAdapter.SetSQL(FDataset, BindParams(SQL));
     FDataset.Open;
     try
       IsAppend := FDataset.RecordCount = 0;
@@ -574,7 +576,7 @@ begin
       FDataset.Post;
       if IsAppend then
       begin
-        LastInsertId := FClient.Adapter.InsertRecord(FDataset, FModelDef);
+        LastInsertId := FAdapter.InsertRecord(FDataset, FModelDef);
         Result := LastInsertId <> -1;
         if FModelDef.DataField = '' then
           FData.Int64s[FModelDef.PrimaryKey] := LastInsertId
@@ -582,7 +584,7 @@ begin
           FIdValue := LastInsertId;
       end
       else
-        Result := FClient.Adapter.ApplyUpdates(FDataset);
+        Result := FAdapter.ApplyUpdates(FDataset);
     finally
       FDataset.Close;
     end;
@@ -829,22 +831,22 @@ constructor TSQLDataResource.Create(AModelDef: TSQLModelDef;
   Client: TSQLResourceClient);
 begin
   FModelDef := AModelDef;
-  FClient := Client;
-  FDataset := Client.Adapter.CreateDataset(Client, AModelDef);
-  FParams := Client.Adapter.CreateParams(FDataset);
+  FAdapter := Client.Adapter;
+  FDataset := FAdapter.CreateDataset(Client, AModelDef);
+  FParams := FAdapter.CreateParams(FDataset);
   FParams.Assign(AModelDef.Params);
 end;
 
 destructor TSQLDataResource.Destroy;
 begin
   FDataset.Destroy;
-  FClient.Adapter.DestroyParams(FParams);
+  FAdapter.DestroyParams(FParams);
   inherited Destroy;
 end;
 
 function TSQLDataResource.BindParams(const SQLTemplate: String): String;
 begin
-  Result := FClient.Adapter.BindParams(SQLTemplate, FParams);
+  Result := FAdapter.BindParams(SQLTemplate, FParams);
 end;
 
 function TSQLDataResource.GetParams: TParams;
@@ -901,7 +903,7 @@ begin
     SQL := FModelDef.SelectSQL;
     if FModelDef.ConditionsSQL <> '' then
       SQL := SQL + ' ' + FModelDef.ConditionsSQL;
-    FClient.Adapter.SetSQL(FDataset, BindParams(SQL));
+    FAdapter.SetSQL(FDataset, BindParams(SQL));
     FDataset.Open;
     try
       FData.Clear;
@@ -1157,12 +1159,10 @@ constructor TSQLResourceClient.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FModelDefs := TSQLResourceModelDefs.Create(Self);
-  FAdapter := CreateAdapter;
 end;
 
 destructor TSQLResourceClient.Destroy;
 begin
-  FAdapter.Free;
   FCacheHandler.Free;
   FModelDefLookup.Free;
   FModelDefs.Destroy;

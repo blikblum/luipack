@@ -14,12 +14,12 @@ type
 
    TSqlite3DatasetAdapter = class(TDatasetAdapter)
    public
-     function ApplyUpdates(Dataset: TDataSet): Boolean; override;
-     function BindParams(const SQL: String; Params: TParams): String; override;
-     function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
-     function CreateParams(Dataset: TDataSet): TParams; override;
-     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
-     procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
+     class function ApplyUpdates(Dataset: TDataSet): Boolean; override;
+     class function BindParams(const SQL: String; Params: TParams): String; override;
+     class function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
+     class function CreateParams(Dataset: TDataSet): TParams; override;
+     class function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
+     class procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
 
    { TSqlite3ResourceClient }
@@ -28,7 +28,7 @@ type
    private
      FDatabase: String;
    protected
-     function CreateAdapter: TDatasetAdapter; override;
+     function GetAdapter: TDatasetAdapterClass; override;
    public
    published
      property Database: String read FDatabase write FDatabase;
@@ -42,14 +42,14 @@ uses
 
 { TSqlite3DatasetAdapter }
 
-function TSqlite3DatasetAdapter.ApplyUpdates(Dataset: TDataSet): Boolean;
+class function TSqlite3DatasetAdapter.ApplyUpdates(Dataset: TDataSet): Boolean;
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin
   DS.ApplyUpdates;
 end;
 
-function TSqlite3DatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
+class function TSqlite3DatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
 var
   Param: TParam;
   i: Integer;
@@ -64,7 +64,8 @@ begin
   end;
 end;
 
-function TSqlite3DatasetAdapter.CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet;
+class function TSqlite3DatasetAdapter.CreateDataset(Client: TSQLResourceClient;
+  ModelDef: TSQLModelDef): TDataSet;
 var
   DS: TSqlite3Dataset absolute Result;
 begin
@@ -75,12 +76,13 @@ begin
   DS.ExecSQL('PRAGMA foreign_keys = ON');
 end;
 
-function TSqlite3DatasetAdapter.CreateParams(Dataset: TDataSet): TParams;
+class function TSqlite3DatasetAdapter.CreateParams(Dataset: TDataSet): TParams;
 begin
   Result := TParams.Create(TParam);
 end;
 
-function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
+class function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef
+  ): Int64;
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin
@@ -88,7 +90,7 @@ begin
   Result := DS.LastInsertRowId;
 end;
 
-procedure TSqlite3DatasetAdapter.SetSQL(Dataset: TDataSet; const SQL: String);
+class procedure TSqlite3DatasetAdapter.SetSQL(Dataset: TDataSet; const SQL: String);
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin
@@ -97,9 +99,9 @@ end;
 
 { TSqlite3ResourceClient }
 
-function TSqlite3ResourceClient.CreateAdapter: TDatasetAdapter;
+function TSqlite3ResourceClient.GetAdapter: TDatasetAdapterClass;
 begin
-  Result := TSqlite3DatasetAdapter.Create;
+  Result := TSqlite3DatasetAdapter;
 end;
 
 
