@@ -18,7 +18,7 @@ type
      function BindParams(const SQL: String; Params: TParams): String; override;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
      function CreateParams(Dataset: TDataSet): TParams; override;
-     function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; override;
+     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
 
@@ -80,8 +80,7 @@ begin
   Result := TParams.Create(TParam);
 end;
 
-function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient;
-  ModelDef: TSQLModelDef): Int64;
+function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin

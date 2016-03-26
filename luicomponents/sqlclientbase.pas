@@ -169,7 +169,7 @@ type
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; virtual; abstract;
      function CreateParams(Dataset: TDataSet): TParams; virtual; abstract;
      procedure DestroyParams(Params: TParams); virtual;
-     function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; virtual; abstract;
+     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; virtual; abstract;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); virtual; abstract;
    end;
 
@@ -574,7 +574,7 @@ begin
       FDataset.Post;
       if IsAppend then
       begin
-        LastInsertId := FClient.Adapter.InsertRecord(FDataset, FClient, FModelDef);
+        LastInsertId := FClient.Adapter.InsertRecord(FDataset, FModelDef);
         Result := LastInsertId <> -1;
         if FModelDef.DataField = '' then
           FData.Int64s[FModelDef.PrimaryKey] := LastInsertId

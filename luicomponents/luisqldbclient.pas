@@ -16,7 +16,7 @@ type
      function ApplyUpdates(Dataset: TDataSet): Boolean; override;
      function CreateDataset(Client: TSQLResourceClient; ModelDef: TSQLModelDef): TDataSet; override;
      function CreateParams(Dataset: TDataSet): TParams; override;
-     function InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient; ModelDef: TSQLModelDef): Int64; override;
+     function InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64; override;
      procedure SetSQL(Dataset: TDataSet; const SQL: String); override;
    end;
 
@@ -111,6 +111,7 @@ begin
   DS := TSQLQuery.Create(nil);
   //DS.PrimaryKey := ModelDef.PrimaryKey;
   DS.DataBase := TSQLDbResourceClient(Client).Connection;
+  DS.ParamCheck := False;
 end;
 
 function TSQLDbAdapter.CreateParams(Dataset: TDataSet): TParams;
@@ -120,17 +121,15 @@ begin
   Result := Query.Params;
 end;
 
-function TSQLDbAdapter.InsertRecord(Dataset: TDataSet; Client: TSQLResourceClient;
-  ModelDef: TSQLModelDef): Int64;
+function TSQLDbAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
 var
   Query: TSQLQuery absolute Dataset;
-  SqldbClient: TSQLDbResourceClient absolute Client;
   Info: TSQLStatementInfo;
   Connection: TSQLConnection;
   InsertQuery: TSQLQuery;
 begin
   Result := -1;
-  Connection := SqldbClient.Connection;
+  Connection := TSQLConnection(Query.DataBase);
   if (Connection is TSQLConnector) then
     Connection := TSQLConnectorAccess(Connection).Proxy;
   {$IF FPC_FULLVERSION >= 30000}
