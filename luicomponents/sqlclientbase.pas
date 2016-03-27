@@ -219,7 +219,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants;
+  LuiJSONUtils, variants, RegExpr;
 
 procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
 var
@@ -1032,6 +1032,8 @@ begin
     Result := SelectSQL
   else
   begin
+    if FTableName = '' then
+      raise Exception.CreateFmt('Model "%s": TableName not defined', [Name]);
     Result := 'Select';
     for i := 0 to FInputFieldsData.Count - 1 do
     begin
@@ -1114,12 +1116,19 @@ procedure TSQLResourceClient.BuildModelDefLookup;
 var
   i: Integer;
   ModelDef: TSQLModelDef;
+  TableNameExpr: TRegExpr;
 begin
+  TableNameExpr := TRegExpr.Create;
+  TableNameExpr.ModifierI := True;
+  TableNameExpr.Expression := 'FROM\s+(\w+)';
   for i := 0 to FModelDefs.Count - 1 do
   begin
     ModelDef := TSQLModelDef(FModelDefs.Items[i]);
+    if (ModelDef.TableName = '') and TableNameExpr.Exec(ModelDef.SelectSQL) then
+      ModelDef.TableName := TableNameExpr.Match[1];
     FModelDefLookup.Add(ModelDef.Name, ModelDef);
   end;
+  TableNameExpr.Destroy;
 end;
 
 procedure TSQLResourceClient.CacheHandlerNeeded;
