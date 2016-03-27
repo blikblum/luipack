@@ -13,6 +13,14 @@ type
 
    TSQLResourceClient = class;
 
+   { TSQLModelDefParam }
+
+   TSQLModelDefParam = class(TParam)
+   public
+     constructor Create(ACollection: TCollection); overload; override;
+   end;
+
+
   { TSQLModelDef }
 
    TSQLModelDef = class(TCollectionItem)
@@ -303,6 +311,15 @@ begin
     PKField.Value := IdValue
   else
     raise Exception.CreateFmt('PrimaryKey ("%s") value not specified', [ModelDef.PrimaryKey]);
+end;
+
+{ TSQLModelDefParam }
+
+constructor TSQLModelDefParam.Create(ACollection: TCollection);
+begin
+  inherited Create(ACollection);
+  ParamType := ptInput;
+  DataType := ftInteger;
 end;
 
 { TDatasetAdapter }
@@ -1063,7 +1080,7 @@ end;
 constructor TSQLModelDef.Create(ACollection: TCollection);
 begin
   inherited Create(ACollection);
-  FParams := TParams.Create(TParam);
+  FParams := TParams.Create(TSQLModelDefParam);
   FCacheMode := cmNone;
 end;
 
