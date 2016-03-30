@@ -55,6 +55,7 @@ type
 
   IResourceClient = interface
     ['{254EE65D-14ED-4597-860D-757532BA51CE}']
+    function GetDataset(const ModelName: String): IDatasetResource;
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
     procedure InvalidateCache(const ModelName: String);

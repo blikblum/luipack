@@ -81,8 +81,7 @@ begin
   Result := TParams.Create(TParam);
 end;
 
-class function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef
-  ): Int64;
+class function TSqlite3DatasetAdapter.InsertRecord(Dataset: TDataSet; ModelDef: TSQLModelDef): Int64;
 var
   DS: TSqlite3Dataset absolute Dataset;
 begin

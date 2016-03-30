@@ -193,6 +193,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function GetDataset(const ModelName: String): IDatasetResource;
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
     procedure InvalidateCache(const ModelName: String);
@@ -1115,6 +1116,11 @@ begin
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
+end;
+
+function TRESTResourceClient.GetDataset(const ModelName: String): IDatasetResource;
+begin
+  Result := nil;
 end;
 
 function TRESTResourceClient.GetJSONArray(const ModelName: String): IJSONArrayResource;
