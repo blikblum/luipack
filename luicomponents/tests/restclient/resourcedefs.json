@@ -1,0 +1,35 @@
+[
+{
+"Name":"root"
+},
+{
+"Name":"contact",
+"Path":"contacts"
+},
+{
+"Name":"contactphone",
+"Path":"contacts/{contactid}/phones",
+"Params":
+[
+{
+"Name":"contactid",
+"DataType":"ftInteger",
+"ParamType":"ptInput"
+}
+]
+},
+{
+"Name":"category",
+"Path":"categories",
+"CacheMode": "cmSession"
+},
+{
+"Name":"systemdata",
+"Path":"systemdata",
+"IdField": ""
+},
+{
+"Name": "contactdetail",
+"Path": "contactdetails"
+}
+]
