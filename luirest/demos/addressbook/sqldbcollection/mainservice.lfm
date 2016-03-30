@@ -12,6 +12,9 @@ object MainServiceModule: TMainServiceModule
     AfterConnect = SQLConnectorAfterConnect
     DatabaseName = 'addressbookdata.db'
     KeepConnection = False
+    Params.Strings = (
+      'foreign_keys=1'
+    )
     Transaction = SQLTransaction
     HostName = 'localhost'
     LogEvents = []
