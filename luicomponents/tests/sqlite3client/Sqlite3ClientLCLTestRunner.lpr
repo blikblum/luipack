@@ -3,8 +3,8 @@ program Sqlite3ClientLCLTestRunner;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, sysutils, GUITestRunner, JSONResourceTests, LuiSqlite3Client, fpjsonrtti, LuiJSONUtils,
-  fpjson, Sqlite3DS;
+  Interfaces, Forms, sysutils, GUITestRunner, JSONResourceTests, DatasetResourceTests,
+  LuiSqlite3Client, fpjsonrtti, LuiJSONUtils, fpjson, Sqlite3DS;
 
 {$R *.res}
 
@@ -51,6 +51,7 @@ end;
 begin
   InitializeSqliteClient;
   TJSONResourceTests.SetClient(Resources);
+  TDatasetResourceTests.SetClient(Resources);
   Application.Initialize;
   RunRegisteredTests;
 end.

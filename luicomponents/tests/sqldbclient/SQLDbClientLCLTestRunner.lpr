@@ -4,7 +4,7 @@ program SQLDbClientLCLTestRunner;
 
 uses
   Interfaces, Forms, sysutils,  GUITestRunner, sqldb, sqlite3conn, LuiJSONUtils, fpjsonrtti,
-  Sqlite3DS, LuiSQLDbClient, JSONResourceTests, fpjson;
+  Sqlite3DS, LuiSQLDbClient, JSONResourceTests, DatasetResourceTests, fpjson;
 
 {$R *.res}
 
@@ -59,6 +59,7 @@ end;
 begin
   InitializeSQLDbClient;
   TJSONResourceTests.SetClient(Resources);
+  TDatasetResourceTests.SetClient(Resources);
   Application.Initialize;
   RunRegisteredTests;
 end.

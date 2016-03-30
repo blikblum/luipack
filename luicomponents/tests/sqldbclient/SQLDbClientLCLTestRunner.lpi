@@ -39,7 +39,7 @@
         <PackageName Value="FCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="SQLDbClientLCLTestRunner.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -57,6 +57,11 @@
         <Filename Value="resourcedefs.json"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="..\sqlite3client\datasetresourcetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DatasetResourceTests"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
