@@ -53,8 +53,8 @@ type
     procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False); virtual;
   public
+    constructor Create; override;
     destructor Destroy; override;
-    procedure AfterConstruction; override;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
     procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); override;
     procedure HandlePatch(ARequest: TRequest; AResponse: TResponse); override;
@@ -226,6 +226,13 @@ begin
       end;
     end;
   end;
+end;
+
+constructor TSqldbResource.Create;
+begin
+  inherited Create;
+  FPrimaryKey := 'Id';
+  FConnection := FDefaultConnection;
 end;
 
 { TSqldbResource }
@@ -508,13 +515,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TSqldbResource.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  FPrimaryKey := 'Id';
-  FConnection := FDefaultConnection;
-end;
-
 procedure TSqldbResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 var
   Query: TSQLQuery;
@@ -757,13 +757,17 @@ begin
     raise Exception.CreateFmt('ItemClass not defined for %s', [ClassName]);
   ItemResource := ResourceClass.Create;
   if ItemResource.SelectSQL = '' then
+  begin
     ItemResource.SelectSQL := SelectSQL;
+    ItemResource.PrimaryKey := PrimaryKey;
+  end;
   if ItemResource.PrimaryKeyParam = '' then
     ItemResource.PrimaryKeyParam := GetItemParam;
   if ItemResource.InputFields = '' then
     ItemResource.InputFields := InputFields;
   if ItemResource.JSONFields = '' then
     ItemResource.JSONFields := JSONFields;
+  ItemResource.IgnoreNotFound := IgnoreNotFound;
   PrepareItem(ItemResource);
 end;
 
