@@ -252,6 +252,7 @@ type
   protected
     function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; override;
   public
+    constructor Create(AModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient); override;
     destructor Destroy; override;
     function Delete: Boolean;
     function Delete(IdValue: Variant): Boolean;
@@ -427,6 +428,14 @@ begin
     hmtDelete:
       ;
   end;
+end;
+
+constructor TRESTJSONObjectResource.Create(AModelDef: TRESTResourceModelDef;
+  ResourceClient: TRESTResourceClient);
+begin
+  inherited Create(AModelDef, ResourceClient);
+  FData := TJSONObject.Create;
+  FOwnsData := True;
 end;
 
 destructor TRESTJSONObjectResource.Destroy;
