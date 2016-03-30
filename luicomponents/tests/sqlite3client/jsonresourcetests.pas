@@ -100,7 +100,7 @@ begin
   ContactCount := GetResourceCount('contact');
 
   FObject := FClient.GetJSONObject('contact');
-  FObject.Data.CopyFrom(['name', 'Luiz', 'categoryid', CategoryId]);
+  FObject.Data.CopyFrom(['name', 'Luiz Américo', 'categoryid', CategoryId]);
   CheckTrue(FObject.Save, 'Save should succeed');
 
   ContactId := FObject.Data.Get('id', -1);
@@ -108,6 +108,10 @@ begin
 
   FObject := FClient.GetJSONObject('contact');
   CheckTrue(FObject.Fetch(ContactId));
+
+  FArray := FClient.GetJSONArray('contact');
+  FArray.Fetch;
+  CheckEquals(ContactCount + 1, FArray.Data.Count, 'Should have one more record');
 
   FObject := FClient.GetJSONObject('contact');
   FObject.Data.CopyFrom(['name', 'Luiz999']);
@@ -118,10 +122,7 @@ begin
 
   FObject := FClient.GetJSONObject('contact');
   CheckTrue(FObject.Fetch(ContactId));
-
-  FArray := FClient.GetJSONArray('contact');
-  FArray.Fetch;
-  CheckEquals(ContactCount + 2, FArray.Data.Count, 'Should have one more record');
+  CheckEquals('Luiz999', FObject.Data.Get('name', ''));
 end;
 
 procedure TJSONResourceTests.FetchWithParam;
@@ -154,6 +155,7 @@ begin
   CheckNotEquals(-1, PhoneId);
 
   FObject := FClient.GetJSONObject('contactphone');
+  FObject.ParamByName('contactid').AsInteger := ContactId;
   CheckTrue(FObject.Fetch(PhoneId));
 
   FArray := FClient.GetJSONArray('contactphone');
