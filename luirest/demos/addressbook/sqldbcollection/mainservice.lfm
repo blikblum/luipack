@@ -9,6 +9,7 @@ object MainServiceModule: TMainServiceModule
   object SQLConnector: TSQLConnector
     Connected = False
     LoginPrompt = False
+    AfterConnect = SQLConnectorAfterConnect
     DatabaseName = 'addressbookdata.db'
     KeepConnection = False
     Transaction = SQLTransaction

@@ -15,6 +15,7 @@ type
   TMainServiceModule = class(TRESTServiceModule)
     SQLConnector: TSQLConnector;
     SQLTransaction: TSQLTransaction;
+    procedure SQLConnectorAfterConnect(Sender: TObject);
   private
     procedure InitConnection;
   public
@@ -27,11 +28,22 @@ var
 implementation
 
 uses
-  LuiRESTSqldb, IniFiles, LuiRESTSwagger;
+  LuiRESTSqldb, IniFiles, LuiRESTSwagger, sqlite3;
 
 {$R *.lfm}
 
+type
+  TSQLConnectorAccess = class(TSQLConnector)
+
+  end;
+
 { TMainServiceModule }
+
+procedure TMainServiceModule.SQLConnectorAfterConnect(Sender: TObject);
+begin
+  if TSQLConnectorAccess(SQLConnector).Proxy is TSQLite3Connection then
+    sqlite3_busy_timeout(TSQLite3Connection(TSQLConnectorAccess(SQLConnector).Proxy).Handle, 3000);
+end;
 
 procedure TMainServiceModule.InitConnection;
 var
@@ -55,7 +67,9 @@ begin
   TSqldbResource.DefaultConnection := SQLConnector;
   Resources.Register('contacts', TContactsResource, 0);
   Resources.Register('categories', TCategoriesResource, 0);
+  Resources.Register('contactdetails', TContactDetailsResource, 0);
   Resources.Register('info', TServiceInfoResource, 0);
+  Resources.Register('systemdata', TSystemDataResource, 0);
   Resources.Register('swagger', TSwaggerDefinitionResource, PtrInt(Resources));
 end;
 

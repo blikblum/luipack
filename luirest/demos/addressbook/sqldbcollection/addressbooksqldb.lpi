@@ -65,7 +65,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\addressbook.cgi" ApplyConventions="False"/>
+      <Filename Value="$CustomDir(webserver-cgi)\addressbook\addressbook.cgi" ApplyConventions="False"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
