@@ -72,6 +72,7 @@ type
      procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
    public
      constructor Create(AOwner: TSQLResourceClient);
+     procedure LoadFromFile(const FileName: String);
    end;
 
    { TDatasetAdapter }
@@ -840,6 +841,11 @@ constructor TSQLResourceModelDefs.Create(AOwner: TSQLResourceClient);
 begin
   inherited Create(TSQLModelDef);
   FOwner := AOwner;
+end;
+
+procedure TSQLResourceModelDefs.LoadFromFile(const FileName: String);
+begin
+
 end;
 
 { TSQLDataResource }
