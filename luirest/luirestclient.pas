@@ -210,7 +210,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants, StrUtils;
+  LuiJSONUtils, variants, StrUtils, BufDataset, fpjsonrtti;
 
 const
   HTTPMethodNames: Array[THTTPMethodType] of String = (
@@ -265,6 +265,189 @@ type
     procedure SetData(JSONObj: TJSONObject; OwnsData: Boolean);
     property Data: TJSONObject read GetData;
   end;
+
+  { TRESTDatasetResource }
+
+  TRESTDatasetResource = class(TRESTDataResource, IDatasetResource)
+  private
+    class var FFieldDefsDataCache: TFPHashObjectList;
+    FIdValue: Variant;
+    FDataset: TBufDataset;
+    function DoFetch(const IdValue: Variant): Boolean;
+    procedure FieldDefsDataCacheNeeded;
+    function GetFieldDefsData: TJSONArray;
+    procedure LoadFieldDefs;
+  protected
+    function ParseResponse(const ResourcePath: String; Method: THTTPMethodType;
+      ResponseStream: TStream): Boolean; override;
+  public
+    constructor Create(AModelDef: TRESTResourceModelDef; ResourceClient: TRESTResourceClient);
+      override;
+    destructor Destroy; override;
+    function Fetch: Boolean;
+    function Fetch(IdValue: Variant): Boolean;
+    function GetDataset: TDataSet;
+    function Save(Options: TSaveOptions = []): Boolean;
+  end;
+
+{ TRESTDatasetResource }
+
+function TRESTDatasetResource.DoFetch(const IdValue: Variant): Boolean;
+var
+  ResourcePath: String;
+begin
+  ResourcePath := GetResourcePath;
+  if not (VarIsEmpty(IdValue) or VarIsNull(IdValue)) then
+    ResourcePath := ResourcePath + '/' + IdValue;
+  Result := FResourceClient.Get(ResourcePath, Self);
+end;
+
+procedure TRESTDatasetResource.FieldDefsDataCacheNeeded;
+begin
+  if FFieldDefsDataCache = nil then
+    FFieldDefsDataCache := TFPHashObjectList.Create(True);
+end;
+
+function TRESTDatasetResource.GetFieldDefsData: TJSONArray;
+var
+  ResourcePath: String;
+begin
+  Result := TJSONArray(FFieldDefsDataCache.Find(FModelDef.Name));
+  if Result = nil then
+  begin
+    ResourcePath := GetResourcePath + '/fielddefs';
+    FResourceClient.Http.Clear;
+    if FResourceClient.Http.HTTPMethod('GET', FResourceClient.BaseURL + ResourcePath) then
+    begin
+      if TryStreamToJSON(FResourceClient.Http.Document, Result) then
+        FFieldDefsDataCache.Add(FModelDef.Name, Result);
+    end;
+  end;
+  if Result = nil then
+    raise Exception.CreateFmt('"%s": Unable to resolve fielddefs', [FModelDef.Name]);
+end;
+
+procedure TRESTDatasetResource.LoadFieldDefs;
+var
+  FieldDefsData: TJSONArray;
+  DeStreamer: TJSONDeStreamer;
+begin
+  FieldDefsData := GetFieldDefsData;
+  if FieldDefsData = nil then
+    Exit;
+  DeStreamer := TJSONDeStreamer.Create(nil);
+  try
+    DeStreamer.JSONToCollection(FieldDefsData, FDataset.FieldDefs);
+  finally
+    DeStreamer.Destroy;
+  end;
+end;
+
+procedure AddRecord(Dataset: TBufDataset; Data: TJSONObject);
+var
+  Field: TField;
+  FieldName: String;
+  i: Integer;
+  PropData: TJSONData;
+begin
+  Dataset.Append;
+  try
+    for i := 0 to Data.Count - 1 do
+    begin
+      FieldName := Data.Names[i];
+      Field := Dataset.FindField(FieldName);
+      if Field <> nil then
+      begin
+        PropData := Data.Items[i];
+        case PropData.JSONType of
+          jtString, jtBoolean, jtNumber:
+            Field.Value := PropData.Value;
+          jtArray, jtObject:
+            Field.AsString := PropData.AsJSON;
+        end;
+      end;
+    end;
+    Dataset.Post;
+  except
+    Dataset.Cancel;
+  end;
+end;
+
+function TRESTDatasetResource.ParseResponse(const ResourcePath: String; Method: THTTPMethodType;
+  ResponseStream: TStream): Boolean;
+var
+  ResponseData, ItemData: TJSONData;
+  i: Integer;
+begin
+  //todo: merge the common code from the three resource classes
+  if not TryStreamToJSON(ResponseStream, ResponseData) then
+  begin
+    FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
+    Exit;
+  end;
+  FDataset.Close;
+  if FDataset.FieldDefs.Count = 0 then
+  begin
+    LoadFieldDefs;
+    FDataset.CreateDataset;
+  end;
+  FDataset.Open;
+  case ResponseData.JSONType of
+    jtObject:
+      AddRecord(FDataset, TJSONObject(ResponseData));
+    jtArray:
+      begin
+        for i := 0 to ResponseData.Count -1 do
+        begin
+          ItemData := ResponseData.Items[i];
+          if ItemData.JSONType = jtObject then
+            AddRecord(FDataset, TJSONObject(ItemData));
+        end;
+      end;
+  end;
+end;
+
+constructor TRESTDatasetResource.Create(AModelDef: TRESTResourceModelDef;
+  ResourceClient: TRESTResourceClient);
+begin
+  inherited Create(AModelDef, ResourceClient);
+  FDataset := TBufDataset.Create(nil);
+  FieldDefsDataCacheNeeded;
+end;
+
+destructor TRESTDatasetResource.Destroy;
+begin
+  FDataset.Destroy;
+  inherited Destroy;
+end;
+
+function TRESTDatasetResource.Fetch: Boolean;
+begin
+  FIdValue := Unassigned;
+  Result := DoFetch(Null);
+end;
+
+function TRESTDatasetResource.Fetch(IdValue: Variant): Boolean;
+begin
+  if not VarIsEmpty(IdValue) then
+  begin
+    FIdValue := IdValue;
+    Result := DoFetch(IdValue);
+  end
+  else
+    Result := Fetch();
+end;
+
+function TRESTDatasetResource.GetDataset: TDataSet;
+begin
+  Result := FDataset;
+end;
+
+function TRESTDatasetResource.Save(Options: TSaveOptions): Boolean;
+begin
+  //todo
+  Result := False;
+end;
 
 { TModelDefParam }
 
@@ -1119,8 +1302,11 @@ begin
 end;
 
 function TRESTResourceClient.GetDataset(const ModelName: String): IDatasetResource;
+var
+  ModelDef: TRESTResourceModelDef;
 begin
-  Result := nil;
+  ModelDef := FindModelDef(ModelName);
+  Result := TRESTDatasetResource.Create(ModelDef, Self);
 end;
 
 function TRESTResourceClient.GetJSONArray(const ModelName: String): IJSONArrayResource;
@@ -1144,6 +1330,9 @@ begin
   CacheHandlerNeeded;
   FCacheHandler.Invalidate(ModelName);
 end;
+
+finalization
+  TRESTDatasetResource.FFieldDefsDataCache.Free;
 
 end.
 

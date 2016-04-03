@@ -2,6 +2,7 @@ object MainServiceModule: TMainServiceModule
   OldCreateOrder = False
   ContentType = 'application/json; charset=UTF-8'
   RootPath = '/'
+  OnResourceLoad = DataModuleResourceLoad
   Height = 162
   HorizontalOffset = 403
   VerticalOffset = 155

@@ -4,7 +4,7 @@ program RESTClientLCLTestRunner;
 
 uses
   SysUtils, Interfaces, Forms, GUITestRunner, LuiRESTClient, fpjsonrtti, fpjson, LuiJSONUtils,
-  JSONResourceTests;
+  JSONResourceTests, DatasetResourceTests;
 
 {$R *.res}
 var
@@ -34,6 +34,7 @@ end;
 begin
   InitializeRESTClient;
   TJSONResourceTests.SetClient(Resources);
+  TDatasetResourceTests.SetClient(Resources);
   Application.Initialize;
   RunRegisteredTests;
 end.

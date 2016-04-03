@@ -15,6 +15,7 @@ type
   TMainServiceModule = class(TRESTServiceModule)
     SQLConnector: TSQLConnector;
     SQLTransaction: TSQLTransaction;
+    procedure DataModuleResourceLoad(Resource: TRESTResource; ResourceTag: PtrInt);
     procedure SQLConnectorAfterConnect(Sender: TObject);
   private
     procedure InitConnection;
@@ -28,7 +29,7 @@ var
 implementation
 
 uses
-  LuiRESTSqldb, IniFiles, LuiRESTSwagger, sqlite3;
+  LuiRESTSqldb, IniFiles, LuiRESTSwagger, sqlite3, fpjsonrtti;
 
 {$R *.lfm}
 
@@ -37,12 +38,68 @@ type
 
   end;
 
+  { TFieldDefsResource }
+
+  TFieldDefsResource = class(TRESTResource)
+  private
+    FSqldbResource: TSqldbResource;
+  protected
+    procedure Loaded(Tag: PtrInt); override;
+  public
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
+{ TFieldDefsResource }
+
+procedure TFieldDefsResource.Loaded(Tag: PtrInt);
+begin
+  inherited Loaded(Tag);
+  FSqldbResource := TObject(Tag) as TSqldbResource;
+end;
+
+procedure TFieldDefsResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
+var
+  Query: TSQLQuery;
+  Streamer: TJSONStreamer;
+  FieldDefsStr: String;
+begin
+  FieldDefsStr := '';
+  Query := TSQLQuery.Create(nil);
+  try
+    Query.DataBase := FSqldbResource.Connection;
+    Query.SQL.Add(FSqldbResource.SelectSQL);
+    Query.SQL.Add('where 1 <> 1');
+    Query.Open;
+    Streamer := TJSONStreamer.Create(nil);
+    try
+      FieldDefsStr := Streamer.CollectionToJSON(Query.FieldDefs);
+    finally
+      Streamer.Destroy;
+    end;
+  finally
+    Query.Destroy;
+  end;
+  if FieldDefsStr <> '' then
+  begin
+    AResponse.Contents.Add(FieldDefsStr);
+    AResponse.Code := 200;
+  end
+  else
+    SetResponseStatus(AResponse, 500, 'Unable to stream fielddefs', []);
+end;
+
 { TMainServiceModule }
 
 procedure TMainServiceModule.SQLConnectorAfterConnect(Sender: TObject);
 begin
   if TSQLConnectorAccess(SQLConnector).Proxy is TSQLite3Connection then
     sqlite3_busy_timeout(TSQLite3Connection(TSQLConnectorAccess(SQLConnector).Proxy).Handle, 3000);
+end;
+
+procedure TMainServiceModule.DataModuleResourceLoad(Resource: TRESTResource; ResourceTag: PtrInt);
+begin
+  if Resource is TSqldbResource then
+    Resource.RegisterSubPath('fielddefs', TFieldDefsResource, PtrInt(Resource));
 end;
 
 procedure TMainServiceModule.InitConnection;
