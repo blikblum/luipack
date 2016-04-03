@@ -271,6 +271,8 @@ type
   TRESTDatasetResource = class(TRESTDataResource, IDatasetResource)
   private
     class var FFieldDefsDataCache: TFPHashObjectList;
+    //the extra private keyword is necessary to avoid further fields being considered as class var
+  private
     FIdValue: Variant;
     FDataset: TBufDataset;
     function DoFetch(const IdValue: Variant): Boolean;
@@ -379,8 +381,9 @@ var
   ResponseData, ItemData: TJSONData;
   i: Integer;
 begin
+  Result := TryStreamToJSON(ResponseStream, ResponseData);
   //todo: merge the common code from the three resource classes
-  if not TryStreamToJSON(ResponseStream, ResponseData) then
+  if not Result then
   begin
     FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
     Exit;
