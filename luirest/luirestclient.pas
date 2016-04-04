@@ -266,6 +266,17 @@ type
     property Data: TJSONObject read GetData;
   end;
 
+  { TRESTDataset }
+
+  TRESTDataset = class(TCustomBufDataset)
+  private
+    FResource: TRESTDataResource;
+  protected
+    procedure ApplyRecUpdate(UpdateKind: TUpdateKind); override;
+  public
+    constructor Create(AOwner: TComponent; AResource: TRESTDataResource);
+  end;
+
   { TRESTDatasetResource }
 
   TRESTDatasetResource = class(TRESTDataResource, IDatasetResource)
@@ -274,7 +285,7 @@ type
     //the extra private keyword is necessary to avoid further fields being considered as class var
   private
     FIdValue: Variant;
-    FDataset: TBufDataset;
+    FDataset: TRESTDataset;
     function DoFetch(const IdValue: Variant): Boolean;
     procedure FieldDefsDataCacheNeeded;
     function GetFieldDefsData: TJSONArray;
@@ -292,6 +303,57 @@ type
     function Save(Options: TSaveOptions = []): Boolean;
   end;
 
+procedure TRESTDataset.ApplyRecUpdate(UpdateKind: TUpdateKind);
+var
+  IdField: TField;
+  ResourcePath: String;
+  RecordData: TJSONObject;
+begin
+  ResourcePath := FResource.GetResourcePath;
+  case UpdateKind of
+    ukInsert:
+    begin
+      //todo: handle setting record id after insert
+      RecordData := DatasetToJSON(Self, [djoCurrentRecord], '') as TJSONObject;
+      IdField := FindField(FResource.ModelDef.IdField);
+      if (IdField <> nil) and not IdField.IsNull then
+      begin
+        ResourcePath := ResourcePath + '/' + IdField.AsString;
+        FResource.FResourceClient.Put(ResourcePath, FResource, RecordData.AsJSON);
+      end
+      else
+        FResource.FResourceClient.Post(ResourcePath, FResource, RecordData.AsJSON);
+      RecordData.Destroy;
+    end;
+    ukModify:
+    begin
+      IdField := FindField(FResource.ModelDef.IdField);
+      if (IdField <> nil) and not IdField.IsNull then
+      begin
+        RecordData := DatasetToJSON(Self, [djoCurrentRecord], '') as TJSONObject;
+        ResourcePath := ResourcePath + '/' + IdField.AsString;
+        FResource.FResourceClient.Put(ResourcePath, FResource, RecordData.AsJSON);
+        RecordData.Destroy;
+      end;
+    end;
+    ukDelete:
+    begin
+      IdField := FindField(FResource.ModelDef.IdField);
+      if (IdField <> nil) and not IdField.IsNull then
+      begin
+        ResourcePath := ResourcePath + '/' + IdField.AsString;
+        FResource.FResourceClient.Delete(ResourcePath, FResource);
+      end;
+    end;
+  end;
+end;
+
+constructor TRESTDataset.Create(AOwner: TComponent; AResource: TRESTDataResource);
+begin
+  inherited Create(AOwner);
+  FResource := AResource;
+end;
+
 { TRESTDatasetResource }
 
 function TRESTDatasetResource.DoFetch(const IdValue: Variant): Boolean;
@@ -300,7 +362,7 @@ var
 begin
   ResourcePath := GetResourcePath;
   if not (VarIsEmpty(IdValue) or VarIsNull(IdValue)) then
-    ResourcePath := ResourcePath + '/' + IdValue;
+    ResourcePath := ResourcePath + '/' + VarToStr(IdValue);
   Result := FResourceClient.Get(ResourcePath, Self);
 end;
 
@@ -313,17 +375,19 @@ end;
 function TRESTDatasetResource.GetFieldDefsData: TJSONArray;
 var
   ResourcePath: String;
+  Http: THTTPSend;
 begin
   Result := TJSONArray(FFieldDefsDataCache.Find(FModelDef.Name));
   if Result = nil then
   begin
     ResourcePath := GetResourcePath + '/fielddefs';
-    FResourceClient.Http.Clear;
-    if FResourceClient.Http.HTTPMethod('GET', FResourceClient.BaseURL + ResourcePath) then
+    Http := THTTPSend.Create;
+    if Http.HTTPMethod('GET', FResourceClient.BaseURL + ResourcePath) then
     begin
-      if TryStreamToJSON(FResourceClient.Http.Document, Result) then
+      if TryStreamToJSON(Http.Document, Result) then
         FFieldDefsDataCache.Add(FModelDef.Name, Result);
     end;
+    Http.Destroy;
   end;
   if Result = nil then
     raise Exception.CreateFmt('"%s": Unable to resolve fielddefs', [FModelDef.Name]);
@@ -345,7 +409,7 @@ begin
   end;
 end;
 
-procedure AddRecord(Dataset: TBufDataset; Data: TJSONObject);
+procedure AddRecord(Dataset: TDataset; Data: TJSONObject);
 var
   Field: TField;
   FieldName: String;
@@ -381,32 +445,39 @@ var
   ResponseData, ItemData: TJSONData;
   i: Integer;
 begin
-  Result := TryStreamToJSON(ResponseStream, ResponseData);
+  Result := (Method = hmtDelete) or TryStreamToJSON(ResponseStream, ResponseData);
   //todo: merge the common code from the three resource classes
   if not Result then
   begin
     FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
     Exit;
   end;
-  FDataset.Close;
-  if FDataset.FieldDefs.Count = 0 then
-  begin
-    LoadFieldDefs;
-    FDataset.CreateDataset;
-  end;
-  FDataset.Open;
-  case ResponseData.JSONType of
-    jtObject:
-      AddRecord(FDataset, TJSONObject(ResponseData));
-    jtArray:
+  case Method of
+    hmtGet:
+    begin
+      FDataset.Close;
+      if FDataset.FieldDefs.Count = 0 then
       begin
-        for i := 0 to ResponseData.Count -1 do
-        begin
-          ItemData := ResponseData.Items[i];
-          if ItemData.JSONType = jtObject then
-            AddRecord(FDataset, TJSONObject(ItemData));
-        end;
+        LoadFieldDefs;
+        FDataset.CreateDataset;
       end;
+      FDataset.Open;
+      case ResponseData.JSONType of
+        jtObject:
+          AddRecord(FDataset, TJSONObject(ResponseData));
+        jtArray:
+          begin
+            for i := 0 to ResponseData.Count -1 do
+            begin
+              ItemData := ResponseData.Items[i];
+              if ItemData.JSONType = jtObject then
+                AddRecord(FDataset, TJSONObject(ItemData));
+            end;
+          end;
+      end;
+      FDataset.MergeChangeLog;
+    end;
+    hmtPost, hmtPut, hmtDelete, hmtPatch: ;
   end;
 end;
 
@@ -414,7 +485,7 @@ constructor TRESTDatasetResource.Create(AModelDef: TRESTResourceModelDef;
   ResourceClient: TRESTResourceClient);
 begin
   inherited Create(AModelDef, ResourceClient);
-  FDataset := TBufDataset.Create(nil);
+  FDataset := TRESTDataset.Create(nil, Self);
   FieldDefsDataCacheNeeded;
 end;
 
@@ -448,8 +519,9 @@ end;
 
 function TRESTDatasetResource.Save(Options: TSaveOptions): Boolean;
 begin
-  //todo
   Result := False;
+  FDataset.ApplyUpdates;
+  Result := True;
 end;
 
 { TModelDefParam }

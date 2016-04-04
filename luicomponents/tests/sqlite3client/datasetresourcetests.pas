@@ -97,7 +97,7 @@ begin
 
   FResource := FClient.GetDataset('category');
   FResource.Fetch;
-  CheckEquals(CategoryCount + 1, FResource.Dataset.RecordCount, 'Should have one more record');
+  CheckEquals(CategoryCount + 1, FResource.Dataset.RecordCount, 'Should have one more category');
 
   ContactCount := GetResourceCount('contact');
 
@@ -117,7 +117,7 @@ begin
   FResource := FClient.GetDataset('contact');
   CheckTrue(FResource.Fetch);
 
-  CheckEquals(ContactCount + 1, FResource.Dataset.RecordCount, 'Should have one more record');
+  CheckEquals(ContactCount + 1, FResource.Dataset.RecordCount, 'Should have one more contact');
 
   FResource := FClient.GetDataset('contact');
   CheckTrue(FResource.Fetch(ContactId));
@@ -153,8 +153,11 @@ begin
   FResource.Dataset.Post;
   CheckTrue(FResource.Save);
 
+  //refetch since id is not automatically set
+  FResource.Fetch;
+  FResource.Dataset.Last;
   PhoneId := FResource.Dataset.FieldByName('id').AsInteger;
-  CheckNotEquals(-1, PhoneId);
+  CheckNotEquals(0, PhoneId);
 
   FResource := FClient.GetDataset('contactphone');
   FResource.ParamByName('contactid').AsInteger := ContactId;
