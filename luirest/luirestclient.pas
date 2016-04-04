@@ -416,6 +416,8 @@ var
   i: Integer;
   PropData: TJSONData;
 begin
+  if Data.Count = 0 then
+    Exit;
   Dataset.Append;
   try
     for i := 0 to Data.Count - 1 do
