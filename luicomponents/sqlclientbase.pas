@@ -37,6 +37,8 @@ type
      FPrimaryKey: String;
      FSelectSQL: String;
      FTableName: String;
+     FInParams: TStringList;
+     procedure InParamsNeeded;
      procedure SetDatasetData(Dataset: TDataset; JSONObj: TJSONObject; Params: TParams; DoPatch: Boolean);
      function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
      function GetUpdateSQL(const ResourceId: Variant): String;
@@ -99,7 +101,7 @@ type
      FAdapter: TDatasetAdapterClass;
      FParams: TParams;
    protected
-     function BindParams(const SQLTemplate: String): String;
+     function BindParams(const SQL: String): String;
      property ModelDef: TSQLModelDef read FModelDef;
    public
      constructor Create(AModelDef: TSQLModelDef; Client: TSQLResourceClient); virtual;
@@ -220,7 +222,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants, RegExpr;
+  LuiJSONUtils, variants, RegExpr, fpjsonrtti;
 
 procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
 var
@@ -844,8 +846,23 @@ begin
 end;
 
 procedure TSQLResourceModelDefs.LoadFromFile(const FileName: String);
+var
+  JSONDestreamer: TJSONDeStreamer;
+  ModelDefsData: TJSONArray;
 begin
-
+  ModelDefsData := nil;
+  JSONDestreamer := TJSONDeStreamer.Create(nil);
+  try
+    if TryReadJSONFile(FileName, ModelDefsData) then
+    begin
+      JSONDestreamer.JSONToCollection(ModelDefsData, Self);
+      ModelDefsData.Destroy;
+    end
+    else
+      raise Exception.CreateFmt('Unable to load modeldefs from "%s". Expected a JSON array file', [FileName]);
+  finally
+    JSONDestreamer.Destroy;
+  end;
 end;
 
 { TSQLDataResource }
@@ -867,9 +884,26 @@ begin
   inherited Destroy;
 end;
 
-function TSQLDataResource.BindParams(const SQLTemplate: String): String;
+function ReplaceInParams(const SQL: String; InParams: TStrings; ResourceParams: TParams): String;
+var
+  i: Integer;
+  ParamName: String;
 begin
-  Result := FAdapter.BindParams(SQLTemplate, FParams);
+  Result := SQL;
+  for i := 0 to InParams.Count - 1 do
+  begin
+    ParamName := InParams[i];
+    Result := StringReplace(Result, ':' + ParamName, ResourceParams.ParamByName(ParamName).AsString,
+      [rfReplaceAll, rfIgnoreCase]);
+  end;
+end;
+
+function TSQLDataResource.BindParams(const SQL: String): String;
+begin
+  if FModelDef.FInParams = nil then
+    Result := FAdapter.BindParams(SQL, FParams)
+  else
+    Result := FAdapter.BindParams(ReplaceInParams(SQL, FModelDef.FInParams, FParams), FParams);
 end;
 
 function TSQLDataResource.GetParams: TParams;
@@ -945,6 +979,15 @@ end;
 procedure TSQLModelDef.SetParams(AValue: TParams);
 begin
   FParams.Assign(AValue);
+end;
+
+procedure TSQLModelDef.InParamsNeeded;
+begin
+  if FInParams = nil then
+  begin
+    FInParams := TStringList.Create;
+    FInParams.Duplicates := dupIgnore;
+  end;
 end;
 
 procedure TSQLModelDef.SetDatasetData(Dataset: TDataset;
@@ -1094,6 +1137,7 @@ end;
 
 destructor TSQLModelDef.Destroy;
 begin
+  FInParams.Free;
   FJSONFieldsData.Free;
   FInputFieldsData.Free;
   FParams.Destroy;
@@ -1120,21 +1164,38 @@ end;
 
 procedure TSQLResourceClient.BuildModelDefLookup;
 var
-  i: Integer;
+  i, j: Integer;
   ModelDef: TSQLModelDef;
-  TableNameExpr: TRegExpr;
+  TableNameExpr, InParamExpr: TRegExpr;
 begin
   TableNameExpr := TRegExpr.Create;
   TableNameExpr.ModifierI := True;
   TableNameExpr.Expression := 'FROM\s+(\w+)';
+  InParamExpr := TRegExpr.Create;
+  InParamExpr.ModifierI := True;
+  InParamExpr.ModifierG := True;
+  InParamExpr.Expression := '\s+IN\s*\(\s*:(\w+)\s*\)';
   for i := 0 to FModelDefs.Count - 1 do
   begin
     ModelDef := TSQLModelDef(FModelDefs.Items[i]);
     if (ModelDef.TableName = '') and TableNameExpr.Exec(ModelDef.SelectSQL) then
       ModelDef.TableName := TableNameExpr.Match[1];
+    if ModelDef.FInParams <> nil then
+      ModelDef.FInParams.Clear;
+    if InParamExpr.Exec(ModelDef.SelectSQL) then
+    repeat
+      ModelDef.InParamsNeeded;
+      ModelDef.FInParams.Add(InParamExpr.Match[1]);
+    until not InParamExpr.ExecNext;
+    if InParamExpr.Exec(ModelDef.ConditionsSQL) then
+    repeat
+      ModelDef.InParamsNeeded;
+      ModelDef.FInParams.Add(InParamExpr.Match[1]);
+    until not InParamExpr.ExecNext;
     FModelDefLookup.Add(ModelDef.Name, ModelDef);
   end;
   TableNameExpr.Destroy;
+  InParamExpr.Destroy;
 end;
 
 procedure TSQLResourceClient.CacheHandlerNeeded;
