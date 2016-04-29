@@ -20,7 +20,7 @@
       </Parsing>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="26">
+    <Files Count="27">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -124,8 +124,12 @@
       </Item25>
       <Item26>
         <Filename Value="luisqldbclient.pas"/>
-        <UnitName Value="LuiSqlite3Client"/>
+        <UnitName Value="luisqldbclient"/>
       </Item26>
+      <Item27>
+        <Filename Value="luiobjecthelpers.pas"/>
+        <UnitName Value="luiobjecthelpers"/>
+      </Item27>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

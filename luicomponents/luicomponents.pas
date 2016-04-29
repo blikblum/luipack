@@ -11,7 +11,8 @@ uses
   LuiDateUtils, LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, LuiJSONUtils, LuiDBExport, 
   LuiObjectUtils, VarRecUtils, LuiDBUtils, LuiDataClasses, LuiJSONClasses, LuiIoCContainer, 
   LuiServices, LuiJSONModel, JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, 
-  CustomMacros, DirectorySelectView, SQLClientBase, luisqldbclient, LazarusPackageIntf;
+  CustomMacros, DirectorySelectView, SQLClientBase, LuiSQLDbClient, LuiObjectHelpers, 
+  LazarusPackageIntf;
 
 implementation
 
