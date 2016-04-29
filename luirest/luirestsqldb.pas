@@ -46,6 +46,7 @@ type
     procedure EncodeJSONFields(RequestData: TJSONObject);
     function GetQuery(AOwner: TComponent): TSQLQuery;
     function GetResourceIdentifierSQL: String;
+    class function GetSelectSQL: String; virtual;
     function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
     procedure PrepareQuery(Query: TSQLQuery; MethodType: THTTPMethodType;
@@ -467,6 +468,8 @@ end;
 procedure TSqldbResource.Loaded(Tag: PtrInt);
 begin
   inherited Loaded(Tag);
+  if FSelectSQL = '' then
+    FSelectSQL := GetSelectSQL;
   if FInputFields <> '' then
   begin
     if not TryStrToJSON(FInputFields, FInputFieldsData) or not (FInputFieldsData.JSONType in [jtArray, jtObject]) then
@@ -513,6 +516,11 @@ begin
   FJSONFieldsData.Free;
   FInputFieldsData.Free;
   inherited Destroy;
+end;
+
+class function TSqldbResource.GetSelectSQL: String;
+begin
+  Result := '';
 end;
 
 procedure TSqldbResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
@@ -803,8 +811,17 @@ begin
 end;
 
 procedure TSqldbCollectionResource.Loaded(Tag: PtrInt);
+var
+  ItemClass: TSqldbResourceClass;
 begin
   inherited Loaded(Tag);
+  if FSelectSQL = '' then
+  begin
+    ItemClass := GetItemClass;
+    if ItemClass = nil then
+      raise Exception.CreateFmt('ItemClass not defined for %s', [ClassName]);
+    FSelectSQL := ItemClass.GetSelectSQL;
+  end;
   SetDefaultSubPath(GetItemParam, @CreateItemResource, 0);
 end;
 
