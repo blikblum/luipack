@@ -30,11 +30,13 @@ type
     FOutputFields: String;
     FPrimaryKey: String;
     FPrimaryKeyParam: String;
+    FQueryParams: String;
     FSelectSQL: String;
     FInputFieldsData: TJSONData;
+    FJSONFieldsData: TJSONArray;
+    FQueryParamsData: TJSONArray;
     FIgnoreNotFound: Boolean;
     FIsCollection: Boolean;
-    FJSONFieldsData: TJSONArray;
     FPreserveCase: Boolean;
     FPutAsPatch: Boolean;
     FReadOnly: Boolean;
@@ -49,6 +51,7 @@ type
     class function GetSelectSQL: String; virtual;
     function InsertRecord(Query: TSQLQuery): String; virtual;
     procedure Loaded(Tag: PtrInt); override;
+    procedure PrepareParams(Params: TParams; ARequest: TRequest);
     procedure PrepareQuery(Query: TSQLQuery; MethodType: THTTPMethodType;
       const ASelectSQL, AConditionsSQL: String); virtual;
     procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
@@ -74,6 +77,7 @@ type
     property PrimaryKeyParam: String read FPrimaryKeyParam write FPrimaryKeyParam;
     //todo: remove when Patch support is added
     property PutAsPatch: Boolean read FPutAsPatch write FPutAsPatch;
+    property QueryParams: String read FQueryParams write FQueryParams;
     property ReadOnly: Boolean read FReadOnly write FReadOnly;
     property SelectSQL: String read FSelectSQL write FSelectSQL;
   end;
@@ -101,6 +105,7 @@ type
   TSqldbJSONResourceClass = TSqldbResourceClass;
 
 procedure JSONDataToParams(JSONObj: TJSONObject; Params: TParams);
+procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray; Params: TParams);
 
 implementation
 
@@ -126,7 +131,6 @@ var
   Param: TParam;
   PropName: String;
 begin
-  Params.Clear;
   for i := 0 to JSONObj.Count -1 do
   begin
     PropName := JSONObj.Names[i];
@@ -137,6 +141,59 @@ begin
       Param.Name := PropName;
     end;
     Param.Value := JSONObj.Items[i].Value;
+  end;
+end;
+
+procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray; Params: TParams);
+var
+  i, FieldIndex: Integer;
+  QueryParamData: TJSONData;
+  ParamName, ParamValue: String;
+  ParamRequired: Boolean;
+  Int64Value: int64;
+  DoubleValue: Extended;
+  Param: TParam;
+begin
+  for i := 0 to QueryParamsData.Count - 1 do
+  begin
+    QueryParamData := QueryParamsData.Items[i];
+    case QueryParamData.JSONType of
+      jtString:
+        begin
+          ParamName := QueryParamData.AsString;
+          ParamRequired := False;
+        end;
+      jtObject:
+        begin
+          ParamName := TJSONObject(QueryParamData).Get('name', '');
+          ParamRequired := TJSONObject(QueryParamData).Get('required', False);
+        end;
+    end;
+    if ParamName <> '' then
+    begin
+      FieldIndex := QueryFields.IndexOfName(ParamName);
+      if FieldIndex <> -1 then
+      begin
+        ParamValue := QueryFields.ValueFromIndex[FieldIndex];
+        Param := Params.FindParam(ParamName);
+        if Param = nil then
+        begin
+          Param := TParam.Create(Params, ptInput);
+          Param.Name := ParamName;
+        end;
+        if TryStrToInt64(ParamValue, Int64Value) then
+          Param.AsLargeInt := Int64Value
+        else if TryStrToFloat(ParamValue, DoubleValue) then
+          Param.AsFloat := DoubleValue
+        else
+          Param.AsString := ParamValue;
+      end
+      else
+      begin
+        if ParamRequired then
+          raise Exception.CreateFmt('Param "%s" is required', [ParamName]);
+      end;
+    end;
   end;
 end;
 
@@ -480,6 +537,19 @@ begin
     if not TryStrToJSON(FJSONFields, FJSONFieldsData) then
       raise Exception.CreateFmt('Invalid JSONFields: "%s"', [FJSONFields]);
   end;
+  if FQueryParams <> '' then
+  begin
+    if not TryStrToJSON(FQueryParams, FQueryParamsData) then
+      raise Exception.CreateFmt('Invalid QueryParams: "%s"', [FQueryParams]);
+  end;
+end;
+
+procedure TSqldbResource.PrepareParams(Params: TParams; ARequest: TRequest);
+begin
+  Params.Clear;
+  if FQueryParamsData <> nil then
+    QueryFieldsToParams(ARequest.QueryFields, FQueryParamsData, Params);
+  JSONDataToParams(URIParams, Params);
 end;
 
 procedure TSqldbResource.PrepareQuery(Query: TSQLQuery;
@@ -533,7 +603,7 @@ begin
   try
     Query.DataBase := FConnection;
     PrepareQuery(Query, hmtGet, FSelectSQL, FConditionsSQL);
-    JSONDataToParams(URIParams, Query.Params);
+    PrepareParams(Query.Params, ARequest);
     try
       Query.Open;
     except
@@ -604,7 +674,7 @@ begin
   try
     Query.DataBase := FConnection;
     PrepareQuery(Query, hmtDelete, FSelectSQL, FConditionsSQL);
-    JSONDataToParams(URIParams, Query.Params);
+    PrepareParams(Query.Params, ARequest);
     try
       Query.Open;
     except
@@ -661,7 +731,7 @@ begin
   try
     Query.DataBase := FConnection;
     PrepareQuery(Query, hmtPost, FSelectSQL, 'where 1 <> 1');
-    JSONDataToParams(URIParams, Query.Params);
+    PrepareParams(Query.Params, ARequest);
     if TryStrToJSON(ARequest.Content, RequestData) then
     begin
       try
@@ -723,7 +793,7 @@ begin
   try
     Query.DataBase := FConnection;
     PrepareQuery(Query, hmtPut, FSelectSQL, FConditionsSQL);
-    JSONDataToParams(URIParams, Query.Params);
+    PrepareParams(Query.Params, ARequest);
     Query.Open;
     if TryStrToJSON(ARequest.Content, RequestData) then
     try
