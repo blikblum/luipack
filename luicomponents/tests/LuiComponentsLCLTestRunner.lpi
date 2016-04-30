@@ -42,7 +42,7 @@
         <PackageName Value="FCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="LuiComponentsLCLTestRunner.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -57,6 +57,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="RTTIUtilsTests"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="ioccontainertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IocContainerTests"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -70,9 +75,6 @@
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>
