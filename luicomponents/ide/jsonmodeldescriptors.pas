@@ -16,6 +16,7 @@ type
     FCollectionName: String;
     FModelName: String;
     FResourceName: String;
+    procedure LoadDefaults;
   public
     constructor Create; override;
     function CreateSource(const aFilename, aSourceName,
@@ -42,15 +43,19 @@ uses
 
 { TJSONModelUnitDescriptor }
 
-constructor TJSONModelUnitDescriptor.Create;
+procedure TJSONModelUnitDescriptor.LoadDefaults;
 begin
-  inherited Create;
-  Name := 'LuiJSONModel Template';
   DefaultFilename := 'jsonmodel.pas';
   DefaultSourceName := 'MyModel';
   FModelName := 'TMyModel';
   FCollectionName := 'TMyCollection';
   FResourceName := 'my';
+end;
+
+constructor TJSONModelUnitDescriptor.Create;
+begin
+  inherited Create;
+  Name := 'LuiJSONModel Template';
 end;
 
 function TJSONModelUnitDescriptor.CreateSource(const aFilename, aSourceName,
@@ -146,6 +151,7 @@ end;
 function TJSONModelUnitDescriptor.Init(var NewFilename: string;
   NewOwner: TObject; var NewSource: string; Quiet: boolean): TModalResult;
 begin
+  LoadDefaults;
   with TJSONModelUnitOptionsForm.Create(nil) do
   begin
     Descriptor := Self;
