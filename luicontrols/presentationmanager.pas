@@ -5,7 +5,7 @@ unit PresentationManager;
 interface
 
 uses
-  Forms, Classes, SysUtils, contnrs, Controls;
+  Forms, Classes, SysUtils, contnrs, Controls, LuiIoCContainer;
 
 type
 
@@ -53,6 +53,7 @@ type
 
   TPresentationManager = class(TComponent, IPresentationManager)
   private
+    FContainer: TIoCContainer;
     FOnPresentationCreate: TPresentationCreateEvent;
     FPresentationDefs: TFPHashObjectList;
   public
@@ -65,6 +66,7 @@ type
       const DefaultProperties: array of const); inline;
     procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass;
       const DefaultProperties: array of const);
+    property Container: TIoCContainer read FContainer write FContainer;
     property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
     property OnPresentationCreate: TPresentationCreateEvent read FOnPresentationCreate write FOnPresentationCreate;
   end;
@@ -300,11 +302,19 @@ end;
 function TPresentationManager.GetPresentation(const PresentationName: String): IPresentation;
 var
   PresentationDef: TPresentationDef;
+  Presentation: TPresentation;
 begin
   PresentationDef := TPresentationDef(FPresentationDefs.Find(PresentationName));
   if PresentationDef = nil then
     raise Exception.CreateFmt('Presentation "%s" not found', [PresentationName]);
-  Result := TPresentation.Create(PresentationName, PresentationDef);
+  Presentation := TPresentation.Create(PresentationName, PresentationDef);
+  if FContainer <> nil then
+  begin
+    ResolveProperties(Presentation.FView, FContainer);
+    if Presentation.FPresenter <> nil then
+      ResolveProperties(Presentation.FPresenter, FContainer);
+  end;
+  Result := Presentation;
   if Assigned(FOnPresentationCreate) then
     FOnPresentationCreate(Result);
 end;
