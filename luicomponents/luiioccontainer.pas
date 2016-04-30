@@ -43,10 +43,12 @@ type
     function Resolve(const IID: TGuid): IInterface;
   end;
 
-  //todo: Add ResolveProperties (TObject, IoCContaner) function
-
+  procedure ResolveProperties(Instance: TObject; Container: TIoCContainer);
 
 implementation
+
+uses
+  typinfo;
 
 const
   SRegisterError = 'RegisterInterface (%s): %s must be <> nil';
@@ -69,6 +71,36 @@ type
       Flags: Word; var Params; VarResult, ExcepInfo, ArgErr: Pointer): HResult; stdcall;
     procedure FreeOnRelease;
   end;
+
+procedure ResolveProperties(Instance: TObject; Container: TIoCContainer);
+var
+  PropList: PPropList;
+  PropCount: SmallInt;
+  PropInfo : PPropinfo;
+  i: Integer;
+  TypeData: PTypeData;
+  Intf: IInterface;
+begin
+  PropCount := GetTypeData(Instance.ClassInfo)^.Propcount;
+  if PropCount = 0 then
+    Exit;
+  GetMem(PropList, PropCount * SizeOf(Pointer));
+  try
+    GetPropInfos(Instance.ClassInfo, PropList);
+    for i := 0 to PropCount - 1 do
+    begin
+      PropInfo := PropList^[i];
+      if (PropInfo^.PropType^.Kind = tkInterface) and (GetInterfaceProp(Instance, PropInfo) = nil) then
+      begin
+        TypeData := GetTypeData(PropInfo^.PropType);
+        Intf := Container.Resolve(TypeData^.GUID);
+        SetInterfaceProp(Instance, PropInfo, Intf);
+      end;
+    end;
+  finally
+    Freemem(PropList, PropCount * SizeOf(Pointer));
+  end;
+end;
 
   { TComponentReference }
 
