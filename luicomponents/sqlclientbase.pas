@@ -198,6 +198,7 @@ type
      procedure BuildModelDefLookup;
      procedure CacheHandlerNeeded;
      function FindModelDef(const ModelName: String): TSQLModelDef;
+     function GetModelDef(const ModelName: String): TSQLModelDef;
      function GetCacheData(const ModelName, ResourcePath: String;
        DataResource: TSQLDataResource): Boolean;
      procedure SetModelDefs(AValue: TSQLResourceModelDefs);
@@ -213,6 +214,7 @@ type
      function GetJSONArray(const ModelName: String): IJSONArrayResource;
      function GetJSONObject(const ModelName: String): IJSONObjectResource;
      procedure InvalidateCache(const ModelName: String);
+     function HasModel(const ModelName: String): Boolean;
    published
      property Database: String read FDatabase write FDatabase;
      property ModelDefs: TSQLResourceModelDefs read FModelDefs write SetModelDefs;
@@ -1212,6 +1214,11 @@ begin
     BuildModelDefLookup;
   end;
   Result := TSQLModelDef(FModelDefLookup.Find(ModelName));
+end;
+
+function TSQLResourceClient.GetModelDef(const ModelName: String): TSQLModelDef;
+begin
+  Result := FindModelDef(ModelName);
   if Result = nil then
     raise Exception.CreateFmt('Unable to find resource model "%s"', [ModelName]);
 end;
@@ -1266,7 +1273,7 @@ function TSQLResourceClient.GetDataset(const ModelName: String): IDatasetResourc
 var
   ModelDef: TSQLModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TSQLDatasetResource.Create(ModelDef, Self);
 end;
 
@@ -1274,7 +1281,7 @@ function TSQLResourceClient.GetJSONArray(const ModelName: String): IJSONArrayRes
 var
   ModelDef: TSQLModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TSQLJSONArrayResource.Create(ModelDef, Self);
 end;
 
@@ -1282,7 +1289,7 @@ function TSQLResourceClient.GetJSONObject(const ModelName: String): IJSONObjectR
 var
   ModelDef: TSQLModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TSQLJSONObjectResource.Create(ModelDef, Self);
 end;
 
@@ -1290,6 +1297,11 @@ procedure TSQLResourceClient.InvalidateCache(const ModelName: String);
 begin
   CacheHandlerNeeded;
   FCacheHandler.Invalidate(ModelName);
+end;
+
+function TSQLResourceClient.HasModel(const ModelName: String): Boolean;
+begin
+  Result := FindModelDef(ModelName) <> nil;
 end;
 
 end.

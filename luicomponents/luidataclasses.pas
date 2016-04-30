@@ -58,6 +58,7 @@ type
     function GetDataset(const ModelName: String): IDatasetResource;
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
+    function HasModel(const ModelName: String): Boolean;
     procedure InvalidateCache(const ModelName: String);
   end;
 

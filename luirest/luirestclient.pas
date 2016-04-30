@@ -113,6 +113,7 @@ type
     procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
   public
     constructor Create(AOwner: TRESTResourceClient);
+    procedure LoadFromFile(const FileName: String);
   end;
 
   { TRESTDataResource }
@@ -166,6 +167,7 @@ type
     procedure BuildModelDefLookup;
     procedure CacheHandlerNeeded;
     function FindModelDef(const ModelName: String): TRESTResourceModelDef;
+    function GetModelDef(const ModelName: String): TRESTResourceModelDef;
     function GetBaseURL: String;
     function GetCacheData(const ModelName, ResourcePath: String;
       DataResource: TRESTDataResource): Boolean;
@@ -197,6 +199,7 @@ type
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
     procedure InvalidateCache(const ModelName: String);
+    function HasModel(const ModelName: String): Boolean;
   published
     property BaseURL: String read GetBaseURL write SetBaseURL;
     property DefaultHeaders: TStrings read GetDefaultHeaders;
@@ -889,6 +892,26 @@ begin
   FOwner := AOwner;
 end;
 
+procedure TRESTResourceModelDefs.LoadFromFile(const FileName: String);
+var
+  JSONDestreamer: TJSONDeStreamer;
+  ModelDefsData: TJSONArray;
+begin
+  ModelDefsData := nil;
+  JSONDestreamer := TJSONDeStreamer.Create(nil);
+  try
+    if TryReadJSONFile(FileName, ModelDefsData) then
+    begin
+      JSONDestreamer.JSONToCollection(ModelDefsData, Self);
+      ModelDefsData.Destroy;
+    end
+    else
+      raise Exception.CreateFmt('Unable to load modeldefs from "%s". Expected a JSON array file', [FileName]);
+  finally
+    JSONDestreamer.Destroy;
+  end;
+end;
+
 { TRESTDataResource }
 
 constructor TRESTDataResource.Create(AModelDef: TRESTResourceModelDef;
@@ -1189,6 +1212,11 @@ begin
     BuildModelDefLookup;
   end;
   Result := TRESTResourceModelDef(FModelDefLookup.Find(ModelName));
+end;
+
+function TRESTResourceClient.GetModelDef(const ModelName: String): TRESTResourceModelDef;
+begin
+  Result := FindModelDef(ModelName);
   if Result = nil then
     raise Exception.CreateFmt('Unable to find resource model "%s"', [ModelName]);
 end;
@@ -1382,7 +1410,7 @@ function TRESTResourceClient.GetDataset(const ModelName: String): IDatasetResour
 var
   ModelDef: TRESTResourceModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TRESTDatasetResource.Create(ModelDef, Self);
 end;
 
@@ -1390,7 +1418,7 @@ function TRESTResourceClient.GetJSONArray(const ModelName: String): IJSONArrayRe
 var
   ModelDef: TRESTResourceModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TRESTJSONArrayResource.Create(ModelDef, Self);
 end;
 
@@ -1398,7 +1426,7 @@ function TRESTResourceClient.GetJSONObject(const ModelName: String): IJSONObject
 var
   ModelDef: TRESTResourceModelDef;
 begin
-  ModelDef := FindModelDef(ModelName);
+  ModelDef := GetModelDef(ModelName);
   Result := TRESTJSONObjectResource.Create(ModelDef, Self);
 end;
 
@@ -1406,6 +1434,11 @@ procedure TRESTResourceClient.InvalidateCache(const ModelName: String);
 begin
   CacheHandlerNeeded;
   FCacheHandler.Invalidate(ModelName);
+end;
+
+function TRESTResourceClient.HasModel(const ModelName: String): Boolean;
+begin
+  Result := FindModelDef(ModelName) <> nil;
 end;
 
 finalization
