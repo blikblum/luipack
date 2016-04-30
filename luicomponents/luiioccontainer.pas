@@ -39,8 +39,9 @@ type
     procedure Register(const IID: TGuid; ComponentClass: TComponentClass);
     procedure Register(const IID: TGuid; CreateCallback: TInstanceCreateEvent);
     procedure Register(const IID: TGuid; Component: TComponent);
-    function Resolve(const IID: TGuid; out Reference): Boolean;
+    procedure Resolve(const IID: TGuid; out Reference);
     function Resolve(const IID: TGuid): IInterface;
+    function TryResolve(const IID: TGuid; out Reference): Boolean;
   end;
 
   procedure ResolveProperties(Instance: TObject; Container: TIoCContainer);
@@ -60,6 +61,8 @@ type
   TComponentReference = class(TInterfacedObject, IVCLComObject)
   private
     FComponent: TComponent;
+  protected
+    function QueryInterface(constref iid : tguid;out obj): longint; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
   public
     constructor Create(Component: TComponent);
     procedure BeforeDestruction; override;
@@ -104,6 +107,14 @@ end;
 
   { TComponentReference }
 
+function TComponentReference.QueryInterface(constref iid : tguid;out obj): longint; {$IFNDEF WINDOWS}cdecl{$ELSE}stdcall{$ENDIF};
+begin
+  if FComponent.GetInterface(iid,obj) then
+    Result:=S_OK
+  else
+    Result:=longint(E_NOINTERFACE);
+end;
+
 constructor TComponentReference.Create(Component: TComponent);
 begin
   FComponent := Component;
@@ -141,7 +152,7 @@ end;
 
 procedure TComponentReference.FreeOnRelease;
 begin
-
+  //
 end;
 
 { TInterfaceDef }
@@ -256,10 +267,9 @@ begin
   FIntfList.Add(GuidStr, Def);
 end;
 
-function TIoCContainer.Resolve(const IID: TGuid; out Reference): Boolean;
+procedure TIoCContainer.Resolve(const IID: TGuid; out Reference);
 begin
   IInterface(Reference) := Resolve(IID);
-  Result := IInterface(Reference) <> nil;
 end;
 
 function TIoCContainer.Resolve(const IID: TGuid): IInterface;
@@ -272,6 +282,19 @@ begin
   Result := Def.GetInterfaceReference(IID);
   if Result = nil then
     raise Exception.CreateFmt('Unable to resolve interface "%s"', [GUIDToString(IID)]);
+end;
+
+function TIoCContainer.TryResolve(const IID: TGuid; out Reference): Boolean;
+var
+  Def: TInterfaceDef;
+begin
+  Def := Find(IID);
+  Result := Def <> nil;
+  if Result then
+  begin
+    IInterface(Reference) := Def.GetInterfaceReference(IID);
+    Result := IInterface(Reference) <> nil;
+  end;
 end;
 
 end.
