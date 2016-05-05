@@ -99,6 +99,17 @@ type
       var SubPathResourceDef: TRESTResourceDef); override;
   end;
 
+  { TFieldDefsResource }
+
+  TFieldDefsResource = class(TRESTResource)
+  private
+    FSqldbResource: TSqldbResource;
+  protected
+    procedure Loaded(Tag: PtrInt); override;
+  public
+    procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+  end;
+
   //for compatibility with old code
   TSqldbJSONResource = TSqldbResource;
 
@@ -110,7 +121,7 @@ procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray
 implementation
 
 uses
-  LuiJSONUtils, dbconst;
+  LuiJSONUtils, fpjsonrtti, dbconst, strutils;
 
 type
   TSQLConnectionAccess = class(TSQLConnection)
@@ -905,6 +916,55 @@ begin
   inherited Create;
   IsCollection := True;
 end;
+
+{ TFieldDefsResource }
+
+procedure TFieldDefsResource.Loaded(Tag: PtrInt);
+begin
+  inherited Loaded(Tag);
+  FSqldbResource := TObject(Tag) as TSqldbResource;
+end;
+
+function SQLConditionsHasWhere(const SQL: String): Boolean;
+begin
+  //use regex??
+  IsWild(SQL, '* WHERE *', True);
+end;
+
+procedure TFieldDefsResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
+var
+  Query: TSQLQuery;
+  Streamer: TJSONStreamer;
+  FieldDefsStr: String;
+  SQL: String;
+begin
+  //poor implementtaion will fail if have params. must be incorporated into get through http header
+  //alternative handle table joined and add to select
+  FieldDefsStr := '';
+  Query := TSQLQuery.Create(nil);
+  try
+    Query.DataBase := FSqldbResource.Connection;
+    Query.SQL.Add(FSqldbResource.SelectSQL);
+    Query.SQL.Add(FSqldbResource.ConditionsSQL);
+    Query.Open;
+    Streamer := TJSONStreamer.Create(nil);
+    try
+      FieldDefsStr := Streamer.CollectionToJSON(Query.FieldDefs);
+    finally
+      Streamer.Destroy;
+    end;
+  finally
+    Query.Destroy;
+  end;
+  if FieldDefsStr <> '' then
+  begin
+    AResponse.Contents.Add(FieldDefsStr);
+    AResponse.Code := 200;
+  end
+  else
+    SetResponseStatus(AResponse, 500, 'Unable to stream fielddefs', []);
+end;
+
 
 end.
 
