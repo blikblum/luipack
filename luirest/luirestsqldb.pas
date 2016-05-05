@@ -121,7 +121,7 @@ procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray
 implementation
 
 uses
-  LuiJSONUtils, fpjsonrtti, dbconst, strutils;
+  LuiJSONUtils, fpjsonrtti, dbconst;
 
 type
   TSQLConnectionAccess = class(TSQLConnection)
@@ -874,6 +874,7 @@ end;
 
 class function TSqldbCollectionResource.GetItemParam: String;
 begin
+  Result := '';
   raise Exception.CreateFmt('GetItemParam not set. Class: %s Path: %s', [ClassName, TRESTRequest.ResourcePath]);
 end;
 
@@ -925,21 +926,14 @@ begin
   FSqldbResource := TObject(Tag) as TSqldbResource;
 end;
 
-function SQLConditionsHasWhere(const SQL: String): Boolean;
-begin
-  //use regex??
-  IsWild(SQL, '* WHERE *', True);
-end;
-
 procedure TFieldDefsResource.HandleGet(ARequest: TRequest; AResponse: TResponse);
 var
   Query: TSQLQuery;
   Streamer: TJSONStreamer;
   FieldDefsStr: String;
-  SQL: String;
 begin
-  //poor implementtaion will fail if have params. must be incorporated into get through http header
-  //alternative handle table joined and add to select
+  //poor implementation will fail if have params. must be incorporated into get through http header
+  //alternative is to add all params. detect using regex
   FieldDefsStr := '';
   Query := TSQLQuery.Create(nil);
   try
