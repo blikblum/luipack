@@ -182,16 +182,16 @@ begin
     end;
     if ParamName <> '' then
     begin
+      Param := Params.FindParam(ParamName);
+      if Param = nil then
+      begin
+        Param := TParam.Create(Params, ptInput);
+        Param.Name := ParamName;
+      end;
       FieldIndex := QueryFields.IndexOfName(ParamName);
       if FieldIndex <> -1 then
       begin
         ParamValue := QueryFields.ValueFromIndex[FieldIndex];
-        Param := Params.FindParam(ParamName);
-        if Param = nil then
-        begin
-          Param := TParam.Create(Params, ptInput);
-          Param.Name := ParamName;
-        end;
         if TryStrToInt64(ParamValue, Int64Value) then
           Param.AsLargeInt := Int64Value
         else if TryStrToFloat(ParamValue, DoubleValue) then
