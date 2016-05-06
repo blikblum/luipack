@@ -124,7 +124,7 @@ type
     FResourceClient: TRESTResourceClient;
     FParams: TParams;
   protected
-    function GetResourcePath: String;
+    function GetResourcePath(WithQuery: Boolean = True): String;
     function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; virtual; abstract;
     property ModelDef: TRESTResourceModelDef read FModelDef;
   public
@@ -383,7 +383,7 @@ begin
   Result := TJSONArray(FFieldDefsDataCache.Find(FModelDef.Name));
   if Result = nil then
   begin
-    ResourcePath := GetResourcePath + '/fielddefs';
+    ResourcePath := GetResourcePath(False) + '/fielddefs';
     Http := THTTPSend.Create;
     if Http.HTTPMethod('GET', FResourceClient.BaseURL + ResourcePath) then
     begin
@@ -929,7 +929,7 @@ begin
   inherited Destroy;
 end;
 
-function TRESTDataResource.GetResourcePath: String;
+function TRESTDataResource.GetResourcePath(WithQuery: Boolean): String;
 var
   Param: TModelDefParam;
   QueryStr: String;
@@ -961,7 +961,7 @@ begin
       end;
     end;
   end;
-  if QueryStr <> '' then
+  if (QueryStr <> '') and WithQuery then
     Result := Result + '?' + QueryStr;
 end;
 
