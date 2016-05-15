@@ -812,6 +812,7 @@ begin
         Query.Edit
       else
       begin
+        //todo: define the behavior when PATCH is called without a record
         Query.Append;
         SetPrimaryKeyData(Query, URIParams);
       end;
