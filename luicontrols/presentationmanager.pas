@@ -26,6 +26,7 @@ type
     function FindProperty(const PropertyName: String; out Value: Int64): Boolean;
     function GetName: String;
     function GetProperty(const PropertyName: String; Default: Int64): Int64;
+    function GetProperty(const PropertyName, Default: String): String;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
     function Show: IPresentation;
@@ -105,8 +106,10 @@ type
     destructor Destroy; override;
     function CallMethod(const AMethodName: String): IPresentation;
     function FindProperty(const PropertyName: String; out Value: Int64): Boolean;
+    function FindProperty(const PropertyName: String; out Value: String): Boolean;
     function GetName: String;
     function GetProperty(const PropertyName: String; Default: Int64): Int64;
+    function GetProperty(const PropertyName, Default: String): String;
     function ModalResult: TModalResult;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
@@ -223,6 +226,13 @@ begin
     Result := LuiRTTIUtils.FindProperty(FView, PropertyName, Value);
 end;
 
+function TPresentation.FindProperty(const PropertyName: String; out Value: String): Boolean;
+begin
+  Result := (FPresenter <> nil) and LuiRTTIUtils.FindProperty(FPresenter, PropertyName, Value);
+  if not Result then
+    Result := LuiRTTIUtils.FindProperty(FView, PropertyName, Value);
+end;
+
 function TPresentation.ModalResult: TModalResult;
 begin
   Result := FModalResult;
@@ -234,6 +244,12 @@ begin
 end;
 
 function TPresentation.GetProperty(const PropertyName: String; Default: Int64): Int64;
+begin
+  if not FindProperty(PropertyName, Result) then
+    Result := Default;
+end;
+
+function TPresentation.GetProperty(const PropertyName, Default: String): String;
 begin
   if not FindProperty(PropertyName, Result) then
     Result := Default;
