@@ -47,9 +47,13 @@ function FindProperty(Instance: TObject; const PropertyName: String; out Value: 
 
 function FindProperty(Instance: TObject; const PropertyName: String; out Value: Boolean): Boolean;
 
-function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: String): Boolean;
 
 function GetProperty(Instance: TObject; const PropertyName: String; Default: Int64): Int64;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: String): String;
 
 implementation
 
@@ -243,9 +247,25 @@ begin
     Value := GetOrdProp(Instance, PropInfo) <> 0;
 end;
 
+function FindProperty(Instance: TObject; const PropertyName: String; out Value: String): Boolean;
+var
+  PropInfo: PPropInfo;
+begin
+  PropInfo := GetPropInfo(Instance.ClassInfo, PropertyName, [tkLString, tkSString, tkAString]);
+  Result := PropInfo <> nil;
+  if Result then
+    Value := GetStrProp(Instance, PropInfo);
+end;
+
 function GetProperty(Instance: TObject; const PropertyName: String; Default: Boolean): Boolean;
 begin
   if not FindProperty(Instance, PropertyName, Result) then
+    Result := Default;
+end;
+
+function GetProperty(Instance: TObject; const PropertyName: String; Default: String): String;
+begin
+  if not FindProperty(Instance, PropertyName, Default) then
     Result := Default;
 end;
 
