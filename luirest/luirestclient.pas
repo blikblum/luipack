@@ -209,12 +209,6 @@ type
     property OnRequest: TRESTResourceRequestEvent read FOnRequest write FOnRequest;
   end;
 
-
-implementation
-
-uses
-  LuiJSONUtils, variants, StrUtils, BufDataset, fpjsonrtti;
-
 const
   HTTPMethodNames: Array[THTTPMethodType] of String = (
     'GET',
@@ -223,6 +217,12 @@ const
     'PATCH',
     'DELETE'
     );
+
+
+implementation
+
+uses
+  LuiJSONUtils, variants, StrUtils, BufDataset, fpjsonrtti;
 
 type
   { TRESTJSONArrayResource }
@@ -484,6 +484,7 @@ begin
     end;
     hmtPost, hmtPut, hmtDelete, hmtPatch: ;
   end;
+  ResponseData.Destroy;
 end;
 
 constructor TRESTDatasetResource.Create(AModelDef: TRESTResourceModelDef;
@@ -1025,7 +1026,7 @@ end;
 
 function TRESTJSONArrayResource.Save(Options: TSaveOptions): Boolean;
 begin
-  //
+  Result := True;
 end;
 
 destructor TRESTJSONArrayResource.Destroy;
