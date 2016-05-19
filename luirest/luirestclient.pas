@@ -930,6 +930,16 @@ begin
   inherited Destroy;
 end;
 
+function GetParamStr(Param: TParam): String;
+begin
+  case Param.DataType of
+    ftDate: Result := IntToStr(Param.AsLargeInt);
+    ftDateTime, ftTime: Result := FloatToStr(Param.AsFloat);
+  else
+    Result := Param.AsString;
+  end;
+end;
+
 function TRESTDataResource.GetResourcePath(WithQuery: Boolean): String;
 var
   Param: TModelDefParam;
@@ -947,7 +957,7 @@ begin
       raise Exception.CreateFmt('Param "%s" of "%s" model not assigned', [Param.Name, FModelDef.Name]);
     if Param.Location = plPath then
     begin
-      Result := StringReplace(Result, '{' + Param.Name + '}', Param.AsString,
+      Result := StringReplace(Result, '{' + Param.Name + '}', GetParamStr(Param),
         [rfReplaceAll, rfIgnoreCase]);
     end
     else
@@ -956,9 +966,9 @@ begin
       begin
         //todo: encode query fields
         if QueryStr = '' then
-          QueryStr := Param.Name + '=' + Param.AsString
+          QueryStr := Param.Name + '=' + GetParamStr(Param)
         else
-          QueryStr := QueryStr + '&' + Param.Name + '=' + Param.AsString;
+          QueryStr := QueryStr + '&' + Param.Name + '=' + GetParamStr(Param);
       end;
     end;
   end;
