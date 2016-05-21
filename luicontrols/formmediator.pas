@@ -188,7 +188,7 @@ end;
 
 function TFormElement.IsNameStored: Boolean;
 begin
-  Result := FName <> PropertyName;
+  Result := (FName <> '') and (FName <> PropertyName);
 end;
 
 procedure TFormElement.Assign(Source: TPersistent);
