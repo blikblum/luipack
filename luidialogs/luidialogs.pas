@@ -66,9 +66,9 @@ implementation
 
 uses
   StrUtils,
-  FileUtil, Dialogs,
+  Dialogs,
   LuiRTTIUtils, LuiStrUtils, LuiMiscUtils, LuiDBExport,
-  fFrameEditor;
+  fFrameEditor, LazUTF8, LazFileUtils;
 
 procedure SetFrameActionState(Controller: IFrameController;
   const ActionId: String; Enabled: Boolean);

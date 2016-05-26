@@ -5,7 +5,7 @@ unit fExportDataset;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, EditBtn, StdCtrls, Buttons, CheckLst, ControlSwitcher, LuiBar, db;
 
 type
@@ -61,7 +61,7 @@ implementation
 {$R *.lfm}
 
 uses
-  GraphType;
+  GraphType, LazUTF8, LazFileUtils;
 
 procedure SetCheckListState(List: TCheckListBox; CheckState: Boolean);
 var
