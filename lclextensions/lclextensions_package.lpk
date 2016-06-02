@@ -1,7 +1,8 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <Name Value="lclextensions_package"/>
+    <Type Value="RunAndDesignTime"/>
     <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Americo Pereira Câmara"/>
     <CompilerOptions>
@@ -15,15 +16,12 @@
           <UseAnsiStrings Value="False"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="LCL Extensions provides additional functions to be used together with LCL
 "/>
     <License Value="Modified LGPL
 "/>
-    <Version Minor="5" Release="1"/>
+    <Version Minor="6"/>
     <Files Count="3">
       <Item1>
         <Filename Value="delphicompat.pas"/>
@@ -38,7 +36,6 @@
         <UnitName Value="LclExt"/>
       </Item3>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="LCL"/>

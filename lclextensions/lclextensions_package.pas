@@ -1,20 +1,21 @@
 { This file was automatically created by Lazarus. Do not edit!
-This source is only used to compile and install the package.
+  This source is only used to compile and install the package.
  }
 
-unit lclextensions_package; 
+unit lclextensions_package;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
-  DelphiCompat, oleutils, LclExt, LazarusPackageIntf; 
+  DelphiCompat, oleutils, LclExt, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-end; 
+end;
 
 initialization
-  RegisterPackage('lclextensions_package', @Register); 
+  RegisterPackage('lclextensions_package', @Register);
 end.
