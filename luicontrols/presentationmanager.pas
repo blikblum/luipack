@@ -35,6 +35,12 @@ type
     function ModalResult: TModalResult;
   end;
 
+  IPresentations = interface
+    ['{57AFA9AC-5B3B-4626-A8B6-3A32CB5BD61A}']
+    function GetPresentation(const PresentationName: String): IPresentation;
+    property Items[const PresentationName: String]: IPresentation read GetPresentation; default;
+  end;
+
   { IPresentationManager }
 
   IPresentationManager = interface
@@ -52,7 +58,7 @@ type
 
   { TPresentationManager }
 
-  TPresentationManager = class(TComponent, IPresentationManager)
+  TPresentationManager = class(TComponent, IPresentationManager, IPresentations)
   private
     FContainer: TIoCContainer;
     FOnPresentationCreate: TPresentationCreateEvent;
