@@ -53,6 +53,7 @@ end;
 class function TSqlite3DatasetAdapter.BindParams(const SQL: String; Params: TParams): String;
 var
   Param: TParam;
+  ParamStr: String;
   i: Integer;
 begin
   Result := SQL;
@@ -60,7 +61,11 @@ begin
   begin
     //todo: handle InputFields
     Param := Params.Items[i];
-    Result := StringReplace(Result, ':' + Param.Name, Param.AsString,
+    if Param.IsNull then
+      ParamStr := 'NULL'
+    else
+      ParamStr := Param.AsString;
+    Result := StringReplace(Result, ':' + Param.Name, ParamStr,
       [rfReplaceAll, rfIgnoreCase]);
   end;
 end;
