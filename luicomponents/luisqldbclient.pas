@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants, dbconst, pqconnection, IBConnection, mysql51conn,
+  variants, dbconst, pqconnection, IBConnection, mysql51conn,
   {$ifdef USE_SQLITE3_SLIM}
   sqlite3slimconn;
   {$else}
