@@ -39,7 +39,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, variants;
+  variants;
 
 { TSqlite3DatasetAdapter }
 
@@ -64,7 +64,11 @@ begin
     if Param.IsNull then
       ParamStr := 'NULL'
     else
+    begin
       ParamStr := Param.AsString;
+      if Param.DataType = ftString then
+        ParamStr := QuotedStr(ParamStr);
+    end;
     Result := StringReplace(Result, ':' + Param.Name, ParamStr,
       [rfReplaceAll, rfIgnoreCase]);
   end;
