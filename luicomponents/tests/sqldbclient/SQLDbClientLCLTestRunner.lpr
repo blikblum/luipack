@@ -18,25 +18,12 @@ end;
 
 procedure InitializeSQLDbClient;
 var
-  DeStreamer: TJSONDeStreamer;
-  ModelDefsData: TJSONArray;
   Dataset: TSqlite3Dataset;
   Connection: TSQLite3Connection;
   Transaction: TSQLTransaction;
 begin
   Resources := TSQLDbResourceClient.Create(Application);
-  DeStreamer := TJSONDeStreamer.Create(nil);
-  try
-    if TryReadJSONFile('resourcedefs.json', ModelDefsData) then
-    begin
-      DeStreamer.JSONToCollection(ModelDefsData, Resources.ModelDefs);
-      ModelDefsData.Free;
-    end
-    else
-      raise Exception.Create('Unable to load file');
-  finally
-    DeStreamer.Destroy;
-  end;
+  Resources.ModelDefs.LoadFromFile('resourcedefs.json');
   Connection := TSQLite3Connection.Create(Application);
   Connection.DatabaseName := CreateRandomFileName;
   Connection.Params.Add('foreign_keys=1');

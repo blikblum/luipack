@@ -5,7 +5,7 @@ unit SQLClientBase;
 interface
 
 uses
-  Classes, SysUtils, LuiDataClasses, fpjson, db, contnrs;
+  Classes, SysUtils, LuiDataClasses, fpjson, db, contnrs, typinfo;
 
 type
    //todo: unify cache mode with RESTClient
@@ -28,10 +28,8 @@ type
      FCacheMode: TSQLCacheMode;
      FConditionsSQL: String;
      FDataField: String;
-     FInputFields: String;
-     FInputFieldsData: TJSONArray;
-     FJSONFields: String;
-     FJSONFieldsData: TJSONArray;
+     FInputFields: TJSONArray;
+     FJSONFields: TJSONArray;
      FName: String;
      FParams: TParams;
      FPrimaryKey: String;
@@ -42,8 +40,8 @@ type
      procedure SetDatasetData(Dataset: TDataset; JSONObj: TJSONObject; Params: TParams; DoPatch: Boolean);
      function GetFieldName(FieldIndex: Integer; out DBFieldName: String): String;
      function GetUpdateSQL(const ResourceId: Variant): String;
-     procedure SetInputFields(const AValue: String);
-     procedure SetJSONFields(const Value: String);
+     procedure SetInputFields(Value: TJSONArray);
+     procedure SetJSONFields(Value: TJSONArray);
      procedure SetParams(AValue: TParams);
    protected
      function GetDisplayName: string; override;
@@ -55,8 +53,8 @@ type
      property CacheMode: TSQLCacheMode read FCacheMode write FCacheMode default cmNone;
      property ConditionsSQL: String read FConditionsSQL write FConditionsSQL;
      property DataField: String read FDataField write FDataField;
-     property InputFields: String read FInputFields write SetInputFields;
-     property JSONFields: String read FJSONFields write SetJSONFields;
+     property InputFields: TJSONArray read FInputFields write SetInputFields;
+     property JSONFields: TJSONArray read FJSONFields write SetJSONFields;
      property Name: String read FName write FName;
      property Params: TParams read FParams write SetParams;
      property PrimaryKey: String read FPrimaryKey write FPrimaryKey;
@@ -69,6 +67,8 @@ type
    TSQLResourceModelDefs = class(TCollection)
    private
      FOwner: TSQLResourceClient;
+     procedure RestoreProperty(Sender: TObject; AObject: TObject; Info: PPropInfo;
+       AValue: TJSONData; var Handled: Boolean);
    protected
      function GetOwner: TPersistent; override;
      procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
@@ -226,7 +226,7 @@ implementation
 uses
   LuiJSONUtils, variants, RegExpr, fpjsonrtti;
 
-procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFieldsData: TJSONArray);
+procedure DoDecodeJSONFields(RecordData: TJSONObject; JSONFields: TJSONArray);
 var
   i: Integer;
   FieldDefData, PropData, DecodedData: TJSONData;
@@ -235,10 +235,10 @@ var
   PropName, PropTypeName: String;
   PropType: TJSONtype;
 begin
-  for i := 0 to JSONFieldsData.Count - 1 do
+  for i := 0 to JSONFields.Count - 1 do
   begin
     //todo parse fielddef once (move out of here)
-    FieldDefData := JSONFieldsData.Items[i];
+    FieldDefData := JSONFields.Items[i];
     PropType := jtUnknown;
     case FieldDefData.JSONType of
       jtObject:
@@ -473,9 +473,9 @@ end;
 
 procedure TSQLJSONObjectResource.DecodeJSONFields(ResponseData: TJSONObject);
 begin
-  if FModelDef.FJSONFieldsData = nil then
+  if FModelDef.FJSONFields = nil then
     Exit;
-  DoDecodeJSONFields(ResponseData, FModelDef.FJSONFieldsData);
+  DoDecodeJSONFields(ResponseData, FModelDef.FJSONFields);
 end;
 
 function TSQLJSONObjectResource.DoDelete(const Id: Variant): Boolean;
@@ -573,7 +573,7 @@ begin
       begin
         //quick hack to save properties in correct format
         //todo: optimize to avoid data copy. Normalize FJSONFieldData as a hash to allow quick lookup
-        if FModelDef.FJSONFieldsData <> nil then
+        if FModelDef.FJSONFields <> nil then
         begin
           TempData := TJSONObject(FData.Clone);
           try
@@ -624,12 +624,12 @@ var
   PropTypeName: TJSONStringType;
   i: Integer;
 begin
-  if FModelDef.FJSONFieldsData = nil then
+  if FModelDef.FJSONFields = nil then
     Exit;
-  for i := 0 to FModelDef.FJSONFieldsData.Count - 1 do
+  for i := 0 to FModelDef.FJSONFields.Count - 1 do
   begin
     //todo parse fielddef once (move out of here)
-    FieldDefData := FModelDef.FJSONFieldsData.Items[i];
+    FieldDefData := FModelDef.FJSONFields.Items[i];
     PropType := jtUnknown;
     case FieldDefData.JSONType of
       jtObject:
@@ -827,6 +827,22 @@ end;
 
 { TSQLResourceModelDefs }
 
+procedure TSQLResourceModelDefs.RestoreProperty(Sender: TObject; AObject: TObject; Info: PPropInfo;
+  AValue: TJSONData; var Handled: Boolean);
+var
+  TypeData: PTypeData;
+begin
+  if Info^.PropType^.Kind = tkClass then
+  begin
+    TypeData := GetTypeData(Info^.PropType);
+    if TypeData^.ClassType.InheritsFrom(AValue.ClassType) then
+    begin
+      Handled := True;
+      SetObjectProp(AObject, Info, AValue.Clone);
+    end;
+  end;
+end;
+
 function TSQLResourceModelDefs.GetOwner: TPersistent;
 begin
   Result := FOwner;
@@ -854,6 +870,7 @@ var
 begin
   ModelDefsData := nil;
   JSONDestreamer := TJSONDeStreamer.Create(nil);
+  JSONDestreamer.OnRestoreProperty := @RestoreProperty;
   try
     if TryReadJSONFile(FileName, ModelDefsData) then
     begin
@@ -947,10 +964,10 @@ procedure TSQLJSONArrayResource.DecodeJSONFields(ResponseData: TJSONArray);
 var
   i: Integer;
 begin
-  if FModelDef.FJSONFieldsData = nil then
+  if FModelDef.FJSONFields = nil then
     Exit;
   for i := 0 to ResponseData.Count - 1 do
-    DoDecodeJSONFields(ResponseData.Objects[i], FModelDef.FJSONFieldsData);
+    DoDecodeJSONFields(ResponseData.Objects[i], FModelDef.FJSONFields);
 end;
 
 function TSQLJSONArrayResource.Fetch: Boolean;
@@ -1002,9 +1019,9 @@ var
   Fields: TFields;
   Param: TParam;
 begin
-  if FInputFieldsData <> nil then
+  if FInputFields <> nil then
   begin
-    for i := 0 to FInputFieldsData.Count - 1 do
+    for i := 0 to FInputFields.Count - 1 do
     begin
       FieldName := GetFieldName(i, DBFieldName);
       Field := Dataset.FieldByName(DBFieldName);
@@ -1056,7 +1073,7 @@ function TSQLModelDef.GetFieldName(FieldIndex: Integer; out DBFieldName: String)
 var
   FieldData: TJSONData;
 begin
-  FieldData := FInputFieldsData.Items[FieldIndex];
+  FieldData := FInputFields.Items[FieldIndex];
   if FieldData.JSONType = jtString then
   begin
     Result := FieldData.AsString;
@@ -1079,18 +1096,18 @@ var
   DBFieldName: String;
   IdValue: String;
 begin
-  if FInputFieldsData = nil then
+  if FInputFields = nil then
     Result := SelectSQL
   else
   begin
     if FTableName = '' then
       raise Exception.CreateFmt('Model "%s": TableName not defined', [Name]);
     Result := 'Select';
-    for i := 0 to FInputFieldsData.Count - 1 do
+    for i := 0 to FInputFields.Count - 1 do
     begin
       GetFieldName(i, DBFieldName);
       Result := Result + ' ' + DBFieldName;
-      if i < (FInputFieldsData.Count - 1) then
+      if i < (FInputFields.Count - 1) then
         Result := Result + ',';
     end;
     Result := Result + ' from ' + FTableName;
@@ -1109,20 +1126,16 @@ begin
   end;
 end;
 
-procedure TSQLModelDef.SetInputFields(const AValue: String);
+procedure TSQLModelDef.SetInputFields(Value: TJSONArray);
 begin
-  if FInputFields = AValue then Exit;
-  FInputFields := AValue;
-  FreeAndNil(FInputFieldsData);
-  TryStrToJSON(AValue, FInputFieldsData);
+  FInputFields.Free;
+  FInputFields := Value;
 end;
 
-procedure TSQLModelDef.SetJSONFields(const Value: String);
+procedure TSQLModelDef.SetJSONFields(Value: TJSONArray);
 begin
-  if FJSONFields = Value then Exit;
+  FJSONFields.Free;
   FJSONFields := Value;
-  FreeAndNil(FJSONFieldsData);
-  TryStrToJSON(Value, FJSONFieldsData);
 end;
 
 function TSQLModelDef.GetDisplayName: string;
@@ -1140,8 +1153,8 @@ end;
 destructor TSQLModelDef.Destroy;
 begin
   FInParams.Free;
-  FJSONFieldsData.Free;
-  FInputFieldsData.Free;
+  FJSONFields.Free;
+  FInputFields.Free;
   FParams.Destroy;
   inherited Destroy;
 end;
@@ -1166,7 +1179,7 @@ end;
 
 procedure TSQLResourceClient.BuildModelDefLookup;
 var
-  i, j: Integer;
+  i: Integer;
   ModelDef: TSQLModelDef;
   TableNameExpr, InParamExpr: TRegExpr;
 begin

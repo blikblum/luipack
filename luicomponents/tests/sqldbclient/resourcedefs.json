@@ -23,12 +23,12 @@
 "SelectSQL":"Select Key, Value as Data from SystemData",
 "PrimaryKey": "key",
 "DataField": "data",
-"InputFields":"[{\"name\":\"data\",\"mapping\":\"Value\"},\"key\"]"
+"InputFields":[{"name":"data","mapping":"Value"},"key"]
 },
 {
 "Name": "contactdetail",
 "SelectSQL": "Select * from ContactDetails",
 "PrimaryKey": "ContactId",
-"JSONFields": "[{\"name\":\"objectdata\",\"type\":\"object\"},{\"name\":\"arraydata\",\"type\":\"array\"}]"
+"JSONFields": [{"name":"objectdata","type":"object"},{"name":"arraydata","type":"array"}]
 }
 ]

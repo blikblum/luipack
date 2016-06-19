@@ -31,7 +31,7 @@ type
 implementation
 
 uses
-  fpjson, LuiJSONUtils;
+  fpjson;
 
 function CreateRandomObject: TJSONObject;
 begin

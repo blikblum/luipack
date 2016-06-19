@@ -18,23 +18,10 @@ end;
 
 procedure InitializeSqliteClient;
 var
-  DeStreamer: TJSONDeStreamer;
-  ModelDefsData: TJSONArray;
   Dataset: TSqlite3Dataset;
 begin
   Resources := TSqlite3ResourceClient.Create(Application);
-  DeStreamer := TJSONDeStreamer.Create(nil);
-  try
-    if TryReadJSONFile('resourcedefs.json', ModelDefsData) then
-    begin
-      DeStreamer.JSONToCollection(ModelDefsData, Resources.ModelDefs);
-      ModelDefsData.Free;
-    end
-    else
-      raise Exception.Create('Unable to load file');
-  finally
-    DeStreamer.Destroy;
-  end;
+  Resources.ModelDefs.LoadFromFile('resourcedefs.json');
   Resources.Database := CreateRandomFileName;
   Dataset := TSqlite3Dataset.Create(nil);
   try
