@@ -1172,7 +1172,7 @@ var
 begin
   TableNameExpr := TRegExpr.Create;
   TableNameExpr.ModifierI := True;
-  TableNameExpr.Expression := 'FROM\s+(\w+)';
+  TableNameExpr.Expression := '\sFROM\s+(\w+)';
   InParamExpr := TRegExpr.Create;
   InParamExpr.ModifierI := True;
   InParamExpr.ModifierG := True;
