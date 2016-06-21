@@ -57,6 +57,8 @@ procedure ExtractNameValue(const NameValuePair: String; out Name, Value: String;
 
 function ExtractInitials(const S: AnsiString; const ExcludeWords: array of String): AnsiString;
 
+function ExtractURLAddress(const URL: String; StripProtocol: Boolean = False): String;
+
 function RNPos(const C: string; S: string; N: Integer): Integer;
 
 implementation
@@ -236,6 +238,18 @@ begin
     Inc(WordIndex);
     Word := ExtractWordPos(WordIndex, S, StdWordDelims, WordPos);
   end;
+end;
+
+function ExtractURLAddress(const URL: String; StripProtocol: Boolean): String;
+var
+  i: Integer;
+begin
+  Result := URL;
+  i := Pos('//', Result);
+  if StripProtocol then
+    Result := Copy(Result, i + 2, Length(Result) - i);
+  i := PosEx('/', Result, i + 2);
+  Result := Copy(Result, 1, i - 1);
 end;
 
 function RNPos(const C: string; S: string; N: Integer): Integer;
