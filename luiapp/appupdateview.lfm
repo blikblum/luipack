@@ -1,0 +1,73 @@
+object AppUpdateForm: TAppUpdateForm
+  Left = 536
+  Height = 148
+  Top = 320
+  Width = 339
+  Caption = 'Atualização do programa'
+  ClientHeight = 148
+  ClientWidth = 339
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.7'
+  object Label1: TLabel
+    Left = 48
+    Height = 17
+    Top = 10
+    Width = 232
+    Alignment = taCenter
+    Caption = 'Uma atualização encontra-se disponível'
+    Font.Height = -13
+    ParentColor = False
+    ParentFont = False
+  end
+  object UpdateButton: TBitBtn
+    Left = 8
+    Height = 30
+    Top = 114
+    Width = 120
+    Anchors = [akLeft, akBottom]
+    Caption = 'Atualizar'
+    OnClick = UpdateButtonClick
+    TabOrder = 0
+  end
+  object SkipButton: TBitBtn
+    Left = 212
+    Height = 30
+    Top = 114
+    Width = 120
+    Anchors = [akLeft, akBottom]
+    Caption = 'Ir para o programa'
+    ModalResult = 11
+    TabOrder = 1
+  end
+  object CurrentVersionLabel: TLabel
+    Left = 8
+    Height = 15
+    Top = 44
+    Width = 106
+    Caption = 'CurrentVersionLabel'
+    ParentColor = False
+  end
+  object UpdateVersionLabel: TLabel
+    Left = 8
+    Height = 15
+    Top = 65
+    Width = 104
+    Caption = 'UpdateVersionLabel'
+    ParentColor = False
+  end
+  object DownloadProgressBar: TProgressBar
+    Left = 8
+    Height = 20
+    Top = 86
+    Width = 324
+    TabOrder = 2
+  end
+  object DownloadTimer: TTimer
+    Enabled = False
+    Interval = 300
+    OnTimer = DownloadTimerTimer
+    left = 159
+    top = 50
+  end
+end
