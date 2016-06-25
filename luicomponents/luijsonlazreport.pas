@@ -103,7 +103,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, Variants {$ifdef DEBUG_JSONLAZREPORT}, LCLProc{$endif};
+  LuiJSONUtils, Variants, LuiJSONHelpers {$ifdef DEBUG_JSONLAZREPORT}, LCLProc{$endif};
 
 { TfrJSONCrossDataset }
 
@@ -566,7 +566,7 @@ begin
       //todo: use findpath or change context dinamically??
       if FindJSONProp(FData, VarToStr(V1), ArrayData) then
       begin
-        if GetJSONIndexOf(ArrayData, V2) > -1 then
+        if ArrayData.IndexOf(V2) > -1 then
           Val := frParser.Calc(p3);
       end;
     end;

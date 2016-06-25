@@ -177,7 +177,7 @@ type
 implementation
 
 uses
-  contnrs, Spin, ExtCtrls, StdCtrls;
+  contnrs, Spin, ExtCtrls, StdCtrls, LuiJSONHelpers;
 
 type
 
@@ -276,7 +276,7 @@ begin
             else
               ValueData := ItemData;
             if ValueData.JSONType in [jtString, jtNull, jtNumber] then
-              CheckGroup.Checked[i] := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) <> -1
+              CheckGroup.Checked[i] := TJSONArray(PropData).IndexOf(ValueData.Value) <> -1
             else
               CheckGroup.Checked[i] := False;
           end;
@@ -457,7 +457,7 @@ begin
           jtObject:
             Checked := TJSONObject(PropData).Get(ValueData.AsString, False);
           jtArray:
-            Checked := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value) > -1;
+            Checked := TJSONArray(PropData).IndexOf(ValueData.Value) > -1;
         end;
       end
       else
@@ -497,7 +497,7 @@ begin
         case PropData.JSONType of
           jtArray:
             begin
-              ValueIndex := GetJSONIndexOf(TJSONArray(PropData), ValueData.Value);
+              ValueIndex := TJSONArray(PropData).IndexOf(ValueData.Value);
               if CheckBox.Checked then
               begin
                 if ValueIndex = -1 then
@@ -684,7 +684,7 @@ begin
       jliValue:
         begin
           if ItemsData <> nil then
-            Result := GetJSONIndexOf(ItemsData, [ValuePath, PropData.Value]);
+            Result := ItemsData.IndexOf([ValuePath, PropData.Value]);
         end;
     end;
     //check for out of range result

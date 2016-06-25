@@ -39,7 +39,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils;
+  LuiJSONUtils, LuiJSONHelpers;
 
 function GetOptionIndex(OptionsData: TJSONArray; AnswerData: TJSONObject; const PropName: String): Integer;
 var
@@ -74,7 +74,7 @@ begin
       end;
     end;
     if (Result = -1) and (PropData.JSONType = jtString) then
-      Result := GetJSONIndexOf(OptionsData, ['custom', True]);
+      Result := OptionsData.IndexOf(['custom', True]);
     if Result = -1 then
       Result := FallbackIndex;
   end;

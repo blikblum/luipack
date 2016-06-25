@@ -126,7 +126,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils;
+  LuiJSONUtils, LuiJSONHelpers;
 
 { TJSONCollectionSelection }
 
@@ -431,7 +431,7 @@ var
   ItemIndex: Integer;
 begin
   //todo: get directly from FItems or CreateItem mechanism to ensure consistency between FItems and FData
-  ItemIndex := GetJSONIndexOf(FData, [FItemClass.GetIdField, Id]);
+  ItemIndex := FData.IndexOf([FItemClass.GetIdField, Id]);
   if ItemIndex > -1 then
     Result := GetItem(ItemIndex)
   else

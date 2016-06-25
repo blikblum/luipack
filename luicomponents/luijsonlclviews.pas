@@ -164,7 +164,7 @@ type
 implementation
 
 uses
-  contnrs, LuiJSONUtils, strutils, spin, typinfo;
+  contnrs, LuiJSONUtils, strutils, spin, typinfo, LuiJSONHelpers;
 
 type
 
@@ -280,7 +280,7 @@ begin
       jdmValue:
         begin
           if FindJSONProp(OptionsData, 'datasource', SourceData) then
-            Result := GetJSONIndexOf(SourceData, [ValuePropName, PropData.Value]);
+            Result := SourceData.IndexOf([ValuePropName, PropData.Value]);
         end;
     end;
     //check for out of range result

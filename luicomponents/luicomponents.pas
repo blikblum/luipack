@@ -4,6 +4,7 @@
 
 unit luicomponents;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -12,7 +13,7 @@ uses
   LuiObjectUtils, VarRecUtils, LuiDBUtils, LuiDataClasses, LuiJSONClasses, LuiIoCContainer, 
   LuiServices, LuiJSONModel, JSONModelDescriptors, LuiDOMClasses, JSONModelUnitOptionsView, 
   CustomMacros, DirectorySelectView, SQLClientBase, LuiSQLDbClient, LuiObjectHelpers, 
-  LazarusPackageIntf;
+  LuiJSONHelpers, LazarusPackageIntf;
 
 implementation
 

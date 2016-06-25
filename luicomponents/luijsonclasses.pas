@@ -107,7 +107,7 @@ type
 implementation
 
 uses
-  fgl;
+  fgl, LuiJSONHelpers;
 
 type
   TJSONObjectMap = specialize TFPGMap<Integer, TJSONObject>;
@@ -447,7 +447,7 @@ end;
 
 function TJSONLookup.IndexOf(const KeyValue: Variant): Integer;
 begin
-  Result := GetJSONIndexOf(FData, [FKeyProperty, KeyValue]);
+  Result := FData.IndexOf([FKeyProperty, KeyValue]);
 end;
 
 procedure TJSONLookup.LoadData(AData: TJSONArray; OwnsData: Boolean);

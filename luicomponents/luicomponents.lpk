@@ -20,7 +20,7 @@
       </Parsing>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="27">
+    <Files Count="28">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -130,6 +130,10 @@
         <Filename Value="luiobjecthelpers.pas"/>
         <UnitName Value="luiobjecthelpers"/>
       </Item27>
+      <Item28>
+        <Filename Value="luijsonhelpers.pas"/>
+        <UnitName Value="luijsonhelpers"/>
+      </Item28>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
