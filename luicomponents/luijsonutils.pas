@@ -77,9 +77,13 @@ function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValu
 
 function FindJSONProp(JSONObj: TJSONObject; const PropName: String; out PropValue: String): Boolean;
 
-function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
+{$ifndef LUIJSONUTILS_WITHOUTDEPRECATED}
 
-function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
+function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer; inline; deprecated 'Use LuiJSONHelpers functions instead';
+
+function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer; inline; deprecated 'Use LuiJSONHelpers functions instead';
+
+{$endif}
 
 function GetJSONPath(Data: TJSONData; const Path: String; Default: Integer): Integer;
 
@@ -146,7 +150,7 @@ procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject;
 implementation
 
 uses
-  jsonparser, Variants, math;
+  jsonparser, Variants, math, LuiJSONHelpers;
 
 type
 
@@ -360,7 +364,7 @@ function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant)
 var
   i: Integer;
 begin
-  i := GetJSONIndexOf(JSONArray, ObjProps);
+  i := JSONArray.IndexOf(ObjProps);
   if i > -1 then
     Result := TJSONObject(JSONArray.Items[i])
   else
@@ -538,46 +542,19 @@ begin
     PropValue := '';
 end;
 
+{$ifndef LUIJSONUTILS_WITHOUTDEPRECATED}
+
 function GetJSONIndexOf(JSONArray: TJSONArray; const ItemValue: Variant): Integer;
 begin
-  for Result := 0 to JSONArray.Count - 1 do
-  begin
-    if SameValue(JSONArray.Items[Result], ItemValue) then
-      Exit;
-  end;
-  Result := -1;
+  Result := JSONArray.IndexOf(ItemValue);
 end;
 
 function GetJSONIndexOf(JSONArray: TJSONArray; const ObjProps: array of Variant): Integer;
-var
-  PropCount, i: Integer;
-  ItemData, PropData: TJSONData;
-  ObjMatches: Boolean;
 begin
-  PropCount := Length(ObjProps);
-  Result := -1;
-  if odd(PropCount) then
-    raise Exception.Create('GetJSONIndexOf - Properties must have even length');
-  PropCount := PropCount div 2;
-  for Result := 0 to JSONArray.Count - 1 do
-  begin
-    ItemData := JSONArray.Items[Result];
-    ObjMatches := False;
-    if ItemData.JSONType = jtObject then
-    begin
-      for i := 0 to PropCount - 1 do
-      begin
-        PropData := ItemData.FindPath(ObjProps[i * 2]);
-        ObjMatches := (PropData <> nil) and SameValue(PropData, ObjProps[(i * 2) + 1]);
-        if not ObjMatches then
-          break;
-      end;
-    end;
-    if ObjMatches then
-      Exit;
-  end;
-  Result := -1;
+  Result := JSONArray.IndexOf(ObjProps);
 end;
+
+{$endif}
 
 function GetJSONPath(Data: TJSONData; const Path: String; Default: Integer): Integer;
 begin

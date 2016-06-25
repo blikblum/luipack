@@ -13,6 +13,20 @@
         <OtherUnitFiles Value="ide;ide\forms;."/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Conditionals Value="if LUIJSONUTILS_WITHOUTDEPRECATED = 'True' then
+begin
+  CustomOptions := '-dLUIJSONUTILS_WITHOUTDEPRECATED';
+end;"/>
+      <BuildMacros>
+        <Count Value="1"/>
+        <Item1>
+          <Identifier Value="LUIJSONUTILS_WITHOUTDEPRECATED"/>
+          <Values Count="2">
+            <Item1 Value="True"/>
+            <Item2 Value="False"/>
+          </Values>
+        </Item1>
+      </BuildMacros>
       <Parsing>
         <SyntaxOptions>
           <UseAnsiStrings Value="False"/>
@@ -112,27 +126,27 @@
       </Item22>
       <Item23>
         <Filename Value="ide\custommacros.pas"/>
-        <UnitName Value="custommacros"/>
+        <UnitName Value="CustomMacros"/>
       </Item23>
       <Item24>
         <Filename Value="ide\forms\directoryselectview.pas"/>
-        <UnitName Value="directoryselectview"/>
+        <UnitName Value="DirectorySelectView"/>
       </Item24>
       <Item25>
         <Filename Value="sqlclientbase.pas"/>
-        <UnitName Value="sqlclientbase"/>
+        <UnitName Value="SQLClientBase"/>
       </Item25>
       <Item26>
         <Filename Value="luisqldbclient.pas"/>
-        <UnitName Value="luisqldbclient"/>
+        <UnitName Value="LuiSQLDbClient"/>
       </Item26>
       <Item27>
         <Filename Value="luiobjecthelpers.pas"/>
-        <UnitName Value="luiobjecthelpers"/>
+        <UnitName Value="LuiObjectHelpers"/>
       </Item27>
       <Item28>
         <Filename Value="luijsonhelpers.pas"/>
-        <UnitName Value="luijsonhelpers"/>
+        <UnitName Value="LuiJSONHelpers"/>
       </Item28>
     </Files>
     <RequiredPkgs Count="2">
