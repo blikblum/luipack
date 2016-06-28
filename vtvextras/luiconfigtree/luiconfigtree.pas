@@ -66,10 +66,13 @@ type
     function DoFocusChanging(OldNode, NewNode: PVirtualNode; OldColumn,
       NewColumn: TColumnIndex): Boolean; override;
     procedure DoFreeNode(Node: PVirtualNode); override;
-    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType; var CellText: String); override;
-    procedure DoInitChildren(Node: PVirtualNode;
-      var NodeChildCount: Cardinal); override;
+    procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: String); override;
+    {$if  VTMajorVersion > 4}
+    function DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal): Boolean; override;
+    {$else}
+    procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    {$endif}
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex;
@@ -415,14 +418,23 @@ begin
   end;
 end;
 
+
+{$if VTMajorVersion > 4}
+function TLuiConfigTree.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal): Boolean;
+{$else}
 procedure TLuiConfigTree.DoInitChildren(Node: PVirtualNode;
   var NodeChildCount: Cardinal);
+{$endif}
 var
   Data: PConfigData;
 begin
   Data := GetConfigData(Node);
   FConfig.ReadSection(Data^.Key, FItems, True);
   NodeChildCount := FItems.Count;
+  {$if  VTMajorVersion > 4}
+  Result := True;
+  {$endif}
 end;
 
 procedure TLuiConfigTree.DoInitNode(ParentNode, Node: PVirtualNode;

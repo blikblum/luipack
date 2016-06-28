@@ -23,8 +23,11 @@ type
   protected
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var AText: String); override;
-    procedure DoInitChildren(Node: PVirtualNode; var AChildCount: Cardinal
-                      ); override;
+    {$if VTMajorVersion > 4}
+    function DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal): Boolean; override;
+    {$else}
+    procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    {$endif}
     procedure DoInitNode(AParent, Node: PVirtualNode;
                      var InitStates: TVirtualNodeInitStates); override;
   public
@@ -57,13 +60,21 @@ begin
   inherited DoGetText(Node, Column, TextType, AText);
 end;
 
+{$if VTMajorVersion > 4}
+function TVirtualObjectTree.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal): Boolean;
+{$else}
 procedure TVirtualObjectTree.DoInitChildren(Node: PVirtualNode;
-  var AChildCount: Cardinal);
+  var NodeChildCount: Cardinal);
+{$endif}
 var
   Data: PObjectData;
 begin
   Data := GetNodeData(Node);
-  AChildCount := Data^.Obj.ChildNodeCount;
+  NodeChildCount := Data^.Obj.ChildNodeCount;
+  {$if  VTMajorVersion > 4}
+  Result := True;
+  {$endif}
 end;
 
 procedure TVirtualObjectTree.DoInitNode(AParent, Node: PVirtualNode;

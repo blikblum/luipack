@@ -101,7 +101,11 @@ type
     procedure DoFreeNode(Node: PVirtualNode); override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: String); override;
+    {$if  VTMajorVersion > 4}
+    function DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal): Boolean; override;
+    {$else}
     procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    {$endif}
     procedure DoInitNode(ParentNode, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     function GetOptionsClass: TTreeOptionsClass; override;
   public
@@ -482,7 +486,9 @@ type
     property OnGetNodeDataSize;
     property OnGetPopupMenu;
     property OnGetUserClipboardFormats;
+    {$if VTMajorVersion = 4}
     property OnHeaderCheckBoxClick;
+    {$endif}
     property OnHeaderClick;
     property OnHeaderDblClick;
     property OnHeaderDragged;
@@ -535,7 +541,11 @@ type
   protected
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String); override;
+    {$if VTMajorVersion > 4}
+    function DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal): Boolean; override;
+    {$else}
     procedure DoInitChildren(Node: PVirtualNode; var NodeChildCount: Cardinal); override;
+    {$endif}
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
   public
@@ -673,7 +683,9 @@ type
     property OnGetNodeDataSize;
     property OnGetPopupMenu;
     property OnGetUserClipboardFormats;
+    {$if VTMajorVersion = 4}
     property OnHeaderCheckBoxClick;
+    {$endif}
     property OnHeaderClick;
     property OnHeaderDblClick;
     property OnHeaderDragged;
@@ -857,13 +869,21 @@ begin
     FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
 end;
 
+{$if VTMajorVersion > 4}
+function TVirtualJSONTreeView.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal): Boolean;
+{$else}
 procedure TVirtualJSONTreeView.DoInitChildren(Node: PVirtualNode;
   var NodeChildCount: Cardinal);
+{$endif}
 var
   ItemData: PTVItemData;
 begin
   ItemData := GetItemData(Node);
   NodeChildCount := ItemData^.ChildrenData.Count;
+  {$if VTMajorVersion > 4}
+  Result := True;
+  {$endif}
 end;
 
 procedure TVirtualJSONTreeView.DoInitNode(ParentNode, Node: PVirtualNode;
@@ -1212,13 +1232,21 @@ begin
   inherited DoFreeNode(Node);
 end;
 
+{$if VTMajorVersion > 4}
+function TVirtualJSONInspector.DoInitChildren(Node: PVirtualNode;
+  var NodeChildCount: Cardinal): Boolean;
+{$else}
 procedure TVirtualJSONInspector.DoInitChildren(Node: PVirtualNode;
   var NodeChildCount: Cardinal);
+{$endif}
 var
   Data: PItemData;
 begin
   Data := GetItemData(Node);
   NodeChildCount := Length(Data^.Children);
+  {$if  VTMajorVersion > 4}
+  Result := True;
+  {$endif}
 end;
 
 procedure TVirtualJSONInspector.DoGetText(Node: PVirtualNode;

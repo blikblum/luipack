@@ -429,7 +429,7 @@ type
       var Text: String); override;
     procedure DoInitNode(Parent, Node: PVirtualNode; var InitStates: TVirtualNodeInitStates); override;
     procedure DoNewText(Node: PVirtualNode; Column: TColumnIndex; const Text: String); override;
-    {$ifdef VTV_VER_5}
+    {$if  VTMajorVersion > 4}
     procedure DoHeaderClick(HitInfo: TVTHeaderHitInfo);
     {$else}
     procedure DoHeaderClick(Column: TColumnIndex; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -2429,7 +2429,7 @@ begin
   inherited DoNewText(Node, Column, Text);
 end;
 
-{$ifdef VTV_VER_5}
+{$if  VTMajorVersion > 4}
 procedure TCustomVirtualDBGrid.DoHeaderClick(HitInfo: TVTHeaderHitInfo);
 begin
   if (DBOptions.SortingType <> stNone) and (aoAllowSorting in DBOptions.AdvOptions) then
