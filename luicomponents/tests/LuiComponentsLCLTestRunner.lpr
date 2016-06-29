@@ -4,7 +4,7 @@ program LuiComponentsLCLTestRunner;
 
 uses
   Interfaces, Forms, GUITestRunner, TestFramework,
-   RTTIUtilsTests, JSONUtilsTests, IocContainerTests;
+   RTTIUtilsTests, JSONUtilsTests, IocContainerTests, JSONHelpersTests;
 
 {$R *.res}
 
