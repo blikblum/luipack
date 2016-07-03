@@ -8,14 +8,22 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="1">
+    <Files Count="3">
       <Item1>
         <Filename Value="handlebars.pas"/>
         <UnitName Value="handlebars"/>
       </Item1>
+      <Item2>
+        <Filename Value="handlebarsscanner.pas"/>
+        <UnitName Value="handlebarsscanner"/>
+      </Item2>
+      <Item3>
+        <Filename Value="handlebarsparser.pas"/>
+        <UnitName Value="handlebarsparser"/>
+      </Item3>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

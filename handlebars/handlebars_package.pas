@@ -4,10 +4,11 @@
 
 unit handlebars_package;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
-  Handlebars, LazarusPackageIntf;
+  Handlebars, HandlebarsScanner, HandlebarsParser, LazarusPackageIntf;
 
 implementation
 
