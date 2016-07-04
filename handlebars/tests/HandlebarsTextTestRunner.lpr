@@ -1,4 +1,4 @@
-program HandlebarsTests;
+program HandlebarsTextTestRunner;
 
 {$mode objfpc}{$H+}
 
@@ -6,7 +6,7 @@ uses
   TextTestRunner,
   //tests
   BasicTests,
-  MustacheTests;
+  MustacheTests, ScannerTests;
 
 begin
   RunRegisteredTests;
