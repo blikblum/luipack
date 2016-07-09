@@ -289,7 +289,7 @@ end;
 
 procedure TScannerTests.EscapeDelimiters;
 begin
-  CreateTokens('{{foo}} \\{{bar}} {{baz}}');
+  CreateTokens('{{foo}} \{{bar}} {{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
   CheckEquals(tkCONTENT, ' ', FTokens[3]);
@@ -298,7 +298,7 @@ end;
 
 procedure TScannerTests.EscapeMultipleDelimiters;
 begin
-  CreateTokens('{{foo}} \\{{bar}} \\{{baz}}');
+  CreateTokens('{{foo}} \{{bar}} \{{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkCONTENT], FTokens.Values);
 
   CheckEquals(tkCONTENT, ' ', FTokens[3]);
@@ -308,7 +308,7 @@ end;
 
 procedure TScannerTests.EscapeTripleStash;
 begin
-  CreateTokens('{{foo}} \\{{{bar}}} {{baz}}');
+  CreateTokens('{{foo}} \{{{bar}}} {{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
   CheckEquals(tkCONTENT, '{{{bar}}} ', FTokens[4]);
@@ -316,30 +316,30 @@ end;
 
 procedure TScannerTests.EscapeEscapeCharacter;
 begin
-  CreateTokens('{{foo}} \\\\{{bar}} {{baz}}');
+  CreateTokens('{{foo}} \\{{bar}} {{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
-  CheckEquals(tkCONTENT, ' \\', FTokens[3]);
+  CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkID, 'bar', FTokens[5]);;
 end;
 
 procedure TScannerTests.EscapeMultipleEscapeCharacters;
 begin
-  CreateTokens('{{foo}} \\\\{{bar}} \\\\{{baz}}');
+  CreateTokens('{{foo}} \\{{bar}} \\{{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
-  CheckEquals(tkCONTENT, ' \\', FTokens[3]);
+  CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkID, 'bar', FTokens[5]);
-  CheckEquals(tkCONTENT, ' \\', FTokens[7]);
+  CheckEquals(tkCONTENT, ' \', FTokens[7]);
   CheckEquals(tkID, 'baz', FTokens[9]);
 end;
 
 procedure TScannerTests.EscapeAfterEscapedEscapeCharacther;
 begin
-  CreateTokens('{{foo}} \\\\{{bar}} \\{{baz}}');
+  CreateTokens('{{foo}} \\{{bar}} \{{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkCONTENT], FTokens.Values);
 
-  CheckEquals(tkCONTENT, ' \\', FTokens[3]);
+  CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkOPEN, '{{', FTokens[4]);
   CheckEquals(tkID, 'bar', FTokens[5]);
   CheckEquals(tkCONTENT, ' ', FTokens[7]);
@@ -348,21 +348,21 @@ end;
 
 procedure TScannerTests.EscapeAfterEscapedMustache;
 begin
-  CreateTokens('{{foo}} \\{{bar}} \\\\{{baz}}');
+  CreateTokens('{{foo}} \{{bar}} \\{{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
   CheckEquals(tkCONTENT, '{{bar}} ', FTokens[4]);
-  CheckEquals(tkCONTENT, '\\', FTokens[5]);
+  CheckEquals(tkCONTENT, '\', FTokens[5]);
   CheckEquals(tkOPEN, '{{', FTokens[6]);
   CheckEquals(tkID, 'baz', FTokens[7]);
 end;
 
 procedure TScannerTests.EscapeEscapeCharacterOnTripleStash;
 begin
-  CreateTokens('{{foo}} \\\\{{{bar}}} {{baz}}');
+  CreateTokens('{{foo}} \\{{{bar}}} {{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPENUNESCAPED, tkID, tkCLOSEUNESCAPED, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
-  CheckEquals(tkCONTENT, ' \\', FTokens[3]);
+  CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkID, 'bar', FTokens[5]);
 end;
 
@@ -403,7 +403,8 @@ end;
 
 procedure TScannerTests.ScapedLiteralsInBrackets;
 begin
-  CreateTokens('{{foo.[bar\\]]}}');
+  //todo: double check how is supposed to work
+  CreateTokens('{{foo.[bar\]]}}');
   CheckEquals([tkOPEN, tkID, tkSEP, tkID, tkCLOSE], FTokens.Values);
   CheckEquals(tkId, '[bar]]', FTokens[3]);
 end;
@@ -558,11 +559,11 @@ end;
 
 procedure TScannerTests.StringParam;
 begin
-  CreateTokens('{{ foo bar \"baz\" }}');
+  CreateTokens('{{ foo bar "baz" }}');
   CheckEquals([tkOPEN, tkID, tkID, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkSTRING, 'baz', FTokens[3]);
 
-  CreateTokens('{{ foo bar \''baz\'' }}');
+  CreateTokens('{{ foo bar ''baz'' }}');
   CheckEquals([tkOPEN, tkID, tkID, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkSTRING, 'baz', FTokens[3]);
 end;
@@ -576,11 +577,12 @@ end;
 
 procedure TScannerTests.StringParamWithQuote;
 begin
-  CreateTokens('{{ foo "bar\\"baz" }}');
+  //todo: double check how is supposed to work
+  CreateTokens('{{ foo "bar\"baz" }}');
   CheckEquals([tkOPEN, tkID, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkSTRING, 'bar"baz', FTokens[2]);
 
-  CreateTokens('{{ foo ''bar\\''baz'' }}');
+  CreateTokens('{{ foo ''bar\''baz'' }}');
   CheckEquals([tkOPEN, tkID, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkSTRING, 'bar''baz', FTokens[2]);
 end;
@@ -643,13 +645,13 @@ begin
   CreateTokens('{{ foo bar'+LineEnding+'  baz=bat }}');
   CheckEquals([tkOPEN, tkID, tkID, tkID, tkEQUALS, tkID, tkCLOSE], FTokens.Values);
 
-  CreateTokens('{{ foo bar baz=\"bat\" }}');
+  CreateTokens('{{ foo bar baz="bat" }}');
   CheckEquals([tkOPEN, tkID, tkID, tkID, tkEQUALS, tkSTRING, tkCLOSE], FTokens.Values);
 
-  CreateTokens('{{ foo bar baz=\"bat\" bam=wot }}');
+  CreateTokens('{{ foo bar baz="bat" bam=wot }}');
   CheckEquals([tkOPEN, tkID, tkID, tkID, tkEQUALS, tkSTRING, tkID, tkEQUALS, tkID, tkCLOSE], FTokens.Values);
 
-  CreateTokens('{{foo omg bar=baz bat=\"bam\"}}');
+  CreateTokens('{{foo omg bar=baz bat="bam"}}');
   CheckEquals([tkOPEN, tkID, tkID, tkID, tkEQUALS, tkID, tkID, tkEQUALS, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkID, 'omg', FTokens[2]);
 end;
@@ -704,7 +706,7 @@ end;
 
 procedure TScannerTests.NestedSubExpressionLiteral;
 begin
-  CreateTokens('{{foo (bar (lol true) false) (baz 1) (blah ''b'') (blorg \"c\")}}');
+  CreateTokens('{{foo (bar (lol true) false) (baz 1) (blah ''b'') (blorg "c")}}');
   CheckEquals([tkOPEN, tkID, tkOPENSEXPR, tkID, tkOPENSEXPR, tkID, tkBOOLEAN, tkCLOSESEXPR, tkBOOLEAN, tkCLOSESEXPR, tkOPENSEXPR, tkID, tkNUMBER, tkCLOSESEXPR, tkOPENSEXPR, tkID, tkSTRING, tkCLOSESEXPR, tkOPENSEXPR, tkID, tkSTRING, tkCLOSESEXPR, tkCLOSE], FTokens.Values);
 end;
 
