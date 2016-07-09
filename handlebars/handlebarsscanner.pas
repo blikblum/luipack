@@ -205,6 +205,7 @@ begin
                 else
                   Result := tkOpenBlock;
               end;
+            '/': Result := tkOpenEndBlock;
             '&': Inc(TokenStr);
             '{': Result := tkOpenUnescaped;
           end;
