@@ -170,29 +170,37 @@ begin
     Exit;
   end;
 
+  Result := tkInvalid;
+
   FCurTokenString := '';
 
   case TokenStr[0] of
     #0:         // Empty line
       begin
-        FetchLine;
-        //Result := tkWhitespace;
+        if not FetchLine then
+        begin
+          Result := tkEOF;
+        end;
       end;
     '{':
       begin
         //{{
+        TokenStart := TokenStr;
         if TokenStr[1] = '{' then
         begin
+          Result := tkOpen;
           Inc(TokenStr, 2);
           case TokenStr[0] of
             '>': Result := tkOpenPartial;
             '#': Result := tkOpenBlock;
-          else
-            Result := tkOpen;
+            '&': Inc(TokenStr);
           end;
           if Result <> tkOpen then
             Inc(TokenStr);
           Inc(FMustacheLevel);
+          SectionLength := TokenStr - TokenStart;
+          SetLength(FCurTokenString, SectionLength);
+          Move(TokenStart^, FCurTokenString[1], SectionLength);
         end
         else
         begin
@@ -202,10 +210,14 @@ begin
       end;
     '}':
       begin
+        TokenStart := TokenStr;
         if (TokenStr[1] = '}') and (FMustacheLevel > 0) then
         begin
           Result := tkClose;
           Inc(TokenStr, 2);
+          SectionLength := TokenStr - TokenStart;
+          SetLength(FCurTokenString, SectionLength);
+          Move(TokenStart^, FCurTokenString[1], SectionLength);
           Dec(FMustacheLevel);
         end
         else

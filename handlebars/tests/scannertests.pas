@@ -265,7 +265,9 @@ procedure TScannerTests.SimpleMustache;
 begin
   CreateTokens('{{foo}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkOpen, '{{', FTokens[0]);
   CheckEquals(tkID, 'foo', FTokens[1]);
+  CheckEquals(tkClose, '}}', FTokens[2]);
 end;
 
 procedure TScannerTests.UnescapeWithAmpersand;
@@ -426,7 +428,9 @@ procedure TScannerTests.SimpleMustacheWithSpaces;
 begin
   CreateTokens('{{  foo  }}');
   CheckEquals([tkOPEN, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkOpen, '{{', FTokens[0]);
   CheckEquals(tkID, 'foo', FTokens[1]);
+  CheckEquals(tkClose, '}}', FTokens[2]);
 end;
 
 procedure TScannerTests.SimpleMustacheWithLineBreaks;
