@@ -79,9 +79,6 @@ type
 
 implementation
 
-const
-  Separators = ['.', '/'];
-
 { THandlebarsScanner }
 
 function THandlebarsScanner.FetchLine: Boolean;
@@ -161,12 +158,10 @@ begin
   inherited Destroy;
 end;
 
-//todo: investigate why this leads to wrong output
 function GetNextToken(Start: PChar): PChar;
 begin
   Result := Start;
-  Inc(Result);
-  while Result[0] <> ' ' do
+  while Result[0] = ' ' do
     Inc(Result);
 end;
 
@@ -219,10 +214,7 @@ begin
             '{': Result := tkOpenUnescaped;
             '^':
               begin
-                NextToken := TokenStr;
-                Inc(NextToken);
-                while NextToken[0] = ' ' do
-                  Inc(NextToken);
+                NextToken := GetNextToken(TokenStr + 1);
                 if (NextToken[0] = '}') and (NextToken[1] = '}') then
                 begin
                   Result := tkInverse;
@@ -233,14 +225,10 @@ begin
                   Result := tkOpenInverse;
               end;
           end;
-          NextToken := TokenStr;
-          while NextToken[0] = ' ' do
-            Inc(NextToken);
+          NextToken := GetNextToken(TokenStr);
           if (NextToken[0] = 'e') and (NextToken[1] = 'l') and (NextToken[2] = 's') and (NextToken[3] = 'e') then
           begin
-            NextToken := NextToken + 4;
-            while NextToken[0] = ' ' do
-              Inc(NextToken);
+            NextToken := GetNextToken(NextToken + 4);
             if (NextToken[0] = '}') and (NextToken[1] = '}') then
             begin
               Result := tkInverse;
