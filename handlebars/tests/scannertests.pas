@@ -466,6 +466,7 @@ procedure TScannerTests.SimplePartial;
 begin
   CreateTokens('{{> foo}}');
   CheckEquals([tkOPENPARTIAL, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkOpenPartial, '{{>', FTokens[0]);
 
   CreateTokens('{{>foo}}');
   CheckEquals([tkOPENPARTIAL, tkID, tkCLOSE], FTokens.Values);

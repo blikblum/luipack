@@ -195,7 +195,16 @@ begin
           Inc(TokenStr, 2);
           case TokenStr[0] of
             '>': Result := tkOpenPartial;
-            '#': Result := tkOpenBlock;
+            '#':
+              begin
+                if TokenStr[1] = '>' then
+                begin
+                  Result := tkOpenPartialBlock;
+                  Inc(TokenStr);
+                end
+                else
+                  Result := tkOpenBlock;
+              end;
             '&': Inc(TokenStr);
             '{': Result := tkOpenUnescaped;
           end;
