@@ -79,6 +79,9 @@ type
 
 implementation
 
+const
+  Separators = ['.', '/'];
+
 { THandlebarsScanner }
 
 function THandlebarsScanner.FetchLine: Boolean;
@@ -243,25 +246,44 @@ begin
     end
     else
     begin
-      Result := tkId;
       while TokenStr[0] = ' ' do
         Inc(TokenStr);
       TokenStart := TokenStr;
-      while TokenStr[0] <> ' ' do
-      begin
-        if TokenStr[0] = #0 then
-        begin
-          if not FetchLine then
+      case TokenStr[0] of
+        '/':
           begin
-            SectionLength := TokenStr - TokenStart;
-            SetLength(FCurTokenString, SectionLength);
-            Move(TokenStart^, FCurTokenString[1], SectionLength);
-            Break;
+            Result := tkSep;
+            Inc(TokenStr);
           end;
+        '.':
+          begin
+            Result := tkSep;
+            if TokenStr[1] = '.' then
+            begin
+              Result := tkId;
+              Inc(TokenStr);
+            end else if FCurToken <> tkId then
+              Result := tkId;
+            Inc(TokenStr);
+          end;
+      else
+        Result := tkId;
+        while TokenStr[0] <> ' ' do
+        begin
+          if TokenStr[0] = #0 then
+          begin
+            if not FetchLine then
+            begin
+              SectionLength := TokenStr - TokenStart;
+              SetLength(FCurTokenString, SectionLength);
+              Move(TokenStart^, FCurTokenString[1], SectionLength);
+              Break;
+            end;
+          end;
+          if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in Separators) then
+            break;
+          Inc(TokenStr);
         end;
-        if (TokenStr[0] = '}') and (TokenStr[1] = '}') then
-          break;
-        Inc(TokenStr);
       end;
       SectionLength := TokenStr - TokenStart;
       SetLength(FCurTokenString, SectionLength);

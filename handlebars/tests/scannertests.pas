@@ -370,6 +370,10 @@ procedure TScannerTests.SimplePath;
 begin
   CreateTokens('{{foo/bar}}');
   CheckEquals([tkOPEN, tkID, tkSEP, tkID, tkCLOSE], FTokens.Values);
+
+  CheckEquals(tkId, 'foo', FTokens[1]);
+  CheckEquals(tkSep, '/', FTokens[2]);
+  CheckEquals(tkId, 'bar', FTokens[3]);
 end;
 
 procedure TScannerTests.SimplePathWithDots;
@@ -385,6 +389,10 @@ procedure TScannerTests.PathLiteralsWithBrackets;
 begin
   CreateTokens('{{foo.[bar]}}');
   CheckEquals([tkOPEN, tkID, tkSEP, tkID, tkCLOSE], FTokens.Values);
+
+  CheckEquals(tkId, 'foo', FTokens[1]);
+  CheckEquals(tkSep, '.', FTokens[2]);
+  CheckEquals(tkId, '[bar]', FTokens[3]);
 end;
 
 procedure TScannerTests.MultiplePathLiteralsWithBrackets;
@@ -397,12 +405,18 @@ procedure TScannerTests.ScapedLiteralsInBrackets;
 begin
   CreateTokens('{{foo.[bar\\]]}}');
   CheckEquals([tkOPEN, tkID, tkSEP, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkId, '[bar]]', FTokens[3]);
 end;
 
 procedure TScannerTests.SingleDotPath;
 begin
   CreateTokens('{{.}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkId, '.', FTokens[1]);
+
+  CreateTokens('{{ . }}');
+  CheckEquals([tkOPEN, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkId, '.', FTokens[1]);
 end;
 
 procedure TScannerTests.ParentPath;
