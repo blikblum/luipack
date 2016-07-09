@@ -56,6 +56,7 @@ type
      FCurLine: string;
      TokenStr: PChar;
      FCurRow: Integer;
+     FMustacheLevel: Integer;
      function FetchLine: Boolean;
      function GetCurColumn: Integer;
      procedure ScanContent;
@@ -158,6 +159,9 @@ begin
 end;
 
 function THandlebarsScanner.FetchToken: THandlebarsToken;
+var
+  TokenStart: PChar;
+  SectionLength: Integer;
 begin
   if (TokenStr = nil) and not FetchLine then
   begin
@@ -188,6 +192,21 @@ begin
           end;
           if Result <> tkOpen then
             Inc(TokenStr);
+          Inc(FMustacheLevel);
+        end
+        else
+        begin
+          Result := tkContent;
+          ScanContent;
+        end;
+      end;
+    '}':
+      begin
+        if (TokenStr[1] = '}') and (FMustacheLevel > 0) then
+        begin
+          Result := tkClose;
+          Inc(TokenStr, 2);
+          Dec(FMustacheLevel);
         end
         else
         begin
@@ -196,8 +215,37 @@ begin
         end;
       end;
   else
-    Result := tkContent;
-    ScanContent;
+    if FMustacheLevel = 0 then
+    begin
+      Result := tkContent;
+      ScanContent;
+    end
+    else
+    begin
+      Result := tkId;
+      while TokenStr[0] = ' ' do
+        Inc(TokenStr);
+      TokenStart := TokenStr;
+      while TokenStr[0] <> ' ' do
+      begin
+        if TokenStr[0] = #0 then
+        begin
+          if not FetchLine then
+          begin
+            SectionLength := TokenStr - TokenStart;
+            SetLength(FCurTokenString, SectionLength);
+            Move(TokenStart^, FCurTokenString[1], SectionLength);
+            Break;
+          end;
+        end;
+        if (TokenStr[0] = '}') and (TokenStr[1] = '}') then
+          break;
+        Inc(TokenStr);
+      end;
+      SectionLength := TokenStr - TokenStart;
+      SetLength(FCurTokenString, SectionLength);
+      Move(TokenStart^, FCurTokenString[1], SectionLength);
+    end;
   end;
 
   FCurToken := Result;
