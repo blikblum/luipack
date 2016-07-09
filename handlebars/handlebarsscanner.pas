@@ -268,7 +268,7 @@ begin
           end;
       else
         Result := tkId;
-        while TokenStr[0] <> ' ' do
+        while True do
         begin
           if TokenStr[0] = #0 then
           begin
@@ -280,7 +280,7 @@ begin
               Break;
             end;
           end;
-          if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in Separators) then
+          if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/']) then
             break;
           Inc(TokenStr);
         end;
@@ -288,6 +288,9 @@ begin
       SectionLength := TokenStr - TokenStart;
       SetLength(FCurTokenString, SectionLength);
       Move(TokenStart^, FCurTokenString[1], SectionLength);
+      //rigth trim space
+      while TokenStr[0] = ' ' do
+        Inc(TokenStr);
     end;
   end;
 
