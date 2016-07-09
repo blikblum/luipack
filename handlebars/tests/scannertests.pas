@@ -168,7 +168,7 @@ begin
   begin
     WriteStr(ExpectedStr, expected);
     WriteStr(ActualStr, actual);
-    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg);
+    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg, CallerAddr);
   end;
 end;
 
@@ -182,7 +182,7 @@ begin
   begin
     ActualStr := TokenArrayToStr(actual);
     ExpectedStr := TokenArrayToStr(expected);
-    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg);
+    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg, CallerAddr);
   end;
 end;
 
@@ -196,10 +196,10 @@ begin
   begin
     WriteStr(ExpectedStr, expectedValue);
     WriteStr(ActualStr, actual.Value);
-    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg);
+    FailNotEquals(ExpectedStr, ActualStr, ErrorMsg, CallerAddr);
   end else if ExpectedContent <> actual.Content then
   begin
-    FailNotEquals(ExpectedContent, actual.Content, ErrorMsg);
+    FailNotEquals(ExpectedContent, actual.Content, ErrorMsg, CallerAddr);
   end;
 end;
 
@@ -539,6 +539,7 @@ procedure TScannerTests.InverseWithId;
 begin
   CreateTokens('{{^foo}}');
   CheckEquals([tkOPENINVERSE, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkOpenInverse, '{{^', FTokens[1]);
   CheckEquals(tkID, 'foo', FTokens[1]);
 
   CreateTokens('{{^ foo  }}');
