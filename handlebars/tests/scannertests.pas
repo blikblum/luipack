@@ -539,7 +539,7 @@ procedure TScannerTests.InverseWithId;
 begin
   CreateTokens('{{^foo}}');
   CheckEquals([tkOPENINVERSE, tkID, tkCLOSE], FTokens.Values);
-  CheckEquals(tkOpenInverse, '{{^', FTokens[1]);
+  CheckEquals(tkOpenInverse, '{{^', FTokens[0]);
   CheckEquals(tkID, 'foo', FTokens[1]);
 
   CreateTokens('{{^ foo  }}');

@@ -161,9 +161,18 @@ begin
   inherited Destroy;
 end;
 
+//todo: investigate why this leads to wrong output
+function GetNextToken(Start: PChar): PChar;
+begin
+  Result := Start;
+  Inc(Result);
+  while Result[0] <> ' ' do
+    Inc(Result);
+end;
+
 function THandlebarsScanner.FetchToken: THandlebarsToken;
 var
-  TokenStart: PChar;
+  TokenStart, NextToken: PChar;
   SectionLength: Integer;
 begin
   if (TokenStr = nil) and not FetchLine then
@@ -208,10 +217,43 @@ begin
             '/': Result := tkOpenEndBlock;
             '&': Inc(TokenStr);
             '{': Result := tkOpenUnescaped;
+            '^':
+              begin
+                NextToken := TokenStr;
+                Inc(NextToken);
+                while NextToken[0] = ' ' do
+                  Inc(NextToken);
+                if (NextToken[0] = '}') and (NextToken[1] = '}') then
+                begin
+                  Result := tkInverse;
+                  TokenStr := NextToken;
+                  Inc(TokenStr, 2);
+                end
+                else
+                  Result := tkOpenInverse;
+              end;
           end;
-          if Result <> tkOpen then
-            Inc(TokenStr);
-          Inc(FMustacheLevel);
+          NextToken := TokenStr;
+          while NextToken[0] = ' ' do
+            Inc(NextToken);
+          if (NextToken[0] = 'e') and (NextToken[1] = 'l') and (NextToken[2] = 's') and (NextToken[3] = 'e') then
+          begin
+            NextToken := NextToken + 4;
+            while NextToken[0] = ' ' do
+              Inc(NextToken);
+            if (NextToken[0] = '}') and (NextToken[1] = '}') then
+            begin
+              Result := tkInverse;
+              TokenStr := NextToken;
+              Inc(TokenStr, 2);
+            end;
+          end;
+          if Result <> tkInverse then
+          begin
+            if Result <> tkOpen then
+              Inc(TokenStr);
+            Inc(FMustacheLevel);
+          end;
           SectionLength := TokenStr - TokenStart;
           SetLength(FCurTokenString, SectionLength);
           Move(TokenStart^, FCurTokenString[1], SectionLength);
@@ -274,6 +316,11 @@ begin
               Inc(TokenStr);
             end else if FCurToken <> tkId then
               Result := tkId;
+            Inc(TokenStr);
+          end;
+        '^':
+          begin
+            Result := tkInverse;
             Inc(TokenStr);
           end;
       else
