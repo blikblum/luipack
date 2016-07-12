@@ -82,6 +82,7 @@ type
     procedure StringParam;
     procedure StringParamWithSpace;
     procedure StringParamWithQuote;
+    procedure StringParamWithEscaped;
     procedure NumberParam;
     procedure BooleanParam;
     procedure UndefinedAndNullParam;
@@ -585,6 +586,11 @@ begin
   CreateTokens('{{ foo ''bar\''baz'' }}');
   CheckEquals([tkOPEN, tkID, tkSTRING, tkCLOSE], FTokens.Values);
   CheckEquals(tkSTRING, 'bar''baz', FTokens[2]);
+end;
+
+procedure TScannerTests.StringParamWithEscaped;
+begin
+  //todo
 end;
 
 procedure TScannerTests.NumberParam;

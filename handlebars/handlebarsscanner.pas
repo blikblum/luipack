@@ -168,7 +168,8 @@ end;
 function THandlebarsScanner.FetchToken: THandlebarsToken;
 var
   TokenStart, NextToken: PChar;
-  SectionLength: Integer;
+  SectionLength, StrOffset: Integer;
+  C, Escaped: Char;
 begin
   if (TokenStr = nil) and not FetchLine then
   begin
@@ -288,6 +289,7 @@ begin
     begin
       while TokenStr[0] = ' ' do
         Inc(TokenStr);
+      StrOffset := 0;
       TokenStart := TokenStr;
       case TokenStr[0] of
         '/':
@@ -306,10 +308,49 @@ begin
               Result := tkId;
             Inc(TokenStr);
           end;
-        '^':
+        '"', '''':
           begin
-            Result := tkInverse;
+            Result := tkString;
+            C := TokenStr[0];
             Inc(TokenStr);
+            TokenStart := TokenStr;
+            while not (TokenStr[0] in [#0, C]) do
+            begin
+              if (TokenStr[0] = '\') then
+              begin
+                // Save length
+                SectionLength := TokenStr - TokenStart;
+                Inc(TokenStr);
+                // Read escaped token
+                case TokenStr[0] of
+                  '"' : Escaped:='"';
+                  '''': Escaped:='''';
+                  't' : Escaped:=#9;
+                  'b' : Escaped:=#8;
+                  'n' : Escaped:=#10;
+                  'r' : Escaped:=#13;
+                  'f' : Escaped:=#12;
+                  '\' : Escaped:='\';
+                  '/' : Escaped:='/';
+                  #0  : Error('SErrOpenString');
+                else
+                  Error('SErrInvalidCharacter', [CurRow,CurColumn,TokenStr[0]]);
+                end;
+                SetLength(FCurTokenString, StrOffset + SectionLength + 2);
+                if SectionLength > 0 then
+                  Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
+                FCurTokenString[StrOffset + SectionLength + 1] := Escaped;
+                Inc(StrOffset, SectionLength + 1);
+                // Next char
+                // Inc(TokenStr);
+                TokenStart := TokenStr + 1;
+              end;
+              if TokenStr[0] = #0 then
+                Error('SErrOpenString');
+              Inc(TokenStr);
+            end;
+            if TokenStr[0] = #0 then
+              Error('SErrOpenString');
           end;
       else
         Result := tkId;
@@ -331,8 +372,11 @@ begin
         end;
       end;
       SectionLength := TokenStr - TokenStart;
-      SetLength(FCurTokenString, SectionLength);
-      Move(TokenStart^, FCurTokenString[1], SectionLength);
+      SetLength(FCurTokenString, SectionLength + StrOffset);
+      if SectionLength > 0 then
+        Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
+      if Result = tkString then
+        Inc(TokenStr);
       //rigth trim space
       while TokenStr[0] = ' ' do
         Inc(TokenStr);
