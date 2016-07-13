@@ -290,6 +290,9 @@ end;
 
 procedure TScannerTests.EscapeDelimiters;
 begin
+  //todo: review how scaped delimiters are tokenized.
+  //handlebars.js creates a new content token probably due to how the tokenizer works
+  //we don't have this limitation an the code could be simplified. for now keep as is
   CreateTokens('{{foo}} \{{bar}} {{baz}}');
   CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
@@ -338,7 +341,8 @@ end;
 procedure TScannerTests.EscapeAfterEscapedEscapeCharacther;
 begin
   CreateTokens('{{foo}} \\{{bar}} \{{baz}}');
-  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkCONTENT], FTokens.Values);
+  //handlebars.js tokenizer adds an empty content. Probably odds of jison
+  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT{{, tkCONTENT}}], FTokens.Values);
 
   CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkOPEN, '{{', FTokens[4]);
@@ -350,12 +354,20 @@ end;
 procedure TScannerTests.EscapeAfterEscapedMustache;
 begin
   CreateTokens('{{foo}} \{{bar}} \\{{baz}}');
-  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, tkCONTENT, tkOPEN, tkID, tkCLOSE], FTokens.Values);
+  //another oddity of handlebars.js tokenizer (jison)
+  //sometimes the escaped is tokenized alone, sometimes with the previous content
+  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT, {tkCONTENT,} tkOPEN, tkID, tkCLOSE], FTokens.Values);
 
-  CheckEquals(tkCONTENT, '{{bar}} ', FTokens[4]);
-  CheckEquals(tkCONTENT, '\', FTokens[5]);
-  CheckEquals(tkOPEN, '{{', FTokens[6]);
-  CheckEquals(tkID, 'baz', FTokens[7]);
+  CheckEquals(tkCONTENT, ' ', FTokens[3]);
+  //original tests
+  //CheckEquals(tkCONTENT, '{{bar}} ', FTokens[4]);
+  //CheckEquals(tkCONTENT, '\', FTokens[5]);
+  //CheckEquals(tkOPEN, '{{', FTokens[6]);
+  //CheckEquals(tkID, 'baz', FTokens[7]);
+
+  CheckEquals(tkCONTENT, '{{bar}} \', FTokens[4]);
+  CheckEquals(tkOPEN, '{{', FTokens[5]);
+  CheckEquals(tkID, 'baz', FTokens[6]);
 end;
 
 procedure TScannerTests.EscapeEscapeCharacterOnTripleStash;

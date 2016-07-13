@@ -126,8 +126,11 @@ begin
       end;
     end;
     if ((TokenStr[0] = '{') and (TokenStr[1] = '{')) or
-      ((TokenStr[0] = '\') and (TokenStr[1] = '{') and (TokenStr[2] = '{')) then
+      (((TokenStr[0] = '\') and not (TokenStr[-1] = '\')) and (TokenStr[1] = '{') and (TokenStr[2] = '{')) then
     begin
+      //escaped escape
+      if (TokenStr[0] = '{') and (TokenStr[-1] = '\') then
+        Dec(SectionLength);
       SetLength(FCurTokenString, SectionLength);
       Move(TokenStart^, FCurTokenString[1], SectionLength);
       Break;
