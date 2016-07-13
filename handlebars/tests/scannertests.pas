@@ -221,7 +221,7 @@ begin
   Scanner := THandlebarsScanner.Create(Source);
   try
     Value := Scanner.FetchToken;
-    while Value <> tkEOF do
+    while not (Value in [tkEOF, tkInvalid]) do
     begin
       Content := Scanner.CurTokenString;
       FTokens.Add(Value, Content);
@@ -342,7 +342,7 @@ procedure TScannerTests.EscapeAfterEscapedEscapeCharacther;
 begin
   CreateTokens('{{foo}} \\{{bar}} \{{baz}}');
   //handlebars.js tokenizer adds an empty content. Probably odds of jison
-  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT{{, tkCONTENT}}], FTokens.Values);
+  CheckEquals([tkOPEN, tkID, tkCLOSE, tkCONTENT, tkOPEN, tkID, tkCLOSE, tkCONTENT, tkCONTENT{, tkCONTENT}], FTokens.Values);
 
   CheckEquals(tkCONTENT, ' \', FTokens[3]);
   CheckEquals(tkOPEN, '{{', FTokens[4]);

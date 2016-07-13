@@ -442,6 +442,12 @@ begin
             Result := tkCloseBlockParams;
             Inc(TokenStr);
           end;
+        '&':
+          begin
+            //todo: see what are the other invalid chars
+            //Result := tkInvalid;
+            Inc(TokenStr);
+          end;
       else
         if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
           Result := tkBoolean
