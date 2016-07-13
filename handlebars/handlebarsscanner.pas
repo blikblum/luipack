@@ -397,6 +397,11 @@ begin
           begin
             Result := tkEquals;
             Inc(TokenStr);
+          end;
+        '@':
+          begin
+            Result := tkData;
+            Inc(TokenStr);
           end
       else
         if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
