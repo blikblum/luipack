@@ -402,7 +402,17 @@ begin
           begin
             Result := tkData;
             Inc(TokenStr);
-          end
+          end;
+        '(':
+          begin
+            Result := tkOpenSExpr;
+            Inc(TokenStr);
+          end;
+        ')':
+          begin
+            Result := tkCloseSExpr;
+            Inc(TokenStr);
+          end;
       else
         if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
           Result := tkBoolean
@@ -425,7 +435,7 @@ begin
             end;
           end;
           if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/'])
-            or (TokenStr[0] = '=') then
+            or (TokenStr[0] = '=') or (TokenStr[0] = ')') then
             break;
           Inc(TokenStr);
         end;
