@@ -430,15 +430,18 @@ begin
           Inc(TokenStr);
         end;
       end;
-      SectionLength := TokenStr - TokenStart;
-      SetLength(FCurTokenString, SectionLength + StrOffset);
-      if SectionLength > 0 then
-        Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
-      if Result = tkString then
-        Inc(TokenStr);
-      //rigth trim space
-      while TokenStr[0] = ' ' do
-        Inc(TokenStr);
+      if TokenStr <> nil then
+      begin;
+        SectionLength := TokenStr - TokenStart;
+        SetLength(FCurTokenString, SectionLength + StrOffset);
+        if SectionLength > 0 then
+          Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
+        if Result = tkString then
+          Inc(TokenStr);
+        //rigth trim space
+        while TokenStr[0] = ' ' do
+          Inc(TokenStr);
+      end;
     end;
   end;
 
