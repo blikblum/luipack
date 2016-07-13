@@ -59,6 +59,7 @@ type
      FMustacheLevel: Integer;
      function FetchLine: Boolean;
      function GetCurColumn: Integer;
+     procedure ScanComment;
      procedure ScanContent(Offset: Integer = 0);
    protected
      procedure Error(const Msg: string);overload;
@@ -103,6 +104,50 @@ end;
 function THandlebarsScanner.GetCurColumn: Integer;
 begin
   Result := TokenStr - PChar(CurLine);
+end;
+
+procedure THandlebarsScanner.ScanComment;
+var
+  TokenStart: PChar;
+  SectionLength, StrOffset, InnerMustacheLevel: Integer;
+
+begin
+  TokenStart := TokenStr;
+  InnerMustacheLevel := 0;
+  StrOffset := 0;
+  while True do
+  begin
+    Inc(TokenStr);
+    if TokenStr[0] = #0 then
+    begin
+      SectionLength := TokenStr - TokenStart;
+      SetLength(FCurTokenString, StrOffset + SectionLength + Length(LineEnding));
+      Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
+      Move(LineEnding[1], FCurTokenString[StrOffset + SectionLength + 1], Length(LineEnding));
+      if not FetchLine then
+      begin
+        //todo: mark as invalid
+        Break;
+      end;
+      TokenStart := TokenStr;
+      Inc(StrOffset, SectionLength + Length(LineEnding));
+    end;
+    if (TokenStr[0] = '{') and (TokenStr[1] = '{') then
+      Inc(InnerMustacheLevel);
+    if (TokenStr[0] = '}') and (TokenStr[1] = '}') then
+    begin
+      if InnerMustacheLevel = 0 then
+      begin
+        Inc(TokenStr, 2);
+        SectionLength := TokenStr - TokenStart;
+        SetLength(FCurTokenString, StrOffset + SectionLength);
+        Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
+        Break;
+      end
+      else
+        Dec(InnerMustacheLevel);
+    end;
+  end;
 end;
 
 procedure THandlebarsScanner.ScanContent(Offset: Integer);
@@ -243,11 +288,16 @@ begin
                 if (NextToken[0] = '}') and (NextToken[1] = '}') then
                 begin
                   Result := tkInverse;
-                  TokenStr := NextToken;
-                  Inc(TokenStr, 2);
+                  TokenStr := NextToken + 2;
                 end
                 else
                   Result := tkOpenInverse;
+              end;
+            '!':
+              begin
+                Result := tkComment;
+                Dec(TokenStr, 2);
+                ScanComment;
               end;
           else
             if GetNextStr(TokenStr, NextToken, 'else', 4) then
@@ -265,15 +315,18 @@ begin
               end;
             end;
           end;
-          if Result <> tkInverse then
+          if not (Result in [tkInverse, tkComment]) then
           begin
             if not (Result in [tkOpen, tkOpenInverseChain]) then
               Inc(TokenStr);
             Inc(FMustacheLevel);
           end;
-          SectionLength := TokenStr - TokenStart;
-          SetLength(FCurTokenString, SectionLength);
-          Move(TokenStart^, FCurTokenString[1], SectionLength);
+          if Result <> tkComment then
+          begin
+            SectionLength := TokenStr - TokenStart;
+            SetLength(FCurTokenString, SectionLength);
+            Move(TokenStart^, FCurTokenString[1], SectionLength);
+          end;
         end
         else
         begin
