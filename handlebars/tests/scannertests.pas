@@ -466,6 +466,10 @@ begin
   CreateTokens('{{  foo  ' + LineEnding + '   bar }}');
   CheckEquals([tkOPEN, tkID, tkID, tkCLOSE], FTokens.Values);
   CheckEquals(tkID, 'foo', FTokens[1]);
+
+  CreateTokens('{{  foo  ' + LineEnding + LineEnding + '   bar }}');
+  CheckEquals([tkOPEN, tkID, tkID, tkCLOSE], FTokens.Values);
+  CheckEquals(tkID, 'foo', FTokens[1]);
 end;
 
 procedure TScannerTests.RawContent;

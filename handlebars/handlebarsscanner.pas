@@ -240,25 +240,20 @@ var
   SectionLength, StrOffset: Integer;
   C, Escaped: Char;
 begin
-  if (TokenStr = nil) and not FetchLine then
+  FCurTokenString := '';
+  while (TokenStr = nil) or (TokenStr[0] = #0) do
   begin
-    Result := tkEOF;
-    FCurToken := Result;
-    Exit;
+    if not FetchLine then
+    begin
+      Result := tkEOF;
+      FCurToken := tkEOF;
+      Exit;
+    end;
   end;
 
   Result := tkInvalid;
 
-  FCurTokenString := '';
-
   case TokenStr[0] of
-    #0:         // Empty line
-      begin
-        if not FetchLine then
-        begin
-          Result := tkEOF;
-        end;
-      end;
     '{':
       begin
         //{{
@@ -525,24 +520,15 @@ begin
 
         while True do
         begin
-          if TokenStr[0] = #0 then
-          begin
-            if not FetchLine then
-            begin
-              SectionLength := TokenStr - TokenStart;
-              SetLength(FCurTokenString, SectionLength);
-              Move(TokenStart^, FCurTokenString[1], SectionLength);
-              Break;
-            end;
-          end;
           if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/'])
-            or (TokenStr[0] = '=') or (TokenStr[0] = ')') or (TokenStr[0] = '|') then
+            or (TokenStr[0] = '=') or (TokenStr[0] = ')') or (TokenStr[0] = '|')
+            or (TokenStr[0] = #0) then
             break;
           Inc(TokenStr);
         end;
       end;
       if TokenStr <> nil then
-      begin;
+      begin
         SectionLength := TokenStr - TokenStart;
         SetLength(FCurTokenString, SectionLength + StrOffset);
         if SectionLength > 0 then
