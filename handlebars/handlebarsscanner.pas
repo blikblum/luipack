@@ -79,6 +79,9 @@ type
 
 implementation
 
+uses
+  strings;
+
 { THandlebarsScanner }
 
 function THandlebarsScanner.FetchLine: Boolean;
@@ -352,8 +355,53 @@ begin
             if TokenStr[0] = #0 then
               Error('SErrOpenString');
           end;
+        '0'..'9','-':
+          begin
+            Result := tkNumber;
+            TokenStart := TokenStr;
+            while True do
+            begin
+              Inc(TokenStr);
+              case TokenStr[0] of
+                '.':
+                  begin
+                    if TokenStr[1] in ['0'..'9', 'e', 'E'] then
+                    begin
+                      Inc(TokenStr);
+                      repeat
+                        Inc(TokenStr);
+                      until not (TokenStr[0] in ['0'..'9', 'e', 'E','-','+']);
+                    end;
+                    break;
+                  end;
+                '0'..'9': ;
+                'e', 'E':
+                  begin
+                    Inc(TokenStr);
+                    if TokenStr[0] in ['-','+']  then
+                      Inc(TokenStr);
+                    while TokenStr[0] in ['0'..'9'] do
+                      Inc(TokenStr);
+                    break;
+                  end;
+                else
+                  break;
+              end;
+            end;
+            SectionLength := TokenStr - TokenStart;
+            SetLength(FCurTokenString, SectionLength);
+            if SectionLength > 0 then
+              Move(TokenStart^, FCurTokenString[1], SectionLength);
+          end;
       else
-        Result := tkId;
+        if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
+          Result := tkBoolean
+        else if strlcomp(TokenStr, 'null', 4) = 0 then
+          Result := tkNull
+        else if strlcomp(TokenStr, 'undefined', 9) = 0 then
+          Result := tkUndefined
+        else
+          Result := tkId;
         while True do
         begin
           if TokenStr[0] = #0 then
