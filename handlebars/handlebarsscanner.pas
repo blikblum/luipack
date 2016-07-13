@@ -168,6 +168,15 @@ begin
     Inc(Result);
 end;
 
+function GetNextToken(Start: PChar; out Next: PChar; const Token: Char): Boolean;
+begin
+  Next := Start;
+  while Next[0] = ' ' do
+    Inc(Next);
+  Result := Next[0] = Token;
+end;
+
+
 function THandlebarsScanner.FetchToken: THandlebarsToken;
 var
   TokenStart, NextToken: PChar;
@@ -236,13 +245,17 @@ begin
             if (NextToken[0] = '}') and (NextToken[1] = '}') then
             begin
               Result := tkInverse;
+              TokenStr := NextToken + 2;
+            end
+            else
+            begin
+              Result := tkOpenInverseChain;
               TokenStr := NextToken;
-              Inc(TokenStr, 2);
             end;
           end;
           if Result <> tkInverse then
           begin
-            if Result <> tkOpen then
+            if not (Result in [tkOpen, tkOpenInverseChain]) then
               Inc(TokenStr);
             Inc(FMustacheLevel);
           end;
@@ -413,6 +426,11 @@ begin
             Result := tkCloseSExpr;
             Inc(TokenStr);
           end;
+        '|':
+          begin
+            Result := tkCloseBlockParams;
+            Inc(TokenStr);
+          end;
       else
         if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
           Result := tkBoolean
@@ -420,8 +438,14 @@ begin
           Result := tkNull
         else if strlcomp(TokenStr, 'undefined', 9) = 0 then
           Result := tkUndefined
+        else if (strlcomp(TokenStr, 'as', 2) = 0) and GetNextToken(TokenStr + 2, NextToken, '|') then
+        begin
+          Result := tkOpenBlockParams;
+          TokenStr := NextToken;
+        end
         else
           Result := tkId;
+
         while True do
         begin
           if TokenStr[0] = #0 then
@@ -435,7 +459,7 @@ begin
             end;
           end;
           if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/'])
-            or (TokenStr[0] = '=') or (TokenStr[0] = ')') then
+            or (TokenStr[0] = '=') or (TokenStr[0] = ')') or (TokenStr[0] = '|') then
             break;
           Inc(TokenStr);
         end;
@@ -446,7 +470,7 @@ begin
         SetLength(FCurTokenString, SectionLength + StrOffset);
         if SectionLength > 0 then
           Move(TokenStart^, FCurTokenString[StrOffset + 1], SectionLength);
-        if Result = tkString then
+        if Result in [tkString, tkOpenBlockParams] then
           Inc(TokenStr);
         //rigth trim space
         while TokenStr[0] = ' ' do
