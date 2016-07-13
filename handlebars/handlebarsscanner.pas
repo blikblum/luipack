@@ -59,7 +59,7 @@ type
      FMustacheLevel: Integer;
      function FetchLine: Boolean;
      function GetCurColumn: Integer;
-     procedure ScanContent;
+     procedure ScanContent(Offset: Integer = 0);
    protected
      procedure Error(const Msg: string);overload;
      procedure Error(const Msg: string; const Args: array of Const);overload;
@@ -105,12 +105,13 @@ begin
   Result := TokenStr - PChar(CurLine);
 end;
 
-procedure THandlebarsScanner.ScanContent;
+procedure THandlebarsScanner.ScanContent(Offset: Integer);
 var
   TokenStart: PChar;
   SectionLength: Integer;
 begin
   TokenStart := TokenStr;
+  Inc(TokenStr, Offset);
   while True do
   begin
     Inc(TokenStr);
@@ -124,7 +125,8 @@ begin
         Break;
       end;
     end;
-    if (TokenStr[0] = '{') and (TokenStr[1] = '{') then
+    if ((TokenStr[0] = '{') and (TokenStr[1] = '{')) or
+      ((TokenStr[0] = '\') and (TokenStr[1] = '{') and (TokenStr[2] = '{')) then
     begin
       SetLength(FCurTokenString, SectionLength);
       Move(TokenStart^, FCurTokenString[1], SectionLength);
@@ -299,7 +301,13 @@ begin
     if FMustacheLevel = 0 then
     begin
       Result := tkContent;
-      ScanContent;
+      if strlcomp(TokenStr, '\{{', 3) = 0 then
+      begin
+        Inc(TokenStr);
+        ScanContent(1);
+      end
+      else
+        ScanContent;
     end
     else
     begin
