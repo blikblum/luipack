@@ -393,6 +393,11 @@ begin
             if SectionLength > 0 then
               Move(TokenStart^, FCurTokenString[1], SectionLength);
           end;
+        '=':
+          begin
+            Result := tkEquals;
+            Inc(TokenStr);
+          end
       else
         if (strlcomp(TokenStr, 'true', 4) = 0) or (strlcomp(TokenStr, 'false', 5) = 0) then
           Result := tkBoolean
@@ -414,7 +419,8 @@ begin
               Break;
             end;
           end;
-          if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/']) then
+          if ((TokenStr[0] = '}') and (TokenStr[1] = '}')) or (TokenStr[0] in [' ', '.', '/'])
+            or (TokenStr[0] = '=') then
             break;
           Inc(TokenStr);
         end;
