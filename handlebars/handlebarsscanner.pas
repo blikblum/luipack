@@ -173,14 +173,21 @@ begin
     Inc(Result);
 end;
 
-function GetNextToken(Start: PChar; out Next: PChar; const Token: Char): Boolean;
+function GetNextChar(Start: PChar; out Next: PChar; const C: Char): Boolean;
 begin
   Next := Start;
   while Next[0] = ' ' do
     Inc(Next);
-  Result := Next[0] = Token;
+  Result := Next[0] = C;
 end;
 
+function GetNextStr(Start: PChar; out Next: PChar; const Str: PChar; Size: SizeInt): Boolean;
+begin
+  Next := Start;
+  while Next[0] = ' ' do
+    Inc(Next);
+  Result := strlcomp(Next, Str, Size) = 0;
+end;
 
 function THandlebarsScanner.FetchToken: THandlebarsToken;
 var
@@ -242,20 +249,20 @@ begin
                 else
                   Result := tkOpenInverse;
               end;
-          end;
-          NextToken := GetNextToken(TokenStr);
-          if (NextToken[0] = 'e') and (NextToken[1] = 'l') and (NextToken[2] = 's') and (NextToken[3] = 'e') then
-          begin
-            NextToken := GetNextToken(NextToken + 4);
-            if (NextToken[0] = '}') and (NextToken[1] = '}') then
+          else
+            if GetNextStr(TokenStr, NextToken, 'else', 4) then
             begin
-              Result := tkInverse;
-              TokenStr := NextToken + 2;
-            end
-            else
-            begin
-              Result := tkOpenInverseChain;
-              TokenStr := NextToken;
+              NextToken := GetNextToken(NextToken + 4);
+              if (NextToken[0] = '}') and (NextToken[1] = '}') then
+              begin
+                Result := tkInverse;
+                TokenStr := NextToken + 2;
+              end
+              else
+              begin
+                Result := tkOpenInverseChain;
+                TokenStr := NextToken;
+              end;
             end;
           end;
           if Result <> tkInverse then
@@ -455,7 +462,7 @@ begin
           Result := tkNull
         else if strlcomp(TokenStr, 'undefined', 9) = 0 then
           Result := tkUndefined
-        else if (strlcomp(TokenStr, 'as', 2) = 0) and GetNextToken(TokenStr + 2, NextToken, '|') then
+        else if (strlcomp(TokenStr, 'as', 2) = 0) and GetNextChar(TokenStr + 2, NextToken, '|') then
         begin
           Result := tkOpenBlockParams;
           TokenStr := NextToken;
