@@ -4,7 +4,7 @@ program HandlebarsGUITestRunner;
 
 uses
   Interfaces, Forms, GUITestRunner,
-  BasicTests, MustacheTests, ScannerTests, luicomponents;
+  BasicTests, MustacheTests, ScannerTests, luicomponents, ParserTests;
 
 {$R *.res}
 
