@@ -18,21 +18,6 @@ type
 
   TStringArray = array of String;
 
-  { TStatementList }
-
-  TStatementList = class
-  private
-    FList: TFPObjectList;
-    function GetCount: Integer; inline;
-    function GetItems(Index: Integer): THandlebarsStatement; inline;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function Add(Statement: THandlebarsStatement): Integer; inline;
-    property Count: Integer read GetCount;
-    property Items[Index: Integer]: THandlebarsStatement read GetItems; default;
-  end;
-
   { THandlebarsNode }
 
   THandlebarsNode = class
@@ -45,7 +30,6 @@ type
 
   THandlebarsExpression = class(THandlebarsNode)
   private
-
   end;
 
   { THandlebarsPathExpression }
@@ -59,6 +43,7 @@ type
   public
     constructor Create(const Path: String);
     property Data: Boolean read FData;
+    property Depth: Integer read FDepth;
     property Parts: TStringArray read FParts;
   end;
 
@@ -91,18 +76,24 @@ type
   private
     FValue: String;
     FOriginal: String;
+  public
+    property Value: String read FValue;
   end;
 
   THandlebarsBooleanLiteral = class(THandlebarsLiteral)
   private
     FValue: Boolean;
     FOriginal: Boolean;
+  public
+    property Value: Boolean read FValue;
   end;
 
   THandlebarsNumberLiteral = class(THandlebarsLiteral)
   private
     FValue: Double;
     FOriginal: Double;
+  public
+    property Value: Double read FValue;
   end;
 
   THandlebarsNullLiteral = class(THandlebarsLiteral)
@@ -134,6 +125,8 @@ type
     property Path: THandlebarsExpression read FPath;
   end;
 
+  { THandlebarsBlockStatement }
+
   THandlebarsBlockStatement = class(THandlebarsStatement)
   private
     FPath: THandlebarsPathExpression;
@@ -144,7 +137,18 @@ type
     FOpenStrip: TStripFlags;
     FInverseStrip: TStripFlags;
     FCloseStrip: TStripFlags;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+  public
+    property Hash: THandlebarsHash read FHash;
+    property Inverse: THandlebarsProgram read FInverse;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsPathExpression read FPath;
+    property TheProgram: THandlebarsProgram read FProgram;
   end;
+
+  { THandlebarsPartialStatement }
 
   THandlebarsPartialStatement = class(THandlebarsStatement)
   private
@@ -153,7 +157,16 @@ type
     FHash: THandlebarsHash;
     FIndent: String;
     FStrip: TStripFlags;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+  public
+    property Indent: String read FIndent;
+    property Hash: THandlebarsHash read FHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
   end;
+
+  { THandlebarsPartialBlockStatement }
 
   THandlebarsPartialBlockStatement = class(THandlebarsStatement)
   private
@@ -164,67 +177,181 @@ type
     FIndent: String;
     FOpenStrip: TStripFlags;
     FCloseStrip: TStripFlags;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+  public
+    property Indent: String read FIndent;
+    property Hash: THandlebarsHash read FHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property TheProgram: THandlebarsProgram read FProgram;
   end;
 
   THandlebarsContentStatement = class(THandlebarsStatement)
   private
     FValue: String;
     FOriginal: String;
+  public
+    property Value: String read FValue;
   end;
 
   THandlebarsCommentStatement = class(THandlebarsStatement)
   private
     FValue: String;
     FStrip: TStripFlags;
+  public
+    property Value: String read FValue;
   end;
+
+  { THandlebarsDecorator }
 
   THandlebarsDecorator = class(THandlebarsStatement)
   private
     FPath: THandlebarsExpression; //PathExpression | Literal
     FParams: TFPObjectList; //[ Expression ];
     FHash: THandlebarsHash;
-
     FStrip: TStripFlags;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+  public
+    property Hash: THandlebarsHash read FHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read FPath;
   end;
+
+  { THandlebarsDecoratorBlock }
 
   THandlebarsDecoratorBlock = class(THandlebarsStatement)
   private
     FPath: THandlebarsExpression; //PathExpression | Literal
     FParams: TFPObjectList; //[ Expression ];
     FHash: THandlebarsHash;
-
     FProgram: THandlebarsProgram;
-
     FOpenStrip: TStripFlags;
     FCloseStrip: TStripFlags;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+  public
+    property Hash: THandlebarsHash read FHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read FPath;
+    property TheProgram: THandlebarsProgram read FProgram;
   end;
 
-  THandlebarsHash = class(THandlebarsNode)
-  private
-    FPairs: TFPObjectList; //[ HashPair ]
-  end;
 
   THandlebarsHashPair = class(THandlebarsNode)
   private
     FKey: String;
     FValue: THandlebarsExpression;
+  public
+    property Key: String read FKey;
+    property Value: THandlebarsExpression read FValue;
+  end;
+
+  { THandlebarsHash }
+
+  THandlebarsHash = class(THandlebarsNode)
+  private
+    FPairs: TFPObjectList; //[ HashPair ]
+    function GetPairCount: Integer;
+    function GetPairs(Index: Integer): THandlebarsHashPair;
+  public
+    property PairCount: Integer read GetPairCount;
+    property Pairs[Index: Integer]: THandlebarsHashPair read GetPairs;
   end;
 
   { THandlebarsProgram }
 
   THandlebarsProgram = class(THandlebarsNode)
   private
-    FBody: TStatementList;
+    FBody: TFPObjectList;
     FBlockParams: TStringArray;
+    function GetBody(Index: Integer): THandlebarsStatement;
+    function GetBodyCount: Integer;
   public
     constructor Create;
     destructor Destroy; override;
     property BlockParams: TStringArray read FBlockParams;
-    property Body: TStatementList read FBody;
+    property Body[Index: Integer]: THandlebarsStatement read GetBody;
+    property BodyCount: Integer read GetBodyCount;
   end;
 
 
 implementation
+
+{ THandlebarsHash }
+
+function THandlebarsHash.GetPairCount: Integer;
+begin
+  Result := FPairs.Count;
+end;
+
+function THandlebarsHash.GetPairs(Index: Integer): THandlebarsHashPair;
+begin
+  Result := THandlebarsHashPair(FPairs[Index]);
+end;
+
+{ THandlebarsDecoratorBlock }
+
+function THandlebarsDecoratorBlock.GetParamCount: Integer;
+begin
+  Result := FParams.Count;
+end;
+
+function THandlebarsDecoratorBlock.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := THandlebarsExpression(FParams[Index]);
+end;
+
+{ THandlebarsDecorator }
+
+function THandlebarsDecorator.GetParamCount: Integer;
+begin
+  Result := FParams.Count;
+end;
+
+function THandlebarsDecorator.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := THandlebarsExpression(FParams[Index]);
+end;
+
+{ THandlebarsPartialBlockStatement }
+
+function THandlebarsPartialBlockStatement.GetParamCount: Integer;
+begin
+  Result  := FParams.Count;
+end;
+
+function THandlebarsPartialBlockStatement.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := THandlebarsExpression(FParams[Index]);
+end;
+
+{ THandlebarsPartialStatement }
+
+function THandlebarsPartialStatement.GetParamCount: Integer;
+begin
+  Result := FParams.Count;
+end;
+
+function THandlebarsPartialStatement.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := THandlebarsExpression(FParams[Index]);
+end;
+
+{ THandlebarsBlockStatement }
+
+function THandlebarsBlockStatement.GetParamCount: Integer;
+begin
+  Result := FParams.Count;
+end;
+
+function THandlebarsBlockStatement.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := THandlebarsExpression(FParams[Index]);
+end;
 
 { THandlebarsMustacheStatement }
 
@@ -236,34 +363,6 @@ end;
 function THandlebarsMustacheStatement.GetParams(Index: Integer): THandlebarsExpression;
 begin
   Result := THandlebarsExpression(FParams[Index]);
-end;
-
-{ TStatementList }
-
-function TStatementList.GetItems(Index: Integer): THandlebarsStatement;
-begin
-  Result := THandlebarsStatement(FList[Index]);
-end;
-
-function TStatementList.GetCount: Integer;
-begin
-  Result := FList.Count;
-end;
-
-constructor TStatementList.Create;
-begin
-  FList := TFPObjectList.Create;
-end;
-
-destructor TStatementList.Destroy;
-begin
-  FList.Destroy;
-  inherited Destroy;
-end;
-
-function TStatementList.Add(Statement: THandlebarsStatement): Integer;
-begin
-  Result := FList.Add(Statement);
 end;
 
 { THandlebarsNode }
@@ -302,9 +401,19 @@ end;
 
 { THandlebarsProgram }
 
+function THandlebarsProgram.GetBody(Index: Integer): THandlebarsStatement;
+begin
+  Result := THandlebarsStatement(FBody[Index]);
+end;
+
+function THandlebarsProgram.GetBodyCount: Integer;
+begin
+  Result := FBody.Count;
+end;
+
 constructor THandlebarsProgram.Create;
 begin
-  FBody := TStatementList.Create;
+  FBody := TFPObjectList.Create;
 end;
 
 destructor THandlebarsProgram.Destroy;

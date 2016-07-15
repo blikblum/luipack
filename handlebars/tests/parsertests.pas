@@ -20,6 +20,26 @@ type
     procedure MustachesWithPath;
     procedure MustachesWithThis;
     procedure MustachesWithHyphen;
+    procedure MustachesWithEscapedBrackets;
+    procedure MustachesWithEscapedEscapeChar;
+    procedure MustachesWithParams;
+    procedure MustachesWithStringParams;
+    procedure MustachesWithNumberParams;
+    procedure MustachesWithBooleanParams;
+    procedure MustachesWithUndefinedOrNull;
+    procedure MustachesWithDataParams;
+    procedure MustachesWithHashArguments;
+    procedure ContentsFollowedByMustache;
+    procedure Partial;
+    procedure PartialWithContext;
+    procedure PartialWithHash;
+    procedure PartialWithContextAndHash;
+    procedure PartialWithComplexName;
+    procedure PartialBlock;
+    procedure BlockMismatch;
+    procedure PartialBlockWithArguments;
+    procedure Comment;
+    procedure MultiLineComment;
   end;
 
 implementation
@@ -29,18 +49,127 @@ uses
 
 type
 
+  { ISubExpression }
+
+  ISubExpression = interface
+    ['{0D038222-BD76-4D77-94F0-681B8E259821}']
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
+  { TMustacheSubExpressionAdapter }
+
+  TMustacheSubExpressionAdapter = class(TInterfacedObject, ISubExpression)
+  private
+    FMustache: THandlebarsMustacheStatement;
+  public
+    constructor Create(Mustache: THandlebarsMustacheStatement);
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
+  { TDecoratorSubExpressionAdapter }
+
+  TDecoratorSubExpressionAdapter = class(TInterfacedObject, ISubExpression)
+  private
+    FDecorator: THandlebarsDecorator;
+  public
+    constructor Create(Decorator: THandlebarsDecorator);
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
+  { TBlockSubExpressionAdapter }
+
+  TBlockSubExpressionAdapter = class(TInterfacedObject, ISubExpression)
+  private
+    FBlock: THandlebarsBlockStatement;
+  public
+    constructor Create(Block: THandlebarsBlockStatement);
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
+  { TDecoratorBlockSubExpressionAdapter }
+
+  TDecoratorBlockSubExpressionAdapter = class(TInterfacedObject, ISubExpression)
+  private
+    FBlock: THandlebarsDecoratorBlock;
+  public
+    constructor Create(Block: THandlebarsDecoratorBlock);
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
+  { TSubExpressionAdapter }
+
+  TSubExpressionAdapter = class(TInterfacedObject, ISubExpression)
+  private
+    FSubExpression: THandlebarsSubExpression;
+  public
+    constructor Create(SubExpression: THandlebarsSubExpression);
+    function GetHash: THandlebarsHash;
+    function GetParamCount: Integer;
+    function GetParams(Index: Integer): THandlebarsExpression;
+    function GetPath: THandlebarsExpression;
+    property Hash: THandlebarsHash read GetHash;
+    property Params[Index: Integer]: THandlebarsExpression read GetParams;
+    property ParamCount: Integer read GetParamCount;
+    property Path: THandlebarsExpression read GetPath;
+  end;
+
   { TASTPrinter }
 
   TASTPrinter = record
     FPadding: Integer;
+    function BooleanToStr(Bool: THandlebarsBooleanLiteral): String;
+    function BlockStatementToStr(Block: THandlebarsBlockStatement): String;
+    function CommentToStr(Comment: THandlebarsCommentStatement): String;
+    function ContentToStr(Content: THandlebarsContentStatement): String;
+    function DecoratorToStr(Decorator: THandlebarsDecorator): String;
+    function DecoratorBlockToStr(Block: THandlebarsDecoratorBlock): String;
+    function HashPairToStr(Pair: THandlebarsHashPair): String;
+    function HashToStr(Hash: THandlebarsHash): String;
     function Pad(const Str: String): String;
     function PathExpressionToStr(Path: THandlebarsPathExpression): String;
     function ProgramToStr(AProgram: THandlebarsProgram): String;
     function MustacheToStr(Mustache: THandlebarsMustacheStatement): String;
-    function InnerMustacheToStr(Mustache: THandlebarsMustacheStatement): String;
     function NodeToStr(Node: THandlebarsNode): String;
-    function SubExpressionToStr(SubExpression: THandlebarsSubExpression): String;
+    function NumberToStr(Number: THandlebarsNumberLiteral): String;
+    function StringToStr(Str: THandlebarsStringLiteral): String;
+    function SubExpressionToStr(SubExpression: ISubExpression): String;
   end;
+
 
   //not supported by fpc 2.6.4
   {
@@ -79,6 +208,141 @@ begin
   Result := '';
 end;
 
+{ TDecoratorBlockSubExpressionAdapter }
+
+constructor TDecoratorBlockSubExpressionAdapter.Create(Block: THandlebarsDecoratorBlock);
+begin
+  FBlock := Block;
+end;
+
+function TDecoratorBlockSubExpressionAdapter.GetHash: THandlebarsHash;
+begin
+  Result := FBlock.Hash;
+end;
+
+function TDecoratorBlockSubExpressionAdapter.GetParamCount: Integer;
+begin
+  Result := FBlock.ParamCount;
+end;
+
+function TDecoratorBlockSubExpressionAdapter.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := FBlock.Params[Index];
+end;
+
+function TDecoratorBlockSubExpressionAdapter.GetPath: THandlebarsExpression;
+begin
+  Result := FBlock.Path;
+end;
+
+{ TBlockSubExpressionAdapter }
+
+constructor TBlockSubExpressionAdapter.Create(Block: THandlebarsBlockStatement);
+begin
+  FBlock := Block;
+end;
+
+function TBlockSubExpressionAdapter.GetHash: THandlebarsHash;
+begin
+  Result := FBlock.Hash;
+end;
+
+function TBlockSubExpressionAdapter.GetParamCount: Integer;
+begin
+  Result := FBlock.ParamCount;
+end;
+
+function TBlockSubExpressionAdapter.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := FBlock.Params[Index];
+end;
+
+function TBlockSubExpressionAdapter.GetPath: THandlebarsExpression;
+begin
+  Result := FBlock.Path;
+end;
+
+{ TDecoratorSubExpressionAdapter }
+
+constructor TDecoratorSubExpressionAdapter.Create(Decorator: THandlebarsDecorator);
+begin
+  FDecorator := Decorator;
+end;
+
+function TDecoratorSubExpressionAdapter.GetHash: THandlebarsHash;
+begin
+  Result := FDecorator.Hash;
+end;
+
+function TDecoratorSubExpressionAdapter.GetParamCount: Integer;
+begin
+  Result := FDecorator.ParamCount;
+end;
+
+function TDecoratorSubExpressionAdapter.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := FDecorator.Params[Index];
+end;
+
+function TDecoratorSubExpressionAdapter.GetPath: THandlebarsExpression;
+begin
+  Result := FDecorator.Path;
+end;
+
+{ TSubExpressionAdapter }
+
+constructor TSubExpressionAdapter.Create(SubExpression: THandlebarsSubExpression);
+begin
+  FSubExpression := SubExpression;
+end;
+
+function TSubExpressionAdapter.GetHash: THandlebarsHash;
+begin
+  Result := FSubExpression.Hash;
+end;
+
+function TSubExpressionAdapter.GetParamCount: Integer;
+begin
+  Result := FSubExpression.ParamCount;
+end;
+
+function TSubExpressionAdapter.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := FSubExpression.Params[Index];
+end;
+
+function TSubExpressionAdapter.GetPath: THandlebarsExpression;
+begin
+  Result := FSubExpression.Path;
+end;
+
+{ TMustacheSubExpressionAdapter }
+
+constructor TMustacheSubExpressionAdapter.Create(Mustache: THandlebarsMustacheStatement);
+begin
+  FMustache := Mustache;
+end;
+
+function TMustacheSubExpressionAdapter.GetHash: THandlebarsHash;
+begin
+  Result := FMustache.Hash;
+end;
+
+function TMustacheSubExpressionAdapter.GetParamCount: Integer;
+begin
+  Result := FMustache.ParamCount;
+end;
+
+function TMustacheSubExpressionAdapter.GetParams(Index: Integer): THandlebarsExpression;
+begin
+  Result := FMustache.Params[Index];
+end;
+
+function TMustacheSubExpressionAdapter.GetPath: THandlebarsExpression;
+begin
+  Result := FMustache.Path;
+end;
+
 { TStringArrayHelper }
 {
 function TStringArrayHelper.Join(const Separator: String): String;
@@ -106,6 +370,83 @@ end;
 }
 
 { TASTPrinter }
+
+function TASTPrinter.BooleanToStr(Bool: THandlebarsBooleanLiteral): String;
+begin
+  Result := 'BOOLEAN{' + BoolToStr(Bool.Value, True) + '}';
+end;
+
+function TASTPrinter.BlockStatementToStr(Block: THandlebarsBlockStatement): String;
+begin
+  Result := Pad('BLOCK:');
+  Inc(FPadding);
+  Result += Pad(SubExpressionToStr(TBlockSubExpressionAdapter.Create(Block)));
+  if (Block.TheProgram <> nil) then
+  begin
+    Result += Pad('PROGRAM:');
+    Inc(FPadding);
+    Result += ProgramToStr(Block.TheProgram);
+    Dec(FPadding);
+  end;
+  if (block.Inverse <> nil) then
+  begin
+    if (block.TheProgram <> nil) then
+      Inc(FPadding);
+    Result += Pad('{{^}}');
+    Inc(FPadding);
+    Result += ProgramToStr(block.inverse);
+    Dec(FPadding);
+    if (block.TheProgram <> nil) then
+      Dec(FPadding);
+  end;
+  Dec(FPadding);
+end;
+
+function TASTPrinter.CommentToStr(Comment: THandlebarsCommentStatement): String;
+begin
+  Result := Pad('{{! ''' + Comment.Value + ''' }}');
+end;
+
+function TASTPrinter.ContentToStr(Content: THandlebarsContentStatement): String;
+begin
+  Result := Pad('CONTENT[ ''' + Content.Value + ''' ]');
+end;
+
+function TASTPrinter.DecoratorToStr(Decorator: THandlebarsDecorator): String;
+begin
+  Result := Pad('{{ DIRECTIVE ' + SubExpressionToStr(TDecoratorSubExpressionAdapter.Create(Decorator)) + ' }}');
+end;
+
+function TASTPrinter.DecoratorBlockToStr(Block: THandlebarsDecoratorBlock): String;
+begin
+  Result := Pad('DIRECTIVE BLOCK:');
+  Inc(FPadding);
+  Result += Pad(SubExpressionToStr(TDecoratorBlockSubExpressionAdapter.Create(Block)));
+  if (Block.TheProgram <> nil) then
+  begin
+    Result += Pad('PROGRAM:');
+    Inc(FPadding);
+    Result += ProgramToStr(Block.TheProgram);
+    Dec(FPadding);
+  end;
+  Dec(FPadding);
+end;
+
+function TASTPrinter.HashPairToStr(Pair: THandlebarsHashPair): String;
+begin
+  Result := Pair.Key + '=' + NodeToStr(Pair.Value);
+end;
+
+function TASTPrinter.HashToStr(Hash: THandlebarsHash): String;
+var
+  Pairs: TStringArray;
+  i: Integer;
+begin
+  for i := 0 to Hash.PairCount - 1 do
+    Push(Pairs, HashPairToStr(Hash.Pairs[i]));
+
+  Result := 'HASH{' + Join(Pairs, ', ') + '}';
+end;
 
 function TASTPrinter.Pad(const Str: String): String;
 begin
@@ -135,7 +476,7 @@ begin
     Result += Pad(BlockParamsStr);
   end;
 
-  for i := 0 to AProgram.Body.Count - 1 do
+  for i := 0 to AProgram.BodyCount - 1 do
     Result += NodeToStr(AProgram.Body[i]);
 
   Dec(FPadding);
@@ -143,36 +484,58 @@ end;
 
 function TASTPrinter.MustacheToStr(Mustache: THandlebarsMustacheStatement): String;
 begin
-  Result := Pad('{{ ' + InnerMustacheToStr(Mustache) + ' }}');
-end;
-
-function TASTPrinter.InnerMustacheToStr(Mustache: THandlebarsMustacheStatement): String;
-//same as subexpression. in JS it's possible to do duck typing...
-var
-  Params: TStringArray;
-  HashStr, ParamsStr: String;
-  i: Integer;
-begin
-  for i := 0 to Mustache.ParamCount - 1 do
-    Push(Params, NodeToStr(Mustache.Params[i]));
-
-  ParamsStr :='[' + Join(Params, ', ') + ']';
-
-  HashStr := IfThen(Mustache.Hash <> nil, NodeToStr(Mustache.Hash));
-  Result := NodeToStr(Mustache.Path) + ' ' + ParamsStr + HashStr;
+  Result := Pad('{{ ' + SubExpressionToStr(TMustacheSubExpressionAdapter.Create(Mustache)) + ' }}');
 end;
 
 function TASTPrinter.NodeToStr(Node: THandlebarsNode): String;
 begin
   case Node.NodeType of
+    'BooleanLiteral':
+      Result := BooleanToStr(THandlebarsBooleanLiteral(Node));
+    'BlockStatement':
+      Result := BlockStatementToStr(THandlebarsBlockStatement(Node));
+    'CommentStatement':
+      Result := CommentToStr(THandlebarsCommentStatement(Node));
+    'ContentStatement':
+      Result := ContentToStr(THandlebarsContentStatement(Node));
+    'Decorator':
+      Result := DecoratorToStr(THandlebarsDecorator(Node));
+    'DecoratorBlock':
+      Result := DecoratorBlockToStr(THandlebarsDecoratorBlock(Node));
+    'Hash':
+      Result := HashToStr(THandlebarsHash(Node));
+    'HashPair':
+      Result := HashPairToStr(THandlebarsHashPair(Node));
+    'MustacheStatement':
+      Result := MustacheToStr(THandlebarsMustacheStatement(Node));
+    'PathExpression':
+      Result := PathExpressionToStr(THandlebarsPathExpression(Node));
     'Program':
       Result := ProgramToStr(THandlebarsProgram(Node));
+    'NumberLiteral':
+      Result := NumberToStr(THandlebarsNumberLiteral(Node));
+    'NullLiteral':
+      Result := 'NULL';
+    'StringLiteral':
+      Result := StringToStr(THandlebarsStringLiteral(Node));
+    'UndefinedLiteral':
+      Result := 'UNDEFINED';
   else
     raise Exception.CreateFmt('Unknow node type: %s', [Node.NodeType]);
   end;
 end;
 
-function TASTPrinter.SubExpressionToStr(SubExpression: THandlebarsSubExpression): String;
+function TASTPrinter.NumberToStr(Number: THandlebarsNumberLiteral): String;
+begin
+  Result := 'NUMBER{' + FloatToStr(Number.Value) + '}';
+end;
+
+function TASTPrinter.StringToStr(Str: THandlebarsStringLiteral): String;
+begin
+  Result := '"' + Str.Value + '"';
+end;
+
+function TASTPrinter.SubExpressionToStr(SubExpression: ISubExpression): String;
 var
   Params: TStringArray;
   HashStr, ParamsStr: String;
@@ -226,6 +589,132 @@ procedure TParserTests.MustachesWithHyphen;
 begin
   CheckEquals('{{ PATH:foo-bar [] }}\n', ASTFor('{{foo-bar}}'));
 end;
+
+procedure TParserTests.MustachesWithEscapedBrackets;
+begin
+  CheckEquals('{{ PATH:foo[] [] }}\n', ASTFor('{{[foo[\]]}}'));
+end;
+
+procedure TParserTests.MustachesWithEscapedEscapeChar;
+begin
+  CheckEquals('{{ PATH:foo\ [] }}\n', ASTFor('{{[foo\\]}}'));
+end;
+
+procedure TParserTests.MustachesWithParams;
+begin
+  CheckEquals('{{ PATH:foo [PATH:bar] }}\n', ASTFor('{{foo bar}}'));
+end;
+
+procedure TParserTests.MustachesWithStringParams;
+begin
+  CheckEquals('{{ PATH:foo [PATH:bar, "baz"] }}\n', ASTFor('{{foo bar "baz" }}'));
+end;
+
+procedure TParserTests.MustachesWithNumberParams;
+begin
+  CheckEquals('{{ PATH:foo [NUMBER{1}] }}\n', ASTFor('{{foo 1}}'));
+end;
+
+procedure TParserTests.MustachesWithBooleanParams;
+begin
+  CheckEquals('{{ PATH:foo [BOOLEAN{true}] }}\n', ASTFor('{{foo true}}'));
+  CheckEquals('{{ PATH:foo [BOOLEAN{false}] }}\n', ASTFor('{{foo false}}'));
+end;
+
+procedure TParserTests.MustachesWithUndefinedOrNull;
+begin
+  //path
+  CheckEquals('{{ UNDEFINED [] }}\n', ASTFor('{{undefined}}'));
+  CheckEquals('{{ NULL [] }}\n', ASTFor('{{null}}'));
+  //params
+  CheckEquals('{{ PATH:foo [UNDEFINED, NULL] }}\n', ASTFor('{{foo undefined null}}'));
+end;
+
+procedure TParserTests.MustachesWithDataParams;
+begin
+  CheckEquals('{{ PATH:foo [@PATH:bar] }}\n', ASTFor('{{foo @bar}}'));
+end;
+
+procedure TParserTests.MustachesWithHashArguments;
+begin
+  CheckEquals('{{ PATH:foo [] HASH{bar=PATH:baz} }}\n', ASTFor('{{foo bar=baz}}'));
+  CheckEquals('{{ PATH:foo [] HASH{bar=NUMBER{1}} }}\n', ASTFor('{{foo bar=1}}'));
+  CheckEquals('{{ PATH:foo [] HASH{bar=BOOLEAN{true}} }}\n', ASTFor('{{foo bar=true}}'));
+  CheckEquals('{{ PATH:foo [] HASH{bar=BOOLEAN{false}} }}\n', ASTFor('{{foo bar=false}}'));
+  CheckEquals('{{ PATH:foo [] HASH{bar=@PATH:baz} }}\n', ASTFor('{{foo bar=@baz}}'));
+
+  CheckEquals('{{ PATH:foo [] HASH{bar=PATH:baz, bat=PATH:bam} }}\n', ASTFor('{{foo bar=baz bat=bam}}'));
+  CheckEquals('{{ PATH:foo [] HASH{bar=PATH:baz, bat="bam"} }}\n', ASTFor('{{foo bar=baz bat="bam"}}'));
+
+  CheckEquals('{{ PATH:foo [] HASH{bat="bam"} }}\n', ASTFor('{{foo bat=''bam''}}'));
+
+  CheckEquals('{{ PATH:foo [PATH:omg] HASH{bar=PATH:baz, bat="bam"} }}\n', ASTFor('{{foo omg bar=baz bat="bam"}}'));
+  CheckEquals('{{ PATH:foo [PATH:omg] HASH{bar=PATH:baz, bat="bam", baz=NUMBER{1}} }}\n', ASTFor('{{foo omg bar=baz bat="bam" baz=1}}'));
+  CheckEquals('{{ PATH:foo [PATH:omg] HASH{bar=PATH:baz, bat="bam", baz=BOOLEAN{true}} }}\n', ASTFor('{{foo omg bar=baz bat="bam" baz=true}}'));
+  CheckEquals('{{ PATH:foo [PATH:omg] HASH{bar=PATH:baz, bat="bam", baz=BOOLEAN{false}} }}\n', ASTFor('{{foo omg bar=baz bat="bam" baz=false}}'));
+end;
+
+procedure TParserTests.ContentsFollowedByMustache;
+begin
+  CheckEquals('CONTENT[ ''foo bar '' ]\n{{ PATH:baz [] }}\n', ASTFor('foo bar {{baz}}'));
+end;
+
+procedure TParserTests.Partial;
+begin
+  CheckEquals('{{> PARTIAL:foo }}\n', ASTFor('{{> foo }}'));
+  CheckEquals('{{> PARTIAL:foo }}\n', ASTFor('{{> "foo" }}'));
+  CheckEquals('{{> PARTIAL:1 }}\n', ASTFor('{{> 1 }}'));
+end;
+
+procedure TParserTests.PartialWithContext;
+begin
+  CheckEquals('{{> PARTIAL:foo PATH:bar }}\n', ASTFor('{{> foo bar}}'));
+end;
+
+procedure TParserTests.PartialWithHash;
+begin
+  CheckEquals('{{> PARTIAL:foo HASH{bar=PATH:bat} }}\n', ASTFor('{{> foo bar=bat}}'));
+end;
+
+procedure TParserTests.PartialWithContextAndHash;
+begin
+  CheckEquals('{{> PARTIAL:foo PATH:bar HASH{bat=PATH:baz} }}\n', ASTFor('{{> foo bar bat=baz}}'));
+end;
+
+procedure TParserTests.PartialWithComplexName;
+begin
+  CheckEquals('{{> PARTIAL:shared/partial?.bar }}\n', ASTFor('{{> shared/partial?.bar}}'));
+end;
+
+procedure TParserTests.PartialBlock;
+begin
+  CheckEquals('{{> PARTIAL BLOCK:foo PROGRAM:\n  CONTENT[ ''bar'' ]\n }}\n', ASTFor('{{#> foo}}bar{{/foo}}'));
+end;
+
+procedure TParserTests.BlockMismatch;
+begin
+  //shouldThrow(function() {
+  //  ASTFor('{{#> goodbyes}}{{/hellos}}');
+  //}, Error, (/goodbyes doesn't match hellos/));
+end;
+
+procedure TParserTests.PartialBlockWithArguments;
+begin
+  CheckEquals('{{> PARTIAL BLOCK:foo PATH:context HASH{hash=PATH:value} PROGRAM:\n  CONTENT[ ''bar'' ]\n }}\n', ASTFor('{{#> foo context hash=value}}bar{{/foo}}'));
+end;
+
+procedure TParserTests.Comment;
+begin
+  CheckEquals('{{! '' this is a comment '' }}\n', ASTFor('{{! this is a comment }}'));
+end;
+
+procedure TParserTests.MultiLineComment;
+begin
+  CheckEquals('{{! '''+LineEnding+'this is a multi-line comment'+LineEnding+''' }}\n', ASTFor('{{!'+LineEnding+'this is a multi-line comment'+LineEnding+'}}'));
+end;
+
+initialization
+  RegisterTest('Parser', TParserTests.Suite);
 
 end.
 
