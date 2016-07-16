@@ -36,13 +36,15 @@ type
     tkId,
     tkSep,
     tkData,
+    tkUndefined,
+    tkNull,
     tkBoolean,
     tkNumber,
     tkString,
-    tkUndefined,
-    tkNull,
     tkInvalid
   );
+
+  THandlebarsTokens = set of THandlebarsToken;
 
   //inspired by fpc jsonscanner
 
@@ -77,6 +79,9 @@ type
      property CurToken: THandlebarsToken read FCurToken;
      property CurTokenString: string read FCurTokenString;
    end;
+
+const
+  LiteralTokens = [tkUndefined..tkString];
 
 implementation
 

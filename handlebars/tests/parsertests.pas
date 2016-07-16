@@ -194,7 +194,7 @@ begin
   end;
 end;
 
-procedure Push(StrArray: TStringArray; const S: String);
+procedure Push(var StrArray: TStringArray; const S: String);
 var
   Len: Integer;
 begin
@@ -204,8 +204,20 @@ begin
 end;
 
 function ASTFor(const Template: String): String;
+var
+  Parser: THandlebarsParser;
+  AProgram: THandlebarsProgram;
+  Printer: TASTPrinter;
 begin
   Result := '';
+  Printer.FPadding := 0;
+  Parser := THandlebarsParser.Create(Template);
+  try
+    AProgram := Parser.Parse;
+    Result := Printer.ProgramToStr(AProgram);
+  finally
+    Parser.Destroy;
+  end;
 end;
 
 { TDecoratorBlockSubExpressionAdapter }
@@ -373,7 +385,7 @@ end;
 
 function TASTPrinter.BooleanToStr(Bool: THandlebarsBooleanLiteral): String;
 begin
-  Result := 'BOOLEAN{' + BoolToStr(Bool.Value, True) + '}';
+  Result := 'BOOLEAN{' + LowerCase(BoolToStr(Bool.Value, True)) + '}';
 end;
 
 function TASTPrinter.BlockStatementToStr(Block: THandlebarsBlockStatement): String;
@@ -521,7 +533,7 @@ begin
     'UndefinedLiteral':
       Result := 'UNDEFINED';
   else
-    raise Exception.CreateFmt('Unknow node type: %s', [Node.NodeType]);
+    raise Exception.CreateFmt('Unknown node type: %s', [Node.NodeType]);
   end;
 end;
 
@@ -546,7 +558,9 @@ begin
 
   ParamsStr :='[' + Join(Params, ', ') + ']';
 
-  HashStr := IfThen(SubExpression.Hash <> nil, NodeToStr(SubExpression.Hash));
+  HashStr := '';
+  if SubExpression.Hash <> nil then
+    HashStr := ' ' + NodeToStr(SubExpression.Hash);
   Result := NodeToStr(SubExpression.Path) + ' ' + ParamsStr + HashStr;
 end;
 

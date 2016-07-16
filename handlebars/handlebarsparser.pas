@@ -5,7 +5,7 @@ unit HandlebarsParser;
 interface
 
 uses
-  Classes, SysUtils, contnrs;
+  Classes, SysUtils, contnrs, HandlebarsScanner;
 
 type
   THandlebarsHash = class;
@@ -41,7 +41,6 @@ type
     FDepth: Integer;
     FData: Boolean;
   public
-    constructor Create(const Path: String);
     property Data: Boolean read FData;
     property Depth: Integer read FDepth;
     property Parts: TStringArray read FParts;
@@ -72,27 +71,36 @@ type
   public
   end;
 
+  { THandlebarsStringLiteral }
+
   THandlebarsStringLiteral = class(THandlebarsLiteral)
   private
     FValue: String;
     FOriginal: String;
   public
+    constructor Create(const AValue: String);
     property Value: String read FValue;
   end;
+
+  { THandlebarsBooleanLiteral }
 
   THandlebarsBooleanLiteral = class(THandlebarsLiteral)
   private
     FValue: Boolean;
     FOriginal: Boolean;
   public
+    constructor Create(const AValue: String);
     property Value: Boolean read FValue;
   end;
+
+  { THandlebarsNumberLiteral }
 
   THandlebarsNumberLiteral = class(THandlebarsLiteral)
   private
     FValue: Double;
     FOriginal: Double;
   public
+    constructor Create(const ValueStr: String);
     property Value: Double read FValue;
   end;
 
@@ -119,6 +127,8 @@ type
     function GetParamCount: Integer;
     function GetParams(Index: Integer): THandlebarsExpression;
   public
+    constructor Create;
+    destructor Destroy; override;
     property Hash: THandlebarsHash read FHash;
     property Params[Index: Integer]: THandlebarsExpression read GetParams;
     property ParamCount: Integer read GetParamCount;
@@ -187,11 +197,14 @@ type
     property TheProgram: THandlebarsProgram read FProgram;
   end;
 
+  { THandlebarsContentStatement }
+
   THandlebarsContentStatement = class(THandlebarsStatement)
   private
     FValue: String;
     FOriginal: String;
   public
+    constructor Create(const Value: String);
     property Value: String read FValue;
   end;
 
@@ -241,11 +254,15 @@ type
   end;
 
 
+  { THandlebarsHashPair }
+
   THandlebarsHashPair = class(THandlebarsNode)
   private
     FKey: String;
     FValue: THandlebarsExpression;
   public
+    constructor Create(const AKey: String; AValue: THandlebarsExpression);
+    destructor Destroy; override;
     property Key: String read FKey;
     property Value: THandlebarsExpression read FValue;
   end;
@@ -258,6 +275,9 @@ type
     function GetPairCount: Integer;
     function GetPairs(Index: Integer): THandlebarsHashPair;
   public
+    constructor Create;
+    destructor Destroy; override;
+    function AddPair(Pair: THandlebarsHashPair): THandlebarsHashPair;
     property PairCount: Integer read GetPairCount;
     property Pairs[Index: Integer]: THandlebarsHashPair read GetPairs;
   end;
@@ -266,7 +286,7 @@ type
 
   THandlebarsProgram = class(THandlebarsNode)
   private
-    FBody: TFPObjectList;
+    FBody: TFPObjectList; //[ Statement ]
     FBlockParams: TStringArray;
     function GetBody(Index: Integer): THandlebarsStatement;
     function GetBodyCount: Integer;
@@ -278,8 +298,251 @@ type
     property BodyCount: Integer read GetBodyCount;
   end;
 
+  EHandlebarsParse = class(Exception);
+
+  { THandlebarsParser }
+
+  THandlebarsParser = class
+  private
+    FScanner: THandlebarsScanner;
+    function ParseExpression(AllowSubExpression: Boolean): THandlebarsExpression;
+    function ParseMustache: THandlebarsMustacheStatement;
+    function ParsePath(IsData: Boolean): THandlebarsPathExpression;
+    function ParseProgram(BreakToken: THandlebarsToken): THandlebarsProgram;
+    function ParseStatement: THandlebarsStatement;
+    procedure UnexpectedToken(Expected: THandlebarsTokens);
+  public
+    constructor Create(Source : TStream); overload;
+    constructor Create(const Source : String); overload;
+    destructor Destroy; override;
+    function Parse: THandlebarsProgram;
+  end;
 
 implementation
+
+{ THandlebarsHashPair }
+
+constructor THandlebarsHashPair.Create(const AKey: String; AValue: THandlebarsExpression);
+begin
+  FKey := AKey;
+  FValue := AValue;
+end;
+
+destructor THandlebarsHashPair.Destroy;
+begin
+  FValue.Free;
+  inherited Destroy;
+end;
+
+{ THandlebarsBooleanLiteral }
+
+constructor THandlebarsBooleanLiteral.Create(const AValue: String);
+begin
+  FValue := AValue = 'true';
+  FOriginal := FValue;
+end;
+
+{ THandlebarsStringLiteral }
+
+constructor THandlebarsStringLiteral.Create(const AValue: String);
+begin
+  FValue := AValue;
+  FOriginal := AValue;
+end;
+
+{ THandlebarsNumberLiteral }
+
+constructor THandlebarsNumberLiteral.Create(const ValueStr: String);
+begin
+  FValue := StrToFloat(ValueStr);
+  FOriginal := FValue;
+end;
+
+{ THandlebarsContentStatement }
+
+constructor THandlebarsContentStatement.Create(const Value: String);
+begin
+  FValue := Value;
+  FOriginal := Value;
+end;
+
+{ THandlebarsParser }
+
+destructor THandlebarsParser.Destroy;
+begin
+  FScanner.Destroy;
+end;
+
+function THandlebarsParser.ParseExpression(AllowSubExpression: Boolean): THandlebarsExpression;
+var
+  T: THandlebarsToken;
+begin
+  T := FScanner.CurToken;
+  case T of
+    tkNumber: Result := THandlebarsNumberLiteral.Create(FScanner.CurTokenString);
+    tkString: Result := THandlebarsStringLiteral.Create(FScanner.CurTokenString);
+    tkBoolean: Result := THandlebarsBooleanLiteral.Create(FScanner.CurTokenString);
+    tkNull: Result := THandlebarsNullLiteral.Create;
+    tkUndefined: Result := THandlebarsUndefinedLiteral.Create;
+    tkId: Result := ParsePath(False);
+    tkData:
+      begin
+        if FScanner.FetchToken = tkId then
+          Result := ParsePath(True)
+        else
+          UnexpectedToken([tkId]);
+      end;
+    tkOpenSExpr:
+      begin
+        if not AllowSubExpression then
+          UnexpectedToken([tkUndefined..tkString, tkId, tkData]);
+      end
+    else
+      UnexpectedToken([tkUndefined..tkString, tkId, tkData, tkOpenSExpr]);
+  end;
+  if T in LiteralTokens then
+    FScanner.FetchToken;
+end;
+
+function THandlebarsParser.ParseMustache: THandlebarsMustacheStatement;
+var
+  PrevTokenString: String;
+  Hash: THandlebarsHash;
+  Expression: THandlebarsExpression;
+begin
+  Result := THandlebarsMustacheStatement.Create;
+  FScanner.FetchToken;
+  Result.FPath := ParseExpression(False);
+  //params
+  while FScanner.CurToken <> tkClose do
+  begin
+    PrevTokenString := FScanner.CurTokenString;
+    Expression := ParseExpression(True);
+    if FScanner.CurToken <> tkEquals then
+      Result.FParams.Add(Expression)
+    else
+    begin
+      //discard previous expression
+      Expression.Destroy;
+      Result.FHash := THandlebarsHash.Create;
+      FScanner.FetchToken;
+      Expression := ParseExpression(True);
+      Result.FHash.AddPair(THandlebarsHashPair.Create(PrevTokenString, Expression));
+      //hash
+      while FScanner.CurToken = tkId do
+      begin
+        PrevTokenString := FScanner.CurTokenString;
+        if FScanner.FetchToken = tkEquals then
+        begin
+          FScanner.FetchToken;
+          Expression := ParseExpression(True);
+          Result.FHash.AddPair(THandlebarsHashPair.Create(PrevTokenString, Expression));
+        end
+        else
+          UnexpectedToken([tkEquals]);
+      end;
+    end;
+  end;
+end;
+
+function THandlebarsParser.ParsePath(IsData: Boolean): THandlebarsPathExpression;
+var
+  PartCount: Integer;
+  Part: String;
+begin
+  Result := THandlebarsPathExpression.Create;
+  Result.FData := IsData;
+  repeat
+    Part := FScanner.CurTokenString;
+    if Part <> 'this' then
+    begin
+      if Part = '..' then
+        Inc(Result.FDepth)
+      else
+      begin
+        PartCount := Length(Result.Parts);
+        SetLength(Result.FParts, PartCount + 1);
+        Result.FParts[PartCount] := Part;
+      end;
+    end;
+    if FScanner.FetchToken = tkSep then
+    begin
+      if FScanner.FetchToken <> tkId then
+        UnexpectedToken([tkId]);
+    end
+    else
+      Break;
+  until False;
+end;
+
+function THandlebarsParser.ParseProgram(BreakToken: THandlebarsToken): THandlebarsProgram;
+var
+  T: THandlebarsToken;
+begin
+  Result := THandlebarsProgram.Create;
+  T := FScanner.FetchToken;
+  while T <> BreakToken do
+  begin
+    Result.FBody.Add(ParseStatement);
+    T := FScanner.FetchToken;
+  end;
+end;
+
+function THandlebarsParser.ParseStatement: THandlebarsStatement;
+var
+  T: THandlebarsToken;
+begin
+  T := FScanner.CurToken;
+  case T of
+    tkContent:
+      Result := THandlebarsContentStatement.Create(FScanner.CurTokenString);
+    tkOpen, tkOpenUnescaped:
+      begin
+        Result := ParseMustache;
+      end;
+  end;
+end;
+
+function TokenSetToStr(Tokens: THandlebarsTokens): String;
+var
+  Token: THandlebarsToken;
+  TokenStr: String;
+begin
+  Result := '[';
+  for Token in Tokens do
+  begin
+    WriteStr(TokenStr, Token);
+    Result := Result + TokenStr;
+    Result := Result + ',';
+  end;
+  Result := Result + ']';
+end;
+
+
+procedure THandlebarsParser.UnexpectedToken(Expected: THandlebarsTokens);
+var
+  ActualStr, ExpectedStr: String;
+begin
+  WriteStr(ActualStr, FScanner.CurToken);
+  ExpectedStr := TokenSetToStr(Expected);
+  raise EHandlebarsParse.CreateFmt('Got %s expected %s', [ActualStr, ExpectedStr]);
+end;
+
+constructor THandlebarsParser.Create(Source: TStream);
+begin
+  FScanner := THandlebarsScanner.Create(Source);
+end;
+
+constructor THandlebarsParser.Create(const Source: String);
+begin
+  FScanner := THandlebarsScanner.Create(Source);
+end;
+
+
+function THandlebarsParser.Parse: THandlebarsProgram;
+begin
+  Result := ParseProgram(tkEOF);
+end;
 
 { THandlebarsHash }
 
@@ -291,6 +554,23 @@ end;
 function THandlebarsHash.GetPairs(Index: Integer): THandlebarsHashPair;
 begin
   Result := THandlebarsHashPair(FPairs[Index]);
+end;
+
+constructor THandlebarsHash.Create;
+begin
+  FPairs := TFPObjectList.Create;
+end;
+
+destructor THandlebarsHash.Destroy;
+begin
+  FPairs.Destroy;
+  inherited Destroy;
+end;
+
+function THandlebarsHash.AddPair(Pair: THandlebarsHashPair): THandlebarsHashPair;
+begin
+  Result := Pair;
+  FPairs.Add(Pair);
 end;
 
 { THandlebarsDecoratorBlock }
@@ -365,11 +645,24 @@ begin
   Result := THandlebarsExpression(FParams[Index]);
 end;
 
+constructor THandlebarsMustacheStatement.Create;
+begin
+  FParams := TFPObjectList.Create;
+end;
+
+destructor THandlebarsMustacheStatement.Destroy;
+begin
+  FPath.Free;
+  FHash.Free;
+  FParams.Destroy;
+  inherited Destroy;
+end;
+
 { THandlebarsNode }
 
 function THandlebarsNode.GetNodeType: String;
 const
-  PrefixOffset = 11; //THandlebars
+  PrefixOffset = 12; //THandlebars
 var
   TheClassName: String;
 begin
@@ -420,13 +713,6 @@ destructor THandlebarsProgram.Destroy;
 begin
   FBody.Destroy;
   inherited Destroy;
-end;
-
-{ THandlebarsPathExpression }
-
-constructor THandlebarsPathExpression.Create(const Path: String);
-begin
-
 end;
 
 end.
