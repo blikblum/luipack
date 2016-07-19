@@ -43,6 +43,7 @@ type
   public
     property Data: Boolean read FData;
     property Depth: Integer read FDepth;
+    property Original: String read FOriginal;
     property Parts: TStringArray read FParts;
   end;
 
@@ -172,6 +173,7 @@ type
   public
     property Indent: String read FIndent;
     property Hash: THandlebarsHash read FHash;
+    property Name: THandlebarsExpression read FName;
     property Params[Index: Integer]: THandlebarsExpression read GetParams;
     property ParamCount: Integer read GetParamCount;
   end;
@@ -192,6 +194,7 @@ type
   public
     property Indent: String read FIndent;
     property Hash: THandlebarsHash read FHash;
+    property Name: THandlebarsExpression read FName;
     property Params[Index: Integer]: THandlebarsExpression read GetParams;
     property ParamCount: Integer read GetParamCount;
     property TheProgram: THandlebarsProgram read FProgram;

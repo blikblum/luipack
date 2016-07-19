@@ -40,6 +40,21 @@ type
     procedure PartialBlockWithArguments;
     procedure Comment;
     procedure MultiLineComment;
+    procedure InvertSection;
+    procedure MultipleInvertSections;
+    procedure EmptyBlock;
+    procedure EmptyBlockWithEmptyInverse;
+    procedure NonEmptyBlockWithEmptyInverse;
+    procedure EmptyBlockWithNonEmptyInverse;
+    procedure StandaloneInverse;
+    procedure ThrowsOnOldInvert;
+    procedure BlockWithParams;
+    procedure InverseBlockWithParams;
+    procedure ChainedInverseBlockWithParams;
+    procedure ParseErrors;
+    procedure InvalidPaths;
+    procedure ReportLineNumbers;
+    procedure Directives;
   end;
 
 implementation
@@ -153,7 +168,7 @@ type
   TASTPrinter = record
     FPadding: Integer;
     function BooleanToStr(Bool: THandlebarsBooleanLiteral): String;
-    function BlockStatementToStr(Block: THandlebarsBlockStatement): String;
+    function BlockToStr(Block: THandlebarsBlockStatement): String;
     function CommentToStr(Comment: THandlebarsCommentStatement): String;
     function ContentToStr(Content: THandlebarsContentStatement): String;
     function DecoratorToStr(Decorator: THandlebarsDecorator): String;
@@ -162,6 +177,8 @@ type
     function HashToStr(Hash: THandlebarsHash): String;
     function Pad(const Str: String): String;
     function PathExpressionToStr(Path: THandlebarsPathExpression): String;
+    function PartialBlockToStr(Partial: THandlebarsPartialBlockStatement): String;
+    function PartialToStr(Partial: THandlebarsPartialStatement): String;
     function ProgramToStr(AProgram: THandlebarsProgram): String;
     function MustacheToStr(Mustache: THandlebarsMustacheStatement): String;
     function NodeToStr(Node: THandlebarsNode): String;
@@ -388,7 +405,7 @@ begin
   Result := 'BOOLEAN{' + LowerCase(BoolToStr(Bool.Value, True)) + '}';
 end;
 
-function TASTPrinter.BlockStatementToStr(Block: THandlebarsBlockStatement): String;
+function TASTPrinter.BlockToStr(Block: THandlebarsBlockStatement): String;
 begin
   Result := Pad('BLOCK:');
   Inc(FPadding);
@@ -473,6 +490,48 @@ begin
   Result := IfThen(Path.Data, '@') + 'PATH:' + PathStr;
 end;
 
+function TASTPrinter.PartialBlockToStr(Partial: THandlebarsPartialBlockStatement): String;
+var
+  Content, Original: String;
+begin
+  if Partial.Name is THandlebarsPathExpression then
+    Original := THandlebarsPathExpression(Partial.Name).Original
+  else
+    Original := '';
+
+  Content := 'PARTIAL BLOCK:' + Original;
+  if (Partial.ParamCount > 0) then
+    Content += ' ' + NodeToStr(Partial.Params[0]);
+
+  if (Partial.Hash <> nil)  then
+    content += ' ' + NodeToStr(Partial.Hash);
+
+  content += ' ' + Pad('PROGRAM:');
+  Inc(FPadding);
+  Content += NodeToStr(Partial.TheProgram);
+  Dec(FPadding);
+
+  Result  := Pad('{{> ' + Content + ' }}');
+end;
+
+function TASTPrinter.PartialToStr(Partial: THandlebarsPartialStatement): String;
+var
+  Content, Original: String;
+begin
+  if Partial.Name is THandlebarsPathExpression then
+    Original := THandlebarsPathExpression(Partial.Name).Original
+  else
+    Original := '';
+  Content := 'PARTIAL:' + Original;
+  if Partial.ParamCount > 0  then
+    Content += ' ' + NodeToStr(Partial.Params[0]);
+
+  if (Partial.Hash <> nil) then
+    Content += ' ' + NodeToStr(Partial.Hash);
+
+  Result := Pad('{{> ' + Content + ' }}');
+end;
+
 function TASTPrinter.ProgramToStr(AProgram: THandlebarsProgram): String;
 var
   BlockParamsStr: String;
@@ -505,7 +564,7 @@ begin
     'BooleanLiteral':
       Result := BooleanToStr(THandlebarsBooleanLiteral(Node));
     'BlockStatement':
-      Result := BlockStatementToStr(THandlebarsBlockStatement(Node));
+      Result := BlockToStr(THandlebarsBlockStatement(Node));
     'CommentStatement':
       Result := CommentToStr(THandlebarsCommentStatement(Node));
     'ContentStatement':
@@ -520,14 +579,18 @@ begin
       Result := HashPairToStr(THandlebarsHashPair(Node));
     'MustacheStatement':
       Result := MustacheToStr(THandlebarsMustacheStatement(Node));
-    'PathExpression':
-      Result := PathExpressionToStr(THandlebarsPathExpression(Node));
-    'Program':
-      Result := ProgramToStr(THandlebarsProgram(Node));
     'NumberLiteral':
       Result := NumberToStr(THandlebarsNumberLiteral(Node));
     'NullLiteral':
       Result := 'NULL';
+    'PartialBlockStatement':
+      Result := PartialBlockToStr(THandlebarsPartialBlockStatement(Node));
+    'PartialStatement':
+      Result := PartialToStr(THandlebarsPartialStatement(Node));
+    'PathExpression':
+      Result := PathExpressionToStr(THandlebarsPathExpression(Node));
+    'Program':
+      Result := ProgramToStr(THandlebarsProgram(Node));
     'StringLiteral':
       Result := StringToStr(THandlebarsStringLiteral(Node));
     'UndefinedLiteral':
@@ -725,6 +788,127 @@ end;
 procedure TParserTests.MultiLineComment;
 begin
   CheckEquals('{{! '''+LineEnding+'this is a multi-line comment'+LineEnding+''' }}\n', ASTFor('{{!'+LineEnding+'this is a multi-line comment'+LineEnding+'}}'));
+end;
+
+procedure TParserTests.InvertSection;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    CONTENT[ '' bar '' ]\n  {{^}}\n    CONTENT[ '' baz '' ]\n', ASTFor('{{#foo}} bar {{^}} baz {{/foo}}'));
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    CONTENT[ '' bar '' ]\n  {{^}}\n    CONTENT[ '' baz '' ]\n', ASTFor('{{#foo}} bar {{else}} baz {{/foo}}'));
+end;
+
+procedure TParserTests.MultipleInvertSections;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    CONTENT[ '' bar '' ]\n  {{^}}\n    BLOCK:\n      PATH:if [PATH:bar]\n      PROGRAM:\n      {{^}}\n        CONTENT[ '' baz '' ]\n', ASTFor('{{#foo}} bar {{else if bar}}{{else}} baz {{/foo}}'));
+end;
+
+procedure TParserTests.EmptyBlock;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n', ASTFor('{{#foo}}{{/foo}}'));
+end;
+
+procedure TParserTests.EmptyBlockWithEmptyInverse;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n  {{^}}\n', ASTFor('{{#foo}}{{^}}{{/foo}}'));
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n  {{^}}\n', ASTFor('{{#foo}}{{else}}{{/foo}}'));
+end;
+
+procedure TParserTests.NonEmptyBlockWithEmptyInverse;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    CONTENT[ '' bar '' ]\n  {{^}}\n', ASTFor('{{#foo}} bar {{^}}{{/foo}}'));
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    CONTENT[ '' bar '' ]\n  {{^}}\n', ASTFor('{{#foo}} bar {{else}}{{/foo}}'));
+end;
+
+procedure TParserTests.EmptyBlockWithNonEmptyInverse;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n  {{^}}\n    CONTENT[ '' bar '' ]\n', ASTFor('{{#foo}}{{^}} bar {{/foo}}'));
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n  {{^}}\n    CONTENT[ '' bar '' ]\n', ASTFor('{{#foo}}{{else}} bar {{/foo}}'));
+end;
+
+procedure TParserTests.StandaloneInverse;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  {{^}}\n    CONTENT[ ''bar'' ]\n', ASTFor('{{^foo}}bar{{/foo}}'));
+end;
+
+procedure TParserTests.ThrowsOnOldInvert;
+begin
+  //shouldThrow(function() {
+  //      ASTFor('{{else foo}}bar{{/foo}}');
+  //    }, Error);
+end;
+
+procedure TParserTests.BlockWithParams;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n    BLOCK PARAMS: [ bar baz ]\n    CONTENT[ ''content'' ]\n', ASTFor('{{#foo as |bar baz|}}content{{/foo}}'));
+end;
+
+procedure TParserTests.InverseBlockWithParams;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  {{^}}\n    BLOCK PARAMS: [ bar baz ]\n    CONTENT[ ''content'' ]\n', ASTFor('{{^foo as |bar baz|}}content{{/foo}}'));
+end;
+
+procedure TParserTests.ChainedInverseBlockWithParams;
+begin
+  CheckEquals('BLOCK:\n  PATH:foo []\n  PROGRAM:\n  {{^}}\n    BLOCK:\n      PATH:foo []\n      PROGRAM:\n        BLOCK PARAMS: [ bar baz ]\n        CONTENT[ ''content'' ]\n', ASTFor('{{#foo}}{{else foo as |bar baz|}}content{{/foo}}'));
+end;
+
+procedure TParserTests.ParseErrors;
+begin
+  //shouldThrow(function() {
+  //  ASTFor('foo{{^}}bar');
+  //}, Error, /Parse error on line 1/);
+  //shouldThrow(function() {
+  //  ASTFor('{{foo}');
+  //}, Error, /Parse error on line 1/);
+  //shouldThrow(function() {
+  //  ASTFor('{{foo &}}');
+  //}, Error, /Parse error on line 1/);
+  //shouldThrow(function() {
+  //  ASTFor('{{#goodbyes}}{{/hellos}}');
+  //}, Error, /goodbyes doesn't match hellos/);
+  //
+  //shouldThrow(function() {
+  //  ASTFor('{{{{goodbyes}}}} {{{{/hellos}}}}');
+  //}, Error, /goodbyes doesn't match hellos/);
+end;
+
+procedure TParserTests.InvalidPaths;
+begin
+  //shouldThrow(function() {
+  //  ASTFor('{{foo/../bar}}');
+  //}, Error, /Invalid path: foo\/\.\. - 1:2/);
+  //shouldThrow(function() {
+  //  ASTFor('{{foo/./bar}}');
+  //}, Error, /Invalid path: foo\/\. - 1:2/);
+  //shouldThrow(function() {
+  //  ASTFor('{{foo/this/bar}}');
+  //}, Error, /Invalid path: foo\/this - 1:2/);
+end;
+
+procedure TParserTests.ReportLineNumbers;
+begin
+//  shouldThrow(function() {
+//    ASTFor('hello\nmy\n{{foo}');
+//  }, Error, /Parse error on line 3/);
+//  shouldThrow(function() {
+//    ASTFor('hello\n\nmy\n\n{{foo}');
+//  }, Error, /Parse error on line 5/);
+//});
+//
+//it('knows how to report the correct line number in errors when the first character is a newline', function() {
+//  shouldThrow(function() {
+//    ASTFor('\n\nhello\n\nmy\n\n{{foo}');
+//  }, Error, /Parse error on line 7/);
+end;
+
+procedure TParserTests.Directives;
+begin
+  CheckEquals('DIRECTIVE BLOCK:\n  PATH:foo []\n  PROGRAM:\n', ASTFor('{{#* foo}}{{/foo}}'));
+  CheckEquals('{{ DIRECTIVE PATH:foo [] }}\n', ASTFor('{{* foo}}'));
+  //it('should fail if directives have inverse', function() {
+  //  shouldThrow(function() {
+  //    ASTFor('{{#* foo}}{{^}}{{/foo}}');
+  //  }, Error, /Unexpected inverse/);
+  //});
 end;
 
 initialization
