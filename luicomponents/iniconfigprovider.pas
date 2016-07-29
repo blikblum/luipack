@@ -16,37 +16,30 @@ type
     FCacheUpdates: Boolean;
     FFileName: String;
     FIniFile: TMemIniFile;
-    procedure SetCacheUpdates(const AValue: Boolean);
-    procedure SetFileName(const AValue: String);
+    procedure SetCacheUpdates(const Value: Boolean);
   protected
     procedure Close; override;
     procedure Open; override;
     procedure ReadSection(const SectionTitle: String; Strings: TStrings); override;
     procedure ReadSections(Strings: TStrings); override;
     function ReadString(const SectionTitle, ItemKey: String; out ValueExists: Boolean): String; override;
-    procedure WriteString(const SectionTitle, ItemKey: String; AValue: String); override;
+    procedure WriteString(const SectionTitle, ItemKey: String; Value: String); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   published
     property CacheUpdates: Boolean read FCacheUpdates write SetCacheUpdates default True;
-    property FileName: String read FFileName write SetFileName;
+    property FileName: String read FFileName write FFileName;
   end;
 
 implementation
 
 { TIniConfigProvider }
 
-procedure TIniConfigProvider.SetFileName(const AValue: string);
+procedure TIniConfigProvider.SetCacheUpdates(const Value: Boolean);
 begin
-  if FFileName = AValue then exit;
-  FFileName := AValue;
-end;
-
-procedure TIniConfigProvider.SetCacheUpdates(const AValue: Boolean);
-begin
-  if FCacheUpdates=AValue then exit;
-  FCacheUpdates:=AValue;
+  if FCacheUpdates = Value then exit;
+  FCacheUpdates := Value;
   if FIniFile <> nil then
     FIniFile.CacheUpdates := FCacheUpdates;
 end;
@@ -70,7 +63,7 @@ procedure TIniConfigProvider.Open;
 var
   ParsedFileName: String;
 begin
-  ParsedFileName := ReplacePathMacros(FFileName);
+  ParsedFileName := ExpandFileName(ReplacePathMacros(FFileName));
   DoDirSeparators(ParsedFileName);
   if FIniFile = nil then
   begin
@@ -105,10 +98,10 @@ begin
 end;
 
 procedure TIniConfigProvider.WriteString(const SectionTitle, ItemKey: String;
-  AValue: String);
+  Value: String);
 begin
   //It's necessary to trim the value to avoid storing an empty space
-  FIniFile.WriteString(SectionTitle, ItemKey, TrimRight(AValue));
+  FIniFile.WriteString(SectionTitle, ItemKey, TrimRight(Value));
 end;
 
 constructor TIniConfigProvider.Create(AOwner: TComponent);
