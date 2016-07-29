@@ -31,7 +31,7 @@ type
     function CreateData: TJSONObject; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
     function DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean; virtual;
-    procedure ParseData(AData: TJSONObject); virtual;
+    procedure ParseData({%H-}AData: TJSONObject); virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -115,7 +115,7 @@ type
   private
     FCollection: TJSONCollection;
     FData: TJSONObject;
-    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
+    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; {%H-}Data: Pointer);
     procedure SetData(Value: TJSONObject);
   public
     constructor Create(ACollection: TJSONCollection);
@@ -358,6 +358,7 @@ end;
 
 function TJSONCollection.Add(Item: TJSONModel): TJSONModel;
 begin
+  Result := Item;
   ItemsNeeded;
   FItems.Add(Item);
   if FData = nil then
