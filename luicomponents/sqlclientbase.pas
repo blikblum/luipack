@@ -381,7 +381,7 @@ var
   Field: TField;
   i: Integer;
 begin
-  if FDataset.RecordCount > 0 then
+  if (FDataset.RecordCount > 0) or (FDataset.State = dsInsert) then
   begin
     FDataset.Edit;
     try
