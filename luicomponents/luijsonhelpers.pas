@@ -13,7 +13,14 @@ type
 
   TJSONObjectHelper = class helper for TJSONObject
   public
-
+    function Find(const PropName: String; out PropData: TJSONData): Boolean; overload;
+    function Find(const PropName: String; out PropData: TJSONObject): Boolean; overload;
+    function Find(const PropName: String; out PropData: TJSONArray): Boolean; overload;
+    function Find(const PropName: String; out PropValue: Integer): Boolean; overload;
+    function Find(const PropName: String; out PropValue: Int64): Boolean; overload;
+    function Find(const PropName: String; out PropValue: Double): Boolean; overload;
+    function Find(const PropName: String; out PropValue: Boolean): Boolean; overload;
+    function Find(const PropName: String; out PropValue: String): Boolean; overload;
   end;
 
   { TJSONArrayHelper }
@@ -31,6 +38,90 @@ uses
 
 type
   JSONHelperException = class(Exception);
+
+{ TJSONObjectHelper }
+
+function TJSONObjectHelper.Find(const PropName: String; out PropData: TJSONData): Boolean;
+begin
+  PropData := Self.Find(PropName);
+  Result := PropData <> nil;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropData: TJSONObject): Boolean;
+var
+  Data: TJSONData absolute PropData;
+begin
+  Data := Self.Find(PropName, jtObject);
+  Result := PropData <> nil;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropData: TJSONArray): Boolean;
+var
+  Data: TJSONData absolute PropData;
+begin
+  Data := Self.Find(PropName, jtArray);
+  Result := PropData <> nil;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropValue: Integer): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := Self.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsInteger
+  else
+    PropValue := 0;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropValue: Int64): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := Self.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsInt64
+  else
+    PropValue := 0;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropValue: Double): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := Self.Find(PropName, jtNumber);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsFloat
+  else
+    PropValue := 0;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropValue: Boolean): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := Self.Find(PropName, jtBoolean);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsBoolean
+  else
+    PropValue := False;
+end;
+
+function TJSONObjectHelper.Find(const PropName: String; out PropValue: String): Boolean;
+var
+  Data: TJSONData;
+begin
+  Data := Self.Find(PropName, jtString);
+  Result := Data <> nil;
+  if Result then
+    PropValue := Data.AsString
+  else
+    PropValue := '';
+end;
 
 { TJSONArrayHelper }
 
