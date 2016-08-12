@@ -388,9 +388,9 @@ end;
 
 procedure TChronoLog.UpdateCount;
 begin
-  if FCount = FCapacity then
-    Expand;
   Inc(FCount);
+  if FCount >= FCapacity then
+    Expand;
 end;
 
 procedure TChronoLog.UpdateCurrentSession;
