@@ -467,6 +467,7 @@ begin
         FDataset.CreateDataset;
       end;
       FDataset.Open;
+      //todo: DisableControls / BlockRead
       case ResponseData.JSONType of
         jtObject:
           AddRecord(FDataset, TJSONObject(ResponseData));
@@ -478,6 +479,7 @@ begin
               if ItemData.JSONType = jtObject then
                 AddRecord(FDataset, TJSONObject(ItemData));
             end;
+            FDataset.First;
           end;
       end;
       FDataset.MergeChangeLog;
