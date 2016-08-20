@@ -285,7 +285,7 @@ end;
 
 procedure TVTCustomComboEditLink.SetBounds(R: TRect); stdcall;
 var
-  Offset: Integer;
+  BorderOffset: Integer;
 begin
   if not FStopping then
   begin
@@ -313,10 +313,10 @@ begin
       // control leaves around the (selected) text.
 
       R := FCombo.ClientRect;
-      Offset := 2;
+      BorderOffset := 2;
       if tsUseThemes in FTree.TreeStates then
-        Inc(Offset);
-      InflateRect(R, -TBaseVirtualTreeAccess(FTree).TextMargin + Offset, Offset);
+        Inc(BorderOffset);
+      InflateRect(R, -TBaseVirtualTreeAccess(FTree).TextMargin + BorderOffset, BorderOffset);
       if not (vsMultiline in FNode^.States) then
         OffsetRect(R, 0, FTextBounds.Top - FCombo.Top);
 
