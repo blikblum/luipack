@@ -9,7 +9,27 @@ uses
 
 type
 
-{ TJSONObjectHelper }
+  { TJSONDataHelper }
+
+  TJSONDataHelper = class helper for TJSONData
+  public
+    function FindPath(const Path: String; AType : TJSONType): TJSONData; overload;
+    function FindPath(const Path: String; out PathData: TJSONData): Boolean; overload;
+    function FindPath(const Path: String; out PathData: TJSONObject): Boolean; overload;
+    function FindPath(const Path: String; out PathData: TJSONArray): Boolean; overload;
+    function FindPath(const Path: String; out PathValue: Integer): Boolean; overload;
+    function FindPath(const Path: String; out PathValue: Int64): Boolean; overload;
+    function FindPath(const Path: String; out PathValue: Double): Boolean; overload;
+    function FindPath(const Path: String; out PathValue: Boolean): Boolean; overload;
+    function FindPath(const Path: String; out PathValue: String): Boolean; overload;
+    function GetPath(const Path: String; Default: Integer): Integer; overload;
+    function GetPath(const Path: String; Default: Int64): Int64; overload;
+    function GetPath(const Path, Default: String): String; overload;
+    function GetPath(const Path: String; Default: Double): Double; overload;
+    function GetPath(const Path: String; Default: Boolean): Boolean; overload;
+  end;
+
+  { TJSONObjectHelper }
 
   TJSONObjectHelper = class helper for TJSONObject
   public
@@ -38,6 +58,127 @@ uses
 
 type
   JSONHelperException = class(Exception);
+
+{ TJSONDataHelper }
+
+function TJSONDataHelper.FindPath(const Path: String; AType: TJSONType): TJSONData;
+begin
+  Result := Self.FindPath(Path);
+  if Assigned(Result) and (Result.JSONType <> AType) then
+    Result := nil;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathData: TJSONData): Boolean;
+begin
+  PathData := Self.FindPath(Path);
+  Result := PathData <> nil;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathData: TJSONObject): Boolean;
+var
+  FoundData: TJSONData absolute PathData;
+begin
+  FoundData := Self.FindPath(Path, jtObject);
+  Result := PathData <> nil;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathData: TJSONArray): Boolean;
+var
+  FoundData: TJSONData absolute PathData;
+begin
+  FoundData := Self.FindPath(Path, jtArray);
+  Result := PathData <> nil;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathValue: Integer): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := Self.FindPath(Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsInteger
+  else
+    PathValue := 0;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathValue: Int64): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := Self.FindPath(Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsInt64
+  else
+    PathValue := 0;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathValue: Double): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := Self.FindPath(Path, jtNumber);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsFloat
+  else
+    PathValue := 0;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathValue: Boolean): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := Self.FindPath(Path, jtBoolean);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsBoolean
+  else
+    PathValue := False;
+end;
+
+function TJSONDataHelper.FindPath(const Path: String; out PathValue: String): Boolean;
+var
+  PathData: TJSONData;
+begin
+  PathData := Self.FindPath(Path, jtString);
+  Result := PathData <> nil;
+  if Result then
+    PathValue := PathData.AsString
+  else
+    PathValue := '';
+end;
+
+function TJSONDataHelper.GetPath(const Path: String; Default: Integer): Integer;
+begin
+  if not Self.FindPath(Path, Result) then
+    Result := Default;
+end;
+
+function TJSONDataHelper.GetPath(const Path: String; Default: Int64): Int64;
+begin
+  if not Self.FindPath(Path, Result) then
+    Result := Default;
+end;
+
+function TJSONDataHelper.GetPath(const Path, Default: String): String;
+begin
+  if not Self.FindPath(Path, Result) then
+    Result := Default;
+end;
+
+function TJSONDataHelper.GetPath(const Path: String; Default: Double): Double;
+begin
+  if not Self.FindPath(Path, Result) then
+    Result := Default;
+end;
+
+function TJSONDataHelper.GetPath(const Path: String; Default: Boolean): Boolean;
+begin
+  if not Self.FindPath(Path, Result) then
+    Result := Default;
+end;
 
 { TJSONObjectHelper }
 

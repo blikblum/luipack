@@ -25,10 +25,69 @@ type
     procedure SearchObjectItems;
   end;
 
+  { TFindPathTestCase }
+
+  TFindPathTestCase = class(TTestCase)
+  private
+    FData: TJSONData;
+    procedure CreateData(const DataStr: String);
+    procedure CheckEquals(Expected, Actual: TJSONtype); overload;
+  protected
+    procedure TearDown; override;
+  published
+    procedure FilterType;
+  end;
+
 implementation
 
 uses
   LuiJSONHelpers, variants;
+
+{ TFindPathTestCase }
+
+procedure TFindPathTestCase.CreateData(const DataStr: String);
+begin
+  FData.Free;
+  FData := GetJSON(DataStr);
+end;
+
+procedure TFindPathTestCase.CheckEquals(Expected, Actual: TJSONtype);
+var
+  ActualStr, ExpectedStr: String;
+begin
+  OnCheckCalled;
+  if Expected <> Actual then
+  begin
+    WriteStr(ActualStr, Actual);
+    WriteStr(ExpectedStr, Expected);
+    FailNotEquals(ExpectedStr, ActualStr);
+  end;
+end;
+
+procedure TFindPathTestCase.TearDown;
+begin
+  FreeAndNil(FData);
+  inherited TearDown;
+end;
+
+procedure TFindPathTestCase.FilterType;
+begin
+  CreateData('{"root": {"int": 1, "str": "x", "bool": true, "null": null}}');
+  CheckEquals(jtNumber, FData.FindPath('root.int', jtNumber).JSONType);
+  CheckEquals(1, FData.FindPath('root.int', jtNumber).AsInteger);
+  CheckNull(FData.FindPath('root.int', jtString));
+
+  CheckEquals(jtString, FData.FindPath('root.str', jtString).JSONType);
+  CheckEquals('x', FData.FindPath('root.str', jtString).AsString);
+  CheckNull(FData.FindPath('root.str', jtBoolean));
+
+  CheckEquals(jtBoolean, FData.FindPath('root.bool', jtBoolean).JSONType);
+  CheckTrue(FData.FindPath('root.bool', jtBoolean).AsBoolean);
+  CheckNull(FData.FindPath('root.bool', jtString));
+
+  CheckEquals(jtNull, FData.FindPath('root.null', jtNull).JSONType);
+  CheckNull(FData.FindPath('root.null', jtBoolean));
+end;
 
 
 { TIndexOfTestCase }
@@ -110,7 +169,7 @@ begin
 end;
 
 initialization
-  ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite]);
+  ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite, TFindPathTestCase.Suite]);
 
 end.
 
