@@ -28,6 +28,7 @@ type
    protected
      function GetAdapter: TDatasetAdapterClass; override;
    public
+     function Connected: Boolean; override;
    published
      property Connection: TSQLConnection read FConnection write FConnection;
    end;
@@ -174,6 +175,11 @@ end;
 function TSQLDbResourceClient.GetAdapter: TDatasetAdapterClass;
 begin
   Result := TSQLDbAdapter;
+end;
+
+function TSQLDbResourceClient.Connected: Boolean;
+begin
+  Result := Connection.Connected;
 end;
 
 end.

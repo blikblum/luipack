@@ -210,6 +210,7 @@ type
      constructor Create(AOwner: TComponent); override;
      destructor Destroy; override;
      property Adapter: TDatasetAdapterClass read GetAdapter;
+     function Connected: Boolean; virtual;
      function GetDataset(const ModelName: String): IDatasetResource;
      function GetJSONArray(const ModelName: String): IJSONArrayResource;
      function GetJSONObject(const ModelName: String): IJSONObjectResource;
@@ -1280,6 +1281,11 @@ begin
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
+end;
+
+function TSQLResourceClient.Connected: Boolean;
+begin
+  Result := True;
 end;
 
 function TSQLResourceClient.GetDataset(const ModelName: String): IDatasetResource;

@@ -195,6 +195,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function Connected: Boolean;
     function GetDataset(const ModelName: String): IDatasetResource;
     function GetJSONArray(const ModelName: String): IJSONArrayResource;
     function GetJSONObject(const ModelName: String): IJSONObjectResource;
@@ -1417,6 +1418,12 @@ begin
   FModelDefLookup.Free;
   FModelDefs.Destroy;
   inherited Destroy;
+end;
+
+function TRESTResourceClient.Connected: Boolean;
+begin
+  //todo
+  Result := True;
 end;
 
 function TRESTResourceClient.GetDataset(const ModelName: String): IDatasetResource;
