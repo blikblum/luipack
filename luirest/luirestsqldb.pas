@@ -812,9 +812,17 @@ begin
         Query.Edit
       else
       begin
-        //todo: define the behavior when PATCH is called without a record
-        Query.Append;
-        SetPrimaryKeyData(Query, URIParams);
+        //todo: replace PutAsPatch by local check for patch SameText(ARequest.Method, 'PATCH')
+        if not FPutAsPatch then
+        begin
+          Query.Append;
+          SetPrimaryKeyData(Query, URIParams);
+        end
+        else
+        begin
+          SetResponseStatus(AResponse, 404, 'Resource does not exists', []);
+          Exit;
+        end;
       end;
       SetQueryData(Query, RequestData, URIParams, FPutAsPatch);
       Query.Post;
