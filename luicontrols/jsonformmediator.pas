@@ -852,7 +852,7 @@ var
   PropData: TJSONData;
   OptionsData: TJSONObject;
 begin
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   OptionsData := Element.OptionsData;
   if PropData <> nil then
   begin
