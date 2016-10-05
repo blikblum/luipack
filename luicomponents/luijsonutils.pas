@@ -41,6 +41,8 @@ procedure CopyJSONObject(SrcObj, DestObj: TJSONObject; const Properties: array o
 
 procedure CopyJSONObject(SrcObj, DestObj: TJSONObject);
 
+function CreateWeakJSONArray: TJSONArray;
+
 function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
 
 function FindJSONPath(Data: TJSONData; const Path: String; AType : TJSONType): TJSONData;
@@ -150,7 +152,7 @@ procedure DatasetToJSON(Dataset: TDataset; JSONObject: TJSONObject;
 implementation
 
 uses
-  jsonparser, Variants, math, LuiJSONHelpers;
+  jsonparser, Variants, math, LuiJSONHelpers, contnrs;
 
 type
 
@@ -358,6 +360,18 @@ var
 begin
   for i := 0 to SrcObj.Count - 1 do
     DestObj.Elements[SrcObj.Names[i]] := SrcObj.Items[i].Clone;
+end;
+
+type
+  TJSONArrayAccess = class(TJSONData)
+  private
+    FList: TFPObjectList;
+  end;
+
+function CreateWeakJSONArray: TJSONArray;
+begin
+  Result := CreateJSONArray([]);
+  TJSONArrayAccess(Result).FList.OwnsObjects := False;
 end;
 
 function FindJSONObject(JSONArray: TJSONArray; const ObjProps: array of Variant): TJSONObject;
