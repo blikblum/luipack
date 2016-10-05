@@ -1,0 +1,68 @@
+object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
+  Left = 403
+  Height = 369
+  Top = 129
+  Width = 536
+  Caption = 'JSON Schema'
+  ClientHeight = 369
+  ClientWidth = 536
+  OnShow = FormShow
+  LCLVersion = '1.7'
+  object PrimitiveListView: TVirtualStringTree
+    Left = 8
+    Height = 256
+    Top = 24
+    Width = 512
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Position = 0
+        Text = 'Path'
+        Width = 300
+      end    
+      item
+        Position = 1
+        Text = 'Type'
+        Width = 120
+      end    
+      item
+        Position = 2
+        Text = 'Allow null'
+        Width = 70
+      end>
+    Header.DefaultHeight = 17
+    Header.Height = 21
+    Header.MainColumn = 2
+    Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible]
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toFullRowSelect]
+    OnChecked = PrimitiveListViewChecked
+    OnGetText = PrimitiveListViewGetText
+    OnInitNode = PrimitiveListViewInitNode
+  end
+  object CancelButton: TBitBtn
+    Left = 384
+    Height = 30
+    Top = 320
+    Width = 136
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object SaveButton: TBitBtn
+    Left = 224
+    Height = 30
+    Top = 320
+    Width = 139
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 2
+  end
+end

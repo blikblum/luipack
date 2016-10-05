@@ -1,0 +1,63 @@
+object MainForm: TMainForm
+  Left = 298
+  Height = 569
+  Top = 95
+  Width = 1008
+  Caption = 'REST API Test Builder'
+  ClientHeight = 569
+  ClientWidth = 1008
+  LCLVersion = '1.7'
+  object EndPointListView: TVirtualJSONListView
+    Left = 8
+    Height = 483
+    Top = 77
+    Width = 256
+    OnGetText = EndPointListViewGetText
+    TextProperty = 'text'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring, coAllowFocus]
+        Position = 0
+        Text = 'EndPoints'
+        Width = 252
+      end>
+    Header.DefaultHeight = 17
+    Header.Options = [hoAutoResize, hoDrag, hoShowSortGlyphs, hoVisible, hoAutoSpring]
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnFocusChanged = EndPointListViewFocusChanged
+    OnFocusChanging = EndPointListViewFocusChanging
+  end
+  object Label1: TLabel
+    Left = 9
+    Height = 15
+    Top = 40
+    Width = 45
+    Caption = 'BaseURL'
+    ParentColor = False
+  end
+  object BaseURLLabel: TLabel
+    Left = 11
+    Height = 1
+    Top = 60
+    Width = 1
+    ParentColor = False
+  end
+  object LoadCollectionButton: TButton
+    Left = 8
+    Height = 30
+    Top = 5
+    Width = 256
+    Caption = 'Load Collection'
+    OnClick = LoadCollectionButtonClick
+    TabOrder = 1
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = 'JSON File|*.json'
+    left = 372
+    top = 182
+  end
+end

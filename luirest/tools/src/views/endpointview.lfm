@@ -1,0 +1,160 @@
+object EndPointFrame: TEndPointFrame
+  Left = 0
+  Height = 564
+  Top = 0
+  Width = 677
+  ClientHeight = 564
+  ClientWidth = 677
+  ParentFont = False
+  TabOrder = 0
+  DesignLeft = 438
+  DesignTop = 42
+  object NameEdit: TEdit
+    Left = 16
+    Height = 23
+    Top = 28
+    Width = 448
+    TabOrder = 0
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 15
+    Top = 11
+    Width = 32
+    Caption = 'Name'
+    ParentColor = False
+  end
+  object URLEdit: TEdit
+    Left = 63
+    Height = 23
+    Top = 79
+    Width = 526
+    ReadOnly = True
+    TabOrder = 1
+  end
+  object MethodLabel: TLabel
+    Left = 16
+    Height = 15
+    Top = 83
+    Width = 70
+    Caption = 'MethodLabel'
+    ParentColor = False
+    ParentFont = False
+  end
+  object DividerBevel1: TDividerBevel
+    Left = 16
+    Height = 15
+    Top = 58
+    Width = 656
+    Caption = 'Request'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 15
+    Top = 111
+    Width = 27
+    Caption = 'Body'
+    ParentColor = False
+  end
+  object RequestBodyMemo: TMemo
+    Left = 16
+    Height = 133
+    Top = 131
+    Width = 656
+    ScrollBars = ssAutoBoth
+    TabOrder = 2
+  end
+  object DividerBevel2: TDividerBevel
+    Left = 16
+    Height = 15
+    Top = 271
+    Width = 656
+    Caption = 'Response'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object PageControl1: TPageControl
+    Left = 16
+    Height = 257
+    Top = 288
+    Width = 656
+    ActivePage = ResponseBodyTabSheet
+    TabIndex = 0
+    TabOrder = 3
+    object ResponseBodyTabSheet: TTabSheet
+      Caption = 'Body'
+      ClientHeight = 229
+      ClientWidth = 648
+      object ResponseBodyMemo: TMemo
+        Left = 2
+        Height = 225
+        Top = 2
+        Width = 644
+        Align = alClient
+        BorderSpacing.Around = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+    object ResponseTestsTabSheet: TTabSheet
+      Caption = 'Tests'
+      ClientHeight = 229
+      ClientWidth = 648
+      object TestsMemo: TMemo
+        Left = 2
+        Height = 195
+        Top = 2
+        Width = 644
+        Align = alClient
+        BorderSpacing.Bottom = 30
+        BorderSpacing.Around = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+      object GenerateTestsButton: TButton
+        Left = 467
+        Height = 25
+        Top = 201
+        Width = 179
+        Anchors = [akRight, akBottom]
+        Caption = 'Generate'
+        OnClick = GenerateTestsButtonClick
+        TabOrder = 1
+      end
+    end
+  end
+  object RunButton: TButton
+    Left = 592
+    Height = 25
+    Top = 78
+    Width = 75
+    Caption = 'Run'
+    TabOrder = 4
+  end
+  object EndPointMediator: TJSONFormMediator
+    Elements = <    
+      item
+        Control = NameEdit
+        PropertyName = 'name'
+      end    
+      item
+        Control = URLEdit
+        Name = 'url'
+        PropertyName = 'request.url'
+      end    
+      item
+        Control = MethodLabel
+        Name = 'method'
+        PropertyName = 'request.method'
+      end    
+      item
+        Control = RequestBodyMemo
+        Name = 'requestbody'
+        PropertyName = 'request.body'
+      end>
+    left = 388
+    top = 81
+  end
+end
