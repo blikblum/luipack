@@ -12,6 +12,8 @@ type
   { TEndPointFrame }
 
   TEndPointFrame = class(TFrame)
+    Label3: TLabel;
+    ResponseCodeLabel: TLabel;
     RunButton: TButton;
     GenerateTestsButton: TButton;
     DividerBevel1: TDividerBevel;
@@ -29,16 +31,17 @@ type
     EndPointMediator: TJSONFormMediator;
     Label1: TLabel;
     procedure GenerateTestsButtonClick(Sender: TObject);
+    procedure RunButtonClick(Sender: TObject);
   private
-
+    FEndPointData: TJSONObject;
   public
-    procedure SetEndPoint(EndPointData: TJSONObject);
+    procedure SetEndPoint(Data: TJSONObject);
   end;
 
 implementation
 
 uses
-  JSONSchemaBuilderView, LuiJSONUtils, Dialogs;
+  JSONSchemaBuilderView, LuiJSONUtils, Dialogs, RESTUtils;
 
 {$R *.lfm}
 
@@ -67,9 +70,21 @@ begin
   end;
 end;
 
-procedure TEndPointFrame.SetEndPoint(EndPointData: TJSONObject);
+procedure TEndPointFrame.RunButtonClick(Sender: TObject);
+var
+  ResponseText: String;
+  ResponseCode: Integer;
 begin
-  EndPointMediator.Data := EndPointData;
+  if not DoRequest(FEndPointData, Trim(RequestBodyMemo.Text), ResponseText, ResponseCode) then
+    ShowMessage('Unable to run request');
+  ResponseCodeLabel.Caption := IntToStr(ResponseCode);
+  ResponseBodyMemo.Text := ResponseText;
+end;
+
+procedure TEndPointFrame.SetEndPoint(Data: TJSONObject);
+begin
+  FEndPointData := Data;
+  EndPointMediator.Data := Data;
   EndPointMediator.LoadData;
   //todo: load test
 end;

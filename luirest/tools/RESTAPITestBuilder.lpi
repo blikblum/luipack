@@ -6,6 +6,7 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <AutoCreateForms Value="False"/>
       <Title Value="RESTAPITestBuilder"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
@@ -22,24 +23,27 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="5">
+    <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="virtualtreeview_package"/>
+        <PackageName Value="laz_synapse"/>
       </Item1>
       <Item2>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="virtualtreeview_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="luicontrols"/>
+        <PackageName Value="LazControls"/>
       </Item3>
       <Item4>
-        <PackageName Value="vtvutils_package"/>
+        <PackageName Value="luicontrols"/>
       </Item4>
       <Item5>
-        <PackageName Value="LCL"/>
+        <PackageName Value="vtvutils_package"/>
       </Item5>
+      <Item6>
+        <PackageName Value="LCL"/>
+      </Item6>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="RESTAPITestBuilder.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -61,6 +65,7 @@
         <Filename Value="src\views\endpointview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EndPointFrame"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="EndPointView"/>
       </Unit3>
@@ -76,6 +81,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="JSONSchemaBuilderView"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="src\helpers\restutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RESTUtils"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

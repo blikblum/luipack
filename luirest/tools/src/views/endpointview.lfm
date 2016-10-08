@@ -1,9 +1,9 @@
 object EndPointFrame: TEndPointFrame
   Left = 0
-  Height = 564
+  Height = 579
   Top = 0
   Width = 677
-  ClientHeight = 564
+  ClientHeight = 579
   ClientWidth = 677
   ParentFont = False
   TabOrder = 0
@@ -29,7 +29,6 @@ object EndPointFrame: TEndPointFrame
     Height = 23
     Top = 79
     Width = 526
-    ReadOnly = True
     TabOrder = 1
   end
   object MethodLabel: TLabel
@@ -78,7 +77,7 @@ object EndPointFrame: TEndPointFrame
   object PageControl1: TPageControl
     Left = 16
     Height = 257
-    Top = 288
+    Top = 316
     Width = 656
     ActivePage = ResponseBodyTabSheet
     TabIndex = 0
@@ -131,7 +130,24 @@ object EndPointFrame: TEndPointFrame
     Top = 78
     Width = 75
     Caption = 'Run'
+    OnClick = RunButtonClick
     TabOrder = 4
+  end
+  object Label3: TLabel
+    Left = 16
+    Height = 15
+    Top = 293
+    Width = 35
+    Caption = 'Status:'
+    ParentColor = False
+  end
+  object ResponseCodeLabel: TLabel
+    Left = 56
+    Height = 15
+    Top = 293
+    Width = 10
+    Caption = '--'
+    ParentColor = False
   end
   object EndPointMediator: TJSONFormMediator
     Elements = <    

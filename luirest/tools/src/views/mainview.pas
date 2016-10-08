@@ -13,11 +13,13 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
+    Label2: TLabel;
     LoadCollectionButton: TButton;
     EndPointListView: TVirtualJSONListView;
     Label1: TLabel;
     BaseURLLabel: TLabel;
     OpenDialog1: TOpenDialog;
+    procedure EndPointListViewChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure EndPointListViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
     procedure EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,
@@ -57,8 +59,17 @@ end;
 procedure TMainForm.EndPointListViewGetText(Sender: TCustomVirtualJSONDataView; Node: PVirtualNode;
   NodeData: TJSONData; Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
 begin
-  CellText := NodeData.GetPath('request.url', '');
-  CellText := Copy(CellText, Length(FAPI.BaseURL) + 1, Length(CellText));
+  case Column of
+    0:
+      begin
+        CellText := NodeData.GetPath('request.method', '');
+      end;
+    1:
+      begin
+        CellText := NodeData.GetPath('request.url', '');
+        CellText := Copy(CellText, Length(FAPI.BaseURL) + 1, Length(CellText));
+      end;
+  end;
 end;
 
 procedure TMainForm.EndPointListViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -68,6 +79,11 @@ var
 begin
   if EndPointListView.GetData(Node, EndPointData) then
     FEndPointView.SetEndPoint(EndPointData);
+end;
+
+procedure TMainForm.EndPointListViewChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+
 end;
 
 procedure TMainForm.EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,

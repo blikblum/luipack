@@ -9,12 +9,12 @@ object MainForm: TMainForm
   LCLVersion = '1.7'
   object EndPointListView: TVirtualJSONListView
     Left = 8
-    Height = 483
-    Top = 77
+    Height = 464
+    Top = 96
     Width = 256
     OnGetText = EndPointListViewGetText
     TextProperty = 'text'
-    Header.AutoSizeIndex = 0
+    Header.AutoSizeIndex = -1
     Header.Columns = <    
       item
         Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring, coAllowFocus]
@@ -23,16 +23,18 @@ object MainForm: TMainForm
         Width = 252
       end>
     Header.DefaultHeight = 17
-    Header.Options = [hoAutoResize, hoDrag, hoShowSortGlyphs, hoVisible, hoAutoSpring]
+    Header.MainColumn = 1
+    Header.Options = [hoAutoResize, hoDrag, hoShowSortGlyphs, hoAutoSpring]
     TabOrder = 0
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnChange = EndPointListViewChange
     OnFocusChanged = EndPointListViewFocusChanged
     OnFocusChanging = EndPointListViewFocusChanging
   end
   object Label1: TLabel
-    Left = 9
+    Left = 8
     Height = 15
     Top = 40
     Width = 45
@@ -54,6 +56,14 @@ object MainForm: TMainForm
     Caption = 'Load Collection'
     OnClick = LoadCollectionButtonClick
     TabOrder = 1
+  end
+  object Label2: TLabel
+    Left = 8
+    Height = 15
+    Top = 80
+    Width = 53
+    Caption = 'EndPoints'
+    ParentColor = False
   end
   object OpenDialog1: TOpenDialog
     Filter = 'JSON File|*.json'
