@@ -168,7 +168,7 @@ object EndPointFrame: TEndPointFrame
       item
         Control = RequestBodyMemo
         Name = 'requestbody'
-        PropertyName = 'request.body'
+        PropertyName = 'request.body.raw'
       end>
     left = 388
     top = 81
