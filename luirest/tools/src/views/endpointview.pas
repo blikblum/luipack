@@ -61,8 +61,7 @@ begin
     SchemaData := TJSONSchemaBuilderForm.CreateSchema(ResponseData);
     if SchemaData <> nil then
     begin
-      //todo
-      TestsMemo.Text := SchemaData.FormatJSON();
+      TestsMemo.Text := FormatTest(MethodLabel.Caption, SchemaData.FormatJSON());
       SchemaData.Destroy;
     end;
   finally
