@@ -36,12 +36,15 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
     Header.MainColumn = 2
     Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible]
     TabOrder = 0
-    TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick, toEditOnDblClick]
     TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
-    TreeOptions.SelectionOptions = [toFullRowSelect]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
     OnChecked = PrimitiveListViewChecked
+    OnCreateEditor = PrimitiveListViewCreateEditor
+    OnEditing = PrimitiveListViewEditing
     OnGetText = PrimitiveListViewGetText
     OnInitNode = PrimitiveListViewInitNode
+    OnNewText = PrimitiveListViewNewText
   end
   object CancelButton: TBitBtn
     Left = 384

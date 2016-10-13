@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, Buttons, VirtualTrees,
-  JSONSchemaBuilder, fpjson;
+  JSONSchemaBuilder, fpjson, StdCtrls;
 
 type
 
@@ -18,15 +18,22 @@ type
     PrimitiveListView: TVirtualStringTree;
     procedure FormShow(Sender: TObject);
     procedure PrimitiveListViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure PrimitiveListViewCreateEditor(Sender: TBaseVirtualTree; Node: PVirtualNode;
+      Column: TColumnIndex; out EditLink: IVTEditLink);
+    procedure PrimitiveListViewEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
+      Column: TColumnIndex; var Allowed: Boolean);
     procedure PrimitiveListViewGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
     procedure PrimitiveListViewInitNode(Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode;
       var InitialStates: TVirtualNodeInitStates);
+    procedure PrimitiveListViewNewText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+      Column: TColumnIndex; const NewText: String);
   private
     FBuilder: TJSONSchemaBuilder;
     FData: TJSONData;
     FSchemaData: TJSONObject;
     FPrimitives: TStringList;
+    procedure UpdateDefinitionType(Node: PVirtualNode; const PropertyType: String);
     procedure PrimitiveProperty(const Path: String; DefinitionData: TJSONObject);
   public
     constructor Create(TheOwner: TComponent); override;
@@ -40,7 +47,7 @@ var
 implementation
 
 uses
-  LuiJSONHelpers;
+  LuiJSONHelpers, VTComboEditLink;
 
 {$R *.lfm}
 
@@ -54,16 +61,30 @@ end;
 
 procedure TJSONSchemaBuilderForm.PrimitiveListViewChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
-var
-  DefinitionData: TJSONObject;
-  PropertyType: String;
 begin
-  DefinitionData := TJSONObject(FPrimitives.Objects[Node^.Index]);
-  PropertyType := PrimitiveListView.Text[Node, 1];
-  if Node^.CheckState = csCheckedNormal then
-    DefinitionData.Arrays['type'] := TJSONArray.Create([PropertyType, 'null'])
-  else
-    DefinitionData.Strings['type'] := PropertyType;
+  UpdateDefinitionType(Node, PrimitiveListView.Text[Node, 1]);
+end;
+
+procedure TJSONSchemaBuilderForm.PrimitiveListViewCreateEditor(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
+var
+  TypeLink: TVTComboEditLink;
+begin
+  case Column of
+    1:
+      begin
+        TypeLink := TVTComboEditLink.Create;
+        TypeLink.Combo.Items.AddStrings(['string', 'number', 'integer', 'boolean']);
+        TypeLink.Combo.Style := csDropDownList;
+        EditLink := TypeLink;
+      end;
+  end;
+end;
+
+procedure TJSONSchemaBuilderForm.PrimitiveListViewEditing(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
+begin
+  Allowed := Column = 1;
 end;
 
 procedure TJSONSchemaBuilderForm.PrimitiveListViewGetText(Sender: TBaseVirtualTree;
@@ -88,8 +109,33 @@ end;
 
 procedure TJSONSchemaBuilderForm.PrimitiveListViewInitNode(Sender: TBaseVirtualTree; ParentNode,
   Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+var
+  DefinitionData: TJSONObject;
+  TypeData: TJSONArray;
 begin
   Node^.CheckType := ctCheckBox;
+  DefinitionData := TJSONObject(FPrimitives.Objects[Node^.Index]);
+  if DefinitionData.Find('type', TypeData) and (TypeData.IndexOf('null') > -1) then
+    Node^.CheckState := csCheckedNormal;
+end;
+
+procedure TJSONSchemaBuilderForm.PrimitiveListViewNewText(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; const NewText: String);
+begin
+  case Column of
+    1: UpdateDefinitionType(Node, NewText);
+  end;
+end;
+
+procedure TJSONSchemaBuilderForm.UpdateDefinitionType(Node: PVirtualNode; const PropertyType: String);
+var
+  DefinitionData: TJSONObject;
+begin
+  DefinitionData := TJSONObject(FPrimitives.Objects[Node^.Index]);
+  if Node^.CheckState = csCheckedNormal then
+    DefinitionData.Arrays['type'] := TJSONArray.Create([PropertyType, 'null'])
+  else
+    DefinitionData.Strings['type'] := PropertyType;
 end;
 
 procedure TJSONSchemaBuilderForm.PrimitiveProperty(const Path: String; DefinitionData: TJSONObject);

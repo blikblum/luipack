@@ -6,6 +6,7 @@ object MainForm: TMainForm
   Caption = 'REST API Test Builder'
   ClientHeight = 569
   ClientWidth = 1008
+  Position = poScreenCenter
   LCLVersion = '1.7'
   object EndPointListView: TVirtualJSONListView
     Left = 6

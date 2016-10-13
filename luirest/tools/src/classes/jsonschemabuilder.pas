@@ -150,7 +150,7 @@ begin
         PropName := NullProps[i];
         PropType := PropertiesData.GetPath(PropName + '.type', 'null');
         if PropType <> 'null' then
-          SetJSONPath(PropertiesData, PropName + '.type', TJSONArray.Create([PropType, nil]));
+          SetJSONPath(PropertiesData, PropName + '.type', TJSONArray.Create([PropType, 'null']));
       end;
     end;
   finally

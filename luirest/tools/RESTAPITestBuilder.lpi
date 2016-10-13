@@ -78,6 +78,7 @@
         <Filename Value="src\views\jsonschemabuilderview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="JSONSchemaBuilderForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="JSONSchemaBuilderView"/>
       </Unit5>
