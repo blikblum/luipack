@@ -47,6 +47,7 @@ type
 
   TJSONArrayHelper = class helper for TJSONArray
   public
+    function Find(const Properties: array of Variant; out ItemData: TJSONObject): Boolean; overload;
     function IndexOf(const ItemValue: Variant): Integer; overload;
     function IndexOf(const Properties: array of Variant): Integer; overload;
   end;
@@ -265,6 +266,18 @@ begin
 end;
 
 { TJSONArrayHelper }
+
+function TJSONArrayHelper.Find(const Properties: array of Variant; out ItemData: TJSONObject): Boolean;
+var
+  i: Integer;
+begin
+  i := IndexOf(Properties);
+  if i > -1 then
+    ItemData := TJSONObject(Items[i])
+  else
+    ItemData := nil;
+  Result := ItemData <> nil;
+end;
 
 function TJSONArrayHelper.IndexOf(const ItemValue: Variant): Integer;
 begin

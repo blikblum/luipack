@@ -38,10 +38,52 @@ type
     procedure FilterType;
   end;
 
+  { TFindTestCase }
+
+  TFindTestCase = class(TTestCase)
+  published
+    procedure FindObjectByProperties;
+  end;
+
 implementation
 
 uses
   LuiJSONHelpers, variants;
+
+{ TFindTestCase }
+
+procedure TFindTestCase.FindObjectByProperties;
+var
+  ArrayData: TJSONArray;
+  ItemData: TJSONObject;
+begin
+  ArrayData := TJSONArray.Create([
+    TJSONObject.Create([
+      'x', '1',
+      'y', 'a'
+    ]),
+    TJSONObject.Create([
+      'x', 1,
+      'y', 'b'
+    ])
+  ]);
+  try
+    CheckTrue(ArrayData.Find(['x', '1'], ItemData));
+    CheckNotNull(ItemData);
+    CheckTrue(ArrayData.Find(['x', 1], ItemData));
+    CheckNotNull(ItemData);
+    ArrayData.Find(['x', '1'], ItemData);
+    CheckEquals('1', ItemData.Get('x', ''));
+    CheckEquals('a', ItemData.Get('y', ''));
+    ArrayData.Find(['x', 1], ItemData);
+    CheckEquals(1, ItemData.Get('x', 1));
+    CheckEquals('b', ItemData.Get('y', ''));
+    CheckFalse(ArrayData.Find(['y', 1], ItemData));
+    CheckNull(ItemData);
+  finally
+    ArrayData.Create;
+  end;
+end;
 
 { TFindPathTestCase }
 
@@ -169,7 +211,8 @@ begin
 end;
 
 initialization
-  ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite, TFindPathTestCase.Suite]);
+  ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite, TFindPathTestCase.Suite,
+    TFindTestCase.Suite]);
 
 end.
 
