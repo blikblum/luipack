@@ -12,9 +12,10 @@ type
   { TEndPointFrame }
 
   TEndPointFrame = class(TFrame)
+    SaveButton: TButton;
     Label3: TLabel;
     ResponseCodeLabel: TLabel;
-    RunButton: TButton;
+    SendButton: TButton;
     GenerateTestsButton: TButton;
     DividerBevel1: TDividerBevel;
     DividerBevel2: TDividerBevel;
@@ -31,9 +32,12 @@ type
     EndPointMediator: TJSONFormMediator;
     Label1: TLabel;
     procedure GenerateTestsButtonClick(Sender: TObject);
-    procedure RunButtonClick(Sender: TObject);
+    procedure SendButtonClick(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
   private
     FEndPointData: TJSONObject;
+    procedure LoadTest;
+    procedure SaveTest;
   public
     procedure SetEndPoint(Data: TJSONObject);
   end;
@@ -41,7 +45,7 @@ type
 implementation
 
 uses
-  JSONSchemaBuilderView, LuiJSONUtils, Dialogs, RESTUtils;
+  JSONSchemaBuilderView, LuiJSONUtils, LuiJSONHelpers, Dialogs, RESTUtils;
 
 {$R *.lfm}
 
@@ -69,7 +73,7 @@ begin
   end;
 end;
 
-procedure TEndPointFrame.RunButtonClick(Sender: TObject);
+procedure TEndPointFrame.SendButtonClick(Sender: TObject);
 var
   ResponseText: String;
   ResponseCode: Integer;
@@ -80,12 +84,56 @@ begin
   ResponseBodyMemo.Text := ResponseText;
 end;
 
+procedure TEndPointFrame.SaveButtonClick(Sender: TObject);
+begin
+  EndPointMediator.SaveData;
+  SaveTest;
+end;
+
+procedure TEndPointFrame.LoadTest;
+var
+  EventsData: TJSONArray;
+  TestData: TJSONObject;
+  TestStr: String;
+begin
+  TestStr := '';
+  if FEndPointData.Find('event', EventsData) and EventsData.Find(['listen', 'test'], TestData) then
+    TestStr := TestData.GetPath('script.exec', '');
+  TestsMemo.Text := TestStr;
+end;
+
+procedure TEndPointFrame.SaveTest;
+var
+  EventsData: TJSONArray;
+  TestData: TJSONObject;
+  TestStr: String;
+begin
+  TestStr := TestsMemo.Text;
+  if not FEndPointData.Find('event', EventsData) then
+  begin
+    EventsData := TJSONArray.Create;
+    FEndPointData.Arrays['event'] := EventsData;
+  end;
+
+  if not EventsData.Find(['listen', 'test'], TestData) then
+  begin
+    TestData := TJSONObject.Create([
+      'listen', 'test',
+      'script', TJSONObject.Create([
+        'type', 'text/javascript'
+      ])
+    ]);
+    EventsData.Add(TestData);
+  end;
+  SetJSONPath(TestData, 'script.exec', TJSONString.Create(TestStr));
+end;
+
 procedure TEndPointFrame.SetEndPoint(Data: TJSONObject);
 begin
   FEndPointData := Data;
   EndPointMediator.Data := Data;
   EndPointMediator.LoadData;
-  //todo: load test
+  LoadTest;
 end;
 
 end.

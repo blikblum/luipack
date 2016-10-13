@@ -13,7 +13,7 @@ object EndPointFrame: TEndPointFrame
     Left = 16
     Height = 23
     Top = 28
-    Width = 448
+    Width = 499
     TabOrder = 0
   end
   object Label1: TLabel
@@ -28,7 +28,7 @@ object EndPointFrame: TEndPointFrame
     Left = 63
     Height = 23
     Top = 79
-    Width = 526
+    Width = 452
     TabOrder = 1
   end
   object MethodLabel: TLabel
@@ -124,13 +124,13 @@ object EndPointFrame: TEndPointFrame
       end
     end
   end
-  object RunButton: TButton
-    Left = 592
+  object SendButton: TButton
+    Left = 518
     Height = 25
     Top = 78
     Width = 75
-    Caption = 'Run'
-    OnClick = RunButtonClick
+    Caption = 'Send'
+    OnClick = SendButtonClick
     TabOrder = 4
   end
   object Label3: TLabel
@@ -148,6 +148,15 @@ object EndPointFrame: TEndPointFrame
     Width = 10
     Caption = '--'
     ParentColor = False
+  end
+  object SaveButton: TButton
+    Left = 597
+    Height = 25
+    Top = 78
+    Width = 75
+    Caption = 'Save'
+    OnClick = SaveButtonClick
+    TabOrder = 5
   end
   object EndPointMediator: TJSONFormMediator
     Elements = <    
