@@ -25,6 +25,7 @@ end;"/>
             <Item1 Value="True"/>
             <Item2 Value="False"/>
           </Values>
+          <ValueDescriptions Count="2"/>
         </Item1>
       </BuildMacros>
       <Parsing>
@@ -34,7 +35,7 @@ end;"/>
       </Parsing>
     </CompilerOptions>
     <Description Value="Auxiliary Freepascal Classes / Components / Functions"/>
-    <Files Count="28">
+    <Files Count="29">
       <Item1>
         <Filename Value="luiconfig.pas"/>
         <UnitName Value="LuiConfig"/>
@@ -148,6 +149,10 @@ end;"/>
         <Filename Value="luijsonhelpers.pas"/>
         <UnitName Value="LuiJSONHelpers"/>
       </Item28>
+      <Item29>
+        <Filename Value="luijsonschema.pas"/>
+        <UnitName Value="luijsonschema"/>
+      </Item29>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>
