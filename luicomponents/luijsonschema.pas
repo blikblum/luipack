@@ -383,6 +383,7 @@ end;
 
 destructor TJSONSchemaValidator.Destroy;
 begin
+  FRegex.Free;
   FErrors.Free;
   inherited Destroy;
 end;
