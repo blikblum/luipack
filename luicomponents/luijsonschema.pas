@@ -25,9 +25,13 @@ type
     FErrors: TStrings;
     procedure AddError(const Error: String);
     procedure AddError(const Error: String; const Args: array of const);
+    procedure CheckAdditionalProperties(Data, PropertiesData, PatternPropertiesData: TJSONObject; AdditionalPropertiesData: TJSONData);
+    procedure CheckPatternProperties(Data, PatternPropertiesData: TJSONObject);
     procedure CheckType(Data, TypeData: TJSONData);
     procedure DoValidate(Data: TJSONData; SchemaData: TJSONObject);
     function MatchesPattern(const Str, Pattern: String): Boolean;
+    function PropertyMatchesPattern(const PropName: String;
+      PatternPropertiesData: TJSONObject): Boolean;
     procedure ValidateArray(Data: TJSONArray; SchemaData: TJSONObject);
     procedure ValidateArrayList(Data: TJSONArray; SchemaData: TJSONObject);
     procedure ValidateArrayTuple(Data, TupleSchemaData: TJSONArray);
@@ -77,6 +81,80 @@ procedure TJSONSchemaValidator.AddError(const Error: String;
   const Args: array of const);
 begin
   FErrors.Add(Format(Error, Args));
+end;
+
+function TJSONSchemaValidator.PropertyMatchesPattern(const PropName: String; PatternPropertiesData: TJSONObject): Boolean;
+var
+  i: Integer;
+  Pattern: String;
+begin
+  Result := False;
+  for i := 0 to PatternPropertiesData.Count - 1 do
+  begin
+    Pattern := PatternPropertiesData.Names[i];
+    Result := MatchesPattern(PropName, Pattern);
+    if Result then
+      exit;
+  end;
+end;
+
+procedure TJSONSchemaValidator.CheckAdditionalProperties(Data, PropertiesData,
+  PatternPropertiesData: TJSONObject; AdditionalPropertiesData: TJSONData);
+var
+  i: Integer;
+  AdditionalSchemaData: TJSONObject;
+  PropName: String;
+begin
+  case AdditionalPropertiesData.JSONType of
+    jtBoolean:
+      begin
+        if AdditionalPropertiesData.AsBoolean then
+          Exit;
+
+        AdditionalSchemaData := nil;
+      end;
+    jtObject:
+      begin
+        AdditionalSchemaData := TJSONObject(AdditionalPropertiesData);
+      end;
+  else
+    //todo: schema error
+    exit;
+  end;
+
+  for i := 0 to Data.Count - 1 do
+  begin
+    PropName := Data.Names[i];
+    if (PropertiesData = nil) or (PropertiesData.IndexOfName(PropName) = -1) then
+    begin
+      if not ((PatternPropertiesData <> nil) and PropertyMatchesPattern(PropName, PatternPropertiesData)) then
+      begin
+        if AdditionalSchemaData <> nil then
+          DoValidate(Data.Items[i], AdditionalSchemaData)
+        else
+          AddError('additionalProperties %s', [PropName]);
+      end;
+    end;
+  end;
+end;
+
+procedure TJSONSchemaValidator.CheckPatternProperties(Data,
+  PatternPropertiesData: TJSONObject);
+var
+  i, k: Integer;
+  Pattern: String;
+  SchemaData: TJSONObject;
+begin
+  for i := 0 to PatternPropertiesData.Count - 1 do
+  begin
+    Pattern := PatternPropertiesData.Names[i];
+    SchemaData := PatternPropertiesData.Items[i] as TJSONObject;
+    for k := 0 to Data.Count - 1 do
+    begin
+      if MatchesPattern(Data.Names[k], Pattern) then
+        DoValidate(Data.Items[k], SchemaData);
+    end;
+  end;
 end;
 
 procedure TJSONSchemaValidator.DoValidate(Data: TJSONData;
@@ -190,22 +268,27 @@ end;
 
 procedure TJSONSchemaValidator.ValidateObject(Data, SchemaData: TJSONObject);
 var
-  PropertiesData: TJSONObject;
+  PropertiesData, PatternPropertiesData: TJSONObject;
   RequiredData: TJSONArray;
   PropName: String;
   i, PropCountLimit: Integer;
-  PropData: TJSONData;
+  PropData, AdditionalPropertiesData: TJSONData;
 begin
   if SchemaData.Find('properties', PropertiesData) then
   begin
     for i := 0 to PropertiesData.Count - 1 do
     begin
       PropName := PropertiesData.Names[i];
-      PropData:= Data.Find(PropName);
-      if PropData <> nil then
+      if Data.Find(PropName, PropData) then
         DoValidate(PropData, PropertiesData.Items[i] as TJSONObject);
     end;
   end;
+
+  if SchemaData.Find('patternProperties', PatternPropertiesData) then
+    CheckPatternProperties(Data, PatternPropertiesData);
+
+  if SchemaData.Find('additionalProperties', AdditionalPropertiesData) then
+    CheckAdditionalProperties(Data, PropertiesData, PatternPropertiesData, AdditionalPropertiesData);
 
   if SchemaData.Find('minProperties', PropCountLimit) and (Data.Count < PropCountLimit) then
     AddError('minProperties %d', [PropCountLimit]);
