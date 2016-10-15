@@ -9,6 +9,8 @@ uses
 
 function ValidateJSON(Data: TJSONData; SchemaData: TJSONObject): Boolean;
 
+function ValidateJSON(Data: TJSONData; SchemaData: TJSONObject; out Errors: TStrings): Boolean;
+
 implementation
 
 uses
@@ -65,6 +67,25 @@ begin
   Validator := TJSONSchemaValidator.Create;
   try
     Result := Validator.Validate(Data, SchemaData);
+  finally
+    Validator.Destroy;
+  end;
+end;
+
+function ValidateJSON(Data: TJSONData; SchemaData: TJSONObject; out
+  Errors: TStrings): Boolean;
+var
+  Validator: TJSONSchemaValidator;
+begin
+  Errors := nil;
+  Validator := TJSONSchemaValidator.Create;
+  try
+    Result := Validator.Validate(Data, SchemaData);
+    if not Result then
+    begin
+      Errors := Validator.Errors;
+      Validator.FErrors := nil;
+    end;
   finally
     Validator.Destroy;
   end;
