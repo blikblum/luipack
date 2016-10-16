@@ -17,6 +17,9 @@ type
     SaveButton: TBitBtn;
     PrimitiveListView: TVirtualStringTree;
     procedure FormShow(Sender: TObject);
+    procedure PrimitiveListViewBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
+      Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
+      var ContentRect: TRect);
     procedure PrimitiveListViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure PrimitiveListViewCreateEditor(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; out EditLink: IVTEditLink);
@@ -28,11 +31,13 @@ type
       var InitialStates: TVirtualNodeInitStates);
     procedure PrimitiveListViewNewText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; const NewText: String);
+    procedure SaveButtonClick(Sender: TObject);
   private
     FBuilder: TJSONSchemaBuilder;
     FData: TJSONData;
     FSchemaData: TJSONObject;
     FPrimitives: TStringList;
+    function HasNullTypes: Boolean;
     procedure UpdateDefinitionType(Node: PVirtualNode; const PropertyType: String);
     procedure PrimitiveProperty(const Path: String; DefinitionData: TJSONObject);
   public
@@ -57,6 +62,22 @@ procedure TJSONSchemaBuilderForm.FormShow(Sender: TObject);
 begin
   FSchemaData := FBuilder.Build(FData);
   PrimitiveListView.RootNodeCount := FPrimitives.Count;
+end;
+
+procedure TJSONSchemaBuilderForm.PrimitiveListViewBeforeCellPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode;
+  CellRect: TRect; var ContentRect: TRect);
+begin
+  case Column of
+    1:
+      begin
+        if PrimitiveListView.Text[Node, 1] = 'null' then
+        begin
+          TargetCanvas.Brush.Color := clRed;
+          TargetCanvas.FillRect(CellRect);
+        end;
+      end;
+  end;
 end;
 
 procedure TJSONSchemaBuilderForm.PrimitiveListViewChecked(Sender: TBaseVirtualTree;
@@ -124,6 +145,33 @@ procedure TJSONSchemaBuilderForm.PrimitiveListViewNewText(Sender: TBaseVirtualTr
 begin
   case Column of
     1: UpdateDefinitionType(Node, NewText);
+  end;
+end;
+
+procedure TJSONSchemaBuilderForm.SaveButtonClick(Sender: TObject);
+var
+  CanClose: Boolean;
+begin
+  CanClose := not HasNullTypes;
+  if not CanClose then
+  begin
+    CanClose := MessageDlg('Confirm close', 'There are fields with null as type' +
+      LineEnding + 'Do you want to continue?', mtConfirmation, mbYesNo, 0) = mrYes;
+  end;
+  if CanClose then
+    ModalResult := mrOK;
+end;
+
+function TJSONSchemaBuilderForm.HasNullTypes: Boolean;
+var
+  Node: PVirtualNode;
+begin
+  Result := False;
+  Node := PrimitiveListView.GetFirst;
+  while Node <> nil do
+  begin
+    Result := Result or (PrimitiveListView.Text[Node, 1] = 'null');
+    Node := PrimitiveListView.GetNext(Node);
   end;
 end;
 

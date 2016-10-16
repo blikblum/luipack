@@ -12,7 +12,7 @@ type
 
   { TMainForm }
 
-  TMainForm = class(TForm)
+  TMainForm = class(TForm, IFPObserver)
     Label2: TLabel;
     LoadCollectionButton: TButton;
     EndPointListView: TVirtualJSONListView;
@@ -26,11 +26,14 @@ type
       NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
     procedure EndPointListViewGetText(Sender: TCustomVirtualJSONDataView; Node: PVirtualNode;
       NodeData: TJSONData; Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure LoadCollectionButtonClick(Sender: TObject);
   private
     FAPI: TRESTAPI;
     FEndPointView: TEndPointFrame;
+    procedure CheckAPIChanges;
     procedure UpdateAPIViews;
+    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
   public
     constructor Create(TheOwner: TComponent); override;
   end;
@@ -49,6 +52,7 @@ uses
 
 procedure TMainForm.LoadCollectionButtonClick(Sender: TObject);
 begin
+  CheckAPIChanges;
   if OpenDialog1.Execute then
   begin
     FAPI.LoadFromFile(OpenDialog1.FileName);
@@ -70,6 +74,11 @@ begin
         CellText := Copy(CellText, Length(FAPI.BaseURL) + 1, Length(CellText));
       end;
   end;
+end;
+
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+  CheckAPIChanges;
 end;
 
 procedure TMainForm.EndPointListViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -99,6 +108,22 @@ begin
   EndPointListView.LoadData;
 end;
 
+procedure TMainForm.CheckAPIChanges;
+begin
+  if FAPI.IsModified then
+  begin
+    if MessageDlg('Data changed', 'Do you want to save changes?', mtConfirmation, mbYesNo, 0) = mrYes then
+      FAPI.Save;
+  end;
+end;
+
+procedure TMainForm.FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation;
+  Data: Pointer);
+begin
+  if Operation = ooChange then
+    FAPI.Modified;
+end;
+
 constructor TMainForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
@@ -107,6 +132,7 @@ begin
   FEndPointView.Parent := Self;
   FEndPointView.Align := alRight;
   FEndPointView.Visible := True;
+  FEndPointView.FPOAttachObserver(Self);
 end;
 
 end.

@@ -10,8 +10,8 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
   LCLVersion = '1.7'
   object PrimitiveListView: TVirtualStringTree
     Left = 8
-    Height = 256
-    Top = 24
+    Height = 300
+    Top = 8
     Width = 512
     DefaultText = 'Node'
     Header.AutoSizeIndex = 0
@@ -39,6 +39,7 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick, toEditOnDblClick]
     TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+    OnBeforeCellPaint = PrimitiveListViewBeforeCellPaint
     OnChecked = PrimitiveListViewChecked
     OnCreateEditor = PrimitiveListViewCreateEditor
     OnEditing = PrimitiveListViewEditing
@@ -65,7 +66,7 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
     Default = True
     DefaultCaption = True
     Kind = bkOK
-    ModalResult = 1
+    OnClick = SaveButtonClick
     TabOrder = 2
   end
 end

@@ -86,6 +86,7 @@ end;
 
 procedure TEndPointFrame.SaveButtonClick(Sender: TObject);
 begin
+  FPONotifyObservers(Self, ooChange, FEndPointData);
   EndPointMediator.SaveData;
   SaveTest;
 end;
@@ -133,6 +134,7 @@ begin
   FEndPointData := Data;
   EndPointMediator.Data := Data;
   EndPointMediator.LoadData;
+  ResponseBodyMemo.Clear;
   LoadTest;
 end;
 

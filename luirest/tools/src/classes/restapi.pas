@@ -16,15 +16,21 @@ type
     FBaseURL: String;
     FData: TJSONObject;
     FEndPointListData: TJSONArray;
+    FFileName: String;
+    FIsModified: Boolean;
     procedure ParseGroupData(GroupData: TJSONObject);
     procedure ParseEndPointData(EndPointData: TJSONObject);
     function GetBaseURL: String;
   public
     destructor Destroy; override;
     procedure LoadFromFile(const FileName: String);
+    procedure Modified;
+    procedure Save;
     property BaseURL: String read FBaseURL;
     property Data: TJSONObject read FData;
     property EndPointListData: TJSONArray read FEndPointListData;
+    property FileName: String read FFileName;
+    property IsModified: Boolean read FIsModified;
   end;
 
 implementation
@@ -103,11 +109,24 @@ procedure TRESTAPI.LoadFromFile(const FileName: String);
 begin
   FreeAndNil(FEndPointListData);
   FreeAndNil(FData);
+  FIsModified := False;
   if not TryReadJSONFile(FileName, FData) then
     raise Exception.CreateFmt('Unable to open file "%s"', [FileName]);
+  FFileName := FileName;
   FEndPointListData := CreateWeakJSONArray;
   ParseGroupData(FData);
   FBaseURL := GetBaseURL;
+end;
+
+procedure TRESTAPI.Modified;
+begin
+  FIsModified := True;
+end;
+
+procedure TRESTAPI.Save;
+begin
+  WriteJSONFile(FData, FFileName, []);
+  FIsModified := False;
 end;
 
 end.
