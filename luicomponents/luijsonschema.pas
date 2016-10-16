@@ -52,7 +52,8 @@ begin
   case DataType of
     'object': Result := Data.JSONType = jtObject;
     'array': Result := Data.JSONType = jtArray;
-    'integer': Result := (Data.JSONType = jtNumber) and (TJSONNumber(Data).NumberType in [ntInt64, ntQWord, ntInteger]);
+    'integer': Result := (Data.JSONType = jtNumber) and
+       (TJSONNumber(Data).NumberType in [ntInt64, {$IF FPC_FULLVERSION >= 30000 } ntQWord,{$ENDIF} ntInteger]);
     'number': Result := Data.JSONType = jtNumber;
     'string': Result := Data.JSONType = jtString;
     'boolean': Result := Data.JSONType = jtBoolean;
