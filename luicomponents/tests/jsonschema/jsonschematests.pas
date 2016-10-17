@@ -26,11 +26,10 @@ type
   TJSONSchemaTestProc = class(TTestProc)
   private
     FData: TJSONObject;
-    FTestCase: TJSONSchemaTestCase;
     procedure ExecuteTest(SchemaData, TestData: TJSONObject);
     procedure ExecuteTests;
   public
-    constructor Create(TestCase: TJSONSchemaTestCase; Data: TJSONObject);
+    constructor Create(Data: TJSONObject);
   end;
 
 
@@ -63,11 +62,9 @@ begin
     ExecuteTest(SchemaData, TestsData.Objects[i]);
 end;
 
-constructor TJSONSchemaTestProc.Create(TestCase: TJSONSchemaTestCase;
-  Data: TJSONObject);
+constructor TJSONSchemaTestProc.Create(Data: TJSONObject);
 begin
   inherited Create(@ExecuteTests, '', @ExecuteTests, Data.Get('description', 'jsonschema-test'));
-  FTestCase := TestCase;
   FData := Data;
 end;
 
@@ -76,7 +73,7 @@ var
   i: Integer;
 begin
   for i := 0 to FSpecData.Count - 1 do
-    FTestIterator.AddTest(TJSONSchemaTestProc.Create(Self, FSpecData.Objects[i]));
+    FTestIterator.AddTest(TJSONSchemaTestProc.Create(FSpecData.Objects[i]));
 end;
 
 constructor TJSONSchemaTestCase.Create(const SpecName: String;
