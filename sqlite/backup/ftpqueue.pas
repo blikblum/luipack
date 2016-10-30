@@ -33,6 +33,7 @@ function TFTPQueue.Upload(FTPData: TJSONObject): Boolean;
 var
   FTP: TFTPSend;
   FilePath: String;
+  StartTime, EndTime: TDateTime;
 begin
   Result := False;
   FTP := TFTPSend.Create;
@@ -42,6 +43,7 @@ begin
     FTP.UserName := FTPData.Get('username', '');
     FTP.Password := DecodePassword(FTPData.Get('password', ''));
     Result := FTP.Login;
+    StartTime := Time;
     if Result then
     begin
       Result := FTP.ChangeWorkingDir(FTPData.Get('directory', ''));
@@ -51,7 +53,10 @@ begin
         FTP.DirectFile := True;
         FTP.DirectFileName := FilePath;
         Result := FTP.StoreFile(ExtractFileName(FilePath), True);
+        EndTime := Time;
       end;
+      if Result then
+        WriteLn('FTP upload finished: ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
     end;
   finally
     FTP.Destroy;

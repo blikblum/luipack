@@ -22,7 +22,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--encode-password test"/>
+        <CommandLineParams Value="nefrolog"/>
       </local>
     </RunParams>
     <RequiredPackages Count="3">

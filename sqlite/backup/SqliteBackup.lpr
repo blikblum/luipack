@@ -14,6 +14,7 @@ type
   TSqliteBackupApplication = class(TCustomApplication)
   protected
     FTaskList: TStrings;
+    FDefaultsData: TJSONObject;
     FFTPQueue: TFTPQueue;
     FConfigData: TJSONObject;
     function ExecuteTask(const TaskName: String; TaskData: TJSONObject): Boolean;
@@ -39,7 +40,7 @@ begin
     Result := Task.Execute;
     if Result then
     begin
-      if TaskData.Find('target.ftp', FTPData) then
+      if TaskData.FindPath('target.ftp', FTPData) then
         FFTPQueue.Add(TaskName, Task.TargetPath, FTPData);
     end;
   except
@@ -59,7 +60,11 @@ begin
   begin
     TaskName := FTaskList[i];
     if FConfigData.FindPath('tasks.' + TaskName, TaskData) then
-      ExecuteTask(TaskName, TaskData)
+    begin
+      if FDefaultsData <> nil then
+        TaskData.Merge(FDefaultsData);
+      ExecuteTask(TaskName, TaskData);
+    end
     else
       WriteLn(TaskName, ': task configuration not found');
   end;
@@ -104,6 +109,7 @@ begin
   end;
 
   { add your program here }
+  FConfigData.Find('defaults', FDefaultsData);
   ExecuteTasks;
   FFTPQueue.Execute;
 
