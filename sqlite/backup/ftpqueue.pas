@@ -25,13 +25,22 @@ type
 implementation
 
 uses
-  ftpsend, PasswordUtils;
+  ftpsend, blcksock, PasswordUtils, LuiJSONHelpers;
+
+procedure ConfigureSockProxy(Sock: TTCPBlockSocket; ProxyData: TJSONObject);
+begin
+  Sock.HTTPTunnelIP := ProxyData.Get('host', '');
+  Sock.HTTPTunnelPort := ProxyData.Get('port', '');
+  Sock.HTTPTunnelPass := ProxyData.Get('password', '');
+  Sock.HTTPTunnelUser := ProxyData.Get('username', '');
+end;
 
 { TFTPQueue }
 
 function TFTPQueue.Upload(FTPData: TJSONObject): Boolean;
 var
   FTP: TFTPSend;
+  ProxyData: TJSONObject;
   FilePath: String;
   StartTime, EndTime: TDateTime;
 begin
@@ -42,6 +51,11 @@ begin
     FTP.TargetPort := FTPData.Get('port', '21');
     FTP.UserName := FTPData.Get('username', '');
     FTP.Password := DecodePassword(FTPData.Get('password', ''));
+    if FTPData.Find('proxy', ProxyData) then
+    begin
+      ConfigureSockProxy(FTP.Sock, ProxyData);
+      ConfigureSockProxy(FTP.DSock, ProxyData);
+    end;
     Result := FTP.Login;
     StartTime := Time;
     if Result then
@@ -57,6 +71,13 @@ begin
       end;
       if Result then
         WriteLn('FTP upload finished: ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
+    end;
+    if not Result then
+    begin
+      WriteLn('FTP upload failed');
+      WriteLn('  Result code: ', FTP.ResultCode, ' - ', FTP.ResultString);
+      WriteLn('  Control sock code: ', FTP.Sock.LastError, ' - ', FTP.Sock.GetErrorDescEx);
+      WriteLn('  Data sock code: ', FTP.DSock.LastError, ' - ', FTP.DSock.GetErrorDescEx);
     end;
   finally
     FTP.Destroy;
