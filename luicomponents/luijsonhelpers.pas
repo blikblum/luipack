@@ -41,6 +41,7 @@ type
     function Find(const PropName: String; out PropValue: Double): Boolean; overload;
     function Find(const PropName: String; out PropValue: Boolean): Boolean; overload;
     function Find(const PropName: String; out PropValue: String): Boolean; overload;
+    procedure Merge(SourceData: TJSONObject);
   end;
 
   { TJSONArrayHelper }
@@ -263,6 +264,28 @@ begin
     PropValue := Data.AsString
   else
     PropValue := '';
+end;
+
+procedure TJSONObjectHelper.Merge(SourceData: TJSONObject);
+var
+  SrcIndex, DestIndex: Integer;
+  PropName: String;
+  SrcPropData, DestPropData: TJSONData;
+begin
+  for SrcIndex := 0 to SourceData.Count - 1 do
+  begin
+    PropName := SourceData.Names[SrcIndex];
+    SrcPropData := SourceData.Items[SrcIndex];
+    DestIndex := IndexOfName(PropName);
+    if DestIndex = -1 then
+      Elements[PropName] := SrcPropData.Clone
+    else
+    begin
+      DestPropData := Items[DestIndex];
+      if ((SrcPropData.JSONType = jtObject) and (DestPropData.JSONType = jtObject)) then
+        TJSONObject(DestPropData).Merge(TJSONObject(SrcPropData));
+    end;
+  end;
 end;
 
 { TJSONArrayHelper }

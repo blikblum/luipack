@@ -45,10 +45,99 @@ type
     procedure FindObjectByProperties;
   end;
 
+  { TMergeTestCase }
+
+  TMergeTestCase = class(TTestCase)
+  published
+    procedure MergeFlatObject;
+    procedure MergeNestedObject;
+  end;
+
 implementation
 
 uses
-  LuiJSONHelpers, variants;
+  LuiJSONHelpers, variants, LuiJSONUtils;
+
+{ TMergeTestCase }
+
+procedure TMergeTestCase.MergeFlatObject;
+var
+  Data1, Data2, Expected: TJSONObject;
+begin
+  Data1 := TJSONObject.Create([
+    'prop1', 'x',
+    'prop3', nil,
+    'prop4', 'y'
+  ]);
+
+  Data2 := TJSONObject.Create([
+    'prop1', 'a',
+    'prop2', 'z',
+    'prop3', 'x',
+    'prop4', 'y',
+    'prop5', nil
+  ]);
+
+  Data1.Merge(Data2);
+
+  Expected := TJSONObject.Create([
+    'prop1', 'x',
+    'prop2', 'z',
+    'prop3', nil,
+    'prop4', 'y',
+    'prop5', nil
+  ]);
+
+  CheckTrue(CompareJSONData(Data1, Expected) = 0, 'Merged flat object');
+
+  Expected.Free;
+  Data1.Free;
+  Data2.Free;
+end;
+
+procedure TMergeTestCase.MergeNestedObject;
+var
+  Data1, Data2, Expected: TJSONObject;
+begin
+  Data1 := TJSONObject.Create([
+    'prop1', 'x',
+    'prop3', nil,
+    'prop4', TJSONObject.Create([
+      'x', 1,
+      'z', 3
+    ])
+  ]);
+
+  Data2 := TJSONObject.Create([
+    'prop1', TJSONObject.Create(['y', 1]),
+    'prop2', TJSONObject.Create(['z', 1]),
+    'prop3', 'z',
+    'prop4', TJSONObject.Create([
+      'x', 2,
+      'y', 10,
+      'z', 3
+    ])
+  ]);
+
+  Data1.Merge(Data2);
+
+  Expected := TJSONObject.Create([
+    'prop1', 'x',
+    'prop2', TJSONObject.Create(['z', 1]),
+    'prop3', nil,
+    'prop4', TJSONObject.Create([
+      'x', 1,
+      'y', 10,
+      'z', 3
+    ])
+  ]);
+
+  CheckTrue(CompareJSONData(Data1, Expected) = 0, 'Merged nested object');
+
+  Expected.Free;
+  Data1.Free;
+  Data2.Free;
+end;
 
 { TFindTestCase }
 
@@ -212,7 +301,7 @@ end;
 
 initialization
   ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite, TFindPathTestCase.Suite,
-    TFindTestCase.Suite]);
+    TFindTestCase.Suite, TMergeTestCase.Suite]);
 
 end.
 
