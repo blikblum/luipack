@@ -104,7 +104,7 @@ begin
   //soFrom* constants are equal to STREAM_SEEK_* constants. Assume it here
   liOffset.LowPart:=Offset;
   liOffset.HighPart:=0;
-  {$if FPC_FULLVERSION >= 30100}
+  {$if FPC_FULLVERSION >= 30001}
   Res:=FSrcStream.Seek(QWord(liOffset), Origin, QWord(liResult));
   {$else}
   Res:=FSrcStream.Seek(Int64(liOffset), Origin, Int64(liResult));
