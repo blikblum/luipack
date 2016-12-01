@@ -6,7 +6,7 @@ unit LuiFPTestHelpers;
 interface
 
 uses
-  Classes, SysUtils, fpjson, LuiJSONUtils, TestFramework;
+  Classes, SysUtils, fpjson, TestFramework;
 
 type
 
@@ -33,11 +33,32 @@ type
     function CheckEquals(const Expected: String; Actual: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs; overload;
     //todo: remove ASAP (the overloaded method does not work at least in fpc 2.6.4 - test in 3.0)
     function CheckEqualsJSON(Expected, Actual: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs;
+    function CheckEqualsJSON(const Expected: String; Actual: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs; overload;
     function CheckEqualsObject(const Expected: array of const; Actual: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs;
     function CheckEqualsArray(const Expected: array of const; Actual: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs;
   end;
 
+  { TProcedureCalls }
+
+  TProcedureCalls = class
+  private
+    FCalls: TJSONObject;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Add(const ProcName: String; const Params: array of const);
+    function Called(const ProcName: String): Boolean;
+    function Called(const ProcName: String; Count: Integer): Boolean;
+    function CalledOnce(const ProcName: String): Boolean;
+    function CalledWith(const ProcName: String; const Params: array of const): Boolean;
+    function Reset: TProcedureCalls;
+  end;
+
+
 implementation
+
+uses
+  LuiJSONHelpers, LuiJSONUtils;
 
 { TJSONTestArgs }
 
@@ -102,10 +123,19 @@ begin
   Result := DoCheckEquals(ExpectedData, Actual, ErrorMsg).FreeExpected;
 end;
 
-function TTestCaseHelper.CheckEqualsJSON(Expected, Actual: TJSONData; const ErrorMsg: string
-  ): TJSONTestArgs;
+function TTestCaseHelper.CheckEqualsJSON(Expected, Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := CheckEquals(Expected, Actual, ErrorMsg);
+end;
+
+function TTestCaseHelper.CheckEqualsJSON(const Expected: String; Actual: TJSONData;
+  const ErrorMsg: string): TJSONTestArgs;
+var
+  ExpectedData: TJSONData;
+begin
+  if not TryStrToJSON(Expected, ExpectedData) then
+    raise Exception.Create('Malformed expected JSON string');
+  Result := DoCheckEquals(ExpectedData, Actual, ErrorMsg).FreeExpected;
 end;
 
 function TTestCaseHelper.CheckEqualsObject(const Expected: array of const;
@@ -118,6 +148,85 @@ function TTestCaseHelper.CheckEqualsArray(const Expected: array of const;
   Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := DoCheckEquals(TJSONArray.Create(Expected), Actual, ErrorMsg).FreeExpected;
+end;
+
+{ TProcedureCalls }
+
+constructor TProcedureCalls.Create;
+begin
+  FCalls := TJSONObject.Create;
+end;
+
+destructor TProcedureCalls.Destroy;
+begin
+  FCalls.Destroy;
+  inherited Destroy;
+end;
+
+procedure TProcedureCalls.Add(const ProcName: String; const Params: array of const);
+var
+  ParamsData, MethodCallsData: TJSONArray;
+  CallData: TJSONObject;
+begin
+  if not FCalls.Find(ProcName, MethodCallsData) then
+  begin
+    MethodCallsData := TJSONArray.Create;
+    FCalls.Arrays[ProcName] := MethodCallsData;
+  end;
+  ParamsData := TJSONArray.Create(Params);
+  MethodCallsData.Add(ParamsData);
+end;
+
+function TProcedureCalls.Called(const ProcName: String): Boolean;
+var
+  MethodCallsData: TJSONArray;
+begin
+  Result := FCalls.Find(ProcName, MethodCallsData);
+  if Result then
+    Result := MethodCallsData.Count >= 1;
+end;
+
+function TProcedureCalls.Called(const ProcName: String; Count: Integer): Boolean;
+var
+  MethodCallsData: TJSONArray;
+begin
+  Result := FCalls.Find(ProcName, MethodCallsData);
+  if Result then
+    Result := MethodCallsData.Count = Count;
+end;
+
+function TProcedureCalls.CalledOnce(const ProcName: String): Boolean;
+begin
+  Result := Called(ProcName, 1);
+end;
+
+function TProcedureCalls.CalledWith(const ProcName: String;
+  const Params: array of const): Boolean;
+var
+  MethodCallsData, ParamsData: TJSONArray;
+  i: Integer;
+begin
+  Result := FCalls.Find(ProcName, MethodCallsData);
+  ParamsData := TJSONArray.Create(Params);
+  try
+    if Result then
+      begin
+        for i := 0 to MethodCallsData.Count - 1 do
+        begin
+          Result := CompareJSONData(ParamsData, MethodCallsData.Items[i]) = 0;
+          if Result then
+            break;
+        end;
+      end;
+  finally
+    ParamsData.Destroy;
+  end;
+end;
+
+function TProcedureCalls.Reset: TProcedureCalls;
+begin
+  FCalls.Clear;
+  Result := Self;
 end;
 
 
