@@ -247,9 +247,17 @@ begin
 end;
 
 procedure TJSONCollection.DeleteItem(Item: TJSONModel);
+var
+  ShouldRemove: Boolean;
 begin
-  ItemResourceNeeded(Item);
-  if FItemResource.Delete then
+  if Item.IsNew then
+    ShouldRemove := True
+  else
+  begin
+    ItemResourceNeeded(Item);
+    ShouldRemove := FItemResource.Delete;
+  end;
+  if ShouldRemove then
   begin
     //todo: CreateItem check to see if really removed
     Data.Extract(Item.Data);
