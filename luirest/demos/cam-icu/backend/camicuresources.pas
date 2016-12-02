@@ -54,7 +54,7 @@ var
   ResponseData: TJSONObject;
 begin
   //todo: remove this as soon get rid of sqldb
-  InitialiseSQLite;
+  InitialiseSQLite('libsqlite3.so.0');
   if not TryReadJSONFile('serviceinfo.json', ResponseData) then
     ResponseData := TJSONObject.Create;
   ResponseData.Strings['sqliteversion'] := StrPas(sqlite3_libversion());
@@ -127,6 +127,9 @@ begin
     end;
   end;
 end;
+
+initialization
+  SQLiteLibraryName := 'libsqlite3.so.0';
 
 end.
 
