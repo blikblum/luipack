@@ -3,6 +3,7 @@
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="vtvutils_package"/>
+    <Type Value="RunAndDesignTime"/>
     <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -17,7 +18,7 @@
         </SyntaxOptions>
       </Parsing>
     </CompilerOptions>
-    <Files Count="12">
+    <Files Count="13">
       <Item1>
         <Filename Value="vtcomboeditlink.pas"/>
         <UnitName Value="VTComboEditLink"/>
@@ -61,14 +62,17 @@
       </Item10>
       <Item11>
         <Filename Value="views\jsoncollectionview.pas"/>
-        <UnitName Value="jsoncollectionview"/>
+        <UnitName Value="JSONCollectionView"/>
       </Item11>
       <Item12>
         <Filename Value="views\jsoncollectionview.lfm"/>
         <Type Value="LFM"/>
       </Item12>
+      <Item13>
+        <Filename Value="vtmediators.pas"/>
+        <UnitName Value="vtmediators"/>
+      </Item13>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="5">
       <Item1>
         <PackageName Value="luidialogs_package"/>
