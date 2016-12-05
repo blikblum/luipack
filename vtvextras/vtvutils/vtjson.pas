@@ -537,6 +537,7 @@ type
 
   TVirtualJSONTreeView = class(TCustomVirtualJSONDataView)
   private
+    FChildrenProperty: String;
     function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
   protected
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
@@ -551,6 +552,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
   published
+    property ChildrenProperty: String read FChildrenProperty write FChildrenProperty;
     property OnGetText;
     property TextProperty;
    //inherited properties
@@ -732,6 +734,9 @@ type
 
 implementation
 
+uses
+  LuiJSONHelpers;
+
 type
   TItemData = record
     DisplayName: String;
@@ -892,7 +897,6 @@ var
   ItemData: PTVItemData;
   JSONData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
-  ChildrenIndex: Integer;
 begin
   JSONData := GetJSONData(ParentNode, Node);
   ItemData := GetItemData(Node);
@@ -900,15 +904,11 @@ begin
   //todo: handle non JSONObject
   if JSONData.JSONType = jtObject then
   begin
-    ChildrenIndex := JSONObject.IndexOfName('children');
-    if ChildrenIndex <> -1 then
+    if JSONObject.Find(FChildrenProperty, ItemData^.ChildrenData) then
     begin
-      ItemData^.ChildrenData := JSONObject.Items[ChildrenIndex] as TJSONArray;
       if ItemData^.ChildrenData.Count > 0 then
         InitStates := InitStates + [ivsHasChildren];
-    end
-    else
-      ItemData^.ChildrenData := nil;
+    end;
   end
   else
     raise Exception.Create('JSONObject expected');
@@ -920,6 +920,7 @@ constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   DefaultText := '';
+  FChildrenProperty := 'children';
   FTextProperty := 'text';
   FItemDataOffset := AllocateInternalDataArea(SizeOf(TTVItemData));
   with TreeOptions do
