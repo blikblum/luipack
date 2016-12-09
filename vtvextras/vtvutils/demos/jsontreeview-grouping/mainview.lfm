@@ -1,0 +1,51 @@
+object MainForm: TMainForm
+  Left = 457
+  Height = 467
+  Top = 130
+  Width = 470
+  Caption = 'JSONTreeView Grouping Demo'
+  ClientHeight = 467
+  ClientWidth = 470
+  LCLVersion = '1.7'
+  object RestaurantsView: TVirtualJSONTreeView
+    Left = 8
+    Height = 408
+    Top = 8
+    Width = 456
+    ChildrenProperty = 'children'
+    OnGetGroup = RestaurantsViewGetGroup
+    OnGetText = RestaurantsViewGetText
+    TextProperty = 'text'
+    DefaultNodeHeight = 19
+    Header.AutoSizeIndex = 0
+    Header.Columns = <    
+      item
+        Position = 0
+        Text = 'Name'
+        Width = 150
+        PropertyName = 'name'
+      end    
+      item
+        Position = 1
+        Text = 'Cuisine'
+        Width = 150
+        PropertyName = 'cuisine'
+      end>
+    Header.DefaultHeight = 17
+    Header.Height = 21
+    Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible]
+    TabOrder = 0
+    TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
+    TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
+  end
+  object LoadButton: TButton
+    Left = 8
+    Height = 33
+    Top = 426
+    Width = 184
+    Caption = 'Load Data'
+    OnClick = LoadButtonClick
+    TabOrder = 1
+  end
+end

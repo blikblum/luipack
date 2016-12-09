@@ -11,6 +11,8 @@ type
 
   TVirtualJSONInspector = class;
 
+  TVirtualJSONTreeView = class;
+
   TVTJSONInspectorFormatValue = procedure (Sender: TVirtualJSONInspector; const PropName: String;
     PropData: TJSONData; var DisplayText: String) of object;
 
@@ -330,6 +332,7 @@ type
     procedure SetTextProperty(const Value: String);
   protected
     procedure DoChecked(Node: PVirtualNode); override;
+    procedure DoLoadRoot; virtual;
     function GetColumnClass: TVirtualTreeColumnClass; override;
     function GetOptionsClass: TTreeOptionsClass; override;
     property OnGetText: TVTJSONDataViewGetText read FOnGetText write FOnGetText;
@@ -344,6 +347,8 @@ type
     property CheckedData: TJSONArray read GetCheckedData;
     property Data: TJSONData read FData write SetData;
   end;
+
+  { TVirtualJSONListView }
 
   TVirtualJSONListView = class(TCustomVirtualJSONDataView)
   private
@@ -535,11 +540,19 @@ type
 
   { TVirtualJSONTreeView }
 
+  TVTJSONTreeViewGetGroup = procedure(Sender: TVirtualJSONTreeView; NodeData: TJSONObject;
+    var GroupText: String) of object;
+
   TVirtualJSONTreeView = class(TCustomVirtualJSONDataView)
   private
     FChildrenProperty: String;
+    FOnGetGroup: TVTJSONTreeViewGetGroup;
+    FRootData: TJSONArray;
+    FOwnsRootData: Boolean;
     function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
+    procedure InitializeGroupData;
   protected
+    function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
     procedure DoGetText(Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String); override;
     {$if VTMajorVersion > 4}
@@ -549,10 +562,14 @@ type
     {$endif}
     procedure DoInitNode(ParentNode, Node: PVirtualNode;
       var InitStates: TVirtualNodeInitStates); override;
+    procedure DoLoadRoot; override;
+    procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
   published
     property ChildrenProperty: String read FChildrenProperty write FChildrenProperty;
+    property OnGetGroup: TVTJSONTreeViewGetGroup read FOnGetGroup write FOnGetGroup;
     property OnGetText;
     property TextProperty;
    //inherited properties
@@ -735,7 +752,7 @@ type
 implementation
 
 uses
-  LuiJSONHelpers;
+  LuiJSONHelpers, LuiJSONUtils;
 
 type
   TItemData = record
@@ -831,14 +848,67 @@ var
   ParentChildrenData: TJSONArray;
 begin
   if ParentNode = nil then
-    //todo: don't assign FData directly when add support for FData = object
-    ParentChildrenData := FData as TJSONArray
+    ParentChildrenData := FRootData
   else
   begin
     ParentItemData := GetItemData(ParentNode);
     ParentChildrenData := ParentItemData^.ChildrenData;
   end;
   Result := ParentChildrenData.Items[Node^.Index];
+end;
+
+procedure TVirtualJSONTreeView.InitializeGroupData;
+var
+  i, GroupIndex: Integer;
+  ItemData: TJSONData;
+  GroupText: String;
+  GroupData: TJSONObject;
+  GroupItemsData: TJSONArray;
+  GroupList: TStringList;
+begin
+  GroupList := TStringList.Create;
+  try
+    for i := 0 to FData.Count - 1 do
+    begin
+      ItemData := FData.Items[i];
+      if ItemData.JSONType = jtObject then
+      begin
+        GroupText := '';
+        FOnGetGroup(Self, TJSONObject(ItemData), GroupText);
+        GroupIndex := GroupList.IndexOf(GroupText);
+        if GroupIndex = -1 then
+        begin
+          GroupItemsData := CreateWeakJSONArray;
+          GroupList.AddObject(GroupText, GroupItemsData);
+        end
+        else
+          GroupItemsData := TJSONArray(GroupList.Objects[GroupIndex]);
+        GroupItemsData.Add(ItemData);
+      end;
+    end;
+
+    for i := 0 to GroupList.Count - 1 do
+    begin
+      GroupItemsData := TJSONArray(GroupList.Objects[i]);
+      GroupData := TJSONObject.Create([
+        FTextProperty, GroupList[i],
+        FChildrenProperty, GroupItemsData,
+        'itemcount', GroupItemsData.Count
+      ]);
+      FRootData.Add(GroupData);
+    end;
+
+  finally
+    GroupList.Destroy;
+  end;
+end;
+
+function TVirtualJSONTreeView.ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean;
+begin
+  if Assigned(FOnGetGroup) and (NodeParent[Node] = nil) then
+    Result := Column > 0
+  else
+    Result := inherited ColumnIsEmpty(Node, Column);
 end;
 
 procedure TVirtualJSONTreeView.DoGetText(Node: PVirtualNode;
@@ -853,7 +923,7 @@ begin
   JSONData := ItemData^.JSONData;
   if JSONData.JSONType = jtObject then
   begin
-    if not Header.UseColumns then
+    if not Header.UseColumns or (Assigned(FOnGetGroup) and (NodeParent[Node] = nil)) then
       TextPropIndex := JSONObject.IndexOfName(FTextProperty)
     else
     begin
@@ -916,6 +986,31 @@ begin
   inherited DoInitNode(ParentNode, Node, InitStates);
 end;
 
+procedure TVirtualJSONTreeView.DoLoadRoot;
+begin
+  if FOwnsRootData then
+    FreeAndNil(FRootData);
+  if Assigned(OnGetGroup) then
+  begin
+    FRootData := TJSONArray.Create;
+    FOwnsRootData := True;
+    InitializeGroupData;
+  end
+  else
+  begin
+    FRootData := TJSONArray(FData);
+    FOwnsRootData := False;
+  end;
+  RootNodeCount := FRootData.Count;
+end;
+
+procedure TVirtualJSONTreeView.Loaded;
+begin
+  inherited Loaded;
+  if Assigned(FOnGetGroup) then
+    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];;
+end;
+
 constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -931,6 +1026,13 @@ begin
     //MiscOptions := MiscOptions + [toEditable, toGridExtensions];
   end;
 
+end;
+
+destructor TVirtualJSONTreeView.Destroy;
+begin
+  if FOwnsRootData then
+    FRootData.Free;
+  inherited Destroy;
 end;
 
 { TVirtualJSONDataViewColumn }
@@ -985,7 +1087,7 @@ begin
     begin
       BeginUpdate;
       Clear;
-      RootNodeCount := FData.Count;
+      DoLoadRoot;
       EndUpdate;
     end;
   end;
@@ -1025,6 +1127,11 @@ procedure TCustomVirtualJSONDataView.DoChecked(Node: PVirtualNode);
 begin
   FreeAndNil(FCheckedData);
   inherited DoChecked(Node);
+end;
+
+procedure TCustomVirtualJSONDataView.DoLoadRoot;
+begin
+  RootNodeCount := FData.Count;
 end;
 
 function TCustomVirtualJSONDataView.GetColumnClass: TVirtualTreeColumnClass;
