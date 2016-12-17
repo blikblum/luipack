@@ -24,7 +24,7 @@ type
 implementation
 
 uses
-  Sqlite3, ctypes;
+  Sqlite3, ctypes, MultiLog;
 
 { TSqliteBackupRunner }
 
@@ -54,13 +54,14 @@ begin
     Backup := sqlite3_backup_init(TargetDb, 'main', SourceDb, 'main');
     if Backup <> nil then
     begin
+      Logger.Send([lcInfo], 'Backup started (%s)', [Database]);
       StartTime := Time;
       repeat
         rc := sqlite3_backup_step(Backup, -1);
       until not ((rc = SQLITE_OK) or (rc = SQLITE_BUSY) or (rc = SQLITE_LOCKED));
       sqlite3_backup_finish(Backup);
       EndTime := Time;
-      WriteLn('Backup time ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
+      Logger.Send([lcInfo], 'Backup finished - Time: ' + FormatDateTime('nn:ss:zzz', EndTime - StartTime));
     end;
     rc := sqlite3_errcode(TargetDb);
     Result := rc = SQLITE_OK;

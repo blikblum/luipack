@@ -4,7 +4,7 @@ program SqliteBackup;
 
 uses
   Classes, SysUtils, CustApp, fpjson,
-  LuiJSONUtils, LuiJSONHelpers,
+  LuiJSONUtils, LuiJSONHelpers, MultiLog, FileChannel,
   BackupTask, FTPQueue, PasswordUtils;
 
 type
@@ -37,15 +37,20 @@ begin
   Task.Name := TaskName;
   Task.Data := TaskData;
   try
-    Result := Task.Execute;
-    if Result then
-    begin
-      if TaskData.FindPath('target.ftp', FTPData) then
-        FFTPQueue.Add(TaskName, Task.TargetPath, FTPData);
+    Logger.EnterMethod([lcInfo], 'ExecuteTask', TaskName + ' task');
+    try
+      Result := Task.Execute;
+      if Result then
+      begin
+        if TaskData.FindPath('targets.ftp', FTPData) then
+          FFTPQueue.Add(TaskName, Task.TargetPath, FTPData);
+      end;
+    except
+      on E: Exception do
+        Logger.Send([lcError], TaskName + ': ' +  E.Message);
     end;
-  except
-    on E: Exception do
-      WriteLn(TaskName, ': ',  E.Message);
+  finally
+    Logger.ExitMethod('ExecuteTask', ' ');
   end;
   Task.Destroy;
 end;
@@ -66,7 +71,7 @@ begin
       ExecuteTask(TaskName, TaskData);
     end
     else
-      WriteLn(TaskName, ': task configuration not found');
+      Logger.Send([lcWarning], TaskName, ': task configuration not found');
   end;
 end;
 
@@ -74,6 +79,9 @@ procedure TSqliteBackupApplication.DoRun;
 var
   ErrorMsg: String;
 begin
+  Logger.Channels.Add(TFileChannel.Create(ExtractFilePath(ParamStr(0)) + 'backup.log'));
+  Logger.Channels.Add(TFileChannel.Create('', []));
+  Logger.ActiveClasses := lcAll;
   // quick check parameters
   ErrorMsg := CheckOptions('h', ['help', 'encode-password'], nil, FTaskList);
   if ErrorMsg <> '' then begin
@@ -96,14 +104,14 @@ begin
 
   if (FTaskList.Count = 0) then
   begin
-    WriteLn('Is necessary to specify at least a backup task');
+    Logger.Send([lcWarning], 'Is necessary to specify at least a backup task');
     Terminate;
     Exit;
   end;
 
-  if not TryReadJSONFile('config.json', FConfigData) then
+  if not TryReadJSONFile(ExtractFilePath(ParamStr(0)) + 'config.json', FConfigData) then
   begin
-    WriteLn('Unable to read config.json file. Must be a valid JSON object');
+    Logger.Send([lcWarning], 'Unable to read config.json file. Must be a valid JSON object');
     Terminate;
     Exit;
   end;

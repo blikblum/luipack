@@ -25,7 +25,7 @@ type
 implementation
 
 uses
-  ftpsend, blcksock, PasswordUtils, LuiJSONHelpers;
+  ftpsend, blcksock, PasswordUtils, LuiJSONHelpers, MultiLog;
 
 procedure ConfigureSockProxy(Sock: TTCPBlockSocket; ProxyData: TJSONObject);
 begin
@@ -56,6 +56,8 @@ begin
       ConfigureSockProxy(FTP.Sock, ProxyData);
       ConfigureSockProxy(FTP.DSock, ProxyData);
     end;
+    Logger.EnterMethod([lcInfo], 'execftp', FTPData.Get('taskname', '') + ' task');
+    Logger.Send([lcInfo], 'Upload started');
     Result := FTP.Login;
     StartTime := Time;
     if Result then
@@ -70,15 +72,16 @@ begin
         EndTime := Time;
       end;
       if Result then
-        WriteLn('FTP upload finished: ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
+        Logger.Send([lcInfo], 'FTP upload finished - Time ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
     end;
     if not Result then
     begin
-      WriteLn('FTP upload failed');
-      WriteLn('  Result code: ', FTP.ResultCode, ' - ', FTP.ResultString);
-      WriteLn('  Control sock code: ', FTP.Sock.LastError, ' - ', FTP.Sock.GetErrorDescEx);
-      WriteLn('  Data sock code: ', FTP.DSock.LastError, ' - ', FTP.DSock.GetErrorDescEx);
+      Logger.Send([lcWarning], 'FTP upload failed');
+      Logger.Send([lcWarning], '  Result code: ' + IntToStr(FTP.ResultCode) + ' - ' + FTP.ResultString);
+      Logger.Send([lcWarning], '  Control sock code: ' + IntToStr(FTP.Sock.LastError) + ' - ' + FTP.Sock.GetErrorDescEx);
+      Logger.Send([lcWarning], '  Data sock code: ' + IntToStr(FTP.DSock.LastError) + ' - ' + FTP.DSock.GetErrorDescEx);
     end;
+    Logger.ExitMethod([lcInfo], 'execftp', ' ');
   finally
     FTP.Destroy;
   end;
@@ -100,8 +103,12 @@ procedure TFTPQueue.Execute;
 var
   i: Integer;
 begin
-  for i := 0 to FData.Count - 1 do
-    Upload(FData.Objects[i]);
+  if FData.Count > 0 then
+  begin
+    Logger.Send([lcInfo], 'FTP uploads' + LineEnding);
+    for i := 0 to FData.Count - 1 do
+      Upload(FData.Objects[i]);
+  end;
 end;
 
 procedure TFTPQueue.Add(const TaskName, FilePath: String; FTPData: TJSONObject);

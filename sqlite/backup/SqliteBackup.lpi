@@ -25,16 +25,19 @@
         <CommandLineParams Value="nefrolog"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="4">
       <Item1>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="multiloglaz"/>
       </Item1>
       <Item2>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="laz_synapse"/>
       </Item2>
       <Item3>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="luicomponents"/>
       </Item3>
+      <Item4>
+        <PackageName Value="Abbrevia"/>
+      </Item4>
     </RequiredPackages>
     <Units Count="5">
       <Unit0>

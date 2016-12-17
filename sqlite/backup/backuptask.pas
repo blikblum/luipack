@@ -28,7 +28,7 @@ type
 implementation
 
 uses
-  LuiJSONHelpers, strutils, AbZipper, AbArcTyp;
+  LuiJSONHelpers, strutils, AbZipper, AbArcTyp, MultiLog;
 
 { TSqliteBackupTask }
 
@@ -56,14 +56,15 @@ var
 begin
   Result  := False;
   FileName := ExtractFileName(FData.Get('database', ''));
-  TargetFileName := FData.GetPath('target.filename', '{{name}}-{{year}}-{{month}}-{{day}}--{{hour}}-{{minute}}');
+  TargetFileName := FData.GetPath('filename', '{{name}}-{{year}}-{{month}}-{{day}}--{{hour}}-{{minute}}');
   TargetFileName := ReplaceTags(TargetFileName);
-  TargetDirectory := IncludeTrailingPathDelimiter(FData.GetPath('target.directory', ''));
+  TargetDirectory := IncludeTrailingPathDelimiter(FData.GetPath('targets.directory', ''));
   if not DirectoryExists(TargetDirectory) then
     raise Exception.CreateFmt('Error - directory "%s" does not exist', [TargetDirectory]);
   FTargetPath := TargetDirectory + TargetFileName + '.zip';
   Zipper := TAbZipper.Create(nil);
   try
+    Logger.Send([lcInfo], 'File compression started (%s)', [FTargetPath]);
     StartTime := Time;
     Zipper.FileName := FTargetPath;
     Zipper.StoreOptions := [soStripPath];
@@ -71,7 +72,7 @@ begin
     Zipper.Move(Zipper.Items[0], FileName);
     Zipper.Save;
     EndTime := Time;
-    WriteLn('Compression time ', FormatDateTime('nn:ss:zzz', EndTime - StartTime));
+    Logger.Send([lcInfo], 'File compression finished - Time: ' + FormatDateTime('nn:ss:zzz', EndTime - StartTime));
   finally
     Zipper.Destroy;
   end;
@@ -86,7 +87,7 @@ begin
   try
     Result := Runner.Execute(FData.Get('database', ''));
     if not Result then
-      WriteLn('Error executing task ', Runner.Error)
+      Logger.Send([lcError], 'Error executing task ', Runner.Error)
     else
     begin
       Result := StoreFile(Runner.Output);
