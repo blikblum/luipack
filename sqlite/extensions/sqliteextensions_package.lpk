@@ -3,7 +3,7 @@
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="sqliteextensions_package"/>
-    <AddToProjectUsesSection Value="True"/>
+    <Type Value="RunAndDesignTime"/>
     <Author Value="Luiz Américo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -51,7 +51,6 @@
         <UnitName Value="sqlite3jsonfunctions"/>
       </Item7>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="luicomponents"/>
@@ -62,7 +61,7 @@
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>

@@ -4,7 +4,6 @@
     <PathDelim Value="\"/>
     <Name Value="luicomponents"/>
     <Type Value="RunAndDesignTime"/>
-    <AddToProjectUsesSection Value="True"/>
     <Author Value="Luiz Américo Pereira Câmara / Rudy Velthuis (VarRecUtils)"/>
     <CompilerOptions>
       <Version Value="11"/>
