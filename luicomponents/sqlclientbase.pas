@@ -601,13 +601,26 @@ begin
       begin
         LastInsertId := FAdapter.InsertRecord(FDataset, FModelDef);
         Result := LastInsertId <> -1;
-        if FModelDef.DataField = '' then
-          FData.Int64s[FModelDef.PrimaryKey] := LastInsertId
-        else
-          FIdValue := LastInsertId;
       end
       else
         Result := FAdapter.ApplyUpdates(FDataset);
+      if Result then
+      begin
+        if FParams.Count > 0 then
+        begin
+          FData.Clear;
+          //todo: investigate if all fields should be returned when doing a patch
+          DatasetToJSON(FDataset, FData, [djoSetNull], '');
+          DecodeJSONFields(FData);
+        end;
+        if IsAppend then
+        begin
+          if FModelDef.DataField = '' then
+            FData.Int64s[FModelDef.PrimaryKey] := LastInsertId
+          else
+            FIdValue := LastInsertId;
+        end;
+      end;
     finally
       FDataset.Close;
     end;

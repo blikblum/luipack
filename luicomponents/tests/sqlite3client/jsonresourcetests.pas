@@ -153,6 +153,7 @@ begin
 
   PhoneId := FObject.Data.Get('id', -1);
   CheckNotEquals(-1, PhoneId);
+  CheckEqualsJSON(Format('{"id": %d, "number": "555", "contactid": %d}', [PhoneId, ContactId]), FObject.Data);
 
   FObject := FClient.GetJSONObject('contactphone');
   FObject.ParamByName('contactid').AsInteger := ContactId;
