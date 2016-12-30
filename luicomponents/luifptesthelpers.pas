@@ -23,9 +23,9 @@ type
     function FreeExpected: TJSONTestArgs;
   end;
 
-  { TTestCaseHelper }
+  { TTestProcHelper }
 
-  TTestCaseHelper = class helper for TTestCase
+  TTestProcHelper = class helper for TTestProc
   private
     function DoCheckEquals(ExpectedData, ActualData: TJSONData; const ErrorMsg: string = ''): TJSONTestArgs;
   public
@@ -87,9 +87,9 @@ begin
   Result := Self;
 end;
 
-{ TTestCaseHelper }
+{ TTestProcHelper }
 
-function TTestCaseHelper.DoCheckEquals(ExpectedData, ActualData: TJSONData;
+function TTestProcHelper.DoCheckEquals(ExpectedData, ActualData: TJSONData;
   const ErrorMsg: string): TJSONTestArgs;
 var
   ExpectedJSON, ActualJSON: String;
@@ -107,13 +107,13 @@ begin
   end;
 end;
 
-function TTestCaseHelper.CheckEquals(Expected, Actual: TJSONData;
+function TTestProcHelper.CheckEquals(Expected, Actual: TJSONData;
   const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := DoCheckEquals(Expected, Actual, ErrorMsg);
 end;
 
-function TTestCaseHelper.CheckEquals(const Expected: String; Actual: TJSONData;
+function TTestProcHelper.CheckEquals(const Expected: String; Actual: TJSONData;
   const ErrorMsg: string): TJSONTestArgs;
 var
   ExpectedData: TJSONData;
@@ -123,12 +123,12 @@ begin
   Result := DoCheckEquals(ExpectedData, Actual, ErrorMsg).FreeExpected;
 end;
 
-function TTestCaseHelper.CheckEqualsJSON(Expected, Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
+function TTestProcHelper.CheckEqualsJSON(Expected, Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := CheckEquals(Expected, Actual, ErrorMsg);
 end;
 
-function TTestCaseHelper.CheckEqualsJSON(const Expected: String; Actual: TJSONData;
+function TTestProcHelper.CheckEqualsJSON(const Expected: String; Actual: TJSONData;
   const ErrorMsg: string): TJSONTestArgs;
 var
   ExpectedData: TJSONData;
@@ -138,13 +138,13 @@ begin
   Result := DoCheckEquals(ExpectedData, Actual, ErrorMsg).FreeExpected;
 end;
 
-function TTestCaseHelper.CheckEqualsObject(const Expected: array of const;
+function TTestProcHelper.CheckEqualsObject(const Expected: array of const;
   Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := DoCheckEquals(TJSONObject.Create(Expected), Actual, ErrorMsg).FreeExpected;
 end;
 
-function TTestCaseHelper.CheckEqualsArray(const Expected: array of const;
+function TTestProcHelper.CheckEqualsArray(const Expected: array of const;
   Actual: TJSONData; const ErrorMsg: string): TJSONTestArgs;
 begin
   Result := DoCheckEquals(TJSONArray.Create(Expected), Actual, ErrorMsg).FreeExpected;
@@ -166,7 +166,6 @@ end;
 procedure TProcedureCalls.Add(const ProcName: String; const Params: array of const);
 var
   ParamsData, MethodCallsData: TJSONArray;
-  CallData: TJSONObject;
 begin
   if not FCalls.Find(ProcName, MethodCallsData) then
   begin
