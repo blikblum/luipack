@@ -451,7 +451,10 @@ var
   ResponseData, ItemData: TJSONData;
   i: Integer;
 begin
-  Result := (Method = hmtDelete) or TryStreamToJSON(ResponseStream, ResponseData);
+  Result := True;
+  if Method = hmtDelete then
+    Exit;
+  Result := TryStreamToJSON(ResponseStream, ResponseData);
   //todo: merge the common code from the three resource classes
   if not Result then
   begin
@@ -485,9 +488,9 @@ begin
       end;
       FDataset.MergeChangeLog;
     end;
-    hmtPost, hmtPut, hmtDelete, hmtPatch: ;
+    hmtPost, hmtDelete, hmtPut, hmtPatch: ;
   end;
-  ResponseData.Destroy;
+  ResponseData.Free;
 end;
 
 constructor TRESTDatasetResource.Create(AModelDef: TRESTResourceModelDef;
@@ -658,9 +661,10 @@ var
   ResponseData: TJSONData;
 begin
   Result := True;
-  try
-    ResponseData := StreamToJSON(ResponseStream);
-  except
+  if Method = hmtDelete then
+    Exit;
+  if not TryStreamToJSON(ResponseStream, ResponseData) then
+  begin
     FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
     Exit;
   end;
@@ -1002,9 +1006,8 @@ var
   ResponseData: TJSONData;
 begin
   Result := True;
-  try
-    ResponseData := StreamToJSON(ResponseStream);
-  except
+  if not TryStreamToJSON(ResponseStream, ResponseData) then
+  begin
     FResourceClient.DoError(ResourcePath, reResponse, 0, Format('%s: Invalid response format. Unable to parse as JSON', [FModelDef.Name]));
     Exit;
   end;
