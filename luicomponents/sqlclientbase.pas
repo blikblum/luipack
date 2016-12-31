@@ -606,7 +606,7 @@ begin
         Result := FAdapter.ApplyUpdates(FDataset);
       if Result then
       begin
-        if FParams.Count > 0 then
+        if IsAppend or (FParams.Count > 0) then
         begin
           FData.Clear;
           //todo: investigate if all fields should be returned when doing a patch

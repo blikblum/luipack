@@ -24,6 +24,8 @@ type
   published
     procedure Fetch;
     procedure AddRecord;
+    procedure AddPartialRecord;
+    procedure UpdateRecord;
     procedure FetchWithParam;
     procedure AddRecordWithParam;
     procedure ArbitraryData;
@@ -106,8 +108,11 @@ begin
   ContactId := FObject.Data.Get('id', -1);
   CheckNotEquals(-1, ContactId, 'Id should be valid');
 
+  CheckEqualsObject(['id', ContactId, 'name', 'Luiz Américo', 'categoryid', CategoryId],
+    FObject.Data, 'Data should match the saved');
+
   FObject := FClient.GetJSONObject('contact');
-  CheckTrue(FObject.Fetch(ContactId));
+  CheckTrue(FObject.Fetch(ContactId), 'Record should be fetched by id');
 
   FArray := FClient.GetJSONArray('contact');
   FArray.Fetch;
@@ -123,6 +128,46 @@ begin
   FObject := FClient.GetJSONObject('contact');
   CheckTrue(FObject.Fetch(ContactId));
   CheckEquals('Luiz999', FObject.Data.Get('name', ''));
+end;
+
+procedure TJSONResourceTests.AddPartialRecord;
+var
+  ContactId: Int64;
+begin
+  FObject := FClient.GetJSONObject('contact');
+  FObject.Data.CopyFrom(['name', 'Luiz Américo']);
+  CheckTrue(FObject.Save, 'Save should succeed');
+
+  ContactId := FObject.Data.Get('id', -1);
+  CheckNotEquals(-1, ContactId, 'Id should be valid');
+
+  CheckEqualsObject(['id', ContactId, 'name', 'Luiz Américo', 'categoryid', nil],
+    FObject.Data, 'All properties should be set');
+
+  FObject := FClient.GetJSONObject('contact');
+  FObject.Data.CopyFrom(['name', 'Luiz Américo']);
+  CheckTrue(FObject.Save([soPatch]), 'Save should succeed, soPatch should be ignored');
+
+  ContactId := FObject.Data.Get('id', -1);
+  CheckNotEquals(-1, ContactId, 'Id should be valid');
+
+  CheckEqualsObject(['id', ContactId, 'name', 'Luiz Américo', 'categoryid', nil],
+    FObject.Data, 'All properties should be set');
+end;
+
+procedure TJSONResourceTests.UpdateRecord;
+var
+  ContactId: Integer;
+begin
+  ContactId := GetLastContactId;
+  FObject := FClient.GetJSONObject('contact');
+  FObject.Fetch(ContactId);
+  FObject.Data.Strings['name'] := 'João';
+  CheckTrue(FObject.Save);
+
+  FObject := FClient.GetJSONObject('contact');
+  FObject.Fetch(ContactId);
+  CheckEquals('João', FObject.Data.Strings['name']);
 end;
 
 procedure TJSONResourceTests.FetchWithParam;
@@ -252,6 +297,7 @@ begin
   FObject := FClient.GetJSONObject('contact');
   FObject.Data.Integers['categoryid'] := CategoryId;
   CheckTrue(FObject.Save(ContactId, [soPatch]));
+  CheckEqualsObject(['categoryid', CategoryId], FObject.Data);
 
   FObject := FClient.GetJSONObject('contact');
   FObject.Fetch(ContactId);
