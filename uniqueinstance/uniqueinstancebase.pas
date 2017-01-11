@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, simpleipc;
 
 const
-  ParamsSeparator = '|';
+  ParamsSeparator = #13;
 
 var
   FIPCServer: TSimpleIPCServer;
