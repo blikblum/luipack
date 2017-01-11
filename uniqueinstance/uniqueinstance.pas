@@ -34,6 +34,9 @@ unit UniqueInstance;
 
 
 {$mode objfpc}{$H+}
+{$if not defined(Windows) or (FPC_FULLVERSION >= 30001)}
+{$define PollIPCMessage}
+{$endif}
 
 interface
 
@@ -54,7 +57,9 @@ type
     FEnabled: Boolean;
     FPriorInstanceRunning: Boolean;
     procedure ReceiveMessage(Sender: TObject);
+    {$ifdef PollIPCMessage}
     procedure CheckMessage(Sender: TObject);
+    {$endif}
   protected
     procedure Loaded; override;
   public
@@ -107,15 +112,19 @@ begin
   end;
 end;
 
+{$ifdef PollIPCMessage}
 procedure TUniqueInstance.CheckMessage(Sender: TObject);
 begin
   FIPCServer.PeekMessage(1, True);
 end;
+{$endif}
 
 procedure TUniqueInstance.Loaded;
 var
   IPCClient: TSimpleIPCClient;
+  {$ifdef PollIPCMessage}
   Timer: TTimer;
+  {$endif}
 begin
   if not (csDesigning in ComponentState) and FEnabled then
   begin
@@ -142,12 +151,14 @@ begin
       FIPCServer.OnMessage := @ReceiveMessage;
       //there's no more need for IPCClient
       IPCClient.Destroy;
+      {$ifdef PollIPCMessage}
       if Assigned(FOnOtherInstance) then
       begin
         Timer := TTimer.Create(Self);
         Timer.Interval := FUpdateInterval;
         Timer.OnTimer := @CheckMessage;
       end;
+      {$endif}
     end;
   end;//if
   inherited;
