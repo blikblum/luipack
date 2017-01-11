@@ -1,9 +1,9 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="uniqueinstance_package"/>
-    <AddToProjectUsesSection Value="True"/>
+    <Type Value="RunAndDesignTime"/>
     <Author Value="Luiz Am�rico Pereira C�mara"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -21,12 +21,6 @@
           <OptimizationLevel Value="2"/>
         </Optimizations>
       </CodeGeneration>
-      <Other>
-        <CompilerMessages>
-          <UseMsgFile Value="True"/>
-        </CompilerMessages>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="UniqueInstance provides a component to limits one instance per application"/>
     <License Value="Modified LGPL"/>
@@ -50,7 +44,6 @@
         <UnitName Value="UniqueInstanceBase"/>
       </Item4>
     </Files>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="LCL"/>
