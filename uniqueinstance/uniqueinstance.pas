@@ -45,7 +45,7 @@ uses
   
 type
 
-  TOnOtherInstance = procedure (Sender : TObject; ParamCount: Integer; Parameters: array of String) of object;
+  TOnOtherInstance = procedure (Sender : TObject; ParamCount: Integer; const Parameters: array of String) of object;
 
   { TUniqueInstance }
 
@@ -82,32 +82,17 @@ uses
 procedure TUniqueInstance.ReceiveMessage(Sender: TObject);
 var
   ParamsArray: array of String;
-  Count: Integer;
-
-  procedure FillParamsArray(const ParamsStr: String);
-  var
-    pos1, pos2, i: Integer;
-  begin
-    SetLength(ParamsArray, Count);
-    //fill params
-    i := 0;
-    pos1 := 1;
-    pos2 := pos(ParamsSeparator, ParamsStr);
-    while pos1 < pos2 do
-    begin
-      ParamsArray[i] := Copy(ParamsStr, pos1, pos2 - pos1);
-      pos1 := pos2+1;
-      pos2 := posex(ParamsSeparator, ParamsStr, pos1);
-      inc(i);
-    end;
-  end;
-
+  Params: String;
+  Count, i: Integer;
 begin
   if Assigned(FOnOtherInstance) then
   begin
     //MsgType stores ParamCount
     Count := FIPCServer.MsgType;
-    FillParamsArray(FIPCServer.StringMessage);
+    SetLength(ParamsArray, Count);
+    Params := FIPCServer.StringMessage;
+    for i := 1 to Count do
+      ParamsArray[i - 1] := ExtractWord(i, Params, [ParamsSeparator]);
     FOnOtherInstance(Self, Count, ParamsArray);
   end;
 end;
