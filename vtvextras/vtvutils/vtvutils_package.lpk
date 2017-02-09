@@ -4,7 +4,6 @@
     <PathDelim Value="\"/>
     <Name Value="vtvutils_package"/>
     <Type Value="RunAndDesignTime"/>
-    <AddToProjectUsesSection Value="True"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
@@ -91,7 +90,7 @@
       </Item5>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)\"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
