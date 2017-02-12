@@ -783,32 +783,22 @@ procedure TVirtualJSONListView.DoGetText(Node: PVirtualNode;
 var
   ItemData: PLVItemData;
   JSONData, TextPropData: TJSONData;
-  JSONObject: TJSONObject absolute JSONData;
-  TextPropIndex: Integer;
 begin
   ItemData := GetItemData(Node);
   JSONData := ItemData^.JSONData;
-  if JSONData.JSONType = jtObject then
+  if Header.UseColumns then
   begin
-    //todo: cache TextPropIndex ??
-    //todo: add option to ignore case
-    if Header.UseColumns then
-    begin
-      if Column <> NoColumn then
-        TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
-      else
-        TextPropIndex := -1;
-    end
+    if Column <> NoColumn then
+      TextPropData := JSONData.FindPath(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
     else
-      TextPropIndex := JSONObject.IndexOfName(FTextProperty);
-    if TextPropIndex <> -1 then
-    begin
-      TextPropData := JSONObject.Items[TextPropIndex];
-      //todo: add display options for null value
-      if TextPropData.JSONType in [jtString, jtNumber, jtBoolean] then
-        CellText := JSONObject.Items[TextPropIndex].AsString;
-    end;
-  end;
+      TextPropData := nil;
+  end
+  else
+    TextPropData := JSONData.FindPath(FTextProperty);
+
+  if (TextPropData <> nil) and (TextPropData.JSONType in [jtString, jtNumber, jtBoolean]) then
+    CellText := TextPropData.AsString;
+
   if Assigned(FOnGetText) then
     FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
 end;
@@ -917,28 +907,23 @@ var
   ItemData: PTVItemData;
   JSONData, TextPropData: TJSONData;
   JSONObject: TJSONObject absolute JSONData;
-  TextPropIndex: Integer;
 begin
   ItemData := GetItemData(Node);
   JSONData := ItemData^.JSONData;
   if JSONData.JSONType = jtObject then
   begin
     if not Header.UseColumns or (Assigned(FOnGetGroup) and (NodeParent[Node] = nil)) then
-      TextPropIndex := JSONObject.IndexOfName(FTextProperty)
+      TextPropData := JSONObject.FindPath(FTextProperty)
     else
     begin
       if Column <> NoColumn then
-        TextPropIndex := JSONObject.IndexOfName(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
+        TextPropData := JSONObject.FindPath(TVirtualJSONDataViewColumn(Header.Columns.Items[Column]).PropertyName)
       else
-        TextPropIndex := -1;
+        TextPropData := nil;
     end;
 
-    if TextPropIndex <> -1 then
-    begin
-      TextPropData := JSONObject.Items[TextPropIndex];
-      if TextPropData.JSONType in [jtString, jtNumber, jtBoolean] then
-        CellText := TextPropData.AsString;
-    end;
+    if (TextPropData <> nil) and (TextPropData.JSONType in [jtString, jtNumber, jtBoolean]) then
+      CellText := TextPropData.AsString;
   end;
   if Assigned(FOnGetText) then
     FOnGetText(Self, Node, JSONData, Column, TextType, CellText);
@@ -1008,7 +993,7 @@ procedure TVirtualJSONTreeView.Loaded;
 begin
   inherited Loaded;
   if Assigned(FOnGetGroup) then
-    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];;
+    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];
 end;
 
 constructor TVirtualJSONTreeView.Create(AOwner: TComponent);
