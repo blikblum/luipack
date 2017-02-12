@@ -260,9 +260,27 @@ end;
 
 procedure TCustomDropDownManager.FormVisibleChanged(Sender: TObject;
   Form: TCustomForm);
+var
+  ControlOwner: TControl;
+  AOwner: TComponent;
 begin
-  Form.AddHandlerFirstShow(@FormFirstShow);
-  Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChanged);
+  AOwner := Owner;
+  ControlOwner := nil;
+  while (AOwner <> nil) do
+  begin
+    if AOwner is TControl then
+    begin
+      ControlOwner := TControl(AOwner);
+      Break;
+    end
+    else
+      AOwner := AOwner.Owner;
+  end;
+  if Form.IsParentOf(ControlOwner) then
+  begin
+    Form.AddHandlerFirstShow(@FormFirstShow);
+    Screen.RemoveHandlerFormVisibleChanged(@FormVisibleChanged);
+  end;
 end;
 
 procedure TCustomDropDownManager.DoHide;
