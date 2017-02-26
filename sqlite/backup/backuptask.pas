@@ -16,6 +16,8 @@ type
     FData: TJSONObject;
     FName: String;
     FTargetPath: String;
+    function CreateRegexExpression(const Template: String): String;
+    procedure DeleteOldFiles(const Directory, Template: String; KeepCount: Integer);
     function ReplaceTags(const Template: String): String;
     function StoreFile(const BackupFileName: String): Boolean;
   public
@@ -28,9 +30,92 @@ type
 implementation
 
 uses
-  LuiJSONHelpers, strutils, AbZipper, AbArcTyp, MultiLog;
+  LuiJSONHelpers, strutils, AbZipper, AbArcTyp, MultiLog, RegExpr, FileUtil, Math;
+
+type
+
+  { TOldFileSearcher }
+
+  TOldFileSearcher = class(TFileSearcher)
+  private
+    FPattern: TRegExpr;
+    FList: TStringList;
+  protected
+    procedure DoFileFound; override;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Search(const Directory, Pattern: String); overload;
+    property List: TStringList read FList;
+  end;
+
+function SortByDate(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  Time1, Time2: PtrInt;
+begin
+  Time1 := PtrInt(List.Objects[Index1]);
+  Time2 := PtrInt(List.Objects[Index2]);
+  Result := CompareValue(Time1, Time2);
+end;
+
+{ TOldFileSearcher }
+
+procedure TOldFileSearcher.DoFileFound;
+begin
+  if FPattern.Exec(FileName) then
+    FList.AddObject(FileName, TObject(PtrInt(FileInfo.Time)));
+end;
+
+constructor TOldFileSearcher.Create;
+begin
+  inherited Create;
+  FPattern := TRegExpr.Create;
+  FList := TStringList.Create;
+end;
+
+destructor TOldFileSearcher.Destroy;
+begin
+  FList.Destroy;
+  FPattern.Destroy;
+  inherited Destroy;
+end;
+
+procedure TOldFileSearcher.Search(const Directory, Pattern: String);
+begin
+  FPattern.Expression := Pattern;
+  Search(Directory, '', False);
+  FList.CustomSort(@SortByDate);
+end;
 
 { TSqliteBackupTask }
+
+function TSqliteBackupTask.CreateRegexExpression(const Template: String): String;
+begin
+  Result := StringReplace(Template, '{{name}}', Name, [rfReplaceAll]);
+  Result := StringReplace(Result, '{{day}}', '\d\d', [rfReplaceAll]);
+  Result := StringReplace(Result, '{{month}}', '\d\d', [rfReplaceAll]);
+  Result := StringReplace(Result, '{{year}}', '\d\d\d\d', [rfReplaceAll]);
+  Result := StringReplace(Result, '{{hour}}', '\d\d', [rfReplaceAll]);
+  Result := StringReplace(Result, '{{minute}}', '\d\d', [rfReplaceAll]);
+end;
+
+procedure TSqliteBackupTask.DeleteOldFiles(const Directory, Template: String; KeepCount: Integer);
+var
+  Searcher: TOldFileSearcher;
+  i: Integer;
+begin
+  Searcher := TOldFileSearcher.Create;
+  try
+    Searcher.Search(Directory, CreateRegexExpression(Template));
+    for i := 0 to Searcher.List.Count - KeepCount - 1 do
+    begin
+      Logger.Send([lcInfo], 'Delete old file: ' + Searcher.List[i]);
+      DeleteFile(Searcher.List[i]);
+    end;
+  finally
+    Searcher.Destroy;
+  end;
+end;
 
 function TSqliteBackupTask.ReplaceTags(const Template: String): String;
 var
@@ -50,14 +135,14 @@ end;
 
 function TSqliteBackupTask.StoreFile(const BackupFileName: String): Boolean;
 var
-  FileName, TargetFileName, TargetDirectory: String;
+  FileName, TargetTemplate, TargetFileName, TargetDirectory: String;
   Zipper: TAbZipper;
   StartTime, EndTime: TDateTime;
 begin
   Result  := False;
   FileName := ExtractFileName(FData.Get('database', ''));
-  TargetFileName := FData.GetPath('filename', '{{name}}-{{year}}-{{month}}-{{day}}--{{hour}}-{{minute}}');
-  TargetFileName := ReplaceTags(TargetFileName);
+  TargetTemplate := FData.GetPath('filename', '{{name}}-{{year}}-{{month}}-{{day}}--{{hour}}-{{minute}}');
+  TargetFileName := ReplaceTags(TargetTemplate);
   TargetDirectory := IncludeTrailingPathDelimiter(FData.GetPath('targets.directory', ''));
   if not DirectoryExists(TargetDirectory) then
     raise Exception.CreateFmt('Error - directory "%s" does not exist', [TargetDirectory]);
@@ -76,6 +161,7 @@ begin
   finally
     Zipper.Destroy;
   end;
+  DeleteOldFiles(TargetDirectory, TargetTemplate, 3);
   Result := True;
 end;
 

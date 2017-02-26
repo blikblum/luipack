@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <Flags>
@@ -25,19 +25,22 @@
         <CommandLineParams Value="nefrolog"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="multiloglaz"/>
+        <PackageName Value="LazUtils"/>
       </Item1>
       <Item2>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="multiloglaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="laz_synapse"/>
       </Item3>
       <Item4>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="luicomponents"/>
       </Item4>
+      <Item5>
+        <PackageName Value="Abbrevia"/>
+      </Item5>
     </RequiredPackages>
     <Units Count="5">
       <Unit0>
