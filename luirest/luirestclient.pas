@@ -487,7 +487,8 @@ begin
     end;
     hmtPost, hmtPut, hmtDelete, hmtPatch: ;
   end;
-  ResponseData.Destroy;
+  if Method <> hmtDelete then
+    ResponseData.Destroy;
 end;
 
 constructor TRESTDatasetResource.Create(AModelDef: TRESTResourceModelDef;
