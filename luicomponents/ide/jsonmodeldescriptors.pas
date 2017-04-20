@@ -134,7 +134,7 @@ begin
 ''+ LineEnding +
 'function {{collectionname}}.CreateItem(AddItem: Boolean): {{modelname}};'+ LineEnding +
 'begin'+ LineEnding +
-'  Result := {{modelname}}(inherited CreateItem);'+ LineEnding +
+'  Result := {{modelname}}(inherited CreateItem(AddItem));'+ LineEnding +
 'end;'+ LineEnding +
 ''+ LineEnding +
 'function {{collectionname}}.Find(const Id: Variant): {{modelname}};'+ LineEnding +
