@@ -227,16 +227,16 @@ begin
   begin
     //try to convert to number
     if TryStrToInt64(EditText, Int64Value) then
-      Data.Int64s[PropName] := Int64Value
+      SetJSONPath(Data, PropName, TJSONInt64Number.Create(Int64Value))
     else if TryStrToFloat(PropName, DoubleValue) then
-      Data.Floats[PropName] := DoubleValue
+      SetJSONPath(Data, PropName, TJSONFloatNumber.Create(DoubleValue))
     else
       //todo: implement default handling for empty
-      Data.Nulls[PropName] := True;
+      SetJSONPath(Data, PropName, TJSONNull.Create);
   end
   else
   begin
-    Data.Strings[PropName] := EditText;
+    SetJSONPath(Data, PropName, TJSONString.Create(EditText));
   end;
 end;
 
@@ -253,7 +253,7 @@ var
   i: Integer;
 begin
   CheckGroup := Element.Control as TCheckGroup;
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   OptionsData := Element.OptionsData;
   //for now require PropData and items to be set
   if (PropData <> nil) and FindJSONProp(OptionsData, 'items', ItemsData) then
@@ -301,7 +301,7 @@ var
   i: Integer;
 begin
   CheckGroup := Element.Control as TCheckGroup;
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   OptionsData := Element.OptionsData;
   if FindJSONProp(OptionsData, 'items', ItemsData) then
   begin
@@ -312,7 +312,7 @@ begin
     if (PropData = nil) or (PropData.JSONType in [jtString, jtNumber, jtNull]) then
     begin
       PropData := TJSONArray.Create;
-      Data.Elements[Element.PropertyName] := PropData;
+      SetJSONPath(Data, Element.PropertyName, PropData);
     end
     else
       PropData.Clear;
@@ -357,7 +357,7 @@ var
   Checked: Boolean;
 begin
   RadioButton := Element.Control as TRadioButton;
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   ValueData := Element.OptionsData.Find('value');
   Checked := False;
   if (PropData <> nil) and (ValueData <> nil) then
@@ -374,7 +374,7 @@ begin
   RadioButton := Element.Control as TRadioButton;
   ValueData := Element.OptionsData.Find('value');
   if RadioButton.Checked and (ValueData <> nil) then
-    Data.Elements[Element.PropertyName] := ValueData.Clone;
+    SetJSONPath(Data, Element.PropertyName, ValueData.Clone);
 end;
 
 class function TJSONRadioButtonMediator.AllowsCaptionLabel: Boolean;
@@ -430,7 +430,7 @@ begin
     PropData := TJSONArray.Create;
     for i := 0 to MemoLines.Count - 1 do
       PropData.Add(MemoLines[i]);
-    Data.Elements[Element.PropertyName] := PropData;
+    SetJSONPath(Data, Element.PropertyName, PropData);
   end;
 end;
 
@@ -802,7 +802,7 @@ var
   DefaultValue: Double;
 begin
   SpinEdit := Element.Control as TCustomFloatSpinEdit;
-  PropData := Data.Find(Element.PropertyName);
+  PropData := Data.FindPath(Element.PropertyName);
   if (PropData = nil) or (PropData.JSONType = jtNull) then
   begin
     if FindJSONProp(Element.OptionsData, 'default', DefaultValue) then
@@ -824,6 +824,7 @@ class procedure TJSONSpinEditMediator.DoGUIToJSON(Element: TJSONFormElement;
   Data: TJSONObject);
 var
   SpinEdit: TCustomFloatSpinEdit;
+  PropData: TJSONData;
   PropName: String;
 begin
   SpinEdit := Element.Control as TCustomFloatSpinEdit;
@@ -831,9 +832,10 @@ begin
   if not SpinEdit.ValueEmpty then
   begin
     if SpinEdit.DecimalPlaces = 0 then
-      Data.Integers[PropName] := round(SpinEdit.Value)
+      PropData := TJSONInt64Number.Create(Round(SpinEdit.Value))
     else
-      Data.Floats[PropName] := SpinEdit.Value;
+      PropData := TJSONFloatNumber.Create(SpinEdit.Value);
+    SetJSONPath(Data, PropName, PropData);
   end
   else
   begin
