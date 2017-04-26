@@ -124,7 +124,7 @@ type
     FResourceClient: TRESTResourceClient;
     FParams: TParams;
   protected
-    function GetResourcePath(WithQuery: Boolean = True): String;
+    function GetResourcePath(const ResourceId: String = ''): String;
     function ParseResponse(const ResourcePath: String; Method: THTTPMethodType; ResponseStream: TStream): Boolean; virtual; abstract;
     property ModelDef: TRESTResourceModelDef read FModelDef;
   public
@@ -312,42 +312,39 @@ var
   IdField: TField;
   ResourcePath: String;
   RecordData: TJSONObject;
+  HasId: Boolean;
 begin
-  ResourcePath := FResource.GetResourcePath;
+  IdField := FindField(FResource.ModelDef.IdField);
+  HasId := (IdField <> nil) and not IdField.IsNull;
+  if HasId then
+    ResourcePath := FResource.GetResourcePath(IdField.AsString)
+  else
+    ResourcePath := FResource.GetResourcePath;
+
   case UpdateKind of
     ukInsert:
     begin
       //todo: handle setting record id after insert
       RecordData := DatasetToJSON(Self, [djoCurrentRecord], '') as TJSONObject;
-      IdField := FindField(FResource.ModelDef.IdField);
-      if (IdField <> nil) and not IdField.IsNull then
-      begin
-        ResourcePath := ResourcePath + '/' + IdField.AsString;
-        FResource.FResourceClient.Put(ResourcePath, FResource, RecordData.AsJSON);
-      end
+      if HasId then
+        FResource.FResourceClient.Put(ResourcePath, FResource, RecordData.AsJSON)
       else
         FResource.FResourceClient.Post(ResourcePath, FResource, RecordData.AsJSON);
       RecordData.Destroy;
     end;
     ukModify:
     begin
-      IdField := FindField(FResource.ModelDef.IdField);
-      if (IdField <> nil) and not IdField.IsNull then
+      if HasId then
       begin
         RecordData := DatasetToJSON(Self, [djoCurrentRecord], '') as TJSONObject;
-        ResourcePath := ResourcePath + '/' + IdField.AsString;
         FResource.FResourceClient.Put(ResourcePath, FResource, RecordData.AsJSON);
         RecordData.Destroy;
       end;
     end;
     ukDelete:
     begin
-      IdField := FindField(FResource.ModelDef.IdField);
-      if (IdField <> nil) and not IdField.IsNull then
-      begin
-        ResourcePath := ResourcePath + '/' + IdField.AsString;
+      if HasId then
         FResource.FResourceClient.Delete(ResourcePath, FResource);
-      end;
     end;
   end;
 end;
@@ -361,13 +358,8 @@ end;
 { TRESTDatasetResource }
 
 function TRESTDatasetResource.DoFetch(const IdValue: Variant): Boolean;
-var
-  ResourcePath: String;
 begin
-  ResourcePath := GetResourcePath;
-  if not (VarIsEmpty(IdValue) or VarIsNull(IdValue)) then
-    ResourcePath := ResourcePath + '/' + VarToStr(IdValue);
-  Result := FResourceClient.Get(ResourcePath, Self);
+  Result := FResourceClient.Get(GetResourcePath(VarToStr(IdValue)), Self);
 end;
 
 procedure TRESTDatasetResource.FieldDefsDataCacheNeeded;
@@ -384,7 +376,7 @@ begin
   Result := TJSONArray(FFieldDefsDataCache.Find(FModelDef.Name));
   if Result = nil then
   begin
-    ResourcePath := GetResourcePath(False) + '/fielddefs';
+    ResourcePath := GetResourcePath('fielddefs');
     Http := THTTPSend.Create;
     if Http.HTTPMethod('GET', FResourceClient.BaseURL + ResourcePath) then
     begin
@@ -630,7 +622,7 @@ end;
 
 function TRESTJSONObjectResource.DoFetch(const Id: String): Boolean;
 begin
-  Result := FResourceClient.Get(GetResourcePath + IfThen(Id <> '', '/' + Id), Self);
+  Result := FResourceClient.Get(GetResourcePath(Id), Self);
 end;
 
 function TRESTJSONObjectResource.DoSave(const Id: String; Options: TSaveOptions): Boolean;
@@ -638,14 +630,14 @@ var
   ResourcePath, IdField: String;
 begin
   IdField := FModelDef.IdField;
-  ResourcePath := GetResourcePath;
   if (Id = '') and (IdField <> '') then
   begin
+    ResourcePath := GetResourcePath;
     Result := FResourceClient.Post(ResourcePath, Self, FData.AsJSON);
   end
   else
   begin
-    ResourcePath := ResourcePath + IfThen(Id <> '', '/' + Id);
+    ResourcePath := GetResourcePath(Id);
     if soPatch in Options then
       Result := FResourceClient.Patch(ResourcePath, Self, FData.AsJSON)
     else
@@ -721,12 +713,11 @@ var
   Id: String;
 begin
   Result := False;
-  ResourcePath := GetResourcePath;
   if VarIsEmpty(FIdValue) or VarIsNull(FIdValue) then
   begin
     if FData = nil then
     begin
-      FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Data not set');
+      FResourceClient.DoError(GetResourcePath, reRequest, 0, 'Delete: Data not set');
       Exit;
     end;
     IdFieldData := FData.Find(FModelDef.IdField);
@@ -736,19 +727,19 @@ begin
         Id := IdFieldData.AsString
       else
       begin
-        FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Id field must be string or number');
+        FResourceClient.DoError(GetResourcePath, reRequest, 0, 'Delete: Id field must be string or number');
         Exit;
       end
     end
     else
     begin
-      FResourceClient.DoError(ResourcePath, reRequest, 0, 'Delete: Id field not set');
+      FResourceClient.DoError(GetResourcePath, reRequest, 0, 'Delete: Id field not set');
       Exit;
     end;
   end
   else
     Id := VarToStr(FIdValue);
-  ResourcePath := ResourcePath + '/' + Id;
+  ResourcePath := GetResourcePath(Id);
   Result := FResourceClient.Delete(ResourcePath, Self);
 end;
 
@@ -758,9 +749,7 @@ var
 begin
   if not VarIsEmpty(IdValue) then
   begin
-    ResourcePath := GetResourcePath;
-    if not VarIsNull(IdValue) then
-      ResourcePath := ResourcePath + '/' + VarToStr(IdValue);
+    ResourcePath := GetResourcePath(VarToStr(IdValue));
     Result := FResourceClient.Delete(ResourcePath, Self);
   end
   else
@@ -944,7 +933,7 @@ begin
   end;
 end;
 
-function TRESTDataResource.GetResourcePath(WithQuery: Boolean): String;
+function TRESTDataResource.GetResourcePath(const ResourceId: String): String;
 var
   Param: TModelDefParam;
   QueryStr: String;
@@ -976,7 +965,9 @@ begin
       end;
     end;
   end;
-  if (QueryStr <> '') and WithQuery then
+  if ResourceId <> '' then
+    Result := Result + '/' + ResourceId;
+  if QueryStr <> '' then
     Result := Result + '?' + QueryStr;
 end;
 
@@ -1050,11 +1041,8 @@ begin
 end;
 
 function TRESTJSONArrayResource.Fetch: Boolean;
-var
-  ResourcePath: String;
 begin
-  ResourcePath := GetResourcePath;
-  Result := FResourceClient.Get(ResourcePath, Self);
+  Result := FResourceClient.Get(GetResourcePath, Self);
 end;
 
 { TRESTResourceModelDef }
