@@ -88,6 +88,8 @@ type
     function GetValue(const PropertyName: String; const KeyValue, Default: Variant): Variant;
     function IndexOf(const KeyValue: Variant): Integer;
     procedure LoadData(AData: TJSONArray; OwnsData: Boolean = False);
+    procedure Map(Data: TJSONArray; const KeyProp, ValueProp: String);
+    procedure Map(Data: TJSONObject; const KeyProp, ValueProp: String);
     property Data: TJSONArray read FData;
     property Items[KeyValue: Variant]: TJSONObject read GetItems;
     property KeyProperty: String read FKeyProperty write FKeyProperty;
@@ -458,6 +460,24 @@ begin
     raise Exception.Create('TJONLookup - Data must be assigned');
   FData := AData;
   FOwnsData := OwnsData;
+end;
+
+procedure TJSONLookup.Map(Data: TJSONArray; const KeyProp, ValueProp: String);
+var
+  i: Integer;
+  ItemData: TJSONData;
+begin
+  for i := 0 to Data.Count - 1 do
+  begin
+    ItemData := Data.Items[i];
+    if ItemData.JSONType = jtObject then
+      Map(TJSONObject(ItemData), KeyProp, ValueProp);
+  end;
+end;
+
+procedure TJSONLookup.Map(Data: TJSONObject; const KeyProp, ValueProp: String);
+begin
+  SetJSONPropValue(Data, ValueProp, Values[Data.Get(KeyProp)], True);
 end;
 
 function TJSONLookup.FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
