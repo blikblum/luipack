@@ -253,10 +253,14 @@ begin
 end;
 
 procedure TfrJSONReport.LoadConfigData;
+var
+  StoredConfigData: TJSONObject;
 begin
   FreeDataLinks;
   FNullValues.Clear;
   FDataLinks.Clear;
+  if TryStrToJSON(Comments.Text, StoredConfigData) then
+    ParseConfigData(StoredConfigData);
   ParseConfigData(FBaseConfigData);
   ParseConfigData(FConfigData);
 end;
@@ -318,7 +322,7 @@ begin
       ItemData := DataLinksData.Items[i];
       if ItemData.JSONType = jtObject then
       begin
-        PropertyName := ItemObject.Strings['property'];
+        PropertyName := ItemObject.Get('property', '');
         FDataLinks.Add(PropertyName, TfrJSONDataLink.Create(ItemObject.Get('band', ''),
           PropertyName, ItemObject.Get('crossband', ''),
           ItemObject.Get('hideband', False)));
