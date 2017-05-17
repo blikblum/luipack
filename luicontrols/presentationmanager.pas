@@ -51,6 +51,7 @@ type
 
   IPresentationManager = interface
     ['{25532926-50FF-42F3-800D-AB4A7B01B3BA}']
+    function Get(const PresentationName, Default: String): IPresentation;
     function GetPresentation(const PresentationName: String): IPresentation;
     procedure Register(const PresentationName: String; ViewClass: TFormClass; PresenterClass: TPresenterClass = nil);
     procedure Register(const PresentationName: String; ViewClass: TFormClass;
@@ -72,6 +73,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function Get(const PresentationName, Default: String): IPresentation;
     function GetPresentation(const PresentationName: String): IPresentation;
     procedure Register(const PresentationName: String; ViewClass: TFormClass;
       PresenterClass: TPresenterClass = nil); inline;
@@ -363,6 +365,14 @@ destructor TPresentationManager.Destroy;
 begin
   FPresentationDefs.Destroy;
   inherited Destroy;
+end;
+
+function TPresentationManager.Get(const PresentationName, Default: String): IPresentation;
+begin
+  if FPresentationDefs.FindIndexOf(PresentationName) <> -1 then
+    Result := GetPresentation(PresentationName)
+  else
+    Result := GetPresentation(Default);
 end;
 
 function TPresentationManager.GetPresentation(const PresentationName: String): IPresentation;
