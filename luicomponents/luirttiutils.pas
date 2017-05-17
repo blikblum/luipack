@@ -285,7 +285,7 @@ end;
 
 function GetProperty(Instance: TObject; const PropertyName: String; Default: String): String;
 begin
-  if not FindProperty(Instance, PropertyName, Default) then
+  if not FindProperty(Instance, PropertyName, Result) then
     Result := Default;
 end;
 
