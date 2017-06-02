@@ -157,7 +157,7 @@ procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray
 var
   i, FieldIndex: Integer;
   QueryParamData: TJSONData;
-  ParamName, ParamValue: String;
+  ParamName, ParamType, ParamValue: String;
   ParamRequired: Boolean;
   Int64Value: int64;
   DoubleValue: Extended;
@@ -166,16 +166,18 @@ begin
   for i := 0 to QueryParamsData.Count - 1 do
   begin
     QueryParamData := QueryParamsData.Items[i];
+    ParamType := '';
+    ParamRequired := False;
     case QueryParamData.JSONType of
       jtString:
         begin
           ParamName := QueryParamData.AsString;
-          ParamRequired := False;
         end;
       jtObject:
         begin
           ParamName := TJSONObject(QueryParamData).Get('name', '');
           ParamRequired := TJSONObject(QueryParamData).Get('required', False);
+          ParamType := TJSONObject(QueryParamData).Get('type', '');
         end;
     end;
     if ParamName <> '' then
@@ -188,12 +190,17 @@ begin
       if FieldIndex <> -1 then
       begin
         ParamValue := QueryFields.ValueFromIndex[FieldIndex];
-        if TryStrToInt64(ParamValue, Int64Value) then
-          Param.AsLargeInt := Int64Value
-        else if TryStrToFloat(ParamValue, DoubleValue) then
-          Param.AsFloat := DoubleValue
+        if ParamType = 'string' then
+          Param.AsString := ParamValue
         else
-          Param.AsString := ParamValue;
+        begin
+          if TryStrToInt64(ParamValue, Int64Value) then
+            Param.AsLargeInt := Int64Value
+          else if TryStrToFloat(ParamValue, DoubleValue) then
+            Param.AsFloat := DoubleValue
+          else
+            Param.AsString := ParamValue;
+        end;
       end
       else
       begin
