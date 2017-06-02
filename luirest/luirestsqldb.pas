@@ -148,10 +148,7 @@ begin
     PropName := JSONObj.Names[i];
     Param := Params.FindParam(PropName);
     if Param = nil then
-    begin
-      Param := TParam.Create(Params, ptInput);
-      Param.Name := PropName;
-    end;
+      Param := Params.CreateParam(ftString, PropName, ptInput);
     Param.Value := JSONObj.Items[i].Value;
   end;
 end;
@@ -185,10 +182,8 @@ begin
     begin
       Param := Params.FindParam(ParamName);
       if Param = nil then
-      begin
-        Param := TParam.Create(Params, ptInput);
-        Param.Name := ParamName;
-      end;
+        Param := Params.CreateParam(ftString, ParamName, ptInput);
+
       FieldIndex := QueryFields.IndexOfName(ParamName);
       if FieldIndex <> -1 then
       begin
