@@ -54,6 +54,7 @@ type
     procedure PrepareParams(Params: TParams; ARequest: TRequest);
     procedure PrepareQuery(Query: TSQLQuery; MethodType: THTTPMethodType;
       const ASelectSQL, AConditionsSQL: String); virtual;
+    procedure PrepareResponse(ResponseData: TJSONData); virtual;
     procedure SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
     procedure SetQueryData(Query: TSQLQuery; RequestData, Params: TJSONObject; DoPatch: Boolean = False); virtual;
   public
@@ -574,6 +575,11 @@ begin
     Query.SQL.Add(GetResourceIdentifierSQL);
 end;
 
+procedure TSqldbResource.PrepareResponse(ResponseData: TJSONData);
+begin
+  //
+end;
+
 procedure TSqldbResource.SetPrimaryKeyData(Query: TSQLQuery; Params: TJSONObject);
 var
   ParamData: TJSONData;
@@ -633,6 +639,7 @@ begin
       try
         DatasetToJSON(Query, TJSONArray(ResponseData), ConvertOptions, FOutputFields);
         DecodeJSONFields(TJSONArray(ResponseData));
+        PrepareResponse(ResponseData);
         AResponse.Contents.Add(ResponseData.AsJSON);
       finally
         ResponseData.Free;
@@ -649,6 +656,7 @@ begin
         try
           DatasetToJSON(Query, TJSONObject(ResponseData), ConvertOptions, FOutputFields);
           DecodeJSONFields(TJSONObject(ResponseData));
+          PrepareResponse(ResponseData);
           AResponse.Contents.Add(ResponseData.AsJSON);
         finally
           ResponseData.Free;
