@@ -160,7 +160,7 @@ procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray
 var
   i, FieldIndex: Integer;
   QueryParamData: TJSONData;
-  ParamName, ParamType, ParamValue: String;
+  ParamName, ParamType, ParamFormat, ParamValue: String;
   ParamRequired: Boolean;
   Int64Value: int64;
   DoubleValue: Extended;
@@ -170,6 +170,7 @@ begin
   begin
     QueryParamData := QueryParamsData.Items[i];
     ParamType := '';
+    ParamFormat := '';
     ParamRequired := False;
     case QueryParamData.JSONType of
       jtString:
@@ -181,6 +182,7 @@ begin
           ParamName := TJSONObject(QueryParamData).Get('name', '');
           ParamRequired := TJSONObject(QueryParamData).Get('required', False);
           ParamType := TJSONObject(QueryParamData).Get('type', '');
+          ParamFormat := TJSONObject(QueryParamData).Get('format', '');
         end;
     end;
     if ParamName <> '' then
@@ -198,9 +200,25 @@ begin
         else
         begin
           if TryStrToInt64(ParamValue, Int64Value) then
-            Param.AsLargeInt := Int64Value
+          begin
+            case ParamFormat of
+              'date': Param.AsDate := Int64Value;
+              'time': Param.AsTime := Int64Value;
+              'datetime': Param.AsDateTime := Int64Value;
+            else
+              Param.AsLargeInt := Int64Value
+            end;
+          end
           else if TryStrToFloat(ParamValue, DoubleValue) then
-            Param.AsFloat := DoubleValue
+          begin
+            case ParamFormat of
+              'date': Param.AsDate := Trunc(DoubleValue);
+              'time': Param.AsTime := Frac(DoubleValue);
+              'datetime': Param.AsDateTime := DoubleValue;
+            else
+              Param.AsFloat := DoubleValue
+            end;
+          end
           else
             Param.AsString := ParamValue;
         end;
