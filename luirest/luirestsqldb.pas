@@ -85,6 +85,8 @@ type
 
   TSqldbResourceClass = class of TSqldbResource;
 
+  { TSqldbCollectionResource }
+
   TSqldbCollectionResource = class(TSqldbResource)
   private
     procedure CreateItemResource(out Resource: TRESTResource; ResourceTag: PtrInt);
@@ -92,6 +94,7 @@ type
     class function IsItemIdValid(const ItemId: String): Boolean; virtual;
     class function GetItemClass: TSqldbResourceClass; virtual;
     class function GetItemParam: String; virtual;
+    class function GetItemParamType: String; virtual;
     procedure Loaded(Tag: PtrInt); override;
     procedure PrepareItem(ItemResource: TSqldbResource); virtual;
   public
@@ -897,6 +900,11 @@ begin
   raise Exception.CreateFmt('GetItemParam not set. Class: %s Path: %s', [ClassName, TRESTRequest.ResourcePath]);
 end;
 
+class function TSqldbCollectionResource.GetItemParamType: String;
+begin
+  Result := '';
+end;
+
 procedure TSqldbCollectionResource.HandleSubPath(const SubPath: String;
   var SubPathResourceDef: TRESTResourceDef);
 begin
@@ -923,7 +931,7 @@ begin
       raise Exception.CreateFmt('ItemClass not defined for %s', [ClassName]);
     FSelectSQL := ItemClass.GetSelectSQL;
   end;
-  SetDefaultSubPath(GetItemParam, @CreateItemResource, 0);
+  SetDefaultSubPath(GetItemParam, @CreateItemResource, 0, GetItemParamType);
 end;
 
 procedure TSqldbCollectionResource.PrepareItem(ItemResource: TSqldbResource);

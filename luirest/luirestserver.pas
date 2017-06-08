@@ -54,6 +54,7 @@ type
   private
     FSubPathResources: TRESTResourceStore;
     FSubPathParamName: String;
+    FSubPathParamType: String;
     FURIParams: TJSONObject;
     class var FServiceModule: TRESTServiceModule;
     procedure SubPathResourcesNeeded;
@@ -62,7 +63,7 @@ type
     procedure RedirectRequest(ARequest: TRequest; AResponse: TResponse;
       const Method, ResourcePath: String; Relative: Boolean = True);
     procedure SetResponseStatus(AResponse: TResponse; StatusCode: Integer; const Message: String; const Args: array of const);
-    procedure SetURIParam(const ParamName, ParamValue: String; IsNumeric: Boolean = False);
+    procedure SetURIParam(const ParamName, ParamValue: String; const ParamType: String = '');
     property SubPathParamName: String read FSubPathParamName;
     property SubPathResources: TRESTResourceStore read FSubPathResources;
   public
@@ -76,8 +77,10 @@ type
     procedure HandleSubPath(const SubPath: String; var SubPathResourceDef: TRESTResourceDef); virtual;
     procedure RegisterSubPath(const ResourceId: ShortString; ResourceClass: TRESTResourceClass; Tag: PtrInt = 0);
     procedure RegisterSubPath(const ResourceId: ShortString; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt = 0);
-    procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TRESTResourceClass; Tag: PtrInt);
-    procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+    procedure SetDefaultSubPath(const ParamName: String; ResourceClass: TRESTResourceClass; Tag: PtrInt;
+      const ParamType: String = '');
+    procedure SetDefaultSubPath(const ParamName: String; CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt;
+      const ParamType: String = '');
     property URIParams: TJSONObject read FURIParams;
   end;
   {$M-}
@@ -420,24 +423,26 @@ begin
   FServiceModule.FResponseFormatter.SetStatus(AResponse, StatusCode, Message, Args);
 end;
 
-procedure TRESTResource.SetURIParam(const ParamName, ParamValue: String;
-  IsNumeric: Boolean);
+procedure TRESTResource.SetURIParam(const ParamName, ParamValue: String; const ParamType: String);
 var
   DoubleValue: Double;
   Int64Value: Int64;
 begin
   //todo: implement constraints
   //todo: add ERestException (define message + status code)
-  if TryStrToInt64(ParamValue, Int64Value) then
-    URIParams.Int64s[ParamName] := Int64Value
-  else if TryStrToFloat(ParamValue, DoubleValue) then
-    URIParams.Floats[ParamName] := DoubleValue
+  if ParamType = 'string' then
+    URIParams.Strings[ParamName] := ParamValue
   else
   begin
-    if not IsNumeric then
-      URIParams.Strings[ParamName] := ParamValue
+    if TryStrToInt64(ParamValue, Int64Value) then
+      URIParams.Int64s[ParamName] := Int64Value
+    else if TryStrToFloat(ParamValue, DoubleValue) then
+      URIParams.Floats[ParamName] := DoubleValue
     else
-      raise Exception.CreateFmt('Invalid param. "%s" expects a numeric value. Got "%s"', [ParamName, ParamValue]);
+    begin
+       URIParams.Strings[ParamName] := ParamValue
+       //raise Exception.CreateFmt('Invalid param. "%s" expects a numeric value. Got "%s"', [ParamName, ParamValue]);
+    end;
   end;
 end;
 
@@ -461,22 +466,24 @@ begin
 end;
 
 procedure TRESTResource.SetDefaultSubPath(const ParamName: String;
-  ResourceClass: TRESTResourceClass; Tag: PtrInt);
+  ResourceClass: TRESTResourceClass; Tag: PtrInt; const ParamType: String);
 begin
   if ResourceClass = nil then
     raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Class']);
   SubPathResourcesNeeded;
   FSubPathParamName := ParamName;
+  FSubPathParamType := ParamType;
   FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(ResourceClass, Tag);
 end;
 
 procedure TRESTResource.SetDefaultSubPath(const ParamName: String;
-  CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt);
+  CreateCallback: TRESTResourceCreateEvent; Tag: PtrInt; const ParamType: String);
 begin
   if CreateCallback = nil then
     raise Exception.CreateFmt(SDefaultSubPathError, [ParamName, 'Event']);
   SubPathResourcesNeeded;
   FSubPathParamName := ParamName;
+  FSubPathParamType := ParamType;
   FSubPathResources.DefaultResourceDef := TRESTResourceDef.Create(CreateCallback, Tag);
 end;
 
@@ -496,7 +503,7 @@ begin
       //todo: add way to check if subpath is a valid default
       //optionally add route handling based in pattern match
       SubPathResourceDef := FSubPathResources.DefaultResourceDef;
-      SetURIParam(FSubPathParamName, SubPath);
+      SetURIParam(FSubPathParamName, SubPath, FSubPathParamType);
     end;
   end;
 end;
