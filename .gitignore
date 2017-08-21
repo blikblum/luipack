@@ -3,4 +3,8 @@
 *.db
 *.cgi
 *.exe
+*.o
+*.or
+*.compiled
+*.ppu
 .idea
