@@ -146,7 +146,7 @@ begin
   except
     on E: EFOpenError do
       ShowMessageFmt('Error opening "%s" : %s', [FileName, E.Message]);
-    on E: EJSONScanner do
+    on E: EJSONParser do
     begin
       ShowMessageFmt('Error parsing "%s" : %s', [FileName, E.Message]);
     end;
@@ -160,6 +160,7 @@ begin
     if Data.JSONType in [{jtObject,} jtArray] then
     begin
       JSONTreeView.Data := Data;
+      JSONTreeView.LoadData;
       JSONTreeView.FullExpand;
     end
     else
