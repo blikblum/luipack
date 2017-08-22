@@ -45,20 +45,23 @@
         <UnitName Value="LuiNotifications"/>
       </Item6>
     </Files>
-    <RequiredPkgs Count="4">
+    <RequiredPkgs Count="5">
       <Item1>
-        <PackageName Value="luicairo_extras"/>
+        <PackageName Value="LuiLCLComponents"/>
       </Item1>
       <Item2>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="luicairo_extras"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="luicomponents"/>
       </Item3>
       <Item4>
+        <PackageName Value="LCL"/>
+      </Item4>
+      <Item5>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item4>
+      </Item5>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
