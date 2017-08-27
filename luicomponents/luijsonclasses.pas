@@ -69,17 +69,22 @@ type
   end;
 
   { TJSONLookup }
+  TJSONLookup = class;
+
+  TJSONLookupGetText = procedure(ItemData: TJSONObject; var Text: String) of object;
 
   TJSONLookup = class(TComponent)
   private
     FData: TJSONArray;
     FKeyProperty: String;
+    FOnGetText: TJSONLookupGetText;
     FValueProperty: String;
     FOwnsData: Boolean;
     function FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
     function GetItems(KeyValue: Variant): TJSONObject;
     function GetKeys(Index: Integer): Variant;
     function GetStrings(const KeyValue: Variant): String;
+    function GetTexts(const KeyValue: Variant): String;
     function GetValues(const KeyValue: Variant): Variant;
   public
     constructor Create(AOwner: TComponent); override;
@@ -90,11 +95,15 @@ type
     procedure LoadData(AData: TJSONArray; OwnsData: Boolean = False);
     procedure Map(Data: TJSONArray; const KeyProp, ValueProp: String);
     procedure Map(Data: TJSONObject; const KeyProp, ValueProp: String);
+    procedure MapText(Data: TJSONArray; const KeyProp, ValueProp: String);
+    procedure MapText(Data: TJSONObject; const KeyProp, ValueProp: String);
     property Data: TJSONArray read FData;
     property Items[KeyValue: Variant]: TJSONObject read GetItems;
     property KeyProperty: String read FKeyProperty write FKeyProperty;
     property Keys[Index: Integer]: Variant read GetKeys;
+    property OnGetText: TJSONLookupGetText read FOnGetText write FOnGetText;
     property Strings[KeyValue: Variant]: String read GetStrings;
+    property Texts[KeyValue: Variant]: String read GetTexts;
     property ValueProperty: String read FValueProperty write FValueProperty;
     property Values[KeyValue: Variant]: Variant read GetValues;
   end;
@@ -480,12 +489,29 @@ begin
   SetJSONPropValue(Data, ValueProp, Values[Data.Get(KeyProp)], True);
 end;
 
+procedure TJSONLookup.MapText(Data: TJSONArray; const KeyProp, ValueProp: String);
+var
+  i: Integer;
+  ItemData: TJSONData;
+begin
+  for i := 0 to Data.Count - 1 do
+  begin
+    ItemData := Data.Items[i];
+    if ItemData.JSONType = jtObject then
+      MapText(TJSONObject(ItemData), KeyProp, ValueProp);
+  end;
+end;
+
+procedure TJSONLookup.MapText(Data: TJSONObject; const KeyProp, ValueProp: String);
+begin
+  Data.Strings[KeyProp] := GetTexts(ValueProp);
+end;
+
 function TJSONLookup.FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
 var
   ItemData: TJSONObject;
 begin
-  ItemData := FindJSONObject(FData, [FKeyProperty, KeyValue]);
-  if ItemData <> nil then
+  if FData.Find([FKeyProperty, KeyValue], ItemData) then
     Result := ItemData.Find(PropertyName)
   else
     Result := nil;
@@ -493,7 +519,7 @@ end;
 
 function TJSONLookup.GetItems(KeyValue: Variant): TJSONObject;
 begin
-  Result := FindJSONObject(FData, [FKeyProperty, KeyValue]);
+  FData.Find([FKeyProperty, KeyValue], Result);
 end;
 
 function TJSONLookup.GetKeys(Index: Integer): Variant;
@@ -518,6 +544,24 @@ begin
     Result := ValueData.AsString
   else
     Result := '';
+end;
+
+function TJSONLookup.GetTexts(const KeyValue: Variant): String;
+var
+  ValueData: TJSONData;
+  ItemData: TJSONObject;
+begin
+  Result := '';
+  if FData.Find([FKeyProperty, KeyValue], ItemData) then
+  begin
+    if Assigned(FOnGetText) then
+      FOnGetText(ItemData, Result)
+    else
+    begin
+      if ItemData.Find(FValueProperty, ValueData) and (ValueData.JSONType in [jtString, jtNumber, jtBoolean]) then
+        Result := ValueData.AsString;
+    end;
+  end;
 end;
 
 end.
