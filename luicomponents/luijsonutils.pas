@@ -794,13 +794,13 @@ begin
       if SetNull then
         JSONObj.Elements[PropName] := TJSONNull.Create;
     end;
-    varstring: JSONObj.Elements[PropName] := TJSONString.Create(Value);
+    varstring, varolestr: JSONObj.Elements[PropName] := TJSONString.Create(Value);
     vardouble, vardate: JSONObj.Elements[PropName] := TJSONFloatNumber.Create(Value);
     varinteger, varlongword: JSONObj.Elements[PropName] := TJSONIntegerNumber.Create(Value);
     varint64, varqword: JSONObj.Elements[PropName] := TJSONInt64Number.Create(Value);
     varboolean: JSONObj.Elements[PropName] := TJSONBoolean.Create(Value);
   else
-    raise Exception.CreateFmt('SetJSONPropValue - Type %d not handled', [VariantType]);
+    raise Exception.CreateFmt('SetJSONPropValue - Error setting "%s": variant type %d not handled', [PropName, VariantType]);
   end
 end;
 
