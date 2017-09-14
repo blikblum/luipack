@@ -1,19 +1,19 @@
 object MainForm: TMainForm
-  Left = 298
-  Height = 569
+  Left = 279
+  Height = 576
   Top = 95
-  Width = 1008
+  Width = 1027
   Caption = 'REST API Test Builder'
-  ClientHeight = 569
-  ClientWidth = 1008
+  ClientHeight = 576
+  ClientWidth = 1027
   OnCloseQuery = FormCloseQuery
   Position = poScreenCenter
   LCLVersion = '1.7'
   object EndPointListView: TVirtualJSONListView
     Left = 6
-    Height = 464
+    Height = 474
     Top = 96
-    Width = 270
+    Width = 294
     OnGetText = EndPointListViewGetText
     TextProperty = 'text'
     Header.AutoSizeIndex = -1
@@ -33,7 +33,6 @@ object MainForm: TMainForm
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     TreeOptions.PaintOptions = [toHideFocusRect, toPopupMode, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowTreeLines, toShowVertGridLines, toThemeAware, toUseBlendedImages]
     TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect]
-    OnChange = EndPointListViewChange
     OnFocusChanged = EndPointListViewFocusChanged
     OnFocusChanging = EndPointListViewFocusChanging
   end
@@ -56,7 +55,7 @@ object MainForm: TMainForm
     Left = 6
     Height = 30
     Top = 5
-    Width = 270
+    Width = 222
     Caption = 'Load Collection'
     OnClick = LoadCollectionButtonClick
     TabOrder = 1

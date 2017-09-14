@@ -7,17 +7,18 @@ object EndPointFrame: TEndPointFrame
   ClientWidth = 677
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 438
-  DesignTop = 42
+  DesignLeft = 636
+  DesignTop = 102
   object NameEdit: TEdit
-    Left = 16
+    Left = 9
     Height = 23
     Top = 28
     Width = 499
+    OnChange = DataChange
     TabOrder = 0
   end
   object Label1: TLabel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 11
     Width = 32
@@ -25,23 +26,24 @@ object EndPointFrame: TEndPointFrame
     ParentColor = False
   end
   object URLEdit: TEdit
-    Left = 63
+    Left = 49
     Height = 23
     Top = 79
-    Width = 452
+    Width = 459
+    OnChange = DataChange
     TabOrder = 1
   end
   object MethodLabel: TLabel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 83
-    Width = 70
-    Caption = 'MethodLabel'
+    Width = 10
+    Caption = '--'
     ParentColor = False
     ParentFont = False
   end
   object DividerBevel1: TDividerBevel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 58
     Width = 656
@@ -50,7 +52,7 @@ object EndPointFrame: TEndPointFrame
     ParentFont = False
   end
   object Label2: TLabel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 111
     Width = 27
@@ -58,15 +60,16 @@ object EndPointFrame: TEndPointFrame
     ParentColor = False
   end
   object RequestBodyMemo: TMemo
-    Left = 16
+    Left = 9
     Height = 133
     Top = 131
     Width = 656
+    OnChange = DataChange
     ScrollBars = ssAutoBoth
     TabOrder = 2
   end
   object DividerBevel2: TDividerBevel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 271
     Width = 656
@@ -75,7 +78,7 @@ object EndPointFrame: TEndPointFrame
     ParentFont = False
   end
   object PageControl1: TPageControl
-    Left = 16
+    Left = 9
     Height = 257
     Top = 316
     Width = 656
@@ -134,7 +137,7 @@ object EndPointFrame: TEndPointFrame
     TabOrder = 4
   end
   object Label3: TLabel
-    Left = 16
+    Left = 9
     Height = 15
     Top = 293
     Width = 35

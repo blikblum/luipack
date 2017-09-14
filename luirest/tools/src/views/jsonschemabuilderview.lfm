@@ -9,11 +9,12 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
   OnShow = FormShow
   LCLVersion = '1.7'
   object PrimitiveListView: TVirtualStringTree
-    Left = 8
-    Height = 300
+    Left = 7
+    Height = 321
     Top = 8
-    Width = 512
+    Width = 522
     DefaultText = 'Node'
+    EditDelay = 100
     Header.AutoSizeIndex = 0
     Header.Columns = <    
       item
@@ -48,9 +49,9 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
     OnNewText = PrimitiveListViewNewText
   end
   object CancelButton: TBitBtn
-    Left = 384
+    Left = 393
     Height = 30
-    Top = 320
+    Top = 334
     Width = 136
     Cancel = True
     DefaultCaption = True
@@ -59,9 +60,9 @@ object JSONSchemaBuilderForm: TJSONSchemaBuilderForm
     TabOrder = 1
   end
   object SaveButton: TBitBtn
-    Left = 224
+    Left = 238
     Height = 30
-    Top = 320
+    Top = 334
     Width = 139
     Default = True
     DefaultCaption = True

@@ -19,7 +19,6 @@ type
     Label1: TLabel;
     BaseURLLabel: TLabel;
     OpenDialog1: TOpenDialog;
-    procedure EndPointListViewChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure EndPointListViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
     procedure EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,
@@ -32,6 +31,7 @@ type
     FAPI: TRESTAPI;
     FEndPointView: TEndPointFrame;
     procedure CheckAPIChanges;
+    procedure CheckEndPointChanges;
     procedure UpdateAPIViews;
     procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
   public
@@ -70,14 +70,19 @@ begin
       end;
     1:
       begin
-        CellText := NodeData.GetPath('request.url', '');
-        CellText := Copy(CellText, Length(FAPI.BaseURL) + 1, Length(CellText));
+        CellText := Trim(NodeData.GetPath('name', ''));
+        if CellText = '' then
+        begin
+          CellText := NodeData.GetPath('request.url', '');
+          CellText := Copy(CellText, Length(FAPI.BaseURL) + 1, Length(CellText));
+        end;
       end;
   end;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
+  CheckEndPointChanges;
   CheckAPIChanges;
 end;
 
@@ -90,15 +95,10 @@ begin
     FEndPointView.SetEndPoint(EndPointData);
 end;
 
-procedure TMainForm.EndPointListViewChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
-begin
-
-end;
-
 procedure TMainForm.EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,
   NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
 begin
-  //todo: implement guard against changes in current endpoint
+  CheckEndPointChanges;
 end;
 
 procedure TMainForm.UpdateAPIViews;
@@ -110,10 +110,24 @@ end;
 
 procedure TMainForm.CheckAPIChanges;
 begin
-  if FAPI.IsModified then
+  if FAPI.IsModified or FEndPointView.IsModified then
   begin
     if MessageDlg('Data changed', 'Do you want to save changes?', mtConfirmation, mbYesNo, 0) = mrYes then
-      FAPI.Save;
+    begin
+      if FAPI.IsModified then
+        FAPI.Save;
+      if FEndPointView.IsModified then
+        FEndPointView.Save;
+    end;
+  end;
+end;
+
+procedure TMainForm.CheckEndPointChanges;
+begin
+  if FEndPointView.IsModified then
+  begin
+    if MessageDlg('Endpoint changed', 'Do you want to save the changes?', mtConfirmation, mbYesNo, 0) = mrYes then
+      FEndPointView.Save;
   end;
 end;
 

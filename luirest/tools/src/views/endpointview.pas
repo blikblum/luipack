@@ -32,14 +32,19 @@ type
     EndPointMediator: TJSONFormMediator;
     Label1: TLabel;
     procedure GenerateTestsButtonClick(Sender: TObject);
+    procedure DataChange(Sender: TObject);
+    procedure Save;
     procedure SendButtonClick(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
   private
     FEndPointData: TJSONObject;
+    FIsModified: Boolean;
     procedure LoadTest;
     procedure SaveTest;
   public
     procedure SetEndPoint(Data: TJSONObject);
+  published
+    property IsModified: Boolean read FIsModified;
   end;
 
 implementation
@@ -66,11 +71,25 @@ begin
     if SchemaData <> nil then
     begin
       TestsMemo.Text := FormatTest(MethodLabel.Caption, SchemaData.FormatJSON());
+      FIsModified := True;
       SchemaData.Destroy;
     end;
   finally
     ResponseData.Destroy;
   end;
+end;
+
+procedure TEndPointFrame.DataChange(Sender: TObject);
+begin
+  FIsModified := True;
+end;
+
+procedure TEndPointFrame.Save;
+begin
+  FPONotifyObservers(Self, ooChange, FEndPointData);
+  EndPointMediator.SaveData;
+  SaveTest;
+  FIsModified := False;
 end;
 
 procedure TEndPointFrame.SendButtonClick(Sender: TObject);
@@ -82,13 +101,12 @@ begin
     ShowMessage('Unable to run request');
   ResponseCodeLabel.Caption := IntToStr(ResponseCode);
   ResponseBodyMemo.Text := ResponseText;
+  PageControl1.ActivePageIndex := 0;
 end;
 
 procedure TEndPointFrame.SaveButtonClick(Sender: TObject);
 begin
-  FPONotifyObservers(Self, ooChange, FEndPointData);
-  EndPointMediator.SaveData;
-  SaveTest;
+  Save;
 end;
 
 procedure TEndPointFrame.LoadTest;
@@ -97,6 +115,7 @@ var
   TestData: TJSONObject;
   TestStr: String;
 begin
+  FIsModified := False;
   TestStr := '';
   if FEndPointData.Find('event', EventsData) and EventsData.Find(['listen', 'test'], TestData) then
     TestStr := TestData.GetPath('script.exec', '');
