@@ -168,11 +168,6 @@ object EndPointFrame: TEndPointFrame
         PropertyName = 'name'
       end    
       item
-        Control = URLEdit
-        Name = 'url'
-        PropertyName = 'request.url'
-      end    
-      item
         Control = MethodLabel
         Name = 'method'
         PropertyName = 'request.method'

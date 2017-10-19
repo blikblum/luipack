@@ -40,7 +40,9 @@ type
     FEndPointData: TJSONObject;
     FIsModified: Boolean;
     procedure LoadTest;
+    procedure LoadURL;
     procedure SaveTest;
+    procedure SaveURL;
   public
     procedure SetEndPoint(Data: TJSONObject);
   published
@@ -89,6 +91,7 @@ begin
   FPONotifyObservers(Self, ooChange, FEndPointData);
   EndPointMediator.SaveData;
   SaveTest;
+  SaveURL;
   FIsModified := False;
 end;
 
@@ -109,26 +112,74 @@ begin
   Save;
 end;
 
+procedure StringsToJSONArray(Strings: TStrings; JSONArray: TJSONArray);
+var
+  i: Integer;
+begin
+  for i := 0 to Strings.Count - 1 do
+    JSONArray.Add(Strings[i]);
+end;
+
+procedure JSONArrayToStrings(JSONArray: TJSONArray; Strings: TStrings);
+var
+  i: Integer;
+begin
+  for i := 0 to JSONArray.Count - 1 do
+    Strings.Add(JSONArray.Strings[i]);
+end;
+
 procedure TEndPointFrame.LoadTest;
 var
   EventsData: TJSONArray;
   TestData: TJSONObject;
-  TestStr: String;
+  ExecData: TJSONData;
 begin
-  FIsModified := False;
-  TestStr := '';
-  if FEndPointData.Find('event', EventsData) and EventsData.Find(['listen', 'test'], TestData) then
-    TestStr := TestData.GetPath('script.exec', '');
-  TestsMemo.Text := TestStr;
+  TestsMemo.Lines.BeginUpdate;
+  try
+    TestsMemo.Clear;
+    if FEndPointData.Find('event', EventsData) and EventsData.Find(['listen', 'test'], TestData) then
+    begin
+      if TestData.FindPath('script.exec', ExecData) then
+      begin
+        case ExecData.JSONType of
+          jtString:
+            TestsMemo.Text := ExecData.AsString;
+          jtArray:
+            JSONArrayToStrings(TJSONArray(ExecData), TestsMemo.Lines);
+          else
+            ShowMessage(Format('Unknow test exec type: %s', [JSONTypeName(ExecData.JSONType)]));
+        end;
+      end;
+    end;
+  finally
+    TestsMemo.Lines.EndUpdate;
+  end;
+end;
+
+procedure TEndPointFrame.LoadURL;
+var
+  URLData: TJSONData;
+begin
+  URLEdit.Text := '';
+  if FEndPointData.FindPath('request.url', URLData) then
+  begin
+    case URLData.JSONType of
+      jtString:
+        URLEdit.Text := URLData.AsString;
+      jtObject:
+        URLEdit.Text := URLData.GetPath('raw', '');
+      else
+        ShowMessage(Format('Unknow url type: %s', [JSONTypeName(URLData.JSONType)]));
+    end;
+  end;
 end;
 
 procedure TEndPointFrame.SaveTest;
 var
   EventsData: TJSONArray;
   TestData: TJSONObject;
-  TestStr: String;
+  ExecData: TJSONArray;
 begin
-  TestStr := TestsMemo.Text;
   if not FEndPointData.Find('event', EventsData) then
   begin
     EventsData := TJSONArray.Create;
@@ -145,7 +196,23 @@ begin
     ]);
     EventsData.Add(TestData);
   end;
-  SetJSONPath(TestData, 'script.exec', TJSONString.Create(TestStr));
+  ExecData := TJSONArray.Create;
+  StringsToJSONArray(TestsMemo.Lines, ExecData);
+  SetJSONPath(TestData, 'script.exec', ExecData);
+end;
+
+procedure TEndPointFrame.SaveURL;
+var
+  URLValue: String;
+  URLData: TJSONObject;
+begin
+  URLValue := Trim(URLEdit.Text);
+  if FEndPointData.FindPath('request.url', URLData) then
+  begin
+    if URLData.Get('raw') = URLValue then
+      Exit;
+  end;
+  SetJSONPath(FEndPointData, 'request.url', TJSONString.Create(URLValue));
 end;
 
 procedure TEndPointFrame.SetEndPoint(Data: TJSONObject);
@@ -155,6 +222,8 @@ begin
   EndPointMediator.LoadData;
   ResponseBodyMemo.Clear;
   LoadTest;
+  LoadURL;
+  FIsModified := False;
 end;
 
 end.
