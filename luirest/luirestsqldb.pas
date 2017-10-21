@@ -151,7 +151,7 @@ begin
     PropName := JSONObj.Names[i];
     Param := Params.FindParam(PropName);
     if Param = nil then
-      Param := Params.CreateParam(ftString, PropName, ptInput);
+      Param := Params.CreateParam(ftUnknown, PropName, ptInput);
     Param.Value := JSONObj.Items[i].Value;
   end;
 end;
