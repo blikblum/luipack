@@ -685,8 +685,8 @@ begin
     varinteger, varlongword, varshortint: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInteger = Value);
     varint64, varqword: Result := (JSONData.JSONType = jtNumber) and (JSONData.AsInt64 = Value);
     varboolean: Result := (JSONData.JSONType = jtBoolean) and (JSONData.AsBoolean = Value);
-    //nil is interpreted as olestream
-    varolestr: Result := (Value = nil) and (JSONData.JSONType = jtNull);
+    //nil and some strings are interpreted as varolestr
+    varolestr: Result := ((Value = nil) and (JSONData.JSONType = jtNull)) or ((JSONData.JSONType = jtString) and (JSONData.AsString = Value));
   end;
 end;
 
