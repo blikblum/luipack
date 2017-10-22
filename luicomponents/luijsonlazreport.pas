@@ -103,7 +103,7 @@ type
 implementation
 
 uses
-  LuiJSONUtils, Variants, LuiJSONHelpers {$ifdef DEBUG_JSONLAZREPORT}, LCLProc{$endif};
+  StrUtils, LuiJSONUtils, Variants, LuiJSONHelpers {$ifdef DEBUG_JSONLAZREPORT}, LCLProc{$endif};
 
 { TfrJSONCrossDataset }
 
@@ -458,7 +458,7 @@ end;
 procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
   p3: Variant; var Val: Variant);
 var
-  V1, V2: Variant;
+  V1, V2, V3: Variant;
   S2, S3: String;
   VType: tvartype;
   ArrayData: TJSONArray;
@@ -559,6 +559,20 @@ begin
         Val := V1
       else
         Val := frParser.Calc(S3);
+    end;
+  end else if AName = 'ADDCHAR' then
+  begin
+    Val := '';
+    V1 := frParser.Calc(p1);
+    if VarIsStr(V1) then
+    begin
+      V2 := frParser.Calc(p2);
+      if not VarIsNull(V2) then
+      begin
+        V3 := frParser.Calc(p3);
+        if VarIsNumeric(V3) then
+          Val := AddChar(V1, V2, V3);
+      end;
     end;
   end else if AName = 'IFFINDITEM' then
   begin
