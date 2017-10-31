@@ -240,21 +240,8 @@ end;
 
 Procedure TSQLite3Cursor.Execute;
 
-var
- wo1: word;
-
 begin
-{$ifdef i386}
-  wo1:= get8087cw;
-  set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
-  Try  // Why do people always forget this ??
-{$endif}
-    fstate:= sqlite3_step(fstatement);
-{$ifdef i386}
-  finally  
-    set8087cw(wo1);                    //restore
-  end;
-{$endif}
+  fstate:= sqlite3_step(fstatement);
   if (fstate<=sqliteerrormax) then
     checkerror(sqlite3_reset(fstatement));
   FSelectable :=sqlite3_column_count(fstatement)>0;
