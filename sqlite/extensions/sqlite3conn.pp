@@ -471,9 +471,15 @@ begin
     size2:=0;
     case FT of
       ftString,
+      ftWideString:
+              begin
+                 size1 := dsMaxStringSize - 1;
+                 size2 := 0;
+                 ExtractPrecisionAndScale(FD, size1, size2);
+                 if size1 > dsMaxStringSize then size1 := dsMaxStringSize;
+               end;
       ftFixedChar,
       ftFixedWideChar,
-      ftWideString,
       ftBytes,
       ftVarBytes:
                begin
