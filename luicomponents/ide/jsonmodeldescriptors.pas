@@ -100,6 +100,7 @@ begin
 '  public'+ LineEnding +
 '    function CreateItem(AddItem: Boolean = True): {{modelname}};'+ LineEnding +
 '    function Find(const Id: Variant): {{modelname}};'+ LineEnding +
+'    function Find(const Properties: array of Variant; out Item: {{modelname}}): Boolean;' + LineEnding +
 '    function Get(ItemData: TJSONObject): {{modelname}};'+ LineEnding +
 '    property Items[Index: Integer]: {{modelname}} read GetItem; default;'+ LineEnding +
 '  end;'+ LineEnding + LineEnding;
@@ -142,6 +143,13 @@ begin
 '  Result := {{modelname}}(inherited Find(Id));'+ LineEnding +
 'end;'+ LineEnding +
 ''+ LineEnding +
+'function {{collectionname}}.Find(const Properties: array of Variant; out Item: {{modelname}}): Boolean;' + LineEnding +
+'var' + LineEnding +
+'  Model: TJSONModel absolute Item;' + LineEnding +
+'begin' + LineEnding +
+'  Result := inherited Find(Properties, Model);' + LineEnding +
+'end;' + LineEnding +
+'' + LineEnding +
 'function {{collectionname}}.Get(ItemData: TJSONObject): {{modelname}};'+ LineEnding +
 'begin'+ LineEnding +
 '  Result := {{modelname}}(inherited Get(ItemData));'+ LineEnding +

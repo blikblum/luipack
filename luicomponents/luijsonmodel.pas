@@ -93,6 +93,7 @@ type
     function CreateItem(AddItem: Boolean = True): TJSONModel;
     procedure Exchange(Index1, Index2: Integer);
     function Fetch: Boolean;
+    function Find(const Properties: array of Variant; out Item: TJSONModel): Boolean;
     function Find(const Id: Variant): TJSONModel;
     function Get(ItemData: TJSONObject): TJSONModel;
     function IndexOf(Item: TJSONModel): Integer;
@@ -433,6 +434,19 @@ begin
   begin
     ResetData;
   end;
+end;
+
+function TJSONCollection.Find(const Properties: array of Variant; out Item: TJSONModel): Boolean;
+var
+  ItemIndex: Integer;
+begin
+  //todo: get directly from FItems or CreateItem mechanism to ensure consistency between FItems and FData
+  ItemIndex := FData.IndexOf(Properties);
+  Result := ItemIndex > -1;
+  if Result then
+    Item := GetItem(ItemIndex)
+  else
+    Item := nil;
 end;
 
 function TJSONCollection.Find(const Id: Variant): TJSONModel;
