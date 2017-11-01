@@ -119,11 +119,6 @@ implementation
 uses
   dbconst, sysutils, dateutils, FmtBCD;
 
-{$IF NOT DECLARED(JulianEpoch)} // sysutils/datih.inc
-const
-  JulianEpoch = TDateTime(-2415018.5); // "julian day 0" is January 1, 4713 BC 12:00AM
-{$ENDIF}
-
 type
 
  TStorageType = (stNone,stInteger,stFloat,stText,stBlob,stNull);
@@ -188,10 +183,10 @@ begin
         ftLargeint: checkerror(sqlite3_bind_int64(fstatement,I,P.AsLargeint));
         ftBcd,
         ftFloat,
-        ftCurrency: checkerror(sqlite3_bind_double(fstatement, I, P.AsFloat));
+        ftCurrency,
         ftDateTime,
         ftDate,
-        ftTime:     checkerror(sqlite3_bind_double(fstatement, I, P.AsFloat - JulianEpoch));
+        ftTime:     checkerror(sqlite3_bind_double(fstatement, I, P.AsFloat));
         ftFMTBcd:
                 begin
                 str1:=BCDToStr(P.AsFMTBCD, Fconnection.FSQLFormatSettings);
@@ -657,8 +652,6 @@ begin
              else
                begin { Assume stored as double }
                PDateTime(buffer)^ := sqlite3_column_double(st,fnum);
-               if PDateTime(buffer)^ > 1721059.5 {Julian 01/01/0000} then
-                  PDateTime(buffer)^ := PDateTime(buffer)^ + JulianEpoch; //backward compatibility hack
                end;
     ftFixedChar,
     ftString: begin
@@ -775,8 +768,7 @@ begin
   checkerror(sqlite3_open(PAnsiChar(filename),@fhandle));
   if (Length(Password)>0) and assigned(sqlite3_key) then
     checkerror(sqlite3_key(fhandle,PChar(Password),StrLen(PChar(Password))));
-  if Params.IndexOfName('foreign_keys') <> -1 then
-    execsql('PRAGMA foreign_keys =  '+Params.Values['foreign_keys']);
+  execsql('PRAGMA foreign_keys = ON');
 end;
 
 procedure TSQLite3Connection.DoInternalDisconnect;
