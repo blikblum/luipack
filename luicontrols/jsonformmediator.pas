@@ -593,11 +593,11 @@ end;
 class procedure TJSONComboBoxMediator.DoJSONToGUI(Data: TJSONObject;
   Element: TJSONFormElement);
 var
-  ComboBox: TComboBox;
+  ComboBox: TCustomComboBox;
   PropName: String;
   OptionsData: TJSONObject;
 begin
-  ComboBox := Element.Control as TComboBox;
+  ComboBox := Element.Control as TCustomComboBox;
   PropName := Element.PropertyName;
   OptionsData := Element.OptionsData;
   ComboBox.ItemIndex := GetItemIndex(Data, PropName, ComboBox.Items, OptionsData);
@@ -613,11 +613,11 @@ end;
 class procedure TJSONComboBoxMediator.DoGUIToJSON(Element: TJSONFormElement;
   Data: TJSONObject);
 var
-  ComboBox: TComboBox;
+  ComboBox: TCustomComboBox;
   OptionsData: TJSONObject;
   PropName: String;
 begin
-  ComboBox := Element.Control as TComboBox;
+  ComboBox := Element.Control as TCustomComboBox;
   PropName := Element.PropertyName;
   OptionsData := Element.OptionsData;
   if (ComboBox.ItemIndex = -1) and (ComboBox.Style = csDropDown) and (OptionsData.Get('schema', 'text') = 'text') then
@@ -628,9 +628,9 @@ end;
 
 class procedure TJSONComboBoxMediator.Initialize(Element: TJSONFormElement);
 var
-  ComboBox: TComboBox;
+  ComboBox: TCustomComboBox;
 begin
-  ComboBox := Element.Control as TComboBox;
+  ComboBox := Element.Control as TCustomComboBox;
   LoadItems(ComboBox.Items, Element.OptionsData);
 end;
 
