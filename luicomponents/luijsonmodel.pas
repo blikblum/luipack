@@ -33,6 +33,7 @@ type
     function DoFetch(const IdValue: Variant): Boolean; virtual;
     function DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean; virtual;
     procedure ParseData({%H-}AData: TJSONObject); virtual;
+    class function GetDefaultId: Variant; virtual;
     class function GetIdField: String; virtual;
     class function GetResourceClient: IResourceClient; virtual;
     class function GetResourceName: String; virtual;
@@ -591,6 +592,11 @@ begin
   //
 end;
 
+class function TJSONModel.GetDefaultId: Variant;
+begin
+  Result := Unassigned;
+end;
+
 class function TJSONModel.GetIdField: String;
 begin
   //todo: get through Resource info?
@@ -639,7 +645,7 @@ end;
 
 function TJSONModel.Delete: Boolean;
 begin
-  Result := DoDelete(Unassigned);
+  Result := DoDelete(GetDefaultId);
 end;
 
 function TJSONModel.Delete(const IdValue: Variant): Boolean;
@@ -649,7 +655,7 @@ end;
 
 function TJSONModel.Fetch: Boolean;
 begin
-  Result := DoFetch(Unassigned);
+  Result := DoFetch(GetDefaultId);
 end;
 
 function TJSONModel.Fetch(const IdValue: Variant): Boolean;
@@ -665,7 +671,7 @@ end;
 
 function TJSONModel.Save(Options: TSaveOptions): Boolean;
 begin
-  Result := DoSave(Unassigned, Options);
+  Result := DoSave(GetDefaultId, Options);
 end;
 
 function TJSONModel.Save(const IdValue: Variant; Options: TSaveOptions): Boolean;
