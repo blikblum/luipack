@@ -29,6 +29,7 @@ type
   protected
     procedure Changed;
     function CreateData: TJSONObject; virtual;
+    function DoDelete(const IdValue: Variant): Boolean; virtual;
     function DoFetch(const IdValue: Variant): Boolean; virtual;
     function DoSave(const IdValue: Variant; Options: TSaveOptions): Boolean; virtual;
     procedure ParseData({%H-}AData: TJSONObject); virtual;
@@ -41,7 +42,8 @@ type
     constructor Create(Data: TJSONObject = nil); virtual;
     destructor Destroy; override;
     class procedure ClearCache;
-    procedure Delete;
+    function Delete: Boolean;
+    function Delete(const IdValue: Variant): Boolean;
     function Fetch: Boolean;
     function Fetch(const IdValue: Variant): Boolean;
     function ParamByName(const ParamName: String): TParam;
@@ -73,7 +75,8 @@ type
     procedure ItemsNeeded;
   protected
     procedure Changed;
-    procedure DeleteItem(Item: TJSONModel);
+    function DeleteItem(Item: TJSONModel): Boolean;
+    function DeleteItem(Item: TJSONModel; const IdValue: Variant): Boolean;
     function FetchItem(Item: TJSONModel): Boolean;
     function FetchItem(Item: TJSONModel; const IdValue: Variant): Boolean;
     function GetItem(ItemIndex: Integer): TJSONModel;
@@ -247,7 +250,7 @@ begin
   FPONotifyObservers(Self, ooChange, nil);
 end;
 
-procedure TJSONCollection.DeleteItem(Item: TJSONModel);
+function TJSONCollection.DeleteItem(Item: TJSONModel): Boolean;
 var
   ShouldRemove: Boolean;
 begin
@@ -257,6 +260,27 @@ begin
   begin
     ItemResourceNeeded(Item);
     ShouldRemove := FItemResource.Delete;
+  end;
+  if ShouldRemove then
+  begin
+    //todo: CreateItem check to see if really removed
+    Data.Extract(Item.Data);
+    Item.FOwnsData := True;
+    FPONotifyObservers(Self, ooDeleteItem, Item);
+    Remove(Item);
+  end;
+end;
+
+function TJSONCollection.DeleteItem(Item: TJSONModel; const IdValue: Variant): Boolean;
+var
+  ShouldRemove: Boolean;
+begin
+  if Item.IsNew then
+    ShouldRemove := True
+  else
+  begin
+    ItemResourceNeeded(Item);
+    ShouldRemove := FItemResource.Delete(IdValue);
   end;
   if ShouldRemove then
   begin
@@ -526,6 +550,17 @@ begin
   Result := TJSONObject.Create;
 end;
 
+function TJSONModel.DoDelete(const IdValue: Variant): Boolean;
+begin
+  if FCollection <> nil then
+    FCollection.DeleteItem(Self, IdValue)
+  else
+  begin
+    ResourceNeeded;
+    FResource.Delete(IdValue);
+  end;
+end;
+
 function TJSONModel.DoFetch(const IdValue: Variant): Boolean;
 begin
   if FCollection <> nil then
@@ -602,15 +637,14 @@ begin
   GetResourceClient.InvalidateCache(GetResourceName);
 end;
 
-procedure TJSONModel.Delete;
+function TJSONModel.Delete: Boolean;
 begin
-  if FCollection <> nil then
-    FCollection.DeleteItem(Self)
-  else
-  begin
-    ResourceNeeded;
-    FResource.Delete;
-  end;
+  Result := DoDelete(Unassigned);
+end;
+
+function TJSONModel.Delete(const IdValue: Variant): Boolean;
+begin
+  Result := DoDelete(IdValue);
 end;
 
 function TJSONModel.Fetch: Boolean;
