@@ -504,7 +504,7 @@ end;
 
 procedure TJSONLookup.MapText(Data: TJSONObject; const KeyProp, ValueProp: String);
 begin
-  Data.Strings[KeyProp] := GetTexts(ValueProp);
+  Data.Strings[ValueProp] := GetTexts(Data.Get(KeyProp));
 end;
 
 function TJSONLookup.FindValueData(const PropertyName: String; const KeyValue: Variant): TJSONData;
