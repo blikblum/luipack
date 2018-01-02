@@ -38,7 +38,7 @@ const
 
 function FileNameToUrl(const FileName: String): WideString;
 begin
-  Result := Format('file:///%s', [StringReplace(ExpandFileName(FileName), '\', '/', [rfReplaceAll])]);
+  Result := UTF8Decode(Format('file:///%s', [StringReplace(ExpandFileName(FileName), '\', '/', [rfReplaceAll])]));
 end;
 
 { TLibreReport }
@@ -56,7 +56,7 @@ var
   DocDescription: WideString;
 begin
   DocDescription := FDocument.GetDocumentProperties().Description;
-  if not TryStrToJSON(DocDescription, Result) then
+  if not TryStrToJSON(UTF8Encode(DocDescription), Result) then
     Result := TJSONObject.Create;
 end;
 
@@ -136,6 +136,7 @@ begin
   end
   else
   begin
+    Rows.InsertByIndex(Row, ItemsData.Count - 1);
     ColumnMapData := CreateColumnMap(Table, Row);
     try
       for i := 0 to ItemsData.Count - 1 do
@@ -214,6 +215,7 @@ begin
   ConfigData := GetConfigData;
   try
     RenderTables(Data, ConfigData);
+    RenderBody(Data);
   finally
     ConfigData.Destroy;
   end;
@@ -221,7 +223,7 @@ end;
 
 procedure TLibreReport.ServiceNeeded;
 begin
-  if VarIsNull(FServiceManager) then
+  if VarIsEmpty(FServiceManager) then
   begin
     try
       FServiceManager := CreateOleObject(ServiceName);
@@ -233,8 +235,11 @@ begin
 end;
 
 procedure TLibreReport.ExportTo(const FileName: String);
+var
+  LoadParams: Variant;
 begin
-
+  LoadParams := VarArrayCreate([0, 0], varVariant);
+  FDocument.storeAsURL(FileNameToUrl(FileName), LoadParams);
 end;
 
 end.
