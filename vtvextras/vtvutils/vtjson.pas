@@ -541,12 +541,17 @@ type
   { TVirtualJSONTreeView }
 
   TVTJSONTreeViewGetGroup = procedure(Sender: TVirtualJSONTreeView; NodeData: TJSONObject;
-    var GroupText: String) of object;
+    var GroupKey: Variant) of object;
+
+  TVariantArray = array of Variant;
+
+  TVTJSONTreeViewInitGroups = procedure(Sender: TVirtualJSONTreeView; var GroupKeys: TVariantArray) of object;
 
   TVirtualJSONTreeView = class(TCustomVirtualJSONDataView)
   private
     FChildrenProperty: String;
     FOnGetGroup: TVTJSONTreeViewGetGroup;
+    FOnInitGroups: TVTJSONTreeViewInitGroups;
     FRootData: TJSONArray;
     FOwnsRootData: Boolean;
     function GetJSONData(ParentNode, Node: PVirtualNode): TJSONData;
@@ -570,6 +575,7 @@ type
   published
     property ChildrenProperty: String read FChildrenProperty write FChildrenProperty;
     property OnGetGroup: TVTJSONTreeViewGetGroup read FOnGetGroup write FOnGetGroup;
+    property OnInitGroups: TVTJSONTreeViewInitGroups read FOnInitGroups write FOnInitGroups;
     property OnGetText;
     property TextProperty;
    //inherited properties
@@ -752,7 +758,7 @@ type
 implementation
 
 uses
-  LuiJSONHelpers, LuiJSONUtils;
+  LuiJSONHelpers, LuiJSONUtils, variants;
 
 type
   TItemData = record
@@ -847,49 +853,70 @@ begin
   Result := ParentChildrenData.Items[Node^.Index];
 end;
 
+function GetVariantArrayIndex(Items: TVariantArray; Item: Variant): Integer;
+begin
+  for Result := 0 to Length(Items) - 1 do
+  begin
+    if VarSameValue(Items[Result], Item) then
+      Exit;
+  end;
+  Result := -1;
+end;
+
 procedure TVirtualJSONTreeView.InitializeGroupData;
 var
   i, GroupIndex: Integer;
   ItemData: TJSONData;
-  GroupText: String;
+  GroupKey: Variant;
   GroupData: TJSONObject;
-  GroupItemsData: TJSONArray;
-  GroupList: TStringList;
+  GroupListsData, ItemsData: TJSONArray;
+  GroupKeys: TVariantArray;
 begin
-  GroupList := TStringList.Create;
+  GroupListsData := CreateWeakJSONArray;
   try
+    if Assigned(FOnInitGroups) then
+    begin
+      GroupKeys := nil;
+      FOnInitGroups(Self, GroupKeys);
+      for i := 1 to Length(GroupKeys) do
+        GroupListsData.Add(CreateWeakJSONArray);
+    end;
     for i := 0 to FData.Count - 1 do
     begin
       ItemData := FData.Items[i];
       if ItemData.JSONType = jtObject then
       begin
-        GroupText := '';
-        FOnGetGroup(Self, TJSONObject(ItemData), GroupText);
-        GroupIndex := GroupList.IndexOf(GroupText);
+        GroupKey := Unassigned;
+        FOnGetGroup(Self, TJSONObject(ItemData), GroupKey);
+        GroupIndex := GetVariantArrayIndex(GroupKeys, GroupKey);
         if GroupIndex = -1 then
         begin
-          GroupItemsData := CreateWeakJSONArray;
-          GroupList.AddObject(GroupText, GroupItemsData);
+          SetLength(GroupKeys, Length(GroupKeys) + 1);
+          GroupKeys[Length(GroupKeys)] := GroupKey;
+          ItemsData := CreateWeakJSONArray;
+          GroupListsData.Add(ItemsData);
         end
         else
-          GroupItemsData := TJSONArray(GroupList.Objects[GroupIndex]);
-        GroupItemsData.Add(ItemData);
+          ItemsData := GroupListsData.Arrays[GroupIndex];
+        ItemsData.Add(ItemData);
       end;
     end;
 
-    for i := 0 to GroupList.Count - 1 do
+    for i := Low(GroupKeys) to High(GroupKeys) do
     begin
-      GroupItemsData := TJSONArray(GroupList.Objects[i]);
+      ItemsData := GroupListsData.Arrays[i];
+      GroupKey := GroupKeys[i];
       GroupData := TJSONObject.Create([
-        FTextProperty, GroupList[i],
-        FChildrenProperty, GroupItemsData,
-        'itemcount', GroupItemsData.Count
+        FTextProperty, VarToStrDef(GroupKey, ''),
+        FChildrenProperty, ItemsData,
+        'itemcount', ItemsData.Count
       ]);
+      SetJSONPropValue(GroupData, 'key', GroupKey, True);
       FRootData.Add(GroupData);
     end;
 
   finally
-    GroupList.Destroy;
+    GroupListsData.Destroy;
   end;
 end;
 
