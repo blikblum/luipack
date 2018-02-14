@@ -31,7 +31,7 @@ type
 implementation
 
 uses
-  variants, comobj, LuiJSONUtils, LuiJSONHelpers, Handlebars;
+  variants, comobj, LuiJSONUtils, LuiJSONHelpers, Handlebars, LazFileUtils;
 
 const
   ServiceName = 'com.sun.star.ServiceManager';
@@ -64,6 +64,8 @@ procedure TLibreReport.LoadFromFile(const FileName: String);
 var
   Desktop, LoadParams: Variant;
 begin
+  if not FileExistsUTF8(FileName) then
+    raise Exception.CreateFmt('LibreReport: file "%s" not found', [FileName]);
   ServiceNeeded;
   Desktop := FServiceManager.CreateInstance('com.sun.star.frame.Desktop');
   LoadParams := VarArrayCreate([0, 1], varVariant);
