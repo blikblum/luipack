@@ -452,7 +452,8 @@ var
 begin
   VType := VarType(V);
   Result := ((VType in [varsmallint..vardate, varboolean, vardecimal..varqword]) and (V <> 0))
-    or (((VType = varstring) or (VType = varustring)) and (V <> ''));
+    or (((VType = varstring) or (VType = varustring)) and (V <> ''))
+    or ((VType = varolestr) and (V <> nil) and (V <> ''));
 end;
 
 procedure TfrJSONReport.DoUserFunction(const AName: String; p1, p2,
