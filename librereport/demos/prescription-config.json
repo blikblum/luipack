@@ -1,0 +1,29 @@
+{
+  "output": "Prescrição - Luiz Américo.odt",
+  "data": {
+    "name": "Luiz Américo Pereira Câmara",
+    "hospitalname": "Policlínica",
+    "date": 738473,
+    "bednumber": "18",
+    "items": [
+      {
+        "medication": "Vancomicina",
+        "dosage": "1g",
+        "frequency": "8/8h",
+        "route": "IV"
+      },
+      {
+        "medication": "Sabão",
+        "dosage": "1g",
+        "frequency": "6/6h",
+        "route": "VO"
+      },
+      {
+        "medication": "Captopril",
+        "dosage": "25mg",
+        "frequency": "12/12h",
+        "route": "IV"
+      }
+    ]
+  }
+}
