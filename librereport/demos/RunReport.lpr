@@ -19,7 +19,7 @@ begin
   begin
     Report := TLibreReport.Create(nil);
     try
-      Report.LoadFromFile('prescription-template.odt');
+      Report.LoadFromFile(Format('%s-template.odt', [TargetName]));
       Report.Render(ConfigData.Objects['data']);
       Report.ExportTo(ConfigData.Get('output', Format('%s-output.odt', [TargetName])));
     finally
