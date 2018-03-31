@@ -1,0 +1,24 @@
+{
+  "output": "Admissão - Luiz Américo Pereira Câmara.odt",
+  "data": {
+    "date": 4.3153000000000000E+004,
+    "age": 68,
+    "id": 6660,
+    "name": "Luiz Américo Pereira Câmara",
+    "sectorid": 4,
+    "registry": 9094932,
+    "gender": "M",
+    "birthdate": 1.8095000000000000E+004,
+    "admissiondatetime": 4.2584000000000000E+004,
+    "bednumber": "201.1",
+    "cns": "2002323982900001",
+    "isolationdata": null,
+    "admission": "\r\n\r\nÚltima Evolução (22/10/2017)\r\n\r\n\r\nExames\r\n\r\n",
+    "problems": "ITR\rChoque",
+    "management": "",
+    "exam": "Lucido. Orientado",
+    "time": "20:18:28",
+    "admissiondate": "30/12/1899",
+    "entrydate": "30/12/1899"
+  }
+}
