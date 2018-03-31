@@ -198,7 +198,9 @@ begin
     if Data.FindPath(Path, PathData) then
     begin
       case PathData.JSONType of
-        jtString, jtNumber, jtBoolean:
+        jtString:
+          ReplaceText := UTF8Decode(StringReplace(PathData.AsString, #13#10, #13, [rfReplaceAll]));
+        jtNumber, jtBoolean:
           ReplaceText := UTF8Decode(PathData.AsString);
       end;
     end;
