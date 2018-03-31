@@ -186,7 +186,7 @@ var
   ReplaceText: WideString;
 begin
   SearchDescriptor := FDocument.CreateSearchDescriptor();
-  SearchDescriptor.SetSearchString('\{\{.+\}\}');
+  SearchDescriptor.SetSearchString('\{\{.+?\}\}');
   SearchDescriptor.SearchRegularExpression := True;
 
   SearchResult := FDocument.FindFirst(SearchDescriptor);
