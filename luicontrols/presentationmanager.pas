@@ -28,6 +28,8 @@ type
     function FindProperty(const PropertyName: String; out Value: Double): Boolean;
     function FindProperty(const PropertyName: String; out Value: Boolean): Boolean;
     function FindProperty(const PropertyName: String; out Value: String): Boolean;
+    function GetInterface(const IId: TGuid; out obj): Boolean;
+    function GetInterface(const IIdStr: ShortString; out obj): Boolean;
     function GetName: String;
     function GetProperty(const PropertyName: String; Default: Int64): Int64;
     function GetProperty(const PropertyName: String; Default: Double): Double;
@@ -124,6 +126,8 @@ type
     function FindProperty(const PropertyName: String; out Value: Double): Boolean;
     function FindProperty(const PropertyName: String; out Value: Boolean): Boolean;
     function FindProperty(const PropertyName: String; out Value: String): Boolean;
+    function GetInterface(const IId: TGuid; out obj): Boolean;
+    function GetInterface(const IIdStr: ShortString; out obj): Boolean;
     function GetName: String;
     function GetProperty(const PropertyName: String; Default: Int64): Int64;
     function GetProperty(const PropertyName: String; Default: Double): Double;
@@ -271,6 +275,20 @@ begin
   Result := (FPresenter <> nil) and LuiRTTIUtils.FindProperty(FPresenter, PropertyName, Value);
   if not Result then
     Result := LuiRTTIUtils.FindProperty(FView, PropertyName, Value);
+end;
+
+function TPresentation.GetInterface(const IId: TGuid; out obj): Boolean;
+begin
+  Result := (FPresenter <> nil) and FPresenter.GetInterface(IId, obj);
+  if not Result then
+    Result := FView.GetInterface(IId, obj);
+end;
+
+function TPresentation.GetInterface(const IIdStr: ShortString; out obj): Boolean;
+begin
+  Result := (FPresenter <> nil) and FPresenter.GetInterface(IIdStr, obj);
+  if not Result then
+    Result := FView.GetInterface(IIdStr, obj);
 end;
 
 function TPresentation.ModalResult: TModalResult;
