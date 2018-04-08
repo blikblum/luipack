@@ -70,6 +70,7 @@ type
     FItems: TFPObjectList;
     FOwnsData: Boolean;
     function GetCount: Integer;
+    function GetData: TJSONArray;
     function GetParams: TParams;
     function GetResource: IJSONArrayResource;
     procedure ItemResourceNeeded(Item: TJSONModel);
@@ -106,7 +107,7 @@ type
     function SaveItem(Item: TJSONModel; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
     function SaveItem(Item: TJSONModel; const IdValue: Variant; Options: TSaveOptions = []; AddItem: Boolean = True): Boolean;
     property Count: Integer read GetCount;
-    property Data: TJSONArray read FData;
+    property Data: TJSONArray read GetData;
     property ItemClass: TJSONModelClass read FItemClass;
     property Items[Index: Integer]: TJSONModel read GetItem; default;
     property Params: TParams read GetParams;
@@ -192,6 +193,16 @@ begin
     Result := FData.Count
   else
     Result := 0;
+end;
+
+function TJSONCollection.GetData: TJSONArray;
+begin
+  if FData = nil then
+  begin
+    FData := TJSONArray.Create;
+    FOwnsData := True;
+  end;
+  Result := FData;
 end;
 
 procedure TJSONCollection.ItemResourceNeeded(Item: TJSONModel);
