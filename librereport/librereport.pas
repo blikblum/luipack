@@ -133,19 +133,17 @@ var
 begin
   Rows := Table.GetRows();
   if not Data.FindPath(Path, ItemsData) or (ItemsData.Count = 0) then
-  begin
-    Rows.RemoveByIndex(Row, 1);
-  end
+    Rows.RemoveByIndex(Row, 1)
   else
   begin
-    Rows.InsertByIndex(Row, ItemsData.Count - 1);
-    ColumnMapData := CreateColumnMap(Table, Row);
+    Rows.InsertByIndex(Row + 1, ItemsData.Count - 1);
+    ColumnMapData := CreateColumnMap(Table, Row + 1);
     try
       for i := 0 to ItemsData.Count - 1 do
       begin
         ItemData := ItemsData.Items[i];
         if ItemData.JSONType = jtObject then
-          RenderRow(Table, Row + i, TJSONObject(ItemData), ColumnMapData);
+          RenderRow(Table, Row + i + 1, TJSONObject(ItemData), ColumnMapData);
       end;
     finally
       ColumnMapData.Destroy;
