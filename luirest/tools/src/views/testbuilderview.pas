@@ -5,15 +5,15 @@ unit TestBuilderView;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls, ExtCtrls;
 
 type
 
   { TTestBuilderForm }
 
   TTestBuilderForm = class(TForm)
-    MethodComboBox: TComboBox;
     GenerateTestsButton: TButton;
+    MethodGroupBox: TRadioGroup;
     PageControl1: TPageControl;
     ResponseBodyMemo: TMemo;
     ResponseBodyTabSheet: TTabSheet;
@@ -53,8 +53,13 @@ begin
     SchemaData := TJSONSchemaBuilderForm.CreateSchema(ResponseData);
     if SchemaData <> nil then
     begin
-      TestsMemo.Text := FormatTest(MethodComboBox.Text, SchemaData.FormatJSON());
+      TestsMemo.Text := FormatTest(MethodGroupBox.Items[MethodGroupBox.ItemIndex], SchemaData.FormatJSON());
       SchemaData.Destroy;
+    end
+    else
+    begin
+      TestsMemo.Clear;
+      ShowMessage('Unable to build schema');
     end;
   finally
     ResponseData.Destroy;
