@@ -13,12 +13,14 @@ type
   { TMainForm }
 
   TMainForm = class(TForm, IFPObserver)
+    BuildTestButton: TButton;
     Label2: TLabel;
     LoadCollectionButton: TButton;
     EndPointListView: TVirtualJSONListView;
     Label1: TLabel;
     BaseURLLabel: TLabel;
     OpenDialog1: TOpenDialog;
+    procedure BuildTestButtonClick(Sender: TObject);
     procedure EndPointListViewFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
     procedure EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,
@@ -44,7 +46,8 @@ var
 implementation
 
 uses
-  LuiJSONHelpers;
+  LuiJSONHelpers,
+  TestBuilderView;
 
 {$R *.lfm}
 
@@ -93,6 +96,18 @@ var
 begin
   if EndPointListView.GetData(Node, EndPointData) then
     FEndPointView.SetEndPoint(EndPointData);
+end;
+
+procedure TMainForm.BuildTestButtonClick(Sender: TObject);
+begin
+  with TTestBuilderForm.Create(nil) do
+  begin
+    try
+      ShowModal;
+    finally
+      Destroy;
+    end;
+  end;
 end;
 
 procedure TMainForm.EndPointListViewFocusChanging(Sender: TBaseVirtualTree; OldNode,

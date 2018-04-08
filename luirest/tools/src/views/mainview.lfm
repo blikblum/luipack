@@ -55,7 +55,7 @@ object MainForm: TMainForm
     Left = 6
     Height = 30
     Top = 5
-    Width = 222
+    Width = 140
     Caption = 'Load Collection'
     OnClick = LoadCollectionButtonClick
     TabOrder = 1
@@ -67,6 +67,15 @@ object MainForm: TMainForm
     Width = 53
     Caption = 'EndPoints'
     ParentColor = False
+  end
+  object BuildTestButton: TButton
+    Left = 160
+    Height = 30
+    Top = 5
+    Width = 140
+    Caption = 'Test Builder'
+    OnClick = BuildTestButtonClick
+    TabOrder = 2
   end
   object OpenDialog1: TOpenDialog
     Filter = 'JSON File|*.json'

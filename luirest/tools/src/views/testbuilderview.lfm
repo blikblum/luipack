@@ -1,0 +1,80 @@
+object TestBuilderForm: TTestBuilderForm
+  Left = 422
+  Height = 502
+  Top = 148
+  Width = 690
+  Caption = 'Test Builder'
+  ClientHeight = 502
+  ClientWidth = 690
+  Position = poOwnerFormCenter
+  LCLVersion = '1.7'
+  object PageControl1: TPageControl
+    Left = 2
+    Height = 458
+    Top = 42
+    Width = 686
+    ActivePage = ResponseBodyTabSheet
+    Align = alClient
+    BorderSpacing.Top = 40
+    BorderSpacing.Around = 2
+    TabIndex = 0
+    TabOrder = 0
+    object ResponseBodyTabSheet: TTabSheet
+      Caption = 'Body'
+      ClientHeight = 430
+      ClientWidth = 678
+      object ResponseBodyMemo: TMemo
+        Left = 2
+        Height = 426
+        Top = 2
+        Width = 674
+        Align = alClient
+        BorderSpacing.Around = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+    object ResponseTestsTabSheet: TTabSheet
+      Caption = 'Tests'
+      ClientHeight = 430
+      ClientWidth = 678
+      object TestsMemo: TMemo
+        Left = 2
+        Height = 396
+        Top = 2
+        Width = 674
+        Align = alClient
+        BorderSpacing.Bottom = 30
+        BorderSpacing.Around = 2
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+      object GenerateTestsButton: TButton
+        Left = 497
+        Height = 25
+        Top = 402
+        Width = 179
+        Anchors = [akRight, akBottom]
+        Caption = 'Generate'
+        OnClick = GenerateTestsButtonClick
+        TabOrder = 1
+      end
+    end
+  end
+  object MethodComboBox: TComboBox
+    Left = 2
+    Height = 23
+    Top = 10
+    Width = 133
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'GET'
+      'PUT'
+      'POST'
+    )
+    Style = csDropDownList
+    TabOrder = 1
+    Text = 'GET'
+  end
+end
