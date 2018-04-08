@@ -91,7 +91,7 @@ const
      '    return result;' + LineEnding +
      '  }, {});' + LineEnding +
      '  console.log(''requestData'', requestData);' + LineEnding +
-     '  console.log(''responseData'', responseDataNoId);' + LineEnding +
+     '  console.log(''responseData'', responseData);' + LineEnding +
      '  console.log(''difference'', difference);' + LineEnding +
      '}';
 
