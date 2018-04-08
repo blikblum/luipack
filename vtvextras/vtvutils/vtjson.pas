@@ -865,7 +865,7 @@ end;
 
 procedure TVirtualJSONTreeView.InitializeGroupData;
 var
-  i, GroupIndex: Integer;
+  i, GroupIndex, GroupKeysLength: Integer;
   ItemData: TJSONData;
   GroupKey: Variant;
   GroupData: TJSONObject;
@@ -891,8 +891,9 @@ begin
         GroupIndex := GetVariantArrayIndex(GroupKeys, GroupKey);
         if GroupIndex = -1 then
         begin
-          SetLength(GroupKeys, Length(GroupKeys) + 1);
-          GroupKeys[Length(GroupKeys)] := GroupKey;
+          GroupKeysLength := Length(GroupKeys);
+          SetLength(GroupKeys, GroupKeysLength + 1);
+          GroupKeys[GroupKeysLength] := GroupKey;
           ItemsData := CreateWeakJSONArray;
           GroupListsData.Add(ItemsData);
         end
