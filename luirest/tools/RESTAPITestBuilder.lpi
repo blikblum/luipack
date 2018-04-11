@@ -91,6 +91,7 @@
         <Filename Value="src\views\testbuilderview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="TestBuilderForm"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TestBuilderView"/>
       </Unit7>
