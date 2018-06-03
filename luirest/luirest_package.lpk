@@ -48,26 +48,23 @@
         <UnitName Value="luirestswagger"/>
       </Item7>
     </Files>
-    <RequiredPkgs Count="6">
+    <RequiredPkgs Count="5">
       <Item1>
-        <PackageName Value="sqliteextensions_package"/>
+        <PackageName Value="laz_synapse"/>
       </Item1>
       <Item2>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="luicomponents"/>
       </Item2>
       <Item3>
-        <PackageName Value="luicomponents"/>
+        <PackageName Value="IDEIntf"/>
       </Item3>
       <Item4>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="weblaz"/>
       </Item4>
       <Item5>
-        <PackageName Value="weblaz"/>
-      </Item5>
-      <Item6>
         <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
-      </Item6>
+      </Item5>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>
