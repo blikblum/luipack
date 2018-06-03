@@ -1,19 +1,12 @@
 unit LuiRESTSqldb;
 
 {$mode objfpc}{$H+}
-{$define USE_SQLITE3_SLIM}
 
 interface
 
 uses
   Classes, SysUtils, sqldb, db, LuiRESTServer, HTTPDefs, fphttp, fpjson,
-  pqconnection, IBConnection, mysql51conn,
-  {$ifdef USE_SQLITE3_SLIM}
-  sqlite3slimconn
-  {$else}
-  sqlite3conn
-  {$endif}
-  ;
+  pqconnection, IBConnection, mysql51conn, sqlite3conn;
 
 type
 
