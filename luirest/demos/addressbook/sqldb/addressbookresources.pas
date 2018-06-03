@@ -1,17 +1,11 @@
 unit AddressBookResources;
 
 {$mode objfpc}{$H+}
-{$define USE_SQLITE3_SLIM}
 
 interface
 
 uses
-  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb, HTTPDefs,
-  {$ifdef USE_SQLITE3_SLIM}
-  sqlite3slimconn
-  {$else}
-  sqlite3conn
-  {$endif};
+  Classes, SysUtils, LuiRESTServer, LuiRESTSqldb, sqldb, HTTPDefs, sqlite3conn;
 
 const
   RES_CONTACTS = 1;

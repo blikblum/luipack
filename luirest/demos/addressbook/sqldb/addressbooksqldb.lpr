@@ -18,6 +18,7 @@ end;
 var
   Callback: TCallback;
 begin
+  Application.LegacyRouting := True;
   Application.OnGetModule := @Callback.GetModuleClass;
   Application.Initialize;
   Application.Run;

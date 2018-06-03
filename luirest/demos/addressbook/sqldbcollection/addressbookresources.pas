@@ -129,7 +129,7 @@ begin
   if TryStrToJSON(ARequest.Content, FieldData) then
   begin
     RequestData := TJSONObject.Create(['value', FieldData]);
-    TRequestAccess(ARequest).FContent := RequestData.AsJSON;
+    ARequest.Content := RequestData.AsJSON;
     RequestData.Destroy;
   end
   else

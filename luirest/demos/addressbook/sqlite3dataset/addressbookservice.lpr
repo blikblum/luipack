@@ -3,7 +3,7 @@ program addressbookservice;
 {$mode objfpc}{$H+}
 
 uses
-  LuiRESTCGI, luicomponents, MainREST, HTTPDefs, fphttp, AddressBookResources;
+  LuiRESTCGI, MainREST, HTTPDefs, fphttp, AddressBookResources;
 
 type
 
@@ -26,6 +26,7 @@ var
   Callback: TCallback;
 
 begin
+  Application.LegacyRouting := True;
   Application.OnGetModule := @Callback.GetModuleClass;
   Application.Initialize;
   Application.Run;

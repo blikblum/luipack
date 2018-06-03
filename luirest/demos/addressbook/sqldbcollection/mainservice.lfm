@@ -7,6 +7,7 @@ object MainServiceModule: TMainServiceModule
   HorizontalOffset = 403
   VerticalOffset = 155
   Width = 188
+  PPI = 96
   object SQLConnector: TSQLConnector
     Connected = False
     LoginPrompt = False
