@@ -25,13 +25,14 @@ var
 implementation
 
 uses
-  RESTResources;
+  PeopleResources, DebugResources;
 
 { TMainRESTModule }
 
 procedure TMainRESTModule.DataModuleCreate(Sender: TObject);
 begin
   Resources.Register('people', TPeople, 0);
+  Resources.Register('env', TEnvDump, 0);
 end;
 
 {$R *.lfm}

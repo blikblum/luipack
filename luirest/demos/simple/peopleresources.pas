@@ -1,4 +1,4 @@
-unit RESTResources;
+unit PeopleResources;
 
 {$mode objfpc}{$H+}
 
@@ -15,7 +15,7 @@ type
   private
     class var ContentStr: String;
   public
-    procedure AfterConstruction; override;
+    constructor Create; override;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
@@ -23,7 +23,7 @@ type
 
   TPersonDetails = class(TPerson)
   public
-    procedure AfterConstruction; override;
+    constructor Create; override;
   end;
 
   { TPeople }
@@ -31,7 +31,7 @@ type
   TPeople = class(TRESTResource)
   protected
   public
-    procedure AfterConstruction; override;
+    constructor Create; override;
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
@@ -45,17 +45,17 @@ const
 
 { TPersonDetails }
 
-procedure TPersonDetails.AfterConstruction;
+constructor TPersonDetails.Create;
 begin
-  inherited AfterConstruction;
+  inherited Create;
   ContentStr := PersonDetailsStr;
 end;
 
 { TPerson }
 
-procedure TPerson.AfterConstruction;
+constructor TPerson.Create;
 begin
-  inherited AfterConstruction;
+  inherited Create;
   RegisterSubPath('details', TPersonDetails, 0);
   ContentStr := PersonStr;
 end;
@@ -74,11 +74,12 @@ end;
 
 { TPeople }
 
-procedure TPeople.AfterConstruction;
+constructor TPeople.Create;
 begin
-  inherited AfterConstruction;
+  inherited Create;
   SetDefaultSubPath('id', TPerson, 0);
 end;
+
 
 procedure TPeople.HandleGet(ARequest: TRequest; AResponse: TResponse);
 begin

@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <Flags>
@@ -17,9 +17,6 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <VersionInfo>
-      <StringTable ProductVersion=""/>
-    </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
     </BuildModes>
@@ -41,11 +38,10 @@
         <PackageName Value="WebLaz"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="simplerest_demo.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="simplerest_demo"/>
       </Unit0>
       <Unit1>
         <Filename Value="mainrest.pas"/>
@@ -56,28 +52,27 @@
         <UnitName Value="MainREST"/>
       </Unit1>
       <Unit2>
-        <Filename Value="restresources.pas"/>
+        <Filename Value="peopleresources.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RESTResources"/>
+        <UnitName Value="PeopleResources"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="debugresources.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DebugResources"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\bin\simplerest.cgi" ApplyConventions="False"/>
+      <Filename Value="$CustomDir(webserver-cgi)\simplerest.cgi" ApplyConventions="False"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <Other>
-      <CompilerMessages>
-        <MsgFileName Value=""/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

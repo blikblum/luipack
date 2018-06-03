@@ -3,7 +3,7 @@ program simplerest_demo;
 {$mode objfpc}{$H+}
 
 uses
-  fpCGI, MainREST, RESTResources, HTTPDefs, fphttp;
+  fpCGI, MainREST, PeopleResources, HTTPDefs, fphttp, DebugResources;
 
 type
 
@@ -25,6 +25,7 @@ end;
 var
   Callback: TCallback;
 begin
+  Application.LegacyRouting := True;
   Application.Initialize;
   Application.OnGetModule := @Callback.GetModuleClass;
   Application.Run;
