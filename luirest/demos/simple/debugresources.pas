@@ -14,20 +14,51 @@ type
   TEnvDump = class(TRESTResource)
   public
     procedure HandleGet(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePatch(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePost(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandlePut(ARequest: TRequest; AResponse: TResponse); override;
+    procedure HandleDelete(ARequest: TRequest; AResponse: TResponse); override;
   end;
 
 implementation
 
-{ TEnvDump }
-
-procedure TEnvDump.HandleGet(ARequest: TRequest; AResponse: TResponse);
+procedure LoadEnviroment(const AResponse: TResponse);
 var
-  i, Count: Integer;
+  Count: Integer;
+  i: Integer;
 begin
   Count := GetEnvironmentVariableCount;
-  for i := 0 to Count - 1 do
+  for i := 1 to Count do
     AResponse.Contents.Add(GetEnvironmentString(i));
-  AResponse.ContentType := 'text';
+  AResponse.ContentType := 'text/plain';
+end;
+
+{ TEnvDump }
+
+
+procedure TEnvDump.HandleGet(ARequest: TRequest; AResponse: TResponse);
+begin
+  LoadEnviroment(AResponse);
+end;
+
+procedure TEnvDump.HandlePatch(ARequest: TRequest; AResponse: TResponse);
+begin
+  LoadEnviroment(AResponse);
+end;
+
+procedure TEnvDump.HandlePost(ARequest: TRequest; AResponse: TResponse);
+begin
+  LoadEnviroment(AResponse);
+end;
+
+procedure TEnvDump.HandlePut(ARequest: TRequest; AResponse: TResponse);
+begin
+  LoadEnviroment(AResponse);
+end;
+
+procedure TEnvDump.HandleDelete(ARequest: TRequest; AResponse: TResponse);
+begin
+  LoadEnviroment(AResponse);
 end;
 
 end.
