@@ -469,7 +469,7 @@ begin
   begin
     Result := '';
     if not ReadOnly then
-      raise Exception.Create('Unable to resolve resource identifier SQL query');
+      raise Exception.CreateFmt('%s - unable to resolve resource identifier - PrimaryKey: "%s" / PrimaryKeyParam: "%s"', [ClassName, FPrimaryKey, FPrimaryKeyParam]);
   end;
 end;
 
