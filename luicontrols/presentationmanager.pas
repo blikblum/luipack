@@ -35,6 +35,7 @@ type
     function GetProperty(const PropertyName: String; Default: Double): Double;
     function GetProperty(const PropertyName: String; Default: Boolean): Boolean;
     function GetProperty(const PropertyName, Default: String): String;
+    procedure Initialize;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
     function Show: IPresentation;
@@ -115,7 +116,6 @@ type
     FView: TForm;
     FModalResult: TModalResult;
     FInitialized: Boolean;
-    procedure Initialize;
     procedure InitializeProperties;
   public
     constructor Create(const Name: String; PresentationDef: TPresentationDef);
@@ -133,6 +133,7 @@ type
     function GetProperty(const PropertyName: String; Default: Double): Double;
     function GetProperty(const PropertyName: String; Default: Boolean): Boolean;
     function GetProperty(const PropertyName, Default: String): String;
+    procedure Initialize;
     function ModalResult: TModalResult;
     function SetParent(Parent: TWinControl): IPresentation;
     function SetProperties(const Properties: array of const): IPresentation;
