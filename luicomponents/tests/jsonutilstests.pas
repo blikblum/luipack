@@ -20,6 +20,20 @@ type
     procedure CompareComplex;
   end;
 
+  { TSetJSONPathTestCase }
+
+  TSetJSONPathTestCase = class(TTestCase)
+   private
+     FData: TJSONData;
+   protected
+     procedure SetUp; override;
+     procedure TearDown; override;
+   published
+     procedure SetObjectProperty;
+     procedure SetNestedObjectProperty;
+     procedure SetNonExistentNestedObjectProperty;
+   end;
+
 implementation
 
 uses
@@ -173,7 +187,48 @@ begin
   CheckNotEquals(0, CompareJSONData(Data1, Data2), 'Complex Array data sub array with different value');
 end;
 
+procedure TSetJSONPathTestCase.SetObjectProperty;
+begin
+  FData := TJSONObject.Create;
+  SetJSONPath(FData, 'prop', TJSONIntegerNumber.Create(2));
+  AssertEquals('Item count', 1, FData.Count);
+  AssertEquals('Property value', 2, TJSONObject(FData).Get('prop', 0));
+end;
+
+procedure TSetJSONPathTestCase.SetNestedObjectProperty;
+var
+  ObjData: TJSONObject;
+begin
+  ObjData := TJSONObject.Create;
+  FData := TJSONObject.Create(['a', ObjData]);
+  SetJSONPath(FData, 'a.prop', TJSONIntegerNumber.Create(2));
+  AssertEquals('Nested object item count', 1, ObjData.Count);
+  AssertEquals('Nested object property value', 2, ObjData.Get('prop', 0));
+end;
+
+procedure TSetJSONPathTestCase.SetNonExistentNestedObjectProperty;
+var
+  ObjData, IntermediaryData: TJSONObject;
+begin
+  ObjData := TJSONObject.Create;
+  FData := TJSONObject.Create(['a', ObjData]);
+  SetJSONPath(FData, 'a.prop.x', TJSONIntegerNumber.Create(2));
+  AssertEquals('Nested object item count', 1, ObjData.Count);
+  AssertTrue('Intermediary object', ObjData.Find('prop', IntermediaryData));
+  AssertEquals('Nested object property value', 2, IntermediaryData.Get('x', 0));
+end;
+
+procedure TSetJSONPathTestCase.SetUp;
+begin
+
+end;
+
+procedure TSetJSONPathTestCase.TearDown;
+begin
+  FData.Free;
+end;
+
 initialization
-  ProjectRegisterTests('JSONUtils', [TCompareDataTestCase.Suite]);
+  ProjectRegisterTests('JSONUtils', [TCompareDataTestCase.Suite, TSetJSONPathTestCase.Suite]);
 end.
 

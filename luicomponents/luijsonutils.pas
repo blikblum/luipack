@@ -740,6 +740,14 @@ begin
   else
   begin
     PropData := Data.Find(PropName);
+    if PropData = nil then
+    begin
+      if Path[1] = '.' then
+      begin
+        PropData := TJSONObject.Create;
+        Data.Elements[PropName] := PropData;
+      end;
+    end;
     if PropData <> nil then
     begin
       case PropData.JSONType of
