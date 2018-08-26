@@ -2,7 +2,6 @@
 <CONFIG>
   <Package Version="4">
     <Name Value="lclextensions_package"/>
-    <Type Value="RunAndDesignTime"/>
     <Author Value="Luiz Americo Pereira Câmara"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -47,5 +46,8 @@
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
     </PublishOptions>
+    <CustomOptions Items="ExternHelp" Version="2">
+      <_ExternHelp Items="Count"/>
+    </CustomOptions>
   </Package>
 </CONFIG>
