@@ -152,6 +152,7 @@ type
   private
     FData: TJSONObject;
     FElements: TJSONFormElements;
+    FStoredData: TJSONObject;
     procedure SetData(Value: TJSONObject);
     procedure SetElements(Value: TJSONFormElements);
   protected
@@ -160,11 +161,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function DataChanged: Boolean;
     function ElementByName(const ElementName: String): TJSONFormElement;
     procedure LoadData;
     procedure LoadData(const PropertySet: String);
     procedure SaveData;
     procedure SaveData(const PropertySet: String);
+    procedure StoreData;
     property Data: TJSONObject read FData write SetData;
   published
     property Elements: TJSONFormElements read FElements write SetElements;
@@ -987,8 +990,16 @@ end;
 
 destructor TJSONFormMediator.Destroy;
 begin
+  FStoredData.Free;
   FElements.Destroy;
   inherited Destroy;
+end;
+
+function TJSONFormMediator.DataChanged: Boolean;
+begin
+  if FStoredData = nil then
+    raise Exception.Create('TJSONFormMediator: no stored data to compare');
+  Result := not SameJSONObject(FStoredData, FData);
 end;
 
 function TJSONFormMediator.ElementByName(const ElementName: String): TJSONFormElement;
@@ -1043,6 +1054,12 @@ begin
   if Element = nil then
     raise Exception.CreateFmt('Could not find a element with property "%s"', [PropertySet]);
   Element.SaveData(FData);
+end;
+
+procedure TJSONFormMediator.StoreData;
+begin
+  FStoredData.Free;
+  FStoredData := TJSONObject(FData.Clone);
 end;
 
 { TJSONFormElements }
