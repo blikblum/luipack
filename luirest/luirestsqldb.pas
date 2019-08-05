@@ -887,6 +887,8 @@ begin
     ItemResource.PrimaryKeyParam := GetItemParam;
   if ItemResource.InputFields = '' then
     ItemResource.InputFields := InputFields;
+  if ItemResource.OutputFields = '' then
+    ItemResource.OutputFields := OutputFields;
   if ItemResource.JSONFields = '' then
     ItemResource.JSONFields := JSONFields;
   ItemResource.IgnoreNotFound := IgnoreNotFound;
