@@ -118,7 +118,7 @@ procedure QueryFieldsToParams(QueryFields: TStrings; QueryParamsData: TJSONArray
 implementation
 
 uses
-  LuiJSONUtils, fpjsonrtti, dbconst;
+  LuiJSONUtils, LuiJSONHelpers, fpjsonrtti, dbconst;
 
 type
   TSQLConnectionAccess = class(TSQLConnection)
@@ -298,7 +298,7 @@ begin
     end;
     //check for exclusions
     if (FInputFieldsData <> nil) and (FInputFieldsData.JSONType = jtObject) and
-      FindJSONProp(TJSONObject(FInputFieldsData), 'exclude', ExcludeFieldsData) then
+      TJSONObject(FInputFieldsData).Find('exclude', ExcludeFieldsData) then
     begin
       for i := 0 to ExcludeFieldsData.Count - 1 do
       begin
