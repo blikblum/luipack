@@ -797,6 +797,7 @@ var
 begin
   VariantType := VarType(Value);
   case VariantType of
+    varempty: JSONObj.Delete(PropName);
     varnull:
     begin
       if SetNull then
