@@ -44,7 +44,8 @@ type
 
   TFile = class
   public
-     class procedure WriteAllText(const Path, Contents: string); overload; static;
+    class function ReadAllText(const Path: String): String; overload; static;
+    class procedure WriteAllText(const Path, Contents: String); overload; static;
   end;
 
 function Capitalize(const U: UnicodeString; const ExcludeWords: array of UnicodeString): UnicodeString;
@@ -323,7 +324,20 @@ end;
 
 { TFile }
 
-class procedure TFile.WriteAllText(const Path, Contents: string);
+class function TFile.ReadAllText(const Path: String): String;
+var
+  Stream: TFileStream;
+begin
+  Stream := TFileStream.Create(Path, fmCreate);
+  try
+    SetLength(Result, Stream.Size);
+    Stream.ReadBuffer(Result[1], Length(Result));
+  finally
+    Stream.Free;
+  end;
+end;
+
+class procedure TFile.WriteAllText(const Path, Contents: String);
 var
   Stream: TFileStream;
 begin
