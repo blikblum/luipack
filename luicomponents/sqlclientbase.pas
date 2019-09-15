@@ -192,7 +192,6 @@ type
    TSQLResourceClient = class(TComponent, IResourceClient)
    private
      FCacheHandler: TSQLCacheHandler;
-     FDatabase: String;
      FModelDefs: TSQLResourceModelDefs;
      FModelDefLookup: TFPHashObjectList;
      procedure BuildModelDefLookup;
@@ -217,7 +216,6 @@ type
      procedure InvalidateCache(const ModelName: String);
      function HasModel(const ModelName: String): Boolean;
    published
-     property Database: String read FDatabase write FDatabase;
      property ModelDefs: TSQLResourceModelDefs read FModelDefs write SetModelDefs;
    end;
 
