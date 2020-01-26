@@ -7,20 +7,20 @@ object TestBuilderForm: TTestBuilderForm
   ClientHeight = 502
   ClientWidth = 690
   Position = poOwnerFormCenter
-  LCLVersion = '1.7'
+  LCLVersion = '2.1.0.0'
   object PageControl1: TPageControl
     Left = 2
     Height = 454
     Top = 46
     Width = 686
-    ActivePage = ResponseBodyTabSheet
+    ActivePage = ResponseTestsTabSheet
     Align = alClient
     BorderSpacing.Top = 44
     BorderSpacing.Around = 2
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     object ResponseBodyTabSheet: TTabSheet
-      Caption = 'Body'
+      Caption = 'Response'
       ClientHeight = 426
       ClientWidth = 678
       object ResponseBodyMemo: TMemo
@@ -36,11 +36,11 @@ object TestBuilderForm: TTestBuilderForm
     end
     object ResponseTestsTabSheet: TTabSheet
       Caption = 'Tests'
-      ClientHeight = 430
+      ClientHeight = 426
       ClientWidth = 678
       object TestsMemo: TMemo
         Left = 2
-        Height = 396
+        Height = 392
         Top = 2
         Width = 674
         Align = alClient
@@ -52,7 +52,7 @@ object TestBuilderForm: TTestBuilderForm
       object GenerateTestsButton: TButton
         Left = 497
         Height = 25
-        Top = 402
+        Top = 398
         Width = 179
         Anchors = [akRight, akBottom]
         Caption = 'Generate'

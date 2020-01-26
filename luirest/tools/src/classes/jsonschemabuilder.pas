@@ -194,9 +194,7 @@ end;
 
 function TJSONSchemaBuilder.Build(Data: TJSONData): TJSONObject;
 begin
-  Result := TJSONObject.Create([
-    '$schema', 'http://json-schema.org/draft-04/schema#'
-  ]);
+  Result := TJSONObject.Create();
   case Data.JSONType of
     jtObject: CreateObjectDefinition(TJSONObject(Data), Result);
     jtArray: CreateArrayDefinition(TJSONArray(Data), Result);

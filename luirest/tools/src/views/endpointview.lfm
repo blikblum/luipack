@@ -7,8 +7,8 @@ object EndPointFrame: TEndPointFrame
   ClientWidth = 677
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 636
-  DesignTop = 102
+  DesignLeft = 1193
+  DesignTop = 143
   object NameEdit: TEdit
     Left = 9
     Height = 23
