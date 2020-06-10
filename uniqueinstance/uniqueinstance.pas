@@ -46,6 +46,7 @@ uses
 type
 
   TOnOtherInstance = procedure (Sender : TObject; ParamCount: Integer; const Parameters: array of String) of object;
+  TOnPrepareParam = procedure (Sender : TObject; var Param: String) of object;
 
   { TUniqueInstance }
 
@@ -53,6 +54,7 @@ type
   private
     FIdentifier: String;
     FOnOtherInstance: TOnOtherInstance;
+    FOnPrepareParam: TOnPrepareParam;
     FUpdateInterval: Cardinal;
     FEnabled: Boolean;
     FPriorInstanceRunning: Boolean;
@@ -64,18 +66,20 @@ type
     procedure Loaded; override;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure SendPreparedParams(IPCClient: TSimpleIPCClient);
     property PriorInstanceRunning: Boolean read FPriorInstanceRunning;
   published
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
     property UpdateInterval: Cardinal read FUpdateInterval write FUpdateInterval default 1000;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
+    property OnPrepareParam: TOnPrepareParam read FOnPrepareParam write FOnPrepareParam;
   end;
 
 implementation
 
 uses
-  StrUtils, UniqueInstanceBase;
+  StrUtils, LazUTF8, UniqueInstanceBase;
 
 { TUniqueInstance }
 
@@ -124,7 +128,10 @@ begin
       if Assigned(FOnOtherInstance) then
       begin
         IPCClient.Active := True;
-        IPCClient.SendStringMessage(ParamCount, GetFormattedParams);
+        if Assigned(FOnPrepareParam) then
+          SendPreparedParams(IPCClient)
+        else
+          IPCClient.SendStringMessage(ParamCount, GetFormattedParams);
       end;
       Application.ShowMainForm := False;
       Application.Terminate;
@@ -153,6 +160,26 @@ constructor TUniqueInstance.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FUpdateInterval := 1000;
+end;
+
+procedure TUniqueInstance.SendPreparedParams(IPCClient: TSimpleIPCClient);
+var
+  Param, PreparedParams: String;
+  i, Count: Integer;
+begin
+  PreparedParams := '';
+  Count := 0;
+  for i := 1 to ParamCount do
+  begin
+    Param := ParamStrUTF8(i);
+    FOnPrepareParam(Self, Param);
+    if Param <> '' then
+    begin
+      Inc(Count);
+      PreparedParams := PreparedParams + Param + ParamsSeparator;
+    end;
+  end;
+  IPCClient.SendStringMessage(Count, PreparedParams);
 end;
 
 end.
