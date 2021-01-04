@@ -8,3 +8,6 @@
 *.compiled
 *.ppu
 .idea
+backup/
+*.bak
+
