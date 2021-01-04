@@ -1,0 +1,38 @@
+object Form1: TForm1
+  Left = 354
+  Height = 300
+  Top = 152
+  Width = 400
+  Caption = 'Form1'
+  ClientHeight = 300
+  ClientWidth = 400
+  DesignTimePPI = 120
+  OnCreate = FormCreate
+  LCLVersion = '2.0.10.0'
+  object Label1: TLabel
+    Left = 48
+    Height = 20
+    Top = 42
+    Width = 126
+    Alignment = taRightJustify
+    Caption = 'This app runned at:'
+    ParentColor = False
+  end
+  object Edit1: TEdit
+    Left = 184
+    Height = 28
+    Top = 40
+    Width = 184
+    ReadOnly = True
+    TabOrder = 0
+    Text = 'Edit1'
+  end
+  object UniqueInstance1: TUniqueInstance
+    Enabled = True
+    OnQueryBeforeCheck = UniqueInstance1QueryBeforeCheck
+    OnOtherInstance = UniqueInstance1OtherInstance
+    TerminatePrevious = True
+    Left = 72
+    Top = 160
+  end
+end

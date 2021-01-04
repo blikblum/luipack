@@ -7,7 +7,7 @@
 *.or
 *.compiled
 *.ppu
+*.bak
+*.res
 .idea
 backup/
-*.bak
-
