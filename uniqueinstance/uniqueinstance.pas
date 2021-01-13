@@ -47,6 +47,7 @@ type
 
   TOnOtherInstance = procedure (Sender : TObject; ParamCount: Integer; const Parameters: array of String) of object;
   TOnPrepareParam = procedure (Sender : TObject; var Param: String) of object;
+  TOnQueryBeforeCheck = procedure (Sender: TObject; var TerminatePrevious: Boolean) of object;
 
   { TUniqueInstance }
 
@@ -55,6 +56,9 @@ type
     FIdentifier: String;
     FOnOtherInstance: TOnOtherInstance;
     FOnPrepareParam: TOnPrepareParam;
+    FOnQueryBeforeCheck: TOnQueryBeforeCheck;
+    FOnTerminateCommand: TNotifyEvent;
+    FTerminatePrevious: Boolean;
     FUpdateInterval: Cardinal;
     FEnabled: Boolean;
     FPriorInstanceRunning: Boolean;
@@ -72,14 +76,21 @@ type
     property Enabled: Boolean read FEnabled write FEnabled default False;
     property Identifier: String read FIdentifier write FIdentifier;
     property UpdateInterval: Cardinal read FUpdateInterval write FUpdateInterval default 1000;
+    property OnQueryBeforeCheck: TOnQueryBeforeCheck read FOnQueryBeforeCheck write FOnQueryBeforeCheck;
     property OnOtherInstance: TOnOtherInstance read FOnOtherInstance write FOnOtherInstance;
     property OnPrepareParam: TOnPrepareParam read FOnPrepareParam write FOnPrepareParam;
+    property OnTerminateCommand: TNotifyEvent read FOnTerminateCommand write FOnTerminateCommand;
+    property TerminatePrevious: Boolean read FTerminatePrevious write FTerminatePrevious default False;
   end;
 
 implementation
 
 uses
   StrUtils, LazUTF8, UniqueInstanceBase;
+
+const
+  aTerminatePreviousMarker = -1;
+  aTerminateMsg = 'Terminate';
 
 { TUniqueInstance }
 
@@ -91,13 +102,23 @@ var
 begin
   if Assigned(FOnOtherInstance) then
   begin
-    //MsgType stores ParamCount
+    //MsgType stores ParamCount if is more or equal zero
     Count := FIPCServer.MsgType;
-    SetLength(ParamsArray, Count);
-    Params := FIPCServer.StringMessage;
-    for i := 1 to Count do
-      ParamsArray[i - 1] := ExtractWord(i, Params, [ParamsSeparator]);
-    FOnOtherInstance(Self, Count, ParamsArray);
+    if Count <> aTerminatePreviousMarker then
+    begin
+      Initialize(ParamsArray);
+      SetLength(ParamsArray, Count);
+      Params := FIPCServer.StringMessage;
+      for i := 1 to Count do
+        ParamsArray[i - 1] := ExtractWord(i, Params, [ParamsSeparator]);
+      FOnOtherInstance(Self, Count, ParamsArray);
+    end
+    else begin
+      if Assigned(FOnTerminateCommand) then
+        FOnTerminateCommand(Self);
+      Application.ShowMainForm := False;
+      Application.Terminate;
+    end;
   end;
 end;
 
@@ -119,6 +140,17 @@ begin
   begin
     IPCClient := TSimpleIPCClient.Create(Self);
     IPCClient.ServerId := GetServerId(FIdentifier);
+    if not Assigned(FIPCServer) and IPCClient.ServerRunning then
+    begin
+      if Assigned(FOnQueryBeforeCheck) then
+        FOnQueryBeforeCheck(Self, FTerminatePrevious);
+      if FTerminatePrevious then
+      begin
+        IPCClient.Active := True;
+        IPCClient.SendStringMessage(aTerminatePreviousMarker, aTerminateMsg);
+        InitializeUniqueServer(IPCClient.ServerID);
+      end;
+    end;
     if not Assigned(FIPCServer) and IPCClient.ServerRunning then
     begin
       //A older instance is running.
