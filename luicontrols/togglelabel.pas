@@ -37,7 +37,7 @@ unit ToggleLabel;
 interface
 
 uses
-  Classes, SysUtils, Controls, StdCtrls, Graphics, LMessages;
+  Classes, SysUtils, Controls, StdCtrls, Graphics, LMessages, LCLVersion;
 
 type
 
@@ -72,8 +72,12 @@ type
     procedure SetHighlightColor(const AValue: TColor);
     procedure SetOptions(const AValue: TToggleLabelOptions);
   protected
+    {$if (lcl_fullversion >= 2020000)}
+    procedure DoDrawText(var Rect: TRect; Flags: Longint); override;
+    {$else}
     procedure DoMeasureTextPosition(var TextTop: integer;
       var TextLeft: integer); override;
+    {$endif}
     procedure FontChanged(Sender: TObject); override;
     function GetLabelText: string; override;
     procedure MouseEnter; override;
@@ -135,7 +139,7 @@ type
 implementation
 
 uses
-  LCLIntf;
+  LCLType, LCLIntf;
 
 { TToggleLabel }
 
@@ -186,8 +190,20 @@ begin
   FOptions := AValue;
 end;
 
-procedure TToggleLabel.DoMeasureTextPosition(var TextTop: Integer;
-  var TextLeft: Integer);
+{$if (lcl_fullversion >= 2020000)}
+procedure TToggleLabel.DoDrawText(var Rect: TRect; Flags: Longint);
+begin
+  if (Flags and DT_CALCRECT = 0) then
+  begin
+    Inc(Rect.Left, FTextOffset);
+    FArrowTopOffset := Rect.Top + ((Rect.Bottom - 1) div 2) - 2;
+  end;
+  inherited DoDrawText(Rect, Flags);
+end;
+
+{$else}
+procedure TToggleLabel.DoMeasureTextPosition(var TextTop: integer;
+  var TextLeft: integer);
 var
   lTextHeight: Integer;
   lTextWidth: Integer;
@@ -208,6 +224,7 @@ begin
   end;
   FArrowTopOffset := TextTop + ((lTextHeight - 1) div 2) - 2;
 end;
+{$endif}
 
 procedure TToggleLabel.FontChanged(Sender: TObject);
 begin
@@ -297,7 +314,7 @@ begin
   inherited Create(TheOwner);
 end;
 
-procedure TToggleLabel.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: integer);
+procedure TToggleLabel.SetBoundsKeepBase(aLeft, aTop, aWidth, aHeight: Integer);
 begin
   if AutoSize then
     Inc(aWidth, FTextOffset);
