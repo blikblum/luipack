@@ -209,11 +209,11 @@ end;
 
 constructor TRESTServiceModule.Create(AOwner: TComponent);
 begin
+  FRootPath := '/';
   inherited Create(AOwner);
   FResources := TRESTResourceStore.Create;
   FContentType := 'application/json; charset=UTF-8';
   FResponseFormatter := TJSONRESTResponseFormatter;
-  FRootPath := '/';
 end;
 
 destructor TRESTServiceModule.Destroy;
