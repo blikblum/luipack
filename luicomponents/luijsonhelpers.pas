@@ -49,6 +49,7 @@ type
 
   TJSONArrayHelper = class helper for TJSONArray
   public
+    function Filter(const Expression: String; out ArrayData: TJSONArray): Boolean;
     function Find(const Properties: array of Variant; out ItemData: TJSONObject): Boolean; overload;
     function IndexOf(const ItemValue: Variant): Integer; overload;
     function IndexOf(const Properties: array of Variant): Integer; overload;
@@ -57,7 +58,7 @@ type
 implementation
 
 uses
-  sysutils, LuiJSONUtils;
+  sysutils, LuiJSONUtils, LuiJSONClasses;
 
 type
   JSONHelperException = class(Exception);
@@ -358,6 +359,32 @@ begin
 end;
 
 { TJSONArrayHelper }
+
+function TJSONArrayHelper.Filter(const Expression: String; out ArrayData: TJSONArray): Boolean;
+var
+  ExpressionParser: TJSONExpressionParser;
+  i: Integer;
+begin
+  Result := False;
+  ArrayData := CreateWeakJSONArray;
+  try
+    ExpressionParser := TJSONExpressionParser.Create(nil);
+    ExpressionParser.Expression := Expression;
+    try
+      for i := 0 to Count - 1 do
+      begin
+        ExpressionParser.Data := Objects[i];
+        if ExpressionParser.AsBoolean then
+          ArrayData.Add(ExpressionParser.Data);
+      end;
+    finally
+      ExpressionParser.Destroy;
+    end;
+  except
+    ArrayData.Destroy;
+  end;
+  Result := True;
+end;
 
 function TJSONArrayHelper.Find(const Properties: array of Variant; out ItemData: TJSONObject): Boolean;
 var

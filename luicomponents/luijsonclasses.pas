@@ -5,7 +5,7 @@ unit LuiJSONClasses;
 interface
 
 uses
-  Classes, SysUtils, fpjson, contnrs, LuiJSONUtils;
+  Classes, SysUtils, fpjson, contnrs, LuiJSONUtils, fpexprpars;
 
 type
 
@@ -115,6 +115,19 @@ type
     procedure AfterConstruction; override;
   end;
 
+  { TJSONExpressionParser }
+
+  TJSONExpressionParser = class(TFPExpressionParser)
+  private
+    FData: TJSONObject;
+    FPropertyIdentifiers: TFPHashObjectList;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    function IdentifierByName(const AName: ShortString): TFPExprIdentifierDef; override;
+    property Data: TJSONObject read FData write FData;
+  end;
+
 implementation
 
 uses
@@ -127,6 +140,70 @@ type
   private
     FList: TFPObjectList;
   end;
+
+{ TJSONExpressionParser }
+
+constructor TJSONExpressionParser.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FPropertyIdentifiers := TFPHashObjectList.Create(True);
+end;
+
+destructor TJSONExpressionParser.Destroy;
+begin
+  FPropertyIdentifiers.Destroy;
+  inherited Destroy;
+end;
+
+function TJSONExpressionParser.IdentifierByName(const AName: ShortString): TFPExprIdentifierDef;
+var
+  PropertyData: TJSONData;
+begin
+  if FData.Find(AName, PropertyData) then
+  begin
+    Result := TFPExprIdentifierDef(FPropertyIdentifiers.Find(AName));
+    if Result = nil then
+    begin
+      Result := TFPExprIdentifierDef.Create(nil);
+      Result.IdentifierType := itVariable;
+      Result.Name := AName;
+      FPropertyIdentifiers.Add(AName, Result);
+    end;
+    // set identifier value dynamically to avoid type mismatch
+    case PropertyData.JSONType of
+      jtNumber:
+        begin
+          if TJSONFloatNumber(PropertyData).NumberType = ntFloat then
+          begin
+            Result.ResultType := rtFloat;
+            Result.AsFloat := PropertyData.AsFloat;
+          end
+          else
+          begin
+            Result.ResultType := rtInteger;
+            Result.AsInteger := PropertyData.AsInt64;
+          end;
+        end;
+      jtString:
+        begin
+          Result.ResultType := rtString;
+          Result.AsString := PropertyData.AsString;
+        end;
+      jtBoolean:
+        begin
+          Result.ResultType := rtBoolean;
+          Result.AsBoolean := PropertyData.AsBoolean;
+        end;
+      else
+        raise Exception.CreateFmt('TJSONExpressionParser: invalid field type for "%s": %s',
+          [AName, JSONTypeName(PropertyData.JSONType)]);
+    end;
+  end;
+  if Result = nil then
+  begin
+    Result := inherited IdentifierByName(AName);
+  end;
+end;
 
 { TWeakJSONArray }
 
