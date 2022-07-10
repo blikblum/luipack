@@ -369,13 +369,15 @@ begin
   ArrayData := CreateWeakJSONArray;
   try
     ExpressionParser := TJSONExpressionParser.Create(nil);
-    ExpressionParser.Expression := Expression;
     try
       for i := 0 to Count - 1 do
       begin
         ExpressionParser.Data := Objects[i];
+        // todo: find a way to avoid reparsing the expresion and only update the variable values
+        ExpressionParser.Expression := Expression;
         if ExpressionParser.AsBoolean then
           ArrayData.Add(ExpressionParser.Data);
+        ExpressionParser.Clear;
       end;
     finally
       ExpressionParser.Destroy;

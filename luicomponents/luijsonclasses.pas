@@ -159,6 +159,7 @@ function TJSONExpressionParser.IdentifierByName(const AName: ShortString): TFPEx
 var
   PropertyData: TJSONData;
 begin
+  Result := nil;
   if FData.Find(AName, PropertyData) then
   begin
     Result := TFPExprIdentifierDef(FPropertyIdentifiers.Find(AName));

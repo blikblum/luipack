@@ -53,10 +53,55 @@ type
     procedure MergeNestedObject;
   end;
 
+  { TFilterTestCase }
+
+  TFilterTestCase = class(TTestCase)
+  private
+    FOriginalData: TJSONArray;
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure FilterSimpleExpression;
+    procedure FilterComplexExpression;
+  end;
+
 implementation
 
 uses
   LuiJSONHelpers, variants, LuiJSONUtils;
+
+{ TFilterTestCase }
+
+procedure TFilterTestCase.SetUp;
+begin
+  inherited SetUp;
+  FOriginalData := TJSONArray.Create([
+    GetJSON('{"id": 1, "type": "string", "value": "hello"}'),
+    GetJSON('{"id": 2, "type": "string", "value": "world"}'),
+    GetJSON('{"id": 3, "type": "boolean", "value": true}'),
+    GetJSON('{"id": 4, "type": "number", "value": 2}')
+  ]);
+end;
+
+procedure TFilterTestCase.TearDown;
+begin
+  FreeAndNil(FOriginalData);
+  inherited TearDown;
+end;
+
+procedure TFilterTestCase.FilterSimpleExpression;
+var
+  FilteredData: TJSONArray;
+begin
+  CheckTrue(FOriginalData.Filter('id < 2', FilteredData), 'Filter returned false');
+  CheckEquals(1, FilteredData.Count, 'Filtered data count incorrect');
+  CheckTrue(FOriginalData.Items[0] = FilteredData.Items[0], 'Filtered data item incorrect');
+end;
+
+procedure TFilterTestCase.FilterComplexExpression;
+begin
+
+end;
 
 { TMergeTestCase }
 
@@ -301,7 +346,7 @@ end;
 
 initialization
   ProjectRegisterTests('JSONHelpers', [TIndexOfTestCase.Suite, TFindPathTestCase.Suite,
-    TFindTestCase.Suite, TMergeTestCase.Suite]);
+    TFindTestCase.Suite, TMergeTestCase.Suite, TFilterTestCase.Suite]);
 
 end.
 
