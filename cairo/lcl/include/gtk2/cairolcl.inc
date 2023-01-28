@@ -7,7 +7,7 @@ end;
 
 function CreateSurfaceFromDC(DC: HDC): Pcairo_surface_t;
 var
-  DeviceContext: TGtk2DeviceContext absolute DC;
+  DeviceContext: TGtkDeviceContext absolute DC;
   Width, Height: Integer;
   Visual: PGdkVisual;
 begin
