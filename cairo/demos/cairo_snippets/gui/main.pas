@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  Cairo, CairoLCL, snippets, InterfaceBase;
+  Cairo, CairoLCL, snippets, InterfaceBase, LCLPlatformDef;
 
 { TFormMain }
 
