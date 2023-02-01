@@ -35,7 +35,7 @@ var
 implementation
 
 uses
-  Cairo, InterfaceBase;
+  Cairo, InterfaceBase, LCLPlatformDef;
 
 const
   m_radius = 0.42;
