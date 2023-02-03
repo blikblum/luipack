@@ -1,5 +1,5 @@
 uses
-  CairoXLib, fpg_x11;
+  CairoXLib, fpg_x11, fpg_interface;
 
 type
 
