@@ -328,7 +328,7 @@ class function TFile.ReadAllText(const Path: String): String;
 var
   Stream: TFileStream;
 begin
-  Stream := TFileStream.Create(Path, fmCreate);
+  Stream := TFileStream.Create(Path, fmOpenRead or fmShareDenyNone);
   try
     SetLength(Result, Stream.Size);
     Stream.ReadBuffer(Result[1], Length(Result));
