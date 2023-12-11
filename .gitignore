@@ -10,4 +10,4 @@
 *.bak
 *.res
 .idea
-backup/
+*/backup/
