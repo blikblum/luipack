@@ -128,6 +128,20 @@ type
     property Data: TJSONObject read FData write FData;
   end;
 
+  { TJSONArrayChunks }
+
+  TJSONArrayChunks = class
+  private
+    FArrays: TFPObjectList;
+    function GetArray(Index: Integer): TJSONArray;
+    function GetCount: Integer;
+  public
+    constructor Create(JSONArray: TJSONArray; Size: Integer);
+    destructor Destroy; override;
+    property Items[Index: Integer]: TJSONArray read GetArray; default;
+    property Count: Integer read GetCount;
+  end;
+
 implementation
 
 uses
@@ -140,6 +154,45 @@ type
   private
     FList: TFPObjectList;
   end;
+
+{ TJSONArrayChunks }
+
+function TJSONArrayChunks.GetArray(Index: Integer): TJSONArray;
+begin
+  Result := TJSONArray(FArrays.Items[Index]);
+end;
+
+function TJSONArrayChunks.GetCount: Integer;
+begin
+  Result := FArrays.Count;
+end;
+
+constructor TJSONArrayChunks.Create(JSONArray: TJSONArray; Size: Integer);
+var
+  i: Integer;
+  ItemData: TJSONData;
+  CurrentChunk: TJSONArray;
+begin
+  FArrays := TFPObjectList.Create(True);
+  CurrentChunk := TJSONArray.Create;
+  FArrays.Add(CurrentChunk);
+  for i := 0 to JSONArray.Count - 1 do
+  begin
+    ItemData := JSONArray.Items[i];
+    CurrentChunk.Add(ItemData.Clone);
+    if CurrentChunk.Count = Size then
+    begin
+      CurrentChunk := TJSONArray.Create;
+      FArrays.Add(CurrentChunk);
+    end;
+  end;
+end;
+
+destructor TJSONArrayChunks.Destroy;
+begin
+  FArrays.Destroy;
+  inherited Destroy;
+end;
 
 { TJSONExpressionParser }
 
