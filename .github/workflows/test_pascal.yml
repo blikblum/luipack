@@ -26,7 +26,7 @@ jobs:
       - run: |
           sudo apt-get update --fix-missing     
           sudo apt-get install --yes fpc lazarus
-      - run: lazbuild miscutils_package.lpk || true
+      - run: lazbuild miscutils/miscutils_package.lpk || true
       - run: fpc miscutils/testcsv2dataset.pas
 
   test_pascal_with_setup_lazarus:
@@ -39,5 +39,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: gcarreno/setup-lazarus@v3
-      - run: lazbuild miscutils_package.lpk || true
+      - run: lazbuild miscutils/miscutils_package.lpk || true
       - run: fpc miscutils/testcsv2dataset.pas
