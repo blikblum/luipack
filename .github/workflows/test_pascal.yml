@@ -1,0 +1,43 @@
+# This is a highly experimental GitHub Action to try testing Pascal code.
+# It has been several decades since I last worked with Pascal!!
+
+# I have created automated tests for numerous languages but never for Pascal.
+# It might be an interesting challenge.  This is an attempt to run an automated
+# Pascal test when code in this repo is changed.  Let's start with a simple test...
+
+# Let's try two different approaches...
+# https://packages.ubuntu.com/jammy/fpc
+# https://packages.ubuntu.com/jammy/lazarus
+# https://github.com/gcarreno/setup-lazarus
+# https://github.com/exercism/free-pascal/blob/main/.github/workflows/test.yml
+
+name: test_pascal
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  test_pascal:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        os: [ubuntu-latest]  # , macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update --fix-missing     
+          sudo apt-get install --yes fpc lazarus
+      - run: lazbuild miscutils_package.lpk || true
+      - run: fpc miscutils/testcsv2dataset.pas
+
+  test_pascal_with_setup_lazarus:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        os: [ubuntu-latest]  # , macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gcarreno/setup-lazarus@v3
+      - run: lazbuild miscutils_package.lpk || true
+      - run: fpc miscutils/testcsv2dataset.pas
