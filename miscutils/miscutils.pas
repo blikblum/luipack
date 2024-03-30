@@ -1,8 +1,8 @@
 unit MiscUtils;
 
-{ Miscelaneous routines and classes
+{ Miscellaneous routines and classes
 
-  Copyright (C) 2007 Luiz Américo Pereira Câmara
+  Copyright (C) 2007 Luiz AmÃ©rico Pereira CÃ¢mara
   pascalive@bol.com.br
   
   This library is free software; you can redistribute it and/or modify it
