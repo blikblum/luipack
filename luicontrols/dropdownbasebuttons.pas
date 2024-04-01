@@ -558,7 +558,7 @@ const
   UpState: array[Boolean] of TButtonState =
   (
 {False} bsUp, // mouse in control = false
-{True } bsHot // mouse in contorl = true
+{True } bsHot // mouse in control = true
   );
 
 procedure TToggleSpeedButton.UpdateState(InvalidateOnChange: boolean);

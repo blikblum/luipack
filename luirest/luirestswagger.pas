@@ -69,7 +69,7 @@ end;
 function CreatePathInfoData(Resource: TRESTResource; URIParams: TJSONObject): TJSONObject;
 begin
   //todo: DRY + check response codes
-  //todo: find a way to check if method is overriden
+  //todo: find a way to check if method is overridden
   Result := TJSONObject.Create;
   if URIParams.Count > 0 then
     Result.Add('parameters', CreatePathParamsData(URIParams));

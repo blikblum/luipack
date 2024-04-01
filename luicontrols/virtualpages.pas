@@ -480,7 +480,7 @@ begin
         PageControl := PageControlClass.Create(FDisplayOptions.Parent);
         PageControl.Name := 'VirtualPage' + IntToStr(NewPageIndex) + PageControlClass.ClassName;
         PageControl.Visible := False;
-        //todo: see how avoid unecessary resizes
+        //todo: see how avoid unnecessary resizes
         FDisplayOptions.SetControlBounds(PageControl);
         PageControl.BorderSpacing := FDisplayOptions.BorderSpacing;
         PageControl.Align := FDisplayOptions.Align;

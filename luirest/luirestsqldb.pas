@@ -642,7 +642,7 @@ begin
     except
       on E: Exception do
       begin
-        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query: %s - SQL: %s', [E.Message, Query.SQL.Text] );
+        SetResponseStatus(AResponse, 500, 'An exception occurred opening a query: %s - SQL: %s', [E.Message, Query.SQL.Text] );
         raise;
       end;
     end;
@@ -715,7 +715,7 @@ begin
     except
       on E: Exception do
       begin
-        SetResponseStatus(AResponse, 500, 'An exception ocurred opening a query:  %s - SQL: %s', [E.Message, Query.SQL.Text]);
+        SetResponseStatus(AResponse, 500, 'An exception occurred opening a query:  %s - SQL: %s', [E.Message, Query.SQL.Text]);
         raise;
       end;
     end;
@@ -855,7 +855,7 @@ begin
     except
       on E: Exception do
       begin
-        SetResponseStatus(AResponse, 500, 'An exception ocurred updating: %s - SQL: %s', [E.Message, Query.SQL.Text]);
+        SetResponseStatus(AResponse, 500, 'An exception occurred updating: %s - SQL: %s', [E.Message, Query.SQL.Text]);
         raise;
       end;
     end;

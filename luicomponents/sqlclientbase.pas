@@ -713,8 +713,8 @@ begin
     Result := DoDelete(IdValue)
   else
   begin
-    //calling Delete without parentesis does not work
-    //the compiler thinks is refering to the function result
+    //calling Delete without parentheses does not work
+    //the compiler thinks is referring to the function result
     Result := Delete();
   end;
 end;
@@ -810,8 +810,8 @@ begin
   end
   else
   begin
-    //calling Save without parentesis does not work
-    //the compiler thinks is refering to the function result
+    //calling Save without parentheses does not work
+    //the compiler thinks is referring to the function result
     Result := Save();
   end;
 end;
