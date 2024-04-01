@@ -26,10 +26,11 @@ jobs:
       - run: |
           sudo apt-get update --fix-missing     
           sudo apt-get install --yes fpc lazarus
+      - run: lazbuild --version && fpc --version
       - run: lazbuild --help
-      - run: lazbuild luicomponents/luicomponents.lpk
-      - run: lazbuild luicomponents/*.lpk
-      - run: lazbuild .
+      # - run: lazbuild luicomponents/luicomponents.lpk
+      # - run: lazbuild luicomponents/*.lpk
+      - run: lazbuild --build-all --recursive --skip-dependencies .
       # - run: lazbuild miscutils/miscutils_package.lpk
       # - run: fpc miscutils/testcsv2dataset.pas
       #- run: miscutils/testcsv2dataset || true  # This fails
@@ -46,10 +47,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: gcarreno/setup-lazarus@v3
+      - run: lazbuild --version && fpc --version
       - run: lazbuild --help
-      - run: lazbuild luicomponents/luicomponents.lpk
-      - run: lazbuild luicomponents/*.lpk
-      - run: lazbuild .
+      # - run: lazbuild luicomponents/luicomponents.lpk
+      # - run: lazbuild luicomponents/*.lpk
+      - run: lazbuild --build-all --recursive --skip-dependencies .
       # - run: lazbuild miscutils/miscutils_package.lpk
       # - run: fpc miscutils/testcsv2dataset.pas
       #- run: miscutils/testcsv2dataset || true  # This fails
