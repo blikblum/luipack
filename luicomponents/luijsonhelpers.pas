@@ -373,7 +373,7 @@ begin
       for i := 0 to Count - 1 do
       begin
         ExpressionParser.Data := Objects[i];
-        // todo: find a way to avoid reparsing the expresion and only update the variable values
+        // todo: find a way to avoid reparsing the expression and only update the variable values
         ExpressionParser.Expression := Expression;
         if ExpressionParser.AsBoolean then
           ArrayData.Add(ExpressionParser.Data);

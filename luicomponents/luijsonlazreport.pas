@@ -582,7 +582,7 @@ begin
     V2 := frParser.Calc(p2);
     if VarIsStr(V1) and not VarIsNull(V2) then
     begin
-      //todo: use findpath or change context dinamically??
+      //todo: use findpath or change context dynamically??
       if FindJSONProp(FData, VarToStr(V1), ArrayData) then
       begin
         if ArrayData.IndexOf(V2) > -1 then

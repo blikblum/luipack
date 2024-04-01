@@ -303,7 +303,7 @@ begin
   if not (csDesigning in ComponentState) and (Owner is TControl) then
   begin
     Form := GetParentForm(TControl(Owner));
-    //todo: review approach when Form is not acessible at this time
+    //todo: review approach when Form is not accessible at this time
     if Form <> nil then
       Form.AddHandlerFirstShow(@FormFirstShow)
     else

@@ -91,7 +91,7 @@ begin
 
   Array1 := TJSONArray.Create([1]);
   Array2 := TJSONArray.Create([1, 1]);
-  CheckNotEquals(0, CompareJSONData(Array1, Array2), 'Arrays with number of items differents and values equals');
+  CheckNotEquals(0, CompareJSONData(Array1, Array2), 'Arrays with number of items different and values equals');
 
   Array1 := TJSONArray.Create(['a', 'b']);
   Array2 := TJSONArray.Create(['b', 'a']);

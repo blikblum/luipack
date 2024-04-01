@@ -47,7 +47,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   //data that will be shared between pages
   FConfigData := TJSONObject.Create(['name', 'Luiz Américo']);
-  //you can add the class dinamically
+  //you can add the class dynamically
   WizardManager.PageByName('config2').ControlClass := TPageFourFrame;
   WizardManager.PageByName('finish').ControlClass := TPageFiveFrame;
   WizardManager.PageIndex := 0;

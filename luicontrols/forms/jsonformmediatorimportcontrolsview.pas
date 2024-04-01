@@ -185,7 +185,7 @@ procedure TJSONFormMediatorImportControlsViewForm.ControlListVewInitNode(
   Sender: TBaseVirtualTree; ParentNode, Node: PVirtualNode;
   var InitialStates: TVirtualNodeInitStates);
 begin
-  //todo: use a tree structur instead of a list one
+  //todo: use a tree structure instead of a list one
   Sender.CheckType[Node] := ctCheckBox;
 end;
 

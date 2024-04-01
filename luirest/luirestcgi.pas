@@ -16,7 +16,7 @@ type
   protected
     //do nothing
     procedure InitPostVars; override;
-    //dont fail on unknow methods
+    //dont fail on unknown methods
     procedure InitRequestVars; override;
   end;
 
