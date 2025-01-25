@@ -104,7 +104,7 @@ end;
 {$ifdef PollIPCMessage}
 procedure TUniqueInstance.CheckMessage(Sender: TObject);
 begin
-  FIPCServer.PeekMessage(1, True);
+  FIPCServer.PeekMessage(0, True);
 end;
 {$endif}
 
