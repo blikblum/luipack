@@ -34,6 +34,9 @@ jobs:
         shell: bash
         run: |
           set -xeuo pipefail
-          sudo bash -c 'apt-get update; apt-get install -y lazarus' >/dev/null
+          sudo bash -c '
+            apt-get update
+            apt-get install -y lazarus librsvg2-dev
+          ' >/dev/null
           instantfpc -Fu/usr/lib/lazarus/*/components/lazutils \
             .github/workflows/make.pas build
