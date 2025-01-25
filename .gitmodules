@@ -1,6 +1,6 @@
 [submodule "luicomponents/tests/jsonschema/JSON-Schema-Test-Suite"]
-	path = luicomponents/tests/jsonschema/JSON-Schema-Test-Suite
-	url = https://github.com/json-schema-org/JSON-Schema-Test-Suite.git
-[submodule ".github/use/fpGUI"]
-	path = .github/use/fpGUI
+    path = luicomponents/tests/jsonschema/JSON-Schema-Test-Suite
+    url = https://github.com/json-schema-org/JSON-Schema-Test-Suite.git
+[submodule "use/fpGUI"]
+	path = use/fpGUI
 	url = git@github.com:graemeg/fpGUI.git
