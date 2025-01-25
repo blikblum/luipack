@@ -4,3 +4,9 @@
 [submodule "use/fpGUI"]
 	path = use/fpGUI
 	url = git@github.com:graemeg/fpGUI.git
+[submodule "use/fptest"]
+	path = use/fptest
+	url = git@github.com:graemeg/fptest.git
+[submodule "use/handlebars.pascal"]
+	path = use/handlebars.pascal
+	url = git@github.com:blikblum/handlebars.pascal.git
