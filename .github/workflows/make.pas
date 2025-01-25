@@ -213,7 +213,7 @@ begin
   try
     if ParamCount > 0 then
       case ParamStr(1) of
-        'build': BuildAll(['MultiLog', 'VampyreImaging']);
+        'build': BuildAll(['MultiLog', 'VampyreImaging', 'VirtualTreeViewV5', 'Synapse40.1']);
         else
           OutLog(etError, ParamStr(1));
       end;
